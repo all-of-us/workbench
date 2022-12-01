@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "license": "BSD",
   "scripts": {
-    "build-terra-deps": "cd src/terraui; ./build.sh",
+    "build-terra-deps": "./src/terraui/build.sh",
     "deps": "yarn run codegen && yarn run build-terra-deps",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
     "dev-up": "yarn && yarn run deps && yarn start",
