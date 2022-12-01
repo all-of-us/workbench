@@ -282,7 +282,7 @@ const RuntimeOpenButton = (props: {
           onClose={() => {
             setShowModal(false);
           }}
-          onSave={() => {
+          onCreate={() => {
             setShowModal(false);
             // close the AppsPanel on notebook creation
             onClose();
