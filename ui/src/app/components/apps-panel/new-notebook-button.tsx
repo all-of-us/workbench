@@ -13,11 +13,8 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 import { buttonStyles } from './utils';
 
-export const RuntimeOpenButton = (props: {
-  workspace: Workspace;
-  onClose: Function;
-}) => {
-  const { workspace, onClose } = props;
+export const NewNotebookButton = (props: { workspace: Workspace }) => {
+  const { workspace } = props;
 
   const [showModal, setShowModal] = useState(false);
   const [notebookNameList, setNotebookNameList] = useState<string[]>([]);

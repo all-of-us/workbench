@@ -13,8 +13,8 @@ import { isActionable } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './app-logo';
+import { NewNotebookButton } from './new-notebook-button';
 import { RuntimeCost } from './runtime-cost';
-import { RuntimeOpenButton } from './runtime-open-button';
 import { RuntimeStateButton } from './runtime-state-button';
 import { buttonStyles, UIAppType } from './utils';
 
@@ -40,18 +40,12 @@ const RuntimeSettingsButton = (props: { onClickRuntimeConf: Function }) => (
 export const ExpandedApp = (props: {
   appType: UIAppType;
   workspace: Workspace;
-  onClose: Function;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
   const { runtime } = useStore(runtimeStore);
-  const {
-    appType,
-    workspace,
-    onClose,
-    onClickRuntimeConf,
-    onClickDeleteRuntime,
-  } = props;
+  const { appType, workspace, onClickRuntimeConf, onClickDeleteRuntime } =
+    props;
   return (
     // first iteration: hard-code Jupyter only
     appType === UIAppType.JUPYTER && (
@@ -80,7 +74,7 @@ export const ExpandedApp = (props: {
         <FlexRow>
           <RuntimeSettingsButton {...{ onClickRuntimeConf }} />
           <RuntimeStateButton {...{ workspace }} />
-          <RuntimeOpenButton {...{ workspace, onClose }} />
+          <NewNotebookButton {...{ workspace }} />
         </FlexRow>
       </FlexColumn>
     )
