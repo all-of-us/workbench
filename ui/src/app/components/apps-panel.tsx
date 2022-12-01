@@ -127,7 +127,13 @@ const AppLogo = (props: { appType: UIAppType }) => {
     [UIAppType.RSTUDIO, rStudioLogo],
   ]);
 
-  return <img src={logos.get(props.appType)} style={{ marginRight: '1em' }} />;
+  return (
+    <img
+      src={logos.get(props.appType)}
+      alt={props.appType.toString()}
+      style={{ marginRight: '1em' }}
+    />
+  );
 };
 
 const AvailableApp = (props: { appType: UIAppType; onClick: Function }) => {

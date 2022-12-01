@@ -185,7 +185,7 @@ interface State {
   tooltipId: number;
   currentModal: CurrentModal;
   runtimeErrors: Array<RuntimeError>;
-  runTimeConfPanelInitialState: PanelContent | null;
+  runtimeConfPanelInitialState: PanelContent | null;
 }
 
 export const HelpSidebar = fp.flow(
@@ -210,7 +210,7 @@ export const HelpSidebar = fp.flow(
         tooltipId: undefined,
         currentModal: CurrentModal.None,
         runtimeErrors: null,
-        runTimeConfPanelInitialState: null,
+        runtimeConfPanelInitialState: null,
       };
     }
 
@@ -237,7 +237,13 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
-      this.setState({ runTimeConfPanelInitialState: null });
+      // let the Runtime Config Panel use its own logic
+      this.setState({ runtimeConfPanelInitialState: null });
+    }
+
+    openRuntimeConfigWithState(runtimeConfPanelInitialState: PanelContent) {
+      setSidebarActiveIconStore.next('runtimeConfig');
+      this.setState({ runtimeConfPanelInitialState });
     }
 
     async componentDidMount() {
@@ -353,14 +359,18 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
+      const { activeIcon, runtimeConfPanelInitialState } = this.state;
       return fp.getOr(
         '14',
         'bodyWidthRem',
-        this.sidebarContent(this.state.activeIcon)
+        this.sidebarContent(activeIcon, runtimeConfPanelInitialState)
       );
     }
 
-    sidebarContent(activeIcon: SidebarIconId): {
+    sidebarContent(
+      activeIcon: SidebarIconId,
+      runtimeConfPanelInitialState: PanelContent
+    ): {
       overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
@@ -370,7 +380,6 @@ export const HelpSidebar = fp.flow(
       showFooter: boolean;
     } {
       const { pageKey, workspace, cohortContext } = this.props;
-      const { runTimeConfPanelInitialState } = this.state;
 
       switch (activeIcon) {
         case 'help':
@@ -415,7 +424,7 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <RuntimeConfigurationPanel
                 onClose={() => this.setActiveIcon(null)}
-                initialPanelContent={runTimeConfPanelInitialState}
+                initialPanelContent={runtimeConfPanelInitialState}
               />
             ),
             showFooter: false,
@@ -428,14 +437,10 @@ export const HelpSidebar = fp.flow(
                 {...{ workspace }}
                 onClose={() => this.setActiveIcon(null)}
                 onClickRuntimeConf={() =>
-                  this.setState({
-                    runTimeConfPanelInitialState: PanelContent.Customize,
-                  })
+                  this.openRuntimeConfigWithState(PanelContent.Customize)
                 }
                 onClickDeleteRuntime={() =>
-                  this.setState({
-                    runTimeConfPanelInitialState: PanelContent.DeleteRuntime,
-                  })
+                  this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
                 }
               />
             ),
@@ -509,14 +514,18 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const { activeIcon, runtimeErrors } = this.state;
+      const { activeIcon, runtimeErrors, runtimeConfPanelInitialState } =
+        this.state;
       const {
         workspace,
         workspace: { namespace, id },
         pageKey,
         criteria,
       } = this.props;
-      const sidebarContent = this.sidebarContent(activeIcon);
+      const sidebarContent = this.sidebarContent(
+        activeIcon,
+        runtimeConfPanelInitialState
+      );
       const shouldRenderWorkspaceMenu =
         !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
 
