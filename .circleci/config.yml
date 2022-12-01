@@ -453,9 +453,9 @@ jobs:
           command: ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
       - ui-cache
       - run:
-          name: Yarn codegen
+          name: Yarn deps
           working_directory: ~/workbench/ui
-          command: yarn codegen
+          command: yarn deps
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
