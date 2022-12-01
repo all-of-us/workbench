@@ -21,8 +21,6 @@ browserTest('create an application', async browser => {
 
   await page.waitForSelector('div[aria-label="Select Applications Modal"]')
 
-  await page.waitForSelector('div[role="button"][aria-label="close"]')
-
   const nextButton = await page.waitForSelector('div[role="button"][aria-label="next"]')
   await expect(nextButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
 
