@@ -359,17 +359,13 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
-      const { activeIcon, runtimeConfPanelInitialState } = this.state;
-      return fp.getOr(
-        '14',
-        'bodyWidthRem',
-        this.sidebarContent(activeIcon, runtimeConfPanelInitialState)
-      );
+      const { activeIcon } = this.state;
+      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(activeIcon));
     }
 
     sidebarContent(
       activeIcon: SidebarIconId,
-      runtimeConfPanelInitialState: PanelContent
+      runtimeConfPanelInitialState?: PanelContent
     ): {
       overflow?: string;
       headerPadding?: string;
