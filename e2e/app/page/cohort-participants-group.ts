@@ -612,7 +612,7 @@ export default class CohortParticipantsGroup {
   }
 
   async criteriaAddedMessage(): Promise<string> {
-    const css = '.p-growl-message-success .p-growl-image.pi-check + .p-growl-message .p-growl-details';
+    const css = '.p-toast-message-success .p-toast-image.pi-check + .p-toast-message .p-toast-details';
     const msg = await this.page.waitForSelector(css, { visible: true, timeout: 5000 });
     return getPropValue<string>(msg, 'textContent');
   }

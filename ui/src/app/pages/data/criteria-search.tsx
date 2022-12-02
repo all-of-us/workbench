@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 
 import { Criteria, Domain } from 'generated/fetch';
 
@@ -417,7 +417,7 @@ export const CriteriaSearch = fp.flow(
       return (
         <div id='criteria-search-container'>
           {loadingSubtree && <SpinnerOverlay />}
-          <Growl
+          <Toast
             ref={(el) => (this.growl = el)}
             style={
               !growlVisible
@@ -492,7 +492,7 @@ export const CriteriaSearch = fp.flow(
             }
           >
             <style>{growlCSS}</style>
-            <Growl
+            <Toast
               ref={(el) => (this.growl = el)}
               style={
                 !growlVisible

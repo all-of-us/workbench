@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 
 import {
   CriteriaType,
@@ -437,7 +437,7 @@ export const CohortSearch = fp.flow(
         !!cohortContext && (
           <FlexRowWrap style={styles.searchContainer}>
             <style>{growlCSS}</style>
-            <Growl
+            <Toast
               ref={(el) => (this.growl = el)}
               style={
                 !growlVisible
