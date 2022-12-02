@@ -7,6 +7,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.InstitutionTierConfig;
+import org.pmiops.workbench.model.UserTierEligibility;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
@@ -27,4 +29,6 @@ public interface InstitutionMapper {
         .getInstitutionUserInstructions(target.getShortName())
         .ifPresent(target::setUserInstructions);
   }
+
+  UserTierEligibility toEligibility(InstitutionTierConfig tierConfig, boolean eligible);
 }

@@ -7,7 +7,7 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsB
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +17,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
@@ -60,7 +61,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private static final String OPERATIONAL_USER_INSTITUTION_SHORT_NAME = "AouOps";
 
-  private final AccessTierDao accessTierDao;
+  private final AccessTierService accessTierService;
 
   private final InstitutionDao institutionDao;
   private final InstitutionEmailDomainDao institutionEmailDomainDao;
@@ -76,7 +77,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Autowired
   InstitutionServiceImpl(
-      AccessTierDao accessTierDao,
+      AccessTierService accessTierService,
       InstitutionDao institutionDao,
       InstitutionEmailDomainDao institutionEmailDomainDao,
       InstitutionEmailAddressDao institutionEmailAddressDao,
@@ -87,7 +88,7 @@ public class InstitutionServiceImpl implements InstitutionService {
       InstitutionUserInstructionsMapper institutionUserInstructionsMapper,
       InstitutionTierConfigMapper institutionTierConfigMapper,
       PublicInstitutionDetailsMapper publicInstitutionDetailsMapper) {
-    this.accessTierDao = accessTierDao;
+    this.accessTierService = accessTierService;
     this.institutionDao = institutionDao;
     this.institutionEmailDomainDao = institutionEmailDomainDao;
     this.institutionEmailAddressDao = institutionEmailAddressDao;
@@ -399,31 +400,24 @@ public class InstitutionServiceImpl implements InstitutionService {
         .collect(Collectors.toList());
   }
 
+  private List<UserTierEligibility> getTierEligibilities(Institution inst, String contactEmail) {
+    return accessTierService.getAllTiersVisibleToUsers().stream()
+        .map(dbAccessTier -> getTierConfigByTier(inst, dbAccessTier.getShortName()))
+        .flatMap(tierConfigMaybe -> tierConfigMaybe.map(Stream::of).orElse(Stream.empty()))
+        .map(
+            tierConfig ->
+                institutionMapper.toEligibility(
+                    tierConfig,
+                    validateInstitutionalEmail(
+                        inst, contactEmail, tierConfig.getAccessTierShortName())))
+        .collect(Collectors.toList());
+  }
+
   @Override
   public List<UserTierEligibility> getUserTierEligibilities(DbUser user) {
-    List<UserTierEligibility> userTierEligibilities = new ArrayList<>();
-
-    Optional<Institution> institution = getByUser(user);
-    if (!institution.isPresent()) {
-      return userTierEligibilities;
-    }
-
-    for (String tierName :
-        accessTierDao.findAll().stream()
-            .map(DbAccessTier::getShortName)
-            .collect(Collectors.toList())) {
-      getTierConfigByTier(institution.get(), tierName)
-          .ifPresent(
-              t ->
-                  userTierEligibilities.add(
-                      new UserTierEligibility()
-                          .accessTierShortName(tierName)
-                          .eraRequired(t.getEraRequired())
-                          .eligible(
-                              validateInstitutionalEmail(
-                                  institution.get(), user.getContactEmail(), tierName))));
-    }
-    return userTierEligibilities;
+    return getByUser(user)
+        .map(inst -> getTierEligibilities(inst, user.getContactEmail()))
+        .orElse(Collections.emptyList());
   }
 
   private Institution toModel(DbInstitution dbInstitution) {
@@ -432,7 +426,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   private void populateAuxTables(
       final Institution modelInstitution, final DbInstitution dbInstitution) {
-    List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
+    List<DbAccessTier> dbAccessTiers = accessTierService.getAllTiers();
     setInstitutionEmailDomains(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionEmailAddresses(modelInstitution, dbInstitution, dbAccessTiers);
     setInstitutionTierRequirement(modelInstitution, dbInstitution, dbAccessTiers);
@@ -541,7 +535,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     // All tier need to be present in API if tier requirement is present.
     if (institutionRequest.getTierConfigs() != null) {
-      List<DbAccessTier> dbAccessTiers = accessTierDao.findAll();
       for (InstitutionTierConfig institutionTierConfig : institutionRequest.getTierConfigs()) {
         if (institutionTierConfig.getMembershipRequirement()
             == InstitutionMembershipRequirement.NO_ACCESS) {
@@ -551,7 +544,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
         // All tier need to be present in API if tier requirement is present.
         getAccessTierByShortNameOrThrow(
-            dbAccessTiers, institutionTierConfig.getAccessTierShortName());
+            accessTierService.getAllTiers(), institutionTierConfig.getAccessTierShortName());
         // Each Email address in all tiers is valid.
         if (institutionTierConfig.getMembershipRequirement()
             == InstitutionMembershipRequirement.ADDRESSES) {
