@@ -1,5 +1,9 @@
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import jupyterLogo from 'assets/images/Jupyter.png';
+import jupyterIcon from 'assets/images/Jupyter-icon.png';
+import rStudioLogo from 'assets/images/RStudio.png';
+import rStudioIcon from 'assets/images/RStudio-icon.png';
 
 export const buttonStyles = reactStyles({
   button: {
@@ -58,3 +62,21 @@ export enum UIAppType {
   JUPYTER = 'Jupyter',
   RSTUDIO = 'RStudio',
 }
+
+interface AppAssets {
+  appType: UIAppType;
+  logo: string;
+  icon: string;
+}
+export const appAssets: AppAssets[] = [
+  {
+    appType: UIAppType.JUPYTER,
+    logo: jupyterLogo,
+    icon: jupyterIcon,
+  },
+  {
+    appType: UIAppType.RSTUDIO,
+    logo: rStudioLogo,
+    icon: rStudioIcon,
+  },
+];
