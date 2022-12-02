@@ -121,23 +121,35 @@ const displayRuntimeStatusIcon = (
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
-  const src = enableGkeApp ? jupyterAssets.icon : thunderstorm;
-  const style: CSSProperties = enableGkeApp
+  const containerStyle: CSSProperties = enableGkeApp
+    ? {
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        background: colors.white,
+      }
+    : {
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+      };
+  const iconStyle: CSSProperties = enableGkeApp
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
+
+  const iconSrc = enableGkeApp ? jupyterAssets.icon : thunderstorm;
 
   // We always want to show the thunderstorm or Jupyter icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <FlexRow
-      style={{
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-      }}
-    >
-      <img {...{ src, style }} data-test-id={'help-sidebar-icon-' + icon.id} />
+    <FlexRow style={containerStyle}>
+      <img
+        src={iconSrc}
+        alt={icon.label}
+        style={iconStyle}
+        data-test-id={'help-sidebar-icon-' + icon.id}
+      />
       <RuntimeStatusIcon
         {...{ workspaceNamespace }}
         style={styles.statusIconContainer}
@@ -335,11 +347,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
           <img
             data-test-id={'help-sidebar-icon-' + icon.id}
             src={thunderstorm}
-            style={{
-              ...icon.style,
-
-              position: 'absolute',
-            }}
+            style={{ ...icon.style, position: 'absolute' }}
           />
         </FlexRow>
       ),
