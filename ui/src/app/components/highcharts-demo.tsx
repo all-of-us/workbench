@@ -10,6 +10,7 @@ import HighchartsReact from 'highcharts-react-official';
 import {
   AgeType,
   CdrVersionTiersResponse,
+  ChartData,
   Cohort,
   CohortDefinition,
   DemoChartInfo,
@@ -18,15 +19,104 @@ import {
 
 import { getChartObj } from 'app/cohort-search/utils';
 import {
+  chartBuilderApi,
   cohortBuilderApi,
   cohortsApi,
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 
+const css = `
+  .stats-left-padding {
+    padding-left: 6rem;
+  }
+  @media print{
+    .doNotPrint{
+      display:none !important;
+      -webkit-print-color-adjust: exact;
+    }
+    .page-break {
+      page-break-inside:auto;
+    }
+    .stats-left-padding {
+      padding-left: 2rem;
+    }
+  }
+`;
+const styles = reactStyles({
+  backBtn: {
+    padding: 0,
+    border: 0,
+    fontSize: '14px',
+    color: colors.accent,
+    background: 'transparent',
+    cursor: 'pointer',
+  },
+  container: {
+    width: '100%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginRight: '-.5rem',
+    marginLeft: '-.5rem',
+  },
+  col: {
+    position: 'relative',
+    minHeight: '1px',
+    width: '100%',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
+  reportBackground: {
+    backgroundColor: colors.white,
+    paddingTop: '1rem',
+    marginTop: '0.5rem',
+  },
+  queryHeader: {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: colors.primary,
+    lineHeight: '24px',
+  },
+  queryTitle: {
+    fontSize: '16px',
+    fontWeight: 600,
+    color: colors.primary,
+    lineHeight: '22px',
+  },
+  queryContent: {
+    fontSize: '13px',
+    color: colors.primary,
+    lineHeight: '30px',
+    paddingBottom: '0.6rem',
+  },
+  containerMargin: {
+    margin: 0,
+    minWidth: '100%',
+  },
+  chartTitle: {
+    marginLeft: '0.4rem',
+    paddingBottom: '0.5rem',
+    fontSize: '16px',
+    fontWeight: 600,
+    color: colors.primary,
+    lineHeight: '22px',
+  },
+  graphBorder: {
+    minHeight: '10rem',
+    marginLeft: '23%',
+    padding: '0.3rem',
+  },
+});
 export interface Props
   extends WithSpinnerOverlayProps,
     RouteComponentProps<MatchParams> {
@@ -37,14 +127,21 @@ export interface Props
 
 interface State {
   demoChartData: DemoChartInfo[];
+  newChartData: ChartData[];
   options: any;
+  newOptions: any;
 }
 
 export const DemoChart = fp.flow(withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
-      this.state = { demoChartData: null, options: null };
+      this.state = {
+        demoChartData: null,
+        options: null,
+        newChartData: null,
+        newOptions: null,
+      };
     }
 
     async componentDidMount(): Promise<void> {
@@ -71,8 +168,13 @@ export const DemoChart = fp.flow(withRouter)(
         AgeType[AgeType.AGE],
         cohortDefinition
       );
-      this.setState({ demoChartData: demoChartData.items });
+      const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
+      this.setState({
+        demoChartData: demoChartData.items,
+        newChartData: newChartData.items,
+      });
       this.getChartOptions();
+      this.getNewChartOptions();
       hideSpinner();
     }
 
@@ -90,6 +192,9 @@ export const DemoChart = fp.flow(withRouter)(
     getChartOptions() {
       const normalized = 'normalized';
       const { categories, series } = this.getCategoriesAndSeries();
+      console.log('categories:', categories);
+      console.log('series:', series);
+
       const height = Math.max(categories.length * 30, 200);
       const options = {
         chart: {
@@ -171,28 +276,33 @@ export const DemoChart = fp.flow(withRouter)(
     }
 
     render() {
-      const { options } = this.state;
+      const { options, newOptions } = this.state;
       return (
-        <div>
-          <div style={{ minHeight: 200 }}>
-            {options && (
-              <HighchartsReact
-                highcharts={highCharts}
-                options={options}
-                callback={getChartObj}
-              />
-            )}
+        <React.Fragment>
+          <style>{css}</style>
+          <div style={{ ...styles.container, margin: 0 }}>
+            <div>
+              <div style={{ minHeight: 200, width: 800 }}>
+                {options && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={options}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
+              <div style={{ minHeight: 200, width: 800 }}>
+                {newOptions && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={newOptions}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-          <div style={{ minHeight: 200 }}>
-            {options && (
-              <HighchartsReact
-                highcharts={highCharts}
-                options={options}
-                callback={getChartObj}
-              />
-            )}
-          </div>
-        </div>
+        </React.Fragment>
       );
     }
   }
