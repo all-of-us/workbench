@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
+  ErrorCode,
+  ErrorResponse,
   Profile,
   UserRole,
   WorkspaceBillingUsageResponse,
@@ -222,11 +224,20 @@ export const WorkspaceAbout = fp.flow(
           workspace.namespace,
           workspace.id
         )
-      ).then((resp: WorkspaceUserRolesResponse) =>
-        this.setState({
-          workspaceUserRoles: fp.sortBy('familyName', resp.items),
-        })
-      );
+      )
+        .then((resp: WorkspaceUserRolesResponse) =>
+          this.setState({
+            workspaceUserRoles: fp.sortBy('familyName', resp.items),
+          })
+        )
+        .catch(async (resp) => {
+          const errorResponse: ErrorResponse = await resp.json();
+          if (errorResponse.errorCode === ErrorCode.TERRATOSNONCOMPLIANT) {
+            console.log('detected Terra-ToS non-compliance');
+          } else {
+            console.error(resp);
+          }
+        });
     }
 
     get workspaceCreationTime(): string {
