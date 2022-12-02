@@ -3,7 +3,7 @@ import * as React from 'react';
 import { appAssets, UIAppType } from './utils';
 
 export const AppLogo = (props: { appType: UIAppType }) => {
-  const { logo } = appAssets.find((assets) => assets.appType === props.appType);
+  const { logo } = appAssets.find((aa) => aa.appType === props.appType);
   return (
     <img
       src={logo}
