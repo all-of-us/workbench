@@ -10,6 +10,7 @@ import HighchartsReact from 'highcharts-react-official';
 import {
   AgeType,
   CdrVersionTiersResponse,
+  ChartData,
   Cohort,
   CohortDefinition,
   DemoChartInfo,
@@ -126,14 +127,21 @@ export interface Props
 
 interface State {
   demoChartData: DemoChartInfo[];
+  newChartData: ChartData[];
   options: any;
+  newOptions: any;
 }
 
 export const DemoChart = fp.flow(withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
-      this.state = { demoChartData: null, options: null };
+      this.state = {
+        demoChartData: null,
+        options: null,
+        newChartData: null,
+        newOptions: null,
+      };
     }
 
     async componentDidMount(): Promise<void> {
@@ -160,11 +168,14 @@ export const DemoChart = fp.flow(withRouter)(
         AgeType[AgeType.AGE],
         cohortDefinition
       );
-      this.setState({ demoChartData: demoChartData.items });
+      const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
+      this.setState({
+        demoChartData: demoChartData.items,
+        newChartData: newChartData.items,
+      });
       this.getChartOptions();
+      this.getNewChartOptions();
       hideSpinner();
-      const c = await chartBuilderApi().getChartData(ns, wsid,1);
-      console.log(JSON.stringify(c));
     }
 
     async getCohort() {
@@ -181,6 +192,9 @@ export const DemoChart = fp.flow(withRouter)(
     getChartOptions() {
       const normalized = 'normalized';
       const { categories, series } = this.getCategoriesAndSeries();
+      console.log('categories:', categories);
+      console.log('series:', series);
+
       const height = Math.max(categories.length * 30, 200);
       const options = {
         chart: {
@@ -258,17 +272,134 @@ export const DemoChart = fp.flow(withRouter)(
           return acc;
         }, [])
         .sort((a, b) => (a.name < b.name ? 1 : -1));
+      console.log('categories:', categories);
+      console.log('series:', series);
+
+      return { categories, series };
+    }
+
+    getNewChartOptions() {
+      const normalized = '';
+      const { categories, series } = this.getCategoriesAndSeries2();
+
+      const height = Math.max(categories.length * 30, 600);
+      const newOptions = {
+        chart: {
+          height,
+          type: 'bar',
+        },
+        title: {
+          text: 'Population pyramid for CDR',
+        },
+        accessibility: {
+          point: {
+            valueDescriptionFormat: '{index}. Age {xDescription} Race {race}',
+          },
+        },
+        xAxis: [
+          {
+            categories: categories,
+            reversed: false,
+            labels: {
+              step: 1,
+            },
+            accessibility: {
+              description: 'Age (male)',
+            },
+          },
+          {
+            // mirror axis on right side
+            opposite: true,
+            reversed: false,
+            categories: categories,
+            linkedTo: 0,
+            labels: {
+              step: 1,
+            },
+            accessibility: {
+              description: 'Age (female)',
+            },
+          },
+        ],
+        yAxis: {
+          title: {
+            text: null,
+          },
+          labels: {
+            formatter: function () {
+              return Math.abs(this.value);
+            },
+          },
+          accessibility: {
+            description: 'Percentage population',
+            rangeDescription: 'Range: 0 to 5%',
+          },
+        },
+        colors: colors.chartColors,
+        legend: {
+          enabled: false,
+        },
+        plotOptions: {
+          bar: {
+            groupPadding: 0,
+            pointPadding: 0.1,
+          },
+          series: {
+            stacking: normalized ? 'percent' : 'normal',
+          },
+        },
+        tooltip: {
+          formatter: function () {
+            return (
+              '<b>' +
+              this.series.name +
+              ', age ' +
+              this.point.category +
+              ', race ' + this.point.race +
+              '</b><br/>' +
+              'Population: ' +
+              highCharts.numberFormat(Math.abs(this.point.y), 1)
+            );
+          },
+        },
+        series,
+      };
+      this.setState({ newOptions });
+    }
+
+    getCategoriesAndSeries2() {
+      const categories = ['20-24', '25-29', '30-34', '35-40', '40-45'];
+      const series = [
+        {
+          name: 'Male',
+          data: [
+            { x: 0, y: -25, race:'W' },
+            { x: 0, y: -15, race:'B' },
+            { x: 0, y: -10, race:'A' },
+            { x: 0, y: -5, race:'U' },
+            { x: 1, y: -15, race:'W' },
+            { x: 1, y: -9, race:'B' },
+            { x: 1, y: -7, race:'A' },
+            { x: 1, y: -1, race:'U' },
+          ],
+        },
+        {
+          name: 'Female',
+          data: [50, 40, 30, 20, 10],
+        },
+      ];
+
       return { categories, series };
     }
 
     render() {
-      const { options } = this.state;
+      const { options, newOptions } = this.state;
       return (
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
             <div>
-              <div style={{ minHeight: 200 }}>
+              <div style={{ minHeight: 200, width: 800 }}>
                 {options && (
                   <HighchartsReact
                     highcharts={highCharts}
@@ -277,11 +408,11 @@ export const DemoChart = fp.flow(withRouter)(
                   />
                 )}
               </div>
-              <div style={{ minHeight: 200 }}>
-                {options && (
+              <div style={{ minHeight: 200, width: 800 }}>
+                {newOptions && (
                   <HighchartsReact
                     highcharts={highCharts}
-                    options={options}
+                    options={newOptions}
                     callback={getChartObj}
                   />
                 )}
