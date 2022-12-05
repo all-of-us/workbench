@@ -77,7 +77,7 @@ public final class SearchGroupItemQueryBuilder {
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
   private static final String AND = " AND ";
-  private static final String UNION_TEMPLATE = " UNION ALL\n";
+  private static final String UNION_TEMPLATE = "UNION ALL\n";
   private static final String DESC = " DESC";
   private static final String BASE_SQL =
       "SELECT DISTINCT person_id, entry_date, concept_id\n"
@@ -196,7 +196,9 @@ public final class SearchGroupItemQueryBuilder {
   private static final String HAS_DATA_SQL =
       "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
-      "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
+      "SELECT concept_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
+  private static final String CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE =
+          "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
@@ -282,16 +284,29 @@ public final class SearchGroupItemQueryBuilder {
     addParamValuePFHHAndFormat(queryParams, pfhhAnswerSearchParameters, queryParts);
 
     String queryPartsSql;
-    if (Domain.SURVEY.equals(domain)
-        || (SOURCE_STANDARD_DOMAINS.contains(domain)
+    if ((SOURCE_STANDARD_DOMAINS.contains(domain)
             && !sourceSearchParameters.isEmpty()
             && !standardSearchParameters.isEmpty())) {
+      // Using an OR is inefficient when dealing with source and standard concepts together
+      // To combat this we do a UNION ALL between source and standard concepts
       queryPartsSql =
-          PERSON_ID_IN
+              CONCEPT_ID_IN_SQL + " ("
               + CB_SEARCH_ALL_EVENTS_WHERE
               + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
               + ")";
+    } else if (Domain.SURVEY.equals(domain)) {
+      // Using an OR between survey/question/answer query parts is really inefficient(10-12secs slower)
+      // To combat this we do a UNION ALL between survey/question/answer query parts but this means
+      // we have to adapt when adding the potential modifiers(age at event or cati) and return early in this method.
+      String ageCatiModifierSql = getAgeDateAndEncounterSql(queryParams, searchGroupItem.getModifiers());
+      queryPartsSql =
+              PERSON_ID_IN
+                      + CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE
+                      + String.join(ageCatiModifierSql + UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE, queryParts)
+                      + ageCatiModifierSql + ")";
+      return CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE + queryPartsSql;
     } else {
+      // besides the special cases above, it's ok to OR query parts together
       queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
     }
     // format the base sql with all query parts
