@@ -176,8 +176,7 @@ export const DemoChart = fp.flow(withRouter)(
         newChartData: newChartData.items,
       });
       this.getChartOptions();
-      this.getDataForPopPyramid(true);
-      this.getDataForPopPyramid(false);
+      this.getDataForPopPyramid();
       hideSpinner();
     }
 
@@ -276,15 +275,16 @@ export const DemoChart = fp.flow(withRouter)(
           return acc;
         }, [])
         .sort((a, b) => (a.name < b.name ? 1 : -1));
-      console.log('categories:', categories);
-      console.log('series:', series);
-
       return { categories, series };
     }
 
-    getDataForPopPyramid(isCanned: boolean) {
+    getDataForPopPyramid() {
       const normalized = '';
-      const { categories, series } = this.parsePopPyramidData(isCanned);
+      const { categories, series } = this.parsePopPyramidData();
+
+      const seriesMaleFemale = series
+        .filter((s) => s.name === 'Male' || s.name === 'Female')
+        .sort((a, b) => (a.gender > b.gender ? 1 : -1));
 
       const height = Math.max(categories.length * 30, 600);
       const opt = {
@@ -362,63 +362,17 @@ export const DemoChart = fp.flow(withRouter)(
               ', race ' +
               this.point.race +
               '</b><br/>' +
-              'Population: ' +
+              'count: ' +
               highCharts.numberFormat(Math.abs(this.point.y), 1)
             );
           },
         },
-        series: series,
+        series: seriesMaleFemale,
       };
-      isCanned
-        ? this.setState({ chartPopPyramidCanned: opt })
-        : this.setState({ chartPopPyramid: opt });
+      this.setState({ chartPopPyramid: opt });
     }
 
-    parsePopPyramidData(isCanned: boolean) {
-      if (isCanned) {
-        const categories = ['20-24', '25-29', '30-34', '35-40', '40-45'];
-        const series = [
-          {
-            name: 'Male',
-            data: [
-              { x: 0, y: -25, race: 'W' },
-              { x: 0, y: -20, race: 'B' },
-              { x: 0, y: -15, race: 'A' },
-              { x: 0, y: -5, race: 'U' },
-              { x: 1, y: -20, race: 'W' },
-              { x: 1, y: -16, race: 'B' },
-              { x: 1, y: -12, race: 'A' },
-              { x: 1, y: -4, race: 'U' },
-              { x: 2, y: -16, race: 'W' },
-              { x: 2, y: -8, race: 'B' },
-              { x: 2, y: -2, race: 'A' },
-              { x: 2, y: -1, race: 'U' },
-              { x: 3, y: -12, race: 'W' },
-              { x: 3, y: -8, race: 'B' },
-              { x: 3, y: -4, race: 'A' },
-              { x: 3, y: -1, race: 'U' },
-            ],
-          },
-          {
-            name: 'Female',
-            data: [
-              { x: 0, y: 25, race: 'W' },
-              { x: 0, y: 20, race: 'B' },
-              { x: 0, y: 15, race: 'A' },
-              { x: 0, y: 5, race: 'U' },
-              { x: 1, y: 20, race: 'W' },
-              { x: 1, y: 16, race: 'B' },
-              { x: 1, y: 12, race: 'A' },
-              { x: 2, y: 16, race: 'W' },
-              { x: 2, y: 8, race: 'B' },
-              { x: 2, y: 1, race: 'U' },
-              { x: 3, y: 12, race: 'W' },
-              { x: 3, y: 8, race: 'B' },
-            ],
-          },
-        ];
-        return { categories, series };
-      }
+    parsePopPyramidData() {
       const { newChartData } = this.state;
       const categories = Array.from(
         new Set(newChartData.map((dat) => dat.ageBin))
@@ -427,69 +381,46 @@ export const DemoChart = fp.flow(withRouter)(
       const getComboKey = (record) => {
         return `${record.gender} ${record.ageBin} ${record.race}`;
       };
-
-      console.log('categories:', categories);
       const ageGenderRaceHelper = {};
       const genderHelper = {};
-      const series = newChartData.reduce((accum, record) => {
-        const key = getComboKey(record);
-        if (!genderHelper[record.gender]) {
-          genderHelper[record.gender] = { genderSum: record.count };
-        } else {
-          genderHelper[record.gender].genderSum += record.count;
-        }
-        if (!ageGenderRaceHelper[key]) {
-          ageGenderRaceHelper[key] = {
-            x: categories.indexOf(record.ageBin),
-            raceCount: record.count,
-            gender: record.gender,
-            race: record.race,
-          };
-          accum.push(ageGenderRaceHelper[key]);
-        } else {
-          ageGenderRaceHelper[key].raceCount += record.count;
-        }
+      const seriesHelper = newChartData
+        .reduce((accum, record) => {
+          const key = getComboKey(record);
+          if (!genderHelper[record.gender]) {
+            genderHelper[record.gender] = { genderSum: record.count };
+          } else {
+            genderHelper[record.gender].genderSum += record.count;
+          }
+          const index = categories.indexOf(record.ageBin);
+          if (!ageGenderRaceHelper[key]) {
+            ageGenderRaceHelper[key] = {
+              x: index,
+              raceCount: record.count,
+              gender: record.gender,
+              race: record.race,
+            };
+            accum.push(ageGenderRaceHelper[key]);
+          } else {
+            ageGenderRaceHelper[key].raceCount += record.count;
+          }
+          return accum;
+        }, [])
+        .sort((a, b) => a.x - b.x);
 
+      const series = seriesHelper.reduce((accum, rec) => {
+        const gender = rec.gender;
+        if (gender === 'Male') {
+          rec.raceCount = -rec.raceCount;
+        }
+        rec.y = (100.0 * rec.raceCount) / genderHelper[rec.gender].genderSum;
+        const index = accum.findIndex((d) => d.name === gender);
+        if (index === -1) {
+          accum.push({ name: rec.gender, data: [rec] });
+        } else {
+          accum[index].data.push(rec);
+        }
         return accum;
       }, []);
-
-      series.reduce((accum, rec) => {
-        rec.racePercent =
-          (100.0 * rec.raceCount) / genderHelper[rec.gender].genderSum;
-        accum.push(rec);
-        return accum;
-      }, []);
-
-      console.log('genderMap', genderHelper);
-      console.log('series', series);
-      // console.log('series1', series);
-
-      // const codeMap = {
-      //   M: 'Male',
-      //   F: 'Female',
-      //   'No matching concept': 'Unknown',
-      // };
-      // const getKey = (dat) => {
-      //   const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
-      //   return `${dat.ageBin || 'Unknown'} ${gender} ${race}`;
-      // };
-      //
-      // console.log('categories', categories);
-      // const series = newChartData
-      //   .reduce((acc, datum) => {
-      //     const key = getKey(datum);
-      //     const obj = { x: categories.indexOf(key), y: datum.count, datum };
-      //     const index = acc.findIndex((d) => d.name === datum.race);
-      //     if (index === -1) {
-      //       acc.push({ name: datum.race, data: [obj] });
-      //     } else {
-      //       acc[index].data.push(obj);
-      //     }
-      //     return acc;
-      //   }, [])
-      //   .sort((a, b) => (a.name < b.name ? 1 : -1));
-      // console.log('series', series);
-
       return { categories, series };
     }
 
