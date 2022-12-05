@@ -1,7 +1,6 @@
 package org.pmiops.workbench.leonardo;
 
 import java.net.SocketTimeoutException;
-import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
@@ -9,17 +8,15 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
-import org.pmiops.workbench.utils.RetryHandler;
+import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoRetryHandler extends RetryHandler<ApiException> {
+public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(LeonardoRetryHandler.class.getName());
-
-  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
 
   private static class LeonardoRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -65,20 +62,12 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
   @Autowired
   public LeonardoRetryHandler(
       BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
-    super(backoffPolicy, new LeonardoRetryPolicy());
-    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
+    super(backoffPolicy, new LeonardoRetryPolicy(), termsOfServiceApiProvider);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-      Optional<WorkbenchException> tosExceptionMaybe =
-          checkForTosNonCompliance(termsOfServiceApiProvider);
-      if (tosExceptionMaybe.isPresent()) {
-        return tosExceptionMaybe.get();
-      }
-    }
-
-    return ExceptionUtils.convertLeonardoException(exception);
+    return maybeTosNonCompliant(exception.getCode())
+        .orElseGet(() -> ExceptionUtils.convertLeonardoException(exception));
   }
 }
