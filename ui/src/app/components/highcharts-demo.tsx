@@ -129,7 +129,8 @@ interface State {
   demoChartData: DemoChartInfo[];
   newChartData: ChartData[];
   options: any;
-  newOptions: any;
+  chartPopPyramid: any;
+  chartPopPyramidCanned: any;
 }
 
 export const DemoChart = fp.flow(withRouter)(
@@ -140,7 +141,8 @@ export const DemoChart = fp.flow(withRouter)(
         demoChartData: null,
         options: null,
         newChartData: null,
-        newOptions: null,
+        chartPopPyramid: null,
+        chartPopPyramidCanned: null,
       };
     }
 
@@ -174,7 +176,8 @@ export const DemoChart = fp.flow(withRouter)(
         newChartData: newChartData.items,
       });
       this.getChartOptions();
-      this.getNewChartOptions();
+      this.getDataForPopPyramid(true);
+      this.getDataForPopPyramid(false);
       hideSpinner();
     }
 
@@ -278,12 +281,12 @@ export const DemoChart = fp.flow(withRouter)(
       return { categories, series };
     }
 
-    getNewChartOptions() {
+    getDataForPopPyramid(isCanned: boolean) {
       const normalized = '';
-      const { categories, series } = this.getCategoriesAndSeries2();
+      const { categories, series } = this.parsePopPyramidData(isCanned);
 
       const height = Math.max(categories.length * 30, 600);
-      const newOptions = {
+      const opt = {
         chart: {
           height,
           type: 'bar',
@@ -293,7 +296,7 @@ export const DemoChart = fp.flow(withRouter)(
         },
         accessibility: {
           point: {
-            valueDescriptionFormat: '{index}. Age {xDescription} Race {race}',
+            valueDescriptionFormat: '{index} Age {xDescription} Race {race}',
           },
         },
         xAxis: [
@@ -355,45 +358,104 @@ export const DemoChart = fp.flow(withRouter)(
               this.series.name +
               ', age ' +
               this.point.category +
-              ', race ' + this.point.race +
+              ', race ' +
+              this.point.race +
               '</b><br/>' +
               'Population: ' +
               highCharts.numberFormat(Math.abs(this.point.y), 1)
             );
           },
         },
-        series,
+        series: series,
       };
-      this.setState({ newOptions });
+      isCanned
+        ? this.setState({ chartPopPyramidCanned: opt })
+        : this.setState({ chartPopPyramid: opt });
     }
 
-    getCategoriesAndSeries2() {
-      const categories = ['20-24', '25-29', '30-34', '35-40', '40-45'];
-      const series = [
-        {
-          name: 'Male',
-          data: [
-            { x: 0, y: -25, race:'W' },
-            { x: 0, y: -15, race:'B' },
-            { x: 0, y: -10, race:'A' },
-            { x: 0, y: -5, race:'U' },
-            { x: 1, y: -15, race:'W' },
-            { x: 1, y: -9, race:'B' },
-            { x: 1, y: -7, race:'A' },
-            { x: 1, y: -1, race:'U' },
-          ],
-        },
-        {
-          name: 'Female',
-          data: [50, 40, 30, 20, 10],
-        },
-      ];
+    parsePopPyramidData(isCanned: boolean) {
+      if (isCanned) {
+        const categories = ['20-24', '25-29', '30-34', '35-40', '40-45'];
+        const series = [
+          {
+            name: 'Male',
+            data: [
+              { x: 0, y: -25, race: 'W' },
+              { x: 0, y: -20, race: 'B' },
+              { x: 0, y: -15, race: 'A' },
+              { x: 0, y: -5, race: 'U' },
+              { x: 1, y: -20, race: 'W' },
+              { x: 1, y: -16, race: 'B' },
+              { x: 1, y: -12, race: 'A' },
+              { x: 1, y: -4, race: 'U' },
+              { x: 2, y: -16, race: 'W' },
+              { x: 2, y: -8, race: 'B' },
+              { x: 2, y: -2, race: 'A' },
+              { x: 2, y: -1, race: 'U' },
+              { x: 3, y: -12, race: 'W' },
+              { x: 3, y: -8, race: 'B' },
+              { x: 3, y: -4, race: 'A' },
+              { x: 3, y: -1, race: 'U' },
+            ],
+          },
+          {
+            name: 'Female',
+            data: [
+              { x: 0, y: 25, race: 'W' },
+              { x: 0, y: 20, race: 'B' },
+              { x: 0, y: 15, race: 'A' },
+              { x: 0, y: 5, race: 'U' },
+              { x: 1, y: 20, race: 'W' },
+              { x: 1, y: 16, race: 'B' },
+              { x: 1, y: 12, race: 'A' },
+              { x: 2, y: 16, race: 'W' },
+              { x: 2, y: 8, race: 'B' },
+              { x: 2, y: 1, race: 'U' },
+              { x: 3, y: 12, race: 'W' },
+              { x: 3, y: 8, race: 'B' },
+            ],
+          },
+        ];
+        return { categories, series };
+      }
+      const { newChartData } = this.state;
+      const categories = [new Set(newChartData.map(dat=>dat.ageBin))];
+      categories.sort((a,b)=>(a >b ? 1 :-1));
 
+      const genders = [new Set(newChartData.map(dat=>dat.gender))];
+      const races = [new Set(newChartData.map(dat=>dat.race))];
+
+
+      const codeMap = {
+        M: 'Male',
+        F: 'Female',
+        'No matching concept': 'Unknown',
+      };
+      const getKey = (dat) => {
+        const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
+        return `${dat.ageBin || 'Unknown'} ${gender} ${race}`;
+      };
+
+      console.log('categories', categories);
+      const series = newChartData
+        .reduce((acc, datum) => {
+          const key = getKey(datum);
+          const obj = { x: categories.indexOf(key), y: datum.count, datum };
+          const index = acc.findIndex((d) => d.name === datum.race);
+          if (index === -1) {
+            acc.push({ name: datum.race, data: [obj] });
+          } else {
+            acc[index].data.push(obj);
+          }
+          return acc;
+        }, [])
+        .sort((a, b) => (a.name < b.name ? 1 : -1));
+      console.log('series', series);
       return { categories, series };
     }
 
     render() {
-      const { options, newOptions } = this.state;
+      const { options, chartPopPyramid, chartPopPyramidCanned } = this.state;
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -408,15 +470,24 @@ export const DemoChart = fp.flow(withRouter)(
                   />
                 )}
               </div>
-              <div style={{ minHeight: 200, width: 800 }}>
-                {newOptions && (
+              <div style={{width: 800 }}>
+                {chartPopPyramidCanned && (
                   <HighchartsReact
                     highcharts={highCharts}
-                    options={newOptions}
+                    options={chartPopPyramidCanned}
                     callback={getChartObj}
                   />
                 )}
               </div>
+            </div>
+            <div style={{ minHeight: 200, width: 800 }}>
+              {chartPopPyramid && (
+                <HighchartsReact
+                  highcharts={highCharts}
+                  options={chartPopPyramid}
+                  callback={getChartObj}
+                />
+              )}
             </div>
           </div>
         </React.Fragment>
