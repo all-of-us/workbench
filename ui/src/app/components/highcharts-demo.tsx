@@ -265,6 +265,7 @@ export const DemoChart = fp.flow(withRouter)(
       const series = demoChartData
         .reduce((acc, datum) => {
           const key = getKey(datum);
+          console.log(key);
           const obj = { x: categories.indexOf(key), y: datum.count };
           const index = acc.findIndex((d) => d.name === datum.race);
           if (index === -1) {
@@ -419,38 +420,76 @@ export const DemoChart = fp.flow(withRouter)(
         return { categories, series };
       }
       const { newChartData } = this.state;
-      const categories = [new Set(newChartData.map(dat=>dat.ageBin))];
-      categories.sort((a,b)=>(a >b ? 1 :-1));
+      const categories = Array.from(
+        new Set(newChartData.map((dat) => dat.ageBin))
+      ).sort((a, b) => (a > b ? 1 : -1));
 
-      const genders = [new Set(newChartData.map(dat=>dat.gender))];
-      const races = [new Set(newChartData.map(dat=>dat.race))];
-
-
-      const codeMap = {
-        M: 'Male',
-        F: 'Female',
-        'No matching concept': 'Unknown',
-      };
-      const getKey = (dat) => {
-        const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
-        return `${dat.ageBin || 'Unknown'} ${gender} ${race}`;
+      const getComboKey = (record) => {
+        return `${record.gender} ${record.ageBin} ${record.race}`;
       };
 
-      console.log('categories', categories);
-      const series = newChartData
-        .reduce((acc, datum) => {
-          const key = getKey(datum);
-          const obj = { x: categories.indexOf(key), y: datum.count, datum };
-          const index = acc.findIndex((d) => d.name === datum.race);
-          if (index === -1) {
-            acc.push({ name: datum.race, data: [obj] });
-          } else {
-            acc[index].data.push(obj);
-          }
-          return acc;
-        }, [])
-        .sort((a, b) => (a.name < b.name ? 1 : -1));
+      console.log('categories:', categories);
+      const ageGenderRaceHelper = {};
+      const genderHelper = {};
+      const series = newChartData.reduce((accum, record) => {
+        const key = getComboKey(record);
+        if (!genderHelper[record.gender]) {
+          genderHelper[record.gender] = { genderSum: record.count };
+        } else {
+          genderHelper[record.gender].genderSum += record.count;
+        }
+        if (!ageGenderRaceHelper[key]) {
+          ageGenderRaceHelper[key] = {
+            x: categories.indexOf(record.ageBin),
+            raceCount: record.count,
+            gender: record.gender,
+            race: record.race,
+          };
+          accum.push(ageGenderRaceHelper[key]);
+        } else {
+          ageGenderRaceHelper[key].raceCount += record.count;
+        }
+
+        return accum;
+      }, []);
+
+      series.reduce((accum, rec) => {
+        rec.racePercent =
+          (100.0 * rec.raceCount) / genderHelper[rec.gender].genderSum;
+        accum.push(rec);
+        return accum;
+      }, []);
+
+      console.log('genderMap', genderHelper);
       console.log('series', series);
+      // console.log('series1', series);
+
+      // const codeMap = {
+      //   M: 'Male',
+      //   F: 'Female',
+      //   'No matching concept': 'Unknown',
+      // };
+      // const getKey = (dat) => {
+      //   const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
+      //   return `${dat.ageBin || 'Unknown'} ${gender} ${race}`;
+      // };
+      //
+      // console.log('categories', categories);
+      // const series = newChartData
+      //   .reduce((acc, datum) => {
+      //     const key = getKey(datum);
+      //     const obj = { x: categories.indexOf(key), y: datum.count, datum };
+      //     const index = acc.findIndex((d) => d.name === datum.race);
+      //     if (index === -1) {
+      //       acc.push({ name: datum.race, data: [obj] });
+      //     } else {
+      //       acc[index].data.push(obj);
+      //     }
+      //     return acc;
+      //   }, [])
+      //   .sort((a, b) => (a.name < b.name ? 1 : -1));
+      // console.log('series', series);
+
       return { categories, series };
     }
 
@@ -470,7 +509,7 @@ export const DemoChart = fp.flow(withRouter)(
                   />
                 )}
               </div>
-              <div style={{width: 800 }}>
+              <div style={{ width: 800 }}>
                 {chartPopPyramidCanned && (
                   <HighchartsReact
                     highcharts={highCharts}
