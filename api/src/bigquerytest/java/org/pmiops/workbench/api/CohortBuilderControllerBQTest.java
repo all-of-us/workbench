@@ -791,23 +791,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private static SearchParameter pfhhSurveyAnswer() {
     return new SearchParameter()
-            .domain(Domain.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .ancestorData(false)
-            .standard(false)
-            .group(false)
-            .conceptId(43528652L)
-            .attributes(
-                    ImmutableList.of(
-                            new Attribute()
-                                    .name(AttrName.PERSONAL_FAMILY_HEALTH_HISTORY)
-                                    .operator(Operator.IN)
-                                    .operands(ImmutableList.of("1740639")),
-                            new Attribute()
-                                    .name(AttrName.CAT)
-                                    .operator(Operator.IN)
-                                    .operands(ImmutableList.of("43528385"))));
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.ANSWER.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false)
+        .conceptId(43528652L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.PERSONAL_FAMILY_HEALTH_HISTORY)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("1740639")),
+                new Attribute()
+                    .name(AttrName.CAT)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("43528385"))));
   }
 
   private static Modifier ageModifier() {
@@ -1140,13 +1140,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsForPFHHSurveyWithCatiModifiers() {
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.SURVEY.toString(),
-                    ImmutableList.of(pfhhSurveyAnswer()),
-                    ImmutableList.of(catiModifier()));
+        createCohortDefinition(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(pfhhSurveyAnswer()),
+            ImmutableList.of(catiModifier()));
 
     assertParticipants(
-            controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
