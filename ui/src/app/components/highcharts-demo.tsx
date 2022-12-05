@@ -285,7 +285,18 @@ export const DemoChart = fp.flow(withRouter)(
       const seriesMaleFemale = series
         .filter((s) => s.name === 'Male' || s.name === 'Female')
         .sort((a, b) => (a.gender > b.gender ? 1 : -1));
-
+      // console.log(seriesMaleFemale);
+      const raceColors = [
+        '#216FB4',
+        '#6CACE4',
+        '#8BC990',
+        '#F8C954',
+        '#F7981C',
+        '#F0718B',
+        '#F38D7A',
+        '#A27DB7',
+        '#CAB2D6',
+      ];
       const height = Math.max(categories.length * 30, 600);
       const opt = {
         chart: {
@@ -297,7 +308,8 @@ export const DemoChart = fp.flow(withRouter)(
         },
         accessibility: {
           point: {
-            valueDescriptionFormat: '{index} Age {xDescription} Race {race}',
+            valueDescriptionFormat:
+              '{index} Age {xDescription} Race {race} Count {raceCount} GenderCount {genderCount} Percent {y}',
           },
         },
         xAxis: [
@@ -339,9 +351,10 @@ export const DemoChart = fp.flow(withRouter)(
             rangeDescription: 'Range: 0 to 5%',
           },
         },
-        colors: colors.chartColors,
+        fillColor: raceColors,
+        // colors: raceColors,
         legend: {
-          enabled: false,
+          enabled: true,
         },
         plotOptions: {
           bar: {
@@ -363,7 +376,16 @@ export const DemoChart = fp.flow(withRouter)(
               this.point.race +
               '</b><br/>' +
               'count: ' +
-              highCharts.numberFormat(Math.abs(this.point.y), 1)
+              Math.abs(this.point.raceCount) +
+              ' / ' +
+              Math.abs(this.point.genderCount) +
+              ' (' +
+              this.series.name +
+              ')' +
+              '</b><br/>' +
+              'percent: ' +
+              highCharts.numberFormat(Math.abs(this.point.y), 1) +
+              '%'
             );
           },
         },
@@ -378,18 +400,25 @@ export const DemoChart = fp.flow(withRouter)(
         new Set(newChartData.map((dat) => dat.ageBin))
       ).sort((a, b) => (a > b ? 1 : -1));
 
+      const races = Array.from(
+        new Set(newChartData.map((dat) => dat.race))
+      ).sort((a, b) => (a > b ? -1 : 1));
+      const raceColorMap = {};
+      races.map((r, i) => (raceColorMap[r] = colors.chartColors[i]));
+
       const getComboKey = (record) => {
         return `${record.gender} ${record.ageBin} ${record.race}`;
       };
+
       const ageGenderRaceHelper = {};
       const genderHelper = {};
       const seriesHelper = newChartData
         .reduce((accum, record) => {
           const key = getComboKey(record);
           if (!genderHelper[record.gender]) {
-            genderHelper[record.gender] = { genderSum: record.count };
+            genderHelper[record.gender] = { genderCount: record.count };
           } else {
-            genderHelper[record.gender].genderSum += record.count;
+            genderHelper[record.gender].genderCount += record.count;
           }
           const index = categories.indexOf(record.ageBin);
           if (!ageGenderRaceHelper[key]) {
@@ -412,7 +441,10 @@ export const DemoChart = fp.flow(withRouter)(
         if (gender === 'Male') {
           rec.raceCount = -rec.raceCount;
         }
-        rec.y = (100.0 * rec.raceCount) / genderHelper[rec.gender].genderSum;
+        rec.genderCount = genderHelper[rec.gender].genderCount;
+        rec.y = (100.0 * rec.raceCount) / rec.genderCount;
+        rec.color = raceColorMap[rec.race];
+
         const index = accum.findIndex((d) => d.name === gender);
         if (index === -1) {
           accum.push({ name: rec.gender, data: [rec] });
@@ -450,7 +482,7 @@ export const DemoChart = fp.flow(withRouter)(
                 )}
               </div>
             </div>
-            <div style={{ minHeight: 200, width: 800 }}>
+            <div style={{ minHeight: 400, width: 2000 }}>
               {chartPopPyramid && (
                 <HighchartsReact
                   highcharts={highCharts}
