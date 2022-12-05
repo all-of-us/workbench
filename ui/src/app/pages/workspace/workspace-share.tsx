@@ -241,8 +241,9 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
           {
             customErrorResponseFormatter: (aer) =>
               aer.responseJson.errorCode === ErrorCode.TERRATOSNONCOMPLIANT && {
-                title: 'Joel test',
-                message: 'TOS 401',
+                title: 'Detected non-compliance',
+                message:
+                  "User has not agreed to Terra's updated Terms of Service",
               },
           }
         );
