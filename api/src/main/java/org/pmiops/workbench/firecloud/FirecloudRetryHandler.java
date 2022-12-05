@@ -1,15 +1,13 @@
 package org.pmiops.workbench.firecloud;
 
 import java.net.SocketTimeoutException;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +18,6 @@ import org.springframework.stereotype.Service;
 public class FirecloudRetryHandler extends RetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(FirecloudRetryHandler.class.getName());
-  private static final String TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE =
-      "User has not accepted the Terra Terms of Service";
 
   private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
 
@@ -66,35 +62,14 @@ public class FirecloudRetryHandler extends RetryHandler<ApiException> {
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    Function<ApiException, WorkbenchException> defaultHandler =
-        ExceptionUtils::convertFirecloudException;
-
     if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
-      return checkToSCompliance(exception, defaultHandler);
+      Optional<WorkbenchException> tosExceptionMaybe =
+          checkForTosNonCompliance(termsOfServiceApiProvider);
+      if (tosExceptionMaybe.isPresent()) {
+        return tosExceptionMaybe.get();
+      }
     }
 
-    return defaultHandler.apply(exception);
-  }
-
-  // ToS non-compliance causes Firecloud to return 401/Unauth - but that's not the only
-  // reason we might see 401 here.  Call Firecloud again to check ToS status.
-  private WorkbenchException checkToSCompliance(
-      ApiException exception, Function<ApiException, WorkbenchException> defaultHandler) {
-    boolean tosCompliant = false;
-    String tosExceptionMessage = TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE;
-
-    try {
-      tosCompliant = Boolean.TRUE.equals(termsOfServiceApiProvider.get().getTermsOfServiceStatus());
-    } catch (ApiException tosException) {
-      tosExceptionMessage =
-          "An exception was thrown checking the user's Terra Terms of Service Status: "
-              + tosException.getMessage();
-    }
-
-    return tosCompliant
-        ? defaultHandler.apply(exception)
-        : new UnauthorizedException(
-            WorkbenchException.errorResponse(
-                tosExceptionMessage, ErrorCode.TERRA_TOS_NON_COMPLIANT));
+    return ExceptionUtils.convertFirecloudException(exception);
   }
 }

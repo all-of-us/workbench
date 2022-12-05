@@ -1,7 +1,13 @@
 package org.pmiops.workbench.utils;
 
+import java.util.Optional;
+import javax.inject.Provider;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.model.ErrorCode;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryException;
 import org.springframework.retry.RetryPolicy;
@@ -43,5 +49,33 @@ public abstract class RetryHandler<E extends Exception> {
     return retryTemplate.execute(retryCallback);
   }
 
+  private static final String TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE =
+      "User has not accepted the Terra Terms of Service";
+
   protected abstract WorkbenchException convertException(E exception);
+
+  // ToS non-compliance causes Terra services to return 401/Unauth - but that's not the only
+  // reason we might see 401 here.  Call Terra again to check ToS status.
+  protected Optional<WorkbenchException> checkForTosNonCompliance(
+      Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
+    boolean tosCompliant = false;
+    String tosExceptionMessage = TERMS_OF_SERVICE_NONCOMPLIANCE_MESSAGE;
+
+    try {
+      tosCompliant = Boolean.TRUE.equals(termsOfServiceApiProvider.get().getTermsOfServiceStatus());
+    } catch (ApiException tosException) {
+      tosExceptionMessage =
+          "An exception was thrown checking the user's Terra Terms of Service Status: "
+              + tosException.getMessage();
+    }
+
+    if (!tosCompliant) {
+      return Optional.of(
+          new UnauthorizedException(
+              WorkbenchException.errorResponse(
+                  tosExceptionMessage, ErrorCode.TERRA_TOS_NON_COMPLIANT)));
+    }
+
+    return Optional.empty();
+  }
 }

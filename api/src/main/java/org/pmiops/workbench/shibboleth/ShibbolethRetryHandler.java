@@ -1,10 +1,13 @@
 package org.pmiops.workbench.shibboleth;
 
 import java.net.SocketTimeoutException;
+import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class ShibbolethRetryHandler extends RetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(ShibbolethRetryHandler.class.getName());
+
+  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
 
   private static class ShibbolethRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -49,12 +54,22 @@ public class ShibbolethRetryHandler extends RetryHandler<ApiException> {
   }
 
   @Autowired
-  public ShibbolethRetryHandler(BackOffPolicy backoffPolicy) {
+  public ShibbolethRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(backoffPolicy, new ShibbolethRetryPolicy());
+    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
+    if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
+      Optional<WorkbenchException> tosExceptionMaybe =
+          checkForTosNonCompliance(termsOfServiceApiProvider);
+      if (tosExceptionMaybe.isPresent()) {
+        return tosExceptionMaybe.get();
+      }
+    }
+
     return ExceptionUtils.convertShibbolethException(exception);
   }
 }

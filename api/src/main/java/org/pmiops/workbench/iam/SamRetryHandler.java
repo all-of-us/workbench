@@ -1,10 +1,13 @@
 package org.pmiops.workbench.iam;
 
 import java.net.SocketTimeoutException;
+import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.sam.ApiException;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class SamRetryHandler extends RetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(SamRetryHandler.class.getName());
+
+  private final Provider<TermsOfServiceApi> termsOfServiceApiProvider;
 
   private static class SamRetryPolicy extends ResponseCodeRetryPolicy {
 
@@ -50,12 +55,22 @@ public class SamRetryHandler extends RetryHandler<ApiException> {
   }
 
   @Autowired
-  public SamRetryHandler(BackOffPolicy backoffPolicy) {
+  public SamRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(backoffPolicy, new SamRetryPolicy());
+    this.termsOfServiceApiProvider = termsOfServiceApiProvider;
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
+    if (exception.getCode() == HttpServletResponse.SC_UNAUTHORIZED) {
+      Optional<WorkbenchException> tosExceptionMaybe =
+          checkForTosNonCompliance(termsOfServiceApiProvider);
+      if (tosExceptionMaybe.isPresent()) {
+        return tosExceptionMaybe.get();
+      }
+    }
+
     return ExceptionUtils.convertSamException(exception);
   }
 }
