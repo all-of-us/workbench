@@ -27,6 +27,7 @@ def build(cmd_name, args)
 
   common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
+     common.run_inline %W{yarn run deps}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
