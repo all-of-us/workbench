@@ -110,8 +110,23 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    */
   async duplicateNotebook(notebookName: string): Promise<string> {
     const notebookCard = await new DataResourceCard(this.page).findCard({ name: notebookName });
+
     await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: false });
     await waitWhileLoading(this.page);
+    return `Duplicate of ${notebookName}`; // name of clone notebook
+  }
+
+  async duplicateNotebookViaTable(notebookName: string): Promise<string> {
+    const resourceCard = new DataResourceCard(this.page);
+    const card = await resourceCard.findNameCellLinkFromTable({ name: notebookName });
+    if (!card) {
+      throw new Error(`ERROR: Failed to find notebook "${notebookName}"`);
+    }
+
+    await resourceCard.selectSnowmanMenu(MenuOption.Duplicate, { name: notebookName, waitForNav: false });
+
+    await waitWhileLoading(this.page);
+
     return `Duplicate of ${notebookName}`; // name of clone notebook
   }
 
