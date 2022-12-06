@@ -64,12 +64,13 @@ interface NotificationProps {
   dataTestId: string;
   text: string | JSX.Element;
   buttonText: string;
-  buttonPath: string;
-  buttonDisabled: boolean;
+  buttonPath?: string;
+  buttonDisabled?: boolean;
   useLocationLink?: boolean;
   boxStyle?: CSSProperties;
   textStyle?: CSSProperties;
   buttonStyle?: CSSProperties;
+  buttonOnClick?: () => void;
   bannerTextWidth: CSSProperties['width'];
 }
 
@@ -83,6 +84,7 @@ export const NotificationBanner = ({
   boxStyle,
   textStyle,
   buttonStyle,
+  buttonOnClick,
   bannerTextWidth,
 }: NotificationProps) => {
   return (
@@ -97,6 +99,7 @@ export const NotificationBanner = ({
           style={{ ...styles.button, ...buttonStyle }}
           path={buttonPath}
           disabled={buttonDisabled}
+          onClick={buttonOnClick}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </ButtonWithLocationState>
@@ -106,6 +109,7 @@ export const NotificationBanner = ({
           style={styles.button}
           path={buttonPath}
           disabled={buttonDisabled}
+          onClick={buttonOnClick}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </Button>
