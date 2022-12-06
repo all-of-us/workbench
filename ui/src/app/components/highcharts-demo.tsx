@@ -126,11 +126,9 @@ export interface Props
 }
 
 interface State {
-  demoChartData: DemoChartInfo[];
   newChartData: ChartData[];
   options: any;
   chartPopPyramid: any;
-  chartPopPyramidCanned: any;
 }
 
 export const DemoChart = fp.flow(withRouter)(
@@ -138,11 +136,9 @@ export const DemoChart = fp.flow(withRouter)(
     constructor(props: Props) {
       super(props);
       this.state = {
-        demoChartData: null,
         options: null,
         newChartData: null,
         chartPopPyramid: null,
-        chartPopPyramidCanned: null,
       };
     }
 
@@ -163,19 +159,17 @@ export const DemoChart = fp.flow(withRouter)(
       // cohortBuilderApi().findEthnicityInfo(ns, wsid, cohortDefinition),
       // cohortBuilderApi().countParticipants(ns, wsid, cohortDefinition),
       //    ]);
-      const demoChartData = await cohortBuilderApi().findDemoChartInfo(
-        ns,
-        wsid,
-        GenderOrSexType[GenderOrSexType.GENDER],
-        AgeType[AgeType.AGE],
-        cohortDefinition
-      );
+      // const demoChartData = await cohortBuilderApi().findDemoChartInfo(
+      //   ns,
+      //   wsid,
+      //   GenderOrSexType[GenderOrSexType.GENDER],
+      //   AgeType[AgeType.AGE],
+      //   cohortDefinition
+      // );
       const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
       this.setState({
-        demoChartData: demoChartData.items,
         newChartData: newChartData.items,
       });
-      this.getChartOptions();
       this.getDataForPopPyramid();
       hideSpinner();
     }
@@ -191,93 +185,6 @@ export const DemoChart = fp.flow(withRouter)(
       return cohortDef;
     }
 
-    getChartOptions() {
-      const normalized = 'normalized';
-      const { categories, series } = this.getCategoriesAndSeries();
-      console.log('categories:', categories);
-      console.log('series:', series);
-
-      const height = Math.max(categories.length * 30, 200);
-      const options = {
-        chart: {
-          height,
-          type: 'bar',
-        },
-        credits: {
-          enabled: false,
-        },
-        title: {
-          text: '',
-        },
-        xAxis: {
-          categories,
-          tickLength: 0,
-          tickPixelInterval: 50,
-        },
-        yAxis: {
-          labels: {
-            format: '{value}' + (normalized ? '%' : ''),
-          },
-          min: 0,
-          title: {
-            text: '',
-          },
-        },
-        colors: colors.chartColors,
-        legend: {
-          enabled: false,
-        },
-        plotOptions: {
-          bar: {
-            groupPadding: 0,
-            pointPadding: 0.1,
-          },
-          series: {
-            stacking: normalized ? 'percent' : 'normal',
-          },
-        },
-        series,
-      };
-      this.setState({ options });
-    }
-
-    getCategoriesAndSeries() {
-      const { demoChartData } = this.state;
-      const codeMap = {
-        M: 'Male',
-        F: 'Female',
-        'No matching concept': 'Unknown',
-      };
-      const getKey = (dat) => {
-        const gender = !!codeMap[dat.name] ? codeMap[dat.name] : dat.name;
-        return `${gender} ${dat.ageRange || 'Unknown'}`;
-      };
-      const categories = demoChartData
-        ?.reduce((acc, datum) => {
-          const key = getKey(datum);
-          if (!acc.includes(key)) {
-            acc.push(key);
-          }
-          return acc;
-        }, [])
-        .sort((a, b) => (a > b ? 1 : -1));
-      const series = demoChartData
-        .reduce((acc, datum) => {
-          const key = getKey(datum);
-          console.log(key);
-          const obj = { x: categories.indexOf(key), y: datum.count };
-          const index = acc.findIndex((d) => d.name === datum.race);
-          if (index === -1) {
-            acc.push({ name: datum.race, data: [obj] });
-          } else {
-            acc[index].data.push(obj);
-          }
-          return acc;
-        }, [])
-        .sort((a, b) => (a.name < b.name ? 1 : -1));
-      return { categories, series };
-    }
-
     getDataForPopPyramid() {
       const normalized = '';
       const { categories, series } = this.parsePopPyramidData();
@@ -285,7 +192,8 @@ export const DemoChart = fp.flow(withRouter)(
       const seriesMaleFemale = series
         .filter((s) => s.name === 'Male' || s.name === 'Female')
         .sort((a, b) => (a.gender > b.gender ? 1 : -1));
-      // console.log(seriesMaleFemale);
+      const seriesOther = series.filter((s) => s.name.startsWith('Not man only'));
+      console.log(seriesOther);
       const raceColors = [
         '#216FB4',
         '#6CACE4',
@@ -297,10 +205,12 @@ export const DemoChart = fp.flow(withRouter)(
         '#A27DB7',
         '#CAB2D6',
       ];
-      const height = Math.max(categories.length * 30, 600);
+      const height = Math.max(categories.length * 60, 300);
+      const width = height*seriesMaleFemale.length;
       const opt = {
         chart: {
           height,
+          width,
           type: 'bar',
         },
         title: {
@@ -314,6 +224,8 @@ export const DemoChart = fp.flow(withRouter)(
         },
         xAxis: [
           {
+            title: {
+              text: 'Age group',},
             categories: categories,
             reversed: false,
             labels: {
@@ -339,11 +251,11 @@ export const DemoChart = fp.flow(withRouter)(
         ],
         yAxis: {
           title: {
-            text: null,
+            text: '',
           },
           labels: {
             formatter: function () {
-              return Math.abs(this.value);
+              return Math.abs(this.value) + '%';
             },
           },
           accessibility: {
@@ -457,32 +369,12 @@ export const DemoChart = fp.flow(withRouter)(
     }
 
     render() {
-      const { options, chartPopPyramid, chartPopPyramidCanned } = this.state;
+      const { chartPopPyramid } = this.state;
       return (
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            <div>
-              <div style={{ minHeight: 200, width: 800 }}>
-                {options && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={options}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
-              <div style={{ width: 800 }}>
-                {chartPopPyramidCanned && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramidCanned}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
-            </div>
-            <div style={{ minHeight: 400, width: 2000 }}>
+            <div style={{ minHeight: 200}}>
               {chartPopPyramid && (
                 <HighchartsReact
                   highcharts={highCharts}

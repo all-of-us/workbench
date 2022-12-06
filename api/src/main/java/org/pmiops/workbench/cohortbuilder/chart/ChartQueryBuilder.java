@@ -253,7 +253,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   }
 
   public QueryJobConfiguration buildNewChartDataQuery() {
-    int ageBin = 5;
+    int ageBin = 10;
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(AGE_BIN_SIZE_PARAM, QueryParameterValue.int64(ageBin));
 
