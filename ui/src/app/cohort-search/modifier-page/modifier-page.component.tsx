@@ -174,33 +174,37 @@ const dateTooltip = `Dates are consistently shifted within a participant’s rec
       by a time period of up to 364 days backwards to de-identify patient data.
       The date shift differs across participants.`;
 
-const defaultFormState = [
-  {
-    name: ModifierType.AGEATEVENT,
-    label: 'Age At Event',
-    type: 'number',
-    operator: undefined,
-    values: [undefined, undefined],
-    options: [
-      {
-        label: 'Any',
-        value: undefined,
-      },
-      {
-        label: 'Greater Than or Equal To',
-        value: Operator.GREATERTHANOREQUALTO,
-      },
-      {
-        label: 'Less Than or Equal To',
-        value: Operator.LESSTHANOREQUALTO,
-      },
-      {
-        label: 'Between',
-        value: Operator.BETWEEN,
-      },
-    ],
-  },
-];
+const getDefaultFormState = () => {
+  const defaultFormState = [
+    {
+      name: ModifierType.AGEATEVENT,
+      label: 'Age At Event',
+      type: 'number',
+      operator: undefined,
+      values: [undefined, undefined],
+      options: [
+        {
+          label: 'Any',
+          value: undefined,
+        },
+        {
+          label: 'Greater Than or Equal To',
+          value: Operator.GREATERTHANOREQUALTO,
+        },
+        {
+          label: 'Less Than or Equal To',
+          value: Operator.LESSTHANOREQUALTO,
+        },
+        {
+          label: 'Between',
+          value: Operator.BETWEEN,
+        },
+      ],
+    },
+  ];
+  // JSON stringify and parse prevents changes from being passed back to default state
+  return JSON.parse(JSON.stringify(defaultFormState));
+};
 
 interface Selection extends Criteria {
   parameterId: string;
@@ -231,7 +235,7 @@ export const ModifierPage = fp.flow(
     const [calculating, setCalculating] = useState(false);
     const [count, setCount] = useState(null);
     const [formErrors, setFormErrors] = useState([]);
-    const [formState, setFormState] = useState([...defaultFormState]);
+    const [formState, setFormState] = useState(getDefaultFormState());
     const [formUntouched, setFormUntouched] = useState(false);
     const [initialFormState, setInitialFormState] = useState(true);
     const [loading, setLoading] = useState(true);
