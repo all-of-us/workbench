@@ -166,7 +166,14 @@ export const DemoChart = fp.flow(withRouter)(
       this.setState({
         newChartData: newChartData.items,
       });
-      this.getDataForPopPyramid();
+      const { categories, seriesGenderMap } = this.getGenderByRaceChartData();
+      this.setState({
+        chartPopPyramid: this.extracted(categories, [
+          seriesGenderMap.Male,
+          seriesGenderMap.Female,
+        ]),
+      });
+
       hideSpinner();
     }
 
@@ -181,131 +188,7 @@ export const DemoChart = fp.flow(withRouter)(
       return cohortDef;
     }
 
-    getDataForPopPyramid() {
-      const normalized = '';
-      const { categories, series } = this.parsePopPyramidData();
-
-      const seriesMaleFemale = series
-        .filter((s) => s.name === 'Male' || s.name === 'Female')
-        .sort((a, b) => (a.gender > b.gender ? 1 : -1));
-      const seriesOther = series.filter((s) =>
-        s.name.startsWith('Not man only')
-      );
-      console.log(seriesOther);
-      const raceColors = [
-        '#216FB4',
-        '#6CACE4',
-        '#8BC990',
-        '#F8C954',
-        '#F7981C',
-        '#F0718B',
-        '#F38D7A',
-        '#A27DB7',
-        '#CAB2D6',
-      ];
-      const height = Math.max(categories.length * 60, 300);
-      const width = height * seriesMaleFemale.length;
-      const opt = {
-        chart: {
-          height,
-          width,
-          type: 'bar',
-        },
-        title: {
-          text: 'Population pyramid for CDR',
-        },
-        accessibility: {
-          point: {
-            valueDescriptionFormat:
-              '{index} Age {xDescription} Race {race} Count {raceCount} GenderCount {genderCount} Percent {y}',
-          },
-        },
-        xAxis: [
-          {
-            title: {
-              text: 'Age group',
-            },
-            categories: categories,
-            reversed: false,
-            labels: {
-              step: 1,
-            },
-            accessibility: {
-              description: 'Age (male)',
-            },
-          },
-          {
-            // mirror axis on right side
-            opposite: true,
-            reversed: false,
-            categories: categories,
-            linkedTo: 0,
-            labels: {
-              step: 1,
-            },
-            accessibility: {
-              description: 'Age (female)',
-            },
-          },
-        ],
-        yAxis: {
-          title: {
-            text: '',
-          },
-          labels: {
-            formatter: function () {
-              return Math.abs(this.value) + '%';
-            },
-          },
-          accessibility: {
-            description: 'Percentage population',
-            rangeDescription: 'Range: 0 to 5%',
-          },
-        },
-        fillColor: raceColors,
-        // colors: raceColors,
-        legend: {
-          enabled: true,
-        },
-        plotOptions: {
-          bar: {
-            groupPadding: 0,
-            pointPadding: 0.1,
-          },
-          series: {
-            stacking: normalized ? 'percent' : 'normal',
-          },
-        },
-        tooltip: {
-          formatter: function () {
-            return (
-              '<b>' +
-              this.series.name +
-              ', age ' +
-              this.point.category +
-              ', race ' +
-              this.point.race +
-              '</b><br/>' +
-              'count: ' +
-              Math.abs(this.point.raceCount) +
-              ' / ' +
-              Math.abs(this.point.genderCount) +
-              ' (' +
-              this.series.name +
-              ')' +
-              '</b><br/>' +
-              'percent: ' +
-              highCharts.numberFormat(Math.abs(this.point.y), 1) +
-              '%'
-            );
-          },
-        },
-        series: seriesMaleFemale,
-      };
-      this.setState({ chartPopPyramid: opt });
-    }
-
-    parsePopPyramidData() {
+    getGenderByRaceChartData() {
       const { newChartData } = this.state;
       const categories = Array.from(
         new Set(newChartData.map((dat) => dat.ageBin))
@@ -364,7 +247,106 @@ export const DemoChart = fp.flow(withRouter)(
         }
         return accum;
       }, []);
-      return { categories, series };
+
+      const seriesGenderMap = series.reduce((accum, rec) => {
+        accum[rec.name] = rec;
+        return accum;
+      }, {});
+
+      return { categories, seriesGenderMap };
+    }
+
+    extracted(ageCategories, genderSeries) {
+      const height = Math.max(ageCategories.length * 60, 300);
+      const width = height * genderSeries.length;
+      const xAxis = [this.getXAxis(ageCategories, false, 'Age group')];
+      if (genderSeries.length === 2) {
+        xAxis.push(this.getXAxis(ageCategories, true, '', 0));
+      }
+
+      return {
+        chart: {
+          height,
+          width,
+          type: 'bar',
+        },
+        title: {
+          text: '',
+        },
+        accessibility: {
+          point: {
+            valueDescriptionFormat:
+              '{index} Age {xDescription} Race {race} Count {raceCount} GenderCount {genderCount} Percent {y}',
+          },
+        },
+        xAxis: xAxis,
+        yAxis: {
+          title: {
+            text: '',
+          },
+          labels: {
+            formatter: function () {
+              return Math.abs(this.value) + '%';
+            },
+          },
+          accessibility: {
+            description: 'Percentage population',
+            rangeDescription: 'Range: 0 to 5%',
+          },
+        },
+        legend: {
+          enabled: true,
+        },
+        plotOptions: {
+          bar: {
+            groupPadding: 0,
+            pointPadding: 0.1,
+          },
+          series: {
+            stacking: 'normal', // 'normal',
+          },
+        },
+        tooltip: {
+          formatter: function () {
+            return (
+              '<b>' +
+              this.series.name +
+              ', age ' +
+              this.point.category +
+              ', race ' +
+              this.point.race +
+              '</b><br/>' +
+              'count: ' +
+              Math.abs(this.point.raceCount) +
+              ' / ' +
+              Math.abs(this.point.genderCount) +
+              ' (' +
+              this.series.name +
+              ')' +
+              '</b><br/>' +
+              'percent: ' +
+              highCharts.numberFormat(Math.abs(this.point.y), 2) +
+              '%'
+            );
+          },
+        },
+        series: genderSeries,
+      };
+    }
+
+    private getXAxis(ageCategories, rightSide, titleText?, linkedToVal?) {
+      return {
+        title: {
+          text: titleText ? titleText : '',
+        },
+        categories: ageCategories,
+        opposite: rightSide,
+        reversed: false,
+        labels: {
+          step: 1,
+        },
+        linkedTo: linkedToVal,
+      };
     }
 
     render() {
