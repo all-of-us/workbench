@@ -8,19 +8,15 @@ import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
 import {
-  AgeType,
   CdrVersionTiersResponse,
   ChartData,
   Cohort,
   CohortDefinition,
-  DemoChartInfo,
-  GenderOrSexType,
 } from 'generated/fetch';
 
 import { getChartObj } from 'app/cohort-search/utils';
 import {
   chartBuilderApi,
-  cohortBuilderApi,
   cohortsApi,
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -145,7 +141,7 @@ export const DemoChart = fp.flow(withRouter)(
     async componentDidMount(): Promise<void> {
       const { hideSpinner } = this.props;
       // call ot get cohort
-      const cohortDefinition = await this.getCohort();
+      // const cohortDefinition = await this.getCohort();
       // all api to get chart data
       const { ns, wsid } = this.props.match.params;
       // const [demoChartInfo, ethnicityInfo, participantCount] = await Promise.all([
@@ -192,7 +188,9 @@ export const DemoChart = fp.flow(withRouter)(
       const seriesMaleFemale = series
         .filter((s) => s.name === 'Male' || s.name === 'Female')
         .sort((a, b) => (a.gender > b.gender ? 1 : -1));
-      const seriesOther = series.filter((s) => s.name.startsWith('Not man only'));
+      const seriesOther = series.filter((s) =>
+        s.name.startsWith('Not man only')
+      );
       console.log(seriesOther);
       const raceColors = [
         '#216FB4',
@@ -206,7 +204,7 @@ export const DemoChart = fp.flow(withRouter)(
         '#CAB2D6',
       ];
       const height = Math.max(categories.length * 60, 300);
-      const width = height*seriesMaleFemale.length;
+      const width = height * seriesMaleFemale.length;
       const opt = {
         chart: {
           height,
@@ -225,7 +223,8 @@ export const DemoChart = fp.flow(withRouter)(
         xAxis: [
           {
             title: {
-              text: 'Age group',},
+              text: 'Age group',
+            },
             categories: categories,
             reversed: false,
             labels: {
@@ -374,7 +373,7 @@ export const DemoChart = fp.flow(withRouter)(
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            <div style={{ minHeight: 200}}>
+            <div style={{ minHeight: 200 }}>
               {chartPopPyramid && (
                 <HighchartsReact
                   highcharts={highCharts}
