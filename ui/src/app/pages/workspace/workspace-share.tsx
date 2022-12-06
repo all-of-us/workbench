@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
-  ErrorCode,
   Profile,
   User,
   UserRole,
@@ -27,7 +26,6 @@ import { userApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles, withUserProfile } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { fetchWithErrorModal } from 'app/utils/errors';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -232,20 +230,9 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
     async loadUserRoles() {
       this.setState({ loadingUserRoles: true });
       try {
-        const resp = await fetchWithErrorModal(
-          async () =>
-            await workspacesApi().getFirecloudWorkspaceUserRoles(
-              this.props.workspace.namespace,
-              this.props.workspace.id
-            ),
-          {
-            customErrorResponseFormatter: (aer) =>
-              aer.responseJson.errorCode === ErrorCode.TERRATOSNONCOMPLIANT && {
-                title: 'Detected non-compliance',
-                message:
-                  "User has not agreed to Terra's updated Terms of Service",
-              },
-          }
+        const resp = await workspacesApi().getFirecloudWorkspaceUserRoles(
+          this.props.workspace.namespace,
+          this.props.workspace.id
         );
         this.setState({
           userRoles: fp.sortBy('familyName', resp.items),
