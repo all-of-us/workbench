@@ -74,7 +74,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
-
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private final CdrVersionDao cdrVersionDao;

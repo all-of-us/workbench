@@ -251,6 +251,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
       if (this.state.saving) {
         return;
       }
+
       this.setState({ saving: true });
       workspacesApi()
         .shareWorkspacePatch(
