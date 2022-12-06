@@ -156,12 +156,12 @@ export const NewUserSatisfactionSurveyModal = ({
                   await surveysApi().createNewUserSatisfactionSurvey(
                     newUserSatisfactionSurveyData
                   );
+                  setSubmittingRequest(false);
                   setError(false);
                   onSubmitSuccess();
                 } catch {
-                  setError(true);
-                } finally {
                   setSubmittingRequest(false);
+                  setError(true);
                 }
               }}
             >
