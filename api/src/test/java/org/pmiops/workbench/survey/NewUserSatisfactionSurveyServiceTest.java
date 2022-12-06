@@ -77,4 +77,13 @@ class NewUserSatisfactionSurveyServiceTest {
     user.setCreationTime(Timestamp.from(twoMonthsTwoWeeksOneDayAgo));
     assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
   }
+
+  @Test
+  public void testEligibilityWindowEnd() {
+    user.setCreationTime(Timestamp.from(PROVIDED_CLOCK.instant()));
+    final Instant twoMonthsTwoWeeksFromNow =
+        PROVIDED_CLOCK.instant().plus(61 + (2 * 7), ChronoUnit.DAYS);
+    assertThat(newUserSatisfactionSurveyService.eligibilityWindowEnd(user))
+        .isEqualTo(twoMonthsTwoWeeksFromNow);
+  }
 }
