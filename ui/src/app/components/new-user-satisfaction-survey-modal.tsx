@@ -80,7 +80,7 @@ export const NewUserSatisfactionSurveyModal = ({
   );
 
   return (
-    <Modal width={850} onRequestClose={onCancel}>
+    <Modal width={850} onRequestClose={onCancel} data={{'test-id': 'new-user-satisfaction-survey-modal'}}>
       <FlexColumn style={{ gap: '0.5rem' }}>
         <MultipleChoiceQuestion
           question='How would you rate your overall satisfaction with the Researcher Workbench?'
