@@ -159,5 +159,10 @@
   },
   "app": {
     "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+  },
+  "e2eTestUsers": {
+    "testUserEmails": [
+      "TODO"
+    ]
   }
 }

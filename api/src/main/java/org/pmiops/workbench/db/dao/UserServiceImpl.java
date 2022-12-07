@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -410,6 +411,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public boolean getUserTerraTermsOfServiceStatusWithImpersonation(String username) {
+    final DbUser dbUser = userDao.findUserByUsername(username);
+
+    try {
+      return fireCloudService.getUserTermsOfServiceStatusWithImpersonation(dbUser);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
+  @Override
   @Transactional
   public void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion) {
     long userId = dbUser.getUserId();
@@ -426,6 +438,22 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public void acceptTerraTermsOfService(@Nonnull DbUser dbUser) {
     fireCloudService.acceptTermsOfService();
+    userTermsOfServiceDao.save(
+        userTermsOfServiceDao
+            .findByUserIdOrThrow(dbUser.getUserId())
+            .setTerraAgreementTime(clockNow()));
+  }
+
+  @Override
+  public void acceptTerraTermsOfServiceWithImpersonation(String username) {
+    final DbUser dbUser = userDao.findUserByUsername(username);
+
+    try {
+      fireCloudService.acceptTermsOfServiceWithImpersonation(dbUser);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
             .findByUserIdOrThrow(dbUser.getUserId())

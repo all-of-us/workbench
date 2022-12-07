@@ -1,8 +1,11 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -147,7 +150,13 @@ public interface FireCloudService {
 
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
 
+  // accept the Terra Terms of Service, as the current user
   void acceptTermsOfService();
 
+  // accept the Terra Terms of Service on behalf of a user by using impersonation
+  void acceptTermsOfServiceWithImpersonation(@Nonnull DbUser dbUser) throws IOException;
+
   boolean getUserTermsOfServiceStatus() throws ApiException;
+
+  boolean getUserTermsOfServiceStatusWithImpersonation(@Nonnull DbUser dbUser) throws IOException;
 }
