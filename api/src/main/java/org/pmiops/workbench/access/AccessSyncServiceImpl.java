@@ -11,7 +11,9 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -28,7 +30,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,6 +45,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private final AccessTierService accessTierService;
+  private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessModuleService accessModuleService;
   private final ComplianceService complianceService;
   private final Clock clock;
