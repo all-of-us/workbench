@@ -68,7 +68,7 @@ public interface UserService {
   // Registers that a user has accepted the latest version of the Terra Terms of Service.
   void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
 
-  // Registers that a user has accepted the latest version of the Terra Terms of Service.
+  // accepts the latest Terra Terms of Service on behalf of a user by using impersonation
   void acceptTerraTermsOfServiceWithImpersonation(String username);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
