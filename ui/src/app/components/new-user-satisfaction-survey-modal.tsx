@@ -80,11 +80,7 @@ export const NewUserSatisfactionSurveyModal = ({
   );
 
   return (
-    <Modal
-      width={850}
-      onRequestClose={onCancel}
-      data={{ 'test-id': 'new-user-satisfaction-survey-modal' }}
-    >
+    <Modal width={850} onRequestClose={onCancel}>
       <FlexColumn style={{ gap: '0.5rem' }}>
         <MultipleChoiceQuestion
           question='How would you rate your overall satisfaction with the Researcher Workbench?'
@@ -131,7 +127,7 @@ export const NewUserSatisfactionSurveyModal = ({
           )}
         </FlexRow>
         <FlexRow style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
-          <Button type='secondary' onClick={onCancel}>
+          <Button type='secondary' onClick={onCancel} aria-label='cancel'>
             Cancel
           </Button>
           <TooltipTrigger
@@ -153,6 +149,7 @@ export const NewUserSatisfactionSurveyModal = ({
           >
             <Button
               type='primary'
+              aria-label='submit'
               disabled={!!validationErrors || submittingRequest}
               onClick={async () => {
                 setSubmittingRequest(true);

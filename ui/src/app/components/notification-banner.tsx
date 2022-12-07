@@ -72,6 +72,7 @@ interface NotificationProps {
   buttonStyle?: CSSProperties;
   buttonOnClick?: () => void;
   bannerTextWidth: CSSProperties['width'];
+  buttonAriaLabel?: string;
 }
 
 export const NotificationBanner = ({
@@ -85,6 +86,7 @@ export const NotificationBanner = ({
   textStyle,
   buttonStyle,
   buttonOnClick,
+  buttonAriaLabel,
   bannerTextWidth,
 }: NotificationProps) => {
   return (
@@ -100,6 +102,7 @@ export const NotificationBanner = ({
           path={buttonPath}
           disabled={buttonDisabled}
           onClick={buttonOnClick}
+          aria-label={buttonAriaLabel}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </ButtonWithLocationState>
@@ -110,6 +113,7 @@ export const NotificationBanner = ({
           path={buttonPath}
           disabled={buttonDisabled}
           onClick={buttonOnClick}
+          aria-label={buttonAriaLabel}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </Button>

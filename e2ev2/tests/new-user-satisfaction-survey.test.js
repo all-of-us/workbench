@@ -10,10 +10,10 @@ browserTest('take the new user satisfaction survey via the relevant notification
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
 
   const surveyNotification = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-notification"]');
-  const launchSurveyButton = await surveyNotification.waitForSelector('[role="button"]');
+  const launchSurveyButton = await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]');
   await launchSurveyButton.click();
 
-  let surveyModal = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-modal"]');
+  let surveyModal = await page.waitForSelector('[aria-modal="true"]');
 
   const verySatisfiedButton = await surveyModal.waitForSelector('[value="VERY_SATISFIED"]');
   await verySatisfiedButton.click();
@@ -21,13 +21,13 @@ browserTest('take the new user satisfaction survey via the relevant notification
   const additionalInfoInput = await surveyModal.waitForSelector('#new-user-satisfaction-survey-additional-info');
   await additionalInfoInput.type('I love the workbench!');
 
-  const submitButton = await surveyModal.waitForSelector('[role="button"]:nth-of-type(2)');
+  const submitButton = await surveyModal.waitForSelector('[aria-label="submit"]');
   await submitButton.click();
 
   // wait for the submit request to succeed
   await new Promise((r) => setTimeout(r, 100));
 
-  surveyModal = await page.$('[data-test-id="new-user-satisfaction-survey-modal"]');
+  surveyModal = await page.$('[aria-modal="true"]');
   expect(surveyModal).toBeNull();
 
   // todo: Verify the notification goes away. Not possible without a different /profile handler that sets newUserSatisfactionSurveyEligibility to false.
