@@ -4501,6 +4501,7 @@ definitions:
     - USER_DISABLED
     - COMPUTE_SECURITY_SUSPENDED
     - TERRA_TOS_NON_COMPLIANT
+    - TERRA_TOS_COMPLIANCE_UNKNOWN
   StatusResponse:
     type: object
     required:

@@ -58,7 +58,7 @@ public class FirecloudRetryHandler extends TerraServiceRetryHandler<ApiException
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return maybeTosNonCompliant(exception.getCode())
+    return maybeConvertMessageForTos(exception.getCode())
         .orElseGet(() -> ExceptionUtils.convertFirecloudException(exception));
   }
 }
