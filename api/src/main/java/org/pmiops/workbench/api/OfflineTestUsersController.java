@@ -45,20 +45,15 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   }
 
   private void ensureTosStatus(String username) {
-    boolean desiredState = true; // TODO for reject
     boolean currentState = userService.getUserTerraTermsOfServiceStatusWithImpersonation(username);
-    if (currentState == desiredState) {
+    if (currentState) {
       LOGGER.info(
           String.format(
-              "Test user %s is already in desired TOS acceptance state: %s",
-              username, desiredState));
+              "Test user %s is already compliant with the Terra Terms of Service", username));
     } else {
-      LOGGER.info(
-          String.format(
-              "Updating test user %s to desired TOS acceptance state: %s", username, desiredState));
-      if (desiredState) {
-        userService.acceptTerraTermsOfServiceWithImpersonation(username);
-      } // TODO else
+      LOGGER.info(String.format("Accepting the Terra Terms of Service for test user %s", username));
+
+      userService.acceptTerraTermsOfServiceWithImpersonation(username);
     }
   }
 }
