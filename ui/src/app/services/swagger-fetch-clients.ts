@@ -33,6 +33,7 @@ import {
   Configuration as FetchConfiguration,
   DataSetApi,
   DiskApi,
+  DisksApi,
   EgressEventsAdminApi,
   FeaturedWorkspacesConfigApi, // internal
   InstitutionApi,
@@ -124,6 +125,7 @@ export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 export const diskApi = bindCtor(DiskApi);
+export const disksApi = bindCtor(DisksApi);
 export const surveysApi = bindCtor(SurveysApi);
 
 export const getApiBaseUrl = () => {
