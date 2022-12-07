@@ -162,7 +162,13 @@
   },
   "e2eTestUsers": {
     "testUserEmails": [
-      "TODO"
+      "puppeteer-tester-1@staging.fake-research-aou.org",
+      "puppeteer-writer-1@staging.fake-research-aou.org",
+      "puppeteer-reader-1@staging.fake-research-aou.org",
+      "puppet-access-tester-1@staging.fake-research-aou.org",
+      "puppeteer-admin-1@staging.fake-research-aou.org",
+      "puppeteer-egress-1@staging.fake-research-aou.org",
+      "puppetcitester4@staging.fake-research-aou.org"
     ]
   }
 }
