@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER;
+
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -23,7 +25,14 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   }
 
   public ResponseEntity<Void> ensureTestUserTosCompliance() {
-    WorkbenchConfig.E2ETestUserConfig testUserConf = workbenchConfigProvider.get().e2eTestUsers;
+    WorkbenchConfig config = workbenchConfigProvider.get();
+
+    // TODO: is there a better way to check for when we're executing in the test env?
+    if (config.server.projectId.equals("all-of-us-workbench-test")) {
+      ensureTosStatus(COMPLIANT_USER);
+    }
+
+    WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
 
     // only some environments have test users
     if (testUserConf == null) {
