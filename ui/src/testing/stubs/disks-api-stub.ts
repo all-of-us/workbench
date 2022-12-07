@@ -11,6 +11,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 export const stubDisk = () => ({
   size: 1000,
   diskType: DiskType.Standard,
+  isGceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
 });
@@ -33,15 +34,6 @@ export class DisksApiStub extends DisksApi {
       }
       this.disk = null;
       resolve({});
-    });
-  }
-
-  lis(_workspaceNamespace: string, _options?: any): Promise<Disk> {
-    return new Promise<Disk>((resolve, reject) => {
-      if (!this.disk) {
-        reject(Error('disk not found'));
-      }
-      resolve(this.disk);
     });
   }
 

@@ -97,6 +97,7 @@ describe('RuntimeConfigurationPanel', () => {
       diskType: DiskType.Standard,
       name: 'my-existing-disk',
       blockSize: 1,
+      isGceRuntime: true
     };
   };
 
@@ -155,8 +156,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     disksApiStub = new DisksApiStub();
     registerApiClient(DisksApi, disksApiStub);
-
-    registerApiClient(DiskApi, disksApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
