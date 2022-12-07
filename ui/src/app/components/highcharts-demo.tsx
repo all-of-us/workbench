@@ -3,7 +3,6 @@
 // 1. create new route - routing - workspace-app-routing.tsx
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { forEach } from 'lodash';
 import * as fp from 'lodash/fp';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -99,9 +98,6 @@ interface State {
   newChartData: ChartData[];
   options: any;
   chartPopPyramid: any;
-  chartPopPyramidM: any;
-  chartPopPyramidF: any;
-  chartPopPyramidO: any;
   chartsGenderRaceByAgeMap: {};
 }
 
@@ -113,9 +109,6 @@ export const DemoChart = fp.flow(withRouter)(
         options: null,
         newChartData: null,
         chartPopPyramid: null,
-        chartPopPyramidM: null,
-        chartPopPyramidF: null,
-        chartPopPyramidO: null,
         chartsGenderRaceByAgeMap: {},
       };
     }
@@ -126,29 +119,11 @@ export const DemoChart = fp.flow(withRouter)(
       // const cohortDefinition = await this.getCohort();
       // all api to get chart data
       const { ns, wsid } = this.props.match.params;
-      // const [demoChartInfo, ethnicityInfo, participantCount] = await Promise.all([
-      //   cohortBuilderApi().findDemoChartInfo(
-      //     ns,
-      //     wsid,
-      //     GenderOrSexType[GenderOrSexType.GENDER],
-      //     AgeType[AgeType.AGE],
-      //     cohortDefinition
-      //   ),
-      // cohortBuilderApi().findEthnicityInfo(ns, wsid, cohortDefinition),
-      // cohortBuilderApi().countParticipants(ns, wsid, cohortDefinition),
-      //    ]);
-      // const demoChartData = await cohortBuilderApi().findDemoChartInfo(
-      //   ns,
-      //   wsid,
-      //   GenderOrSexType[GenderOrSexType.GENDER],
-      //   AgeType[AgeType.AGE],
-      //   cohortDefinition
-      // );
       const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
       this.setState({
         newChartData: newChartData.items,
       });
-      const { categories, seriesGenderMap, races, genderHelper } =
+      const { categories, seriesGenderMap, genderHelper } =
         this.getGenderByRaceChartData();
       // change y values for Male to be negative for Population Chart
       const M = JSON.parse(JSON.stringify(seriesGenderMap.M));
@@ -158,47 +133,20 @@ export const DemoChart = fp.flow(withRouter)(
         return accum;
       }, []);
       this.setState({
-        chartPopPyramid: this.extracted(
-          categories,
-          [M, seriesGenderMap.F],
-          races
-        ),
+        chartPopPyramid: this.getGenderRaceByAgeChart(categories, [
+          M,
+          seriesGenderMap.F,
+        ]),
       });
       // after pyramid plot
       const chartsGenderRaceByAgeMap = {};
       for (const key of Object.keys(genderHelper)) {
-        chartsGenderRaceByAgeMap[key] = this.extracted(
+        chartsGenderRaceByAgeMap[key] = this.getGenderRaceByAgeChart(
           categories,
-          seriesGenderMap[genderHelper[key].genderKey],
-          races
+          [seriesGenderMap[genderHelper[key].genderKey]]
         );
       }
-      console.log('chartsGenderRaceByAgeMap', chartsGenderRaceByAgeMap);
       this.setState({ chartsGenderRaceByAgeMap });
-
-      this.setState({
-        chartPopPyramidM: this.extracted(
-          categories,
-          [seriesGenderMap.M],
-          races
-        ),
-      });
-      this.setState({
-        chartPopPyramidF: this.extracted(
-          categories,
-          [seriesGenderMap.F],
-          races
-        ),
-      });
-      this.setState({
-        chartPopPyramidO: this.extracted(
-          categories,
-          [seriesGenderMap.O],
-          races
-        ),
-      });
-      const m = this.state.chartPopPyramidM;
-      console.log(m.name);
       hideSpinner();
     }
 
@@ -284,7 +232,7 @@ export const DemoChart = fp.flow(withRouter)(
       return { categories, seriesGenderMap, races, genderHelper };
     }
 
-    extracted(ageCategories, genderSeries, races) {
+    getGenderRaceByAgeChart(ageCategories, genderSeries) {
       const height = Math.max(ageCategories.length * 60, 300);
       // const width = height * genderSeries.length;
       const xAxis = [this.getXAxis(ageCategories, false, 'Age group')];
@@ -325,21 +273,13 @@ export const DemoChart = fp.flow(withRouter)(
           },
         },
         legend: {
-          align: 'center',
-          verticalAlign: 'middle',
-          itemMarginBottom: 10,
-          x: -15,
-          y: 0,
-          labelFormatter: function () {
-            return races[2];
-          },
+          enabled: false,
         },
         plotOptions: {
           bar: {
             groupPadding: 0,
             pointPadding: 0.1,
           },
-          showInLegend: true,
           series: {
             stacking: 'normal', // 'normal',
           },
@@ -388,14 +328,7 @@ export const DemoChart = fp.flow(withRouter)(
     }
 
     render() {
-      const {
-        chartPopPyramid,
-        chartPopPyramidM,
-        chartPopPyramidF,
-        chartPopPyramidO,
-        chartsGenderRaceByAgeMap,
-      } = this.state;
-      const chartMap = JSON.parse(JSON.stringify(chartsGenderRaceByAgeMap));
+      const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -420,87 +353,26 @@ export const DemoChart = fp.flow(withRouter)(
               </span>
             </div>
             <div style={styles.row}>
-              <div
-                style={{
-                  ...styles.col,
-                  flex: '0 0 33%',
-                  maxWidth: '33%',
-                }}
-              >
-                <div>
-                  <span style={styles.chartTitle}>Male</span>
-                </div>
-                {chartPopPyramidM && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramidM}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
-              <div
-                style={{
-                  ...styles.col,
-                  flex: '0 0 33%',
-                  maxWidth: '33%',
-                }}
-              >
-                <div>
-                  <span style={styles.chartTitle}>Male</span>
-                </div>
-                {chartPopPyramidF && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramidF}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
-              <div
-                style={{
-                  ...styles.col,
-                  flex: '0 0 33%',
-                  maxWidth: '33%',
-                }}
-              >
-                <div>
-                  <span style={styles.chartTitle}>Not man only,...</span>
-                </div>
-                {chartPopPyramidO && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramidO}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-          <div style={{ ...styles.container, margin: 0 }}>
-            <div>
-              <span style={styles.chartTitle}>
-                Race by gender over age groups
-              </span>
-            </div>
-            <div style={styles.row}>
-              {Object.keys(chartMap).map((key) => (
-                <div
-                  style={{
-                    ...styles.col,
-                    flex: '0 0 33%',
-                    maxWidth: '33%',
-                  }}
-                >
-                  <div>
-                    <span style={styles.chartTitle}>{key}</span>
+              {chartsGenderRaceByAgeMap &&
+                Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 33%',
+                      maxWidth: '33%',
+                    }}
+                  >
+                    <div>
+                      <span style={styles.chartTitle}>{key}</span>
+                    </div>
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={chartsGenderRaceByAgeMap[key]}
+                      callback={getChartObj}
+                    />
                   </div>
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartMap[key]}
-                    callback={getChartObj}
-                  />
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </React.Fragment>
