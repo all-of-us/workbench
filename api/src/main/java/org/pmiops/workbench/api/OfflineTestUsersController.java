@@ -29,7 +29,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
 
     // TODO: is there a better way to check for when we're executing in the test env?
     if (config.server.projectId.equals("all-of-us-workbench-test")) {
-      ensureTosStatus(COMPLIANT_USER);
+      ensureTosCompliance(COMPLIANT_USER);
     }
 
     WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
@@ -38,13 +38,13 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     if (testUserConf == null) {
       LOGGER.info("This environment does not have a test user config block.  Exiting.");
     } else {
-      testUserConf.testUserEmails.forEach(this::ensureTosStatus);
+      testUserConf.testUserEmails.forEach(this::ensureTosCompliance);
     }
 
     return ResponseEntity.ok().build();
   }
 
-  private void ensureTosStatus(String username) {
+  private void ensureTosCompliance(String username) {
     boolean currentState = userService.getUserTerraTermsOfServiceStatusWithImpersonation(username);
     if (currentState) {
       LOGGER.info(
