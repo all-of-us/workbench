@@ -135,7 +135,7 @@ describe('RuntimeConfigurationPanel', () => {
 
   const setCurrentDisk = (d: Disk) => {
     disksApiStub.disk = d;
-    diskStoreStub.persistentDisk = d;
+    diskStoreStub.gcePersistentDisk = d;
   };
 
   const setCurrentRuntime = (r: Runtime) => {
@@ -192,7 +192,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     diskStoreStub = {
       workspaceNamespace: workspaceStubs[0].namespace,
-      persistentDisk: null,
+      gcePersistentDisk: null,
     };
     diskStore.set(diskStoreStub);
 
@@ -1372,7 +1372,7 @@ describe('RuntimeConfigurationPanel', () => {
       await clickButtonIfVisible(wrapper, 'Delete');
     }
 
-    expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
+    expect(updateDiskSpy).toHaveBeenCalledTimes(0);
     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
 
     expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
