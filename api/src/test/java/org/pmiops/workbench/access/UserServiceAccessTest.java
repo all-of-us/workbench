@@ -69,11 +69,11 @@ import org.springframework.test.annotation.DirtiesContext;
  * Tests to cover access change determinations by executing {@link
  * UserService#updateUserWithRetries(java.util.function.Function,
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} or {@link
- * UserService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
+ * AccessSyncService#updateUserAccessTiers(org.pmiops.workbench.db.model.DbUser,
  * org.pmiops.workbench.actionaudit.Agent)} with different configurations, which ultimately executes
- * the private method {
- * UserServiceImpl#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)} to
- * make this determination.
+ * the private method {@link
+ * AccessSyncService#shouldGrantUserTierAccess(org.pmiops.workbench.db.model.DbUser, List, String)}
+ * to make this determination.
  */
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -100,23 +100,25 @@ public class UserServiceAccessTest {
   private Institution institution;
 
   @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private AccessModuleService accessModuleService;
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessSyncService accessSyncService;
+  @Autowired private InstitutionService institutionService;
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserDao userDao;
   @Autowired private UserService userService;
-  @Autowired private AccessModuleService accessModuleService;
-  @Autowired private InstitutionService institutionService;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
   @MockBean private MailService mailService;
 
   @Import({
     UserServiceTestConfiguration.class,
-    AccessTierServiceImpl.class,
-    AccessModuleServiceImpl.class,
-    UserAccessModuleMapperImpl.class,
     CommonMappers.class,
+    AccessModuleServiceImpl.class,
+    AccessTierServiceImpl.class,
+    AccessSyncServiceImpl.class,
     InstitutionServiceImpl.class,
+    UserAccessModuleMapperImpl.class,
   })
   @MockBean({
     ComplianceService.class,
@@ -1228,7 +1230,7 @@ public class UserServiceAccessTest {
   }
 
   private DbUser updateUserAccessTiers() {
-    return userService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   private void updateInstitutionTier(InstitutionTierConfig updatedTierConfig) {

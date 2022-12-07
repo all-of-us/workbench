@@ -41,12 +41,17 @@ public class CloudTaskUserControllerTest {
 
   @Autowired private CloudTaskUserController controller;
   @Autowired private UserDao userDao;
-  @Autowired private UserService mockUserService;
+
   @Autowired private AccessModuleService mockAccessModuleService;
+  @Autowired private UserService mockUserService;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserService.class, AccessModuleService.class})
+  @MockBean({
+    AccessModuleService.class,
+    CloudResourceManagerService.class,
+    UserService.class,
+  })
   static class Configuration {}
 
   @BeforeEach
@@ -84,9 +89,8 @@ public class CloudTaskUserControllerTest {
     when(mockAccessModuleService.getAccessModuleStatus(userB, DbAccessModuleName.TWO_FACTOR_AUTH))
         .thenReturn(Optional.of(new AccessModuleStatus()));
 
-    // kluge to prevent test NPEs on the return value of syncDuccVersionStatus()
-    when(mockUserService.syncDuccVersionStatus(userA, Agent.asSystem())).thenReturn(userA);
-    when(mockUserService.syncDuccVersionStatus(userB, Agent.asSystem())).thenReturn(userB);
+    // kluge to ensure a valid return value for syncTwoFactorAuthStatus()
+    when(mockUserService.syncTwoFactorAuthStatus(userA, Agent.asSystem())).thenReturn(userA);
 
     controller.synchronizeUserAccess(
         new SynchronizeUserAccessRequest()
@@ -96,16 +100,13 @@ public class CloudTaskUserControllerTest {
     // Ideally we would use a real implementation of UserService and mock its external deps, but
     // unfortunately UserService is too sprawling to replicate in a unit test.
 
+    // we only sync 2FA users with completed 2FA
+    verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
+
     // we sync DUCC for all users
     verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem());
     verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
 
-    // we only sync 2FA users with completed 2FA
-    verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
-
-    // normally we would expect the userService sync methods to add to this count, but userService
-    // is mocked so we only see the direct calls from synchronizeUserAccess(), one per user
-    verify(mockUserService, times(2)).updateUserAccessTiers(any(), any());
     verifyNoMoreInteractions(mockUserService);
   }
 }

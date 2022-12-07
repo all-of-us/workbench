@@ -28,11 +28,6 @@ public interface UserService {
    */
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
-  /**
-   * Ensures that the data access tiers for the user reflect the state of other fields on the user
-   */
-  DbUser updateUserAccessTiers(DbUser dbUser, Agent agent);
-
   DbUser createServiceAccountUser(String email);
 
   // version used by DevUserRegistrationService
