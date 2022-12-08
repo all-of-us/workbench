@@ -92,13 +92,12 @@ export const AppsPanel = (props: {
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
-      {appsToDisplay.map((appType) => {
-        return (
+      {appsToDisplay.map(
+        (appType) =>
           showInActiveSection(appType) && (
             <ExpandedApp {...{ ...props, appType }} key={appType} />
           )
-        );
-      })}
+      )}
     </FlexColumn>
   );
 
@@ -110,8 +109,8 @@ export const AppsPanel = (props: {
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
-      {appsToDisplay.map((appType) => {
-        return (
+      {appsToDisplay.map(
+        (appType) =>
           showInAvailableSection(appType) &&
           (userExpandedApps.includes(appType) ? (
             <ExpandedApp {...{ ...props, appType }} key={appType} />
@@ -122,8 +121,7 @@ export const AppsPanel = (props: {
               onClick={() => addToExpandedApps(appType)}
             />
           ))
-        );
-      })}
+      )}
     </FlexColumn>
   );
 
