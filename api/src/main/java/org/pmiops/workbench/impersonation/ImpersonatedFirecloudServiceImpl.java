@@ -11,8 +11,15 @@ import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * An impersonation-enabled version of {@link org.pmiops.workbench.firecloud.FireCloudServiceImpl}
+ *
+ * <p>REMINDER: With great power comes great responsibility. Impersonation should not be used in
+ * production, except where absolutely necessary.
+ */
 @Service
 public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudService {
+
   private final FirecloudApiClientFactory firecloudApiClientFactory;
   private final FirecloudRetryHandler retryHandler;
 
@@ -25,17 +32,18 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
 
   @Override
   public void acceptTermsOfService(@Nonnull DbUser dbUser) throws IOException {
-    TermsOfServiceApi termsOfServiceApi =
-        new TermsOfServiceApi(
-            firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
+    TermsOfServiceApi termsOfServiceApi = getTosApi(dbUser);
     retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
   }
 
   @Override
   public boolean getUserTermsOfServiceStatus(@Nonnull DbUser dbUser) throws IOException {
-    TermsOfServiceApi termsOfServiceApi =
-        new TermsOfServiceApi(
-            firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
+    TermsOfServiceApi termsOfServiceApi = getTosApi(dbUser);
     return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
+  }
+
+  private TermsOfServiceApi getTosApi(@Nonnull DbUser dbUser) throws IOException {
+    return new TermsOfServiceApi(
+        firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 }

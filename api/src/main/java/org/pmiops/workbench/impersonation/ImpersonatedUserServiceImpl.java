@@ -10,8 +10,15 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * An impersonation-enabled version of {@link org.pmiops.workbench.db.dao.UserServiceImpl}
+ *
+ * <p>REMINDER: With great power comes great responsibility. Impersonation should not be used in
+ * production, except where absolutely necessary.
+ */
 @Service
 public class ImpersonatedUserServiceImpl implements ImpersonatedUserService {
+
   private final Clock clock;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
   private final UserDao userDao;
@@ -53,10 +60,6 @@ public class ImpersonatedUserServiceImpl implements ImpersonatedUserService {
     userTermsOfServiceDao.save(
         userTermsOfServiceDao
             .findByUserIdOrThrow(dbUser.getUserId())
-            .setTerraAgreementTime(clockNow()));
-  }
-
-  private Timestamp clockNow() {
-    return new Timestamp(clock.instant().toEpochMilli());
+            .setTerraAgreementTime(new Timestamp(clock.instant().toEpochMilli())));
   }
 }
