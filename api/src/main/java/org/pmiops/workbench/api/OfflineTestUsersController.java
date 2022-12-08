@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;
+import org.pmiops.workbench.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +29,8 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   public ResponseEntity<Void> ensureTestUserTosCompliance() {
     WorkbenchConfig config = workbenchConfigProvider.get();
 
-    // TODO: is there a better way to check for when we're executing in the test env?
-    if (config.server.projectId.equals("all-of-us-workbench-test")) {
+    // only run this on the Test env
+    if (UserUtils.isUserInDomain(COMPLIANT_USER, config)) {
       ensureTosCompliance(COMPLIANT_USER);
     }
 
