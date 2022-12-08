@@ -69,10 +69,10 @@ public class NotebooksControllerTest {
 
   @TestConfiguration
   @Import({
-      AccessTierServiceImpl.class,
-      FakeClockConfiguration.class,
-      LogsBasedMetricServiceFakeImpl.class,
-      NotebooksController.class,
+    AccessTierServiceImpl.class,
+    FakeClockConfiguration.class,
+    LogsBasedMetricServiceFakeImpl.class,
+    NotebooksController.class,
   })
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
   static class Configuration {
@@ -174,7 +174,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceName(toWorkspaceName);
 
     when(mockNotebookService.copyNotebook(
-        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
@@ -212,7 +212,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceName(toWorkspaceName);
 
     when(mockNotebookService.copyNotebook(
-        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
@@ -243,7 +243,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
 
     when(mockNotebookService.copyNotebook(
-        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
     Throwable exception =
@@ -615,9 +615,9 @@ public class NotebooksControllerTest {
         .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
-        notebooksController
-            .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-            .getBody())
+            notebooksController
+                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+                .getBody())
         .isEqualTo(expectedResponse);
   }
 
