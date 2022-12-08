@@ -74,4 +74,9 @@ cron:
   schedule: every 6 hours
   timezone: UTC
   target: api
+- description: Update the Terra-TOS compliance status of test users, if ncessary
+  url: /v1/cron/ensureTestUserTosCompliance
+  schedule: every day 19:00
+  timezone: America/Chicago
+  target: api
 
