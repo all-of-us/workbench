@@ -63,7 +63,7 @@ describe('AppsPanel', () => {
     [RuntimeStatus.Updating, true, true],
     [RuntimeStatus.Deleted, false, true], // not visible [isVisible() = false]
     [RuntimeStatus.Error, false, true], // not visible [isVisible() = false]
-    [null, false, false],
+    [null, false, true],
   ])(
     'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
     async (status, activeExpected, availableExpected) => {
