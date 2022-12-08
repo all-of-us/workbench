@@ -132,8 +132,8 @@ export const AppsPanel = (props: {
     <DisabledPanel />
   ) : (
     <div>
-      {runtime?.status && showActiveSection && <ActiveApps />}
-      {runtime?.status && showAvailableSection && <AvailableApps />}
+      {showActiveSection && <ActiveApps />}
+      {showAvailableSection && <AvailableApps />}
     </div>
   );
 };
