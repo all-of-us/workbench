@@ -159,5 +159,16 @@
   },
   "app": {
     "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+  },
+  "e2eTestUsers": {
+    "testUserEmails": [
+      "puppeteer-tester-1@staging.fake-research-aou.org",
+      "puppeteer-writer-1@staging.fake-research-aou.org",
+      "puppeteer-reader-1@staging.fake-research-aou.org",
+      "puppet-access-tester-1@staging.fake-research-aou.org",
+      "puppeteer-admin-1@staging.fake-research-aou.org",
+      "puppeteer-egress-1@staging.fake-research-aou.org",
+      "puppetcitester4@staging.fake-research-aou.org"
+    ]
   }
 }

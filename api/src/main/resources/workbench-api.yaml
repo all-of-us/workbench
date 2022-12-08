@@ -2056,6 +2056,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/ensureTestUserTosCompliance":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Keep test users' TOS compliance statuses in the appropriate states"
+      operationId: ensureTestUserTosCompliance
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:
