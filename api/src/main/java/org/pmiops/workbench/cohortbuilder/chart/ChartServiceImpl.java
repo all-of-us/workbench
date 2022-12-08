@@ -101,10 +101,13 @@ public class ChartServiceImpl implements ChartService {
   }
 
   @Override
-  public List<ChartData> getChartData() {
+  public List<ChartData> getChartData(CohortDefinition cohortDefinition, Domain domain) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            chartQueryBuilder.buildNewChartDataQuery());
+            chartQueryBuilder.buildNewChartDataQuery(
+                new ParticipantCriteria(
+                    cohortDefinition, GenderOrSexType.GENDER, AgeType.AGE_AT_CDR),
+                domain));
     return cohortBuilderMapper.tableResultToChartData(result);
   }
 }

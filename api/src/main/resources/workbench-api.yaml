@@ -4208,9 +4208,14 @@ paths:
           format: int64
           required: false
           description: cohort id optional
+        - in: query
+          name: domain
+          type: string
+          required: false
+          description: domain name
       responses:
         200:
-          description: A collection of criteria
+          description: A collection of ChartData
           schema:
             "$ref": "#/definitions/ChartDataListResponse"
   "/v1/surveys/newUserSatisfactionSurvey":

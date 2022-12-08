@@ -301,7 +301,7 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/data/cohorts/:cid/plots-demo`}
+        path={`${path}/data/cohorts/plots-demo/:cid`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <PlotDemoChartPage

@@ -3,6 +3,7 @@
 // 1. create new route - routing - workspace-app-routing.tsx
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { cloneDeep } from 'lodash';
 import * as fp from 'lodash/fp';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -118,8 +119,13 @@ export const DemoChart = fp.flow(withRouter)(
       // call ot get cohort
       // const cohortDefinition = await this.getCohort();
       // all api to get chart data
-      const { ns, wsid } = this.props.match.params;
-      const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
+      const { ns, wsid, cid } = this.props.match.params;
+      const newChartData = await chartBuilderApi().getChartData(
+        ns,
+        wsid,
+        +cid,
+        null
+      );
       this.setState({
         newChartData: newChartData.items,
       });
@@ -127,7 +133,7 @@ export const DemoChart = fp.flow(withRouter)(
         this.getGenderByRaceChartData();
       // change y values for Female to be negative for Population Chart
       // make a copy without changing the original
-      const F = JSON.parse(JSON.stringify(seriesGenderMap.F));
+      const F = cloneDeep(seriesGenderMap.F);
       F.data.reduce((accum, rec) => {
         rec.y = -rec.y;
         accum.push(rec);
@@ -235,8 +241,6 @@ export const DemoChart = fp.flow(withRouter)(
     }
 
     getGenderRaceByAgeChart(ageCategories, genderSeries, isAxesInverted?) {
-      const height = Math.max(ageCategories.length * 60, 300);
-      // const width = height * genderSeries.length;
       const xAxis = [this.getXAxis(ageCategories, false, 'Age group')];
       // pop pyramid plot of the 2-genderSeries
       if (genderSeries.length === 2) {
@@ -245,7 +249,6 @@ export const DemoChart = fp.flow(withRouter)(
 
       return {
         chart: {
-          height,
           type: 'column',
           inverted: !!isAxesInverted,
         },
@@ -265,7 +268,7 @@ export const DemoChart = fp.flow(withRouter)(
           },
           labels: {
             formatter: function () {
-              return Math.abs(this.value) + '%....';
+              return Math.abs(this.value) + '%';
             },
           },
           accessibility: {
@@ -330,12 +333,11 @@ export const DemoChart = fp.flow(withRouter)(
 
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
-      const swapped = JSON.parse(JSON.stringify(chartsGenderRaceByAgeMap));
+      const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
       Object.keys(swapped).map((key) => {
         swapped[key].chart.inverted = true;
       });
-      console.log(swapped);
 
       return (
         <React.Fragment>
@@ -344,17 +346,23 @@ export const DemoChart = fp.flow(withRouter)(
             <div>
               <span style={styles.chartTitle}>Population Pyramid</span>
             </div>
-            <div style={{ minHeight: 200 }}>
-              {chartPopPyramid && (
-                <HighchartsReact
-                  highcharts={highCharts}
-                  options={chartPopPyramid}
-                  callback={getChartObj}
-                />
-              )}
+            <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 100%',
+                  maxWidth: '100%',
+                }}
+              >
+                {chartPopPyramid && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={chartPopPyramid}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <div style={{ ...styles.container, margin: 0 }}>
             <div>
               <span style={styles.chartTitle}>
                 Race by gender over age groups
@@ -381,6 +389,11 @@ export const DemoChart = fp.flow(withRouter)(
                     />
                   </div>
                 ))}
+            </div>
+            <div>
+              <span style={styles.chartTitle}>
+                (Swapped axes) Race by gender over age groups
+              </span>
             </div>
             <div style={styles.row}>
               {swapped &&
