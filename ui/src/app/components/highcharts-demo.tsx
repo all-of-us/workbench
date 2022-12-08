@@ -125,18 +125,20 @@ export const DemoChart = fp.flow(withRouter)(
       });
       const { categories, seriesGenderMap, genderHelper } =
         this.getGenderByRaceChartData();
-      // change y values for Male to be negative for Population Chart
-      const M = JSON.parse(JSON.stringify(seriesGenderMap.M));
-      M.data.reduce((accum, rec) => {
+      // change y values for Female to be negative for Population Chart
+      // make a copy without changing the original
+      const F = JSON.parse(JSON.stringify(seriesGenderMap.F));
+      F.data.reduce((accum, rec) => {
         rec.y = -rec.y;
         accum.push(rec);
         return accum;
       }, []);
       this.setState({
-        chartPopPyramid: this.getGenderRaceByAgeChart(categories, [
-          M,
-          seriesGenderMap.F,
-        ]),
+        chartPopPyramid: this.getGenderRaceByAgeChart(
+          categories,
+          [F, seriesGenderMap.M],
+          true
+        ),
       });
       // after pyramid plot
       const chartsGenderRaceByAgeMap = {};
@@ -232,21 +234,20 @@ export const DemoChart = fp.flow(withRouter)(
       return { categories, seriesGenderMap, races, genderHelper };
     }
 
-    getGenderRaceByAgeChart(ageCategories, genderSeries) {
+    getGenderRaceByAgeChart(ageCategories, genderSeries, isAxesInverted?) {
       const height = Math.max(ageCategories.length * 60, 300);
       // const width = height * genderSeries.length;
       const xAxis = [this.getXAxis(ageCategories, false, 'Age group')];
+      // pop pyramid plot of the 2-genderSeries
       if (genderSeries.length === 2) {
-        xAxis.push(this.getXAxis(ageCategories, true, '', 0));
-      } else if (genderSeries.length === 3) {
-        xAxis.push(this.getXAxis(ageCategories, false, '', 0));
         xAxis.push(this.getXAxis(ageCategories, true, '', 0));
       }
 
       return {
         chart: {
           height,
-          type: 'bar',
+          type: 'column',
+          inverted: !!isAxesInverted,
         },
         title: {
           text: '',
@@ -264,7 +265,7 @@ export const DemoChart = fp.flow(withRouter)(
           },
           labels: {
             formatter: function () {
-              return Math.abs(this.value) + '%';
+              return Math.abs(this.value) + '%....';
             },
           },
           accessibility: {
@@ -329,6 +330,13 @@ export const DemoChart = fp.flow(withRouter)(
 
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
+      const swapped = JSON.parse(JSON.stringify(chartsGenderRaceByAgeMap));
+      // change chart.inverted:true
+      Object.keys(swapped).map((key) => {
+        swapped[key].chart.inverted = true;
+      });
+      console.log(swapped);
+
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -369,6 +377,28 @@ export const DemoChart = fp.flow(withRouter)(
                     <HighchartsReact
                       highcharts={highCharts}
                       options={chartsGenderRaceByAgeMap[key]}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
+            <div style={styles.row}>
+              {swapped &&
+                Object.keys(swapped).map((key, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 33%',
+                      maxWidth: '33%',
+                    }}
+                  >
+                    <div>
+                      <span style={styles.chartTitle}>{key}</span>
+                    </div>
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={swapped[key]}
                       callback={getChartObj}
                     />
                   </div>
