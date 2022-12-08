@@ -484,7 +484,7 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
       tooltip: runtimeTooltip('Applications', loadingError),
-      hasContent: true, // TODO?
+      hasContent: true,
     },
     runtimeConfig: {
       id: 'runtimeConfig',
