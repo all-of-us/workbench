@@ -6,7 +6,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +13,11 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -559,25 +556,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void acceptTermsOfServiceWithImpersonation(@Nonnull DbUser dbUser) throws IOException {
-    TermsOfServiceApi termsOfServiceApi =
-        new TermsOfServiceApi(
-            firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
-    retryHandler.run((context) -> termsOfServiceApi.acceptTermsOfService(TERMS_OF_SERVICE_BODY));
-  }
-
-  @Override
   public boolean getUserTermsOfServiceStatus() throws ApiException {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
-    return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
-  }
-
-  @Override
-  public boolean getUserTermsOfServiceStatusWithImpersonation(@Nonnull DbUser dbUser)
-      throws IOException {
-    TermsOfServiceApi termsOfServiceApi =
-        new TermsOfServiceApi(
-            firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
     return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
   }
 }

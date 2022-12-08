@@ -60,16 +60,11 @@ public interface UserService {
 
   boolean getUserTerraTermsOfServiceStatus(@Nonnull DbUser dbUser);
 
-  boolean getUserTerraTermsOfServiceStatusWithImpersonation(String username);
-
   // Registers that a user has agreed to a given version of the AoU Terms of Service.
   void submitAouTermsOfService(@Nonnull DbUser dbUser, @Nonnull Integer tosVersion);
 
   // Registers that a user has accepted the latest version of the Terra Terms of Service.
   void acceptTerraTermsOfService(@Nonnull DbUser dbUser);
-
-  // accepts the latest Terra Terms of Service on behalf of a user by using impersonation
-  void acceptTerraTermsOfServiceWithImpersonation(String username);
 
   DbUser setDisabledStatus(Long userId, boolean disabled);
 

@@ -5,7 +5,7 @@ import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.impersonation.ImpersonatedUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,13 +15,14 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private static final Logger LOGGER = Logger.getLogger(OfflineTestUsersController.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserService userService;
+  private final ImpersonatedUserService impersonatedUserService;
 
   @Autowired
   public OfflineTestUsersController(
-      Provider<WorkbenchConfig> workbenchConfigProvider, UserService userService) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      ImpersonatedUserService impersonatedUserService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userService = userService;
+    this.impersonatedUserService = impersonatedUserService;
   }
 
   public ResponseEntity<Void> ensureTestUserTosCompliance() {
@@ -45,7 +46,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   }
 
   private void ensureTosCompliance(String username) {
-    boolean currentState = userService.getUserTerraTermsOfServiceStatusWithImpersonation(username);
+    boolean currentState = impersonatedUserService.getUserTerraTermsOfServiceStatus(username);
     if (currentState) {
       LOGGER.info(
           String.format(
@@ -53,7 +54,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     } else {
       LOGGER.info(String.format("Accepting the Terra Terms of Service for test user %s", username));
 
-      userService.acceptTerraTermsOfServiceWithImpersonation(username);
+      impersonatedUserService.acceptTerraTermsOfService(username);
     }
   }
 }
