@@ -90,19 +90,19 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "and rnk <= @%s\n"
           + "order by rank asc, standardName, startDate\n";
 
+  private static final String COHORT_PIDS_SQL =
+      "SELECT distinct person_id \n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
   private static final String AGE_BIN_SIZE_PARAM = "ageBin";
-
-  private static final String NEW_CHART_DATA_SQL =
-      "select gender,\n"
-          + "       sex_at_birth as sexAtBirth,\n"
-          + "       race,\n"
-          + "       ethnicity,\n"
-          + "       age_bin as ageBin,\n"
-          + "       count(distinct pid) as count,\n"
-          + "       safe_divide(count(distinct pid), sum(count(distinct pid)) over ()) as fract\n"
-          + "FROM\n"
+  private static final String TBL_TMP_DEMO = "tmp_demo";
+  private static final String WITH_TMP_DEMO_SQL =
+      "WITH "
+          + TBL_TMP_DEMO
+          + " AS"
           + "(\n"
-          + "select gender,\n"
+          + "select person_id,\n"
+          + "       gender,\n"
           + "       sex_at_birth,\n"
           + "       race,\n"
           + "       ethnicity,\n"
@@ -116,14 +116,25 @@ public class ChartQueryBuilder extends QueryBuilder {
           + AGE_BIN_SIZE_PARAM
           + ")+1) * @"
           + AGE_BIN_SIZE_PARAM
-          + ") - 1 as int64)) as age_bin,\n"
-          + "       person_id as pid\n"
-          + "       from `${projectId}.${dataSetId}.cb_search_person`\n"
-          + ") a\n"
-          + "group by 1,2,3,4,5\n"
-          + "order by 1,2,3,4,5\n"
-          + "; ";
+          + ") - 1 as int64)) as age_bin \n"
+          + " from `${projectId}.${dataSetId}.cb_search_person`\n"
+          + " where person_id in (@COHORT_PIDS_SQL@) \n" // "" where person_id in (@PERSON_IDS_SQL@)
+          // "
+          + ")\n";
 
+  private static final String NEW_CHART_DEMO_SQL =
+      " select gender,\n"
+          + "       sex_at_birth as sexAtBirth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       age_bin as ageBin,\n"
+          + "       count(distinct person_id) as count,\n"
+          + "       safe_divide(count(distinct person_id), sum(count(distinct person_id)) over ()) as fract\n"
+          + "FROM "
+          + TBL_TMP_DEMO
+          + " \n"
+          + "group by 1,2,3,4,5\n"
+          + "order by 1,2,3,4,5\n";
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -252,12 +263,24 @@ public class ChartQueryBuilder extends QueryBuilder {
         .build();
   }
 
-  public QueryJobConfiguration buildNewChartDataQuery() {
-    int ageBin = 10;
+  public QueryJobConfiguration buildNewChartDataQuery(
+      ParticipantCriteria participantCriteria, Domain domain) {
     Map<String, QueryParameterValue> params = new HashMap<>();
+    // 1. build cohorort pids SQL
+    StringBuilder queryBuilder = new StringBuilder(COHORT_PIDS_SQL);
+    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    addDataFilters(
+        participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
+    String sqlWherePids = queryBuilder.toString();
+    // replace in new chart sql
+    String demoSql =
+        WITH_TMP_DEMO_SQL.replace("@COHORT_PIDS_SQL@", sqlWherePids)
+            + NEW_CHART_DEMO_SQL;
+
+    int ageBin = 10;
     params.put(AGE_BIN_SIZE_PARAM, QueryParameterValue.int64(ageBin));
 
-    return QueryJobConfiguration.newBuilder(NEW_CHART_DATA_SQL)
+    return QueryJobConfiguration.newBuilder(demoSql)
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();

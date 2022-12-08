@@ -1,8 +1,14 @@
 package org.pmiops.workbench.api;
 
+import com.google.gson.Gson;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.ChartDataListResponse;
+import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,23 +24,38 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
 
   private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final CohortDao cohortDao;
 
   @Autowired
-  ChartBuilderController(ChartService chartService, WorkspaceAuthService workspaceAuthService) {
+  ChartBuilderController(
+      ChartService chartService, WorkspaceAuthService workspaceAuthService, CohortDao cohortDao) {
     this.chartService = chartService;
     this.workspaceAuthService = workspaceAuthService;
+    this.cohortDao = cohortDao;
   }
 
   @Override
   public ResponseEntity<ChartDataListResponse> getChartData(
-      String workspaceNamespace, String workspaceId, Long cohortId) {
+      String workspaceNamespace, String workspaceId, Long cohortId, String domain) {
 
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
+    CohortDefinition cohortDefinition = getCohortDefinition(dbWorkspace.getWorkspaceId(), cohortId);
+    System.out.println(cohortDefinition);
     ChartDataListResponse response = new ChartDataListResponse();
-    System.out.println("*******CohortId:"+ cohortId);
 
-    return ResponseEntity.ok(response.items(chartService.getChartData()));
+    return ResponseEntity.ok(response.items(chartService.getChartData(cohortDefinition, null)));
+  }
+
+  private CohortDefinition getCohortDefinition(Long workspaceId, Long cohortId) {
+    DbCohort dbCohort = cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortId);
+    String definition = dbCohort.getCriteria();
+    if (definition == null) {
+      throw new NotFoundException(
+          String.format("Not Found: No Cohort definition matching cohortId: %s", cohortId));
+    }
+    return new Gson().fromJson(definition, CohortDefinition.class);
   }
 }
