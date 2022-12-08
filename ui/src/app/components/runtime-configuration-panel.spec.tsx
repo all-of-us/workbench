@@ -12,13 +12,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import {
-  Disk,
-  DiskApi,
-  DiskType,
-  Runtime,
-  RuntimeApi,
-} from 'generated/fetch/api';
+import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
 
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
@@ -97,7 +91,7 @@ describe('RuntimeConfigurationPanel', () => {
       diskType: DiskType.Standard,
       name: 'my-existing-disk',
       blockSize: 1,
-      isGceRuntime: true
+      isGceRuntime: true,
     };
   };
 
@@ -1372,7 +1366,7 @@ describe('RuntimeConfigurationPanel', () => {
       await clickButtonIfVisible(wrapper, 'Delete');
     }
 
-    expect(updateDiskSpy).toHaveBeenCalledTimes(0);
+    expect(updateDiskSpy).toHaveBeenCalledTimes(wantUpdateDisk ? 1 : 0);
     expect(deleteDiskSpy).toHaveBeenCalledTimes(wantDeleteDisk ? 1 : 0);
 
     expect(updateRuntimeSpy).toHaveBeenCalledTimes(wantUpdateRuntime ? 1 : 0);
