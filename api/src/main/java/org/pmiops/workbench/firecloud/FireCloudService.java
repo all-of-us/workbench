@@ -147,7 +147,6 @@ public interface FireCloudService {
 
   boolean workspaceFileTransferComplete(String workspaceNamespace, String fireCloudName);
 
-  // accept the Terra Terms of Service, as the current user
   void acceptTermsOfService();
 
   boolean getUserTermsOfServiceStatus() throws ApiException;
