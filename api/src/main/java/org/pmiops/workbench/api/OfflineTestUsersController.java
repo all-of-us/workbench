@@ -54,7 +54,6 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
               "Test user %s is already compliant with the Terra Terms of Service", username));
     } else {
       LOGGER.info(String.format("Accepting the Terra Terms of Service for test user %s", username));
-
       impersonatedUserService.acceptTerraTermsOfService(username);
     }
   }
