@@ -35,7 +35,7 @@ const styles = reactStyles({
   closeButton: { marginLeft: 'auto', alignSelf: 'center' },
 });
 
-const AvailableApp = (props: { appType: UIAppType; onClick: Function }) => {
+const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
     <Clickable {...{ onClick }}>
@@ -59,9 +59,9 @@ export const AppsPanel = (props: {
   const appsToDisplay = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
 
   const appStates = [
-    { appType: UIAppType.JUPYTER, expand: isVisible(runtime?.status) },
+    { appType: UIAppType.JUPYTER, shouldExpand: isVisible(runtime?.status) },
     // RStudio is not implemented yet, so we don't expand it
-    { appType: UIAppType.RSTUDIO, expand: false },
+    { appType: UIAppType.RSTUDIO, shouldExpand: false },
   ];
 
   // which app(s) have the user explicitly expanded by clicking?
@@ -69,30 +69,26 @@ export const AppsPanel = (props: {
   const addToExpandedApps = (appType: UIAppType) =>
     setUserExpandedApps([...userExpandedApps, appType]);
 
-  const showExpanded = (appType: UIAppType): boolean =>
-    userExpandedApps.includes(appType) ||
-    appStates.find((s) => s.appType === appType)?.expand;
-
+  // show apps that have shouldExpand = true in the Active section
+  // all will be shown in expanded mode
   const showInActiveSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    showExpanded(appType) &&
-    !userExpandedApps.includes(appType);
-  const showActiveSection = appStates
-    .map((s) => s.appType)
-    .some(showInActiveSection);
+    appStates.find((s) => s.appType === appType)?.shouldExpand;
+  const showActiveSection = appsToDisplay.some(showInActiveSection);
 
+  // show apps that have shouldExpand = false in the Available section
+  // by default they will be shown in Unexpanded mode
+  // BUT some of these may be userExpandedApps, which are shown in Expanded mode
   const showInAvailableSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    (userExpandedApps.includes(appType) || !showExpanded(appType));
-  const showAvailableSection = appStates
-    .map((s) => s.appType)
-    .some(showInAvailableSection);
+    !appStates.find((s) => s.appType === appType)?.shouldExpand;
+  const showAvailableSection = appsToDisplay.some(showInAvailableSection);
 
-  const ActiveApps = () => (
+  const ActiveApps = (sectionProps: { showCloseButton: boolean }) => (
     <FlexColumn>
       <FlexRow>
         <h3 style={styles.header}>Active applications</h3>
-        {showActiveSection && (
+        {sectionProps.showCloseButton && (
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
@@ -104,20 +100,20 @@ export const AppsPanel = (props: {
     </FlexColumn>
   );
 
-  const AvailableApps = () => (
+  const AvailableApps = (sectionProps: { showCloseButton: boolean }) => (
     <FlexColumn>
       <FlexRow>
         <h3 style={styles.header}>Launch other applications</h3>
-        {!showActiveSection && (
+        {sectionProps.showCloseButton && (
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
       {appsToDisplay.map((appType) => {
         return showInAvailableSection(appType) ? (
-          showExpanded(appType) ? (
+          userExpandedApps.includes(appType) ? (
             <ExpandedApp {...{ ...props, appType }} key={appType} />
           ) : (
-            <AvailableApp
+            <UnexpandedApp
               {...{ appType }}
               key={appType}
               onClick={() => addToExpandedApps(appType)}
@@ -132,8 +128,10 @@ export const AppsPanel = (props: {
     <DisabledPanel />
   ) : (
     <div>
-      {showActiveSection && <ActiveApps />}
-      {showAvailableSection && <AvailableApps />}
+      {showActiveSection && <ActiveApps showCloseButton={showActiveSection} />}
+      {showAvailableSection && (
+        <AvailableApps showCloseButton={!showActiveSection} />
+      )}
     </div>
   );
 };
