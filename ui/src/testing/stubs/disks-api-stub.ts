@@ -45,9 +45,7 @@ export class DisksApiStub extends DisksApi {
       if (!this.disk) {
         reject(Error('disk not found'));
       }
-      const disksResponse: ListDisksResponse = [];
-      disksResponse.push(this.disk);
-      resolve(disksResponse);
+      resolve([this.disk]);
     });
   }
 
