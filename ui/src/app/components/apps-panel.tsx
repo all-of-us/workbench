@@ -93,9 +93,11 @@ export const AppsPanel = (props: {
         )}
       </FlexRow>
       {appsToDisplay.map((appType) => {
-        return showInActiveSection(appType) ? (
-          <ExpandedApp {...{ ...props, appType }} key={appType} />
-        ) : null;
+        return (
+          showInActiveSection(appType) && (
+            <ExpandedApp {...{ ...props, appType }} key={appType} />
+          )
+        );
       })}
     </FlexColumn>
   );
@@ -109,8 +111,9 @@ export const AppsPanel = (props: {
         )}
       </FlexRow>
       {appsToDisplay.map((appType) => {
-        return showInAvailableSection(appType) ? (
-          userExpandedApps.includes(appType) ? (
+        return (
+          showInAvailableSection(appType) &&
+          (userExpandedApps.includes(appType) ? (
             <ExpandedApp {...{ ...props, appType }} key={appType} />
           ) : (
             <UnexpandedApp
@@ -118,8 +121,8 @@ export const AppsPanel = (props: {
               key={appType}
               onClick={() => addToExpandedApps(appType)}
             />
-          )
-        ) : null;
+          ))
+        );
       })}
     </FlexColumn>
   );
