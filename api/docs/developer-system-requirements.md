@@ -2,7 +2,7 @@
 ### Operating System
 We currently only support MacOS and Linux for development and testing.
 ### Prerequisite Software
-  * [Java 8](https://openjdk.java.net/projects/jdk8/)
+  * [Java 8](https://adoptium.net/temurin/releases/)
     * This must be installed, but needn't be the default.
     * See [Developer System Initialization](developer-system-initialization.md) for configuration if your
       system has a different default version of Java
@@ -14,7 +14,7 @@ We currently only support MacOS and Linux for development and testing.
   * [Ruby](https://www.ruby-lang.org/en/downloads/)
     * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.
     * You may need to add ruby gems to your path if things are not working. If so follow [these instructions](https://guides.rubygems.org/faqs/#i-installed-gems-with---user-install-and-their-commands-are-not-available).
-  * [Python](https://www.python.org/downloads/) >= 2.7.9
+  * [Python](https://www.python.org/downloads/) >= 3.5
     * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
     * Command-line interface for Google Cloud Platform.
@@ -26,13 +26,10 @@ We currently only support MacOS and Linux for development and testing.
     gcloud components install alpha
     ```
 
-
 For local development, also install:
 
   * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
-  * [Node.js](https://nodejs.org/en/) >= 14.  Currently known to work up to 16.15.1
-  * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-  * [Docker Compose](https://docs.docker.com/compose/install/)
+  * [Node.js](https://nodejs.org/en/) >= 14.  Currently known to work up to 18.12.1
   * `envsubst` which is part of [gettext](https://www.gnu.org/software/gettext/)
     * Mac: `brew install gettext`
 

@@ -10,6 +10,7 @@ import {
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
+  ResourceType,
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
@@ -25,12 +26,17 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
-import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
+import {
+  appendNotebookFileSuffix,
+  dropNotebookFileSuffix,
+  getExistingNotebookNames,
+} from 'app/pages/analysis/util';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
+import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -65,7 +71,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
   );
   const [isExporting, setIsExporting] = useState(false);
   const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
-  const [notebookName, setNotebookName] = useState('');
+  const [notebookNameWithoutSuffix, setNotebookNameWithoutSuffix] =
+    useState('');
   const [codePreview, setCodePreview] = useState(null);
   const [loadingNotebook, setIsLoadingNotebook] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -101,7 +108,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       kernelType,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
-      notebookName,
+      notebookName: appendNotebookFileSuffix(notebookNameWithoutSuffix),
       newNotebook: creatingNewNotebook,
     };
   }
@@ -117,10 +124,11 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
         workspace.id,
         createExportDatasetRequest()
       );
-      // Open notebook in a new tab and return back to the Data tab
       const notebookUrl =
         `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
-        appendNotebookFileSuffix(encodeURIComponentStrict(notebookName));
+        encodeURIComponentStrict(
+          appendNotebookFileSuffix(notebookNameWithoutSuffix)
+        );
       navigateByUrl(notebookUrl);
     } catch (e) {
       console.error(e);
@@ -174,18 +182,22 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
     }
   }
 
-  function onNotebookSelect(value) {
-    setCreatingNewNotebook(value === '');
-    setNotebookName(value);
+  function onNotebookSelect(nameWithoutSuffix) {
+    setCreatingNewNotebook(nameWithoutSuffix === '');
+    setNotebookNameWithoutSuffix(nameWithoutSuffix);
     setErrorMsg(null);
 
-    if (value === '') {
+    if (nameWithoutSuffix === '') {
       setCreatingNewNotebook(true);
     } else {
       setCreatingNewNotebook(false);
       setIsLoadingNotebook(true);
       notebooksApi()
-        .getNotebookKernel(workspace.namespace, workspace.id, value)
+        .getNotebookKernel(
+          workspace.namespace,
+          workspace.id,
+          appendNotebookFileSuffix(nameWithoutSuffix)
+        )
         .then((resp) => setKernelType(resp.kernelType))
         .catch(() =>
           setErrorMsg(
@@ -218,13 +230,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
   }
 
   useEffect(() => {
-    notebooksApi()
-      .getNoteBookList(workspace.namespace, workspace.id)
-      .then((notebooks) =>
-        setExistingNotebooks(
-          notebooks.map((fileDetail) => fileDetail.name.slice(0, -6))
-        )
-      )
+    getExistingNotebookNames(workspace)
+      .then(setExistingNotebooks)
       .catch(() => setExistingNotebooks([])); // If the request fails, at least let the user create new notebooks
   }, [workspace]);
 
@@ -236,15 +243,14 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
 
   const errors = {
     ...validate(
-      { notebookName },
+      // we expect the notebook name to lack the .ipynb suffix
+      // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
+      { notebookName: dropNotebookFileSuffix(notebookNameWithoutSuffix) },
       {
-        notebookName: {
-          presence: { allowEmpty: false },
-          exclusion: {
-            within: creatingNewNotebook ? existingNotebooks : [],
-            message: 'already exists',
-          },
-        },
+        notebookName: nameValidationFormat(
+          creatingNewNotebook ? existingNotebooks : [],
+          ResourceType.NOTEBOOK
+        ),
       }
     ),
     ...(workspace.billingStatus === BillingStatus.INACTIVE
@@ -282,7 +288,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
           <ModalBody>
             <div style={{ marginTop: '1rem' }}>
               <Select
-                value={creatingNewNotebook ? '' : notebookName}
+                value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
                 options={selectOptions}
                 onChange={(v) => onNotebookSelect(v)}
@@ -295,8 +301,8 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
                   Notebook Name
                 </SmallHeader>
                 <TextInput
-                  onChange={(v) => setNotebookName(v)}
-                  value={notebookName}
+                  onChange={(v) => setNotebookNameWithoutSuffix(v)}
+                  value={notebookNameWithoutSuffix}
                   data-test-id='notebook-name-input'
                 />
               </React.Fragment>

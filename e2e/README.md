@@ -15,8 +15,16 @@ main ([example](https://app.circleci.com/pipelines/github/all-of-us/workbench/40
 * Clone github project: `git clone git@github.com:all-of-us/workbench.git`
 
 * Install required node libraries
-    - change to e2e dir `cd e2e`
-    - run cmd `yarn install`
+    - Change to e2e dir `cd e2e`
+    - (M1 Macs only) Manually install Chromium `brew install chromium --no-quarantine`
+    - (M1 Macs only) Add `export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` to your `.bashrc` or equivalent. Then run `source ~/.bashrc`.
+    - Run command `yarn install`
+    - (M1 Macs only) Add the following alias to your `.bashrc`: `alias yarnm1e2e="find node_modules/puppeteer -name '*.js' | xargs sed -i '' \"s%/usr/bin/chromium-browser%\$(which chromium)%g\" && yarn"`. Then run `source ~/.bashrc`.
+      - If you are on an M1 Mac, use this alias every time you would otherwise use `yarn`
+      - Wait, what?
+        - Older puppeteer versions on M1 macs do not respect chromium path configurations 
+        - We can’t add symlinks to `/usr/bin` (the default location puppeteer looks) without disabling Mac security controls
+      - Alternatively, you could the run the above find/sed command every time you update node_modules and then run `yarn` normally.
 * Compile `yarn compile`
 
 ## Test Users

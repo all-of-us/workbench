@@ -45,12 +45,12 @@ const styles = reactStyles({
 
 interface Props {
   workspaceNamespace: string;
-  notebookName: string;
+  notebookNameWithSuffix: string;
   accessReason: string;
 }
 
 const AdminNotebookViewComponent = (props: Props) => {
-  const { workspaceNamespace, notebookName, accessReason } = props;
+  const { workspaceNamespace, notebookNameWithSuffix, accessReason } = props;
   const [notebookHtml, setHtml] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -66,7 +66,8 @@ const AdminNotebookViewComponent = (props: Props) => {
     );
     return (
       <div style={styles.heading}>
-        Viewing {notebookName} in {link} for reason:<div>{accessReason}</div>
+        Viewing {notebookNameWithSuffix} in {link} for reason:
+        <div>{accessReason}</div>
       </div>
     );
   };
@@ -104,13 +105,13 @@ const AdminNotebookViewComponent = (props: Props) => {
     }
 
     workspaceAdminApi()
-      .adminReadOnlyNotebook(workspaceNamespace, notebookName, {
+      .adminReadOnlyNotebook(workspaceNamespace, notebookNameWithSuffix, {
         reason: accessReason,
       })
       .then((response) => setHtml(response.html))
       .catch((e) => {
         if (e.status === 404) {
-          setErrorMessage(`Notebook ${notebookName} was not found`);
+          setErrorMessage(`Notebook ${notebookNameWithSuffix} was not found`);
         } else if (e.status === 412) {
           setErrorMessage('Notebook is too large to display in preview mode');
         } else {
@@ -135,11 +136,11 @@ const AdminNotebookView = (spinnerProps: WithSpinnerOverlayProps) => {
   const { ns, nbName } = useParams<MatchParams>();
   const accessReason = useQuery().get('accessReason');
 
-  // react-router does not handling decoding of URL parameters, they must be decoded here.
+  // react-router does not handle decoding of URL parameters, they must be decoded here.
   return (
     <AdminNotebookViewComponent
       workspaceNamespace={ns}
-      notebookName={decodeURIComponent(nbName)}
+      notebookNameWithSuffix={decodeURIComponent(nbName)}
       accessReason={accessReason}
     />
   );

@@ -59,7 +59,7 @@ public class AdminAuthorityTest {
           // logEgressEvent requires an API key secret; it's a webhook which cannot use authority
           "logEgressEvent",
           // Not technically an admin endpoint, but only enabled in lower environments
-          "unsafeSelfBypassAccessRequirement");
+          "unsafeSelfBypassAccessRequirements");
 
   /**
    * Heuristic test: if there's a REST endpoint that looks like an admin endpoint (based on the

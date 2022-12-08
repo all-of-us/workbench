@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -103,25 +104,6 @@ public class NotebooksServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser getDbUser() {
       return dbUser;
-    }
-  }
-
-  class MockNotebook {
-    Blob blob;
-    FileDetail fileDetail;
-
-    MockNotebook(String path, String bucketName) {
-      blob = mock(Blob.class);
-      fileDetail = new FileDetail();
-      Set<String> workspaceUsersSet = new HashSet();
-
-      String[] parts = path.split("/");
-      String fileName = parts[parts.length - 1];
-      fileDetail.setName(fileName);
-
-      when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsersSet))
-          .thenReturn(fileDetail);
     }
   }
 
@@ -194,6 +176,14 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testAdminGetReadOnlyHtml_requiresFileSuffix() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName"));
+  }
+
+  @Test
   public void testCloneNotebook() {
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
     doReturn(dbWorkspace).when(workspaceDao).getRequired(anyString(), anyString());
@@ -218,7 +208,7 @@ public class NotebooksServiceTest {
     String fromBucket = "FROM_BUCKET";
     String toWorkspaceNamespace = "toWorkspaceNamespace";
     String toWorkspaceFirecloudName = "toWorkspaceFirecloudName";
-    String newNotebookName = "newNotebookName";
+    String newNotebookName = "newNotebookName.ipynb";
     String toBucket = "TO_BUCKET";
     HashSet<BlobId> existingBlobIds = new HashSet<>();
 
@@ -443,14 +433,16 @@ public class NotebooksServiceTest {
   @Test
   public void testGetNotebooks() {
     MockNotebook notebook1 =
-        new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), BUCKET_NAME);
-    MockNotebook notebook2 = new MockNotebook("notebooks/mockFile.text", BUCKET_NAME);
+        MockNotebook.mockWithPathAndJupyterExtension(
+            "mockFile", BUCKET_NAME, mockCloudStorageClient);
+    MockNotebook notebook2 =
+        MockNotebook.mockWithPath("mockFile.text", BUCKET_NAME, mockCloudStorageClient);
     MockNotebook notebook3 =
-        new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), BUCKET_NAME);
+        MockNotebook.mockWithPathAndJupyterExtension(
+            "two words", BUCKET_NAME, mockCloudStorageClient);
 
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+        BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(notebook1.blob, notebook2.blob, notebook3.blob));
     stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
 
@@ -487,10 +479,11 @@ public class NotebooksServiceTest {
         dbWorkspace.getFirecloudName(),
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
-    when(mockBlob1.getName()).thenReturn("notebooks/f1.ipynb");
-    when(mockBlob2.getName()).thenReturn("notebooks/f2.rmd");
-    when(mockBlob3.getName()).thenReturn("notebooks/f3.random");
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+    when(mockBlob1.getName()).thenReturn(NotebookUtils.withNotebookPath("f1.ipynb"));
+    when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.rmd"));
+    when(mockBlob3.getName()).thenReturn(NotebookUtils.withNotebookPath("f3.random"));
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+        BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
@@ -524,10 +517,14 @@ public class NotebooksServiceTest {
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
     when(mockBlob1.getName())
-        .thenReturn(NotebooksService.withJupyterNotebookExtension("notebooks/extra/nope"));
+        .thenReturn(
+            NotebookUtils.withNotebookPath(
+                NotebookUtils.withJupyterNotebookExtension("extra/nope")));
     when(mockBlob2.getName())
-        .thenReturn(NotebooksService.withJupyterNotebookExtension("notebooks/foo"));
-    when(mockCloudStorageClient.getBlobPageForPrefix(BUCKET_NAME, "notebooks"))
+        .thenReturn(
+            NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("foo")));
+    when(mockCloudStorageClient.getBlobPageForPrefix(
+        BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
     when(mockCloudStorageClient.blobToFileDetail(mockBlob1, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail1);
@@ -542,7 +539,7 @@ public class NotebooksServiceTest {
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
 
     assertThat(gotNames)
-        .isEqualTo(ImmutableList.of(NotebooksService.withJupyterNotebookExtension("foo")));
+        .isEqualTo(ImmutableList.of(NotebookUtils.withJupyterNotebookExtension("foo")));
   }
 
   @Test
@@ -621,7 +618,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testIsNotebookBlob_negative() {
-    when(mockBlob.getName()).thenReturn("notebooks/test.txt");
+    when(mockBlob.getName()).thenReturn(NotebookUtils.withNotebookPath("test.txt"));
     assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
   }
 
@@ -639,8 +636,8 @@ public class NotebooksServiceTest {
         notebooksService.renameNotebook(
             NAMESPACE_NAME,
             WORKSPACE_NAME,
-            NotebooksService.withJupyterNotebookExtension("oldName"),
-            NotebooksService.withJupyterNotebookExtension("newName"));
+            NotebookUtils.withJupyterNotebookExtension("oldName"),
+            NotebookUtils.withJupyterNotebookExtension("newName"));
 
     verify(mockCloudStorageClient).deleteBlob(any());
     verify(mockUserRecentResourceService).deleteNotebookEntry(anyLong(), anyLong(), anyString());
@@ -660,7 +657,16 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetNotebookKernel_notSupported() {
+  public void testSaveNotebook_notSupportedWithoutSuffix() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.saveNotebook(
+                BUCKET_NAME, "test", new JSONObject().put("who", "I'm a notebook!")));
+  }
+
+  @Test
+  public void testSaveNotebook_rmdNotSupported() {
     Assertions.assertThrows(
         NotImplementedException.class,
         () ->

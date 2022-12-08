@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { NotificationBanner } from 'app/components/notification-banner';
+import { AoU } from 'app/components/text-wrappers';
 import { reactStyles } from 'app/utils';
 import {
   DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
   DEMOGRAPHIC_SURVEY_V2_PATH,
 } from 'app/utils/constants';
-import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
-
-import { NotificationBanner } from './notification-banner';
-import { AoU } from './text-wrappers';
+import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   bannerText: {
@@ -47,11 +46,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   const deadlineReached =
     +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) < +new Date();
 
-  const featureFlag =
-    serverConfigStore.get().config.enableUpdatedDemographicSurvey;
-
   return (
-    featureFlag &&
     !profile.demographicSurveyV2 && (
       <NotificationBanner
         dataTestId={'take-survey-notification'}

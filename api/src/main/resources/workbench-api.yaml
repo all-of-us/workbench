@@ -1519,21 +1519,12 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/unsafe-self-bypass-access-requirement":
+  "/v1/admin/unsafe-self-bypass-access-requirements":
     post:
       tags:
-      - userAdmin
-      consumes:
-      - application/json
-      description: 'Updates the given user to bypass the request access requirement'
-      parameters:
-      - in: body
-        name: request
-        schema:
-          "$ref": "#/definitions/AccessBypassRequest"
-        description: 'Whether the requirement should be bypassed or not. Defaults
-          to true, so an empty body  will cause the requirement to be bypassed.'
-      operationId: unsafeSelfBypassAccessRequirement
+        - userAdmin
+      description: 'Updates the given user to bypass all access requirements'
+      operationId: unsafeSelfBypassAccessRequirements
       responses:
         200:
           description: success
@@ -1541,10 +1532,6 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         403:
           description: Self bypass is disallowed in this environment
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        400:
-          description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
@@ -4513,6 +4500,8 @@ definitions:
     - PARSE_ERROR
     - USER_DISABLED
     - COMPUTE_SECURITY_SUSPENDED
+    - TERRA_TOS_NON_COMPLIANT
+    - TERRA_TOS_COMPLIANCE_UNKNOWN
   StatusResponse:
     type: object
     required:

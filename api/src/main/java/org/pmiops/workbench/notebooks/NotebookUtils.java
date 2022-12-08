@@ -17,19 +17,35 @@ public class NotebookUtils {
   public static final Pattern R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(rmd))$");
 
-  public static boolean isJupyterNotebookWithDirectory(String name) {
-    return JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(name).matches();
+  public static boolean isJupyterNotebookWithDirectory(String nameWithFileExtension) {
+    return JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
   }
 
-  public static boolean isRMarkDownNotebookWithDirectory(String name) {
-    return R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(name).matches();
+  public static boolean isRMarkDownNotebookWithDirectory(String nameWithFileExtension) {
+    return R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
   }
 
-  public static boolean isJupyterNotebook(String name) {
-    return name.endsWith(JUPYTER_NOTEBOOK_EXTENSION);
+  public static boolean isJupyterNotebook(String nameWithFileExtension) {
+    return nameWithFileExtension.endsWith(JUPYTER_NOTEBOOK_EXTENSION);
   }
 
-  public static boolean isRMarkdownNotebook(String name) {
-    return name.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
+  public static boolean isRMarkdownNotebook(String nameWithFileExtension) {
+    return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
+  }
+
+  public static String withJupyterNotebookExtension(String notebookName) {
+    return notebookName.endsWith(JUPYTER_NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(JUPYTER_NOTEBOOK_EXTENSION);
+  }
+
+  public static String withRMarkdownExtension(String notebookName) {
+    return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
+        ? notebookName
+        : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
+  }
+
+  public static String withNotebookPath(String notebookName) {
+    return NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
   }
 }

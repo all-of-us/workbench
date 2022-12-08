@@ -44,7 +44,7 @@ const styles = reactStyles({
   countPreview: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     padding: '0.5rem',
-    margin: '0 2.5%',
+    margin: '0.5rem',
     width: '35%',
   },
   option: {
@@ -66,9 +66,9 @@ const styles = reactStyles({
   },
   selectList: {
     alignItems: 'center',
-    display: 'flex',
     marginRight: '1rem',
     maxHeight: '15rem',
+    overflow: 'auto',
     padding: '0.5rem 0 0 0.25rem',
   },
   slider: {
@@ -93,6 +93,18 @@ const ageNode = {
   type: CriteriaType.AGE,
   value: '',
 };
+// Forces scrollbar to be visible when the container has overlapping content
+const scrollbarCSS = `
+  .show-scrollbar::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+  }
+  .show-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+`;
 
 const ageTypes = [
   { label: 'Current Age', type: AttrName.AGE },
@@ -448,7 +460,8 @@ export class Demographics extends React.Component<Props, State> {
     ) : (
       // List of selectable criteria used for Race, Ethnicity, Gender and Sex
       <React.Fragment>
-        <div style={styles.selectList}>
+        <style>{scrollbarCSS}</style>
+        <div className='show-scrollbar' style={styles.selectList}>
           <div style={{ margin: '0.25rem 0', overflow: 'auto', width: '100%' }}>
             {nodes.map((opt, o) => (
               <div key={o} style={styles.option}>

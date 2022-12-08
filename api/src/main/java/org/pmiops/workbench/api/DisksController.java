@@ -12,6 +12,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
@@ -36,14 +38,17 @@ public class DisksController implements DisksApiDelegate {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoMapper leonardoMapper;
   private final WorkspaceService workspaceService;
+  private final Provider<DbUser> userProvider;
 
   @Autowired
   public DisksController(
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoMapper leonardoMapper,
+      Provider<DbUser> userProvider,
       WorkspaceService workspaceService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoMapper = leonardoMapper;
+    this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
 
@@ -108,9 +113,14 @@ public class DisksController implements DisksApiDelegate {
     // Iterate original list first to check if disks are valid. Print log if disks maybe in
     // incorrect state to help future debugging.
     // Disk maybe in incorrect state if having additional active state disks.
+    String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
+
     List<Disk> activeDisks =
         disksToValidate.stream()
-            .filter(d -> ACTIVE_DISK_STATUS.contains(d.getStatus()))
+            .filter(
+                d ->
+                    ACTIVE_DISK_STATUS.contains(d.getStatus())
+                        && d.getName().startsWith(pdNamePrefix))
             .collect(Collectors.toList());
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =

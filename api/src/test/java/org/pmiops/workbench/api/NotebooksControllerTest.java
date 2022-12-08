@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -18,7 +16,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -44,7 +42,9 @@ import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
@@ -69,10 +69,10 @@ public class NotebooksControllerTest {
 
   @TestConfiguration
   @Import({
-    AccessTierServiceImpl.class,
-    FakeClockConfiguration.class,
-    LogsBasedMetricServiceFakeImpl.class,
-    NotebooksController.class,
+      AccessTierServiceImpl.class,
+      FakeClockConfiguration.class,
+      LogsBasedMetricServiceFakeImpl.class,
+      NotebooksController.class,
   })
   @MockBean({CloudStorageClient.class, FireCloudService.class, UserRecentResourceService.class})
   static class Configuration {
@@ -80,24 +80,6 @@ public class NotebooksControllerTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return currentUser;
-    }
-  }
-
-  class MockNotebook {
-    Blob blob;
-    FileDetail fileDetail;
-
-    MockNotebook(String path, String bucketName) {
-      blob = mock(Blob.class);
-      fileDetail = new FileDetail();
-
-      String[] parts = path.split("/");
-      String fileName = parts[parts.length - 1];
-      fileDetail.setName(fileName);
-
-      when(blob.getName()).thenReturn(path);
-      when(mockCloudStorageClient.blobToFileDetail(blob, bucketName, mock(Set.class)))
-          .thenReturn(fileDetail);
     }
   }
 
@@ -141,6 +123,28 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testCloneNotebook_rmd() {
+    String fromNotebookName = "starter.rmd";
+    String toNotebookName = "Duplicate of starter.rmd";
+    String toPath = "/path/to/" + toNotebookName;
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
+
+    when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName)
+            .getBody();
+
+    verify(mockNotebookService)
+        .cloneNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName);
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
   public void testCloneNotebook_alreadyExists() {
     when(mockNotebookService.cloneNotebook(anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
@@ -170,7 +174,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceName(toWorkspaceName);
 
     when(mockNotebookService.copyNotebook(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
@@ -192,36 +196,39 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testCopyNotebook_rmd_withNoExtensionName() {
+  public void testCopyNotebook_rmd() {
+    String fromNotebookName = "test.rmd";
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String newName = "toName";
+    String newNameWithExtension = newName + ".rmd";
     String toPath = "/path/to/" + newName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
-    FileDetail expectedFileDetail = createFileDetail(newName + ".rmd", toPath, toLastModifiedTime);
+    FileDetail expectedFileDetail =
+        createFileDetail(newNameWithExtension, toPath, toLastModifiedTime);
     copyRequest.setNewName(newName);
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
     copyRequest.setToWorkspaceName(toWorkspaceName);
 
     when(mockNotebookService.copyNotebook(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
 
     FileDetail actualFileDetail =
         notebooksController
-            .copyNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "test.rmd", copyRequest)
+            .copyNotebook(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, fromNotebookName, copyRequest)
             .getBody();
 
-    // Note the fromNotebooName will change after stop setting extension for notebookName.
     verify(mockNotebookService)
         .copyNotebook(
             FROM_WORKSPACE_NAMESPACE,
             FROM_WORKSPACE_NAME,
-            "test.rmd.ipynb",
+            fromNotebookName,
             toWorkspaceNamespace,
             toWorkspaceName,
-            newName + ".rmd");
+            newNameWithExtension);
 
     assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
   }
@@ -236,7 +243,7 @@ public class NotebooksControllerTest {
     copyRequest.setToWorkspaceNamespace(toWorkspaceNamespace);
 
     when(mockNotebookService.copyNotebook(
-            anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
+        anyString(), anyString(), anyString(), anyString(), anyString(), anyString()))
         .thenThrow(BlobAlreadyExistsException.class);
 
     Throwable exception =
@@ -275,11 +282,9 @@ public class NotebooksControllerTest {
     String workspaceNamespace = "project";
     String workspaceName = "workspace";
     MockNotebook notebook1 =
-        new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/mockFile"), "bucket");
+        MockNotebook.mockWithPathAndJupyterExtension("mockFile", "bucket", mockCloudStorageClient);
     MockNotebook notebook2 =
-        new MockNotebook(
-            NotebooksService.withJupyterNotebookExtension("notebooks/two words"), "bucket");
+        MockNotebook.mockWithPathAndJupyterExtension("two words", "bucket", mockCloudStorageClient);
 
     when(mockNotebookService.getNotebooks(anyString(), anyString()))
         .thenReturn(ImmutableList.of(notebook1.fileDetail, notebook2.fileDetail));
@@ -318,7 +323,16 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testGetNotebookKernel_notSupported() {
+  public void testGetNotebookKernel_notSupportedWithoutSuffix() {
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            notebooksController.getNotebookKernel(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file"));
+  }
+
+  @Test
+  public void testGetNotebookKernel_rmdNotSupported() {
     assertThrows(
         BadRequestException.class,
         () ->
@@ -482,6 +496,15 @@ public class NotebooksControllerTest {
   }
 
   @Test
+  public void testReadOnlyNotebook_requiresSuffix() {
+    assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksController.readOnlyNotebook(
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "notebook without suffix"));
+  }
+
+  @Test
   public void testRenameNotebook() {
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
 
@@ -491,6 +514,37 @@ public class NotebooksControllerTest {
 
     notebookRename.setName(FROM_NOTEBOOK_NAME);
     notebookRename.setNewName(TO_NOTEBOOK_NAME);
+
+    when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(expectedFileDetail);
+
+    FileDetail actualFileDetail =
+        notebooksController
+            .renameNotebook(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, notebookRename)
+            .getBody();
+
+    verify(mockNotebookService)
+        .renameNotebook(
+            FROM_WORKSPACE_NAMESPACE,
+            FROM_WORKSPACE_NAME,
+            notebookRename.getName(),
+            notebookRename.getNewName());
+
+    assertThat(actualFileDetail).isEqualTo(expectedFileDetail);
+  }
+
+  @Test
+  public void testRenameNotebook_rmd() {
+    String fromNotebookName = "original.rmd";
+    String toNotebookName = "new.rmd";
+    String toPath = "/path/to/" + toNotebookName;
+
+    long toLastModifiedTime = Instant.now().toEpochMilli();
+    NotebookRename notebookRename = new NotebookRename();
+    FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
+
+    notebookRename.setName(fromNotebookName);
+    notebookRename.setNewName(toNotebookName);
 
     when(mockNotebookService.renameNotebook(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(expectedFileDetail);
@@ -543,7 +597,7 @@ public class NotebooksControllerTest {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
-    final String testNotebook = NotebooksService.withJupyterNotebookExtension("test-notebook");
+    final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
     FirecloudWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
@@ -555,15 +609,15 @@ public class NotebooksControllerTest {
     when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
         .thenReturn(acl.getAcl());
 
-    final String testNotebookPath = "notebooks/" + testNotebook;
+    final String testNotebookPath = NotebookUtils.withNotebookPath(testNotebook);
     doReturn(gcsMetadata)
         .when(mockCloudStorageClient)
         .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(
-            notebooksController
-                .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
-                .getBody())
+        notebooksController
+            .getNotebookLockingMetadata(testWorkspaceNamespace, testWorkspaceName, testNotebook)
+            .getBody())
         .isEqualTo(expectedResponse);
   }
 

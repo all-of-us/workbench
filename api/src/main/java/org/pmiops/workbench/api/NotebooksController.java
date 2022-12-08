@@ -1,7 +1,10 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
-
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.BaseEncoding;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -10,9 +13,8 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -23,8 +25,7 @@ import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebookLockingUtils;
-import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,23 +73,14 @@ public class NotebooksController implements NotebooksApiDelegate {
       CopyRequest copyRequest) {
     FileDetail fileDetail;
     try {
-      // Checks the new name extension to match the original from file type, add extension if
-      // needed.
-      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
-      String newName =
-          isRMarkdownNotebook(fromNotebookName)
-              ? NotebooksService.withRMarkdownExtension(copyRequest.getNewName())
-              : NotebooksService.withJupyterNotebookExtension(copyRequest.getNewName());
-
-      // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       fileDetail =
           notebooksService.copyNotebook(
               fromWorkspaceNamespace,
               fromWorkspaceId,
-              NotebooksService.withJupyterNotebookExtension(fromNotebookName),
+              NotebooksService.withNotebookExtension(fromNotebookName),
               copyRequest.getToWorkspaceNamespace(),
               copyRequest.getToWorkspaceName(),
-              newName);
+              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
     } catch (BlobAlreadyExistsException e) {
       throw new ConflictException("File already exists at copy destination");
     }
@@ -111,11 +103,6 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspaceNamespace, String workspaceName, String notebookName) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookName));
-    }
-
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
@@ -141,11 +128,6 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<KernelTypeResponse> getNotebookKernel(
       String workspace, String workspaceName, String notebookName) {
-    if (!NotebookUtils.isJupyterNotebook(notebookName)) {
-      throw new BadRequestException(
-          String.format("%s is not a Jupyter notebook file", notebookName));
-    }
-
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspace, workspaceName, WorkspaceAccessLevel.READER);
 
@@ -196,8 +178,7 @@ public class NotebooksController implements NotebooksApiDelegate {
                 .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
                 .keySet();
 
-        response.lastLockedBy(
-            NotebookLockingUtils.findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
+        response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
       }
     }
 
@@ -218,5 +199,25 @@ public class NotebooksController implements NotebooksApiDelegate {
     }
 
     return ResponseEntity.ok(response);
+  }
+
+  private String findHashedUser(String bucket, Set<String> workspaceUsers, String hash) {
+    return workspaceUsers.stream()
+        .filter(email -> notebookLockingEmailHash(bucket, email).equals(hash))
+        .findAny()
+        .orElse("UNKNOWN");
+  }
+
+  @VisibleForTesting
+  static String notebookLockingEmailHash(String bucket, String email) {
+    String toHash = String.format("%s:%s", bucket, email);
+    try {
+      MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+      byte[] hash = sha256.digest(toHash.getBytes(StandardCharsets.UTF_8));
+      // convert to printable hex text
+      return BaseEncoding.base16().lowerCase().encode(hash);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new ServerErrorException(e);
+    }
   }
 }

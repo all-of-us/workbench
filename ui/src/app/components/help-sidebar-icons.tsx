@@ -94,7 +94,8 @@ export type SidebarIconId =
   | 'notebooksHelp'
   | 'dataDictionary'
   | 'annotations'
-  | 'runtime'
+  | 'runtimeConfig'
+  | 'apps'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -109,7 +110,11 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-const displayRuntimeIcon = (icon: IconConfig, workspaceNamespace: string) => {
+const displayRuntimeStatusIcon = (
+  icon: IconConfig,
+  workspaceNamespace: string,
+  featureFlaggedStyling: boolean = false
+) => {
   // We always want to show the thunderstorm icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
@@ -119,6 +124,7 @@ const displayRuntimeIcon = (icon: IconConfig, workspaceNamespace: string) => {
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
+        background: featureFlaggedStyling && colors.danger,
       }}
     >
       <img
@@ -310,7 +316,11 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         </a>
       ),
     ],
-    ['runtime', () => displayRuntimeIcon(icon, workspace.namespace)],
+    [
+      'runtimeConfig',
+      () => displayRuntimeStatusIcon(icon, workspace.namespace),
+    ],
+    ['apps', () => displayRuntimeStatusIcon(icon, workspace.namespace, true)],
     [
       'terminal',
       () => (
@@ -336,7 +346,6 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
         icon.faIcon === null ? (
           <img
             data-test-id={'help-sidebar-icon-' + icon.id}
-            src={icon.id === 'runtime' && thunderstorm}
             style={icon.style}
           />
         ) : (
@@ -432,8 +441,8 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Annotations',
       hasContent: true,
     },
-    runtime: {
-      id: 'runtime',
+    runtimeConfig: {
+      id: 'runtimeConfig',
       disabled: !!loadingError,
       faIcon: null,
       label: 'Cloud Icon',
@@ -441,6 +450,19 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       style: { height: '22px', width: '22px' },
       tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
       hasContent: true,
+    },
+    apps: {
+      id: 'apps',
+      disabled: !!loadingError,
+      faIcon: null,
+      label: 'Cloud Icon',
+      showIcon: () => true,
+      style: { height: '22px', width: '22px', background: colors.danger },
+      tooltip: runtimeTooltip(
+        '[Feature-Flagged Preview] Applications',
+        loadingError
+      ),
+      hasContent: true, // TODO?
     },
     terminal: {
       id: 'terminal',
@@ -492,7 +514,8 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     criteria,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-
+  const { enableGkeApp, enableGenomicExtraction } =
+    serverConfigStore.get().config;
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
@@ -505,12 +528,19 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     iconConfig({ iconId, pageKey, criteria, loadingError }).showIcon()
   );
 
+  if (
+    enableGkeApp &&
+    WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+  ) {
+    keys.push('apps');
+  }
+
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('runtime', 'terminal');
+    keys.push('runtimeConfig', 'terminal');
   }
 
   if (
-    serverConfigStore.get().config.enableGenomicExtraction &&
+    enableGenomicExtraction &&
     getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
   ) {
     keys.push('genomicExtractions');

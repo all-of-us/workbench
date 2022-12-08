@@ -16,9 +16,11 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { APP_LIST } from 'app/utils/constants';
+import { AnalyticsTracker } from 'app/utils/analytics';
+import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
@@ -45,13 +47,38 @@ export const AppsList = withCurrentWorkspace()((props) => {
   const { workspace } = props;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
+  const [showJupyterModal, setShowJupyterModal] = useState(false);
 
   const canWrite = (): boolean => {
     return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
   };
 
+  const closeAllApplicationModal = () => {
+    setShowJupyterModal(false);
+  };
+
   const onClose = () => {
+    setSelectedApp('');
+    closeAllApplicationModal();
     setShowSelectAppModal(false);
+  };
+
+  const backToSelectAppModal = () => {
+    setShowSelectAppModal(true);
+  };
+
+  const onJupyterAppSelect = () => {
+    AnalyticsTracker.Notebooks.OpenCreateModal();
+    setShowSelectAppModal(false);
+    setShowJupyterModal(true);
+  };
+
+  const onNext = () => {
+    switch (selectedApp) {
+      case JUPYTER_APP:
+        onJupyterAppSelect();
+        break;
+    }
   };
 
   useEffect(() => {
@@ -67,6 +94,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               Your Analysis
             </ListPageHeader>
             <Button
+              aria-label='start'
               data-test-id='start-button'
               style={styles.startButton}
               onClick={() => {
@@ -78,21 +106,27 @@ export const AppsList = withCurrentWorkspace()((props) => {
               }
             >
               <div style={{ paddingRight: '0.5rem' }}>Start</div>
-              <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+              <FontAwesomeIcon icon={faPlusCircle} />
             </Button>
           </FlexRow>
         </FlexColumn>
       </FadeBox>
       {showSelectAppModal && (
-        <Modal data-test-id='select-application-modal'>
+        <Modal
+          data-test-id='select-application-modal'
+          aria={{
+            label: 'Select Applications Modal',
+          }}
+        >
           <ModalTitle>Analyze Data</ModalTitle>
           <ModalBody>
             <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
-              data-test-id={'application-list-dropdown'}
+              data-test-id='application-list-dropdown'
+              ariaLabel='Application List Dropdown'
               value={selectedApp}
               options={APP_LIST}
-              placeholder={'Choose One'}
+              placeholder='Choose One'
               onChange={(e) => setSelectedApp(e.value)}
               style={{ width: '9rem' }}
             />
@@ -100,23 +134,32 @@ export const AppsList = withCurrentWorkspace()((props) => {
           <ModalFooter style={{ paddingTop: '2rem' }}>
             <Button
               style={{ marginRight: '2rem' }}
-              type={'secondary'}
-              label={'Close'}
+              type='secondary'
+              aria-label='close'
               onClick={() => onClose()}
             >
               Close
             </Button>
             <Button
-              type={'primary'}
-              label={'Next'}
-              onClick={() => {}}
-              style={{ cursor: 'not-allowed' }}
-              disabled
+              data-test-id='next-btn'
+              type='primary'
+              aria-label='next'
+              onClick={() => onNext()}
+              disabled={selectedApp === ''}
             >
               Next
             </Button>
           </ModalFooter>
         </Modal>
+      )}
+      {showJupyterModal && !showSelectAppModal && (
+        <NewNotebookModal
+          data-test-id='jupyter-modal'
+          onClose={() => onClose()}
+          workspace={props.workspace}
+          existingNameList={null}
+          onBack={() => backToSelectAppModal()}
+        />
       )}
     </>
   );

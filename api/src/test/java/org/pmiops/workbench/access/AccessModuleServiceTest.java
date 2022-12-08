@@ -92,7 +92,8 @@ public class AccessModuleServiceTest {
   @Test
   public void testBypassSuccess_insertNewEntity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, true);
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
     assertThat(userAccessModule.get(0).getAccessModule().getName())
@@ -120,7 +121,8 @@ public class AccessModuleServiceTest {
             .setBypassTime(existingBypasstime);
     userAccessModuleDao.save(existingDbUserAccessModule);
     assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, true);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -138,7 +140,8 @@ public class AccessModuleServiceTest {
   @Test
   public void testUnBypassSuccess_insertNewEntity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, false);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -166,7 +169,8 @@ public class AccessModuleServiceTest {
             .setBypassTime(existingBypasstime);
     userAccessModuleDao.save(existingDbUserAccessModule);
     assertThat(userAccessModuleDao.getAllByUser(user).size()).isEqualTo(1);
-    accessModuleService.updateBypassTime(user.getUserId(), AccessModule.TWO_FACTOR_AUTH, false);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, false);
 
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(1);
@@ -187,7 +191,7 @@ public class AccessModuleServiceTest {
         ForbiddenException.class,
         () ->
             accessModuleService.updateBypassTime(
-                user.getUserId(), AccessModule.PROFILE_CONFIRMATION, true));
+                user.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, true));
   }
 
   @Test
