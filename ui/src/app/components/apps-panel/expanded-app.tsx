@@ -52,7 +52,7 @@ export const ExpandedApp = (props: {
       <FlexColumn style={styles.expandedAppContainer}>
         <FlexRow>
           <div>
-            <AppLogo {...{ appType }} />
+            <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
           </div>
           <RuntimeStatusIcon
             style={{ alignSelf: 'center', marginRight: '0.5em' }}

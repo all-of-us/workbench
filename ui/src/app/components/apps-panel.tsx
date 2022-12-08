@@ -40,7 +40,7 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   return (
     <Clickable {...{ onClick }}>
       <FlexRow style={styles.availableApp}>
-        <AppLogo {...{ appType }} />
+        <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
     </Clickable>
   );
@@ -84,11 +84,11 @@ export const AppsPanel = (props: {
     !appStates.find((s) => s.appType === appType)?.shouldExpand;
   const showAvailableSection = appsToDisplay.some(showInAvailableSection);
 
-  const ActiveApps = (sectionProps: { showCloseButton: boolean }) => (
+  const ActiveApps = (sectionProps: { showCloseButtonHere: boolean }) => (
     <FlexColumn>
       <FlexRow>
         <h3 style={styles.header}>Active applications</h3>
-        {sectionProps.showCloseButton && (
+        {sectionProps.showCloseButtonHere && (
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
@@ -102,11 +102,11 @@ export const AppsPanel = (props: {
     </FlexColumn>
   );
 
-  const AvailableApps = (sectionProps: { showCloseButton: boolean }) => (
+  const AvailableApps = (sectionProps: { showCloseButtonHere: boolean }) => (
     <FlexColumn>
       <FlexRow>
         <h3 style={styles.header}>Launch other applications</h3>
-        {sectionProps.showCloseButton && (
+        {sectionProps.showCloseButtonHere && (
           <CloseButton {...{ onClose }} style={styles.closeButton} />
         )}
       </FlexRow>
@@ -131,9 +131,11 @@ export const AppsPanel = (props: {
     <DisabledPanel />
   ) : (
     <div>
-      {showActiveSection && <ActiveApps showCloseButton={showActiveSection} />}
+      {showActiveSection && (
+        <ActiveApps showCloseButtonHere={showActiveSection} />
+      )}
       {showAvailableSection && (
-        <AvailableApps showCloseButton={!showActiveSection} />
+        <AvailableApps showCloseButtonHere={!showActiveSection} />
       )}
     </div>
   );
