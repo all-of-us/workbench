@@ -18,7 +18,9 @@ export const toolTipTextDemographic =
   'education level, or income\n';
 
 export const tooltipTextBillingWarning =
-  'Unable to fecth billing information. If you would like to modify your billing account, please try again later.';
+  'Unfortunately it is not possible to change the billing account for this workspace at this time.  ' +
+  'Please try again later.  If you continue to see this message after 5 minutes after creation, ' +
+  'please contact support.';
 
 export const toolTipTextDucc = (
   <div>
