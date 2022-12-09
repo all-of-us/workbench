@@ -191,8 +191,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
+    dbWorkspace =
+        workspaceDao.saveWithLastModified(
+            dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
+            userProvider.get());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {
