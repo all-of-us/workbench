@@ -32,6 +32,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
   }
 
+  @Override
   public ResponseEntity<Void> ensureTestUserTosCompliance() {
     WorkbenchConfig config = workbenchConfigProvider.get();
 
@@ -64,6 +65,7 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     }
   }
 
+  @Override
   public ResponseEntity<Void> deleteAllTestUserWorkspaces() {
     WorkbenchConfig config = workbenchConfigProvider.get();
     WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
@@ -81,10 +83,17 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private void deleteAllOwnedWorkspaces(String username) {
     List<WorkspaceResponse> workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
-        String.format("Test user %s currently owns %d workspaces", username, workspaces.size()));
+        String.format("Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
 
-    workspaces.forEach(
+    // only delete this many workspaces per user; remove after we gain confidence with this tool
+    int tempLimit = 5;
+
+    workspaces.stream().limit(tempLimit).forEach(
         workspace ->
             impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
+
+    workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
+    LOGGER.info(
+        String.format("After deletions, test user %s now owns %d workspaces", username, workspaces.size()));
   }
 }
