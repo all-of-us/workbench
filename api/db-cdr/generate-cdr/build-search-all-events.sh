@@ -388,7 +388,9 @@ WHERE o.observation_concept_id is not null
               where domain_id = 'Observation'
               and vocabulary_id in ('CPT4')
               and standard_concept = 'S'
-            )"
+            )
+    and c.vocabulary_id != 'PPI'
+    and c.concept_class_id != 'Survey'"
 
 ############################################################
 # insert standard device data into cb_search_all_events
@@ -458,3 +460,198 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = v.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = v.visit_concept_id)
 WHERE v.visit_concept_id is not null
     and v.visit_concept_id != 0"
+
+##########################################################
+# Delete Lifestyle entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete lifestyle entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH lifestyle_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1585855)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1585855)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+         WHERE concept_id IN (1585855)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     )
+   )
+   SELECT *
+   FROM lifestyle_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
+
+##########################################################
+# Delete Overall Health entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete Overall Health entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH lifestyle_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1585710)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1585710)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+         WHERE concept_id IN (1585710)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     )
+   )
+   SELECT *
+   FROM lifestyle_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
+
+##########################################################
+# Delete Basics entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete Basics entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH lifestyle_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE (observation_source_concept_id IN (903581, 1384450)
+            OR observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1586134)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         ))
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE (observation_source_concept_id IN (903581, 1384450)
+            OR observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+             WHERE concept_id IN (1586134)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         ))
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND (observation_source_concept_id IN (903581, 1384450)
+      OR observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+         WHERE concept_id IN (1586134)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     ))
+   )
+   SELECT *
+   FROM lifestyle_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
