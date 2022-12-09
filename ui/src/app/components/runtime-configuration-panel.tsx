@@ -237,17 +237,19 @@ const PanelMain = fp.flow(
     onClose = () => {},
     initialPanelContent,
   }) => {
-    const { namespace, id, cdrVersionId, googleProject } = workspace;
-
     const { profile } = profileState;
+    const { namespace, id, cdrVersionId, googleProject } = workspace;
+    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const { hasWgsData: allowDataproc } = findCdrVersion(
       cdrVersionId,
       cdrVersionTiersResponse
     ) || { hasWgsData: false };
+
     const { persistentDisk } = useStore(diskStore);
     let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
       useCustomRuntime(namespace, persistentDisk);
+
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
     if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
       currentRuntime = applyPresetOverride(
@@ -280,8 +282,6 @@ const PanelMain = fp.flow(
         runtime: fromAnalysisConfig(config),
         detachedDisk: config.detachedDisk,
       });
-
-    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initializePanelContent = (): PanelContent =>
       cond(

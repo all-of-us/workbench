@@ -34,6 +34,7 @@ import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
+import { appAssets, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIcon } from './runtime-status-icon';
@@ -94,8 +95,8 @@ export type SidebarIconId =
   | 'notebooksHelp'
   | 'dataDictionary'
   | 'annotations'
-  | 'runtimeConfig'
   | 'apps'
+  | 'runtimeConfig'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -112,25 +113,42 @@ export interface IconConfig {
 
 const displayRuntimeStatusIcon = (
   icon: IconConfig,
-  workspaceNamespace: string,
-  featureFlaggedStyling: boolean = false
+  workspaceNamespace: string
 ) => {
-  // We always want to show the thunderstorm icon.
-  // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
-  // overlay icon in the bottom right of the tab showing the runtime status.
-  return (
-    <FlexRow
-      style={{
+  const { enableGkeApp } = serverConfigStore.get().config;
+
+  const jupyterAssets = appAssets.find(
+    (aa) => aa.appType === UIAppType.JUPYTER
+  );
+
+  const containerStyle: CSSProperties = enableGkeApp
+    ? {
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
-        background: featureFlaggedStyling && colors.danger,
-      }}
-    >
+        background: colors.white,
+      }
+    : {
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+      };
+  const iconStyle: CSSProperties = enableGkeApp
+    ? { width: '36px', position: 'absolute' }
+    : { width: '22px', position: 'absolute' };
+
+  const iconSrc = enableGkeApp ? jupyterAssets.icon : thunderstorm;
+
+  // We always want to show the thunderstorm or Jupyter icon.
+  // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
+  // overlay icon in the bottom right of the tab showing the runtime status.
+  return (
+    <FlexRow style={containerStyle}>
       <img
+        src={iconSrc}
+        alt={icon.label}
+        style={iconStyle}
         data-test-id={'help-sidebar-icon-' + icon.id}
-        src={thunderstorm}
-        style={{ ...icon.style, position: 'absolute' }}
       />
       <RuntimeStatusIcon
         {...{ workspaceNamespace }}
@@ -317,10 +335,27 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
       ),
     ],
     [
+      'apps',
+      () => (
+        <FlexRow
+          style={{
+            height: '100%',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+          }}
+        >
+          <img
+            data-test-id={'help-sidebar-icon-' + icon.id}
+            src={thunderstorm}
+            style={{ ...icon.style, position: 'absolute' }}
+          />
+        </FlexRow>
+      ),
+    ],
+    [
       'runtimeConfig',
       () => displayRuntimeStatusIcon(icon, workspace.namespace),
     ],
-    ['apps', () => displayRuntimeStatusIcon(icon, workspace.namespace, true)],
     [
       'terminal',
       () => (
@@ -441,28 +476,25 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: 'Annotations',
       hasContent: true,
     },
-    runtimeConfig: {
-      id: 'runtimeConfig',
-      disabled: !!loadingError,
-      faIcon: null,
-      label: 'Cloud Icon',
-      showIcon: () => true,
-      style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
-      hasContent: true,
-    },
     apps: {
       id: 'apps',
       disabled: !!loadingError,
       faIcon: null,
       label: 'Cloud Icon',
       showIcon: () => true,
-      style: { height: '22px', width: '22px', background: colors.danger },
-      tooltip: runtimeTooltip(
-        '[Feature-Flagged Preview] Applications',
-        loadingError
-      ),
-      hasContent: true, // TODO?
+      style: { height: '22px', width: '22px' },
+      tooltip: runtimeTooltip('Applications', loadingError),
+      hasContent: true,
+    },
+    runtimeConfig: {
+      id: 'runtimeConfig',
+      disabled: !!loadingError,
+      faIcon: null,
+      label: 'Jupyter Icon',
+      showIcon: () => true,
+      style: { width: '36px' },
+      tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
+      hasContent: true,
     },
     terminal: {
       id: 'terminal',
