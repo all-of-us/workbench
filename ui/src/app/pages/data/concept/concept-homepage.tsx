@@ -2,14 +2,12 @@ import * as React from 'react';
 import * as fp from 'lodash/fp';
 
 import {
-  CdrVersionTiersResponse,
   Concept,
   Domain,
   DomainCard as ConceptDomainCard,
   SurveyModule,
 } from 'generated/fetch';
 
-import { notSynthAndHasSurveyConductData } from 'app/cohort-search/search-group-list/search-group-list.component';
 import { AlertClose, AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { DomainCardBase } from 'app/components/card';
@@ -24,7 +22,6 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
   validateInputForMySQL,
-  withCdrVersions,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -239,7 +236,6 @@ interface Props extends WithSpinnerOverlayProps, NavigationProps {
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
@@ -266,7 +262,6 @@ interface State {
 }
 
 export const ConceptHomepage = fp.flow(
-  withCdrVersions(),
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
   withCurrentWorkspace(),
@@ -301,7 +296,6 @@ export const ConceptHomepage = fp.flow(
     async loadDomainsAndSurveys() {
       const {
         cohortContext,
-        workspace,
         workspace: { id, namespace },
       } = this.props;
       this.setState({
@@ -320,17 +314,9 @@ export const ConceptHomepage = fp.flow(
         });
       const getSurveyInfo = cohortBuilderApi()
         .findSurveyModules(namespace, id)
-        .then((surveysInfo) => {
-          // Surveys to hide if hasSurveyConductData cdr flag is enabled
-          const surveyConductConceptIds = [1740639, 43529712, 43528698];
-          // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
-          const surveysList = notSynthAndHasSurveyConductData(workspace)
-            ? surveysInfo.items.filter(
-                ({ conceptId }) => !surveyConductConceptIds.includes(conceptId)
-              )
-            : surveysInfo.items;
-          this.setState({ conceptSurveysList: surveysList });
-        })
+        .then((surveysInfo) =>
+          this.setState({ conceptSurveysList: surveysInfo.items })
+        )
         .catch((e) => {
           this.setState({ surveyInfoError: true });
           console.error(e);
