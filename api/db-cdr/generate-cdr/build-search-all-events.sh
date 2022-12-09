@@ -471,7 +471,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
  WHERE EXISTS (
    WITH lifestyle_survey_remove_participants AS (
      SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
-     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
      WHERE person_id IN (
          SELECT DISTINCT person_id
          FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
@@ -533,9 +533,9 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "DELETE
  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
  WHERE EXISTS (
-   WITH lifestyle_survey_remove_participants AS (
+   WITH overall_health_survey_remove_participants AS (
      SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
-     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
      WHERE person_id IN (
          SELECT DISTINCT person_id
          FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
@@ -585,7 +585,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
      )
    )
    SELECT *
-   FROM lifestyle_survey_remove_participants lsrp
+   FROM overall_health_survey_remove_participants lsrp
    WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
  )"
 
@@ -597,9 +597,9 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "DELETE
  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
  WHERE EXISTS (
-   WITH lifestyle_survey_remove_participants AS (
+   WITH basics_survey_remove_participants AS (
      SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
-     FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R3.observation\`
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
      WHERE person_id IN (
          SELECT DISTINCT person_id
          FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
@@ -652,6 +652,6 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
      ))
    )
    SELECT *
-   FROM lifestyle_survey_remove_participants lsrp
+   FROM basics_survey_remove_participants lsrp
    WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
  )"
