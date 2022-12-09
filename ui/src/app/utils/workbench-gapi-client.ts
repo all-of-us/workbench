@@ -4,7 +4,7 @@ import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from './cookies';
 
 declare const gapi: any;
 
-interface GoogleBillingAccountInfo {
+export interface GoogleBillingAccountInfo {
   billingAccountName: string;
   billingEnabled: boolean;
 }

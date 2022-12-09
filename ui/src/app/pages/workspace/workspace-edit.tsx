@@ -94,7 +94,10 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
+import {
+  getBillingAccountInfo,
+  GoogleBillingAccountInfo,
+} from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -450,29 +453,65 @@ export const WorkspaceEdit = fp.flow(
       }
     }
 
-    async fetchBillingAccounts() {
-      this.setState({ fetchBillingAccountLoading: true });
+    async getFormattedBillingAccounts(): Promise<BillingAccount[]> {
       const billingAccounts = (await userApi().listBillingAccounts())
         .billingAccounts;
 
       // Replace the free billing account with a new display name that has spend usage.
-      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map(
-        (b) => {
-          if (b.isFreeTier) {
-            return {
-              ...b,
-              displayName: this.formatFreeTierBillingAccountName(),
-            };
-          }
-          return b;
+      return billingAccounts.map((b) => {
+        if (b.isFreeTier) {
+          return {
+            ...b,
+            displayName: this.formatFreeTierBillingAccountName(),
+          };
         }
+        return b;
+      });
+    }
+
+    addBillingInfoToAccounts(
+      billingInfo: GoogleBillingAccountInfo,
+      billingAccounts: BillingAccount[]
+    ): BillingAccount[] {
+      billingAccounts.push({
+        name: this.props.workspace.billingAccountName,
+        displayName: 'User Provided Billing Account',
+        isFreeTier: false,
+        isOpen: true,
+      });
+
+      if (
+        billingInfo.billingAccountName !==
+        this.props.workspace.billingAccountName
+      ) {
+        // This should never happen but it means the database is out of sync with Google
+        // and does not have the correct billing account stored.
+        // We cannot send over the correct billing account info since the current user
+        // does not have permissions to set it.
+
+        reportError({
+          name: 'Out of date billing account name',
+          message:
+            `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+            `Stored value is ${this.props.workspace.billingAccountName}. ` +
+            `True value is ${billingInfo.billingAccountName}`,
+        });
+      }
+      return billingAccounts;
+    }
+
+    async fetchBillingAccounts() {
+      this.setState({ fetchBillingAccountLoading: true });
+      let formattedBillingAccounts = [];
+      this.getFormattedBillingAccounts().then(
+        (billingAccounts) => (formattedBillingAccounts = billingAccounts)
       );
 
       if (
         this.isMode(WorkspaceEditMode.Create) ||
         this.isMode(WorkspaceEditMode.Duplicate)
       ) {
-        const maybeFreeTierAccount = displayBillingAccounts.find(
+        const maybeFreeTierAccount = await formattedBillingAccounts.find(
           (billingAccount) => billingAccount.isFreeTier
         );
         if (maybeFreeTierAccount) {
@@ -485,83 +524,59 @@ export const WorkspaceEdit = fp.flow(
           );
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        try {
-          const fetchedBillingInfo = await getBillingAccountInfo(
-            this.props.workspace.googleProject
-          );
-          if (
-            !displayBillingAccounts.find(
-              (billingAccount) =>
-                billingAccount.name === fetchedBillingInfo.billingAccountName
-            )
-          ) {
-            // If the user has owner access on the workspace but does not have access to the billing account
-            // that it is attached to, keep the server's current value for billingAccountName and add a shim
-            // entry into billingAccounts so the dropdown entry is not empty.
-            //
-            // The server will not perform an updateBillingInfo call if the received billingAccountName
-            // is the same as what is currently stored.
-            //
-            // This can happen if a workspace is shared to another researcher as an owner.
-            displayBillingAccounts.push({
-              name: this.props.workspace.billingAccountName,
-              displayName: 'User Provided Billing Account',
-              isFreeTier: false,
-              isOpen: true,
-            });
-
+        getBillingAccountInfo(this.props.workspace.googleProject)
+          .then((fetchedBillingInfo) => {
             if (
-              fetchedBillingInfo.billingAccountName !==
-              this.props.workspace.billingAccountName
+              !formattedBillingAccounts.find(
+                (billingAccount) =>
+                  billingAccount.name === fetchedBillingInfo.billingAccountName
+              )
             ) {
-              // This should never happen but it means the database is out of sync with Google
-              // and does not have the correct billing account stored.
-              // We cannot send over the correct billing account info since the current user
-              // does not have permissions to set it.
-
-              reportError({
-                name: 'Out of date billing account name',
-                message:
-                  `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
-                  `Stored value is ${this.props.workspace.billingAccountName}. ` +
-                  `True value is ${fetchedBillingInfo.billingAccountName}`,
-              });
+              // If the user has owner access on the workspace but does not have access to the billing account
+              // that it is attached to, keep the server's current value for billingAccountName and add a shim
+              // entry into billingAccounts so the dropdown entry is not empty.
+              //
+              // The server will not perform an updateBillingInfo call if the received billingAccountName
+              // is the same as what is currently stored.
+              //
+              // This can happen if a workspace is shared to another researcher as an owner.
+              this.addBillingInfoToAccounts(
+                fetchedBillingInfo,
+                formattedBillingAccounts
+              );
+            } else {
+              // Otherwise, use this as an opportunity to sync the fetched billing account name from
+              // the source of truth, Google
+              this.setState((prevState) =>
+                fp.set(
+                  ['workspace', 'billingAccountName'],
+                  fetchedBillingInfo.billingAccountName,
+                  prevState
+                )
+              );
             }
-            this.setState({ billingAccountFetched: true });
-          } else {
-            // Otherwise, use this as an opportunity to sync the fetched billing account name from
-            // the source of truth, Google
+          })
+          .catch(() => {
             this.setState((prevState) =>
               fp.set(
                 ['workspace', 'billingAccountName'],
-                fetchedBillingInfo.billingAccountName,
+                this.props.workspace.billingAccountName,
                 prevState
               )
             );
-          }
-          this.setState({ billingAccountFetched: true });
-        } catch (e) {
-          displayBillingAccounts.push({
-            name: this.props.workspace.billingAccountName,
-            displayName: 'User Provided Billing Account',
-            isFreeTier: false,
-            isOpen: true,
+            this.setState({
+              fetchBillingAccountError: true,
+            });
           });
-          this.setState((prevState) =>
-            fp.set(
-              ['workspace', 'billingAccountName'],
-              this.props.workspace.billingAccountName,
-              prevState
-            )
-          );
-          this.setState({ fetchBillingAccountError: true });
-          this.setState({ billingAccountFetched: false });
-        }
       }
-      this.setState({ billingAccounts: displayBillingAccounts ?? [] });
-      this.setState({ fetchBillingAccountLoading: false });
+      this.setState({
+        billingAccounts: formattedBillingAccounts,
+        fetchBillingAccountLoading: false,
+        billingAccountFetched: true,
+      });
       window.dispatchEvent(new Event('billing-accounts-loaded'));
     }
+
     async requestBillingScopeThenFetchBillingAccount() {
       if (!this.state.billingAccountFetched) {
         await ensureBillingScope();
