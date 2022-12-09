@@ -83,17 +83,21 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private void deleteAllOwnedWorkspaces(String username) {
     List<WorkspaceResponse> workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
-        String.format("Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
+        String.format(
+            "Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
 
     // only delete this many workspaces per user; remove after we gain confidence with this tool
     int tempLimit = 5;
 
-    workspaces.stream().limit(tempLimit).forEach(
-        workspace ->
-            impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
+    workspaces.stream()
+        .limit(tempLimit)
+        .forEach(
+            workspace ->
+                impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
 
     workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
-        String.format("After deletions, test user %s now owns %d workspaces", username, workspaces.size()));
+        String.format(
+            "After deletions, test user %s now owns %d workspaces", username, workspaces.size()));
   }
 }
