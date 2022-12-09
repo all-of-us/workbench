@@ -503,15 +503,15 @@ export const WorkspaceEdit = fp.flow(
     async fetchBillingAccounts() {
       this.setState({ fetchBillingAccountLoading: true });
       let formattedBillingAccounts = [];
-      this.getFormattedBillingAccounts().then(
-        (billingAccounts) => (formattedBillingAccounts = billingAccounts)
-      );
+      await this.getFormattedBillingAccounts().then((billingAccounts) => {
+        formattedBillingAccounts = billingAccounts;
+      });
 
       if (
         this.isMode(WorkspaceEditMode.Create) ||
         this.isMode(WorkspaceEditMode.Duplicate)
       ) {
-        const maybeFreeTierAccount = await formattedBillingAccounts.find(
+        const maybeFreeTierAccount = formattedBillingAccounts.find(
           (billingAccount) => billingAccount.isFreeTier
         );
         if (maybeFreeTierAccount) {
@@ -524,7 +524,7 @@ export const WorkspaceEdit = fp.flow(
           );
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        getBillingAccountInfo(this.props.workspace.googleProject)
+        await getBillingAccountInfo(this.props.workspace.googleProject)
           .then((fetchedBillingInfo) => {
             if (
               !formattedBillingAccounts.find(

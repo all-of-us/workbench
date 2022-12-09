@@ -9,6 +9,7 @@ import {
 
 import { FlexColumn } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
+import { SupportMailto } from 'app/components/support';
 import { AoU, AouTitle } from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
 
@@ -17,10 +18,13 @@ export const toolTipTextDemographic =
   'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
   'education level, or income\n';
 
-export const tooltipTextBillingWarning =
-  'Unfortunately it is not possible to change the billing account for this workspace at this time.  ' +
-  'Please try again later.  If you continue to see this message after 5 minutes after creation, ' +
-  'please contact support.';
+export const tooltipTextBillingWarning = (
+  <div>
+    Unfortunately it is not possible to change the billing account for this
+    workspace at this time. Please try again later. If you continue to see this
+    message after 5 minutes after creation, please contact <SupportMailto />
+  </div>
+);
 
 export const toolTipTextDucc = (
   <div>
