@@ -318,6 +318,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   populationChecked: boolean;
   selectResearchPurpose: boolean;
+  fetchBillingAccountError: boolean;
   fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
@@ -358,6 +359,7 @@ export const WorkspaceEdit = fp.flow(
           ? props.workspace.researchPurpose.populationDetails.length > 0
           : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        fetchBillingAccountError: false,
         fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
@@ -525,6 +527,7 @@ export const WorkspaceEdit = fp.flow(
                   `True value is ${fetchedBillingInfo.billingAccountName}`,
               });
             }
+            this.setState({ billingAccountFetched: true });
           } else {
             // Otherwise, use this as an opportunity to sync the fetched billing account name from
             // the source of truth, Google
@@ -536,19 +539,13 @@ export const WorkspaceEdit = fp.flow(
               )
             );
           }
-          this.setState({ billingAccounts: displayBillingAccounts });
           this.setState({ billingAccountFetched: true });
         } catch (e) {
-          console.log('Whoops');
-          this.setState({
-            billingAccounts: [
-              {
-                name: this.props.workspace.billingAccountName,
-                displayName: 'User Provided Billing Account',
-                isFreeTier: false,
-                isOpen: true,
-              },
-            ],
+          displayBillingAccounts.push({
+            name: this.props.workspace.billingAccountName,
+            displayName: 'User Provided Billing Account',
+            isFreeTier: false,
+            isOpen: true,
           });
           this.setState((prevState) =>
             fp.set(
@@ -557,12 +554,12 @@ export const WorkspaceEdit = fp.flow(
               prevState
             )
           );
+          this.setState({ fetchBillingAccountError: true });
           this.setState({ billingAccountFetched: false });
-        } finally {
-          this.setState({ fetchBillingAccountLoading: false });
         }
       }
-
+      this.setState({ billingAccounts: displayBillingAccounts ?? [] });
+      this.setState({ fetchBillingAccountLoading: false });
       window.dispatchEvent(new Event('billing-accounts-loaded'));
     }
     async requestBillingScopeThenFetchBillingAccount() {
@@ -1271,12 +1268,11 @@ export const WorkspaceEdit = fp.flow(
     }
 
     buildBillingAccountOptions() {
-      const options = this.state.billingAccounts.map((a) => ({
+      return this.state.billingAccounts.map((a) => ({
         label: a.displayName,
         value: a.name,
         disabled: !a.isOpen,
       }));
-      return options;
     }
 
     // are we currently performing a CDR Version Upgrade?
@@ -1657,13 +1653,13 @@ export const WorkspaceEdit = fp.flow(
                           id='billing-dropdown-container'
                           data-test-id='billing-dropdown-div'
                           onClick={() =>
-                            this.state.billingAccountFetched &&
+                            !this.state.fetchBillingAccountError &&
                             this.requestBillingScopeThenFetchBillingAccount()
                           }
                         >
                           <Dropdown
                             data-test-id='billing-dropdown'
-                            disabled={!this.state.billingAccountFetched}
+                            disabled={this.state.fetchBillingAccountError}
                             style={{ width: '20rem' }}
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
@@ -1680,7 +1676,7 @@ export const WorkspaceEdit = fp.flow(
                       </FlexColumn>
                       <FlexColumn>
                         <Button
-                          disabled={!this.state.billingAccountFetched}
+                          disabled={this.state.fetchBillingAccountError}
                           type='primary'
                           style={{
                             marginLeft: '20px',
@@ -1697,7 +1693,7 @@ export const WorkspaceEdit = fp.flow(
                           CREATE BILLING ACCOUNT
                         </Button>
                       </FlexColumn>
-                      {!this.state.billingAccountFetched && (
+                      {this.state.fetchBillingAccountError && (
                         <FlexColumn
                           style={{ alignSelf: 'center', marginLeft: '0.5rem' }}
                         >
