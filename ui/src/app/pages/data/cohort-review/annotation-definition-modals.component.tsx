@@ -260,7 +260,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
         await cohortAnnotationDefinitionApi().deleteCohortAnnotationDefinition(
           ns,
           wsid,
-          cid,
+          parseInt(cid, 10),
           id
         );
         setAnnotationDefinitions(
@@ -298,9 +298,14 @@ export const EditAnnotationDefinitionsModal = withRouter(
             await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
               ns,
               wsid,
-              cid,
+              parseInt(cid, 10),
               editId,
-              { cohortId: cid, columnName: editValue, annotationType, etag }
+              {
+                cohortId: parseInt(cid, 10),
+                columnName: editValue,
+                annotationType,
+                etag,
+              }
             );
           setAnnotationDefinitions(
             annotationDefinitions.map((oldDef) => {
