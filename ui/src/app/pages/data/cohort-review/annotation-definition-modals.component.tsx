@@ -19,6 +19,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { cohortAnnotationDefinitionApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -252,7 +253,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
           this.props;
         const {
           params: { ns, wsid, cid },
-        } = matchPath(location.pathname, {
+        } = matchPath<MatchParams>(location.pathname, {
           path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews/:crid',
         });
         this.setState({ busy: true });
@@ -280,7 +281,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
         const { annotationDefinitions, setAnnotationDefinitions } = this.props;
         const {
           params: { ns, wsid, cid },
-        } = matchPath(location.pathname, {
+        } = matchPath<MatchParams>(location.pathname, {
           path: '/workspaces/:ns/:wsid/data/cohorts/:cid/reviews',
         });
         const { editId, editValue } = this.state;
