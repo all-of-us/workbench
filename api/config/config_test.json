@@ -174,7 +174,7 @@
       "puppet-access-tester-1@fake-research-aou.org",
       "puppeteer-admin-1@fake-research-aou.org",
       "puppeteer-egress-1@fake-research-aou.org",
-      "RAS_TEST_USER=puppeteer-tester-3@fake-research-aou.org"
+      "puppeteer-tester-3@fake-research-aou.org"
     ]
   }
 }
