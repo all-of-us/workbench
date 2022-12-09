@@ -62,7 +62,7 @@ export const CreateModal = ({
   }, []);
 
   const nameConflictMsg = `A ${entityName.toLowerCase()} with this name already exists. Please choose a different name.`;
-  const invalidNameInput = nameTouched && (!name || !name.trim());
+  const invalidNameInput = nameTouched && !name?.trim();
   const nameConflict = !!name && existingNames.includes(name.trim());
   const inputErrorMsg = invalidNameInput
     ? `${entityName} name is required`
