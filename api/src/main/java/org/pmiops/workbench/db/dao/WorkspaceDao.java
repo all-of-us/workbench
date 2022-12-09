@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -81,6 +82,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
       @Param("status") short status);
 
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
+
+  default List<DbWorkspace> findActiveByFirecloudUuidIn(Collection<String> firecloudUuids) {
+    return findAllByFirecloudUuidIn(firecloudUuids).stream()
+        .filter(DbWorkspace::isActive)
+        .collect(Collectors.toList());
+  }
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 

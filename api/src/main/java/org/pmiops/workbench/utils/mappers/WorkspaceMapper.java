@@ -2,10 +2,14 @@ package org.pmiops.workbench.utils.mappers;
 
 import static org.mapstruct.NullValuePropertyMappingStrategy.SET_TO_DEFAULT;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
@@ -66,6 +70,27 @@ public interface WorkspaceMapper {
         toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
         firecloudWorkspaceResponse.getAccessLevel());
   };
+
+  default List<WorkspaceResponse> toApiWorkspaceResponses(
+      WorkspaceDao workspaceDao, List<FirecloudWorkspaceResponse> workspaces) {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid =
+        workspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                    fcWorkspace -> fcWorkspace));
+
+    List<DbWorkspace> dbWorkspaces =
+        workspaceDao.findActiveByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
+    return dbWorkspaces.stream()
+        .map(
+            dbWorkspace ->
+                toApiWorkspaceResponse(
+                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
+        .collect(Collectors.toList());
+  }
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
