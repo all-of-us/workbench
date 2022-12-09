@@ -130,43 +130,24 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
-    return getWorkspacesAndPublicWorkspaces().stream()
-        .filter(
-            workspaceResponse ->
-                workspaceResponse.getAccessLevel() == WorkspaceAccessLevel.OWNER
-                    || workspaceResponse.getAccessLevel() == WorkspaceAccessLevel.WRITER
-                    || !workspaceResponse.getWorkspace().getPublished())
+    return workspaceMapper.toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+        .stream()
+        .filter(WorkspaceServiceImpl::filterToNonPublished)
         .collect(Collectors.toList());
+  }
+
+  private static boolean filterToNonPublished(WorkspaceResponse response) {
+    return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
+        || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
+        || !response.getWorkspace().getPublished();
   }
 
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return getWorkspacesAndPublicWorkspaces().stream()
+    return workspaceMapper.toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+        .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getPublished())
         .collect(Collectors.toList());
-  }
-
-  private List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
-    Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid = getFirecloudWorkspaces();
-    List<DbWorkspace> dbWorkspaces =
-        workspaceDao.findAllByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
-    return dbWorkspaces.stream()
-        .filter(DbWorkspace::isActive)
-        .map(
-            dbWorkspace ->
-                workspaceMapper.toApiWorkspaceResponse(
-                    dbWorkspace, fcWorkspacesByUuid.get(dbWorkspace.getFirecloudUuid())))
-        .collect(Collectors.toList());
-  }
-
-  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
-    // fields must include at least "workspace.workspaceId", otherwise
-    // the map creation will fail
-    return fireCloudService.getWorkspaces().stream()
-        .collect(
-            Collectors.toMap(
-                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
   }
 
   @Transactional
@@ -210,8 +191,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
+    dbWorkspace =
+        workspaceDao.saveWithLastModified(
+            dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
+            userProvider.get());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {
