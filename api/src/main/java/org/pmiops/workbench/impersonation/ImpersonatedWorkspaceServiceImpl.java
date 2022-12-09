@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -35,7 +34,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   private final BillingProjectAuditor billingProjectAuditor;
   private final FireCloudService firecloudService;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
-  private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceDao workspaceDao;
@@ -46,7 +44,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       BillingProjectAuditor billingProjectAuditor,
       FireCloudService firecloudService,
       ImpersonatedFirecloudService impersonatedFirecloudService,
-      Provider<DbUser> userProvider,
       UserDao userDao,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceDao workspaceDao,
@@ -54,7 +51,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     this.billingProjectAuditor = billingProjectAuditor;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
-    this.userProvider = userProvider;
     this.userDao = userDao;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceDao = workspaceDao;
@@ -95,11 +91,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       throw new ServerErrorException(e);
     }
 
-    dbWorkspace =
-        workspaceDao.saveWithLastModified(
-            dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED),
-            userProvider.get());
-    workspaceAuditor.fireDeleteAction(dbWorkspace);
+    workspaceDao.saveWithLastModified(
+        dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED), dbUser);
 
     try {
       // use the real FirecloudService here because impersonation is not needed;
