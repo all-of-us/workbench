@@ -17,6 +17,9 @@ export const toolTipTextDemographic =
   'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
   'education level, or income\n';
 
+export const tooltipTextBillingWarning =
+  'Unable to fecth billing information. If you would like to modify your billing account, please try again later.';
+
 export const toolTipTextDucc = (
   <div>
     These steps include, but are not limited to:

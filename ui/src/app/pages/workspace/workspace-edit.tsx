@@ -22,7 +22,7 @@ import {
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { InfoIcon } from 'app/components/icons';
+import { InfoIcon, WarningIcon } from 'app/components/icons';
 import {
   CheckBox,
   RadioButton,
@@ -55,6 +55,7 @@ import {
   SpecificPopulationItem,
   SpecificPopulationItems,
   toolTipText,
+  tooltipTextBillingWarning,
   toolTipTextDemographic,
   toolTipTextDucc,
   toolTipTextStigmatization,
@@ -482,65 +483,88 @@ export const WorkspaceEdit = fp.flow(
           );
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        const fetchedBillingInfo = await getBillingAccountInfo(
-          this.props.workspace.googleProject
-        );
-        if (
-          !displayBillingAccounts.find(
-            (billingAccount) =>
-              billingAccount.name === fetchedBillingInfo.billingAccountName
-          )
-        ) {
-          // If the user has owner access on the workspace but does not have access to the billing account
-          // that it is attached to, keep the server's current value for billingAccountName and add a shim
-          // entry into billingAccounts so the dropdown entry is not empty.
-          //
-          // The server will not perform an updateBillingInfo call if the received billingAccountName
-          // is the same as what is currently stored.
-          //
-          // This can happen if a workspace is shared to another researcher as an owner.
-          displayBillingAccounts.push({
-            name: this.props.workspace.billingAccountName,
-            displayName: 'User Provided Billing Account',
-            isFreeTier: false,
-            isOpen: true,
-          });
-
+        try {
+          const fetchedBillingInfo = await getBillingAccountInfo(
+            this.props.workspace.googleProject
+          );
           if (
-            fetchedBillingInfo.billingAccountName !==
-            this.props.workspace.billingAccountName
+            !displayBillingAccounts.find(
+              (billingAccount) =>
+                billingAccount.name === fetchedBillingInfo.billingAccountName
+            )
           ) {
-            // This should never happen but it means the database is out of sync with Google
-            // and does not have the correct billing account stored.
-            // We cannot send over the correct billing account info since the current user
-            // does not have permissions to set it.
-
-            reportError({
-              name: 'Out of date billing account name',
-              message:
-                `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
-                `Stored value is ${this.props.workspace.billingAccountName}. ` +
-                `True value is ${fetchedBillingInfo.billingAccountName}`,
+            // If the user has owner access on the workspace but does not have access to the billing account
+            // that it is attached to, keep the server's current value for billingAccountName and add a shim
+            // entry into billingAccounts so the dropdown entry is not empty.
+            //
+            // The server will not perform an updateBillingInfo call if the received billingAccountName
+            // is the same as what is currently stored.
+            //
+            // This can happen if a workspace is shared to another researcher as an owner.
+            displayBillingAccounts.push({
+              name: this.props.workspace.billingAccountName,
+              displayName: 'User Provided Billing Account',
+              isFreeTier: false,
+              isOpen: true,
             });
+
+            if (
+              fetchedBillingInfo.billingAccountName !==
+              this.props.workspace.billingAccountName
+            ) {
+              // This should never happen but it means the database is out of sync with Google
+              // and does not have the correct billing account stored.
+              // We cannot send over the correct billing account info since the current user
+              // does not have permissions to set it.
+
+              reportError({
+                name: 'Out of date billing account name',
+                message:
+                  `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+                  `Stored value is ${this.props.workspace.billingAccountName}. ` +
+                  `True value is ${fetchedBillingInfo.billingAccountName}`,
+              });
+            }
+          } else {
+            // Otherwise, use this as an opportunity to sync the fetched billing account name from
+            // the source of truth, Google
+            this.setState((prevState) =>
+              fp.set(
+                ['workspace', 'billingAccountName'],
+                fetchedBillingInfo.billingAccountName,
+                prevState
+              )
+            );
           }
-        } else {
-          // Otherwise, use this as an opportunity to sync the fetched billing account name from
-          // the source of truth, Google
+          this.setState({ billingAccounts: displayBillingAccounts });
+          this.setState({ billingAccountFetched: true });
+        } catch (e) {
+          console.log('Whoops');
+          this.setState({
+            billingAccounts: [
+              {
+                name: this.props.workspace.billingAccountName,
+                displayName: 'User Provided Billing Account',
+                isFreeTier: false,
+                isOpen: true,
+              },
+            ],
+          });
           this.setState((prevState) =>
             fp.set(
               ['workspace', 'billingAccountName'],
-              fetchedBillingInfo.billingAccountName,
+              this.props.workspace.billingAccountName,
               prevState
             )
           );
+          this.setState({ billingAccountFetched: false });
+        } finally {
+          this.setState({ fetchBillingAccountLoading: false });
         }
       }
-      this.setState({ billingAccounts: displayBillingAccounts });
-      this.setState({ fetchBillingAccountLoading: false });
-      this.setState({ billingAccountFetched: true });
+
       window.dispatchEvent(new Event('billing-accounts-loaded'));
     }
-
     async requestBillingScopeThenFetchBillingAccount() {
       if (!this.state.billingAccountFetched) {
         await ensureBillingScope();
@@ -1633,11 +1657,13 @@ export const WorkspaceEdit = fp.flow(
                           id='billing-dropdown-container'
                           data-test-id='billing-dropdown-div'
                           onClick={() =>
+                            this.state.billingAccountFetched &&
                             this.requestBillingScopeThenFetchBillingAccount()
                           }
                         >
                           <Dropdown
                             data-test-id='billing-dropdown'
+                            disabled={!this.state.billingAccountFetched}
                             style={{ width: '20rem' }}
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
@@ -1654,6 +1680,7 @@ export const WorkspaceEdit = fp.flow(
                       </FlexColumn>
                       <FlexColumn>
                         <Button
+                          disabled={!this.state.billingAccountFetched}
                           type='primary'
                           style={{
                             marginLeft: '20px',
@@ -1670,6 +1697,15 @@ export const WorkspaceEdit = fp.flow(
                           CREATE BILLING ACCOUNT
                         </Button>
                       </FlexColumn>
+                      {!this.state.billingAccountFetched && (
+                        <FlexColumn
+                          style={{ alignSelf: 'center', marginLeft: '0.5rem' }}
+                        >
+                          <TooltipTrigger content={tooltipTextBillingWarning}>
+                            <WarningIcon style={styles.infoIcon} />
+                          </TooltipTrigger>
+                        </FlexColumn>
+                      )}
                     </FlexRow>
                   </div>
                 )}
