@@ -59,9 +59,17 @@ export const AppsPanel = (props: {
   const appsToDisplay = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
 
   const appStates = [
-    { appType: UIAppType.JUPYTER, shouldExpand: isVisible(runtime?.status) },
+    {
+      appType: UIAppType.JUPYTER,
+      expandable: true,
+      shouldExpandByDefault: isVisible(runtime?.status),
+    },
     // RStudio is not implemented yet, so we don't expand it
-    { appType: UIAppType.RSTUDIO, shouldExpand: false },
+    {
+      appType: UIAppType.RSTUDIO,
+      expandable: false,
+      shouldExpandByDefault: false,
+    },
   ];
 
   // which app(s) have the user explicitly expanded by clicking?
@@ -73,7 +81,7 @@ export const AppsPanel = (props: {
   // all will be shown in expanded mode
   const showInActiveSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    appStates.find((s) => s.appType === appType)?.shouldExpand;
+    appStates.find((s) => s.appType === appType)?.shouldExpandByDefault;
   const showActiveSection = appsToDisplay.some(showInActiveSection);
 
   // show apps that have shouldExpand = false in the Available section
@@ -81,7 +89,7 @@ export const AppsPanel = (props: {
   // BUT some of these may be userExpandedApps, which are shown in Expanded mode
   const showInAvailableSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    !appStates.find((s) => s.appType === appType)?.shouldExpand;
+    !appStates.find((s) => s.appType === appType)?.shouldExpandByDefault;
   const showAvailableSection = appsToDisplay.some(showInAvailableSection);
 
   const ActiveApps = (sectionProps: { showCloseButtonHere: boolean }) => (
@@ -118,7 +126,10 @@ export const AppsPanel = (props: {
             <UnexpandedApp
               {...{ appType }}
               key={appType}
-              onClick={() => addToExpandedApps(appType)}
+              onClick={() =>
+                appStates.find((s) => s.appType === appType)?.expandable &&
+                addToExpandedApps(appType)
+              }
             />
           ))
       )}
