@@ -460,47 +460,48 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                                     style={styles.subMenuIcon}
                                     className='pi pi-sort-down'
                                   />
-                                  {hoverId === `${index}-${m}` && subMenuOpen && (
-                                    <ul style={styles.subMenu}>
-                                      {menuItem.children?.map(
-                                        (subMenuItem, s) => (
-                                          <li>
-                                            <a
-                                              role='menuitem'
-                                              key={s}
-                                              style={{
-                                                ...styles.subMenuItem,
-                                                ...(subHoverId ===
-                                                `${index}-${m}-${s}`
-                                                  ? {
-                                                      background:
-                                                        colorWithWhiteness(
-                                                          colors.light,
-                                                          0.5
-                                                        ),
-                                                    }
-                                                  : {}),
-                                              }}
-                                              onMouseEnter={() =>
-                                                setSubHoverId(
+                                  {hoverId === `${index}-${m}` &&
+                                    subMenuOpen && (
+                                      <ul style={styles.subMenu}>
+                                        {menuItem.children?.map(
+                                          (subMenuItem, s) => (
+                                            <li>
+                                              <a
+                                                role='menuitem'
+                                                key={s}
+                                                style={{
+                                                  ...styles.subMenuItem,
+                                                  ...(subHoverId ===
                                                   `${index}-${m}-${s}`
-                                                )
-                                              }
-                                              onMouseLeave={() => {
-                                                setSubHoverId(null);
-                                              }}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                onMenuItemClick(subMenuItem);
-                                              }}
-                                            >
-                                              {subMenuItem.name}
-                                            </a>
-                                          </li>
-                                        )
-                                      )}
-                                    </ul>
-                                  )}
+                                                    ? {
+                                                        background:
+                                                          colorWithWhiteness(
+                                                            colors.light,
+                                                            0.5
+                                                          ),
+                                                      }
+                                                    : {}),
+                                                }}
+                                                onMouseEnter={() =>
+                                                  setSubHoverId(
+                                                    `${index}-${m}-${s}`
+                                                  )
+                                                }
+                                                onMouseLeave={() => {
+                                                  setSubHoverId(null);
+                                                }}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  onMenuItemClick(subMenuItem);
+                                                }}
+                                              >
+                                                {subMenuItem.name}
+                                              </a>
+                                            </li>
+                                          )
+                                        )}
+                                      </ul>
+                                    )}
                                 </React.Fragment>
                               )}
                             </li>
