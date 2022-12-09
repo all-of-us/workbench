@@ -1,13 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import {
-  CdrVersionTiersResponse,
-  CohortDefinition,
-  CriteriaMenu,
-  Domain,
-  Workspace,
-} from 'generated/fetch';
+import { CohortDefinition, CriteriaMenu, Domain } from 'generated/fetch';
 
 import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
 import { SearchGroup } from 'app/cohort-search/search-group/search-group.component';
@@ -22,11 +16,9 @@ import {
 } from 'app/cohort-search/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { cdrVersionStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -105,14 +97,6 @@ function mapMenuItem(item: CriteriaMenu) {
   };
 }
 
-export const notSynthAndHasSurveyConductData = (workspace: Workspace) => {
-  const { hasSurveyConductData, name } = getCdrVersion(
-    workspace,
-    cdrVersionStore.get() as CdrVersionTiersResponse
-  );
-  return !name.includes('Synthetic') && hasSurveyConductData;
-};
-
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
@@ -120,17 +104,13 @@ interface Props {
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
   criteriaMenuOptions: Array<any>;
   index: number;
 }
-const SearchGroupList = fp.flow(
-  withCurrentWorkspace(),
-  withCdrVersions()
-)(
+const SearchGroupList = fp.flow(withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private subscription: Subscription;
     constructor(props: Props) {
@@ -166,7 +146,6 @@ const SearchGroupList = fp.flow(
 
     getMenuOptions() {
       const {
-        workspace,
         workspace: { cdrVersionId, id, namespace },
       } = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
@@ -182,23 +161,7 @@ const SearchGroupList = fp.flow(
                   id,
                   option.id
                 );
-                const filterSurveyConductData =
-                  option.domain === Domain.SURVEY.toString() &&
-                  notSynthAndHasSurveyConductData(workspace);
-                // Survey items to hide if hasSurveyConductData cdr flag is enabled
-                const surveyConductMenuItems = [
-                  'Personal Medical History',
-                  'Family History',
-                  'Personal and Family Health History',
-                ];
-                // TODO Remove filter after fix for survey conduct data in new dataset is complete
-                option.children = children.items
-                  .filter(
-                    ({ name }) =>
-                      !filterSurveyConductData ||
-                      !surveyConductMenuItems.includes(name)
-                  )
-                  .map(mapMenuItem);
+                option.children = children.items.map(mapMenuItem);
               }
               return option;
             })
