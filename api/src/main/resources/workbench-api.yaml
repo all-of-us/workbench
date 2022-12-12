@@ -9017,6 +9017,24 @@ definitions:
         description: number of subjects
         type: integer
         format: int64
+      domain:
+        description: domain name, if present
+        type: string
+      conceptName:
+        description: concept name, if present
+        type: string
+      conceptId:
+        description: concept id, if present
+        type: integer
+        format: int64
+      numConceptsCoOccur:
+        description: number of top N ranked concepts that co-occur for a subject, if present
+        type: integer
+        format: int64
+      conceptRank:
+        description: top rank of concept if present
+        type: integer
+        format: int64
   ParticipantDemographics:
     type: object
     required:
