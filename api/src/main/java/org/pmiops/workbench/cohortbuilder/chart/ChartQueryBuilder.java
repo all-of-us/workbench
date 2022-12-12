@@ -8,6 +8,7 @@ import java.util.Set;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.QueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.GenderOrSexType;
@@ -99,7 +100,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   private static final String WITH_TMP_DEMO_SQL =
       "WITH "
           + TBL_TMP_DEMO
-          + " AS"
+          + " AS \n"
           + "(\n"
           + "select person_id,\n"
           + "       gender,\n"
@@ -118,10 +119,48 @@ public class ChartQueryBuilder extends QueryBuilder {
           + AGE_BIN_SIZE_PARAM
           + ") - 1 as int64)) as age_bin \n"
           + " from `${projectId}.${dataSetId}.cb_search_person`\n"
-          + " where person_id in (@COHORT_PIDS_SQL@) \n" // "" where person_id in (@PERSON_IDS_SQL@)
-          // "
+          + " where person_id in (@COHORT_PIDS_SQL@) \n"
           + ")\n";
 
+  private static final String TBL_TMP_TOP_N = "top_10";
+
+  private static final String WITH_TEMP_TOP_N_SQL =
+      TBL_TMP_TOP_N
+          + " AS \n"
+          + "(SELECT\n"
+          + "       standard_name ,\n"
+          + "       standard_concept_id ,\n"
+          + "       COUNT(DISTINCT person_id) as count,\n"
+          + "       row_number() over (order by COUNT(DISTINCT person_id) desc) as concept_rank\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events` \n"
+          + "JOIN cohort_ids using (person_id)\n"
+          + "WHERE\n"
+          + "domain = @"
+          + DOMAIN_PARAM
+          + "\n"
+          + "AND standard_concept_id != 0\n"
+          + "GROUP BY standard_name, standard_concept_id\n"
+          + "ORDER BY count DESC, standard_name ASC\n"
+          + "LIMIT @"
+          + LIMIT
+          + "\n"
+          + ")";
+
+  private static final String TBL_TMP_TOP_N_CO_OCCUR = "top_10_co_occur";
+  // replace %s,$s with domain_table and domain_table-concept_id column name
+  // example condition_occurrence, condition_concept_id
+  private static final String WITH_TEMP_TOP_N_CO_OCCUR =
+      TBL_TMP_TOP_N_CO_OCCUR
+          + " AS\n"
+          + "(SELECT\n"
+          + "       person_id,\n"
+          + "       COUNT(distinct condition_concept_id) as n_concept_co_occur\n"
+          + "FROM `${projectId}.${dataSetId}.%s `\n"
+          + "JOIN cohort_ids using (person_id)\n"
+          + "join top_10 on top_10.standard_concept_id=%s\n"
+          + "GROUP BY 1\n"
+          + "order by 2 desc\n"
+          + ")";
   private static final String NEW_CHART_DEMO_SQL =
       " select gender,\n"
           + "       sex_at_birth as sexAtBirth,\n"
@@ -129,12 +168,37 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "       ethnicity,\n"
           + "       age_bin as ageBin,\n"
           + "       count(distinct person_id) as count,\n"
-          + "       safe_divide(count(distinct person_id), sum(count(distinct person_id)) over ()) as fract\n"
+         // + "       safe_divide(count(distinct person_id), sum(count(distinct person_id)) over ()) as fract\n"
           + "FROM "
           + TBL_TMP_DEMO
           + " \n"
-          + "group by 1,2,3,4,5\n"
-          + "order by 1,2,3,4,5\n";
+          + "group by 1,2,3,4,5\n";
+
+  private static final String NEW_CHART_DOMAIN_SQL =
+      "\n"
+          + "SELECT\n"
+          + "      gender,\n"
+          + "      sex_at_birth,\n"
+          + "      race,\n"
+          + "      ethnicity,\n"
+          + "      age_bin as ageBin,\n"
+          + "      cb.domain as domain,\n"
+          + "      cb.standard_name as conceptName,\n"
+          + "      cb.standard_concept_id as conceptId,\n"
+          + "      concept_rank as conceptRank\n"
+          + "      n_concept_co_occur as numConceptsCoOccur\n"
+          + "      COUNT(DISTINCT cb.person_id) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events` cb\n"
+          + "join "
+          + TBL_TMP_TOP_N
+          + " using (standard_concept_id)\n"
+          + "JOIN "
+          + TBL_TMP_DEMO
+          + " using (person_id)\n"
+          + "JOIN "
+          + TBL_TMP_TOP_N_CO_OCCUR
+          + " using(person_id)\n"
+          + "group by 1,2,3,4,5,6,7,8,9,10\n";
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -208,7 +272,6 @@ public class ChartQueryBuilder extends QueryBuilder {
         .setUseLegacySql(false)
         .build();
   }
-
   /**
    * Provides counts with domain info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -266,21 +329,36 @@ public class ChartQueryBuilder extends QueryBuilder {
   public QueryJobConfiguration buildNewChartDataQuery(
       ParticipantCriteria participantCriteria, Domain domain) {
     Map<String, QueryParameterValue> params = new HashMap<>();
-    // 1. build cohorort pids SQL
+    // 1. build cohort pids SQL
     StringBuilder queryBuilder = new StringBuilder(COHORT_PIDS_SQL);
     addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
     addDataFilters(
         participantCriteria.getCohortDefinition().getDataFilters(), queryBuilder, params);
-    String sqlWherePids = queryBuilder.toString();
-    // replace in new chart sql
-    String demoSql =
-        WITH_TMP_DEMO_SQL.replace("@COHORT_PIDS_SQL@", sqlWherePids)
-            + NEW_CHART_DEMO_SQL;
-
-    int ageBin = 10;
+    // 2.build temp demographics table from cohort_pids sql - no grouping is done
+    String sqlPartWithDemo =
+        WITH_TMP_DEMO_SQL.replace("@COHORT_PIDS_SQL@", queryBuilder.toString());
+    int ageBin = 10; // maybe get it from input?
     params.put(AGE_BIN_SIZE_PARAM, QueryParameterValue.int64(ageBin));
 
-    return QueryJobConfiguration.newBuilder(demoSql)
+    StringBuilder chartSql = new StringBuilder();
+    if (domain == null) {
+      // 3. For demographics chart: append sql for grouping using tables in WITH
+      chartSql.append(sqlPartWithDemo).append(NEW_CHART_DEMO_SQL);
+    } else {
+      // if domain then to sqlPartWithDemo append as temp tables:
+      // 3. sql for top 10 concepts for domain
+      // 3a. if domain is condition: sql for count of n-distinct-top10-concepts per person-id
+      // 4. append grouping sql for chart
+      throw new NotImplementedException("Not yet for domain...");
+    }
+
+    System.out.println("*******DEMO counts SQL******");
+    System.out.println(chartSql.toString());
+    System.out.println("*******DEMO counts SQL - params******");
+    System.out.println(params);
+    System.out.println("*******DEMO counts SQL and params******");
+
+    return QueryJobConfiguration.newBuilder(chartSql.toString())
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();

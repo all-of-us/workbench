@@ -25,6 +25,7 @@ import { reactStyles } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import { parseQueryParams } from './app-router';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 
 const css = `
@@ -119,12 +120,15 @@ export const DemoChart = fp.flow(withRouter)(
       // call ot get cohort
       // const cohortDefinition = await this.getCohort();
       // all api to get chart data
-      const { ns, wsid, cid } = this.props.match.params;
+      const { ns, wsid } = this.props.match.params;
+      const cid = parseQueryParams(this.props.location.search).get('cohortId');
+      const domain = parseQueryParams(this.props.location.search).get('domain');
+
       const newChartData = await chartBuilderApi().getChartData(
         ns,
         wsid,
         +cid,
-        null
+        domain
       );
       this.setState({
         newChartData: newChartData.items,

@@ -100,6 +100,13 @@ public interface CohortBuilderMapper {
     FieldValues.getString(row, "ethnicity").ifPresent(data::setEthnicity);
     FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
     FieldValues.getLong(row, "count").ifPresent(data::setCount);
+    if (row.stream().count() > 6) {
+      FieldValues.getString(row, "domain").ifPresent(data::setDomain);
+      FieldValues.getString(row, "conceptName").ifPresent(data::setConceptName);
+      FieldValues.getLong(row, "conceptId").ifPresent(data::setConceptId);
+      FieldValues.getLong(row, "conceptRank").ifPresent(data::setConceptRank);
+      FieldValues.getLong(row, "numConceptsCoOccur").ifPresent(data::setNumConceptsCoOccur);
+    }
     return data;
   }
 
