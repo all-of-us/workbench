@@ -4165,6 +4165,41 @@ paths:
       responses:
         200:
           description: 'The survey responses were successfully stored.'
+  "/v1/surveys/newUserSatisfactionSurvey/validateOneTimeCode/{oneTimeCode}":
+    get:
+      security: []
+      tags:
+      - surveys
+      description: Checks if a given one-time can be used to create a new user satisfaction survey response.
+      operationId: validateOneTimeCodeForNewUserSatisfactionSurvey
+      parameters:
+        - in: path
+          name: oneTimeCode
+          type: string
+          required: true
+          description: the one-time code being validated
+      responses:
+        200:
+          description: 'The server successfully determined if the one-time code is valid.'
+          schema:
+            type: boolean
+  "/v1/surveys/newUserSatisfactionSurvey/withOneTimeCode":
+    post:
+      security: []
+      tags:
+      - surveys
+      description: Stores user responses for the new user satisfaction survey if they have a valid one-time code.
+      operationId: createNewUserSatisfactionSurveyWithOneTimeCode
+      parameters:
+      - in: body
+        name: NewUserSatisfactionSurveyWithOneTimeCode
+        description: Survey response data and the one-time code
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateNewUserSatisfactionSurveyWithOneTimeCode"
+      responses:
+        200:
+          description: 'The survey responses were successfully stored.'
 definitions:
   ArchivalStatus:
     type: string
@@ -10263,6 +10298,15 @@ definitions:
       - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
       - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER
+
+  CreateNewUserSatisfactionSurveyWithOneTimeCode:
+    type: object
+    properties:
+      createNewUserSatisfactionSurvey:
+        "$ref": "#/definitions/CreateNewUserSatisfactionSurvey"
+      oneTimeCode:
+        type: string
+        description: One-time code for creating this survey response.
 
   CreateNewUserSatisfactionSurvey:
     type: object

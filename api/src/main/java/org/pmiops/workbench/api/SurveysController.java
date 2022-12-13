@@ -6,6 +6,8 @@ import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
+import org.pmiops.workbench.model.CreateNewUserSatisfactionSurveyWithOneTimeCode;
+import org.pmiops.workbench.survey.InvalidOneTimeCodeException;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyMapper;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,25 @@ public class SurveysController implements SurveysApiDelegate {
         newUserSatisfactionSurveyMapper.toDbNewUserSatisfactionSurvey(
             createNewUserSatisfactionSurvey, user);
     newUserSatisfactionSurvey = newUserSatisfactionSurveyDao.save(newUserSatisfactionSurvey);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Boolean> validateOneTimeCodeForNewUserSatisfactionSurvey(
+      String oneTimeCode) {
+    return ResponseEntity.ok(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode));
+  }
+
+  @Override
+  public ResponseEntity<Void> createNewUserSatisfactionSurveyWithOneTimeCode(
+      CreateNewUserSatisfactionSurveyWithOneTimeCode newUserSatisfactionSurveyWithOneTimeCode) {
+    try {
+      newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
+          newUserSatisfactionSurveyWithOneTimeCode.getCreateNewUserSatisfactionSurvey(),
+          newUserSatisfactionSurveyWithOneTimeCode.getOneTimeCode());
+    } catch (InvalidOneTimeCodeException e) {
+      throw new BadRequestException("The provided code is invalid.");
+    }
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

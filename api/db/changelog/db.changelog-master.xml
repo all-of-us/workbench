@@ -217,6 +217,7 @@
   <include file="changelog/db.changelog-207-cdr-version-hasFitbitSleep-hasSurveyConduct-field.xml"/>
   <include file="changelog/db.changelog-208-add-new-user-satisfaction-survey.xml"/>
   <include file="changelog/db.changelog-209-drop-admin-action-history-table.xml"/>
+  <include file="changelog/db.changelog-210-add-one-time-code.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
