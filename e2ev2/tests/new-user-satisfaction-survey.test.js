@@ -10,19 +10,12 @@ browserTest('take the new user satisfaction survey via the relevant notification
   await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
 
   const surveyNotification = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-notification"]');
-  const launchSurveyButton = await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]');
-  await launchSurveyButton.click();
+  await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]').then(b => b.click());
 
   let surveyModal = await page.waitForSelector('[aria-modal="true"]');
-
-  const verySatisfiedButton = await surveyModal.waitForSelector('[value="VERY_SATISFIED"]');
-  await verySatisfiedButton.click();
-
-  const additionalInfoInput = await surveyModal.waitForSelector('#new-user-satisfaction-survey-additional-info');
-  await additionalInfoInput.type('I love the workbench!');
-
-  const submitButton = await surveyModal.waitForSelector('[aria-label="submit"]');
-  await submitButton.click();
+  await surveyModal.waitForSelector('[value="VERY_SATISFIED"]').then(b => b.click());
+  await surveyModal.waitForSelector('#new-user-satisfaction-survey-additional-info').then(i => i.type('I love the workbench!'));
+  await surveyModal.waitForSelector('[aria-label="submit"]').then(b => b.click());
 
   // wait for the submit request to succeed
   await new Promise((r) => setTimeout(r, 100));
