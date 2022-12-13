@@ -159,6 +159,9 @@ export const NewUserSatisfactionSurveyModal = ({
                   );
                   setSubmittingRequest(false);
                   setError(false);
+                  window.dispatchEvent(
+                    new Event('new-user-satisfaction-survey-submitted')
+                  );
                   onSubmitSuccess();
                 } catch {
                   setSubmittingRequest(false);

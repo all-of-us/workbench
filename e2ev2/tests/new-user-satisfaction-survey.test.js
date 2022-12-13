@@ -15,10 +15,10 @@ browserTest('take the new user satisfaction survey via the relevant notification
   let surveyModal = await page.waitForSelector('[aria-modal="true"]');
   await surveyModal.waitForSelector('[value="VERY_SATISFIED"]').then(b => b.click());
   await surveyModal.waitForSelector('#new-user-satisfaction-survey-additional-info').then(i => i.type('I love the workbench!'));
-  await surveyModal.waitForSelector('[aria-label="submit"]').then(b => b.click());
+  const submitButton = await surveyModal.waitForSelector('[aria-label="submit"]');
 
-  // wait for the submit request to succeed
-  await new Promise((r) => setTimeout(r, 100));
+  const [submitEvent] = await tu.promiseWindowEvent(page, 'new-user-satisfaction-survey-submitted');
+  await Promise.all([submitEvent, submitButton.click()]);
 
   surveyModal = await page.$('[aria-modal="true"]');
   expect(surveyModal).toBeNull();
