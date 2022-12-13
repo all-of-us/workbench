@@ -280,8 +280,6 @@ then
           , value_as_concept_id
           , value_source_concept_id
           , survey_version_concept_id
-          , survey_concept_id
-          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -299,13 +297,10 @@ then
       , a.value_as_concept_id
       , a.value_source_concept_id
       , c.survey_version_concept_id
-      , e.survey_concept_id
-      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 else
@@ -328,8 +323,6 @@ else
           , value_as_number
           , value_as_concept_id
           , value_source_concept_id
-          , survey_concept_id
-          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -346,12 +339,9 @@ else
       , a.value_as_number
       , a.value_as_concept_id
       , a.value_source_concept_id
-      , e.survey_concept_id
-      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 fi
