@@ -57,6 +57,7 @@ class NewUserSatisfactionSurveyServiceTest {
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final Timestamp ELIGIBLE_CREATION_TIME =
       Timestamp.from(PROVIDED_CLOCK.instant().minus(3 * 7, ChronoUnit.DAYS));
+  private static final String UI_BASE_URL = "example.com";
   private DbUser user;
 
   private DbOneTimeCode validOneTimeCode() {
@@ -80,6 +81,14 @@ class NewUserSatisfactionSurveyServiceTest {
     @Bean
     Clock clock() {
       return PROVIDED_CLOCK;
+    }
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+      workbenchConfig.server.uiBaseUrl = UI_BASE_URL;
+      return workbenchConfig;
     }
   }
 
@@ -240,5 +249,72 @@ class NewUserSatisfactionSurveyServiceTest {
         () ->
             newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
                 formData, oneTimeCode));
+  }
+
+  @Test
+  public void testEmailNewUserSatisfactionSurveyLinks() throws MessagingException {
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    String oneTimeCodeString = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+    DbOneTimeCode oneTimeCode = validOneTimeCode();
+    oneTimeCode.setId(UUID.fromString(oneTimeCodeString));
+    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+
+    newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
+
+    verify(oneTimeCodeDao).save(oneTimeCodeCaptor.capture());
+    assertThat(oneTimeCodeCaptor.getValue().getUsedTime()).isNull();
+    assertThat(oneTimeCodeCaptor.getValue().getUser()).isEqualTo(user);
+    verify(mailService)
+        .sendNewUserSatisfactionSurveyEmail(user, UI_BASE_URL + "?surveyCode=" + oneTimeCodeString);
+  }
+
+  @Test
+  public void testEmailNewUserSatisfactionSurveyLinks_throwsExceptionWhenMailerFails()
+      throws MessagingException {
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
+    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+
+    doThrow(new MessagingException())
+        .when(mailService)
+        .sendNewUserSatisfactionSurveyEmail(any(), any());
+
+    assertThrows(
+        ServerErrorException.class,
+        () -> newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks());
+  }
+
+  @Test
+  public void testEmailNewUserSatisfactionSurveyLinks_doesNotEmailPreviouslyEmailedUsers()
+      throws MessagingException {
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
+    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+
+    // a code has been created for the user already
+    user.setOneTimeCodes(ImmutableSet.of(validOneTimeCode()));
+
+    newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
+
+    verify(mailService, never()).sendNewUserSatisfactionSurveyEmail(any(), any());
+  }
+
+  @Test
+  public void testEmailNewUserSatisfactionSurveyLinks_doesNotEmailIneligibleUsers()
+      throws MessagingException {
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
+    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+
+    // the user has already taken the survey
+    user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
+
+    newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
+
+    verify(mailService, never()).sendNewUserSatisfactionSurveyEmail(any(), any());
   }
 }

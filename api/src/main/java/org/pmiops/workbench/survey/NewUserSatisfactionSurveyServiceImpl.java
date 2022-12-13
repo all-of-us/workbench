@@ -95,4 +95,27 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
             createNewUserSatisfactionSurvey, dbOneTimeCode.getUser()));
     dbOneTimeCode = oneTimeCodeDao.save(dbOneTimeCode.setUsedTime(Timestamp.from(clock.instant())));
   }
+
+  @Override
+  public void emailNewUserSatisfactionSurveyLinks() {
+    for (DbUser user : userDao.findAll()) {
+      final boolean previouslyEmailedSurvey =
+          user.getOneTimeCodes().stream()
+              .anyMatch((code) -> code.getPurpose() == Purpose.NEW_USER_SATISFACTION_SURVEY);
+      if (!previouslyEmailedSurvey && eligibleToTakeSurvey(user)) {
+        DbOneTimeCode dbOneTimeCode =
+            oneTimeCodeDao.save(
+                new DbOneTimeCode().setUser(user).setPurpose(Purpose.NEW_USER_SATISFACTION_SURVEY));
+        final String surveyLink =
+            String.format(
+                "%s?surveyCode=%s",
+                workbenchConfigProvider.get().server.uiBaseUrl, dbOneTimeCode.getId().toString());
+        try {
+          mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
+        } catch (MessagingException e) {
+          throw new ServerErrorException("Failed to send new user satisfaction survey email", e);
+        }
+      }
+    }
+  }
 }

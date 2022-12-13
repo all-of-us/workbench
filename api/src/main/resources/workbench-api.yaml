@@ -2067,6 +2067,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/emailNewUserSatisfactionSurveyLinks":
+    get:
+      security: []
+      tags:
+      - offlineEmailNewUserSatisfactionSurveyLinks
+      - cron
+      description: Email newly eligible users a link to take the new user satisfaction survey.
+      operationId: emailNewUserSatisfactionSurveyLinks
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:
