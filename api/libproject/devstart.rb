@@ -518,7 +518,7 @@ def create_cdr_indices(cmd_name, *args)
   op.opts.data_browser = false
   op.opts.branch = "main"
   op.add_option(
-    "--branch [--branch]",
+    "--branch [branch]",
     ->(opts, v) { opts.branch = v},
     "Branch. Optional - Default is main."
   )
