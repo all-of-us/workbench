@@ -2,10 +2,7 @@ package org.pmiops.workbench.cohortbuilder.chart;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -129,7 +126,7 @@ public class ChartQueryBuilder extends QueryBuilder {
           + " using (person_id) \n"
           + ")";
 
-  private static final String TBL_TMP_TOP_N = "top_10";
+  private static final String TBL_TMP_TOP_N = "top_n";
 
   private static final String WITH_TEMP_TOP_N_SQL =
       TBL_TMP_TOP_N
@@ -155,7 +152,7 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "\n"
           + ")";
 
-  private static final String TBL_TMP_TOP_N_CO_OCCUR = "top_10_co_occur";
+  private static final String TBL_TMP_TOP_N_CO_OCCUR = "top_n_co_occur";
   // replace %s,$s with domain_table and domain_table-concept_id column name
   // example condition_occurrence, condition_concept_id
   private static final String WITH_TEMP_TOP_N_CO_OCCUR =
@@ -163,12 +160,14 @@ public class ChartQueryBuilder extends QueryBuilder {
           + " AS\n"
           + "(SELECT\n"
           + "       person_id,\n"
-          + "       COUNT(distinct condition_concept_id) as n_concept_co_occur\n"
-          + "FROM `${projectId}.${dataSetId}.%s`\n"
+          + "       COUNT(distinct standard_concept_id) as n_concept_co_occur\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events`\n"
           + "JOIN "
           + TBL_TMP_COHORT_IDS
           + " using (person_id)\n"
-          + "join top_10 on top_10.standard_concept_id=%s\n"
+          + "join "
+          + TBL_TMP_TOP_N
+          + " using(standard_concept_id)\n"
           + "GROUP BY 1\n"
           + "order by 2 desc\n"
           + ")";
@@ -214,13 +213,6 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "group by 1,2,3,4,5,6,7,8,9,10\n"
           + "order by gender, race, ageBin, conceptRank";
 
-  private static final Map<Domain, List<String>> DOMAIN_TBL_NAME_COLUMN_NAME_MAP =
-      new ImmutableMap.Builder<Domain, List<String>>()
-          .put(Domain.CONDITION, ImmutableList.of("condition_occurrence", "condition_concept_id"))
-          .put(Domain.PROCEDURE, ImmutableList.of("procedure_occurrence", "procedure_concept_id"))
-          .put(Domain.LAB, ImmutableList.of("measurement", "measurement_concept_id"))
-          .put(Domain.DRUG, ImmutableList.of("drug_exposure", "drug_concept_id"))
-          .build();
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -378,16 +370,7 @@ public class ChartQueryBuilder extends QueryBuilder {
       params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.toString()));
       params.put(LIMIT, QueryParameterValue.int64(limit));
       // 3a. if domain is condition: sql for count of n-distinct-top10-concepts per person-id
-      if (Domain.CONDITION == domain) {
-        // the sql will need domain table_name and column_name
-        chartSql
-            .append(",\n")
-            .append(
-                String.format(
-                    WITH_TEMP_TOP_N_CO_OCCUR,
-                    DOMAIN_TBL_NAME_COLUMN_NAME_MAP.get(domain).get(0),
-                    DOMAIN_TBL_NAME_COLUMN_NAME_MAP.get(domain).get(1)));
-      }
+      chartSql.append(",\n").append(WITH_TEMP_TOP_N_CO_OCCUR);
       // 4. append grouping sql for chart
       chartSql.append("\n").append(NEW_CHART_DOMAIN_SQL);
     }
