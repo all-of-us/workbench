@@ -9,7 +9,8 @@ export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 export WGV_TABLE=$5         # whole genome variant table
-export ARRAY_TABLE=$6       # array data table
+export LR_WGV_TABLE=$6      # long read whole genome variant table
+export ARRAY_TABLE=$7       # array data table
 
 ################################################
 # insert person data into cb_search_person
@@ -76,6 +77,10 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)"
 else
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
@@ -91,6 +96,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_fitbit
         , has_whole_genome_variant
         , has_array_data
+        , has_lr_whole_genome_variant
     )
 SELECT
       p.person_id
@@ -127,6 +133,10 @@ SELECT
         WHEN a.sample_name is null THEN 0
         ELSE 1
       END has_array_data
+    , CASE
+        WHEN lrw.sample_name is null THEN 0
+        ELSE 1
+      END has_lr_whole_genome_variant
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
@@ -147,8 +157,13 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)
 LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$LR_WGV_TABLE\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
 LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$ARRAY_TABLE\` a on (CAST(p.person_id as STRING) = a.sample_name)"
 fi
 
