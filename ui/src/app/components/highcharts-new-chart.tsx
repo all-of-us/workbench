@@ -1,32 +1,18 @@
 // For DT-32 demonstration plots
-// original file from dolbeew/highcharts-demo -- src/app/components/highcharts-demo.tsx
+// original file from dolbeew/highcharts-demo -- src/app/components/highcharts-new-gallery.tsx
 // 1. create new route - routing - workspace-app-routing.tsx
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
-import * as fp from 'lodash/fp';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import {
-  CdrVersionTiersResponse,
-  ChartData,
-  Cohort,
-  CohortDefinition,
-} from 'generated/fetch';
+import { ChartData } from 'generated/fetch';
 
 import { getChartObj } from 'app/cohort-search/utils';
-import {
-  chartBuilderApi,
-  cohortsApi,
-} from 'app/services/swagger-fetch-clients';
+import { chartBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-import { MatchParams } from 'app/utils/stores';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
-
-import { parseQueryParams } from './app-router';
-import { WithSpinnerOverlayProps } from './with-spinner-overlay';
 
 const css = `
   .stats-left-padding {
@@ -88,26 +74,29 @@ const styles = reactStyles({
     lineHeight: '22px',
   },
 });
-export interface Props
-  extends WithSpinnerOverlayProps,
-    RouteComponentProps<MatchParams> {
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
-  cohort: Cohort;
+
+export interface ChartProps {
+  domain?: string;
+  cid;
   workspace: WorkspaceData;
 }
 
-interface State {
-  newChartData: ChartData[];
+export interface ChartState {
+  data: any;
+  loading: boolean;
   options: any;
+  newChartData: ChartData[];
   chartPopPyramid: any;
   chartsGenderRaceByAgeMap: {};
 }
 
-export const DemoChart = fp.flow(withRouter)(
-  class extends React.Component<Props, State> {
-    constructor(props: Props) {
+export const Chart = withCurrentWorkspace()(
+  class extends React.Component<ChartProps, ChartState> {
+    constructor(props: ChartProps) {
       super(props);
       this.state = {
+        data: null,
+        loading: true,
         options: null,
         newChartData: null,
         chartPopPyramid: null,
@@ -115,24 +104,31 @@ export const DemoChart = fp.flow(withRouter)(
       };
     }
 
-    async componentDidMount(): Promise<void> {
-      const { hideSpinner } = this.props;
-      // call ot get cohort
-      // const cohortDefinition = await this.getCohort();
-      // all api to get chart data
-      const { ns, wsid } = this.props.match.params;
-      const cid = parseQueryParams(this.props.location.search).get('cohortId');
-      const domain = parseQueryParams(this.props.location.search).get('domain');
+    componentDidMount() {
+      this.getChartData();
+    }
+
+    componentDidUpdate(prevProps: Readonly<ChartProps>) {
+      const { domain } = this.props;
+      if (domain && domain !== prevProps.domain) {
+        this.setState({ loading: true });
+        this.getChartData();
+      }
+    }
+
+    async getChartData() {
+      const {
+        domain,
+        cid,
+        workspace: { id, namespace },
+      } = this.props;
 
       const newChartData = await chartBuilderApi().getChartData(
-        ns,
-        wsid,
+        namespace,
+        id,
         +cid,
         domain
       );
-
-      console.log(newChartData);
-
       this.setState({
         newChartData: newChartData.items,
       });
@@ -161,24 +157,8 @@ export const DemoChart = fp.flow(withRouter)(
           [seriesGenderMap[genderHelper[key].genderKey]]
         );
       }
-      this.setState({ chartsGenderRaceByAgeMap });
-      hideSpinner();
+      this.setState({ chartsGenderRaceByAgeMap, loading: false });
     }
-
-    async getCohort() {
-      const { ns, wsid, cid } = this.props.match.params;
-      let cohortDef: CohortDefinition;
-      await cohortsApi()
-        .getCohort(ns, wsid, +cid)
-        .then(async (cohortResponse) => {
-          cohortDef = JSON.parse(cohortResponse.criteria);
-        });
-      return cohortDef;
-    }
-
-    // data.sort(function (a, b) {
-    //   return a.city.localeCompare(b.city) || b.price - a.price;
-    // });
 
     getGenderByRaceChartData() {
       const { newChartData } = this.state;
@@ -225,7 +205,7 @@ export const DemoChart = fp.flow(withRouter)(
           }
           return accum;
         }, [])
-        .sort((a, b) => a.x - b.x  || a.race.localeCompare(b.race));
+        .sort((a, b) => a.x - b.x || a.race.localeCompare(b.race));
 
       const series = seriesHelper.reduce((accum, rec) => {
         const gender = rec.gender;
@@ -344,6 +324,7 @@ export const DemoChart = fp.flow(withRouter)(
 
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
+      const { domain } = this.props;
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
       Object.keys(swapped).map((key) => {
@@ -355,7 +336,13 @@ export const DemoChart = fp.flow(withRouter)(
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
             <div>
-              <span style={styles.chartTitle}>Population Pyramid</span>
+              <span style={styles.chartTitle}>
+                <p>
+                  NEW-COMPONENT-CHART Population Pyramid (React version:{' '}
+                  {React.version})
+                </p>
+                <p>{domain}</p>
+              </span>
             </div>
             <div style={styles.row}>
               <div
@@ -376,7 +363,7 @@ export const DemoChart = fp.flow(withRouter)(
             </div>
             <div>
               <span style={styles.chartTitle}>
-                Race by gender over age groups
+                {domain}-Race by gender over age groups
               </span>
             </div>
             <div style={styles.row}>
@@ -403,7 +390,7 @@ export const DemoChart = fp.flow(withRouter)(
             </div>
             <div>
               <span style={styles.chartTitle}>
-                (Swapped axes) Race by gender over age groups
+                {domain}-(Swapped axes) Race by gender over age groups
               </span>
             </div>
             <div style={styles.row}>
