@@ -143,7 +143,7 @@ fi
 
 #  Getting count for Cope Minute Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
-where concept_id = 765936"
+where concept_id = 1741006"
 minuteCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 if [[ "$minuteCount" > 0 ]]; then
   # Insert row for Cope Minute Survey
@@ -151,7 +151,7 @@ if [[ "$minuteCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (765936,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,8)"
+  (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,8)"
 fi
 
 echo "Updating survey names on survey_module from cb_criteria table"
