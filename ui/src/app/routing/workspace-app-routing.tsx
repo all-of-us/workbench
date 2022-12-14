@@ -6,7 +6,8 @@ import { CohortPage } from 'app/cohort-search/cohort-page/cohort-page.component'
 import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
-import { DemoChart } from 'app/components/highcharts-demo';
+import { NewChart } from 'app/components/highcharts-new-chart-component';
+import { NewChartGallery } from 'app/components/highcharts-new-gallery';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
@@ -39,7 +40,11 @@ const CohortReviewPagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(CohortReviewPage);
-const PlotDemoChartPage = fp.flow(withRouteData, withRoutingSpinner)(DemoChart);
+const NewChartGalleryPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(NewChartGallery);
+const NewChartPage = fp.flow(withRouteData, withRoutingSpinner)(NewChart);
 const ConceptHomepagePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -301,19 +306,32 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/data/cohorts/plots-demo`}
+        path={`${path}/data/cohorts/new-chart-gallery`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        <PlotDemoChartPage
+        <NewChartGalleryPage
           routeData={{
-            title: 'Plot Demo Actions',
+            title: 'New Chart Gallery',
             breadcrumb: BreadcrumbType.Cohort,
             workspaceNavBarTab: 'data',
             pageKey: 'cohortBuilder',
           }}
         />
       </AppRoute>
-
+      <AppRoute
+        exact
+        path={`${path}/data/cohorts/new-chart`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <NewChartPage
+          routeData={{
+            title: 'New Chart Component',
+            breadcrumb: BreadcrumbType.Cohort,
+            workspaceNavBarTab: 'data',
+            pageKey: 'cohortBuilder',
+          }}
+        />
+      </AppRoute>
       <AppRoute
         exact
         path={`${path}/data/cohorts/:cid/reviews/cohort-description`}
