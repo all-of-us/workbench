@@ -433,7 +433,7 @@ export const NewChartGallery = fp.flow(withRouter)(
             >
               {
                 <div>
-                  <Chart domain={'CONDITION'} cid={this.props.match.params} />
+                  <Chart domain={'CONDITION'} />
                 </div>
               }
             </div>
