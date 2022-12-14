@@ -225,7 +225,7 @@ export const DemoChart = fp.flow(withRouter)(
           }
           return accum;
         }, [])
-        .sort((a, b) => a.x - b.x);
+        .sort((a, b) => a.x - b.x  || a.race.localeCompare(b.race));
 
       const series = seriesHelper.reduce((accum, rec) => {
         const gender = rec.gender;
