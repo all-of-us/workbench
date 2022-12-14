@@ -20,8 +20,8 @@ browserTest('take the new user satisfaction survey via the relevant notification
   const [submitEvent] = await tu.promiseWindowEvent(page, 'new-user-satisfaction-survey-submitted');
   await Promise.all([submitEvent, submitButton.click()]);
 
-  surveyModal = await page.$('[aria-modal="true"]');
-  expect(surveyModal).toBeNull();
+  // Ideally, we would check that `surveyModal` is now hidden, but as far as I know puppeteer does not offer a way to check that
+  await page.waitForSelector('[aria-modal="true"]', { hidden: true });
 
   // todo: Verify the notification goes away. Not possible without a different /profile handler that sets newUserSatisfactionSurveyEligibility to false.
 }, 10e3);
