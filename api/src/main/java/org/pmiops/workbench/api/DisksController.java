@@ -32,7 +32,7 @@ public class DisksController implements DisksApiDelegate {
   private static final Logger log = Logger.getLogger(DisksController.class.getName());
 
   // https://github.com/DataBiosphere/leonardo/blob/3774547f2018e056e9af42142a10ac004cfe1ee8/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/diskModels.scala#L60
-  private static final Set<DiskStatus> ACTIVE_DISK_STATUS =
+  private static final Set<DiskStatus> ACTIVE_DISK_STATUSES =
       ImmutableSet.of(DiskStatus.READY, DiskStatus.CREATING, DiskStatus.RESTORING);
 
   private final LeonardoApiClient leonardoNotebooksClient;
@@ -119,8 +119,8 @@ public class DisksController implements DisksApiDelegate {
         disksToValidate.stream()
             .filter(
                 d ->
-                    ACTIVE_DISK_STATUS.contains(d.getStatus())
-                        && d.getName().startsWith(pdNamePrefix))
+                    ACTIVE_DISK_STATUSES.contains(d.getStatus())
+                        && d.getCreator().equals(userProvider.get().getUsername()))
             .collect(Collectors.toList());
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =

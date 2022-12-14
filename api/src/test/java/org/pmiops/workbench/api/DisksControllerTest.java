@@ -215,6 +215,7 @@ public class DisksControllerTest {
             NOW.minusSeconds(100).toString(),
             AppType.RSTUDIO);
 
+    rstudioDisk.auditInfo(rstudioDisk.getAuditInfo().creator("other@gmail.com"));
     when(mockLeonardoApiClient.listPersistentDiskByProject(GOOGLE_PROJECT_ID, false))
         .thenReturn(ImmutableList.of(rstudioDisk));
 
@@ -236,7 +237,7 @@ public class DisksControllerTest {
     verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
   }
 
-  private static LeonardoListPersistentDiskResponse newListPdResponse(
+  private LeonardoListPersistentDiskResponse newListPdResponse(
       String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
     LeonardoListPersistentDiskResponse response =
         new LeonardoListPersistentDiskResponse()
@@ -244,7 +245,7 @@ public class DisksControllerTest {
             .size(300)
             .diskType(LeonardoDiskType.STANDARD)
             .status(status)
-            .auditInfo(new LeonardoAuditInfo().createdDate(date))
+            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
             .googleProject(GOOGLE_PROJECT_ID);
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
@@ -254,8 +255,7 @@ public class DisksControllerTest {
     return response;
   }
 
-  private static Disk newDisk(
-      String pdName, DiskStatus status, String date, @Nullable AppType appType) {
+  private Disk newDisk(String pdName, DiskStatus status, String date, @Nullable AppType appType) {
 
     Disk disk =
         new Disk()
@@ -263,7 +263,8 @@ public class DisksControllerTest {
             .size(300)
             .diskType(DiskType.STANDARD)
             .status(status)
-            .createdDate(date);
+            .createdDate(date)
+            .creator(user.getUsername());
     if (appType != null) {
       disk.appType(appType);
     } else {
