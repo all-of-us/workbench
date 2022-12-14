@@ -113,7 +113,6 @@ public class DisksController implements DisksApiDelegate {
     // Iterate original list first to check if disks are valid. Print log if disks maybe in
     // incorrect state to help future debugging.
     // Disk maybe in incorrect state if having additional active state disks.
-    String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
 
     List<Disk> activeDisks =
         disksToValidate.stream()
