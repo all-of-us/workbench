@@ -6,7 +6,7 @@ import { CohortPage } from 'app/cohort-search/cohort-page/cohort-page.component'
 import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
-import { NewChart } from 'app/components/highcharts-new-chart-component';
+import { NewChart } from 'app/components/highcharts-new-chart-tester';
 import { NewChartGallery } from 'app/components/highcharts-new-gallery';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';

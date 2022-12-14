@@ -88,7 +88,6 @@ export interface Props
     RouteComponentProps<MatchParams> {}
 
 interface State {
-  cohortId: any;
   newChartData: ChartData[];
   options: any;
   chartPopPyramid: any;
@@ -100,7 +99,6 @@ export const NewChartGallery = fp.flow(withRouter)(
     constructor(props: Props) {
       super(props);
       this.state = {
-        cohortId: null,
         options: null,
         newChartData: null,
         chartPopPyramid: null,
@@ -115,8 +113,6 @@ export const NewChartGallery = fp.flow(withRouter)(
       // all api to get chart data
       const { ns, wsid } = this.props.match.params;
       const cid = parseQueryParams(this.props.location.search).get('cohortId');
-
-      this.setState({ cohortId: cid });
 
       const newChartData = await chartBuilderApi().getChartData(
         ns,
@@ -335,7 +331,7 @@ export const NewChartGallery = fp.flow(withRouter)(
     }
 
     render() {
-      const { chartPopPyramid, chartsGenderRaceByAgeMap, cohortId } = this.state;
+      const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
 
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
@@ -434,8 +430,7 @@ export const NewChartGallery = fp.flow(withRouter)(
             >
               {
                 <div>
-                  <Chart domain={'CONDITION'}
-                         cohortId={cohortId} />
+                  <Chart domain={'CONDITION'} cohortId={2} />
                 </div>
               }
             </div>

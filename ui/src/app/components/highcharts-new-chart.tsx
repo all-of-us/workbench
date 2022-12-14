@@ -79,7 +79,7 @@ const styles = reactStyles({
 
 export interface ChartProps extends RouteComponentProps<MatchParams> {
   domain?: string;
-  cohortId: number;
+  cohortId?: any;
   workspace: WorkspaceData;
 }
 
@@ -128,7 +128,7 @@ export const Chart = withCurrentWorkspace()(
       const newChartData = await chartBuilderApi().getChartData(
         namespace,
         id,
-        cohortId,
+        +cohortId,
         domain
       );
       this.setState({
