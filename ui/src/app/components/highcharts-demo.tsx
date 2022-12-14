@@ -130,6 +130,9 @@ export const DemoChart = fp.flow(withRouter)(
         +cid,
         domain
       );
+
+      console.log(newChartData);
+
       this.setState({
         newChartData: newChartData.items,
       });
@@ -172,6 +175,10 @@ export const DemoChart = fp.flow(withRouter)(
         });
       return cohortDef;
     }
+
+    // data.sort(function (a, b) {
+    //   return a.city.localeCompare(b.city) || b.price - a.price;
+    // });
 
     getGenderByRaceChartData() {
       const { newChartData } = this.state;

@@ -44,9 +44,9 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    System.out.println("cohortId:"+cohortId);
-    System.out.println("domain:"+domain);
-    System.out.println("domain is null?:"+ (domain==null));
+    System.out.println("cohortId:" + cohortId);
+    System.out.println("domain:" + domain);
+    System.out.println("domain is null?:" + (domain == null));
 
     Domain domainEnum = null;
     if (domain.length() > 0) {
@@ -55,7 +55,7 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
     //
     CohortDefinition cohortDefinition = getCohortDefinition(dbWorkspace.getWorkspaceId(), cohortId);
     ChartDataListResponse response = new ChartDataListResponse();
-    System.out.println("cohortDefinition:"+cohortDefinition);
+    System.out.println("cohortDefinition:" + cohortDefinition);
     return ResponseEntity.ok(
         response.items(chartService.getChartData(cohortDefinition, domainEnum)));
   }
