@@ -474,6 +474,38 @@ FROM
 WHERE x.domain_id = 'SURVEY'
 and x.concept_id = y.ancestor_concept_id"
 
+# Correct Cope Survey total participant count. Concept ids (1310132, 1310137)
+# are duplicated in both Cope Surveys and Cope Vaccine Surveys. We only show them
+# in the vaccinations survey, so we need to update count to not include these concepts.
+echo "PPI SURVEYS - Correct Survey counts for Cope Survey"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT b.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN
+            (
+                SELECT *
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                        WHERE domain_id = 'SURVEY'
+                          AND parent_id = 0
+                          AND concept_id = 1333342
+                    )
+            ) b on a.concept_id = b.descendant_concept_id
+        WHERE a.is_standard = 0
+        AND b.descendant_concept_id NOT IN (1310132, 1310137)
+        GROUP BY 1
+    ) y
+WHERE x.domain_id = 'SURVEY'
+and x.concept_id = y.ancestor_concept_id"
+
 echo "PPI SURVEYS - update Minute Survey Name"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
