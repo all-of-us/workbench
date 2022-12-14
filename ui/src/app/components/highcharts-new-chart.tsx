@@ -2,6 +2,7 @@
 // original file from dolbeew/highcharts-demo -- src/app/components/highcharts-new-gallery.tsx
 // 1. create new route - routing - workspace-app-routing.tsx
 import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -12,6 +13,7 @@ import { getChartObj } from 'app/cohort-search/utils';
 import { chartBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const css = `
@@ -75,9 +77,9 @@ const styles = reactStyles({
   },
 });
 
-export interface ChartProps {
+export interface ChartProps extends RouteComponentProps<MatchParams> {
   domain?: string;
-  cid;
+  cohortId: number;
   workspace: WorkspaceData;
 }
 
@@ -119,14 +121,14 @@ export const Chart = withCurrentWorkspace()(
     async getChartData() {
       const {
         domain,
-        cid,
+        cohortId,
         workspace: { id, namespace },
       } = this.props;
 
       const newChartData = await chartBuilderApi().getChartData(
         namespace,
         id,
-        +cid,
+        cohortId,
         domain
       );
       this.setState({
