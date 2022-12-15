@@ -6140,6 +6140,9 @@ definitions:
         $ref: '#/definitions/DemographicSurveyV2'
       newUserSatisfactionSurveyEligibility:
         type: boolean
+      newUserSatisfactionSurveyEligibilityEndTime:
+        type: string
+        description: Timestamp indicating when the user is ineligible to take the new user survey in ISO 8601 format
 
   AccessModuleStatus:
     type: object
