@@ -4,10 +4,12 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.dao.OneTimeCodeDao;
@@ -31,6 +33,9 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   private final MailService mailService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  @VisibleForTesting static final int TWO_WEEKS_DAYS = 2 * 7;
+  @VisibleForTesting static final int TWO_MONTHS_DAYS = 61;
+
   @Autowired
   public NewUserSatisfactionSurveyServiceImpl(
       Clock clock,
@@ -51,6 +56,8 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
 
   @Override
   public boolean eligibleToTakeSurvey(DbUser user) {
+    // Logic in this method is duplicated in emailNewUserSatisfactionSurveyLinks to improve cron
+    // performance. If you update one, you should update the other.
     if (user.getNewUserSatisfactionSurvey() != null) {
       return false;
     }
@@ -62,12 +69,12 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   private Instant eligibilityWindowStart(DbUser user) {
     final Instant createdTime = user.getCreationTime().toInstant();
 
-    return createdTime.plus(2 * 7, ChronoUnit.DAYS);
+    return createdTime.plus(TWO_WEEKS_DAYS, ChronoUnit.DAYS);
   }
 
   @Override
   public Instant eligibilityWindowEnd(DbUser user) {
-    return eligibilityWindowStart(user).plus(61, ChronoUnit.DAYS);
+    return eligibilityWindowStart(user).plus(TWO_MONTHS_DAYS, ChronoUnit.DAYS);
   }
 
   private boolean oneTimeCodeValid(DbOneTimeCode oneTimeCode) {
@@ -110,23 +117,27 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
 
   @Override
   public void emailNewUserSatisfactionSurveyLinks() {
-    for (DbUser user : userDao.findAll()) {
-      final boolean haveNotEmailedSurvey = user.getOneTimeCode() == null;
-      if (haveNotEmailedSurvey && eligibleToTakeSurvey(user)) {
-        DbOneTimeCode dbOneTimeCode = oneTimeCodeDao.save(new DbOneTimeCode().setUser(user));
-        final String surveyLink =
+    // Logic in this call is duplicated from eligibleToTakeSurvey to improve cron performance.
+    // If you update one, you should update the other.
+    final List<DbUser> eligibleUsers =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(
+                clock.instant().minus(TWO_WEEKS_DAYS + TWO_MONTHS_DAYS, ChronoUnit.DAYS)),
+            Timestamp.from(clock.instant().minus(TWO_WEEKS_DAYS, ChronoUnit.DAYS)));
+    for (DbUser user : eligibleUsers) {
+      DbOneTimeCode dbOneTimeCode = oneTimeCodeDao.save(new DbOneTimeCode().setUser(user));
+      final String surveyLink =
+          String.format(
+              "%s?surveyCode=%s",
+              workbenchConfigProvider.get().server.uiBaseUrl, dbOneTimeCode.getId().toString());
+      try {
+        mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
+      } catch (MessagingException e) {
+        throw new ServerErrorException(
             String.format(
-                "%s?surveyCode=%s",
-                workbenchConfigProvider.get().server.uiBaseUrl, dbOneTimeCode.getId().toString());
-        try {
-          mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
-        } catch (MessagingException e) {
-          throw new ServerErrorException(
-              String.format(
-                  "Failed to send new user satisfaction survey email to user %s with code %s",
-                  user.getUserId(), dbOneTimeCode.getId()),
-              e);
-        }
+                "Failed to send new user satisfaction survey email to user %s with code %s",
+                user.getUserId(), dbOneTimeCode.getId()),
+            e);
       }
     }
   }

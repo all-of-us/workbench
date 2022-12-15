@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,9 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
+import org.pmiops.workbench.db.model.DbOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
@@ -52,6 +56,8 @@ public class UserDaoTest {
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private OneTimeCodeDao oneTimeCodeDao;
+  @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
 
   @Autowired private UserDao userDao;
 
@@ -422,6 +428,79 @@ public class UserDaoTest {
 
     assertThat(userDao.findUserByUsernameIn(ImmutableList.of("afunk123", "bobo1")))
         .containsExactly(alice, bob);
+  }
+
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersCreatedBetweenTimes() {
+    Instant creationTimeWindowStart = now().toInstant().minus(2, ChronoUnit.DAYS);
+    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
+
+    DbUser invalidUserNearWindowStart =
+        userDao.save(
+            new DbUser()
+                .setCreationTime(
+                    Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+    DbUser validUserNearWindowStart =
+        userDao.save(
+            new DbUser()
+                .setCreationTime(
+                    Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS))));
+    DbUser validUserNearWindowEnd =
+        userDao.save(
+            new DbUser()
+                .setCreationTime(
+                    Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS))));
+    DbUser invalidUserNearWindowEnd =
+        userDao.save(
+            new DbUser()
+                .setCreationTime(
+                    Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users)
+        .containsExactlyElementsIn(
+            ImmutableList.of(validUserNearWindowStart, validUserNearWindowEnd));
+  }
+
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutOneTimeCodes() {
+    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
+    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+
+    DbUser userWithoutCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    DbUser userWithCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    oneTimeCodeDao.save(new DbOneTimeCode().setUser(userWithCode));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users).containsExactlyElementsIn(ImmutableList.of(userWithoutCode));
+  }
+
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutSurveys() {
+    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
+    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+
+    DbUser userWithoutSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    DbUser userWithSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    newUserSatisfactionSurveyDao.save(
+        new DbNewUserSatisfactionSurvey()
+            .setSatisfaction(Satisfaction.NEUTRAL)
+            .setAdditionalInfo("")
+            .setUser(userWithSurvey));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users).containsExactlyElementsIn(ImmutableList.of(userWithoutSurvey));
   }
 
   private List<DbUser> insertTestUsers(

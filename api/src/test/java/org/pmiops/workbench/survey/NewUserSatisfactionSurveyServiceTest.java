@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -269,7 +268,16 @@ class NewUserSatisfactionSurveyServiceTest {
   @Test
   public void testEmailNewUserSatisfactionSurveyLinks() throws MessagingException {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    when(userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(
+                START_INSTANT.minus(
+                    NewUserSatisfactionSurveyServiceImpl.TWO_WEEKS_DAYS
+                        + NewUserSatisfactionSurveyServiceImpl.TWO_MONTHS_DAYS,
+                    ChronoUnit.DAYS)),
+            Timestamp.from(
+                START_INSTANT.minus(
+                    NewUserSatisfactionSurveyServiceImpl.TWO_WEEKS_DAYS, ChronoUnit.DAYS))))
+        .thenReturn(ImmutableList.of(user));
     String oneTimeCodeString = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
     DbOneTimeCode oneTimeCode = validOneTimeCode();
     oneTimeCode.setId(UUID.fromString(oneTimeCodeString));
@@ -288,7 +296,8 @@ class NewUserSatisfactionSurveyServiceTest {
   public void testEmailNewUserSatisfactionSurveyLinks_throwsExceptionWhenMailerFails()
       throws MessagingException {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
+    when(userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(any(), any()))
+        .thenReturn(ImmutableList.of(user));
     DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
     when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
 
@@ -299,37 +308,5 @@ class NewUserSatisfactionSurveyServiceTest {
     assertThrows(
         ServerErrorException.class,
         () -> newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks());
-  }
-
-  @Test
-  public void testEmailNewUserSatisfactionSurveyLinks_doesNotEmailPreviouslyEmailedUsers()
-      throws MessagingException {
-    user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
-    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
-    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
-
-    // a code has been created for the user already
-    user.setOneTimeCode(validOneTimeCode());
-
-    newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
-
-    verify(mailService, never()).sendNewUserSatisfactionSurveyEmail(any(), any());
-  }
-
-  @Test
-  public void testEmailNewUserSatisfactionSurveyLinks_doesNotEmailIneligibleUsers()
-      throws MessagingException {
-    user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    when(userDao.findAll()).thenReturn(ImmutableList.of(user));
-    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
-    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
-
-    // the user has already taken the survey
-    user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
-
-    newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
-
-    verify(mailService, never()).sendNewUserSatisfactionSurveyEmail(any(), any());
   }
 }
