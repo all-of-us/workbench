@@ -127,7 +127,7 @@ export const NewUserSatisfactionSurveyModal = ({
           )}
         </FlexRow>
         <FlexRow style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
-          <Button type='secondary' onClick={onCancel}>
+          <Button type='secondary' onClick={onCancel} aria-label='cancel'>
             Cancel
           </Button>
           <TooltipTrigger
@@ -149,6 +149,7 @@ export const NewUserSatisfactionSurveyModal = ({
           >
             <Button
               type='primary'
+              aria-label='submit'
               disabled={!!validationErrors || submittingRequest}
               onClick={async () => {
                 setSubmittingRequest(true);
@@ -156,12 +157,15 @@ export const NewUserSatisfactionSurveyModal = ({
                   await surveysApi().createNewUserSatisfactionSurvey(
                     newUserSatisfactionSurveyData
                   );
+                  setSubmittingRequest(false);
                   setError(false);
+                  window.dispatchEvent(
+                    new Event('new-user-satisfaction-survey-submitted')
+                  );
                   onSubmitSuccess();
                 } catch {
-                  setError(true);
-                } finally {
                   setSubmittingRequest(false);
+                  setError(true);
                 }
               }}
             >

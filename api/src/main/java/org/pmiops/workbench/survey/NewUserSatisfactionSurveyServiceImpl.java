@@ -22,13 +22,18 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
       return false;
     }
 
+    final Instant now = clock.instant();
+    return now.isAfter(eligibilityWindowStart(user)) && now.isBefore(eligibilityWindowEnd(user));
+  }
+
+  private Instant eligibilityWindowStart(DbUser user) {
     final Instant createdTime = user.getCreationTime().toInstant();
 
-    final Instant windowStart = createdTime.plus(2 * 7, ChronoUnit.DAYS);
-    final Instant windowEnd = windowStart.plus(61, ChronoUnit.DAYS);
+    return createdTime.plus(2 * 7, ChronoUnit.DAYS);
+  }
 
-    final Instant now = clock.instant();
-
-    return now.isAfter(windowStart) && now.isBefore(windowEnd);
+  @Override
+  public Instant eligibilityWindowEnd(DbUser user) {
+    return eligibilityWindowStart(user).plus(61, ChronoUnit.DAYS);
   }
 }
