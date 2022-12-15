@@ -458,9 +458,24 @@ public class UserDaoTest {
         new DbUser()
             .setCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
 
+    System.out.println("Printing users before query.");
+    for (DbUser user : userDao.findAll()) {
+      System.out.println(
+          String.format(
+              "User with ID %s has creationTime %s", user.getUserId(), user.getCreationTime()));
+    }
+
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
             Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+
+    System.out.println("Printing users returned from query.");
+    for (DbUser user : users) {
+      System.out.println(
+          String.format(
+              "User with ID %s has creationTime %s", user.getUserId(), user.getCreationTime()));
+    }
+
     assertThat(users)
         .containsExactlyElementsIn(
             ImmutableList.of(validUserNearWindowStart, validUserNearWindowEnd));
