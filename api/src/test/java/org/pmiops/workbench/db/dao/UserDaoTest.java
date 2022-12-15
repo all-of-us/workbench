@@ -439,11 +439,10 @@ public class UserDaoTest {
     Instant creationTimeWindowStart = now().toInstant().minus(2, ChronoUnit.DAYS);
     Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
 
-    DbUser invalidUserNearWindowStart =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+    // Invalid user near window start
+    userDao.save(
+        new DbUser()
+            .setCreationTime(Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
     DbUser validUserNearWindowStart =
         userDao.save(
             new DbUser()
@@ -454,11 +453,10 @@ public class UserDaoTest {
             new DbUser()
                 .setCreationTime(
                     Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS))));
-    DbUser invalidUserNearWindowEnd =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
+    // Invalid user near window end
+    userDao.save(
+        new DbUser()
+            .setCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
 
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
