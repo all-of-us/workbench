@@ -121,7 +121,11 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
         try {
           mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
         } catch (MessagingException e) {
-          throw new ServerErrorException("Failed to send new user satisfaction survey email", e);
+          throw new ServerErrorException(
+              String.format(
+                  "Failed to send new user satisfaction survey email to user %s with code %s",
+                  user.getUserId(), dbOneTimeCode.getId()),
+              e);
         }
       }
     }
