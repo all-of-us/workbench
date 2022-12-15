@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import * as fp from 'lodash/fp';
 
 import { useQuery } from 'app/components/app-router';
+import { withErrorModal } from 'app/components/modals';
 import { NewUserSatisfactionSurveyModal } from 'app/components/new-user-satisfaction-survey-modal';
 import { surveysApi } from 'app/services/swagger-fetch-clients';
 import { authStore, profileStore, useStore } from 'app/utils/stores';
@@ -24,15 +26,24 @@ export const withNewUserSatisfactionSurveyModal = (WrappedComponent) => {
       }
       setSurveyCode(codeParam);
 
-      // Deleting the query parameter prevents certain flows (such as logging out) from re-triggering a cancelled survey
-      query.delete(ONE_TIME_CODE_QUERY_PARAMETER);
-      history.replace({
-        search: query.toString(),
-      });
-
-      surveysApi()
-        .validateOneTimeCodeForNewUserSatisfactionSurvey(codeParam)
-        .then(setShowModal);
+      fp.flow(
+        withErrorModal({
+          title: 'Unable to load survey',
+          message:
+            'An error occurred trying to load the survey. Please try again.',
+        })
+      )(() =>
+        surveysApi()
+          .validateOneTimeCodeForNewUserSatisfactionSurvey(codeParam)
+          .then((isValid) => {
+            setShowModal(isValid);
+            // Deleting the query parameter prevents certain flows (such as logging out) from re-triggering a cancelled survey
+            query.delete(ONE_TIME_CODE_QUERY_PARAMETER);
+            history.replace({
+              search: query.toString(),
+            });
+          })
+      )();
     }, []);
 
     return (

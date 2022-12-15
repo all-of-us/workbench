@@ -9,6 +9,7 @@ import {
   registerApiClient,
   surveysApi,
 } from 'app/services/swagger-fetch-clients';
+import { notificationStore } from 'app/utils/stores';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { SurveysApiStub } from 'testing/stubs/surveys-api-stub';
@@ -72,6 +73,31 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     const wrapper = await createWrapperAtPath(`?surveyCode=${code}`);
 
     expect(wrapper.find(NewUserSatisfactionSurveyModal).exists()).toBeFalsy();
+  });
+
+  it('should not show an error if the code query parameter validation request succeeds', async () => {
+    const code = 'abc';
+    jest
+      .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
+      .mockImplementationOnce(() => Promise.resolve(true));
+
+    await createWrapperAtPath(`?surveyCode=${code}`);
+
+    expect(notificationStore.get()).toBeNull();
+  });
+
+  it('should show an error if the code query parameter validation request fails', async () => {
+    const code = 'abc';
+    jest
+      .spyOn(surveysApi(), 'validateOneTimeCodeForNewUserSatisfactionSurvey')
+      .mockImplementationOnce(() => Promise.reject());
+
+    expect(notificationStore.get()).toBeNull();
+
+    await createWrapperAtPath(`?surveyCode=${code}`);
+
+    expect(notificationStore.get().title).toBeTruthy();
+    expect(notificationStore.get().message).toBeTruthy();
   });
 
   it('should call create API with the code', async () => {
