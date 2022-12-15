@@ -443,11 +443,10 @@ public class UserDaoTest {
     System.out.println(String.format("creationTimeWindowEnd is: %s", creationTimeWindowEnd));
 
     // Invalid user near window start
-    DbUser invalidUserNearWindowStart =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+    DbUser invalidUserNearWindowStart = userDao.save(new DbUser());
+    userDao.save(
+        invalidUserNearWindowStart.setCreationTime(
+            Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
 
     System.out.println(
         String.format(
@@ -471,21 +470,20 @@ public class UserDaoTest {
             "creationTimeWindowStart.minus(1, ChronoUnit.DAYS) is: %s",
             creationTimeWindowStart.minus(1, ChronoUnit.DAYS)));
 
-    DbUser validUserNearWindowStart =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS))));
-
-    DbUser validUserNearWindowEnd =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS))));
-    // Invalid user near window end
+    DbUser validUserNearWindowStart = userDao.save(new DbUser());
     userDao.save(
-        new DbUser()
-            .setCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
+        validUserNearWindowStart.setCreationTime(
+            Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS))));
+
+    DbUser validUserNearWindowEnd = userDao.save(new DbUser());
+    userDao.save(
+        validUserNearWindowEnd.setCreationTime(
+            Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS))));
+    // Invalid user near window end
+    DbUser invalidUserNearWindowEnd = userDao.save(new DbUser());
+    userDao.save(
+        invalidUserNearWindowEnd.setCreationTime(
+            Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
 
     System.out.println("Printing users before query.");
     for (DbUser user : userDao.findAll()) {
