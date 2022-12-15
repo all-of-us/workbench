@@ -81,7 +81,7 @@ cron:
   target: api
 - description: Email newly eligible users a link to take the new user satisfaction survey.
   url: /v1/cron/emailNewUserSatisfactionSurveyLinks
-  schedule: every day 09:00
+  schedule: every day 21:30
   timezone: America/Chicago
   target: api
 
