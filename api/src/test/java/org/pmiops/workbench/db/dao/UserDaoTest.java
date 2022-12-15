@@ -436,8 +436,8 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersCreatedBetweenTimes() {
-    Instant creationTimeWindowStart = now().toInstant().minus(2, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = creationTimeWindowStart.plus(1, ChronoUnit.DAYS);
 
     // Invalid user near window start
     userDao.save(
@@ -469,9 +469,9 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutOneTimeCodes() {
-    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
-    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
     DbUser userWithoutCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
     DbUser userWithCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
@@ -487,9 +487,9 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutSurveys() {
-    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
-    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
     DbUser userWithoutSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
     DbUser userWithSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
