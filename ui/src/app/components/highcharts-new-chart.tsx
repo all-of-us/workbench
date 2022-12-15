@@ -370,14 +370,12 @@ export const Chart = withCurrentWorkspace()(
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            if(chartType==='DemograhicsChart'){}
             <div>
               <span style={styles.chartTitle}>
                 <p>
-                  NEW-COMPONENT-CHART Population Pyramid (React version:{' '}
+                  <b>{chartType}:</b> NEW-COMPONENT-CHART Population Pyramid (React version:{' '}
                   {React.version})
                 </p>
-                <p>{domain}</p>
               </span>
             </div>
             <div style={styles.row}>
