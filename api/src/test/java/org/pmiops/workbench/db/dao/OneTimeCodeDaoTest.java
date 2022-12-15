@@ -49,16 +49,4 @@ public class OneTimeCodeDaoTest {
     oneTimeCodeDao.delete(oneTimeCode);
     assertThat(oneTimeCodeDao.findById(oneTimeCode.getId()).isPresent()).isFalse();
   }
-
-  @Test
-  public void testFindByStringId_findsCode() {
-    DbOneTimeCode oneTimeCode = createValidDbOneTimeCode();
-    assertThat(oneTimeCodeDao.findByStringId(oneTimeCode.getId().toString()).get())
-        .isEqualTo(oneTimeCode);
-  }
-
-  @Test
-  public void testFindByStringId_returnsEmptyForInvalidUUID() {
-    assertThat(oneTimeCodeDao.findByStringId("not a uuid").isPresent()).isFalse();
-  }
 }

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
@@ -75,15 +76,29 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
 
   @Override
   public boolean oneTimeCodeStringValid(String oneTimeCode) {
-    return oneTimeCodeDao.findByStringId(oneTimeCode).map(this::oneTimeCodeValid).orElse(false);
+    try {
+      return oneTimeCodeDao
+          .findById(UUID.fromString(oneTimeCode))
+          .map(this::oneTimeCodeValid)
+          .orElse(false);
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
   }
 
   @Override
   @Transactional
   public void createNewUserSatisfactionSurveyWithOneTimeCode(
       CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey, String oneTimeCode) {
-    DbOneTimeCode dbOneTimeCode =
-        oneTimeCodeDao.findByStringId(oneTimeCode).orElseThrow(ForbiddenException::new);
+    DbOneTimeCode dbOneTimeCode;
+    try {
+      dbOneTimeCode =
+          oneTimeCodeDao
+              .findById(UUID.fromString(oneTimeCode))
+              .orElseThrow(ForbiddenException::new);
+    } catch (IllegalArgumentException e) {
+      throw new ForbiddenException();
+    }
     if (!oneTimeCodeValid(dbOneTimeCode)) {
       throw new ForbiddenException();
     }

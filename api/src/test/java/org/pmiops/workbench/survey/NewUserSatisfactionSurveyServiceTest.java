@@ -59,6 +59,8 @@ class NewUserSatisfactionSurveyServiceTest {
   private static final String UI_BASE_URL = "example.com";
   private DbUser user;
 
+  final String VALID_UUID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+
   private DbOneTimeCode validOneTimeCode() {
     return new DbOneTimeCode().setUser(user);
   }
@@ -146,31 +148,41 @@ class NewUserSatisfactionSurveyServiceTest {
   @Test
   public void testOneTimeCodeStringValid() {
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isTrue();
   }
 
   @Test
   public void testOneTimeCodeStringValid_noCodeExistsWithId() {
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.empty());
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode))).thenReturn(Optional.empty());
+    assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
+  }
+
+  @Test
+  public void testOneTimeCodeStringValid_codeIsNotAUuid() {
+    final String oneTimeCode = "not_a_uuid";
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
   @Test
   public void testOneTimeCodeStringValid_codeIsUsed() {
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
     dbOneTimeCode.setUsedTime(Timestamp.from(Instant.now()));
 
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
@@ -178,12 +190,13 @@ class NewUserSatisfactionSurveyServiceTest {
   public void testOneTimeCodeStringValid_userIsIneligibleForSurvey() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
 
     // user has already taken the survey
     user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
 
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
@@ -191,9 +204,10 @@ class NewUserSatisfactionSurveyServiceTest {
   public void testCreateNewUserSatisfactionSurveyWithOneTimeCode() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbOneTimeCode));
 
     newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
         formData, oneTimeCode);
@@ -207,9 +221,23 @@ class NewUserSatisfactionSurveyServiceTest {
   public void
       testCreateNewUserSatisfactionSurveyWithOneTimeCode_throwsExceptionWhenCodeDoesNotExist() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.empty());
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode))).thenReturn(Optional.empty());
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
+                formData, oneTimeCode));
+  }
+
+  @Test
+  public void
+      testCreateNewUserSatisfactionSurveyWithOneTimeCode_throwsExceptionWhenCodeIsNotAUuid() {
+    user.setCreationTime(ELIGIBLE_CREATION_TIME);
+    final String oneTimeCode = "not_a_uuid";
+    final CreateNewUserSatisfactionSurvey formData = createValidFormData();
 
     assertThrows(
         ForbiddenException.class,
@@ -224,9 +252,10 @@ class NewUserSatisfactionSurveyServiceTest {
       testCreateNewUserSatisfactionSurveyWithOneTimeCode_throwsExceptionWhenCodeIsInvalid() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
+    final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
+    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbOneTimeCode));
 
     dbOneTimeCode.setUsedTime(Timestamp.from(START_INSTANT));
 
