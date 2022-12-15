@@ -2071,7 +2071,7 @@ paths:
     get:
       security: []
       tags:
-      - offlineEmailNewUserSatisfactionSurveyLinks
+      - offlineNewUserSatisfactionSurvey
       - cron
       description: Email newly eligible users a link to take the new user satisfaction survey.
       operationId: emailNewUserSatisfactionSurveyLinks

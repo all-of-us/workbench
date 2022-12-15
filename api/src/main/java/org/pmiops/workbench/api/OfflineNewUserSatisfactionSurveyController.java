@@ -6,12 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class OfflineEmailNewUserSatisfactionSurveyLinkController
-    implements OfflineEmailNewUserSatisfactionSurveyLinksApiDelegate {
+public class OfflineNewUserSatisfactionSurveyController
+    implements OfflineNewUserSatisfactionSurveyApiDelegate {
   private final NewUserSatisfactionSurveyService newUserSatisfactionSurveyService;
 
   @Autowired
-  public OfflineEmailNewUserSatisfactionSurveyLinkController(
+  public OfflineNewUserSatisfactionSurveyController(
       NewUserSatisfactionSurveyService newUserSatisfactionSurveyService) {
     this.newUserSatisfactionSurveyService = newUserSatisfactionSurveyService;
   }
