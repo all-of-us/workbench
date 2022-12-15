@@ -71,7 +71,7 @@ FROM
         WHERE b.standard_concept = 'S'
             and b.domain_id = 'Observation'
             and a.observation_concept_id != 0
-            and b.vocabulary_id != 'PPI'
+            and b.vocabulary_id NOT IN ('PPI', 'CPT4')
             and b.concept_class_id != 'Survey'
             and b.concept_id not in (
                 select distinct observation_concept_id

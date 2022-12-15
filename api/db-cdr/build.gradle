@@ -7,7 +7,7 @@ repositories {
     mavenCentral()
 }
 
-def db_host = System.getenv("DB_HOST") ?: "db"
+def db_host = System.getenv("DB_HOST") ?: "localhost"
 def db_port = System.getenv("DB_PORT") ?: "3306"
 def db_name = System.getenv("CDR_DB_NAME") ?: "cdr"
 def liquibase_password = System.getenv("LIQUIBASE_DB_PASSWORD") ?: "lb-notasecret"
