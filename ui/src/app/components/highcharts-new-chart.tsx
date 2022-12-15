@@ -152,6 +152,8 @@ export const Chart = withCurrentWorkspace()(
 
       const { categories, seriesGenderMap, genderHelper } =
         this.getGenderByRaceChartData();
+      console.log(seriesGenderMap);
+
       // change y values for Female to be negative for Population Chart
       // make a copy without changing the original
       const F = cloneDeep(seriesGenderMap.F);
@@ -187,11 +189,6 @@ export const Chart = withCurrentWorkspace()(
           ).sort((a, b) => (a > b ? 1 : -1));
         }
       }
-      console.log(categoryValueMap);
-      //
-      // const categories = Array.from(
-      //     new Set(newChartData.map((dat) => dat.ageBin))
-      // ).sort((a, b) => (a > b ? 1 : -1));
     }
 
     getGenderByRaceChartData() {
@@ -271,6 +268,7 @@ export const Chart = withCurrentWorkspace()(
       if (genderSeries.length === 2) {
         xAxis.push(this.getXAxis(ageCategories, true, '', 0));
       }
+      const yAxis = [this.getYAxis()];
 
       return {
         chart: {
@@ -280,35 +278,12 @@ export const Chart = withCurrentWorkspace()(
         title: {
           text: '',
         },
-        accessibility: {
-          point: {
-            valueDescriptionFormat:
-              '{index} Age {xDescription} Race {race} Count {raceCount} GenderCount {genderCount} Percent {y}',
-          },
-        },
         xAxis: xAxis,
-        yAxis: {
-          title: {
-            text: '',
-          },
-          labels: {
-            formatter: function () {
-              return Math.abs(this.value) + '%';
-            },
-          },
-          accessibility: {
-            description: 'Percentage population',
-            rangeDescription: 'Range: 0 to 5%',
-          },
-        },
+        yAxis: yAxis,
         legend: {
           enabled: false,
         },
         plotOptions: {
-          bar: {
-            groupPadding: 0,
-            pointPadding: 0.1,
-          },
           series: {
             stacking: 'normal', // 'normal',
           },
@@ -318,9 +293,10 @@ export const Chart = withCurrentWorkspace()(
             return (
               '<b>' +
               this.series.name +
-              ', age ' +
+              ' (' +
               this.point.category +
-              ', race ' +
+              ')' +
+              ', race: ' +
               this.point.race +
               '</b><br/>' +
               'count: ' +
@@ -341,6 +317,18 @@ export const Chart = withCurrentWorkspace()(
       };
     }
 
+    private getYAxis() {
+      return {
+        title: {
+          text: '',
+        },
+        labels: {
+          formatter: function () {
+            return Math.abs(this.value) + '%';
+          },
+        },
+      };
+    }
     private getXAxis(ageCategories, rightSide, titleText?, linkedToVal?) {
       return {
         title: {
@@ -373,8 +361,8 @@ export const Chart = withCurrentWorkspace()(
             <div>
               <span style={styles.chartTitle}>
                 <p>
-                  <b>{chartType}:</b> NEW-COMPONENT-CHART Population Pyramid (React version:{' '}
-                  {React.version})
+                  <b>{chartType}:</b> NEW-COMPONENT-CHART Population Pyramid
+                  (React version: {React.version})
                 </p>
               </span>
             </div>
