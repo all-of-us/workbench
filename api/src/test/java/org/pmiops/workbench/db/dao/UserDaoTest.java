@@ -22,7 +22,7 @@ import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
-import org.pmiops.workbench.db.model.DbOneTimeCode;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
@@ -56,7 +56,10 @@ public class UserDaoTest {
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
-  @Autowired private OneTimeCodeDao oneTimeCodeDao;
+
+  @Autowired
+  private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
+
   @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
 
   @Autowired private UserDao userDao;
@@ -474,7 +477,8 @@ public class UserDaoTest {
 
     DbUser userWithoutCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
     DbUser userWithCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
-    oneTimeCodeDao.save(new DbOneTimeCode().setUser(userWithCode));
+    newUserSatisfactionSurveyOneTimeCodeDao.save(
+        new DbNewUserSatisfactionSurveyOneTimeCode().setUser(userWithCode));
 
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(

@@ -14,8 +14,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "one_time_code")
-public class DbOneTimeCode {
+@Table(name = "new_user_satisfaction_survey_one_time_code")
+public class DbNewUserSatisfactionSurveyOneTimeCode {
   private UUID id;
   private DbUser user;
   private Timestamp creationTime;
@@ -24,14 +24,17 @@ public class DbOneTimeCode {
   @Id
   @GeneratedValue(generator = "uuid2")
   @GenericGenerator(name = "uuid2", strategy = "uuid2")
-  @Column(name = "one_time_code_id", columnDefinition = "VARCHAR(36)", nullable = false)
+  @Column(
+      name = "new_user_satisfaction_survey_one_time_code_id",
+      columnDefinition = "VARCHAR(36)",
+      nullable = false)
   @Type(type = "uuid-char")
   public UUID getId() {
     return id;
   }
 
-  public DbOneTimeCode setId(UUID one_time_code_id) {
-    this.id = one_time_code_id;
+  public DbNewUserSatisfactionSurveyOneTimeCode setId(UUID id) {
+    this.id = id;
     return this;
   }
 
@@ -41,7 +44,7 @@ public class DbOneTimeCode {
     return user;
   }
 
-  public DbOneTimeCode setUser(DbUser user) {
+  public DbNewUserSatisfactionSurveyOneTimeCode setUser(DbUser user) {
     this.user = user;
     return this;
   }
@@ -52,7 +55,7 @@ public class DbOneTimeCode {
     return creationTime;
   }
 
-  public DbOneTimeCode setCreationTime(Timestamp creationTime) {
+  public DbNewUserSatisfactionSurveyOneTimeCode setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
   }
@@ -62,7 +65,7 @@ public class DbOneTimeCode {
     return usedTime;
   }
 
-  public DbOneTimeCode setUsedTime(Timestamp usedTime) {
+  public DbNewUserSatisfactionSurveyOneTimeCode setUsedTime(Timestamp usedTime) {
     this.usedTime = usedTime;
     return this;
   }

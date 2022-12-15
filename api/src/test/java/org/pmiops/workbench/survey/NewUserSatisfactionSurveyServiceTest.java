@@ -21,10 +21,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
-import org.pmiops.workbench.db.dao.OneTimeCodeDao;
+import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyOneTimeCodeDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
-import org.pmiops.workbench.db.model.DbOneTimeCode;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -47,9 +47,9 @@ class NewUserSatisfactionSurveyServiceTest {
   @MockBean private NewUserSatisfactionSurveyMapper newUserSatisfactionSurveyMapper;
   @MockBean private MailService mailService;
   @MockBean private UserDao userDao;
-  @MockBean private OneTimeCodeDao oneTimeCodeDao;
+  @MockBean private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
 
-  @Captor private ArgumentCaptor<DbOneTimeCode> oneTimeCodeCaptor;
+  @Captor private ArgumentCaptor<DbNewUserSatisfactionSurveyOneTimeCode> oneTimeCodeCaptor;
 
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
@@ -60,8 +60,8 @@ class NewUserSatisfactionSurveyServiceTest {
 
   final String VALID_UUID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 
-  private DbOneTimeCode validOneTimeCode() {
-    return new DbOneTimeCode().setUser(user);
+  private DbNewUserSatisfactionSurveyOneTimeCode validOneTimeCode() {
+    return new DbNewUserSatisfactionSurveyOneTimeCode().setUser(user);
   }
 
   private CreateNewUserSatisfactionSurvey createValidFormData() {
@@ -146,12 +146,13 @@ class NewUserSatisfactionSurveyServiceTest {
 
   @Test
   public void testOneTimeCodeStringValid() {
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
+    final DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
+        validOneTimeCode();
     final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
-        .thenReturn(Optional.of(dbOneTimeCode));
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbNewUserSatisfactionSurveyOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isTrue();
   }
 
@@ -160,7 +161,8 @@ class NewUserSatisfactionSurveyServiceTest {
     final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode))).thenReturn(Optional.empty());
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.empty());
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
@@ -174,46 +176,50 @@ class NewUserSatisfactionSurveyServiceTest {
 
   @Test
   public void testOneTimeCodeStringValid_codeIsUsed() {
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
+    final DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
+        validOneTimeCode();
     final String oneTimeCode = VALID_UUID;
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
 
-    dbOneTimeCode.setUsedTime(Timestamp.from(Instant.now()));
+    dbNewUserSatisfactionSurveyOneTimeCode.setUsedTime(Timestamp.from(Instant.now()));
 
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
-        .thenReturn(Optional.of(dbOneTimeCode));
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbNewUserSatisfactionSurveyOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
   @Test
   public void testOneTimeCodeStringValid_userIsIneligibleForSurvey() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
+    final DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
+        validOneTimeCode();
     final String oneTimeCode = VALID_UUID;
 
     // user has already taken the survey
     user.setNewUserSatisfactionSurvey(new DbNewUserSatisfactionSurvey());
 
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
-        .thenReturn(Optional.of(dbOneTimeCode));
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbNewUserSatisfactionSurveyOneTimeCode));
     assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
   }
 
   @Test
   public void testCreateNewUserSatisfactionSurveyWithOneTimeCode() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
+    final DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
+        validOneTimeCode();
     final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
-        .thenReturn(Optional.of(dbOneTimeCode));
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbNewUserSatisfactionSurveyOneTimeCode));
 
     newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
         formData, oneTimeCode);
 
     verify(newUserSatisfactionSurveyMapper).toDbNewUserSatisfactionSurvey(formData, user);
-    verify(oneTimeCodeDao).save(dbOneTimeCode);
-    assertThat(dbOneTimeCode.getUsedTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    verify(newUserSatisfactionSurveyOneTimeCodeDao).save(dbNewUserSatisfactionSurveyOneTimeCode);
+    assertThat(dbNewUserSatisfactionSurveyOneTimeCode.getUsedTime())
+        .isEqualTo(Timestamp.from(START_INSTANT));
   }
 
   @Test
@@ -222,7 +228,8 @@ class NewUserSatisfactionSurveyServiceTest {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode))).thenReturn(Optional.empty());
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.empty());
 
     assertThrows(
         ForbiddenException.class,
@@ -250,13 +257,14 @@ class NewUserSatisfactionSurveyServiceTest {
   public void
       testCreateNewUserSatisfactionSurveyWithOneTimeCode_throwsExceptionWhenCodeIsInvalid() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
+    final DbNewUserSatisfactionSurveyOneTimeCode dbNewUserSatisfactionSurveyOneTimeCode =
+        validOneTimeCode();
     final String oneTimeCode = VALID_UUID;
     final CreateNewUserSatisfactionSurvey formData = createValidFormData();
-    when(oneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
-        .thenReturn(Optional.of(dbOneTimeCode));
+    when(newUserSatisfactionSurveyOneTimeCodeDao.findById(UUID.fromString(oneTimeCode)))
+        .thenReturn(Optional.of(dbNewUserSatisfactionSurveyOneTimeCode));
 
-    dbOneTimeCode.setUsedTime(Timestamp.from(START_INSTANT));
+    dbNewUserSatisfactionSurveyOneTimeCode.setUsedTime(Timestamp.from(START_INSTANT));
 
     assertThrows(
         ForbiddenException.class,
@@ -279,13 +287,13 @@ class NewUserSatisfactionSurveyServiceTest {
                     NewUserSatisfactionSurveyServiceImpl.TWO_WEEKS_DAYS, ChronoUnit.DAYS))))
         .thenReturn(ImmutableList.of(user));
     String oneTimeCodeString = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
-    DbOneTimeCode oneTimeCode = validOneTimeCode();
+    DbNewUserSatisfactionSurveyOneTimeCode oneTimeCode = validOneTimeCode();
     oneTimeCode.setId(UUID.fromString(oneTimeCodeString));
-    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+    when(newUserSatisfactionSurveyOneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
 
     newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
 
-    verify(oneTimeCodeDao).save(oneTimeCodeCaptor.capture());
+    verify(newUserSatisfactionSurveyOneTimeCodeDao).save(oneTimeCodeCaptor.capture());
     assertThat(oneTimeCodeCaptor.getValue().getUsedTime()).isNull();
     assertThat(oneTimeCodeCaptor.getValue().getUser()).isEqualTo(user);
     verify(mailService)
@@ -298,8 +306,9 @@ class NewUserSatisfactionSurveyServiceTest {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     when(userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(any(), any()))
         .thenReturn(ImmutableList.of(user));
-    DbOneTimeCode oneTimeCode = validOneTimeCode().setId(UUID.randomUUID());
-    when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
+    DbNewUserSatisfactionSurveyOneTimeCode oneTimeCode =
+        validOneTimeCode().setId(UUID.randomUUID());
+    when(newUserSatisfactionSurveyOneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
 
     doThrow(new MessagingException())
         .when(mailService)

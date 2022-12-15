@@ -67,7 +67,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
   private DbNewUserSatisfactionSurvey newUserSatisfactionSurvey;
-  private DbOneTimeCode oneTimeCode;
+  private DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode;
 
   // user-editable Profile fields
 
@@ -428,12 +428,13 @@ public class DbUser {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public DbOneTimeCode getOneTimeCode() {
-    return oneTimeCode;
+  public DbNewUserSatisfactionSurveyOneTimeCode getNewUserSatisfactionSurveyOneTimeCode() {
+    return newUserSatisfactionSurveyOneTimeCode;
   }
 
-  public DbUser setOneTimeCode(DbOneTimeCode oneTimeCode) {
-    this.oneTimeCode = oneTimeCode;
+  public DbUser setNewUserSatisfactionSurveyOneTimeCode(
+      DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode) {
+    this.newUserSatisfactionSurveyOneTimeCode = newUserSatisfactionSurveyOneTimeCode;
     return this;
   }
 

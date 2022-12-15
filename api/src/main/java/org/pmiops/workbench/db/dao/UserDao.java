@@ -59,7 +59,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   @Query(
       "SELECT u FROM DbUser u "
-          + "LEFT JOIN FETCH u.oneTimeCode otc "
+          + "LEFT JOIN FETCH u.newUserSatisfactionSurveyOneTimeCode otc "
           + "LEFT JOIN FETCH u.newUserSatisfactionSurvey nuss "
           + "WHERE u.creationTime BETWEEN :minCreationTime AND :maxCreationTime "
           + "  AND otc.id IS NULL "
