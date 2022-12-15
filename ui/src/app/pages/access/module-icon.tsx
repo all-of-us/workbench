@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { AccessModule } from 'generated/fetch';
 
-import { CheckCircle, MinusCircle } from 'app/components/icons';
+import { CircleCheck, CircleMinus } from 'app/components/icons';
 import colors from 'app/styles/colors';
 import { cond } from 'app/utils';
 
@@ -21,7 +21,7 @@ export const ModuleIcon = (props: {
         [
           !eligible,
           () => (
-            <MinusCircle
+            <CircleMinus
               data-test-id={`module-${moduleName}-ineligible`}
               style={{ color: colors.disabled }}
             />
@@ -30,7 +30,7 @@ export const ModuleIcon = (props: {
         [
           eligible && completedOrBypassed,
           () => (
-            <CheckCircle
+            <CircleCheck
               data-test-id={`module-${moduleName}-complete`}
               style={{ color: colors.success }}
             />
@@ -39,7 +39,7 @@ export const ModuleIcon = (props: {
         [
           eligible && !completedOrBypassed,
           () => (
-            <CheckCircle
+            <CircleCheck
               data-test-id={`module-${moduleName}-incomplete`}
               style={{ color: colors.disabled }}
             />

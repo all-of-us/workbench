@@ -5,7 +5,7 @@ import { AccessModule, AdminTableUser } from 'generated/fetch';
 
 import { Button, IconButton } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
-import { Check, ClrIcon, Times } from 'app/components/icons';
+import { Check, ClrIcon, Xmark } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { PopupTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -235,7 +235,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <IconButton
-                icon={Times}
+                icon={Xmark}
                 onClick={() => this.cancel()}
                 disabled={!this.hasEdited()}
               />

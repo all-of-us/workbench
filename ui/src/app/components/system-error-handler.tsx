@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ErrorCode, ErrorResponse, Profile } from 'generated/fetch';
@@ -187,7 +187,7 @@ export const SystemErrorHandler = fp.flow(
                     )}
                   </FlexColumn>
                   <FontAwesomeIcon
-                    icon={faTimes}
+                    icon={faXmark}
                     style={styles.iconStyles}
                     onClick={() => this.closeError()}
                   />
@@ -198,7 +198,7 @@ export const SystemErrorHandler = fp.flow(
               <div style={styles.errorHandler}>
                 Server is currently busy (503)
                 <FontAwesomeIcon
-                  icon={faTimes}
+                  icon={faXmark}
                   style={styles.iconStyles}
                   onClick={() => this.closeError()}
                 />

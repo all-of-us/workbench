@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { StyledRouterLink } from 'app/components/buttons';
@@ -77,7 +77,7 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
             </div>
           </FlexRow>
           <FontAwesomeIcon
-            icon={faTimes}
+            icon={faXmark}
             style={styles.iconStyles}
             onClick={() => this.handleCloseCookies()}
           />

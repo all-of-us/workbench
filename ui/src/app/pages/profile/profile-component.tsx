@@ -14,7 +14,7 @@ import {
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ExclamationTriangle } from 'app/components/icons';
+import { TriangleExclamation } from 'app/components/icons';
 import {
   TextAreaWithLengthValidationMessage,
   TextInput,
@@ -378,7 +378,7 @@ export const ProfileComponent = fp.flow(
                 {(hasExpired ||
                   wasReferredFromRenewal(this.props.location.search)) && (
                   <div style={styles.renewalBox}>
-                    <ExclamationTriangle
+                    <TriangleExclamation
                       size={25}
                       color={colors.warning}
                       style={{ margin: '0.5rem' }}

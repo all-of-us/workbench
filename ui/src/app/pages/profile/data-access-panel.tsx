@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { FlexRow } from 'app/components/flex';
 import {
-  CheckCircle,
+  CircleCheck,
   ControlledTierBadge,
   RegisteredTierBadge,
 } from 'app/components/icons';
@@ -36,7 +36,7 @@ const Tier = (props: TierProps) => {
         {displayName}
       </div>
       {userHasAccess ? (
-        <CheckCircle
+        <CircleCheck
           data-test-id={`${shortName}-tier-access-granted`}
           style={{ gridArea: 'available' }}
           color={colors.success}

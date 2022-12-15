@@ -5,8 +5,8 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import {
   faBan,
-  faCheckCircle,
-  faExclamationTriangle,
+  faCircleCheck,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -47,14 +47,14 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
     };
   } else if (status === TerraJobStatus.SUCCEEDED) {
     return {
-      icon: faCheckCircle,
+      icon: faCircleCheck,
       style: {
         color: colors.success,
       },
     };
   } else if (status === TerraJobStatus.FAILED) {
     return {
-      icon: faExclamationTriangle,
+      icon: faTriangleExclamation,
       iconTooltip:
         "This extraction has failed. Please try again from the dataset's page.",
       style: {
@@ -187,7 +187,7 @@ const FailedRequestMessage = () => (
       }}
     >
       <FontAwesomeIcon
-        icon={faExclamationTriangle}
+        icon={faTriangleExclamation}
         style={{
           color: colors.danger,
           fontSize: '.8rem',

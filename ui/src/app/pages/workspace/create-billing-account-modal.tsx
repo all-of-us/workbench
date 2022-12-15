@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import * as fp from 'lodash/fp';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button } from 'app/components/buttons';
@@ -571,7 +571,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
       </ModalFooter>
       {currentStep === 0 && (
         <FontAwesomeIcon
-          icon={faTimes}
+          icon={faXmark}
           size='lg'
           style={{
             color: colors.accent,

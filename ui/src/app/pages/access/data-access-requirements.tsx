@@ -9,7 +9,7 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
-import { ExclamationTriangle } from 'app/components/icons';
+import { TriangleExclamation } from 'app/components/icons';
 import { withErrorModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
@@ -468,7 +468,7 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
   return (
     <div style={styles.renewalInnerHeaderContainer}>
       {hasExpired && (
-        <ExclamationTriangle
+        <TriangleExclamation
           size={40}
           color={colors.warning}
           style={styles.renewalInnerHeaderIcon}

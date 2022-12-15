@@ -5,9 +5,9 @@ import { AccessModule, Profile } from 'generated/fetch';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
-  CheckCircle,
+  CircleCheck,
+  CircleMinus,
   ControlledTierBadge,
-  MinusCircle,
 } from 'app/components/icons';
 import { SUPPORT_EMAIL } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
@@ -72,12 +72,12 @@ const ControlledTierStep = (props: {
       <FlexRow style={styles.backgroundModuleBox}>
         <div style={styles.moduleIcon}>
           {props.enabled ? (
-            <CheckCircle
+            <CircleCheck
               data-test-id='eligible'
               style={{ color: colors.success }}
             />
           ) : (
-            <MinusCircle
+            <CircleMinus
               data-test-id='ineligible'
               style={{ color: colors.disabled }}
             />

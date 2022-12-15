@@ -4,12 +4,12 @@ import {
   faBan,
   faCaretRight,
   faCheck,
-  faCheckCircle,
+  faCircleCheck,
+  faCircleMinus,
   faClock,
-  faExclamationTriangle,
-  faLongArrowAltRight,
-  faMinusCircle,
-  faTimes,
+  faRightLong,
+  faTriangleExclamation,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/pro-regular-svg-icons';
 import { faAlarmExclamation, faRepeat } from '@fortawesome/pro-solid-svg-icons';
@@ -175,21 +175,19 @@ export const withCircleBackground =
 export const AlarmExclamation = (props) => (
   <Icon shape={faAlarmExclamation} {...props} />
 );
-export const ArrowRight = (props) => (
-  <Icon shape={faLongArrowAltRight} {...props} />
-);
+export const ArrowRight = (props) => <Icon shape={faRightLong} {...props} />;
 export const Ban = (props) => <Icon shape={faBan} {...props} />;
 export const CaretRight = (props) => <Icon shape={faCaretRight} {...props} />;
 export const Check = (props) => <Icon shape={faCheck} {...props} />;
-export const CheckCircle = (props) => <Icon shape={faCheckCircle} {...props} />;
 export const Circle = (props) => <Icon shape={faCircle} {...props} />;
+export const CircleCheck = (props) => <Icon shape={faCircleCheck} {...props} />;
+export const CircleMinus = (props) => <Icon shape={faCircleMinus} {...props} />;
 export const Clock = (props) => <Icon shape={faClock} {...props} />;
-export const ExclamationTriangle = (props) => (
-  <Icon shape={faExclamationTriangle} color={colors.danger} {...props} />
-);
-export const MinusCircle = (props) => <Icon shape={faMinusCircle} {...props} />;
 export const Repeat = (props) => <Icon shape={faRepeat} {...props} />;
-export const Times = (props) => <Icon shape={faTimes} {...props} />;
+export const TriangleExclamation = (props) => (
+  <Icon shape={faTriangleExclamation} color={colors.danger} {...props} />
+);
+export const Xmark = (props) => <Icon shape={faXmark} {...props} />;
 
 const svgIcon =
   (src) =>

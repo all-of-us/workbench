@@ -6,7 +6,7 @@ import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
-import { CheckCircle, Circle, Clock, ClrIcon } from 'app/components/icons';
+import { Circle, CircleCheck, Clock, ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { SupportMailto } from 'app/components/support';
@@ -523,7 +523,7 @@ export const RenewalCardBody = (props: {
     <div style={renewalStyle.moduleContainer}>
       <div style={{ gridArea: 'checkbox' }}>
         {isRenewalCompleteForModule(moduleStatus) ? (
-          <CheckCircle color={colors.success} style={styles.renewalStatus} />
+          <CircleCheck color={colors.success} style={styles.renewalStatus} />
         ) : (
           <Circle color={'#cbcbcb'} style={styles.renewalStatus} />
         )}
