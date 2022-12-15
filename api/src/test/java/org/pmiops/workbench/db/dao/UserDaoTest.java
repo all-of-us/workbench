@@ -439,15 +439,44 @@ public class UserDaoTest {
     Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
     Instant creationTimeWindowEnd = creationTimeWindowStart.plus(1, ChronoUnit.DAYS);
 
+    System.out.println(String.format("creationTimeWindowStart is: %s", creationTimeWindowStart));
+    System.out.println(String.format("creationTimeWindowEnd is: %s", creationTimeWindowEnd));
+
     // Invalid user near window start
-    userDao.save(
-        new DbUser()
-            .setCreationTime(Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+    DbUser invalidUserNearWindowStart =
+        userDao.save(
+            new DbUser()
+                .setCreationTime(
+                    Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+
+    System.out.println(
+        String.format(
+            "invalidUserNearWindowStart.creationTime is: %s",
+            invalidUserNearWindowStart.getCreationTime()));
+
+    System.out.println(
+        String.format(
+            "creationTimeWindowStart.minus(1, ChronoUnit.SECONDS) is: %s",
+            creationTimeWindowStart.minus(1, ChronoUnit.SECONDS)));
+    System.out.println(
+        String.format(
+            "creationTimeWindowStart.minus(1, ChronoUnit.MINUTES) is: %s",
+            creationTimeWindowStart.minus(1, ChronoUnit.MINUTES)));
+    System.out.println(
+        String.format(
+            "creationTimeWindowStart.minus(1, ChronoUnit.HOURS) is: %s",
+            creationTimeWindowStart.minus(1, ChronoUnit.HOURS)));
+    System.out.println(
+        String.format(
+            "creationTimeWindowStart.minus(1, ChronoUnit.DAYS) is: %s",
+            creationTimeWindowStart.minus(1, ChronoUnit.DAYS)));
+
     DbUser validUserNearWindowStart =
         userDao.save(
             new DbUser()
                 .setCreationTime(
                     Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS))));
+
     DbUser validUserNearWindowEnd =
         userDao.save(
             new DbUser()
