@@ -13,6 +13,7 @@ import { MatchParams } from 'app/utils/stores';
 
 import { Chart } from './highcharts-new-chart';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
+import { parseQueryParams } from './app-router';
 
 const styles = reactStyles({
   backBtn: {
@@ -90,6 +91,10 @@ export const NewChart = fp.flow(withRouter)(
     // });
 
     render() {
+      const cohortId = parseQueryParams(this.props.location.search).get(
+        'cohortId'
+      );
+      const domain = parseQueryParams(this.props.location.search).get('domain');
       return (
         <React.Fragment>
           <div style={styles.row}>
@@ -102,7 +107,7 @@ export const NewChart = fp.flow(withRouter)(
             >
               {
                 <div>
-                  <Chart domain={'CONDITION'} cohortId={2} />
+                  <Chart domain={domain} cohortId={cohortId} />
                 </div>
               }
             </div>
