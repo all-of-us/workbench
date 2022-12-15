@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +18,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurveyWithOneTimeCode;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
-import org.pmiops.workbench.survey.InvalidOneTimeCodeException;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyMapperImpl;
 import org.pmiops.workbench.survey.NewUserSatisfactionSurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,8 +109,7 @@ public class SurveysControllerTest {
   }
 
   @Test
-  public void testCreateNewUserSatisfactionSurveyWithOneTimeCode()
-      throws InvalidOneTimeCodeException {
+  public void testCreateNewUserSatisfactionSurveyWithOneTimeCode() {
     final CreateNewUserSatisfactionSurveyWithOneTimeCode requestBody =
         createValidFormDataWithOneTimeCode();
 
@@ -121,20 +118,5 @@ public class SurveysControllerTest {
     verify(newUserSatisfactionSurveyService)
         .createNewUserSatisfactionSurveyWithOneTimeCode(
             requestBody.getCreateNewUserSatisfactionSurvey(), requestBody.getOneTimeCode());
-  }
-
-  @Test
-  public void testCreateNewUserSatisfactionSurveyWithOneTimeCode_failsIfCodeInvalid()
-      throws InvalidOneTimeCodeException {
-    final CreateNewUserSatisfactionSurveyWithOneTimeCode requestBody =
-        createValidFormDataWithOneTimeCode();
-
-    doThrow(new InvalidOneTimeCodeException())
-        .when(newUserSatisfactionSurveyService)
-        .createNewUserSatisfactionSurveyWithOneTimeCode(
-            requestBody.getCreateNewUserSatisfactionSurvey(), requestBody.getOneTimeCode());
-    assertThrows(
-        BadRequestException.class,
-        () -> surveysController.createNewUserSatisfactionSurveyWithOneTimeCode(requestBody));
   }
 }

@@ -13,6 +13,7 @@ import org.pmiops.workbench.db.dao.OneTimeCodeDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
@@ -80,12 +81,11 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   @Override
   @Transactional
   public void createNewUserSatisfactionSurveyWithOneTimeCode(
-      CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey, String oneTimeCode)
-      throws InvalidOneTimeCodeException {
+      CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey, String oneTimeCode) {
     DbOneTimeCode dbOneTimeCode =
-        oneTimeCodeDao.findByStringId(oneTimeCode).orElseThrow(InvalidOneTimeCodeException::new);
+        oneTimeCodeDao.findByStringId(oneTimeCode).orElseThrow(ForbiddenException::new);
     if (!oneTimeCodeValid(dbOneTimeCode)) {
-      throw new InvalidOneTimeCodeException();
+      throw new ForbiddenException();
     }
     newUserSatisfactionSurveyDao.save(
         newUserSatisfactionSurveyMapper.toDbNewUserSatisfactionSurvey(

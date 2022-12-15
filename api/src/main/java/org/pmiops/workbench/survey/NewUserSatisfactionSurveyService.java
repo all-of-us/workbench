@@ -12,8 +12,7 @@ public interface NewUserSatisfactionSurveyService {
   boolean oneTimeCodeStringValid(String oneTimeCode);
 
   void createNewUserSatisfactionSurveyWithOneTimeCode(
-      CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey, String oneTimeCode)
-      throws InvalidOneTimeCodeException;
+      CreateNewUserSatisfactionSurvey createNewUserSatisfactionSurvey, String oneTimeCode);
 
   void emailNewUserSatisfactionSurveyLinks();
 }

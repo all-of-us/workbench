@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.CreateNewUserSatisfactionSurvey;
@@ -187,8 +188,7 @@ class NewUserSatisfactionSurveyServiceTest {
   }
 
   @Test
-  public void testCreateNewUserSatisfactionSurveyWithOneTimeCode()
-      throws InvalidOneTimeCodeException {
+  public void testCreateNewUserSatisfactionSurveyWithOneTimeCode() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
     final String oneTimeCode = "abc";
@@ -212,7 +212,7 @@ class NewUserSatisfactionSurveyServiceTest {
     when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.empty());
 
     assertThrows(
-        InvalidOneTimeCodeException.class,
+        ForbiddenException.class,
         () ->
             newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
                 formData, oneTimeCode));
@@ -231,7 +231,7 @@ class NewUserSatisfactionSurveyServiceTest {
     dbOneTimeCode.setUsedTime(Timestamp.from(START_INSTANT));
 
     assertThrows(
-        InvalidOneTimeCodeException.class,
+        ForbiddenException.class,
         () ->
             newUserSatisfactionSurveyService.createNewUserSatisfactionSurveyWithOneTimeCode(
                 formData, oneTimeCode));
