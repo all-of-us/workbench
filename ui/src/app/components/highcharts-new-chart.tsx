@@ -87,9 +87,12 @@ export interface ChartState {
   data: any;
   loading: boolean;
   options: any;
+  chartType: any;
   newChartData: ChartData[];
   chartPopPyramid: any;
   chartsGenderRaceByAgeMap: {};
+  categoryNames: any;
+  categoryValueMap: {};
 }
 
 export const Chart = withCurrentWorkspace()(
@@ -100,9 +103,18 @@ export const Chart = withCurrentWorkspace()(
         data: null,
         loading: true,
         options: null,
+        chartType: null,
         newChartData: null,
         chartPopPyramid: null,
         chartsGenderRaceByAgeMap: {},
+        categoryNames: {
+          gender: 'Gender',
+          race: 'Race',
+          ethnicity: 'Ethnicity',
+          ageBin: 'Age Range',
+          conceptName: 'Concept Name',
+        },
+        categoryValueMap: {},
       };
     }
 
@@ -133,7 +145,11 @@ export const Chart = withCurrentWorkspace()(
       );
       this.setState({
         newChartData: newChartData.items,
+        chartType: domain ? 'DomainChart' : 'DemographicsChart',
       });
+
+      this.setCategoryMap();
+
       const { categories, seriesGenderMap, genderHelper } =
         this.getGenderByRaceChartData();
       // change y values for Female to be negative for Population Chart
@@ -160,6 +176,22 @@ export const Chart = withCurrentWorkspace()(
         );
       }
       this.setState({ chartsGenderRaceByAgeMap, loading: false });
+    }
+
+    setCategoryMap() {
+      const { newChartData, categoryNames, categoryValueMap } = this.state;
+      for (const prop in categoryNames) {
+        if (categoryNames.hasOwnProperty(prop)) {
+          categoryValueMap[prop] = Array.from(
+            new Set(newChartData.map((dat) => dat[prop]))
+          ).sort((a, b) => (a > b ? 1 : -1));
+        }
+      }
+      console.log(categoryValueMap);
+      //
+      // const categories = Array.from(
+      //     new Set(newChartData.map((dat) => dat.ageBin))
+      // ).sort((a, b) => (a > b ? 1 : -1));
     }
 
     getGenderByRaceChartData() {
@@ -327,6 +359,7 @@ export const Chart = withCurrentWorkspace()(
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
       const { domain } = this.props;
+      const { chartType } = this.state;
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
       Object.keys(swapped).map((key) => {
@@ -337,6 +370,7 @@ export const Chart = withCurrentWorkspace()(
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
+            if(chartType==='DemograhicsChart'){}
             <div>
               <span style={styles.chartTitle}>
                 <p>
