@@ -436,27 +436,17 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersCreatedBetweenTimes() {
-    Instant creationTimeWindowStart = now().toInstant().minus(2, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = creationTimeWindowStart.plus(1, ChronoUnit.DAYS);
 
     // Invalid user near window start
-    userDao.save(
-        new DbUser()
-            .setCreationTime(Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS))));
+    userWithCreationTime(Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS)));
     DbUser validUserNearWindowStart =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS))));
+        userWithCreationTime(Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS)));
     DbUser validUserNearWindowEnd =
-        userDao.save(
-            new DbUser()
-                .setCreationTime(
-                    Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS))));
+        userWithCreationTime(Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS)));
     // Invalid user near window end
-    userDao.save(
-        new DbUser()
-            .setCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS))));
+    userWithCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS)));
 
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
@@ -469,12 +459,12 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutOneTimeCodes() {
-    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
-    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
-    DbUser userWithoutCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
-    DbUser userWithCode = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    DbUser userWithoutCode = userWithCreationTime(validCreationTime);
+    DbUser userWithCode = userWithCreationTime(validCreationTime);
     newUserSatisfactionSurveyOneTimeCodeDao.save(
         new DbNewUserSatisfactionSurveyOneTimeCode().setUser(userWithCode));
 
@@ -487,12 +477,12 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutSurveys() {
-    Instant creationTimeWindowStart = now().toInstant().minus(3, ChronoUnit.DAYS);
-    Instant creationTimeWindowEnd = now().toInstant().minus(1, ChronoUnit.DAYS);
-    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(2, ChronoUnit.DAYS));
+    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
-    DbUser userWithoutSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
-    DbUser userWithSurvey = userDao.save(new DbUser().setCreationTime(validCreationTime));
+    DbUser userWithoutSurvey = userWithCreationTime(validCreationTime);
+    DbUser userWithSurvey = userWithCreationTime(validCreationTime);
     newUserSatisfactionSurveyDao.save(
         new DbNewUserSatisfactionSurvey()
             .setSatisfaction(Satisfaction.NEUTRAL)
@@ -597,5 +587,11 @@ public class UserDaoTest {
 
   private Timestamp now() {
     return Timestamp.from(Instant.now());
+  }
+
+  // When testing in CircleCI, but not locally, the first save overwrites the creationTime
+  private DbUser userWithCreationTime(Timestamp creationTime) {
+    DbUser user = userDao.save(new DbUser());
+    return userDao.save(user.setCreationTime(creationTime));
   }
 }
