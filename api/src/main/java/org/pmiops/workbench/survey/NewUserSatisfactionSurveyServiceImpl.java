@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.dao.NewUserSatisfactionSurveyDao;
 import org.pmiops.workbench.db.dao.OneTimeCodeDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbOneTimeCode;
-import org.pmiops.workbench.db.model.DbOneTimeCode.Purpose;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mail.MailService;
@@ -70,9 +69,7 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   }
 
   private boolean oneTimeCodeValid(DbOneTimeCode oneTimeCode) {
-    return oneTimeCode.getUsedTime() == null
-        && oneTimeCode.getPurpose() == Purpose.NEW_USER_SATISFACTION_SURVEY
-        && eligibleToTakeSurvey(oneTimeCode.getUser());
+    return oneTimeCode.getUsedTime() == null && eligibleToTakeSurvey(oneTimeCode.getUser());
   }
 
   @Override
@@ -99,13 +96,9 @@ public class NewUserSatisfactionSurveyServiceImpl implements NewUserSatisfaction
   @Override
   public void emailNewUserSatisfactionSurveyLinks() {
     for (DbUser user : userDao.findAll()) {
-      final boolean previouslyEmailedSurvey =
-          user.getOneTimeCodes().stream()
-              .anyMatch((code) -> code.getPurpose() == Purpose.NEW_USER_SATISFACTION_SURVEY);
-      if (!previouslyEmailedSurvey && eligibleToTakeSurvey(user)) {
-        DbOneTimeCode dbOneTimeCode =
-            oneTimeCodeDao.save(
-                new DbOneTimeCode().setUser(user).setPurpose(Purpose.NEW_USER_SATISFACTION_SURVEY));
+      final boolean haveNotEmailedSurvey = user.getOneTimeCode() == null;
+      if (haveNotEmailedSurvey && eligibleToTakeSurvey(user)) {
+        DbOneTimeCode dbOneTimeCode = oneTimeCodeDao.save(new DbOneTimeCode().setUser(user));
         final String surveyLink =
             String.format(
                 "%s?surveyCode=%s",

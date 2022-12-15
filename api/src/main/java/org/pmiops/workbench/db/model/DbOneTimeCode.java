@@ -4,12 +4,10 @@ import java.sql.Timestamp;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -22,7 +20,6 @@ public class DbOneTimeCode {
   private DbUser user;
   private Timestamp creationTime;
   private Timestamp usedTime;
-  private Purpose purpose;
 
   @Id
   @GeneratedValue(generator = "uuid2")
@@ -38,8 +35,8 @@ public class DbOneTimeCode {
     return this;
   }
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
+  @OneToOne
+  @JoinColumn(name = "user_id")
   public DbUser getUser() {
     return user;
   }
@@ -68,20 +65,5 @@ public class DbOneTimeCode {
   public DbOneTimeCode setUsedTime(Timestamp usedTime) {
     this.usedTime = usedTime;
     return this;
-  }
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "purpose", nullable = false)
-  public Purpose getPurpose() {
-    return purpose;
-  }
-
-  public DbOneTimeCode setPurpose(Purpose purpose) {
-    this.purpose = purpose;
-    return this;
-  }
-
-  public enum Purpose {
-    NEW_USER_SATISFACTION_SURVEY,
   }
 }

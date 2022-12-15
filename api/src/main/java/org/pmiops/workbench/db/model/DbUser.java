@@ -67,7 +67,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
   private DbNewUserSatisfactionSurvey newUserSatisfactionSurvey;
-  private Set<DbOneTimeCode> oneTimeCodes = new HashSet<>();
+  private DbOneTimeCode oneTimeCode;
 
   // user-editable Profile fields
 
@@ -423,17 +423,17 @@ public class DbUser {
     return this;
   }
 
-  @OneToMany(
+  @OneToOne(
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public Set<DbOneTimeCode> getOneTimeCodes() {
-    return oneTimeCodes;
+  public DbOneTimeCode getOneTimeCode() {
+    return oneTimeCode;
   }
 
-  public DbUser setOneTimeCodes(Set<DbOneTimeCode> oneTimeCodes) {
-    this.oneTimeCodes = oneTimeCodes;
+  public DbUser setOneTimeCode(DbOneTimeCode oneTimeCode) {
+    this.oneTimeCode = oneTimeCode;
     return this;
   }
 

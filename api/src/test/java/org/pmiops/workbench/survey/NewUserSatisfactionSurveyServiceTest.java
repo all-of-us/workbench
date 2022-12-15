@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +26,6 @@ import org.pmiops.workbench.db.dao.OneTimeCodeDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbOneTimeCode;
-import org.pmiops.workbench.db.model.DbOneTimeCode.Purpose;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mail.MailService;
@@ -61,7 +59,7 @@ class NewUserSatisfactionSurveyServiceTest {
   private DbUser user;
 
   private DbOneTimeCode validOneTimeCode() {
-    return new DbOneTimeCode().setUser(user).setPurpose(Purpose.NEW_USER_SATISFACTION_SURVEY);
+    return new DbOneTimeCode().setUser(user);
   }
 
   private CreateNewUserSatisfactionSurvey createValidFormData() {
@@ -176,18 +174,6 @@ class NewUserSatisfactionSurveyServiceTest {
   }
 
   @Test
-  public void testOneTimeCodeStringValid_codeIsNotForNewUserSatisfactionSurvey() {
-    final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
-    final String oneTimeCode = "abc";
-    user.setCreationTime(ELIGIBLE_CREATION_TIME);
-
-    dbOneTimeCode.setPurpose(null);
-
-    when(oneTimeCodeDao.findByStringId(oneTimeCode)).thenReturn(Optional.of(dbOneTimeCode));
-    assertThat(newUserSatisfactionSurveyService.oneTimeCodeStringValid(oneTimeCode)).isFalse();
-  }
-
-  @Test
   public void testOneTimeCodeStringValid_userIsIneligibleForSurvey() {
     user.setCreationTime(ELIGIBLE_CREATION_TIME);
     final DbOneTimeCode dbOneTimeCode = validOneTimeCode();
@@ -295,7 +281,7 @@ class NewUserSatisfactionSurveyServiceTest {
     when(oneTimeCodeDao.save(any())).thenReturn(oneTimeCode);
 
     // a code has been created for the user already
-    user.setOneTimeCodes(ImmutableSet.of(validOneTimeCode()));
+    user.setOneTimeCode(validOneTimeCode());
 
     newUserSatisfactionSurveyService.emailNewUserSatisfactionSurveyLinks();
 

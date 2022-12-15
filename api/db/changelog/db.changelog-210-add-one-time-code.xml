@@ -23,11 +23,6 @@
         />
       </column>
       <column name="used_time" type="datetime"/>
-      <column name="purpose" type="ENUM('NEW_USER_SATISFACTION_SURVEY')">
-        <constraints
-            nullable="false"
-        />
-      </column>
     </createTable>
 
     <rollback>

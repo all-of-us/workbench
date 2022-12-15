@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.model.DbOneTimeCode;
-import org.pmiops.workbench.db.model.DbOneTimeCode.Purpose;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -32,11 +31,7 @@ public class OneTimeCodeDaoTest {
   }
 
   private DbOneTimeCode createValidDbOneTimeCode() {
-    return oneTimeCodeDao.save(
-        new DbOneTimeCode()
-            .setUser(user)
-            .setUsedTime(CURRENT_TIMESTAMP)
-            .setPurpose(Purpose.NEW_USER_SATISFACTION_SURVEY));
+    return oneTimeCodeDao.save(new DbOneTimeCode().setUser(user).setUsedTime(CURRENT_TIMESTAMP));
   }
 
   @Test
