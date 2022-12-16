@@ -254,7 +254,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.answer_concept_id = CAST(c.v
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
 
-echo "ds_survey - inserting data for cope surveys"
+echo "ds_survey - inserting data for cope vaccine survey"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
    (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
@@ -278,8 +278,51 @@ JOIN
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                 AND parent_id = 0
-                AND concept_id IN (1741006, 1333342)
+                AND concept_id IN (1741006)
             )
+    ) b on a.observation_source_concept_id = b.descendant_concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
+GROUP BY a.person_id,
+        survey_datetime,
+        survey,
+        question_concept_id,
+        question,
+        answer_concept_id,
+        answer,
+        survey_version_concept_id,
+        survey_version_name"
+
+echo "ds_survey - inserting data for COVID-19 Participant Experience (COPE) Survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
+   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
+SELECT  a.person_id,
+        a.observation_datetime as survey_datetime,
+        case when g.display_name like '%COPE Survey' then 'COVID-19 Participant Experience (COPE) Survey' when g.display_name like '%Minute Survey' then 'COVID-19 Vaccine Survey' else c.name end as survey,
+        d.concept_id as question_concept_id,
+        d.concept_name as question,
+        e.concept_id as answer_concept_id,
+        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer,
+        g.survey_version_concept_id as survey_version_concept_id,
+        g.display_name as survey_version_name
+FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+JOIN
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+        WHERE ancestor_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                AND parent_id = 0
+                AND concept_id IN (1333342)
+            )
+        AND descendant_concept_id NOT IN (1310132, 1310137)
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
