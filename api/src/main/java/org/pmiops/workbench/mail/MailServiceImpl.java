@@ -75,6 +75,8 @@ public class MailServiceImpl implements MailService {
   private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
       "emails/initial_credits_expiration/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
+  private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
+      "emails/new_user_satisfaction_survey/content.html";
   private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
       "emails/rt_access_expired/content.html";
   private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
@@ -334,6 +336,26 @@ public class MailServiceImpl implements MailService {
   public void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException {
     sendEgressRemediationEmailWithContent(dbUser, action, FILE_LENGTHS_EGRESS_REMEDIATION_EMAIL);
+  }
+
+  @Override
+  public void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
+      throws MessagingException {
+    String htmlMessage =
+        buildHtml(
+            NEW_USER_SATISFACTION_SURVEY_RESOURCE,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+                .put(EmailSubstitutionField.SURVEY_LINK, surveyLink)
+                .build());
+
+    sendWithRetries(
+        ImmutableList.of(dbUser.getContactEmail()),
+        ImmutableList.of(),
+        "Researcher satisfaction survey for the All of Us Researcher Workbench",
+        String.format("New user satisfaction survey email for %s", dbUser.getUsername()),
+        htmlMessage);
   }
 
   @Override

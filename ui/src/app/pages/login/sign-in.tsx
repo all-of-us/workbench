@@ -17,6 +17,7 @@ import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
 } from 'app/components/with-error-modal-wrapper';
+import { withNewUserSatisfactionSurveyModal } from 'app/components/with-new-user-satisfaction-survey-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
@@ -500,5 +501,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
 export const SignIn = fp.flow(
   withWindowSize(),
-  withProfileErrorModal
+  withProfileErrorModal,
+  withNewUserSatisfactionSurveyModal
 )(SignInImpl);

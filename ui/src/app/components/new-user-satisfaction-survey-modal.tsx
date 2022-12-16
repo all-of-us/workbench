@@ -2,7 +2,10 @@ import * as React from 'react';
 import { useState } from 'react';
 import validate from 'validate.js';
 
-import { NewUserSatisfactionSurveySatisfaction } from 'generated/fetch';
+import {
+  CreateNewUserSatisfactionSurvey,
+  NewUserSatisfactionSurveySatisfaction,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -14,7 +17,6 @@ import { Modal } from 'app/components/modals';
 import { MultipleChoiceQuestion } from 'app/components/multiple-choice-question';
 import { TooltipTrigger } from 'app/components/popups';
 import { surveyStyles } from 'app/components/surveys';
-import { surveysApi } from 'app/services/swagger-fetch-clients';
 import {
   createNewUserSatisfactionSurveyStore,
   useStore,
@@ -48,6 +50,9 @@ export const ADDITIONAL_INFO_MAX_CHARACTERS = 500;
 export interface NewUserSatisfactionSurveyModalProps {
   onCancel: () => void;
   onSubmitSuccess: () => void;
+  createSurveyApiCall: (
+    newUserSatisfactionSurveyData: CreateNewUserSatisfactionSurvey
+  ) => Promise<any>;
 }
 
 const validationCheck = {
@@ -67,6 +72,7 @@ const validationCheck = {
 export const NewUserSatisfactionSurveyModal = ({
   onCancel,
   onSubmitSuccess,
+  createSurveyApiCall,
 }: NewUserSatisfactionSurveyModalProps) => {
   const { newUserSatisfactionSurveyData } = useStore(
     createNewUserSatisfactionSurveyStore
@@ -80,7 +86,11 @@ export const NewUserSatisfactionSurveyModal = ({
   );
 
   return (
-    <Modal width={850} onRequestClose={onCancel}>
+    <Modal
+      width={850}
+      onRequestClose={onCancel}
+      shouldCloseOnOverlayClick={false}
+    >
       <FlexColumn style={{ gap: '0.5rem' }}>
         <MultipleChoiceQuestion
           question='How would you rate your overall satisfaction with the Researcher Workbench?'
@@ -154,9 +164,7 @@ export const NewUserSatisfactionSurveyModal = ({
               onClick={async () => {
                 setSubmittingRequest(true);
                 try {
-                  await surveysApi().createNewUserSatisfactionSurvey(
-                    newUserSatisfactionSurveyData
-                  );
+                  await createSurveyApiCall(newUserSatisfactionSurveyData);
                   setSubmittingRequest(false);
                   setError(false);
                   window.dispatchEvent(
