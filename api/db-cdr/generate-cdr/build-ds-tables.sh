@@ -195,18 +195,18 @@ else
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 fi
 
-echo "ds_survey - inserting data for all surveys except cope"
+echo "ds_survey - inserting data for all surveys except COPE and PFHH"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
    (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
 SELECT  a.person_id,
-        a.observation_datetime as survey_datetime,
+        a.entry_datetime as survey_datetime,
         c.name as survey,
         d.concept_id as question_concept_id,
         d.concept_name as question,
         e.concept_id as answer_concept_id,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
 JOIN
     (
         SELECT *
@@ -217,15 +217,44 @@ JOIN
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                 AND parent_id = 0
-                AND concept_id NOT IN (1741006, 1333342)
+                AND concept_id NOT IN (1741006, 1333342, 1740639)
             )
-    ) b on a.observation_source_concept_id = b.descendant_concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id and f.survey_concept_id = c.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
+    ) b on a.concept_id = b.descendant_concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
 
-echo "ds_survey - inserting data for all cope surveys"
+echo "ds_survey - inserting data for PFHH survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
+   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
+SELECT  a.person_id,
+        a.entry_datetime as survey_datetime,
+        'Personal and Family Health History' as survey,
+        d.concept_id as question_concept_id,
+        d.concept_name as question,
+        e.concept_id as answer_concept_id,
+        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+JOIN
+    (
+        SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+        JOIN (
+              SELECT CAST(id AS STRING) AS id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+              WHERE concept_id IN (1740639)
+              AND domain_id = 'SURVEY'
+            ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+        WHERE domain_id = 'SURVEY'
+        AND type = 'PPI'
+        AND subtype = 'ANSWER'
+    ) b on a.value_source_concept_id = b.answer_concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.answer_concept_id = CAST(c.value AS INT64)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+
+echo "ds_survey - inserting data for cope surveys"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
    (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
