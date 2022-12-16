@@ -335,11 +335,11 @@ FROM
     (
         SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_source_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Measurement'
             and vocabulary_id = 'CPT4'
-            and measurement_concept_id NOT IN
+            and measurement_source_concept_id NOT IN
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
@@ -392,11 +392,11 @@ FROM
     (
         SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_source_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Observation'
             and vocabulary_id = 'CPT4'
-            and observation_concept_id NOT IN
+            and observation_source_concept_id NOT IN
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
