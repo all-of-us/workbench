@@ -436,7 +436,7 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersCreatedBetweenTimes() {
-    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
     Instant creationTimeWindowEnd = creationTimeWindowStart.plus(1, ChronoUnit.DAYS);
 
     // Invalid user near window start
@@ -459,7 +459,7 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutOneTimeCodes() {
-    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
     Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
     Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
@@ -477,7 +477,7 @@ public class UserDaoTest {
   @Test
   public void
       testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutSurveys() {
-    Instant creationTimeWindowStart = Instant.parse("2000-01-01T00:00:00.00Z");
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
     Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
     Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
 
