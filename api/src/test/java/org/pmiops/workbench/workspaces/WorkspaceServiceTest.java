@@ -63,7 +63,6 @@ import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.profile.ProfileMapper;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -109,10 +108,7 @@ public class WorkspaceServiceTest {
     FireCloudService.class,
     FirecloudMapper.class,
     FreeTierBillingService.class,
-    ProfileMapper.class,
-    UserDao.class,
     UserMapper.class,
-    IamService.class,
   })
   static class Configuration {
     @Bean
