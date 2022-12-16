@@ -225,7 +225,6 @@ FROM
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.procedure_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Procedure'
-            and vocabulary_id NOT IN ('CPT4', 'ICD9Proc', 'ICD10PCS')
             and procedure_concept_id NOT IN
                 (
                     SELECT concept_id
@@ -282,7 +281,7 @@ FROM
         LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Measurement'
-            and vocabulary_id not in ('PPI', 'CPT4')
+            and vocabulary_id not in ('PPI')
             and measurement_concept_id NOT IN
                 (
                     SELECT concept_id
