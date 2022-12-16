@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="Peter-Lavigne" id="changelog-210-add-one-time-code">
+    <createTable tableName="new_user_satisfaction_survey_one_time_code">
+      <column name="new_user_satisfaction_survey_one_time_code_id" type="VARCHAR(36)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints
+            nullable="false"
+            foreignKeyName="fk_new_user_satisfaction_survey_one_time_code_user"
+            references="user(user_id)"
+            deleteCascade="true"
+        />
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints
+            nullable="false"
+        />
+      </column>
+      <column name="used_time" type="datetime"/>
+    </createTable>
+
+    <rollback>
+      <dropTable tableName="new_user_satisfaction_survey_one_time_code"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

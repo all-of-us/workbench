@@ -67,6 +67,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
   private DbNewUserSatisfactionSurvey newUserSatisfactionSurvey;
+  private DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode;
 
   // user-editable Profile fields
 
@@ -419,6 +420,21 @@ public class DbUser {
   public DbUser setNewUserSatisfactionSurvey(
       DbNewUserSatisfactionSurvey newUserSatisfactionSurvey) {
     this.newUserSatisfactionSurvey = newUserSatisfactionSurvey;
+    return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DbNewUserSatisfactionSurveyOneTimeCode getNewUserSatisfactionSurveyOneTimeCode() {
+    return newUserSatisfactionSurveyOneTimeCode;
+  }
+
+  public DbUser setNewUserSatisfactionSurveyOneTimeCode(
+      DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode) {
+    this.newUserSatisfactionSurveyOneTimeCode = newUserSatisfactionSurveyOneTimeCode;
     return this;
   }
 

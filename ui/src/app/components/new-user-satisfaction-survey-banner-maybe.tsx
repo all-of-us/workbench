@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { NewUserSatisfactionSurveyModal } from 'app/components/new-user-satisfaction-survey-modal';
 import { NotificationBanner } from 'app/components/notification-banner';
+import { surveysApi } from 'app/services/swagger-fetch-clients';
 import { profileStore, useStore } from 'app/utils/stores';
 import moment from 'moment';
 
@@ -39,6 +40,9 @@ export const NewUserSatisfactionSurveyBannerMaybe = () => {
             setShowModal(false);
             reload();
           }}
+          createSurveyApiCall={(data) =>
+            surveysApi().createNewUserSatisfactionSurvey(data)
+          }
         />
       )}
     </>
