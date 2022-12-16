@@ -410,7 +410,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     return (int)
         StreamSupport.stream(
                 cloudStorageClient
-                    .getBlobsForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
+                    .getBlobsForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
                     .spliterator(),
                 false)
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())

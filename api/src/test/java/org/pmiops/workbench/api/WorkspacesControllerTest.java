@@ -666,12 +666,11 @@ public class WorkspacesControllerTest {
 
     assertThrows(testException, () -> workspacesController.createWorkspace(workspace));
 
-      verify(fireCloudService)
-          .updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
-      verify(fireCloudService)
-          .updateBillingAccountAsService(
-              workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
-
+    verify(fireCloudService)
+        .updateBillingAccount(workspace.getNamespace(), workspace.getBillingAccountName());
+    verify(fireCloudService)
+        .updateBillingAccountAsService(
+            workspace.getNamespace(), workbenchConfig.billing.freeTierBillingAccountName());
   }
 
   @Test
