@@ -34,7 +34,7 @@ public class CohortAnnotationDefinitionMapperTest {
 
   @Test
   public void dbModelToClient() {
-    SortedSet enumValues = new TreeSet();
+    SortedSet<DbCohortAnnotationEnumValue> enumValues = new TreeSet<>();
     enumValues.add(new DbCohortAnnotationEnumValue().name("name"));
     CohortAnnotationDefinition expectedCohortAnnotationDefinition =
         new CohortAnnotationDefinition()
