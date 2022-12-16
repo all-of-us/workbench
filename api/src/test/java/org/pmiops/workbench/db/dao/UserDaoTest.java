@@ -451,9 +451,7 @@ public class UserDaoTest {
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
             Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
-    assertThat(users)
-        .containsExactlyElementsIn(
-            ImmutableList.of(validUserNearWindowStart, validUserNearWindowEnd));
+    assertThat(users).containsExactly(validUserNearWindowStart, validUserNearWindowEnd);
   }
 
   @Test
@@ -471,7 +469,7 @@ public class UserDaoTest {
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
             Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
-    assertThat(users).containsExactlyElementsIn(ImmutableList.of(userWithoutCode));
+    assertThat(users).containsExactly(userWithoutCode);
   }
 
   @Test
@@ -492,7 +490,7 @@ public class UserDaoTest {
     List<DbUser> users =
         userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
             Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
-    assertThat(users).containsExactlyElementsIn(ImmutableList.of(userWithoutSurvey));
+    assertThat(users).containsExactly(userWithoutSurvey);
   }
 
   private List<DbUser> insertTestUsers(
