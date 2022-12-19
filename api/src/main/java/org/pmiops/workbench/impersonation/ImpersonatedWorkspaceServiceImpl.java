@@ -35,7 +35,6 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   private final FireCloudService firecloudService;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
   private final UserDao userDao;
-  private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
 
@@ -45,14 +44,12 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       FireCloudService firecloudService,
       ImpersonatedFirecloudService impersonatedFirecloudService,
       UserDao userDao,
-      WorkspaceAuditor workspaceAuditor,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.billingProjectAuditor = billingProjectAuditor;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
     this.userDao = userDao;
-    this.workspaceAuditor = workspaceAuditor;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
   }
