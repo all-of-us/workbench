@@ -514,3 +514,30 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.domain_id = 'DRUG'
     and x.type in ('CVX', 'HCPCS', 'RxNorm Extension')"
+
+echo "PROCEDURE - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'PROCEDURE'
+ AND type IN ('CPT4', 'ICD9Proc', 'ICD10PCS')
+ AND is_standard = 1
+ AND has_hierarchy = 0"
+
+echo "Measurement - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'MEASUREMENT'
+ AND type IN ('CPT4')
+ AND is_standard = 1
+ AND has_hierarchy = 0"
+
+echo "Observation - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'OBSERVATION'
+ AND type IN ('CPT4')
+ AND is_standard = 1
+ AND has_hierarchy = 0"
