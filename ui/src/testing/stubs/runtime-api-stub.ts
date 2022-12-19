@@ -8,15 +8,16 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { diskApi } from 'app/services/swagger-fetch-clients';
+import { disksApi } from 'app/services/swagger-fetch-clients';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
   MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
-import { DiskApiStub, stubDisk } from './disk-api-stub';
+import { stubDisk } from './disks-api-stub';
 
 export const defaultGceConfig = (): GceConfig => ({
   // Set the default disk size a bit over the minimum for ease of testing
@@ -68,8 +69,8 @@ export class RuntimeApiStub extends RuntimeApi {
   ): Promise<{}> {
     const reqDisk = runtime?.gceWithPdConfig?.persistentDisk;
     if (reqDisk && !reqDisk.name) {
-      const dapi = diskApi();
-      if (dapi instanceof DiskApiStub) {
+      const dapi = disksApi();
+      if (dapi instanceof DisksApiStub) {
         dapi.disk = {
           ...stubDisk(),
           size: reqDisk.size,
@@ -87,7 +88,7 @@ export class RuntimeApiStub extends RuntimeApi {
     deleteDisk: boolean
   ): Promise<{}> {
     if (deleteDisk) {
-      await diskApi().deleteDisk(
+      await disksApi().deleteDisk(
         workspaceNamespace,
         this.runtime.gceWithPdConfig?.persistentDisk?.name
       );

@@ -10,13 +10,13 @@ import { diskStore, runtimeStore, useStore } from 'app/utils/stores';
 
 export const RuntimeCost = () => {
   const { runtime } = useStore(runtimeStore);
-  const { persistentDisk } = useStore(diskStore);
+  const { gcePersistentDisk } = useStore(diskStore);
 
   if (!isVisible(runtime?.status)) {
     return null;
   }
 
-  const analysisConfig = toAnalysisConfig(runtime, persistentDisk);
+  const analysisConfig = toAnalysisConfig(runtime, gcePersistentDisk);
   const runningCost = formatUsd(machineRunningCost(analysisConfig));
   const storageCost = formatUsd(machineStorageCost(analysisConfig));
 
