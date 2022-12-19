@@ -1,15 +1,22 @@
-import { Disk, DiskApi, DiskType, EmptyResponse } from 'generated/fetch';
+import {
+  Disk,
+  DisksApi,
+  DiskType,
+  EmptyResponse,
+  ListDisksResponse,
+} from 'generated/fetch';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export const stubDisk = () => ({
   size: 1000,
   diskType: DiskType.Standard,
+  isGceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
 });
 
-export class DiskApiStub extends DiskApi {
+export class DisksApiStub extends DisksApi {
   constructor(public disk?: Disk) {
     super(undefined, undefined, (..._: any[]) => {
       throw stubNotImplementedError;
@@ -30,12 +37,15 @@ export class DiskApiStub extends DiskApi {
     });
   }
 
-  getDisk(_workspaceNamespace: string, _options?: any): Promise<Disk> {
-    return new Promise<Disk>((resolve, reject) => {
+  listDisksInWorkspace(
+    _workspaceNamespace: string,
+    _options?: any
+  ): Promise<ListDisksResponse> {
+    return new Promise<ListDisksResponse>((resolve, reject) => {
       if (!this.disk) {
         reject(Error('disk not found'));
       }
-      resolve(this.disk);
+      resolve([this.disk]);
     });
   }
 

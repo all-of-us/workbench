@@ -5,19 +5,14 @@ import { ReactWrapper } from 'enzyme';
 
 import {
   BillingStatus,
+  DisksApi,
   ProfileApi,
   RuntimeConfigurationType,
   RuntimeStatus,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import {
-  Disk,
-  DiskApi,
-  DiskType,
-  Runtime,
-  RuntimeApi,
-} from 'generated/fetch/api';
+import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
 
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
@@ -26,7 +21,7 @@ import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-
 import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
 import { Spinner } from 'app/components/spinners';
 import {
-  diskApi,
+  disksApi,
   profileApi,
   registerApiClient,
   runtimeApi,
@@ -59,7 +54,7 @@ import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
-import { DiskApiStub } from 'testing/stubs/disk-api-stub';
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import {
   defaultDataprocConfig,
@@ -76,7 +71,7 @@ interface Props {
 describe('RuntimeConfigurationPanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
-  let diskApiStub: DiskApiStub;
+  let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
   let enableGpu: boolean;
@@ -96,6 +91,7 @@ describe('RuntimeConfigurationPanel', () => {
       diskType: DiskType.Standard,
       name: 'my-existing-disk',
       blockSize: 1,
+      isGceRuntime: true,
     };
   };
 
@@ -132,8 +128,8 @@ describe('RuntimeConfigurationPanel', () => {
   let diskStoreStub;
 
   const setCurrentDisk = (d: Disk) => {
-    diskApiStub.disk = d;
-    diskStoreStub.persistentDisk = d;
+    disksApiStub.disk = d;
+    diskStoreStub.gcePersistentDisk = d;
   };
 
   const setCurrentRuntime = (r: Runtime) => {
@@ -152,8 +148,8 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
 
-    diskApiStub = new DiskApiStub();
-    registerApiClient(DiskApi, diskApiStub);
+    disksApiStub = new DisksApiStub();
+    registerApiClient(DisksApi, disksApiStub);
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
@@ -190,7 +186,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     diskStoreStub = {
       workspaceNamespace: workspaceStubs[0].namespace,
-      persistentDisk: null,
+      gcePersistentDisk: null,
     };
     diskStore.set(diskStoreStub);
 
@@ -1349,8 +1345,8 @@ describe('RuntimeConfigurationPanel', () => {
     ]: DetachableDiskCase,
     existingDiskName: string
   ) {
-    const updateDiskSpy = jest.spyOn(diskApi(), 'updateDisk');
-    const deleteDiskSpy = jest.spyOn(diskApi(), 'deleteDisk');
+    const updateDiskSpy = jest.spyOn(disksApi(), 'updateDisk');
+    const deleteDiskSpy = jest.spyOn(disksApi(), 'deleteDisk');
     const createRuntimeSpy = jest.spyOn(runtimeApi(), 'createRuntime');
     const updateRuntimeSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
 
@@ -1385,9 +1381,9 @@ describe('RuntimeConfigurationPanel', () => {
     }
 
     if (wantDeleteDisk) {
-      expect(diskApiStub.disk.name).not.toEqual(existingDiskName);
+      expect(disksApiStub.disk.name).not.toEqual(existingDiskName);
     } else {
-      expect(diskApiStub.disk.name).toEqual(existingDiskName);
+      expect(disksApiStub.disk.name).toEqual(existingDiskName);
     }
   }
 
@@ -1495,7 +1491,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
-    expect(diskApiStub.disk).toBeTruthy();
+    expect(disksApiStub.disk).toBeTruthy();
   });
 
   it('should allow disk deletion when detaching', async () => {
@@ -1524,7 +1520,7 @@ describe('RuntimeConfigurationPanel', () => {
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
-    expect(diskApiStub.disk).toBeNull();
+    expect(disksApiStub.disk).toBeNull();
   });
 
   it('should allow skipping disk deletion when detaching', async () => {
@@ -1549,7 +1545,7 @@ describe('RuntimeConfigurationPanel', () => {
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
-    expect(diskApiStub.disk?.name).toEqual(disk.name);
+    expect(disksApiStub.disk?.name).toEqual(disk.name);
   });
 
   it('should prevent runtime creation when running cost is too high for free tier', async () => {
