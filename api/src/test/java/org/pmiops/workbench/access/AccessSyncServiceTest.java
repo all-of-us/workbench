@@ -1,10 +1,8 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +14,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -30,6 +29,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -134,14 +134,14 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Completion timestamp should not change when the method is called again.
     tick();
     accessSyncService.syncComplianceTrainingStatusV2();
 
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
   }
 
@@ -159,7 +159,7 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Deprecate the old training.
@@ -167,14 +167,14 @@ public class AccessSyncServiceTest {
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionMissing(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user);
 
     // The user does a new training.
     retBadge.lastissued(issued + 5).valid(true);
 
     // Completion and expiry timestamp should be updated.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Time passes, user renews training
@@ -183,7 +183,7 @@ public class AccessSyncServiceTest {
 
     // Completion should be updated to the current time.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
@@ -205,9 +205,9 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
@@ -215,9 +215,9 @@ public class AccessSyncServiceTest {
 
     // Renewing training updates completion.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
@@ -236,7 +236,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionMissing(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user);
   }
 
   @Test
@@ -265,20 +265,20 @@ public class AccessSyncServiceTest {
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByUsername(USERNAME);
     Timestamp twoFactorAuthCompletionTime =
-        getModuleCompletionTime(DbAccessModuleName.TWO_FACTOR_AUTH, user);
+        getModuleCompletionTime(DbAccessModuleName.TWO_FACTOR_AUTH, user).get();
     assertThat(twoFactorAuthCompletionTime).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     accessSyncService.syncTwoFactorAuthStatus();
-    assertModuleCompletionEqual(
+    assertModuleCompletionTime(
         DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
 
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     accessSyncService.syncTwoFactorAuthStatus();
     user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, null);
+    assertModuleCompletionMissing(DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser);
   }
 
   @Test
@@ -291,7 +291,12 @@ public class AccessSyncServiceTest {
           user.setDuccAgreement(signDucc(user, version));
           user = userDao.save(user);
           accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
-          verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
+          assertModuleCompletionTime(
+              DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
+              user,
+
+              // FIXME
+              null);
         });
   }
 
@@ -305,8 +310,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(accessModuleService)
-        .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    assertModuleCompletionMissing(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, user);
   }
 
   @Test
@@ -315,20 +319,22 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(accessModuleService)
-        .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
+    assertModuleCompletionMissing(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, user);
   }
 
-  private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
+  private Optional<Timestamp> getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
     return userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
-        .get()
-        .getCompletionTime();
+        .map(DbUserAccessModule::getCompletionTime);
   }
 
-  private void assertModuleCompletionEqual(
+  private void assertModuleCompletionTime(
       DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
-    assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
+    assertThat(getModuleCompletionTime(moduleName, user)).hasValue(timestamp);
+  }
+
+  private void assertModuleCompletionMissing(DbAccessModuleName moduleName, DbUser user) {
+    assertThat(getModuleCompletionTime(moduleName, user).orElse(null)).isNull();
   }
 
   private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
