@@ -273,12 +273,8 @@ export const ConceptHomepage = fp.flow(
       this.state = {
         conceptDomainCards: [],
         conceptSurveysList: [],
-        currentInputString: props.cohortContext
-          ? props.cohortContext.searchTerms
-          : '',
-        currentSearchString: props.cohortContext
-          ? props.cohortContext.searchTerms
-          : '',
+        currentInputString: '',
+        currentSearchString: '',
         domainInfoError: false,
         showSearchError: false,
         surveyInfoError: false,
@@ -295,7 +291,6 @@ export const ConceptHomepage = fp.flow(
 
     async loadDomainsAndSurveys() {
       const {
-        cohortContext,
         workspace: { id, namespace },
       } = this.props;
       this.setState({
@@ -322,11 +317,7 @@ export const ConceptHomepage = fp.flow(
           console.error(e);
         });
       await Promise.all([getDomainCards, getSurveyInfo]);
-      if (cohortContext?.searchTerms) {
-        await this.updateCardCounts();
-      } else {
-        this.setState({ loadingConceptCounts: false });
-      }
+      this.setState({ loadingConceptCounts: false });
     }
 
     async updateCardCounts() {
