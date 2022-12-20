@@ -215,6 +215,7 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_SLEEP_DAILY_SUMMARY, (short) 23)
           .put(Domain.FITBIT_SLEEP_LEVEL, (short) 24)
           .put(Domain.LR_WHOLE_GENOME_VARIANT, (short) 25)
+          .put(Domain.STRUCTURAL_VARIANT_DATA, (short) 26)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -244,6 +245,7 @@ public final class DbStorageEnums {
           .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
           .put(Domain.WHOLE_GENOME_VARIANT, "Whole Genome Variant")
           .put(Domain.LR_WHOLE_GENOME_VARIANT, "Long Read Whole Genome Variant")
+          .put(Domain.STRUCTURAL_VARIANT_DATA, "Structural Variant Data")
           .put(Domain.ZIP_CODE_SOCIOECONOMIC, "Zip Code Socioeconomic Status")
           .put(Domain.ARRAY_DATA, "Global Diversity Array")
           .build();

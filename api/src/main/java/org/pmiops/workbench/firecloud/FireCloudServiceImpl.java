@@ -537,9 +537,8 @@ public class FireCloudServiceImpl implements FireCloudService {
                       fireCloudName,
                       FIRECLOUD_WORKSPACE_REQUIRED_FIELDS_FOR_CLONE_FILE_TRANSFER)
                   .getWorkspace();
-          return fcWorkspaceDetails == null
-              ? false
-              : notebookTransferComplete(
+          return fcWorkspaceDetails != null
+              && notebookTransferComplete(
                   fcWorkspaceDetails
                       .getCompletedCloneWorkspaceFileTransfer()
                       .format(DateTimeFormatter.ISO_DATE_TIME));
@@ -559,8 +558,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public boolean getUserTermsOfServiceStatus() throws ApiException {
     TermsOfServiceApi termsOfServiceApi = termsOfServiceApiProvider.get();
-    boolean userHasAcceptedTOS =
-        retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
-    return userHasAcceptedTOS;
+    return retryHandler.run((context) -> termsOfServiceApi.getTermsOfServiceStatus());
   }
 }

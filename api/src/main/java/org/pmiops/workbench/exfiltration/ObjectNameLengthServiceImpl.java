@@ -147,11 +147,10 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
                   "Alerting user with ID: %s, workspace with long file names is: %s",
                   user.getUserId(), workspace.getWorkspaceId()));
           // Create an egress alert.
-          Optional<DbEgressEvent> maybeEvent =
-              this.maybePersistEgressEvent(bucketAuditEntry, user, workspace);
+          DbEgressEvent event = this.persistEgressEvent(bucketAuditEntry, user, workspace);
           // There's no need to push this event to the executor because it's not expected that
           // it happens frequently. And if it happens, it has to be handled immediately.
-          egressRemediationService.remediateEgressEvent(maybeEvent.get().getEgressEventId());
+          egressRemediationService.remediateEgressEvent(event.getEgressEventId());
         }
 
       } catch (IOException | ApiException e) {
@@ -189,21 +188,16 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
     return bucketAuditQueryService.queryBucketFileInformationGroupedByPetAccount();
   }
 
-  private Optional<DbEgressEvent> maybePersistEgressEvent(
+  private DbEgressEvent persistEgressEvent(
       BucketAuditEntry bucketAuditEntry, DbUser dbUser, DbWorkspace dbWorkspace) {
 
-    return Optional.of(
-        egressEventDao.save(
-            new DbEgressEvent()
-                .setUser(dbUser)
-                .setWorkspace(dbWorkspace)
-                .setSumologicEvent("{}")
-                .setEgressMegabytes(
-                    Optional.ofNullable(bucketAuditEntry.getFileLengths())
-                        // bytes -> Megabytes (10^6 bytes)
-                        .map(bytes -> (float) (bytes / (1024 * 1024)))
-                        .orElse(null))
-                .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDurationInSeconds())
-                .setStatus(DbEgressEventStatus.PENDING)));
+    return egressEventDao.save(
+        new DbEgressEvent()
+            .setUser(dbUser)
+            .setWorkspace(dbWorkspace)
+            .setSumologicEvent("{}")
+            .setEgressMegabytes((float) (bucketAuditEntry.getFileLengths() / (1024.0 * 1024.0)))
+            .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDurationInSeconds())
+            .setStatus(DbEgressEventStatus.PENDING));
   }
 }

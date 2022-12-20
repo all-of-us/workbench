@@ -128,7 +128,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
       const updateStores = async (namespace) => {
         diskStore.set({
           workspaceNamespace: namespace,
-          persistentDisk: undefined,
+          gcePersistentDisk: undefined,
         });
         runtimeStore.set({
           workspaceNamespace: namespace,

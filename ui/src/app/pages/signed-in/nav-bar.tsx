@@ -5,6 +5,7 @@ import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
+import { NewUserSatisfactionSurveyBannerMaybe } from 'app/components/new-user-satisfaction-survey-banner-maybe';
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
 import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demographic-survey-v2';
@@ -111,6 +112,7 @@ export const NavBar = () => {
       <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />
       <TakeDemographicSurveyV2BannerMaybe />
+      <NewUserSatisfactionSurveyBannerMaybe />
       <CTAvailableBannerMaybe />
       {showSideNav && (
         <SideNav

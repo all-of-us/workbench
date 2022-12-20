@@ -16,7 +16,7 @@ import {
 
 import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
-import { Clickable, StyledExternalLink } from 'app/components/buttons';
+import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -57,6 +57,7 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
+import { PanelContent } from 'app/utils/runtime-utils';
 import {
   routeDataStore,
   runtimeStore,
@@ -65,7 +66,6 @@ import {
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
-import times from 'assets/icons/times-light.svg';
 
 export const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -185,6 +185,7 @@ interface State {
   tooltipId: number;
   currentModal: CurrentModal;
   runtimeErrors: Array<RuntimeError>;
+  runtimeConfPanelInitialState: PanelContent | null;
 }
 
 export const HelpSidebar = fp.flow(
@@ -209,6 +210,7 @@ export const HelpSidebar = fp.flow(
         tooltipId: undefined,
         currentModal: CurrentModal.None,
         runtimeErrors: null,
+        runtimeConfPanelInitialState: null,
       };
     }
 
@@ -235,6 +237,13 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
+      // let the Runtime Config Panel use its own logic
+      this.setState({ runtimeConfPanelInitialState: null });
+    }
+
+    openRuntimeConfigWithState(runtimeConfPanelInitialState: PanelContent) {
+      setSidebarActiveIconStore.next('runtimeConfig');
+      this.setState({ runtimeConfPanelInitialState });
     }
 
     async componentDidMount() {
@@ -350,14 +359,14 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
-      return fp.getOr(
-        '14',
-        'bodyWidthRem',
-        this.sidebarContent(this.state.activeIcon)
-      );
+      const { activeIcon } = this.state;
+      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(activeIcon));
     }
 
-    sidebarContent(activeIcon: SidebarIconId): {
+    sidebarContent(
+      activeIcon: SidebarIconId,
+      runtimeConfPanelInitialState?: PanelContent
+    ): {
       overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
@@ -366,7 +375,8 @@ export const HelpSidebar = fp.flow(
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const { pageKey, cohortContext } = this.props;
+      const { pageKey, workspace, cohortContext } = this.props;
+
       switch (activeIcon) {
         case 'help':
           return {
@@ -410,6 +420,7 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <RuntimeConfigurationPanel
                 onClose={() => this.setActiveIcon(null)}
+                initialPanelContent={runtimeConfPanelInitialState}
               />
             ),
             showFooter: false,
@@ -417,7 +428,18 @@ export const HelpSidebar = fp.flow(
         case 'apps':
           return {
             bodyWidthRem: '19',
-            renderBody: () => <AppsPanel />,
+            renderBody: () => (
+              <AppsPanel
+                {...{ workspace }}
+                onClose={() => this.setActiveIcon(null)}
+                onClickRuntimeConf={() =>
+                  this.openRuntimeConfigWithState(PanelContent.Customize)
+                }
+                onClickDeleteRuntime={() =>
+                  this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
+                }
+              />
+            ),
             showFooter: false,
           };
         case 'notebooksHelp':
@@ -488,14 +510,18 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const { activeIcon, runtimeErrors } = this.state;
+      const { activeIcon, runtimeErrors, runtimeConfPanelInitialState } =
+        this.state;
       const {
         workspace,
         workspace: { namespace, id },
         pageKey,
         criteria,
       } = this.props;
-      const sidebarContent = this.sidebarContent(activeIcon);
+      const sidebarContent = this.sidebarContent(
+        activeIcon,
+        runtimeConfPanelInitialState
+      );
       const shouldRenderWorkspaceMenu =
         !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
 
@@ -611,16 +637,10 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <Clickable
+                            <CloseButton
                               style={{ marginLeft: 'auto' }}
-                              onClick={() => this.setActiveIcon(null)}
-                            >
-                              <img
-                                src={times}
-                                style={{ height: '27px', width: '17px' }}
-                                alt='Close'
-                              />
-                            </Clickable>
+                              onClose={() => this.setActiveIcon(null)}
+                            />
                           </FlexRow>
                         )}
 

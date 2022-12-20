@@ -33,7 +33,7 @@ import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
-import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { disksApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   cond,
@@ -187,7 +187,7 @@ export const PresetSelector = ({
   allowDataproc,
   setAnalysisConfig,
   disabled,
-  persistentDisk,
+  gcePersistentDisk,
 }) => {
   return (
     <Dropdown
@@ -211,7 +211,7 @@ export const PresetSelector = ({
         }))
       )(runtimePresets)}
       onChange={({ value }) => {
-        setAnalysisConfig(toAnalysisConfig(value, persistentDisk));
+        setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
 
         // Return false to skip the normal handling of the value selection. We're
         // abusing the dropdown here to act as if it were a menu instead.
@@ -237,24 +237,26 @@ const PanelMain = fp.flow(
     onClose = () => {},
     initialPanelContent,
   }) => {
-    const { namespace, id, cdrVersionId, googleProject } = workspace;
-
     const { profile } = profileState;
+    const { namespace, id, cdrVersionId, googleProject } = workspace;
+    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const { hasWgsData: allowDataproc } = findCdrVersion(
       cdrVersionId,
       cdrVersionTiersResponse
     ) || { hasWgsData: false };
-    const { persistentDisk } = useStore(diskStore);
+
+    const { gcePersistentDisk } = useStore(diskStore);
     let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
-      useCustomRuntime(namespace, persistentDisk);
+      useCustomRuntime(namespace, gcePersistentDisk);
+
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
     if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
       currentRuntime = applyPresetOverride(
         // The attached disk information is lost for deleted runtimes. In any case,
         // by default we want to offer that the user reattach their existing disk,
         // if any and if the configuration allows it.
-        maybeWithExistingDisk(currentRuntime, persistentDisk)
+        maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
       );
     }
 
@@ -269,19 +271,17 @@ const PanelMain = fp.flow(
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
     const existingAnalysisConfig = toAnalysisConfig(
       existingRuntime,
-      persistentDisk
+      gcePersistentDisk
     );
 
     const [analysisConfig, setAnalysisConfig] = useState(
-      withAnalysisConfigDefaults(existingAnalysisConfig, persistentDisk)
+      withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
     );
     const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
         runtime: fromAnalysisConfig(config),
         detachedDisk: config.detachedDisk,
       });
-
-    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const initializePanelContent = (): PanelContent =>
       cond(
@@ -342,15 +342,16 @@ const PanelMain = fp.flow(
       runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
 
     const attachedPdExists =
-      !!persistentDisk &&
+      !!gcePersistentDisk &&
       runtimeExists &&
       existingAnalysisConfig.diskConfig.detachable;
-    const unattachedPdExists = !!persistentDisk && !attachedPdExists;
+    const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
     const unattachedDiskNeedsRecreate =
       unattachedPdExists &&
       analysisConfig.diskConfig.detachable &&
-      (persistentDisk.size > analysisConfig.diskConfig.size ||
-        persistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
+      (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
+        gcePersistentDisk.diskType !==
+          analysisConfig.diskConfig.detachableType);
 
     const disableDetachableReason = cond(
       [
@@ -656,7 +657,7 @@ const PanelMain = fp.flow(
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
                     computeType={existingAnalysisConfig.computeType}
-                    disk={persistentDisk}
+                    disk={gcePersistentDisk}
                   />
                 );
               } else {
@@ -679,7 +680,10 @@ const PanelMain = fp.flow(
             () => (
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
-                  await diskApi().deleteDisk(namespace, persistentDisk.name);
+                  await disksApi().deleteDisk(
+                    namespace,
+                    gcePersistentDisk.name
+                  );
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -692,7 +696,10 @@ const PanelMain = fp.flow(
               <ConfirmDeleteUnattachedPD
                 showCreateMessaging
                 onConfirm={async () => {
-                  await diskApi().deleteDisk(namespace, persistentDisk.name);
+                  await disksApi().deleteDisk(
+                    namespace,
+                    gcePersistentDisk.name
+                  );
                   requestAnalysisConfig(analysisConfig);
                   onClose();
                 }}
@@ -741,7 +748,7 @@ const PanelMain = fp.flow(
                     {...{
                       allowDataproc,
                       setAnalysisConfig,
-                      persistentDisk,
+                      gcePersistentDisk,
                       disabled: disableControls,
                     }}
                   />
@@ -814,7 +821,7 @@ const PanelMain = fp.flow(
                             setAnalysisConfig(
                               withAnalysisConfigDefaults(
                                 { ...analysisConfig, computeType },
-                                persistentDisk
+                                gcePersistentDisk
                               )
                             )
                           }
@@ -900,12 +907,12 @@ const PanelMain = fp.flow(
                         diskConfig,
                         detachedDisk: diskConfig.detachable
                           ? null
-                          : persistentDisk,
+                          : gcePersistentDisk,
                       })
                     }
                     disabled={disableControls}
                     disableDetachableReason={disableDetachableReason}
-                    existingDisk={persistentDisk}
+                    existingDisk={gcePersistentDisk}
                     computeType={analysisConfig.computeType}
                   />
                 )}
@@ -1025,7 +1032,7 @@ const PanelMain = fp.flow(
                   setPanelContent(PanelContent.ConfirmUpdate);
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
-                disk={persistentDisk}
+                disk={gcePersistentDisk}
               />
             ),
           ],
