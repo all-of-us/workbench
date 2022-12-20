@@ -674,6 +674,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .ancestorData(false);
   }
 
+  private static SearchParameter arrayData() {
+    return new SearchParameter()
+        .domain(Domain.ARRAY_DATA.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
+  private static SearchParameter structuralVariantData() {
+    return new SearchParameter()
+        .domain(Domain.STRUCTURAL_VARIANT_DATA.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -1521,6 +1537,26 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createCohortDefinition(
             Domain.LR_WHOLE_GENOME_VARIANT.toString(),
             ImmutableList.of(longReadWholeGenomeVariant()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsArrayData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.ARRAY_DATA.toString(), ImmutableList.of(arrayData()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsStructuralVariantData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.STRUCTURAL_VARIANT_DATA.toString(),
+            ImmutableList.of(structuralVariantData()),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
