@@ -195,9 +195,10 @@ function initItem(id: string, type: string, tempGroup: number) {
 
 interface Props {
   group: any;
-  index: number;
-  setSearchContext: (context: any) => void;
+  groupIndex: number;
   role: keyof CohortDefinition;
+  roleIndex: number;
+  setSearchContext: (context: any) => void;
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;
@@ -391,9 +392,9 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     rename(newName: string) {
-      const { group, index, role } = this.props;
+      const { group, roleIndex, role } = this.props;
       const searchRequest = searchRequestStore.getValue();
-      searchRequest[role][index] = { ...group, name: newName };
+      searchRequest[role][roleIndex] = { ...group, name: newName };
       searchRequestStore.next(searchRequest);
       this.setState({ renaming: false });
     }
@@ -566,7 +567,7 @@ export const SearchGroup = withCurrentWorkspace()(
     render() {
       const {
         group: { id, items, mention, name, status, temporal, time, timeValue },
-        index,
+        groupIndex,
         setSearchContext,
         role,
       } = this.props;
@@ -580,7 +581,7 @@ export const SearchGroup = withCurrentWorkspace()(
         overlayStyle,
         renaming,
       } = this.state;
-      const groupName = !!name ? name : `Group ${index + 1}`;
+      const groupName = !!name ? name : `Group ${groupIndex + 1}`;
       const showGroupCount =
         !loading &&
         !error &&
