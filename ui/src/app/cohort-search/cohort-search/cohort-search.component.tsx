@@ -203,6 +203,8 @@ export const CohortSearch = fp.flow(
         this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
+      } else if (domain === Domain.STRUCTURALVARIANTDATA) {
+        this.selectStructuralVariantData();
       }
 
       currentCohortCriteriaStore.next(selections);
@@ -422,6 +424,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Global Diversity Array'
+      );
+      saveCriteria([param]);
+    }
+
+    selectStructuralVariantData() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Structural Variant Data',
+        group: false,
+        domainId: Domain.STRUCTURALVARIANTDATA.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Structural Variant Data'
       );
       saveCriteria([param]);
     }
