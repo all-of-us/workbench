@@ -2078,6 +2078,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/deleteTestUserWorkspaces":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Delete all test users' workspaces"
+      operationId: deleteAllTestUserWorkspaces
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:

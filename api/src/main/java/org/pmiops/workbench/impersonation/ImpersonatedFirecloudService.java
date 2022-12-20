@@ -1,8 +1,10 @@
 package org.pmiops.workbench.impersonation;
 
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 
 /**
  * An impersonation-enabled version of {@link org.pmiops.workbench.firecloud.FireCloudService}
@@ -16,4 +18,9 @@ public interface ImpersonatedFirecloudService {
 
   // retrieve a user's Terra Terms of Service status, by using impersonation
   boolean getUserTermsOfServiceStatus(@Nonnull DbUser dbUser) throws IOException;
+
+  List<FirecloudWorkspaceResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException;
+
+  void deleteWorkspace(@Nonnull DbUser dbUser, String workspaceNamespace, String firecloudName)
+      throws IOException;
 }
