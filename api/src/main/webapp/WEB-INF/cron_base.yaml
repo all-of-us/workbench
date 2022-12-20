@@ -74,7 +74,7 @@ cron:
   schedule: every 6 hours
   timezone: UTC
   target: api
-- description: Update the Terra-TOS compliance status of test users, if ncessary
+- description: Update the Terra-TOS compliance status of test users, if necessary
   url: /v1/cron/ensureTestUserTosCompliance
   schedule: every day 19:00
   timezone: America/Chicago
@@ -82,6 +82,11 @@ cron:
 - description: Email newly eligible users a link to take the new user satisfaction survey.
   url: /v1/cron/emailNewUserSatisfactionSurveyLinks
   schedule: every day 21:30
+  timezone: America/Chicago
+  target: api
+- description: Delete all test user workspaces
+  url: /v1/cron/deleteTestUserWorkspaces
+  schedule: every day 20:00
   timezone: America/Chicago
   target: api
 
