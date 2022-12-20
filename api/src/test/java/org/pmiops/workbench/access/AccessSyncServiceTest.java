@@ -134,14 +134,14 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Completion timestamp should not change when the method is called again.
     tick();
     accessSyncService.syncComplianceTrainingStatusV2();
 
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
   }
 
@@ -159,7 +159,7 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Deprecate the old training.
@@ -174,7 +174,7 @@ public class AccessSyncServiceTest {
 
     // Completion and expiry timestamp should be updated.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     // Time passes, user renews training
@@ -183,7 +183,7 @@ public class AccessSyncServiceTest {
 
     // Completion should be updated to the current time.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
@@ -205,9 +205,9 @@ public class AccessSyncServiceTest {
 
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
@@ -215,9 +215,9 @@ public class AccessSyncServiceTest {
 
     // Renewing training updates completion.
     accessSyncService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
@@ -271,7 +271,7 @@ public class AccessSyncServiceTest {
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     accessSyncService.syncTwoFactorAuthStatus();
-    assertModuleCompletionTime(
+    assertModuleCompletionEqual(
         DbAccessModuleName.TWO_FACTOR_AUTH, providedDbUser, twoFactorAuthCompletionTime);
 
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
@@ -291,7 +291,7 @@ public class AccessSyncServiceTest {
           user.setDuccAgreement(signDucc(user, version));
           user = userDao.save(user);
           accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
-          assertModuleCompletionTime(
+          assertModuleCompletionEqual(
               DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
               user,
 
@@ -328,7 +328,7 @@ public class AccessSyncServiceTest {
         .map(DbUserAccessModule::getCompletionTime);
   }
 
-  private void assertModuleCompletionTime(
+  private void assertModuleCompletionEqual(
       DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
     assertThat(getModuleCompletionTime(moduleName, user)).hasValue(timestamp);
   }
