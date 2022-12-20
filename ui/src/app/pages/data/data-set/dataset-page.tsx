@@ -349,7 +349,7 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
         </TooltipTrigger>
         <div style={{ marginLeft: 'auto', paddingRight: '1rem' }}>
           <StyledRouterLink
-            path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/review/cohort-description`}
+            path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
           >
             <ClrIcon size='20' shape='bar-chart' />
