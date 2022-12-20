@@ -61,11 +61,11 @@ public class AccessSyncServiceTest {
   @Autowired private AccessSyncService accessSyncService;
 
   @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private AccessModuleService accessModuleService;
   @Autowired private FakeClock fakeClock;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
 
-  @MockBean private AccessModuleService mockAccessModuleService;
   @MockBean private ComplianceService mockComplianceService;
   @MockBean private DirectoryService mockDirectoryService;
 
@@ -226,7 +226,7 @@ public class AccessSyncServiceTest {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    mockAccessModuleService.updateCompletionTime(
+    accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
@@ -291,7 +291,7 @@ public class AccessSyncServiceTest {
           user.setDuccAgreement(signDucc(user, version));
           user = userDao.save(user);
           accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
-          verify(mockAccessModuleService, never()).updateCompletionTime(any(), any(), any());
+          verify(accessModuleService, never()).updateCompletionTime(any(), any(), any());
         });
   }
 
@@ -305,7 +305,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(mockAccessModuleService)
+    verify(accessModuleService)
         .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
@@ -315,7 +315,7 @@ public class AccessSyncServiceTest {
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
-    verify(mockAccessModuleService)
+    verify(accessModuleService)
         .updateCompletionTime(user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
   }
 
