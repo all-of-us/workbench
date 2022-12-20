@@ -502,10 +502,7 @@ export const WorkspaceEdit = fp.flow(
 
     async fetchBillingAccounts() {
       this.setState({ fetchBillingAccountLoading: true });
-      let formattedBillingAccounts = [];
-      await this.getFormattedBillingAccounts().then((billingAccounts) => {
-        formattedBillingAccounts = billingAccounts;
-      });
+      const formattedBillingAccounts = await this.getFormattedBillingAccounts();
 
       if (
         this.isMode(WorkspaceEditMode.Create) ||
