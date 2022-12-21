@@ -147,20 +147,19 @@ public class AccessSyncServiceTest {
 
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
+    Instant originalCompletion = fakeClock.instant();
+
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
-
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
-
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
+        .thenReturn(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, retBadge));
 
     accessSyncService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
     // Deprecate the old training.
     retBadge.setValid(false);
@@ -175,20 +174,25 @@ public class AccessSyncServiceTest {
     // Completion and expiry timestamp should be updated.
     accessSyncService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
     // Time passes, user renews training
     retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
     fakeClock.increment(5000);
 
-    // Completion should be updated to the current time.
     accessSyncService.syncComplianceTrainingStatusV2();
+
+    // Completion should be updated to the current time.
+    Instant newCompletion = fakeClock.instant();
+    assertThat(newCompletion.isAfter(originalCompletion)).isTrue();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(newCompletion));
   }
 
   @Test
   public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
+    Instant originalCompletion = fakeClock.instant();
+
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 ctBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
     Map<BadgeName, BadgeDetailsV2> userBadgesByName =
@@ -206,19 +210,21 @@ public class AccessSyncServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
     fakeClock.increment(5000);
 
     // Renewing training updates completion.
     accessSyncService.syncComplianceTrainingStatusV2();
+    Instant newCompletion = fakeClock.instant();
+    assertThat(newCompletion.isAfter(originalCompletion)).isTrue();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(newCompletion));
   }
 
   @Test
@@ -296,7 +302,7 @@ public class AccessSyncServiceTest {
               user,
 
               // FIXME
-              null);
+              Timestamp.from(START_INSTANT.plusSeconds(12345)));
         });
   }
 
@@ -339,6 +345,12 @@ public class AccessSyncServiceTest {
 
   private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
     return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
+  }
+
+  private void clearModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
+    userAccessModuleDao
+        .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
+        .ifPresent(userAccessModuleDao::delete);
   }
 
   private void tick() {
