@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +34,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
@@ -156,79 +153,6 @@ public class UserServiceTest {
 
   private void tick() {
     fakeClock.increment(CLOCK_INCREMENT_MILLIS);
-  }
-
-  @Test
-  public void testSyncEraCommonsStatus() {
-    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
-    nihStatus.setLinkedNihUsername("nih-user");
-    // FireCloud stores the NIH status in seconds, not msecs.
-    final long FC_LINK_EXPIRATION_SECONDS = START_INSTANT.toEpochMilli() / 1000;
-    nihStatus.setLinkExpireTime(FC_LINK_EXPIRATION_SECONDS);
-
-    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
-
-    userService.syncEraCommonsStatus();
-
-    DbUser user = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
-
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
-
-    // Completion timestamp should not change when the method is called again.
-    tick();
-    userService.syncEraCommonsStatus();
-
-    assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
-  }
-
-  @Test
-  public void testClearsEraCommonsStatus() {
-    // Put the test user in a state where eRA commons is completed.
-    DbUser testUser = userDao.findUserByUsername(USERNAME);
-    testUser.setEraCommonsLinkedNihUsername("nih-user");
-    testUser = userDao.save(testUser);
-
-    accessModuleService.updateCompletionTime(
-        testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
-
-    userService.syncEraCommonsStatus();
-
-    DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.ERA_COMMONS, retrievedUser, null);
-  }
-
-  @Test
-  public void testSyncEraCommonsStatus_lastModified() {
-    // User starts without eRA commons.
-    Supplier<Timestamp> getLastModified =
-        () -> userDao.findUserByUsername(USERNAME).getLastModifiedTime();
-    Timestamp modifiedTime0 = getLastModified.get();
-
-    when(mockFireCloudService.getNihStatus())
-        .thenReturn(
-            new FirecloudNihStatus()
-                .linkedNihUsername("nih-user")
-                // FireCloud stores the NIH status in seconds, not msecs.
-                .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
-
-    tick();
-    userService.syncEraCommonsStatus();
-    Timestamp modifiedTime1 = getLastModified.get();
-    assertWithMessage(
-            "modified time should change when eRA commons status changes, want %s < %s",
-            modifiedTime0, modifiedTime1)
-        .that(modifiedTime0.before(modifiedTime1))
-        .isTrue();
-
-    userService.syncEraCommonsStatus();
-    assertWithMessage(
-            "modified time should not change on sync, if eRA commons status doesn't change")
-        .that(modifiedTime1)
-        .isEqualTo(getLastModified.get());
   }
 
   @Test

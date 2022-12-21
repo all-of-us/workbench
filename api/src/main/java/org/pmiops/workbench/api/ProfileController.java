@@ -365,7 +365,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
-    userService.syncEraCommonsStatus();
+    accessSyncService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());
   }
 
@@ -517,7 +517,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     shibbolethService.updateShibbolethToken(token.getJwt());
 
-    userService.syncEraCommonsStatus();
+    accessSyncService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());
   }
 

@@ -54,4 +54,6 @@ public interface AccessSyncService {
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncDuccVersionStatus(DbUser targetUser, Agent agent);
+
+  DbUser syncEraCommonsStatus();
 }

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.javers.common.collections.Lists;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -28,6 +29,8 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.AccessModuleStatus;
@@ -50,6 +53,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private final ComplianceService complianceService;
   private final Clock clock;
   private final DirectoryService directoryService;
+  private final FireCloudService fireCloudService;
   private final InstitutionService institutionService;
   private final UserDao userDao;
   private final UserServiceAuditor userServiceAuditor;
@@ -64,6 +68,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
       ComplianceService complianceService,
       Clock clock,
       DirectoryService directoryService,
+      FireCloudService fireCloudService,
       InstitutionService institutionService,
       UserDao userDao,
       UserServiceAuditor userServiceAuditor) {
@@ -75,6 +80,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.complianceService = complianceService;
     this.clock = clock;
     this.directoryService = directoryService;
+    this.fireCloudService = fireCloudService;
     this.institutionService = institutionService;
     this.userDao = userDao;
     this.userServiceAuditor = userServiceAuditor;
@@ -265,6 +271,64 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     }
 
     return updateUserAccessTiers(targetUser, agent);
+  }
+
+  @Override
+  public DbUser syncEraCommonsStatus() {
+    DbUser user = userProvider.get();
+    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
+    if (nihStatus == null) {
+      accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
+      return userDao.save(
+          user.setEraCommonsLinkedNihUsername(null).setEraCommonsLinkExpireTime(null));
+    } else {
+      Timestamp nihLinkExpireTime =
+          Timestamp.from(Instant.ofEpochSecond(nihStatus.getLinkExpireTime()));
+      Timestamp eraCommonsCompletionTime =
+          calculateEraCompletion(user, nihStatus, nihLinkExpireTime);
+
+      accessModuleService.updateCompletionTime(
+          user, DbAccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
+
+      return userDao.save(
+          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername())
+              .setEraCommonsLinkExpireTime(nihLinkExpireTime));
+    }
+  }
+
+  @Nullable
+  private Timestamp calculateEraCompletion(
+      DbUser user, FirecloudNihStatus nihStatus, Timestamp nihLinkExpireTime) {
+    Timestamp eraCommonsCompletionTime =
+        accessModuleService
+            .getAccessModuleStatus(user, DbAccessModuleName.ERA_COMMONS)
+            .map(AccessModuleStatus::getCompletionEpochMillis)
+            .map(Timestamp::new)
+            .orElse(null);
+
+    Timestamp now = clockNow();
+
+    // NihStatus should never come back from firecloud with an empty linked username.
+    // If that is the case, there is an error with FC, because we should get a 404
+    // in that case. Leaving the null checking in for code safety reasons
+
+    if (nihStatus.getLinkedNihUsername() == null) {
+      // If FireCloud says we have no NIH link, always clear the completion time.
+      eraCommonsCompletionTime = null;
+    } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
+      // If the link expiration time has changed, we treat this as a "new" completion of the
+      // access requirement.
+      eraCommonsCompletionTime = now;
+    } else if (nihStatus.getLinkedNihUsername() != null
+        && !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) {
+      // If the linked username has changed, we treat this as a new completion time.
+      eraCommonsCompletionTime = now;
+    } else if (eraCommonsCompletionTime == null) {
+      // If the user hasn't previously completed this access requirement, set the time to now.
+      eraCommonsCompletionTime = now;
+    }
+
+    return eraCommonsCompletionTime;
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
