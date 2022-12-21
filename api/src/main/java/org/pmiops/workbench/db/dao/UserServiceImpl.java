@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierService;
@@ -40,10 +39,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
@@ -465,65 +462,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public Set<DbUser> findActiveUsersByUsernames(List<String> usernames) {
     return userDao.findUserByUsernameInAndDisabledFalse(usernames);
-  }
-
-  @Nullable
-  private Timestamp calculateEraCompletion(
-      DbUser user, FirecloudNihStatus nihStatus, Timestamp nihLinkExpireTime) {
-    Timestamp eraCommonsCompletionTime =
-        accessModuleService
-            .getAccessModuleStatus(user, DbAccessModuleName.ERA_COMMONS)
-            .map(AccessModuleStatus::getCompletionEpochMillis)
-            .map(Timestamp::new)
-            .orElse(null);
-
-    Timestamp now = clockNow();
-
-    // NihStatus should never come back from firecloud with an empty linked username.
-    // If that is the case, there is an error with FC, because we should get a 404
-    // in that case. Leaving the null checking in for code safety reasons
-
-    if (nihStatus.getLinkedNihUsername() == null) {
-      // If FireCloud says we have no NIH link, always clear the completion time.
-      eraCommonsCompletionTime = null;
-    } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
-      // If the link expiration time has changed, we treat this as a "new" completion of the
-      // access requirement.
-      eraCommonsCompletionTime = now;
-    } else if (nihStatus.getLinkedNihUsername() != null
-        && !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) {
-      // If the linked username has changed, we treat this as a new completion time.
-      eraCommonsCompletionTime = now;
-    } else if (eraCommonsCompletionTime == null) {
-      // If the user hasn't previously completed this access requirement, set the time to now.
-      eraCommonsCompletionTime = now;
-    }
-
-    return eraCommonsCompletionTime;
-  }
-
-  /** Syncs the eraCommons access module status for the current user. */
-  @Override
-  public DbUser syncEraCommonsStatus() {
-    DbUser user = userProvider.get();
-    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus == null) {
-      accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
-      return userDao.save(
-          user.setEraCommonsLinkedNihUsername(null).setEraCommonsLinkExpireTime(null));
-    } else {
-      Timestamp nihLinkExpireTime =
-          Timestamp.from(Instant.ofEpochSecond(nihStatus.getLinkExpireTime()));
-      Timestamp eraCommonsCompletionTime =
-          calculateEraCompletion(user, nihStatus, nihLinkExpireTime);
-
-      accessModuleService.updateCompletionTime(
-          user, DbAccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
-
-      return userDao.save(
-          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername())
-              .setEraCommonsLinkExpireTime(nihLinkExpireTime));
-    }
   }
 
   @Override

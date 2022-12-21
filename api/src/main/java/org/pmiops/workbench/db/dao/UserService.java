@@ -95,9 +95,6 @@ public interface UserService {
    */
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
-  // TODO migrate to AccessTierSyncService
-  DbUser syncEraCommonsStatus();
-
   Optional<DbUser> getByUsername(String username);
 
   // same as the above, but throw NotFoundException if not found
