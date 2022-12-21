@@ -291,18 +291,18 @@ public class AccessSyncServiceTest {
   public void testSyncDuccVersionStatus_correctVersions() {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
+    final DbUser user = userDao.findUserByUsername(USERNAME);
+    accessModuleService.updateCompletionTime(
+        user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
+
     providedWorkbenchConfig.access.currentDuccVersions.forEach(
         version -> {
-          DbUser user = userDao.findUserByUsername(USERNAME);
-          user.setDuccAgreement(signDucc(user, version));
-          user = userDao.save(user);
-          accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
+          DbUser updatedUser = userDao.save(user.setDuccAgreement(signDucc(user, version)));
+          accessSyncService.syncDuccVersionStatus(updatedUser, Agent.asSystem());
           assertModuleCompletionEqual(
               DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
-              user,
-
-              // FIXME
-              Timestamp.from(START_INSTANT.plusSeconds(12345)));
+              updatedUser,
+              Timestamp.from(START_INSTANT));
         });
   }
 
@@ -311,11 +311,14 @@ public class AccessSyncServiceTest {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    user.setDuccAgreement(signDucc(user, 2));
-    user = userDao.save(user);
+    accessModuleService.updateCompletionTime(
+        user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
+
+    user = userDao.save(user.setDuccAgreement(signDucc(user, 2)));
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
+    // the completion time we recoded here was removed because the DUCC version is non-compliant
     assertModuleCompletionMissing(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, user);
   }
 
