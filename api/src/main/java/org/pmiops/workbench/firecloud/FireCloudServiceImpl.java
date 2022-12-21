@@ -383,7 +383,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspaceResponse getWorkspaceAsService(
-      String workspaceNamespace, String firecloudName) throws WorkbenchException {
+      String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = serviceAccountWorkspaceApiProvider.get();
     return retryHandler.run(
         (context) ->
@@ -392,8 +392,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName)
-      throws WorkbenchException {
+  public FirecloudWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return retryHandler.run(
         (context) ->
@@ -402,8 +401,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace)
-      throws WorkbenchException {
+  public Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
     try {
       final FirecloudWorkspaceResponse result =
           getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
@@ -421,15 +419,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces() throws WorkbenchException {
+  public List<FirecloudWorkspaceResponse> getWorkspaces() {
     return retryHandler.run(
         (context) ->
             endUserWorkspacesApiProvider.get().listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override
-  public void deleteWorkspace(String workspaceNamespace, String firecloudName)
-      throws WorkbenchException {
+  public void deleteWorkspace(String workspaceNamespace, String firecloudName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     retryHandler.run(
         (context) -> {
@@ -439,13 +436,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudManagedGroupWithMembers getGroup(String groupName) throws WorkbenchException {
+  public FirecloudManagedGroupWithMembers getGroup(String groupName) {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.getGroup(groupName));
   }
 
   @Override
-  public FirecloudManagedGroupWithMembers createGroup(String groupName) throws WorkbenchException {
+  public FirecloudManagedGroupWithMembers createGroup(String groupName) {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.createGroup(groupName));
   }

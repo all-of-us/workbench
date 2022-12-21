@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -87,8 +88,16 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
             "Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
 
     workspaces.forEach(
-        workspace ->
-            impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
+        workspace -> {
+          try {
+            impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace());
+          } catch (NotFoundException e) {
+            LOGGER.info(
+                String.format(
+                    "Workspace %s/%s was not found - may have been concurrently deleted",
+                    workspace.getWorkspace().getNamespace(), workspace.getWorkspace().getId()));
+          }
+        });
 
     workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
