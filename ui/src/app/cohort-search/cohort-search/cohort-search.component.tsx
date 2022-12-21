@@ -377,16 +377,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Short Read Whole Genome Sequence',
+        name: 'Short Read WGS',
         group: false,
         domainId: Domain.WHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Short Read Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Short Read WGS');
       saveCriteria([param]);
     }
 
@@ -396,16 +394,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Long Read Whole Genome Sequence',
+        name: 'Long Read WGS',
         group: false,
         domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Long Read Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Long Read WGS');
       saveCriteria([param]);
     }
 

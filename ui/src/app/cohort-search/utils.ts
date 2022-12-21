@@ -119,10 +119,10 @@ export function domainToTitle(domain: any): string {
       domain = 'Fitbit';
       break;
     case Domain.WHOLEGENOMEVARIANT:
-      domain = 'Short Read Whole Genome Sequence';
+      domain = 'Short Read WGS';
       break;
     case Domain.LRWHOLEGENOMEVARIANT:
-      domain = 'Long Read Whole Genome Sequence';
+      domain = 'Long Read WGS';
       break;
     case Domain.ARRAYDATA:
       domain = 'Global Diversity Array';
