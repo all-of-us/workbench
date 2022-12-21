@@ -177,9 +177,8 @@ public class AccessSyncServiceTest {
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
     // Time passes, user renews training
+    tick();
     retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
-    fakeClock.increment(5000);
-
     accessSyncService.syncComplianceTrainingStatusV2();
 
     // Completion should be updated to the current time.
@@ -214,8 +213,8 @@ public class AccessSyncServiceTest {
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
+    tick();
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
-    fakeClock.increment(5000);
 
     // Renewing training updates completion.
     accessSyncService.syncComplianceTrainingStatusV2();
@@ -297,7 +296,11 @@ public class AccessSyncServiceTest {
 
     providedWorkbenchConfig.access.currentDuccVersions.forEach(
         version -> {
-          DbUser updatedUser = userDao.save(user.setDuccAgreement(signDucc(user, version)));
+          DbUser updatedUser =
+              userDao.save(
+                  user.setDuccAgreement(
+                      TestMockFactory.createDuccAgreement(
+                          user, version, FakeClockConfiguration.NOW)));
           accessSyncService.syncDuccVersionStatus(updatedUser, Agent.asSystem());
           assertModuleCompletionEqual(
               DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
@@ -309,12 +312,17 @@ public class AccessSyncServiceTest {
   @Test
   public void testSyncDuccVersionStatus_incorrectVersion() {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
+    int olderVersion = 2;
 
     DbUser user = userDao.findUserByUsername(USERNAME);
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, Timestamp.from(START_INSTANT));
 
-    user = userDao.save(user.setDuccAgreement(signDucc(user, 2)));
+    user =
+        userDao.save(
+            user.setDuccAgreement(
+                TestMockFactory.createDuccAgreement(
+                    user, olderVersion, FakeClockConfiguration.NOW)));
 
     accessSyncService.syncDuccVersionStatus(user, Agent.asSystem());
 
@@ -348,12 +356,6 @@ public class AccessSyncServiceTest {
 
   private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
     return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
-  }
-
-  private void clearModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
-    userAccessModuleDao
-        .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
-        .ifPresent(userAccessModuleDao::delete);
   }
 
   private void tick() {
