@@ -377,7 +377,7 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Whole Genome Sequence',
+        name: 'Short Read Whole Genome Sequence',
         group: false,
         domainId: Domain.WHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
@@ -385,7 +385,7 @@ export const CohortSearch = fp.flow(
         attributes: [],
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Whole Genome Sequence'
+        'Select Short Read Whole Genome Sequence'
       );
       saveCriteria([param]);
     }

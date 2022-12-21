@@ -119,7 +119,16 @@ export function domainToTitle(domain: any): string {
       domain = 'Fitbit';
       break;
     case Domain.WHOLEGENOMEVARIANT:
-      domain = 'Whole Genome Variant';
+      domain = 'Short Read Whole Genome Sequence';
+      break;
+    case Domain.LRWHOLEGENOMEVARIANT:
+      domain = 'Long Read Whole Genome Sequence';
+      break;
+    case Domain.ARRAYDATA:
+      domain = 'Global Diversity Array';
+      break;
+    case Domain.STRUCTURALVARIANTDATA:
+      domain = 'Structural Variant Data';
       break;
   }
   return domain;
