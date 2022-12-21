@@ -4,7 +4,6 @@ import 'app/styles/genome-extraction-datatable.css';
 import 'app/styles/sidebar.css';
 import '@clr/icons/clr-icons.min.css';
 import '@clr/icons/clr-icons.min.js';
-import '@clr/ui/clr-ui.min.css';
 import '@webcomponents/custom-elements/custom-elements.min.js';
 import 'nouislider/distribute/nouislider.min.css';
 import 'outdated-browser-rework/dist/style.css';
@@ -12,6 +11,7 @@ import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/nova-light/theme.css';
 import 'react-calendar/dist/Calendar.css';
+import 'clr-ui-temp.css';
 import 'styles.css';
 
 import * as React from 'react';

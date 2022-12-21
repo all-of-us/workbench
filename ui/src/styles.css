@@ -26,9 +26,6 @@ body, input[text] {
 }
 
 * {
-  /*
-   * Need to include elsewhere as well to override clarity's font styles.
-   */
   font-family: 'Montserrat', sans-serif;
 }
 
