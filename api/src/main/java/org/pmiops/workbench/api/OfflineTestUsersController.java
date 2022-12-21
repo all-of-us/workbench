@@ -86,14 +86,9 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
         String.format(
             "Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
 
-    // only delete this many workspaces per user; remove after we gain confidence with this tool
-    int tempLimit = 5;
-
-    workspaces.stream()
-        .limit(tempLimit)
-        .forEach(
-            workspace ->
-                impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
+    workspaces.forEach(
+        workspace ->
+            impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace()));
 
     workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
