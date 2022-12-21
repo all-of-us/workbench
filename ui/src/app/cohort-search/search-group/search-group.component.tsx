@@ -352,6 +352,9 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.SURVEY,
           Domain.FITBIT,
           Domain.WHOLEGENOMEVARIANT,
+          Domain.LRWHOLEGENOMEVARIANT,
+          Domain.ARRAYDATA,
+          Domain.STRUCTURALVARIANTDATA,
         ].includes(it.type)
       );
     }
