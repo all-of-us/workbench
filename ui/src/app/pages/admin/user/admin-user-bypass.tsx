@@ -3,9 +3,9 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, AdminTableUser } from 'generated/fetch';
 
-import { Button, IconButton } from 'app/components/buttons';
+import { Button } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
-import { Check, ClrIcon, Times } from 'app/components/icons';
+import { ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { PopupTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -234,17 +234,20 @@ export class AdminUserBypass extends React.Component<Props, State> {
               />
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <IconButton
-                icon={Times}
+              <Button
+                type='secondary'
                 onClick={() => this.cancel()}
                 disabled={!this.hasEdited()}
-              />
-              <IconButton
-                icon={Check}
+              >
+                Cancel
+              </Button>
+              <Button
                 data-test-id='toggle-save'
                 onClick={() => this.save()}
                 disabled={!this.hasEdited()}
-              />
+              >
+                Save
+              </Button>
             </div>
             {isSaving && <SpinnerOverlay />}
           </FlexColumn>
