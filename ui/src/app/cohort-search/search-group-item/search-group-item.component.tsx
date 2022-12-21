@@ -408,7 +408,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
         type === Domain.FITBIT.toString() ||
         type === Domain.WHOLEGENOMEVARIANT.toString() ||
         type === Domain.LRWHOLEGENOMEVARIANT.toString() ||
-        type === Domain.ARRAYDATA.toString()
+        type === Domain.ARRAYDATA.toString() ||
+        type === Domain.STRUCTURALVARIANTDATA.toString()
       ) {
         return !!name ? name : searchParameters[0].name;
       } else {
