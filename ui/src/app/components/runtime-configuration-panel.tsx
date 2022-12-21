@@ -21,6 +21,7 @@ import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-
 import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
+import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
 import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
@@ -29,8 +30,10 @@ import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-
 import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
 import { StartStopRuntimeButton } from 'app/components/runtime-configuration-panel/start-stop-runtime-button';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
+import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
+import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
-import { diskApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { disksApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   cond,
@@ -60,6 +63,8 @@ import {
   diffsToUpdateMessaging,
   fromAnalysisConfig,
   getAnalysisConfigDiffs,
+  isActionable,
+  isVisible,
   maybeWithExistingDisk,
   PanelContent,
   RuntimeStatusRequest,
@@ -74,14 +79,8 @@ import {
   runtimeStore,
   serverConfigStore,
   useStore,
-  withStore,
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
-import { RuntimeSummary } from './runtime-summary';
-import { TextColumn } from './text-column';
-import { AoU } from './text-wrappers';
 
 const { useState, useEffect, Fragment } = React;
 
@@ -183,35 +182,12 @@ const CreatePanel = ({
   );
 };
 
-const DisabledPanel = () => {
-  return (
-    <WarningMessage
-      data-test-id='runtime-disabled-panel'
-      iconSize={16}
-      iconPosition={'top'}
-    >
-      {
-        <TextColumn>
-          <div style={{ fontWeight: 600 }}>
-            Cloud services are disabled for this workspace.
-          </div>
-          <div style={{ marginTop: '0.5rem' }}>
-            You cannot run or edit notebooks in this workspace because billed
-            services are disabled for the workspace creator's <AoU /> Researcher
-            account.
-          </div>
-        </TextColumn>
-      }
-    </WarningMessage>
-  );
-};
-
 // Select a recommended preset configuration.
 export const PresetSelector = ({
   allowDataproc,
   setAnalysisConfig,
   disabled,
-  persistentDisk,
+  gcePersistentDisk,
 }) => {
   return (
     <Dropdown
@@ -235,7 +211,7 @@ export const PresetSelector = ({
         }))
       )(runtimePresets)}
       onChange={({ value }) => {
-        setAnalysisConfig(toAnalysisConfig(value, persistentDisk));
+        setAnalysisConfig(toAnalysisConfig(value, gcePersistentDisk));
 
         // Return false to skip the normal handling of the value selection. We're
         // abusing the dropdown here to act as if it were a menu instead.
@@ -259,25 +235,28 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     onClose = () => {},
+    initialPanelContent,
   }) => {
-    const { namespace, id, cdrVersionId, googleProject } = workspace;
-
     const { profile } = profileState;
+    const { namespace, id, cdrVersionId, googleProject } = workspace;
+    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const { hasWgsData: allowDataproc } = findCdrVersion(
       cdrVersionId,
       cdrVersionTiersResponse
     ) || { hasWgsData: false };
-    const { persistentDisk } = useStore(diskStore);
+
+    const { gcePersistentDisk } = useStore(diskStore);
     let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
-      useCustomRuntime(namespace, persistentDisk);
+      useCustomRuntime(namespace, gcePersistentDisk);
+
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
     if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
       currentRuntime = applyPresetOverride(
         // The attached disk information is lost for deleted runtimes. In any case,
         // by default we want to offer that the user reattach their existing disk,
         // if any and if the configuration allows it.
-        maybeWithExistingDisk(currentRuntime, persistentDisk)
+        maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
       );
     }
 
@@ -292,11 +271,11 @@ const PanelMain = fp.flow(
       pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
     const existingAnalysisConfig = toAnalysisConfig(
       existingRuntime,
-      persistentDisk
+      gcePersistentDisk
     );
 
     const [analysisConfig, setAnalysisConfig] = useState(
-      withAnalysisConfigDefaults(existingAnalysisConfig, persistentDisk)
+      withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
     );
     const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
@@ -304,35 +283,37 @@ const PanelMain = fp.flow(
         detachedDisk: config.detachedDisk,
       });
 
-    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
+    const initializePanelContent = (): PanelContent =>
+      cond(
+        [!!initialPanelContent, () => initialPanelContent],
+        [
+          workspace.billingStatus === BillingStatus.INACTIVE,
+          () => PanelContent.Disabled,
+        ],
+        // If there's a pendingRuntime, this means there's already a create/update
+        // in progress, even if the runtime store doesn't actively reflect this yet.
+        // Show the customize panel in this event.
+        [!!pendingRuntime, () => PanelContent.Customize],
+        [
+          currentRuntime === null ||
+            currentRuntime === undefined ||
+            status === RuntimeStatus.Unknown,
+          () => PanelContent.Create,
+        ],
+        [
+          currentRuntime?.status === RuntimeStatus.Deleted &&
+            [
+              RuntimeConfigurationType.GeneralAnalysis,
+              RuntimeConfigurationType.HailGenomicAnalysis,
+            ].includes(currentRuntime?.configurationType),
+          () => PanelContent.Create,
+        ],
+        () => PanelContent.Customize
+      );
 
-    const initialPanelContent = fp.cond([
-      [
-        ([b, _, _2]) => b === BillingStatus.INACTIVE,
-        () => PanelContent.Disabled,
-      ],
-      // If there's a pendingRuntime, this means there's already a create/update
-      // in progress, even if the runtime store doesn't actively reflect this yet.
-      // Show the customize panel in this event.
-      [() => !!pendingRuntime, () => PanelContent.Customize],
-      [
-        ([, r, s]) =>
-          r === null || r === undefined || s === RuntimeStatus.Unknown,
-        () => PanelContent.Create,
-      ],
-      [
-        ([, r, _]) =>
-          r.status === RuntimeStatus.Deleted &&
-          [
-            RuntimeConfigurationType.GeneralAnalysis,
-            RuntimeConfigurationType.HailGenomicAnalysis,
-          ].includes(r.configurationType),
-        () => PanelContent.Create,
-      ],
-      [() => true, () => PanelContent.Customize],
-    ])([workspace.billingStatus, currentRuntime, status]);
-    const [panelContent, setPanelContent] =
-      useState<PanelContent>(initialPanelContent);
+    const [panelContent, setPanelContent] = useState<PanelContent>(
+      initializePanelContent()
+    );
 
     const validMainMachineTypes =
       analysisConfig.computeType === ComputeType.Standard
@@ -354,29 +335,23 @@ const PanelMain = fp.flow(
       }
     }, [analysisConfig.computeType]);
 
-    const runtimeExists =
-      (status &&
-        ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) ||
-      !!pendingRuntime;
-    const disableControls =
-      runtimeExists &&
-      ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
-        status as RuntimeStatus
-      );
+    const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
+    const disableControls = runtimeExists && !isActionable(status);
 
     const dataprocExists =
       runtimeExists && existingAnalysisConfig.dataprocConfig !== null;
 
     const attachedPdExists =
-      !!persistentDisk &&
+      !!gcePersistentDisk &&
       runtimeExists &&
       existingAnalysisConfig.diskConfig.detachable;
-    const unattachedPdExists = !!persistentDisk && !attachedPdExists;
+    const unattachedPdExists = !!gcePersistentDisk && !attachedPdExists;
     const unattachedDiskNeedsRecreate =
       unattachedPdExists &&
       analysisConfig.diskConfig.detachable &&
-      (persistentDisk.size > analysisConfig.diskConfig.size ||
-        persistentDisk.diskType !== analysisConfig.diskConfig.detachableType);
+      (gcePersistentDisk.size > analysisConfig.diskConfig.size ||
+        gcePersistentDisk.diskType !==
+          analysisConfig.diskConfig.detachableType);
 
     const disableDetachableReason = cond(
       [
@@ -682,7 +657,7 @@ const PanelMain = fp.flow(
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
                     computeType={existingAnalysisConfig.computeType}
-                    disk={persistentDisk}
+                    disk={gcePersistentDisk}
                   />
                 );
               } else {
@@ -705,7 +680,10 @@ const PanelMain = fp.flow(
             () => (
               <ConfirmDeleteUnattachedPD
                 onConfirm={async () => {
-                  await diskApi().deleteDisk(namespace, persistentDisk.name);
+                  await disksApi().deleteDisk(
+                    namespace,
+                    gcePersistentDisk.name
+                  );
                   onClose();
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
@@ -718,7 +696,10 @@ const PanelMain = fp.flow(
               <ConfirmDeleteUnattachedPD
                 showCreateMessaging
                 onConfirm={async () => {
-                  await diskApi().deleteDisk(namespace, persistentDisk.name);
+                  await disksApi().deleteDisk(
+                    namespace,
+                    gcePersistentDisk.name
+                  );
                   requestAnalysisConfig(analysisConfig);
                   onClose();
                 }}
@@ -767,7 +748,7 @@ const PanelMain = fp.flow(
                     {...{
                       allowDataproc,
                       setAnalysisConfig,
-                      persistentDisk,
+                      gcePersistentDisk,
                       disabled: disableControls,
                     }}
                   />
@@ -840,7 +821,7 @@ const PanelMain = fp.flow(
                             setAnalysisConfig(
                               withAnalysisConfigDefaults(
                                 { ...analysisConfig, computeType },
-                                persistentDisk
+                                gcePersistentDisk
                               )
                             )
                           }
@@ -926,12 +907,12 @@ const PanelMain = fp.flow(
                         diskConfig,
                         detachedDisk: diskConfig.detachable
                           ? null
-                          : persistentDisk,
+                          : gcePersistentDisk,
                       })
                     }
                     disabled={disableControls}
                     disableDetachableReason={disableDetachableReason}
-                    existingDisk={persistentDisk}
+                    existingDisk={gcePersistentDisk}
                     computeType={analysisConfig.computeType}
                   />
                 )}
@@ -1051,7 +1032,7 @@ const PanelMain = fp.flow(
                   setPanelContent(PanelContent.ConfirmUpdate);
                 }}
                 onCancel={() => setPanelContent(PanelContent.Customize)}
-                disk={persistentDisk}
+                disk={gcePersistentDisk}
               />
             ),
           ],
@@ -1066,14 +1047,15 @@ const PanelMain = fp.flow(
   }
 );
 
-export const RuntimeConfigurationPanel = withStore(
-  runtimeStore,
-  'runtime'
-)(({ runtime, onClose = () => {} }) => {
-  if (!runtime.runtimeLoaded) {
+export const RuntimeConfigurationPanel = ({
+  onClose = () => {},
+  initialPanelContent = null,
+}) => {
+  const { runtimeLoaded } = useStore(runtimeStore);
+  if (!runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '5rem' }} />;
   }
 
   // TODO: can we remove this indirection?
-  return <PanelMain onClose={onClose} />;
-});
+  return <PanelMain {...{ onClose, initialPanelContent }} />;
+};

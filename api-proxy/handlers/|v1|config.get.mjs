@@ -16,6 +16,7 @@ const body = JSON.stringify(
   unsafeAllowSelfBypass: true,
   defaultFreeCreditsDollarLimit: 300,
   enableEventDateModifier: false,
+  enableGkeApp: true,
   enableResearchReviewPrompt: false,
   enableRasLoginGovLinking: true,
   enforceRasLoginGovLinking: true,

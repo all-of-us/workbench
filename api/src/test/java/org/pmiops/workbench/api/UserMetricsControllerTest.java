@@ -49,6 +49,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -354,7 +355,8 @@ public class UserMetricsControllerTest {
         .thenReturn(
             ImmutableList.of(dbUserRecentlyModifiedResource1, dbUserRecentlyModifiedResource2));
     when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
-        .thenReturn(ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
+        .thenReturn(
+            ImmutableSet.of(BlobId.of("bkt", NotebookUtils.withNotebookPath("notebook.ipynb"))));
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();

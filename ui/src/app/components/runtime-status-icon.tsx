@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
 import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
 import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
@@ -13,7 +14,8 @@ import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
   compoundRuntimeOpStore,
-  RuntimeStore,
+  runtimeStore,
+  useStore,
   withStore,
 } from 'app/utils/stores';
 
@@ -29,28 +31,37 @@ const styles = reactStyles({
     border: `1px solid ${colors.white}`,
     borderRadius: '.25rem',
   },
-  statusIconContainer: {
-    alignSelf: 'flex-end',
-    margin: '0 .1rem .1rem auto',
-  },
   rotate: {
     animation: 'rotation 2s infinite linear',
   },
 });
 
+const errIcon = (
+  <FontAwesomeIcon
+    icon={faCircle}
+    style={{
+      ...styles.asyncOperationStatusIcon,
+      ...styles.runtimeStatusIconOutline,
+      color: colors.asyncOperationStatus.error,
+    }}
+  />
+);
+
 export const RuntimeStatusIcon = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps')
 )(
   (props: {
-    store: RuntimeStore;
+    style: CSSProperties;
     compoundRuntimeOps: CompoundRuntimeOpStore;
     workspaceNamespace: string;
   }) => {
-    const { store, compoundRuntimeOps, workspaceNamespace } = props;
+    const { style, compoundRuntimeOps, workspaceNamespace } = props;
 
-    let status = store?.runtime?.status;
+    const { runtime, loadingError } = useStore(runtimeStore);
+    let status = runtime?.status;
     if (
       (!status || status === RuntimeStatus.Deleted) &&
+      compoundRuntimeOps &&
       workspaceNamespace in compoundRuntimeOps
     ) {
       // If a compound operation is still pending, and we're transitioning
@@ -63,24 +74,10 @@ export const RuntimeStatusIcon = fp.flow(
     }
 
     return (
-      <FlexRow
-        data-test-id='runtime-status-icon-container'
-        style={styles.statusIconContainer}
-      >
+      <FlexRow {...{ style }} data-test-id='runtime-status-icon-container'>
         {(() => {
-          const errIcon = (
-            <FontAwesomeIcon
-              icon={faCircle}
-              style={{
-                ...styles.asyncOperationStatusIcon,
-                ...styles.runtimeStatusIconOutline,
-                color: colors.asyncOperationStatus.error,
-              }}
-            />
-          );
-
-          if (store.loadingError) {
-            if (store.loadingError instanceof ComputeSecuritySuspendedError) {
+          if (loadingError) {
+            if (loadingError instanceof ComputeSecuritySuspendedError) {
               return (
                 <FontAwesomeIcon
                   icon={faLock}

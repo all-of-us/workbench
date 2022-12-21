@@ -15,7 +15,6 @@ from os.path import isfile, join
 surveys = ['ENGLISHBasics_DataDictionary',
            'ENGLISHLifestyle_DataDictionary',
            'ENGLISHOverallHealth_DataDictionary',
-           'ENGLISHPersonalMedicalHistory_DataDictionary',
            'ENGLISHHealthCareAccessUtiliza_DataDictionary',
            'ENGLISHNewYearMinuteSurveyOnCO_DataDictionary',
            'ENGLISHSocialDeterminantsOfHea_DataDictionary',
@@ -137,9 +136,6 @@ def main():
         blob.upload_from_filename(home_dir + "/" + f)
 
     # These files are static and never change moving forward
-    bucket.copy_blob(bucket.blob('redcap/familyhealthhistory_staged.csv'),
-                     bucket,
-                     dataset + '/cdr_csv_files/familyhealthhistory_staged.csv')
     bucket.copy_blob(bucket.blob('redcap/cope_staged.csv'),
                      bucket,
                      dataset + '/cdr_csv_files/cope_staged.csv')

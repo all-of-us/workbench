@@ -378,7 +378,7 @@ describe('NotebookLauncher', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
-      wrapper.exists({ 'data-test-id': 'runtime-intializer-create' })
+      wrapper.exists({ 'data-test-id': 'runtime-initializer-create' })
     ).toBeTruthy();
   });
 
@@ -392,12 +392,12 @@ describe('NotebookLauncher', () => {
       await waitForFakeTimersAndUpdate(wrapper);
 
       wrapper
-        .find({ 'data-test-id': `runtime-intializer-${action}` })
+        .find({ 'data-test-id': `runtime-initializer-${action}` })
         .simulate('click');
       await waitForFakeTimersAndUpdate(wrapper);
 
       expect(
-        wrapper.exists({ 'data-test-id': `runtime-intializer-${action}` })
+        wrapper.exists({ 'data-test-id': `runtime-initializer-${action}` })
       ).toBeFalsy();
       expect(wrapper.text()).toContain(
         'This action requires an analysis environment.'
@@ -413,12 +413,12 @@ describe('NotebookLauncher', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     wrapper
-      .find({ 'data-test-id': 'runtime-intializer-create' })
+      .find({ 'data-test-id': 'runtime-initializer-create' })
       .simulate('click');
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
-      wrapper.exists({ 'data-test-id': 'runtime-intializer-create' })
+      wrapper.exists({ 'data-test-id': 'runtime-initializer-create' })
     ).toBeFalsy();
     expect(runtimeStub.runtime).toBeTruthy();
   });

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,9 @@ import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
+import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurveyOneTimeCode;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
@@ -52,6 +56,11 @@ public class UserDaoTest {
   @Autowired private UserAccessTierDao userAccessTierDao;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
+  @Autowired
+  private NewUserSatisfactionSurveyOneTimeCodeDao newUserSatisfactionSurveyOneTimeCodeDao;
+
+  @Autowired private NewUserSatisfactionSurveyDao newUserSatisfactionSurveyDao;
 
   @Autowired private UserDao userDao;
 
@@ -424,6 +433,66 @@ public class UserDaoTest {
         .containsExactly(alice, bob);
   }
 
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersCreatedBetweenTimes() {
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = creationTimeWindowStart.plus(1, ChronoUnit.DAYS);
+
+    // Invalid user near window start
+    userWithCreationTime(Timestamp.from(creationTimeWindowStart.minus(1, ChronoUnit.SECONDS)));
+    DbUser validUserNearWindowStart =
+        userWithCreationTime(Timestamp.from(creationTimeWindowStart.plus(1, ChronoUnit.SECONDS)));
+    DbUser validUserNearWindowEnd =
+        userWithCreationTime(Timestamp.from(creationTimeWindowEnd.minus(1, ChronoUnit.SECONDS)));
+    // Invalid user near window end
+    userWithCreationTime(Timestamp.from(creationTimeWindowEnd.plus(1, ChronoUnit.SECONDS)));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users).containsExactly(validUserNearWindowStart, validUserNearWindowEnd);
+  }
+
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutOneTimeCodes() {
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
+
+    DbUser userWithoutCode = userWithCreationTime(validCreationTime);
+    DbUser userWithCode = userWithCreationTime(validCreationTime);
+    newUserSatisfactionSurveyOneTimeCodeDao.save(
+        new DbNewUserSatisfactionSurveyOneTimeCode().setUser(userWithCode));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users).containsExactly(userWithoutCode);
+  }
+
+  @Test
+  public void
+      testFindUsersBetweenCreationTimeWithoutNewUserSurveyOrCode_returnsUsersWithoutSurveys() {
+    Instant creationTimeWindowStart = Instant.parse("2022-01-01T00:00:00.00Z");
+    Instant creationTimeWindowEnd = now().toInstant().plus(2, ChronoUnit.DAYS);
+    Timestamp validCreationTime = Timestamp.from(now().toInstant().minus(1, ChronoUnit.DAYS));
+
+    DbUser userWithoutSurvey = userWithCreationTime(validCreationTime);
+    DbUser userWithSurvey = userWithCreationTime(validCreationTime);
+    newUserSatisfactionSurveyDao.save(
+        new DbNewUserSatisfactionSurvey()
+            .setSatisfaction(Satisfaction.NEUTRAL)
+            .setAdditionalInfo("")
+            .setUser(userWithSurvey));
+
+    List<DbUser> users =
+        userDao.findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+            Timestamp.from(creationTimeWindowStart), Timestamp.from(creationTimeWindowEnd));
+    assertThat(users).containsExactly(userWithoutSurvey);
+  }
+
   private List<DbUser> insertTestUsers(
       boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
 
@@ -516,5 +585,11 @@ public class UserDaoTest {
 
   private Timestamp now() {
     return Timestamp.from(Instant.now());
+  }
+
+  // When testing in CircleCI, but not locally, the first save overwrites the creationTime
+  private DbUser userWithCreationTime(Timestamp creationTime) {
+    DbUser user = userDao.save(new DbUser());
+    return userDao.save(user.setCreationTime(creationTime));
   }
 }

@@ -8,15 +8,6 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 
 public interface NotebooksService {
 
-  String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
-  String NOTEBOOK_EXTENSION = ".ipynb";
-
-  static String withNotebookExtension(String notebookName) {
-    return notebookName.endsWith(NOTEBOOK_EXTENSION)
-        ? notebookName
-        : notebookName.concat(NOTEBOOK_EXTENSION);
-  }
-
   List<FileDetail> getNotebooks(String workspaceNamespace, String workspaceName);
 
   /**
@@ -32,17 +23,21 @@ public interface NotebooksService {
   FileDetail copyNotebook(
       String fromWorkspaceNamespace,
       String fromWorkspaceName,
-      String fromNotebookName,
+      String fromNotebookNameWithExtension,
       String toWorkspaceNamespace,
       String toWorkspaceName,
-      String newNotebookName);
+      String newNotebookNameWithExtension);
 
-  FileDetail cloneNotebook(String workspaceNamespace, String workspaceName, String notebookName);
+  FileDetail cloneNotebook(
+      String workspaceNamespace, String workspaceName, String notebookNameWithExtension);
 
   void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName);
 
   FileDetail renameNotebook(
-      String workspaceNamespace, String workspaceName, String notebookName, String newName);
+      String workspaceNamespace,
+      String workspaceName,
+      String originalNameWithExtension,
+      String newNameWithExtension);
 
   JSONObject getNotebookContents(String bucketName, String notebookName);
 
@@ -51,11 +46,13 @@ public interface NotebooksService {
   KernelTypeEnum getNotebookKernel(
       String workspaceNamespace, String workspaceName, String notebookName);
 
-  void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents);
+  void saveNotebook(
+      String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
   public String convertNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 
-  String adminGetReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
+  String adminGetReadOnlyHtml(
+      String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension);
 }

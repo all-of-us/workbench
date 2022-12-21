@@ -335,11 +335,11 @@ FROM
     (
         SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.measurement_source_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Measurement'
             and vocabulary_id = 'CPT4'
-            and measurement_concept_id NOT IN
+            and measurement_source_concept_id NOT IN
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
@@ -392,11 +392,11 @@ FROM
     (
         SELECT concept_name, vocabulary_id, concept_id, concept_code, count(DISTINCT person_id) cnt
         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_concept_id = b.concept_id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.observation_source_concept_id = b.concept_id
         WHERE standard_concept = 'S'
             and domain_id = 'Observation'
             and vocabulary_id = 'CPT4'
-            and observation_concept_id NOT IN
+            and observation_source_concept_id NOT IN
                 (
                     SELECT concept_id
                     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
@@ -514,3 +514,30 @@ FROM
 WHERE x.concept_id = y.concept_id
     and x.domain_id = 'DRUG'
     and x.type in ('CVX', 'HCPCS', 'RxNorm Extension')"
+
+echo "PROCEDURE - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'PROCEDURE'
+ AND type IN ('CPT4', 'ICD9Proc', 'ICD10PCS')
+ AND is_standard = 1
+ AND has_hierarchy = 0"
+
+echo "Measurement - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'MEASUREMENT'
+ AND type IN ('CPT4')
+ AND is_standard = 1
+ AND has_hierarchy = 0"
+
+echo "Observation - Delete all source concepts listed as standard"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+ WHERE domain_id = 'OBSERVATION'
+ AND type IN ('CPT4')
+ AND is_standard = 1
+ AND has_hierarchy = 0"

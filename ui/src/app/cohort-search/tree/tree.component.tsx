@@ -10,7 +10,6 @@ import {
 } from 'generated/fetch';
 
 import { SearchBar } from 'app/cohort-search/search-bar/search-bar.component';
-import { notSynthAndHasSurveyConductData } from 'app/cohort-search/search-group-list/search-group-list.component';
 import { ppiSurveys } from 'app/cohort-search/search-state.service';
 import { TreeNode } from 'app/cohort-search/tree-node/tree-node.component';
 import { ClrIcon } from 'app/components/icons';
@@ -190,14 +189,9 @@ export const CriteriaTree = fp.flow(
       const { concept, domain, selectedIds, source } = this.props;
       if (source === 'conceptSetDetails') {
         if (prevProps.concept !== concept) {
-          const { cdrVersionId } = currentWorkspaceStore.getValue();
           this.setState({ children: concept, loading: false });
           if (domain === Domain.SURVEY) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = concept;
-              ppiSurveys.next(rootSurveys);
-            }
+            this.setPPISurveys(concept);
           }
         }
       }
@@ -223,14 +217,9 @@ export const CriteriaTree = fp.flow(
           node: { id, isStandard, parentId, subtype, type },
           selectedSurvey,
           source,
-          workspace,
         } = this.props;
         this.setState({ loading: true });
-        const {
-          cdrVersionId,
-          id: workspaceId,
-          namespace,
-        } = currentWorkspaceStore.getValue();
+        const { id: workspaceId, namespace } = currentWorkspaceStore.getValue();
         const criteriaType =
           domain === Domain.DRUG ? CriteriaType.ATC.toString() : type;
         const promises = [
@@ -282,17 +271,7 @@ export const CriteriaTree = fp.flow(
             ),
           });
         }
-        const filterSurveyConductData =
-          domain === Domain.SURVEY &&
-          notSynthAndHasSurveyConductData(workspace);
-        // Surveys to hide if hasSurveyConductData cdr flag is enabled
-        const surveyConductConceptIds = [1740639, 43529712, 43528698];
-        // TODO Remove condition and filter after fix for survey conduct data in new dataset is complete
-        const rootNodes = filterSurveyConductData
-          ? criteriaResponse.items.filter(
-              ({ conceptId }) => !surveyConductConceptIds.includes(conceptId)
-            )
-          : criteriaResponse.items;
+        const rootNodes = criteriaResponse.items;
         if (domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT) {
           let children = [];
           const rootParentId = domain === Domain.VISIT ? -1 : 0;
@@ -315,6 +294,7 @@ export const CriteriaTree = fp.flow(
                 (child) => child.name === selectedSurvey
               ),
             });
+            this.setPPISurveys(rootNodes);
           } else {
             // Temp: This should be handle in API
             this.updatePpiSurveys(
@@ -338,11 +318,7 @@ export const CriteriaTree = fp.flow(
                 : rootNodes,
           });
           if (domain === Domain.SURVEY) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = rootNodes;
-              ppiSurveys.next(rootSurveys);
-            }
+            this.setPPISurveys(rootNodes);
           }
         }
       } catch (error) {
@@ -350,6 +326,15 @@ export const CriteriaTree = fp.flow(
         this.setState({ error: true });
       } finally {
         this.setState({ loading: false });
+      }
+    }
+
+    setPPISurveys(rootSurveyList: Criteria[]) {
+      const { cdrVersionId } = currentWorkspaceStore.getValue();
+      const rootSurveys = ppiSurveys.getValue();
+      if (!rootSurveys[cdrVersionId]) {
+        rootSurveys[cdrVersionId] = rootSurveyList;
+        ppiSurveys.next(rootSurveys);
       }
     }
 
@@ -367,7 +352,7 @@ export const CriteriaTree = fp.flow(
       const {
         node: { domainId, isStandard, type },
       } = this.props;
-      const { cdrVersionId, id, namespace } = currentWorkspaceStore.getValue();
+      const { id, namespace } = currentWorkspaceStore.getValue();
       if (selectedSurveyChild && selectedSurveyChild.length > 0) {
         cohortBuilderApi()
           .findCriteriaBy(
@@ -383,11 +368,7 @@ export const CriteriaTree = fp.flow(
           );
       } else {
         this.setState({ children: resp });
-        const rootSurveys = ppiSurveys.getValue();
-        if (!rootSurveys[cdrVersionId]) {
-          rootSurveys[cdrVersionId] = resp;
-          ppiSurveys.next(rootSurveys);
-        }
+        this.setPPISurveys(resp);
       }
     }
 

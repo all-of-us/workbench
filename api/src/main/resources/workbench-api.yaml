@@ -1519,21 +1519,12 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/unsafe-self-bypass-access-requirement":
+  "/v1/admin/unsafe-self-bypass-access-requirements":
     post:
       tags:
-      - userAdmin
-      consumes:
-      - application/json
-      description: 'Updates the given user to bypass the request access requirement'
-      parameters:
-      - in: body
-        name: request
-        schema:
-          "$ref": "#/definitions/AccessBypassRequest"
-        description: 'Whether the requirement should be bypassed or not. Defaults
-          to true, so an empty body  will cause the requirement to be bypassed.'
-      operationId: unsafeSelfBypassAccessRequirement
+        - userAdmin
+      description: 'Updates the given user to bypass all access requirements'
+      operationId: unsafeSelfBypassAccessRequirements
       responses:
         200:
           description: success
@@ -1541,10 +1532,6 @@ paths:
             "$ref": "#/definitions/EmptyResponse"
         403:
           description: Self bypass is disallowed in this environment
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        400:
-          description: No module exists with name submitted
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/users/{usernameWithoutGsuiteDomain}/audit":
@@ -2066,6 +2053,39 @@ paths:
       - cron
       description: ''
       operationId: checkObjectNameSize
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/ensureTestUserTosCompliance":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Keep test users' TOS compliance statuses in the appropriate states"
+      operationId: ensureTestUserTosCompliance
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/emailNewUserSatisfactionSurveyLinks":
+    get:
+      security: []
+      tags:
+      - offlineNewUserSatisfactionSurvey
+      - cron
+      description: Email newly eligible users a link to take the new user satisfaction survey.
+      operationId: emailNewUserSatisfactionSurveyLinks
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/deleteTestUserWorkspaces":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Delete all test users' workspaces"
+      operationId: deleteAllTestUserWorkspaces
       responses:
         204:
           description: No content.
@@ -4167,6 +4187,41 @@ paths:
       responses:
         200:
           description: 'The survey responses were successfully stored.'
+  "/v1/surveys/newUserSatisfactionSurvey/validateOneTimeCode/{oneTimeCode}":
+    get:
+      security: []
+      tags:
+      - surveys
+      description: Checks if a given one-time can be used to create a new user satisfaction survey response.
+      operationId: validateOneTimeCodeForNewUserSatisfactionSurvey
+      parameters:
+        - in: path
+          name: oneTimeCode
+          type: string
+          required: true
+          description: the one-time code being validated
+      responses:
+        200:
+          description: 'The server successfully determined if the one-time code is valid.'
+          schema:
+            type: boolean
+  "/v1/surveys/newUserSatisfactionSurvey/withOneTimeCode":
+    post:
+      security: []
+      tags:
+      - surveys
+      description: Stores user responses for the new user satisfaction survey if they have a valid one-time code.
+      operationId: createNewUserSatisfactionSurveyWithOneTimeCode
+      parameters:
+      - in: body
+        name: NewUserSatisfactionSurveyWithOneTimeCode
+        description: Survey response data and the one-time code
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateNewUserSatisfactionSurveyWithOneTimeCode"
+      responses:
+        200:
+          description: 'The survey responses were successfully stored.'
 definitions:
   ArchivalStatus:
     type: string
@@ -4225,6 +4280,8 @@ definitions:
     - FITBIT_SLEEP_LEVEL
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
+    - LR_WHOLE_GENOME_VARIANT
+    - STRUCTURAL_VARIANT_DATA
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
   Surveys:
@@ -4512,6 +4569,8 @@ definitions:
     - PARSE_ERROR
     - USER_DISABLED
     - COMPUTE_SECURITY_SUSPENDED
+    - TERRA_TOS_NON_COMPLIANT
+    - TERRA_TOS_COMPLIANCE_UNKNOWN
   StatusResponse:
     type: object
     required:
@@ -6113,6 +6172,9 @@ definitions:
         $ref: '#/definitions/DemographicSurveyV2'
       newUserSatisfactionSurveyEligibility:
         type: boolean
+      newUserSatisfactionSurveyEligibilityEndTime:
+        type: string
+        description: Timestamp indicating when the user is ineligible to take the new user survey in ISO 8601 format
 
   AccessModuleStatus:
     type: object
@@ -9301,6 +9363,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingInstitution"
+      newUserSatisfactionSurveys:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingNewUserSatisfactionSurvey"
       workspaceFreeTierUsage:
         type: array
         items:
@@ -9814,6 +9880,30 @@ definitions:
       registeredTierRequirement:
         description: Institution tegisted tier requirement.
         "$ref": "#/definitions/InstitutionMembershipRequirement"
+  ReportingNewUserSatisfactionSurvey:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: ID of the survey response.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      created:
+        type: string
+        format: date-time
+        description: Time the survey response was created.
+      modified:
+        type: string
+        format: date-time
+        description: Time the survey response was last modified.
+      satisfaction:
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
+      additionalInfo:
+        type: string
+        description: Additional information regarding the satisfaction score.
 
   ReportingDataset:
     x-aou-note: |-
@@ -10232,18 +10322,30 @@ definitions:
       - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER
 
+  CreateNewUserSatisfactionSurveyWithOneTimeCode:
+    type: object
+    properties:
+      createNewUserSatisfactionSurvey:
+        "$ref": "#/definitions/CreateNewUserSatisfactionSurvey"
+      oneTimeCode:
+        type: string
+        description: One-time code for creating this survey response.
+
   CreateNewUserSatisfactionSurvey:
     type: object
     properties:
       satisfaction:
-        type: string
-        description: How satisfied the user is with the researcher workbench
-        enum:
-          - VERY_UNSATISFIED
-          - UNSATISFIED
-          - NEUTRAL
-          - SATISFIED
-          - VERY_SATISFIED
+        "$ref": "#/definitions/NewUserSatisfactionSurveySatisfaction"
       additionalInfo:
         type: string
         description: Additional information regarding their satisfaction score
+
+  NewUserSatisfactionSurveySatisfaction:
+    type: string
+    description: How satisfied the user is with the researcher workbench.
+    enum:
+      - VERY_UNSATISFIED
+      - UNSATISFIED
+      - NEUTRAL
+      - SATISFIED
+      - VERY_SATISFIED

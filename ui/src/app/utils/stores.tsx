@@ -4,6 +4,7 @@ import { useParams } from 'react-router';
 import {
   CdrVersionTier,
   ConfigResponse,
+  CreateNewUserSatisfactionSurvey,
   Disk,
   Profile,
   Runtime,
@@ -112,6 +113,18 @@ export const profileStore = atom<ProfileStore>({
     }),
 });
 
+export interface CreateNewUserSatisfactionSurveyStore {
+  newUserSatisfactionSurveyData: CreateNewUserSatisfactionSurvey;
+}
+
+export const createNewUserSatisfactionSurveyStore =
+  atom<CreateNewUserSatisfactionSurveyStore>({
+    newUserSatisfactionSurveyData: {
+      satisfaction: undefined,
+      additionalInfo: '',
+    },
+  });
+
 export interface NotificationStore {
   title: string;
   message: string;
@@ -182,12 +195,12 @@ export const runtimeStore = atom<RuntimeStore>({
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
 export interface DiskStore {
   workspaceNamespace: string | null | undefined;
-  persistentDisk: Disk | null | undefined;
+  gcePersistentDisk: Disk | null | undefined;
 }
 
 export const diskStore = atom<DiskStore>({
   workspaceNamespace: undefined,
-  persistentDisk: undefined,
+  gcePersistentDisk: undefined,
 });
 
 export interface StackdriverErrorReporterStore {

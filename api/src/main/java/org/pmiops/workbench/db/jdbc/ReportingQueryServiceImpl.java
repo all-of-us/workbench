@@ -22,12 +22,14 @@ import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
+import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
@@ -64,6 +66,33 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .cost(rs.getDouble("cost"))
                 .userId(rs.getLong("user_id"))
                 .workspaceId(rs.getLong("workspace_id")));
+  }
+
+  @Override
+  public List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(
+      long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT\n"
+                + "  new_user_satisfaction_survey_id,\n"
+                + "  user_id,\n"
+                + "  creation_time,\n"
+                + "  satisfaction,\n"
+                + "  additional_info\n"
+                + "FROM new_user_satisfaction_survey\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingNewUserSatisfactionSurvey()
+                .id(rs.getLong("new_user_satisfaction_survey_id"))
+                .userId(rs.getLong("user_id"))
+                .created(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                // Users cannot modify this survey, so `modified` is the same as `created`.
+                .modified(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                .satisfaction(
+                    NewUserSatisfactionSurveySatisfaction.valueOf(rs.getString("satisfaction")))
+                .additionalInfo(rs.getString("additional_info")));
   }
 
   @Override
@@ -506,6 +535,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getCohortsCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
+  }
+
+  @Override
+  public int getNewUserSatisfactionSurveysCount() {
+    return jdbcTemplate.queryForObject(
+        "SELECT count(*) FROM new_user_satisfaction_survey", Integer.class);
   }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */

@@ -199,6 +199,8 @@ export const CohortSearch = fp.flow(
         this.selectFitbit();
       } else if (domain === Domain.WHOLEGENOMEVARIANT) {
         this.selectGenome();
+      } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
+        this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
       }
@@ -386,6 +388,25 @@ export const CohortSearch = fp.flow(
       saveCriteria([param]);
     }
 
+    selectLongReadGenome() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Long Read Whole Genome Sequence',
+        group: false,
+        domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Long Read Whole Genome Sequence'
+      );
+      saveCriteria([param]);
+    }
+
     selectArrayData() {
       const param = {
         id: null,
@@ -449,10 +470,7 @@ export const CohortSearch = fp.flow(
                 }
               >
                 {domain === Domain.PERSON ? (
-                  <div
-                    data-test-id='demographics'
-                    style={{ flex: 1, overflow: 'auto' }}
-                  >
+                  <div data-test-id='demographics'>
                     <Demographics
                       criteriaType={type}
                       select={this.addSelection}

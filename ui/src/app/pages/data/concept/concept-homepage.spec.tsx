@@ -10,10 +10,8 @@ import {
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { cdrVersionStore } from 'app/utils/stores';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
-import { cdrVersionTiersResponse } from 'testing/stubs/cdr-versions-api-stub';
 import {
   CohortBuilderServiceStub,
   DomainStubVariables,
@@ -41,7 +39,6 @@ describe('ConceptHomepage', () => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', () => {

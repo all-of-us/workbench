@@ -13,7 +13,6 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { DemographicSurvey } from 'app/components/demographic-survey';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ExclamationTriangle } from 'app/components/icons';
 import {
@@ -22,7 +21,7 @@ import {
   ValidationError,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { Modal, withErrorModal, withSuccessModal } from 'app/components/modals';
+import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import {
@@ -43,7 +42,6 @@ import {
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -78,7 +76,6 @@ interface ProfilePageProps
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
-  showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 export const ProfileComponent = fp.flow(
@@ -94,7 +91,6 @@ export const ProfileComponent = fp.flow(
       this.state = {
         currentProfile: this.initializeProfile(),
         institutions: [],
-        showDemographicSurveyModal: false,
         updating: false,
       };
     }
@@ -244,8 +240,7 @@ export const ProfileComponent = fp.flow(
       const {
         profileState: { profile },
       } = this.props;
-      const { currentProfile, updating, showDemographicSurveyModal } =
-        this.state;
+      const { currentProfile, updating } = this.state;
       const {
         givenName,
         familyName,
@@ -364,9 +359,6 @@ export const ProfileComponent = fp.flow(
           </div>
         );
       };
-
-      const enableUpdatedDemographicSurvey =
-        serverConfigStore.get().config.enableUpdatedDemographicSurvey;
 
       /* API returns completion time as a Date object but creates that Date object with a
        * seconds representation instead of a milliseconds representation, so it needs to be adjusted
@@ -565,13 +557,7 @@ export const ProfileComponent = fp.flow(
                 />
                 <DemographicSurveyPanel
                   demographicSurveyCompletionTime={
-                    enableUpdatedDemographicSurvey
-                      ? demographicSurveyV2CompletionTimeMillis
-                      : profile.demographicSurveyCompletionTime
-                  }
-                  firstSignInTime={profile.firstSignInTime}
-                  onClick={() =>
-                    this.setState({ showDemographicSurveyModal: true })
+                    demographicSurveyV2CompletionTimeMillis
                   }
                 />
                 {canRenderSignedDucc(profile.duccSignedVersion) && (
@@ -611,23 +597,6 @@ export const ProfileComponent = fp.flow(
                 </TooltipTrigger>
               </div>
             </div>
-            {showDemographicSurveyModal && (
-              <Modal width={850}>
-                <DemographicSurvey
-                  profile={currentProfile}
-                  onCancelClick={() => {
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  saveProfile={(profileWithDemoSurvey) => {
-                    this.saveProfile(profileWithDemoSurvey);
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  enableCaptcha={false}
-                  enablePrevious={false}
-                  showStepCount={false}
-                />
-              </Modal>
-            )}
           </div>
         </FadeBox>
       );

@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -262,7 +263,9 @@ public class UserRecentResourceServiceTest {
     CLOCK.increment(2000);
 
     userRecentResourceService.updateNotebookEntry(
-        newWorkspace.getWorkspaceId(), user.getUserId(), "notebooks");
+        newWorkspace.getWorkspaceId(),
+        user.getUserId(),
+        NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY);
     userRecentResourceService.updateCohortEntry(
         newWorkspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
 

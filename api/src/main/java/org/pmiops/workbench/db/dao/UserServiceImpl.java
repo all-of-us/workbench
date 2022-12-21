@@ -1,10 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
-
 import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -12,7 +7,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,9 +21,9 @@ import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
-import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -37,7 +31,6 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
@@ -53,12 +46,10 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -104,7 +95,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
-  private final InstitutionService institutionService;
+  private final AccessSyncService accessSyncService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -125,7 +116,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
-      InstitutionService institutionService) {
+      AccessSyncService accessSyncService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -141,7 +132,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
-    this.institutionService = institutionService;
+    this.accessSyncService = accessSyncService;
   }
 
   /**
@@ -157,7 +148,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      dbUser = updateUserAccessTiers(dbUser, agent);
+      dbUser = accessSyncService.updateUserAccessTiers(dbUser, agent);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -204,84 +195,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         }
       }
     }
-  }
-
-  /**
-   * Ensures that the data access tiers for the user reflect the state of other fields on the user
-   */
-  @Override
-  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
-    final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
-
-    final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
-    if (!newAccessTiers.equals(previousAccessTiers)) {
-      userServiceAuditor.fireUpdateAccessTiersAction(
-          dbUser, previousAccessTiers, newAccessTiers, agent);
-    }
-
-    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
-    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
-
-    // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
-    final List<DbAccessTier> tiersForRemoval =
-        Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
-    tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
-
-    return dbUser;
-  }
-
-  private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
-    // If user does NOT have access to RT, they should not have access to any TIER
-    if (!shouldGrantUserTierAccess(
-        dbUser, REQUIRED_MODULES_FOR_REGISTERED_TIER, REGISTERED_TIER_SHORT_NAME)) {
-      return Collections.emptyList();
-    }
-
-    // User is already qualified for RT
-    List<DbAccessTier> userAccessTiers =
-        com.google.common.collect.Lists.newArrayList(accessTierService.getRegisteredTierOrThrow());
-
-    // Add Controlled Access Tier to the list, if user has completed/bypassed all CT Steps.
-    accessTierService
-        .getAccessTierByName(CONTROLLED_TIER_SHORT_NAME)
-        .ifPresent(
-            tier -> {
-              if (shouldGrantUserTierAccess(
-                  dbUser, REQUIRED_MODULES_FOR_CONTROLLED_TIER, CONTROLLED_TIER_SHORT_NAME)) {
-                userAccessTiers.add(tier);
-              }
-            });
-
-    return userAccessTiers;
-  }
-
-  private boolean shouldGrantUserTierAccess(
-      DbUser user, List<DbAccessModuleName> requiredModules, String tierShortName) {
-    boolean allStandardRequiredModulesCompliant =
-        requiredModules.stream()
-            .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));
-    boolean eraCompliant =
-        accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
-
-    boolean eRARequiredForTier = true;
-    boolean institutionalEmailValidForTier = false;
-    Optional<Institution> institution = institutionService.getByUser(user);
-    if (institution.isPresent()) {
-      // eRA is required when login.gov linking is not enabled or user institution requires that in
-      // tier requirement.
-      eRARequiredForTier =
-          !configProvider.get().access.enableRasLoginGovLinking
-              || institutionService.eRaRequiredForTier(institution.get(), tierShortName);
-      institutionalEmailValidForTier =
-          institutionService.validateInstitutionalEmail(
-              institution.get(), user.getContactEmail(), tierShortName);
-    } else {
-      log.warning(String.format("Institution not found for user %s", user.getUsername()));
-    }
-    return !user.getDisabled()
-        && (!eRARequiredForTier || eraCompliant)
-        && institutionalEmailValidForTier
-        && allStandardRequiredModulesCompliant;
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -660,7 +573,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
               accessModuleService.updateCompletionTime(
                   dbUser, accessModuleName, timestamp.orElse(null)));
 
-      return updateUserAccessTiers(dbUser, agent);
+      return accessSyncService.updateUserAccessTiers(dbUser, agent);
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
@@ -781,7 +694,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           targetUser, DbAccessModuleName.TWO_FACTOR_AUTH, null);
     }
 
-    return updateUserAccessTiers(targetUser, agent);
+    return accessSyncService.updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -796,7 +709,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           targetUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, null);
     }
 
-    return updateUserAccessTiers(targetUser, agent);
+    return accessSyncService.updateUserAccessTiers(targetUser, agent);
   }
 
   @Override
@@ -879,7 +792,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, clockNow());
 
-    return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
@@ -889,7 +802,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, clockNow());
 
-    return updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
+    return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */

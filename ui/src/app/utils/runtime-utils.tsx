@@ -16,7 +16,7 @@ import {
 } from 'generated/fetch';
 
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { diskApi, runtimeApi } from 'app/services/swagger-fetch-clients';
+import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
 import { switchCase, withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
@@ -870,14 +870,18 @@ const useRuntime = (currentWorkspaceNamespace) => {
             return;
           }
         }
-        if (
-          currentWorkspaceNamespace === runtimeStore.get().workspaceNamespace
-        ) {
-          runtimeStore.set({
-            workspaceNamespace: currentWorkspaceNamespace,
+        const currentStore = runtimeStore.get();
+        if (currentWorkspaceNamespace === currentStore.workspaceNamespace) {
+          const newStore = {
+            ...currentStore,
             runtime: leoRuntime,
             runtimeLoaded: true,
-          });
+          };
+          // checking for (deep) value equality substantially reduces the number of runtimeStore updates over the
+          // default (reference) equality check, because runtime is often a new object
+          if (!fp.isEqual(currentStore, newStore)) {
+            runtimeStore.set(newStore);
+          }
         }
       }
     );
@@ -927,11 +931,17 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
       return;
     }
     const getDisk = withAsyncErrorHandling(
-      () => diskStore.set({ workspaceNamespace: null, persistentDisk: null }),
+      () =>
+        diskStore.set({ workspaceNamespace: null, gcePersistentDisk: null }),
       async () => {
-        let persistentDisk: Disk = null;
+        let gcePersistentDisk: Disk = null;
         try {
-          persistentDisk = await diskApi().getDisk(currentWorkspaceNamespace);
+          const availableDisks = await disksApi().listDisksInWorkspace(
+            currentWorkspaceNamespace
+          );
+          gcePersistentDisk = availableDisks.find(
+            (disk) => !!disk.isGceRuntime
+          );
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;
@@ -940,7 +950,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
         if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
           diskStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
-            persistentDisk,
+            gcePersistentDisk,
           });
         }
       }
@@ -1033,9 +1043,9 @@ export const useRuntimeStatus = (
       [
         RuntimeStatusRequest.DeletePD,
         () => {
-          return diskApi().deleteDisk(
+          return disksApi().deleteDisk(
             currentWorkspaceNamespace,
-            diskStore.get().persistentDisk.name
+            diskStore.get().gcePersistentDisk.name
           );
         },
       ],
@@ -1094,7 +1104,7 @@ export const useCustomRuntime = (
   useEffect(() => {
     let mounted = true;
     const aborter = new AbortController();
-    const existingDisk = diskStore.get().persistentDisk;
+    const existingDisk = diskStore.get().gcePersistentDisk;
     const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
       const applyRuntimeUpdate = async () => {
@@ -1114,7 +1124,7 @@ export const useCustomRuntime = (
 
         // A disk update may be need in combination with a runtime update.
         if (mostSevereDiskDiff === AnalysisDiffState.CAN_UPDATE_IN_PLACE) {
-          await diskApi().updateDisk(
+          await disksApi().updateDisk(
             currentWorkspaceNamespace,
             existingDisk.name,
             requestedDisk.size
@@ -1165,7 +1175,7 @@ export const useCustomRuntime = (
         if (runtimeExists) {
           await applyRuntimeUpdate();
         } else if (diskNeedsSizeIncrease(requestedDisk, existingDisk)) {
-          await diskApi().updateDisk(
+          await disksApi().updateDisk(
             currentWorkspaceNamespace,
             existingDisk.name,
             requestedDisk.size
@@ -1244,3 +1254,11 @@ export enum PanelContent {
   ConfirmUpdateWithDiskDelete = 'ConfirmUpdateWithDiskDelete',
   SparkConsole = 'SparkConsole',
 }
+
+// should we show the runtime in the UI?
+export const isVisible = (status: RuntimeStatus) =>
+  status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status);
+
+// is the runtime in a state where the user can take action?
+export const isActionable = (status: RuntimeStatus) =>
+  [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);

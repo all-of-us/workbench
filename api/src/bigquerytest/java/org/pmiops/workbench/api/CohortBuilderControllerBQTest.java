@@ -666,6 +666,30 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .ancestorData(false);
   }
 
+  private static SearchParameter longReadWholeGenomeVariant() {
+    return new SearchParameter()
+        .domain(Domain.LR_WHOLE_GENOME_VARIANT.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
+  private static SearchParameter arrayData() {
+    return new SearchParameter()
+        .domain(Domain.ARRAY_DATA.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
+  private static SearchParameter structuralVariantData() {
+    return new SearchParameter()
+        .domain(Domain.STRUCTURAL_VARIANT_DATA.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -779,6 +803,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                     .name(AttrName.NUM)
                     .operator(Operator.EQUAL)
                     .operands(ImmutableList.of("10"))));
+  }
+
+  private static SearchParameter pfhhSurveyAnswer() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.ANSWER.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(false)
+        .conceptId(43528652L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.PERSONAL_FAMILY_HEALTH_HISTORY)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("1740639")),
+                new Attribute()
+                    .name(AttrName.CAT)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("43528385"))));
   }
 
   private static Modifier ageModifier() {
@@ -1103,6 +1148,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Domain.SURVEY.toString(),
             ImmutableList.of(survey().conceptId(1585899L)),
             ImmutableList.of(ageModifier()));
+
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countSubjectsForPFHHSurveyWithCatiModifiers() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(pfhhSurveyAnswer()),
+            ImmutableList.of(catiModifier()));
 
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
@@ -1469,6 +1526,37 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createCohortDefinition(
             Domain.WHOLE_GENOME_VARIANT.toString(),
             ImmutableList.of(wholeGenomeVariant()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsLongReadWholeGenomeVariant() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.LR_WHOLE_GENOME_VARIANT.toString(),
+            ImmutableList.of(longReadWholeGenomeVariant()),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsArrayData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.ARRAY_DATA.toString(), ImmutableList.of(arrayData()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsStructuralVariantData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.STRUCTURAL_VARIANT_DATA.toString(),
+            ImmutableList.of(structuralVariantData()),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);

@@ -15,11 +15,7 @@ import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
-import {
-  notebooksApi,
-  profileApi,
-  workspacesApi,
-} from 'app/services/swagger-fetch-clients';
+import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -27,6 +23,8 @@ import { convertToResource } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+
+import { dropNotebookFileSuffix, getExistingNotebooks } from './util';
 
 const styles = {
   heading: {
@@ -148,19 +146,16 @@ export const NotebookList = withCurrentWorkspace()(
 
     private async loadNotebooks() {
       try {
-        const {
-          workspace: { namespace, id },
-        } = this.props;
+        const { workspace } = this.props;
         this.setState({ loading: true });
-        const notebookList = await notebooksApi().getNoteBookList(
-          namespace,
-          id
-        );
-        this.setState({ notebookList });
-        const notebookNameList = notebookList.map((fd) =>
-          fd.name.slice(0, -'.ipynb'.length)
-        );
-        this.setState({ notebookNameList });
+        getExistingNotebooks(workspace).then((notebookList) => {
+          this.setState({
+            notebookList,
+            notebookNameList: notebookList.map((fd) =>
+              dropNotebookFileSuffix(fd.name)
+            ),
+          });
+        });
       } catch (error) {
         console.error(error);
       } finally {
