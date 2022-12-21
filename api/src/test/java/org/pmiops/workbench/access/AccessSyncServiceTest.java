@@ -354,10 +354,6 @@ public class AccessSyncServiceTest {
     assertThat(getModuleCompletionTime(moduleName, user).orElse(null)).isNull();
   }
 
-  private DbUserCodeOfConductAgreement signDucc(DbUser dbUser, int version) {
-    return TestMockFactory.createDuccAgreement(dbUser, version, FakeClockConfiguration.NOW);
-  }
-
   private void tick() {
     fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
