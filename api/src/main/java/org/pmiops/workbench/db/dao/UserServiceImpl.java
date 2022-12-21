@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
+import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierService;
@@ -464,62 +465,40 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public Set<DbUser> findActiveUsersByUsernames(List<String> usernames) {
     return userDao.findUserByUsernameInAndDisabledFalse(usernames);
   }
-  /**
-   * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
-   *
-   * <p>This method saves the updated user object to the database and returns it.
-   */
-  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus, Agent agent) {
+
+  @Nullable
+  private Timestamp calculateEraCompletion(
+      DbUser user, FirecloudNihStatus nihStatus, Timestamp nihLinkExpireTime) {
+    Timestamp eraCommonsCompletionTime =
+        accessModuleService
+            .getAccessModuleStatus(user, DbAccessModuleName.ERA_COMMONS)
+            .map(AccessModuleStatus::getCompletionEpochMillis)
+            .map(Timestamp::new)
+            .orElse(null);
+
     Timestamp now = clockNow();
 
-    return updateUserWithRetries(
-        user -> {
-          if (nihStatus != null) {
-            Timestamp eraCommonsCompletionTime =
-                accessModuleService
-                    .getAccessModuleStatus(user, DbAccessModuleName.ERA_COMMONS)
-                    .map(AccessModuleStatus::getCompletionEpochMillis)
-                    .map(Timestamp::new)
-                    .orElse(null);
+    // NihStatus should never come back from firecloud with an empty linked username.
+    // If that is the case, there is an error with FC, because we should get a 404
+    // in that case. Leaving the null checking in for code safety reasons
 
-            Timestamp nihLinkExpireTime =
-                Timestamp.from(Instant.ofEpochSecond(nihStatus.getLinkExpireTime()));
+    if (nihStatus.getLinkedNihUsername() == null) {
+      // If FireCloud says we have no NIH link, always clear the completion time.
+      eraCommonsCompletionTime = null;
+    } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
+      // If the link expiration time has changed, we treat this as a "new" completion of the
+      // access requirement.
+      eraCommonsCompletionTime = now;
+    } else if (nihStatus.getLinkedNihUsername() != null
+        && !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) {
+      // If the linked username has changed, we treat this as a new completion time.
+      eraCommonsCompletionTime = now;
+    } else if (eraCommonsCompletionTime == null) {
+      // If the user hasn't previously completed this access requirement, set the time to now.
+      eraCommonsCompletionTime = now;
+    }
 
-            // NihStatus should never come back from firecloud with an empty linked username.
-            // If that is the case, there is an error with FC, because we should get a 404
-            // in that case. Leaving the null checking in for code safety reasons
-
-            if (nihStatus.getLinkedNihUsername() == null) {
-              // If FireCloud says we have no NIH link, always clear the completion time.
-              eraCommonsCompletionTime = null;
-            } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
-              // If the link expiration time has changed, we treat this as a "new" completion of the
-              // access requirement.
-              eraCommonsCompletionTime = now;
-            } else if (nihStatus.getLinkedNihUsername() != null
-                && !nihStatus
-                    .getLinkedNihUsername()
-                    .equals(user.getEraCommonsLinkedNihUsername())) {
-              // If the linked username has changed, we treat this as a new completion time.
-              eraCommonsCompletionTime = now;
-            } else if (eraCommonsCompletionTime == null) {
-              // If the user hasn't yet completed this access requirement, set the time to now.
-              eraCommonsCompletionTime = now;
-            }
-
-            user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
-            user.setEraCommonsLinkExpireTime(nihLinkExpireTime);
-            accessModuleService.updateCompletionTime(
-                user, DbAccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
-          } else {
-            user.setEraCommonsLinkedNihUsername(null);
-            user.setEraCommonsLinkExpireTime(null);
-            accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
-          }
-          return user;
-        },
-        targetUser,
-        agent);
+    return eraCommonsCompletionTime;
   }
 
   /** Syncs the eraCommons access module status for the current user. */
@@ -527,7 +506,23 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    return setEraCommonsStatus(user, nihStatus, Agent.asUser(user));
+    if (nihStatus == null) {
+      accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
+      return userDao.save(
+          user.setEraCommonsLinkedNihUsername(null).setEraCommonsLinkExpireTime(null));
+    } else {
+      Timestamp nihLinkExpireTime =
+          Timestamp.from(Instant.ofEpochSecond(nihStatus.getLinkExpireTime()));
+      Timestamp eraCommonsCompletionTime =
+          calculateEraCompletion(user, nihStatus, nihLinkExpireTime);
+
+      accessModuleService.updateCompletionTime(
+          user, DbAccessModuleName.ERA_COMMONS, eraCommonsCompletionTime);
+
+      return userDao.save(
+          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername())
+              .setEraCommonsLinkExpireTime(nihLinkExpireTime));
+    }
   }
 
   @Override
