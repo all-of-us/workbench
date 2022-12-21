@@ -113,12 +113,13 @@ export const NewChartGallery = fp.flow(withRouter)(
       // all api to get chart data
       const { ns, wsid } = this.props.match.params;
       const cid = parseQueryParams(this.props.location.search).get('cohortId');
+      const domain = parseQueryParams(this.props.location.search).get('domain');
 
       const newChartData = await chartBuilderApi().getChartData(
         ns,
         wsid,
         +cid,
-        null
+        domain
       );
 
       this.setState({
