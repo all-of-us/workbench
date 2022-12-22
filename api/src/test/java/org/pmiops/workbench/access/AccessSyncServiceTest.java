@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -10,15 +9,12 @@ import static org.mockito.Mockito.when;
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sun.swing.internal.plaf.metal.resources.metal_it;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -127,7 +123,8 @@ public class AccessSyncServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
+    Instant originalCompletion = fakeClock.instant();
+    long issued = originalCompletion.getEpochSecond() - 100;
 
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(
@@ -140,14 +137,15 @@ public class AccessSyncServiceTest {
     // The user should be updated in the database with a non-empty completion.
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
 
     // Completion timestamp should not change when the method is called again.
     tick();
+    assertThat(fakeClock.instant().isAfter(originalCompletion)).isTrue();
     accessSyncService.syncComplianceTrainingStatusV2();
 
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(originalCompletion));
   }
 
   @Test
@@ -346,40 +344,128 @@ public class AccessSyncServiceTest {
 
   @Test
   public void testSyncEraCommonsStatus() {
-    Instant originalCompletion = fakeClock.instant();
+    assertModuleCompletionMissing(
+        DbAccessModuleName.ERA_COMMONS, userDao.findUserByUsername(USERNAME));
+
+    String nihUsername = "nih-user";
+    Instant nihExpirationTime = START_INSTANT.plusSeconds(12345);
+    // FireCloud stores the NIH status in seconds, not msecs.
+    long nihExpirationEpochSeconds = nihExpirationTime.toEpochMilli() / 1000;
 
     FirecloudNihStatus nihStatus = new FirecloudNihStatus();
-    nihStatus.setLinkedNihUsername("nih-user");
-    // FireCloud stores the NIH status in seconds, not msecs.
-    final long FC_LINK_EXPIRATION_SECONDS = START_INSTANT.toEpochMilli() / 1000;
-    nihStatus.setLinkExpireTime(FC_LINK_EXPIRATION_SECONDS);
-
+    nihStatus.setLinkedNihUsername(nihUsername);
+    nihStatus.setLinkExpireTime(nihExpirationEpochSeconds);
     when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
+    Instant originalCompletionTime = fakeClock.instant();
     accessSyncService.syncEraCommonsStatus();
 
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletion));
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletionTime));
 
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
-    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(nihExpirationTime));
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(nihUsername);
 
-    // Completion timestamp should not change when the method is called again.
+    // the completion time is unrelated to the link expiration time
+    assertThat(user.getEraCommonsLinkExpireTime().equals(Timestamp.from(originalCompletionTime)))
+        .isFalse();
+
+    // Completion timestamp should not change when the method is called again
+    // and the NIH linked username and expiration time have not changed
+
     tick();
-    assertThat(fakeClock.instant().isAfter(originalCompletion)).isTrue();
+    assertThat(fakeClock.instant().isAfter(originalCompletionTime)).isTrue();
 
     accessSyncService.syncEraCommonsStatus();
     assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletion));
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletionTime));
   }
 
+  @Test
+  public void testSyncEraCommonsStatus_updatesWhenNihNameChanges() {
+    assertModuleCompletionMissing(
+        DbAccessModuleName.ERA_COMMONS, userDao.findUserByUsername(USERNAME));
 
-  // TODO other nih state change tests
+    String nihUsername = "nih-user";
+    Instant nihExpirationTime = START_INSTANT.plusSeconds(12345);
+    // FireCloud stores the NIH status in seconds, not msecs.
+    long nihExpirationEpochSeconds = nihExpirationTime.toEpochMilli() / 1000;
 
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
+    nihStatus.setLinkedNihUsername(nihUsername);
+    nihStatus.setLinkExpireTime(nihExpirationEpochSeconds);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    Instant originalCompletionTime = fakeClock.instant();
+    accessSyncService.syncEraCommonsStatus();
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletionTime));
+
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(nihExpirationTime));
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(nihUsername);
+
+    nihStatus.setLinkedNihUsername("a new name");
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    // Completion timestamp should now change when the method is called again
+
+    tick();
+    Instant newCompletionTime = fakeClock.instant();
+    assertThat(newCompletionTime.isAfter(originalCompletionTime)).isTrue();
+
+    accessSyncService.syncEraCommonsStatus();
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(newCompletionTime));
+  }
 
   @Test
-  public void testClearsEraCommonsStatus() {
+  public void testSyncEraCommonsStatus_updatesWhenNihExpirationChanges() {
+    assertModuleCompletionMissing(
+        DbAccessModuleName.ERA_COMMONS, userDao.findUserByUsername(USERNAME));
+
+    String nihUsername = "nih-user";
+    Instant nihExpirationTime = START_INSTANT.plusSeconds(12345);
+    // FireCloud stores the NIH status in seconds, not msecs.
+    long nihExpirationEpochSeconds = nihExpirationTime.toEpochMilli() / 1000;
+
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
+    nihStatus.setLinkedNihUsername(nihUsername);
+    nihStatus.setLinkExpireTime(nihExpirationEpochSeconds);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    Instant originalCompletionTime = fakeClock.instant();
+    accessSyncService.syncEraCommonsStatus();
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletionTime));
+
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(nihExpirationTime));
+    assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo(nihUsername);
+
+    long newNihExpirationEpochSeconds = nihExpirationEpochSeconds + 123;
+    nihStatus.setLinkExpireTime(newNihExpirationEpochSeconds);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    // Completion timestamp should now change when the method is called again
+
+    tick();
+    Instant newCompletionTime = fakeClock.instant();
+    assertThat(newCompletionTime.isAfter(originalCompletionTime)).isTrue();
+    // the new completion time is unrelated to the link expiration time
+    assertThat(newCompletionTime.equals(Instant.ofEpochSecond(newNihExpirationEpochSeconds)))
+        .isFalse();
+
+    accessSyncService.syncEraCommonsStatus();
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(newCompletionTime));
+  }
+
+  @Test
+  public void testSyncEraCommonsStatus_clearsWhenNihNull() {
     // Put the test user in a state where eRA commons is completed.
     DbUser testUser = userDao.findUserByUsername(USERNAME);
     testUser.setEraCommonsLinkedNihUsername("nih-user");
@@ -387,6 +473,64 @@ public class AccessSyncServiceTest {
 
     accessModuleService.updateCompletionTime(
         testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, testUser, Timestamp.from(START_INSTANT));
+
+    // null status from NIH will clear the user's completion
+    when(mockFireCloudService.getNihStatus()).thenReturn(null);
+
+    accessSyncService.syncEraCommonsStatus();
+
+    DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionMissing(DbAccessModuleName.ERA_COMMONS, retrievedUser);
+  }
+
+  @Test
+  public void testSyncEraCommonsStatus_clearsWhenNihNameNull() {
+    // Put the test user in a state where eRA commons is completed.
+    DbUser testUser = userDao.findUserByUsername(USERNAME);
+    testUser.setEraCommonsLinkedNihUsername("nih-user");
+    testUser = userDao.save(testUser);
+
+    accessModuleService.updateCompletionTime(
+        testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, testUser, Timestamp.from(START_INSTANT));
+
+    // null username from NIH will clear the user's completion
+
+    Instant nihExpirationTime = START_INSTANT.plusSeconds(12345);
+    // FireCloud stores the NIH status in seconds, not msecs.
+    long nihExpirationEpochSeconds = nihExpirationTime.toEpochMilli() / 1000;
+
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
+    nihStatus.setLinkedNihUsername(null);
+    nihStatus.setLinkExpireTime(nihExpirationEpochSeconds);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    accessSyncService.syncEraCommonsStatus();
+
+    DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
+    assertModuleCompletionMissing(DbAccessModuleName.ERA_COMMONS, retrievedUser);
+  }
+
+  @Test
+  public void testSyncEraCommonsStatus_clearsWhenNihTimeNull() {
+    // Put the test user in a state where eRA commons is completed.
+    DbUser testUser = userDao.findUserByUsername(USERNAME);
+    testUser.setEraCommonsLinkedNihUsername("nih-user");
+    testUser = userDao.save(testUser);
+
+    accessModuleService.updateCompletionTime(
+        testUser, DbAccessModuleName.ERA_COMMONS, Timestamp.from(START_INSTANT));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.ERA_COMMONS, testUser, Timestamp.from(START_INSTANT));
+
+    // null expiration time from NIH will clear the user's completion
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
+    nihStatus.setLinkedNihUsername("nih-user");
+    nihStatus.setLinkExpireTime(null);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
     accessSyncService.syncEraCommonsStatus();
 

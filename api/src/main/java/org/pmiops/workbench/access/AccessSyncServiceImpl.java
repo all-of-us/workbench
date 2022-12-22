@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.javers.common.collections.Lists;
-import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -277,7 +276,14 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus == null) {
+
+    // NihStatus should never come back from firecloud with an empty linked username.
+    // If that is the case, there is an error with FC, because we should get a 404
+    // in that case. Leaving the null checking in for code safety reasons
+
+    if (nihStatus == null
+        || nihStatus.getLinkedNihUsername() == null
+        || nihStatus.getLinkExpireTime() == null) {
       accessModuleService.updateCompletionTime(user, DbAccessModuleName.ERA_COMMONS, null);
       return userDao.save(
           user.setEraCommonsLinkedNihUsername(null).setEraCommonsLinkExpireTime(null));
@@ -296,7 +302,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     }
   }
 
-  @Nullable
   private Timestamp calculateEraCompletion(
       DbUser user, FirecloudNihStatus nihStatus, Timestamp nihLinkExpireTime) {
     Timestamp eraCommonsCompletionTime =
@@ -308,14 +313,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     Timestamp now = clockNow();
 
-    // NihStatus should never come back from firecloud with an empty linked username.
-    // If that is the case, there is an error with FC, because we should get a 404
-    // in that case. Leaving the null checking in for code safety reasons
-
-    if (nihStatus.getLinkedNihUsername() == null) {
-      // If FireCloud says we have no NIH link, always clear the completion time.
-      eraCommonsCompletionTime = null;
-    } else if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
+    if (!nihLinkExpireTime.equals(user.getEraCommonsLinkExpireTime())) {
       // If the link expiration time has changed, we treat this as a "new" completion of the
       // access requirement.
       eraCommonsCompletionTime = now;
