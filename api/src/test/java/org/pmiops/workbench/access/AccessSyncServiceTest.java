@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.sun.swing.internal.plaf.metal.resources.metal_it;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
@@ -344,6 +346,8 @@ public class AccessSyncServiceTest {
 
   @Test
   public void testSyncEraCommonsStatus() {
+    Instant originalCompletion = fakeClock.instant();
+
     FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
     // FireCloud stores the NIH status in seconds, not msecs.
@@ -356,18 +360,23 @@ public class AccessSyncServiceTest {
 
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletion));
 
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
     tick();
-    accessSyncService.syncEraCommonsStatus();
+    assertThat(fakeClock.instant().isAfter(originalCompletion)).isTrue();
 
+    accessSyncService.syncEraCommonsStatus();
     assertModuleCompletionEqual(
-        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.ERA_COMMONS, user, Timestamp.from(originalCompletion));
   }
+
+
+  // TODO other nih state change tests
+
 
   @Test
   public void testClearsEraCommonsStatus() {
@@ -382,37 +391,7 @@ public class AccessSyncServiceTest {
     accessSyncService.syncEraCommonsStatus();
 
     DbUser retrievedUser = userDao.findUserByUsername(USERNAME);
-    assertModuleCompletionEqual(DbAccessModuleName.ERA_COMMONS, retrievedUser, null);
-  }
-
-  @Test
-  public void testSyncEraCommonsStatus_lastModified() {
-    // User starts without eRA commons.
-    Supplier<Timestamp> getLastModified =
-        () -> userDao.findUserByUsername(USERNAME).getLastModifiedTime();
-    Timestamp modifiedTime0 = getLastModified.get();
-
-    when(mockFireCloudService.getNihStatus())
-        .thenReturn(
-            new FirecloudNihStatus()
-                .linkedNihUsername("nih-user")
-                // FireCloud stores the NIH status in seconds, not msecs.
-                .linkExpireTime(START_INSTANT.toEpochMilli() / 1000));
-
-    tick();
-    accessSyncService.syncEraCommonsStatus();
-    Timestamp modifiedTime1 = getLastModified.get();
-    assertWithMessage(
-            "modified time should change when eRA commons status changes, want %s < %s",
-            modifiedTime0, modifiedTime1)
-        .that(modifiedTime0.before(modifiedTime1))
-        .isTrue();
-
-    accessSyncService.syncEraCommonsStatus();
-    assertWithMessage(
-            "modified time should not change on sync, if eRA commons status doesn't change")
-        .that(modifiedTime1)
-        .isEqualTo(getLastModified.get());
+    assertModuleCompletionMissing(DbAccessModuleName.ERA_COMMONS, retrievedUser);
   }
 
   private Optional<Timestamp> getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
