@@ -406,11 +406,11 @@ export const Chart = withCurrentWorkspace()(
       let width = 100;
       if (chartRow) {
         width = width / chartRow.length;
-        console.log('chartRow[0]:',chartRow[0]);
+        console.log('chartRow[0]:', chartRow[0]);
       }
 
       const canned = getCanned();
-      console.log('canned:',canned);
+      console.log('canned:', canned);
 
       return (
         <React.Fragment>

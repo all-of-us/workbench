@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 export function getCanned() {
   // http://jsfiddle.net/Moonbird_IT/30Luzmya/2/
@@ -7,9 +6,9 @@ export function getCanned() {
       type: 'column',
     },
     legend: {
-      layout: 'vertical',
+      layout: 'horizontal',
       align: 'right',
-      verticalAlign: 'middle',
+      verticalAlign: 'top',
     },
     xAxis: {
       type: 'category',
