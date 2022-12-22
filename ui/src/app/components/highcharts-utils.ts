@@ -1,6 +1,7 @@
 import * as highCharts from 'highcharts';
 
 import { ChartData, Domain } from 'generated/fetch';
+
 import hcColors from './highcharts-colors';
 
 export enum Category {
@@ -66,20 +67,21 @@ export function getChartCategoryCounts(
 ) {
   const categoryProp = category.toString();
   let total = 0;
-  const categoryTotals = {};
-  const categoryCounts = dataForCharts
+  let categoryCounts = [];
+  categoryCounts = dataForCharts
     .reduce((accum, record) => {
       const key = record[categoryProp];
-      if (!categoryTotals[key]) {
-        categoryTotals[key] = {
+      const rec = accum.find((rec) => rec.categoryName === key);
+      // console.log('key:',key,'rec:',rec);
+      if (!rec) {
+        accum.push({
           category: categoryProp,
           categoryName: key,
           categoryCount: record.count,
           categorySortKey: getCategorySortKey(domain, categoryProp, record),
-        };
-        accum.push(categoryTotals[key]);
+        });
       } else {
-        categoryTotals[key].categoryCount += record.count;
+        rec.categoryCount += record.count;
       }
       total += record.count;
       return accum;
@@ -87,24 +89,26 @@ export function getChartCategoryCounts(
     .sort(
       (a, b) => a.x - b.x || a.categorySortKey.localeCompare(b.categorySortKey)
     );
+  console.log('categoryCounts:', categoryCounts);
+
   // compute %
   // categoryTotal * 100 / sum(categoryTotal)
   const categories = [];
+
   const series = categoryCounts.reduce((accum, rec, i) => {
     categories.push(rec.categoryName);
     rec.x = i;
     rec.y = (100 * rec.categoryCount) / total;
     rec.total = total;
     rec.color = hcColors.hcColors[categoryProp][i];
-    const seriesObj = {
+    accum.push({
       name: rec.categoryName,
       color: rec.color,
       data: [rec],
-    };
-    accum.push(seriesObj);
+    });
     return accum;
   }, []);
-  console.log('series:',series);
+  console.log('series:', series);
 
   const chart = {
     chart: {
@@ -117,9 +121,14 @@ export function getChartCategoryCounts(
     xAxis: [getXAxis(categories, false, '', 0)],
     yAxis: [getYAxis()],
     legend: {
-      layout: 'vertical',
-      align: 'right',
-      verticalAlign: 'middle',
+      layout: 'horizontal',
+      // align: 'right',
+      verticalAlign: 'top',
+      itemMarginBottom: 5,
+      useHTML: true,
+      labelFormatter: function () {
+        return this.name.slice(0, 15) + (this.name.length > 15 ? '...' : '');
+      },
     },
     plotOptions: {
       series: {
@@ -146,7 +155,7 @@ export function getChartCategoryCounts(
         );
       },
     },
-    series: [{ data: series }],
+    series: series,
   };
   return chart;
 }
