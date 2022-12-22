@@ -1,3 +1,142 @@
+img {
+  border-style: none;
+}
+
+hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  margin: 0;
+}
+
+button,
+html [type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
+button,
+input {
+  overflow: visible;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button:focus {
+  text-decoration: none;
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+
+legend {
+  box-sizing: border-box;
+  color: inherit;
+  display: table;
+  max-width: 100%;
+  padding: 0;
+  white-space: normal;
+}
+
+section {
+  display: block;
+}
+
+h1 {
+  font-weight: 200;
+  letter-spacing: normal;
+  line-height: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+h2 {
+  font-weight: 200;
+  letter-spacing: normal;
+  line-height: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+h3 {
+  font-weight: 200;
+  letter-spacing: normal;
+  line-height: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+h4 {
+  color: #000;
+  font-weight: 200;
+  font-size: 0.75rem;
+  letter-spacing: normal;
+  line-height: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+h5 {
+  color: #565656;
+  font-weight: 400;
+  font-size: 0.66667rem;
+  letter-spacing: 0.01em;
+  line-height: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+h6 {
+  font-weight: 500;
+  font-size: 0.58333rem;
+  letter-spacing: normal;
+  line-height: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+  color: #313131;
+}
+
+
+body p {
+  color: #565656;
+  font-size: 0.58333rem;
+  letter-spacing: normal;
+  line-height: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+html {
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  color: #565656;
+  font-size: 24px;
+}
+
 h1, h1 > *,
 h2, h2 > *,
 h3, h3 > * {
@@ -10,6 +149,7 @@ body .h-color {
 
 h1 {
   font-size: 36px;
+  margin: 0.67em 0;
 }
 
 h2 {
@@ -26,13 +166,10 @@ body, input[text] {
 }
 
 * {
-  /*
-   * Need to include elsewhere as well to override clarity's font styles.
-   */
   font-family: 'Montserrat', sans-serif;
 }
 
-b,strong {
+b, strong {
   font-weight: bold;
 }
 
@@ -40,9 +177,20 @@ a {
   color: #6fb4ff;
   cursor: pointer;
   cursor: hand;
+  background-color: transparent;
+  -webkit-text-decoration-skip: objects;
+}
+
+a:active,
+a:hover {
+  outline-width: 0;
 }
 
 body {
+  margin: 0;
+  font-size: 0.58333rem;
+  letter-spacing: normal;
+  line-height: 1rem;
   background-color: #FAFBFC;
   min-height: 100vh;
   width: 100%;
@@ -53,6 +201,7 @@ textarea {
   height: 10em;
   resize: none;
   padding: 0.1rem 0.2rem;
+  overflow: auto;
 }
 
 input[type=text], input[type=password] {
@@ -61,6 +210,17 @@ input[type=text], input[type=password] {
 
 input[type=text]:focus, input[type=password]:focus {
   border: 1px solid #0094d2;
+}
+
+[type="checkbox"],
+[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+[type="number"]::-webkit-inner-spin-button,
+[type="number"]::-webkit-outer-spin-button {
+  height: auto;
 }
 
 .loading-text {
@@ -171,14 +331,6 @@ form .form-block > label,
   font-weight: 300;
 }
 
-button:focus {
-    text-decoration: none;
-    outline:none;
-    border: none;
-    box-shadow: none;
-  background: none;
-}
-
 /*
  * Force the Zendesk web widget "launcher" button to be hidden at all times.
  * This is a style-based workaround to ensure the Zendesk launcher button isn't
@@ -284,4 +436,3 @@ iframe#launcher {
 body .p-paginator .p-paginator-pages {
   height: auto;
 }
-
