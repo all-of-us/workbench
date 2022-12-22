@@ -103,6 +103,26 @@ export interface ChartState {
   chartRow: any;
 }
 
+function getSeperatorDiv(seperatorText) {
+  return (
+    <div style={styles.row}>
+      <div
+        style={{
+          ...styles.col,
+          flex: '0 0 100%',
+          maxWidth: '100%',
+        }}
+      >
+        <hr style={{ ...styles.col, color: '#FF0000' }}></hr>
+        <div style={styles.chartTitle}>
+          <h1>{seperatorText}</h1>
+        </div>
+        <hr style={{ ...styles.col, color: '#FF00FF' }}></hr>
+      </div>
+    </div>
+  );
+}
+
 export const Chart = withCurrentWorkspace()(
   class extends React.Component<ChartProps, ChartState> {
     constructor(props: ChartProps) {
@@ -127,30 +147,21 @@ export const Chart = withCurrentWorkspace()(
       };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       // this.getChartDataOld();
-      this.doCharts();
+      await this.doCharts();
     }
 
-    componentDidUpdate(prevProps: Readonly<ChartProps>) {
-      const {
-        domain,
-        cohortId,
-        workspace: { id, namespace },
-      } = this.props;
+    async componentDidUpdate(prevProps: Readonly<ChartProps>) {
+      const { domain } = this.props;
 
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
-        this.doCharts();
+        await this.doCharts();
       }
     }
 
     async doCharts() {
-      const {
-        domain,
-        cohortId,
-        workspace: { id, namespace },
-      } = this.props;
       // get new chart data
       const newChartData = await this.fetchChartData().then((result) => {
         return result.items;
@@ -158,13 +169,13 @@ export const Chart = withCurrentWorkspace()(
 
       this.setState({ newChartData: newChartData });
       // get available categories and their valueMap
-      const { categoryNames, categoryValues } =
-        getAvailableCategories(newChartData);
+      getAvailableCategories(newChartData);
 
       const cRow = [];
       // if (domain) {
       // } else {
       const cats = [
+        Category.AgeBin,
         Category.Gender,
         Category.SexAtBirth,
         Category.Race,
@@ -179,7 +190,7 @@ export const Chart = withCurrentWorkspace()(
 
       this.setState({ chartRow: cRow });
 
-      this.getChartDataOld();
+      await this.getChartDataOld();
     }
 
     async fetchChartData() {
@@ -394,11 +405,9 @@ export const Chart = withCurrentWorkspace()(
 
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
-      const { domain } = this.props;
-      const { chartType } = this.state;
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
-      Object.keys(swapped).map((key, index) => {
+      Object.keys(swapped).map((key) => {
         swapped[key].chart.inverted = true;
       });
 
@@ -416,6 +425,7 @@ export const Chart = withCurrentWorkspace()(
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
+            {getSeperatorDiv('Canned Frequency counts - one category')}
             <div style={styles.row}>
               <HighchartsReact
                 highcharts={highCharts}
@@ -423,6 +433,7 @@ export const Chart = withCurrentWorkspace()(
                 callback={getChartObj}
               />
             </div>
+            {getSeperatorDiv('Demographics Frequency counts - one category')}
             <div style={styles.row}>
               {chartRow &&
                 Object.values(chartRow).map((value, index) => (
@@ -442,7 +453,7 @@ export const Chart = withCurrentWorkspace()(
                   </div>
                 ))}
             </div>
-            <hr></hr>
+
             <div style={styles.row}>
               {chartsGenderRaceByAgeMap &&
                 Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (

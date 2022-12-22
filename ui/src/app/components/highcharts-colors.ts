@@ -1,4 +1,3 @@
-import Color from 'color';
 // https://public.tableau.com/views/TableauColors/ColorPaletteswithRGBValues?%3Aembed=y&%3AshowVizHome=no&%3Adisplay_count=y&%3Adisplay_static_image=y
 // Number of distinct values CT:RT (2022Q4R6)
 //      Gender:  9:4
@@ -7,6 +6,20 @@ import Color from 'color';
 //   Ethnicity:  6:6 (7 with AI/AN)?
 export default {
   hcColors: {
+    ageBin: [
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+      '#996600',
+    ],
     gender: [
       '#AABBFF',
       '#9999FF',

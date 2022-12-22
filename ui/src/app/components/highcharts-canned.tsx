@@ -1,9 +1,11 @@
-
 export function getCanned() {
   // http://jsfiddle.net/Moonbird_IT/30Luzmya/2/
   return {
     chart: {
       type: 'column',
+    },
+    title: {
+      text: 'Count/Frequency plot - One category',
     },
     legend: {
       layout: 'horizontal',
