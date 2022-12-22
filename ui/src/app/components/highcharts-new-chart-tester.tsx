@@ -4,16 +4,19 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
+import * as highCharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 
 import { ChartData } from 'generated/fetch';
 
+import { getChartObj } from 'app/cohort-search/utils';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 
+import { parseQueryParams } from './app-router';
 import { Chart } from './highcharts-new-chart';
 import { WithSpinnerOverlayProps } from './with-spinner-overlay';
-import { parseQueryParams } from './app-router';
 
 const styles = reactStyles({
   backBtn: {
@@ -90,6 +93,7 @@ export const NewChart = fp.flow(withRouter)(
     //   return a.city.localeCompare(b.city) || b.price - a.price;
     // });
 
+
     render() {
       const cohortId = parseQueryParams(this.props.location.search).get(
         'cohortId'
@@ -101,8 +105,8 @@ export const NewChart = fp.flow(withRouter)(
             <div
               style={{
                 ...styles.col,
-                flex: '0 0 80%',
-                maxWidth: '80%',
+                flex: '0 0 100%',
+                maxWidth: '100%',
               }}
             >
               {
