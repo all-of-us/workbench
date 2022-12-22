@@ -64,15 +64,7 @@ section {
   display: block;
 }
 
-h1 {
-  font-weight: 200;
-  letter-spacing: normal;
-  line-height: 2rem;
-  margin-top: 1rem;
-  margin-bottom: 0;
-}
-
-h2 {
+h1, h2, h3, h4 {
   font-weight: 200;
   letter-spacing: normal;
   line-height: 2rem;
@@ -81,21 +73,14 @@ h2 {
 }
 
 h3 {
-  font-weight: 200;
-  letter-spacing: normal;
   line-height: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 0;
 }
 
 h4 {
   color: #000;
-  font-weight: 200;
   font-size: 0.75rem;
   letter-spacing: normal;
   line-height: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 0;
 }
 
 h5 {
