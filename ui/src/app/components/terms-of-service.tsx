@@ -94,7 +94,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
             </h3>
             <p className='h-color' style={{ marginTop: '0.25rem' }}>
               The Terra Platform terms, which are incorporated by reference into
-              the <AoU /> terms, have been updated. This updated replaces
+              the <AoU /> terms, have been updated. This update replaces
               references to specific federal datasets with a more broad
               reference to federal datasets as a type of data.
             </p>

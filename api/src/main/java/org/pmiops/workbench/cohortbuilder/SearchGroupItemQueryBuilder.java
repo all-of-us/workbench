@@ -72,7 +72,9 @@ public final class SearchGroupItemQueryBuilder {
           Domain.ARRAY_DATA,
           "has_array_data",
           Domain.LR_WHOLE_GENOME_VARIANT,
-          "has_lr_whole_genome_variant");
+          "has_lr_whole_genome_variant",
+          Domain.STRUCTURAL_VARIANT_DATA,
+          "has_structural_variant_data");
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
@@ -867,6 +869,7 @@ public final class SearchGroupItemQueryBuilder {
         || Domain.WHOLE_GENOME_VARIANT.equals(domain)
         || Domain.LR_WHOLE_GENOME_VARIANT.equals(domain)
         || Domain.ARRAY_DATA.equals(domain)
+        || Domain.STRUCTURAL_VARIANT_DATA.equals(domain)
         || (searchGroupItem.getSearchParameters().size() == 1
             && searchGroupItem.getSearchParameters().stream()
                 .allMatch(

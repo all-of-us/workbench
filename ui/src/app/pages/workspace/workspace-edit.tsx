@@ -22,7 +22,7 @@ import {
 import { Button, LinkButton, StyledExternalLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { InfoIcon } from 'app/components/icons';
+import { InfoIcon, WarningIcon } from 'app/components/icons';
 import {
   CheckBox,
   RadioButton,
@@ -55,6 +55,7 @@ import {
   SpecificPopulationItem,
   SpecificPopulationItems,
   toolTipText,
+  tooltipTextBillingWarning,
   toolTipTextDemographic,
   toolTipTextDucc,
   toolTipTextStigmatization,
@@ -93,7 +94,10 @@ import {
 import { serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { getBillingAccountInfo } from 'app/utils/workbench-gapi-client';
+import {
+  getBillingAccountInfo,
+  GoogleBillingAccountInfo,
+} from 'app/utils/workbench-gapi-client';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -317,6 +321,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   populationChecked: boolean;
   selectResearchPurpose: boolean;
+  fetchBillingAccountError: boolean;
   fetchBillingAccountLoading: boolean;
   showCdrVersionModal: boolean;
   showConfirmationModal: boolean;
@@ -357,6 +362,7 @@ export const WorkspaceEdit = fp.flow(
           ? props.workspace.researchPurpose.populationDetails.length > 0
           : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        fetchBillingAccountError: false,
         fetchBillingAccountLoading: false,
         showCdrVersionModal: false,
         showConfirmationModal: false,
@@ -447,29 +453,62 @@ export const WorkspaceEdit = fp.flow(
       }
     }
 
-    async fetchBillingAccounts() {
-      this.setState({ fetchBillingAccountLoading: true });
+    async getFormattedBillingAccounts(): Promise<BillingAccount[]> {
       const billingAccounts = (await userApi().listBillingAccounts())
         .billingAccounts;
 
       // Replace the free billing account with a new display name that has spend usage.
-      const displayBillingAccounts: Array<BillingAccount> = billingAccounts.map(
-        (b) => {
-          if (b.isFreeTier) {
-            return {
-              ...b,
-              displayName: this.formatFreeTierBillingAccountName(),
-            };
-          }
-          return b;
+      return billingAccounts.map((b) => {
+        if (b.isFreeTier) {
+          return {
+            ...b,
+            displayName: this.formatFreeTierBillingAccountName(),
+          };
         }
-      );
+        return b;
+      });
+    }
+
+    addBillingInfoToAccounts(
+      billingInfo: GoogleBillingAccountInfo,
+      billingAccounts: BillingAccount[]
+    ): BillingAccount[] {
+      billingAccounts.push({
+        name: this.props.workspace.billingAccountName,
+        displayName: 'User Provided Billing Account',
+        isFreeTier: false,
+        isOpen: true,
+      });
+
+      if (
+        billingInfo.billingAccountName !==
+        this.props.workspace.billingAccountName
+      ) {
+        // This should never happen but it means the database is out of sync with Google
+        // and does not have the correct billing account stored.
+        // We cannot send over the correct billing account info since the current user
+        // does not have permissions to set it.
+
+        reportError({
+          name: 'Out of date billing account name',
+          message:
+            `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+            `Stored value is ${this.props.workspace.billingAccountName}. ` +
+            `True value is ${billingInfo.billingAccountName}`,
+        });
+      }
+      return billingAccounts;
+    }
+
+    async fetchBillingAccounts() {
+      this.setState({ fetchBillingAccountLoading: true });
+      const formattedBillingAccounts = await this.getFormattedBillingAccounts();
 
       if (
         this.isMode(WorkspaceEditMode.Create) ||
         this.isMode(WorkspaceEditMode.Duplicate)
       ) {
-        const maybeFreeTierAccount = displayBillingAccounts.find(
+        const maybeFreeTierAccount = formattedBillingAccounts.find(
           (billingAccount) => billingAccount.isFreeTier
         );
         if (maybeFreeTierAccount) {
@@ -482,62 +521,56 @@ export const WorkspaceEdit = fp.flow(
           );
         }
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
-        const fetchedBillingInfo = await getBillingAccountInfo(
-          this.props.workspace.googleProject
-        );
-        if (
-          !displayBillingAccounts.find(
-            (billingAccount) =>
-              billingAccount.name === fetchedBillingInfo.billingAccountName
-          )
-        ) {
-          // If the user has owner access on the workspace but does not have access to the billing account
-          // that it is attached to, keep the server's current value for billingAccountName and add a shim
-          // entry into billingAccounts so the dropdown entry is not empty.
-          //
-          // The server will not perform an updateBillingInfo call if the received billingAccountName
-          // is the same as what is currently stored.
-          //
-          // This can happen if a workspace is shared to another researcher as an owner.
-          displayBillingAccounts.push({
-            name: this.props.workspace.billingAccountName,
-            displayName: 'User Provided Billing Account',
-            isFreeTier: false,
-            isOpen: true,
-          });
-
-          if (
-            fetchedBillingInfo.billingAccountName !==
-            this.props.workspace.billingAccountName
-          ) {
-            // This should never happen but it means the database is out of sync with Google
-            // and does not have the correct billing account stored.
-            // We cannot send over the correct billing account info since the current user
-            // does not have permissions to set it.
-
-            reportError({
-              name: 'Out of date billing account name',
-              message:
-                `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
-                `Stored value is ${this.props.workspace.billingAccountName}. ` +
-                `True value is ${fetchedBillingInfo.billingAccountName}`,
+        await getBillingAccountInfo(this.props.workspace.googleProject)
+          .then((fetchedBillingInfo) => {
+            if (
+              !formattedBillingAccounts.find(
+                (billingAccount) =>
+                  billingAccount.name === fetchedBillingInfo.billingAccountName
+              )
+            ) {
+              // If the user has owner access on the workspace but does not have access to the billing account
+              // that it is attached to, keep the server's current value for billingAccountName and add a shim
+              // entry into billingAccounts so the dropdown entry is not empty.
+              //
+              // The server will not perform an updateBillingInfo call if the received billingAccountName
+              // is the same as what is currently stored.
+              //
+              // This can happen if a workspace is shared to another researcher as an owner.
+              this.addBillingInfoToAccounts(
+                fetchedBillingInfo,
+                formattedBillingAccounts
+              );
+            } else {
+              // Otherwise, use this as an opportunity to sync the fetched billing account name from
+              // the source of truth, Google
+              this.setState((prevState) =>
+                fp.set(
+                  ['workspace', 'billingAccountName'],
+                  fetchedBillingInfo.billingAccountName,
+                  prevState
+                )
+              );
+            }
+          })
+          .catch(() => {
+            this.setState((prevState) =>
+              fp.set(
+                ['workspace', 'billingAccountName'],
+                this.props.workspace.billingAccountName,
+                prevState
+              )
+            );
+            this.setState({
+              fetchBillingAccountError: true,
             });
-          }
-        } else {
-          // Otherwise, use this as an opportunity to sync the fetched billing account name from
-          // the source of truth, Google
-          this.setState((prevState) =>
-            fp.set(
-              ['workspace', 'billingAccountName'],
-              fetchedBillingInfo.billingAccountName,
-              prevState
-            )
-          );
-        }
+          });
       }
-      this.setState({ billingAccounts: displayBillingAccounts });
-      this.setState({ fetchBillingAccountLoading: false });
-      this.setState({ billingAccountFetched: true });
+      this.setState({
+        billingAccounts: formattedBillingAccounts,
+        fetchBillingAccountLoading: false,
+        billingAccountFetched: true,
+      });
       window.dispatchEvent(new Event('billing-accounts-loaded'));
     }
 
@@ -1247,12 +1280,11 @@ export const WorkspaceEdit = fp.flow(
     }
 
     buildBillingAccountOptions() {
-      const options = this.state.billingAccounts.map((a) => ({
+      return this.state.billingAccounts.map((a) => ({
         label: a.displayName,
         value: a.name,
         disabled: !a.isOpen,
       }));
-      return options;
     }
 
     // are we currently performing a CDR Version Upgrade?
@@ -1633,11 +1665,13 @@ export const WorkspaceEdit = fp.flow(
                           id='billing-dropdown-container'
                           data-test-id='billing-dropdown-div'
                           onClick={() =>
+                            !this.state.fetchBillingAccountError &&
                             this.requestBillingScopeThenFetchBillingAccount()
                           }
                         >
                           <Dropdown
                             data-test-id='billing-dropdown'
+                            disabled={this.state.fetchBillingAccountError}
                             style={{ width: '20rem' }}
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
@@ -1654,6 +1688,7 @@ export const WorkspaceEdit = fp.flow(
                       </FlexColumn>
                       <FlexColumn>
                         <Button
+                          disabled={this.state.fetchBillingAccountError}
                           type='primary'
                           style={{
                             marginLeft: '20px',
@@ -1670,6 +1705,15 @@ export const WorkspaceEdit = fp.flow(
                           CREATE BILLING ACCOUNT
                         </Button>
                       </FlexColumn>
+                      {this.state.fetchBillingAccountError && (
+                        <FlexColumn
+                          style={{ alignSelf: 'center', marginLeft: '0.5rem' }}
+                        >
+                          <TooltipTrigger content={tooltipTextBillingWarning}>
+                            <WarningIcon style={styles.infoIcon} />
+                          </TooltipTrigger>
+                        </FlexColumn>
+                      )}
                     </FlexRow>
                   </div>
                 )}

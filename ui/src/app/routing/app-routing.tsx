@@ -305,7 +305,7 @@ export const AppRoutingComponent: React.FunctionComponent<
             <TermsOfService
               showReAcceptNotification={true}
               onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
-              filePath={'/aou-tos.html'}
+              filePath='/aou-tos.html'
               afterPrev={false}
               style={{ height: '36rem' }}
             />

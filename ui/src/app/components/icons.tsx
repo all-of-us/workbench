@@ -130,6 +130,15 @@ export const InfoIcon = ({ style = {}, ...props }) => (
   />
 );
 
+export const WarningIcon = ({ style = {}, ...props }) => (
+  <ClrIcon
+    shape='warning-standard'
+    {...props}
+    class='is-solid'
+    style={{ ...styles.dangerIcon, ...style }}
+  />
+);
+
 export const ValidationIcon = (props) => {
   if (props.validSuccess === undefined) {
     return null;

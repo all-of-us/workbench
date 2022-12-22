@@ -203,6 +203,8 @@ export const CohortSearch = fp.flow(
         this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
+      } else if (domain === Domain.STRUCTURALVARIANTDATA) {
+        this.selectStructuralVariantData();
       }
 
       currentCohortCriteriaStore.next(selections);
@@ -375,16 +377,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Whole Genome Sequence',
+        name: 'Short Read WGS',
         group: false,
         domainId: Domain.WHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Short Read WGS');
       saveCriteria([param]);
     }
 
@@ -394,16 +394,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Long Read Whole Genome Sequence',
+        name: 'Long Read WGS',
         group: false,
         domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Long Read Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Long Read WGS');
       saveCriteria([param]);
     }
 
@@ -422,6 +420,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Global Diversity Array'
+      );
+      saveCriteria([param]);
+    }
+
+    selectStructuralVariantData() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Structural Variant Data',
+        group: false,
+        domainId: Domain.STRUCTURALVARIANTDATA.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Structural Variant Data'
       );
       saveCriteria([param]);
     }

@@ -163,6 +163,14 @@ class SearchGroupItemParameter extends React.Component<
   }
 }
 
+const SKIP_DOMAIN_SEARCH = [
+  Domain.FITBIT.toString(),
+  Domain.WHOLEGENOMEVARIANT.toString(),
+  Domain.LRWHOLEGENOMEVARIANT.toString(),
+  Domain.ARRAYDATA.toString(),
+  Domain.STRUCTURALVARIANTDATA.toString(),
+];
+
 interface ItemProp extends Item {
   count: number;
   status: string;
@@ -404,12 +412,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {
         item: { name, searchParameters, type },
       } = this.props;
-      if (
-        type === Domain.FITBIT.toString() ||
-        type === Domain.WHOLEGENOMEVARIANT.toString() ||
-        type === Domain.LRWHOLEGENOMEVARIANT.toString() ||
-        type === Domain.ARRAYDATA.toString()
-      ) {
+      if (SKIP_DOMAIN_SEARCH.includes(type)) {
         return !!name ? name : searchParameters[0].name;
       } else {
         const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
@@ -426,9 +429,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         item: { searchParameters, type },
       } = this.props;
       return (
-        type === Domain.ARRAYDATA.toString() ||
-        type === Domain.FITBIT.toString() ||
-        type === Domain.WHOLEGENOMEVARIANT.toString() ||
+        SKIP_DOMAIN_SEARCH.includes(type) ||
         (searchParameters[0] &&
           searchParameters[0].type === CriteriaType.DECEASED.toString())
       );
