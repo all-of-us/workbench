@@ -7,7 +7,7 @@ import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { ChartData } from 'generated/fetch';
+import { ChartData, Domain } from 'generated/fetch';
 
 import { getChartObj } from 'app/cohort-search/utils';
 import { chartBuilderApi } from 'app/services/swagger-fetch-clients';
@@ -15,6 +15,13 @@ import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
+
+import { getCanned } from './highcharts-canned';
+import {
+  Category,
+  getAvailableCategories,
+  getChartCategoryCounts,
+} from './highcharts-utils';
 
 const css = `
   .stats-left-padding {
@@ -46,14 +53,14 @@ const styles = reactStyles({
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    // paddingLeft: '0.5rem',
+    // paddingRight: '0.5rem',
   },
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    marginRight: '-.5rem',
-    marginLeft: '-.5rem',
+    // marginRight: '-.5rem',
+    // marginLeft: '-.5rem',
   },
   col: {
     position: 'relative',
@@ -91,8 +98,9 @@ export interface ChartState {
   newChartData: ChartData[];
   chartPopPyramid: any;
   chartsGenderRaceByAgeMap: {};
-  categoryNames: any;
-  categoryValueMap: {};
+  categoryNames: {};
+  categoryValues: {};
+  chartRow: any;
 }
 
 export const Chart = withCurrentWorkspace()(
@@ -114,23 +122,77 @@ export const Chart = withCurrentWorkspace()(
           ageBin: 'Age Range',
           conceptName: 'Concept Name',
         },
-        categoryValueMap: {},
+        categoryValues: {},
+        chartRow: null,
       };
     }
 
     componentDidMount() {
-      this.getChartData();
+      // this.getChartDataOld();
+      this.doCharts();
     }
 
     componentDidUpdate(prevProps: Readonly<ChartProps>) {
-      const { domain } = this.props;
+      const {
+        domain,
+        cohortId,
+        workspace: { id, namespace },
+      } = this.props;
+
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
-        this.getChartData();
+        this.doCharts();
       }
     }
 
-    async getChartData() {
+    async doCharts() {
+      const {
+        domain,
+        cohortId,
+        workspace: { id, namespace },
+      } = this.props;
+      // get new chart data
+      const newChartData = await this.fetchChartData().then((result) => {
+        return result.items;
+      });
+
+      this.setState({ newChartData: newChartData });
+      // get available categories and their valueMap
+      const { categoryNames, categoryValues } =
+        getAvailableCategories(newChartData);
+
+      const cRow = [];
+      // if (domain) {
+      // } else {
+      const cats = [
+        Category.Gender,
+        Category.SexAtBirth,
+        Category.Race,
+        Category.Ethnicity,
+      ];
+      Object.values(cats).forEach((category) => {
+        cRow.push(
+          getChartCategoryCounts(newChartData, Domain.PERSON, category)
+        );
+      });
+      // }
+
+      this.setState({ chartRow: cRow });
+
+      this.getChartDataOld();
+    }
+
+    async fetchChartData() {
+      const {
+        domain,
+        cohortId,
+        workspace: { id, namespace },
+      } = this.props;
+
+      return chartBuilderApi().getChartData(namespace, id, +cohortId, domain);
+    }
+
+    async getChartDataOld() {
       const {
         domain,
         cohortId,
@@ -145,14 +207,11 @@ export const Chart = withCurrentWorkspace()(
       );
       this.setState({
         newChartData: newChartData.items,
-        chartType: domain ? 'DomainChart' : 'DemographicsChart',
+        chartType: domain ? domain + ' Chart' : 'Demographics Chart',
       });
-
-      this.setCategoryMap();
 
       const { categories, seriesGenderMap, genderHelper } =
         this.getGenderByRaceChartData();
-      console.log(seriesGenderMap);
 
       // change y values for Female to be negative for Population Chart
       // make a copy without changing the original
@@ -178,17 +237,6 @@ export const Chart = withCurrentWorkspace()(
         );
       }
       this.setState({ chartsGenderRaceByAgeMap, loading: false });
-    }
-
-    setCategoryMap() {
-      const { newChartData, categoryNames, categoryValueMap } = this.state;
-      for (const prop in categoryNames) {
-        if (categoryNames.hasOwnProperty(prop)) {
-          categoryValueMap[prop] = Array.from(
-            new Set(newChartData.map((dat) => dat[prop]))
-          ).sort((a, b) => (a > b ? 1 : -1));
-        }
-      }
     }
 
     getGenderByRaceChartData() {
@@ -350,44 +398,51 @@ export const Chart = withCurrentWorkspace()(
       const { chartType } = this.state;
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
       // change chart.inverted:true
-      Object.keys(swapped).map((key) => {
+      Object.keys(swapped).map((key, index) => {
         swapped[key].chart.inverted = true;
       });
+
+      const { chartRow } = this.state;
+      let width = 100;
+      if (chartRow) {
+        width = width / chartRow.length;
+        console.log('chartRow[0]:',chartRow[0]);
+      }
+
+      const canned = getCanned();
+      console.log('canned:',canned);
 
       return (
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            <div>
-              <span style={styles.chartTitle}>
-                <p>
-                  <b>{chartType}:</b> NEW-COMPONENT-CHART Population Pyramid
-                  (React version: {React.version})
-                </p>
-              </span>
+            <div style={styles.row}>
+              <HighchartsReact
+                highcharts={highCharts}
+                options={canned}
+                callback={getChartObj}
+              />
             </div>
             <div style={styles.row}>
-              <div
-                style={{
-                  ...styles.col,
-                  flex: '0 0 100%',
-                  maxWidth: '100%',
-                }}
-              >
-                {chartPopPyramid && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramid}
-                    callback={getChartObj}
-                  />
-                )}
-              </div>
+              {chartRow &&
+                Object.values(chartRow).map((value, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + width + '%',
+                      maxWidth: width + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
             </div>
-            <div>
-              <span style={styles.chartTitle}>
-                {domain}-Race by gender over age groups
-              </span>
-            </div>
+            <hr></hr>
             <div style={styles.row}>
               {chartsGenderRaceByAgeMap &&
                 Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (
@@ -395,8 +450,8 @@ export const Chart = withCurrentWorkspace()(
                     key={index}
                     style={{
                       ...styles.col,
-                      flex: '0 0 33%',
-                      maxWidth: '33%',
+                      flex: '0 0 ' + width + '%',
+                      maxWidth: width + '%',
                     }}
                   >
                     <div>
@@ -410,11 +465,7 @@ export const Chart = withCurrentWorkspace()(
                   </div>
                 ))}
             </div>
-            <div>
-              <span style={styles.chartTitle}>
-                {domain}-(Swapped axes) Race by gender over age groups
-              </span>
-            </div>
+            <hr></hr>
             <div style={styles.row}>
               {swapped &&
                 Object.keys(swapped).map((key, index) => (
@@ -436,6 +487,24 @@ export const Chart = withCurrentWorkspace()(
                     />
                   </div>
                 ))}
+            </div>
+            <hr></hr>
+            <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 100%',
+                  maxWidth: '100%',
+                }}
+              >
+                {chartPopPyramid && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={chartPopPyramid}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </React.Fragment>
