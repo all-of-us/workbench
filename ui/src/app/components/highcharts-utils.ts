@@ -114,7 +114,6 @@ export function getChartCategoryCounts(
     .sort(
       (a, b) => a.x - b.x || a.categorySortKey.localeCompare(b.categorySortKey)
     );
-  console.log('categoryCounts:', categoryCounts);
 
   // compute %
   // categoryTotal * 100 / sum(categoryTotal)

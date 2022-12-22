@@ -172,8 +172,7 @@ export const Chart = withCurrentWorkspace()(
       getAvailableCategories(newChartData);
 
       const cRow = [];
-      // if (domain) {
-      // } else {
+
       const cats = [
         Category.AgeBin,
         Category.Gender,
@@ -181,12 +180,20 @@ export const Chart = withCurrentWorkspace()(
         Category.Race,
         Category.Ethnicity,
       ];
-      Object.values(cats).forEach((category) => {
-        cRow.push(
-          getChartCategoryCounts(newChartData, Domain.PERSON, category)
-        );
-      });
-      // }
+      const { domain } = this.props;
+      if (domain) {
+        Object.values(cats).forEach((category) => {
+          cRow.push(
+            getChartCategoryCounts(newChartData, Domain[domain], category)
+          );
+        });
+      } else {
+        Object.values(cats).forEach((category) => {
+          cRow.push(
+            getChartCategoryCounts(newChartData, Domain.PERSON, category)
+          );
+        });
+      }
 
       this.setState({ chartRow: cRow });
 
@@ -415,11 +422,11 @@ export const Chart = withCurrentWorkspace()(
       let width = 100;
       if (chartRow) {
         width = width / chartRow.length;
-        console.log('chartRow[0]:', chartRow[0]);
+        // console.log('chartRow[0]:', chartRow[0]);
       }
+      const { domain } = this.props;
 
       const canned = getCanned();
-      console.log('canned:', canned);
 
       return (
         <React.Fragment>
@@ -433,7 +440,9 @@ export const Chart = withCurrentWorkspace()(
                 callback={getChartObj}
               />
             </div>
-            {getSeperatorDiv('Demographics Frequency counts - one category')}
+            {getSeperatorDiv(
+              'Demographics Frequency counts - one category (' + domain + ')'
+            )}
             <div style={styles.row}>
               {chartRow &&
                 Object.values(chartRow).map((value, index) => (
