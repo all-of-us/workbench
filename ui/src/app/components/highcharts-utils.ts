@@ -27,14 +27,12 @@ const CHART_CATEGORY_KEY_NAME = {
 export function getAvailableCategories(dataForCharts: Array<ChartData>) {
   const categoryNames = {};
   const categoryValues = {};
-  for (const key in CHART_CATEGORY_KEY_NAME) {
+  Object.keys(CHART_CATEGORY_KEY_NAME).forEach((key) => {
     categoryNames[key] = CHART_CATEGORY_KEY_NAME[key];
     categoryValues[key] = Array.from(
       new Set(dataForCharts.map((dat) => dat[key]))
     ).sort((a, b) => (a > b ? 1 : -1));
-  }
-  console.log('categoryNames:', categoryNames);
-  console.log('categoryValueMap:', categoryValues);
+  });
   return { categoryNames, categoryValues };
 }
 
@@ -60,6 +58,34 @@ function getCategorySortKey(
   }
 }
 
+function getXAxis(ageCategories, rightSide, titleText?, linkedToVal?) {
+  return {
+    title: {
+      text: titleText ? titleText : '',
+    },
+    categories: ageCategories,
+    opposite: rightSide,
+    reversed: false,
+    labels: {
+      step: 1,
+    },
+    linkedTo: linkedToVal,
+  };
+}
+
+function getYAxis(titleText?) {
+  return {
+    title: {
+      text: titleText ? titleText : '',
+    },
+    labels: {
+      formatter: function () {
+        return Math.abs(this.value) + '%';
+      },
+    },
+  };
+}
+
 export function getChartCategoryCounts(
   dataForCharts: Array<ChartData>,
   domain: Domain,
@@ -67,11 +93,10 @@ export function getChartCategoryCounts(
 ) {
   const categoryProp = category.toString();
   let total = 0;
-  let categoryCounts = [];
-  categoryCounts = dataForCharts
+  const categoryCounts = dataForCharts
     .reduce((accum, record) => {
       const key = record[categoryProp];
-      const rec = accum.find((rec) => rec.categoryName === key);
+      const rec = accum.find((item) => item.categoryName === key);
       // console.log('key:',key,'rec:',rec);
       if (!rec) {
         accum.push({
@@ -110,7 +135,7 @@ export function getChartCategoryCounts(
   }, []);
   console.log('series:', series);
 
-  const chart = {
+  return {
     chart: {
       type: 'column',
       inverted: false,
@@ -156,34 +181,5 @@ export function getChartCategoryCounts(
       },
     },
     series: series,
-  };
-  return chart;
-}
-
-function getXAxis(ageCategories, rightSide, titleText?, linkedToVal?) {
-  return {
-    title: {
-      text: titleText ? titleText : '',
-    },
-    categories: ageCategories,
-    opposite: rightSide,
-    reversed: false,
-    labels: {
-      step: 1,
-    },
-    linkedTo: linkedToVal,
-  };
-}
-
-function getYAxis(titleText?) {
-  return {
-    title: {
-      text: titleText ? titleText : '',
-    },
-    labels: {
-      formatter: function () {
-        return Math.abs(this.value) + '%';
-      },
-    },
   };
 }
