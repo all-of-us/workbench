@@ -132,7 +132,7 @@ export function getChartCategoryCounts(
     });
     return accum;
   }, []);
-  console.log('series:', series);
+  //console.log('series:', series);
 
   return {
     chart: {
