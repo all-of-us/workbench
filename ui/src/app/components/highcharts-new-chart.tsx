@@ -101,6 +101,7 @@ export interface ChartState {
   categoryNames: {};
   categoryValues: {};
   chartRow: any;
+  chartWidths: any;
 }
 
 function getSeperatorDiv(seperatorText) {
@@ -144,6 +145,7 @@ export const Chart = withCurrentWorkspace()(
         },
         categoryValues: {},
         chartRow: null,
+        chartWidths: null,
       };
     }
 
@@ -167,7 +169,6 @@ export const Chart = withCurrentWorkspace()(
         return result.items;
       });
 
-      this.setState({ newChartData: newChartData });
       // get available categories and their valueMap
       getAvailableCategories(newChartData);
 
@@ -194,8 +195,11 @@ export const Chart = withCurrentWorkspace()(
           );
         });
       }
+      const chartWidths = await this.getChartWidths(cRow);
 
-      this.setState({ chartRow: cRow });
+      // this.setState({ newChartData: newChartData });
+
+      this.setState({ chartRow: cRow, chartWidths: chartWidths });
 
       await this.getChartDataOld();
     }
@@ -410,6 +414,21 @@ export const Chart = withCurrentWorkspace()(
       };
     }
 
+    async getChartWidths(chartRow) {
+      let totalBars = 0;
+      chartRow.forEach(
+        (chart) => (totalBars += chart.xAxis[0].categories.length + 1)
+      );
+      const chartWidths = [];
+      chartRow.forEach((chart) => {
+        chartWidths.push(
+          ((chart.xAxis[0].categories.length + 1) * 100) / totalBars
+        );
+      });
+
+      return chartWidths;
+    }
+
     render() {
       const { chartPopPyramid, chartsGenderRaceByAgeMap } = this.state;
       const swapped = cloneDeep(chartsGenderRaceByAgeMap);
@@ -417,13 +436,7 @@ export const Chart = withCurrentWorkspace()(
       Object.keys(swapped).map((key) => {
         swapped[key].chart.inverted = true;
       });
-
-      const { chartRow } = this.state;
-      let width = 100;
-      if (chartRow) {
-        width = width / chartRow.length;
-        // console.log('chartRow[0]:', chartRow[0]);
-      }
+      const { chartRow, chartWidths } = this.state;
       const { domain } = this.props;
 
       const canned = getCanned();
@@ -450,8 +463,8 @@ export const Chart = withCurrentWorkspace()(
                     key={index}
                     style={{
                       ...styles.col,
-                      flex: '0 0 ' + width + '%',
-                      maxWidth: width + '%',
+                      flex: '0 0 ' + chartWidths[index] + '%',
+                      maxWidth: chartWidths[index] + '%',
                     }}
                   >
                     <HighchartsReact
@@ -470,8 +483,8 @@ export const Chart = withCurrentWorkspace()(
                     key={index}
                     style={{
                       ...styles.col,
-                      flex: '0 0 ' + width + '%',
-                      maxWidth: width + '%',
+                      flex: '0 0 33%',
+                      maxWidth: '33%',
                     }}
                   >
                     <div>
