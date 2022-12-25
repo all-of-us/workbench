@@ -1,4 +1,3 @@
-import { forEach, forIn } from 'lodash';
 import * as highCharts from 'highcharts';
 
 import { ChartData, Domain } from 'generated/fetch';
@@ -253,7 +252,9 @@ export function getChartCategoryCountsByAgeBin(
       rec.y = (rec.categoryCount * 100) / total[serObj.name];
     }, []);
   }, {});
-  const series = Object.values(categoryCounts);
+  const series = Object.values(categoryCounts).sort((a, b) =>
+    b.sortKey.localeCompare(a.sortKey)
+  );
 
   return {
     chart: {

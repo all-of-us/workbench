@@ -542,7 +542,7 @@ export const Chart = withCurrentWorkspace()(
                 ))}
             </div>
             {getSeperatorDiv(
-              'Demographics Frequency/ counts Distribution by Ager Range - one category (' +
+              'Demographics Frequency/ counts Distribution by Age Range - one category (' +
                 domain +
                 ')'
             )}
