@@ -16,11 +16,15 @@ import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { getCanned } from './highcharts-canned';
+import {
+  getCannedCategoryCounts,
+  getCannedCategoryCountsByAgeBin,
+} from './highcharts-canned';
 import {
   Category,
   getAvailableCategories,
   getChartCategoryCounts,
+  getChartCategoryCountsByAgeBin,
 } from './highcharts-utils';
 
 const css = `
@@ -100,8 +104,10 @@ export interface ChartState {
   chartsGenderRaceByAgeMap: {};
   categoryNames: {};
   categoryValues: {};
-  chartRow: any;
-  chartWidths: any;
+  categoryCountsRow: any;
+  categoryCountsWidths: any;
+  categoryCountsAgeBinRow: any;
+  categoryCountsAgeBinWidths: any;
 }
 
 function getSeperatorDiv(seperatorText) {
@@ -144,8 +150,10 @@ export const Chart = withCurrentWorkspace()(
           conceptName: 'Concept Name',
         },
         categoryValues: {},
-        chartRow: null,
-        chartWidths: null,
+        categoryCountsRow: null,
+        categoryCountsWidths: null,
+        categoryCountsAgeBinRow: null,
+        categoryCountsAgeBinWidths: null,
       };
     }
 
@@ -172,8 +180,6 @@ export const Chart = withCurrentWorkspace()(
       // get available categories and their valueMap
       getAvailableCategories(newChartData);
 
-      const cRow = [];
-
       const cats = [
         Category.AgeBin,
         Category.Gender,
@@ -182,6 +188,8 @@ export const Chart = withCurrentWorkspace()(
         Category.Ethnicity,
       ];
       const { domain } = this.props;
+      // demographics counts charts
+      const cRow = [];
       if (domain) {
         Object.values(cats).forEach((category) => {
           cRow.push(
@@ -195,11 +203,48 @@ export const Chart = withCurrentWorkspace()(
           );
         });
       }
-      const chartWidths = await this.getChartWidths(cRow);
+      const cWidths = await this.getChartWidths(cRow);
+      this.setState({
+        categoryCountsRow: cRow,
+        categoryCountsWidths: cWidths,
+      });
+      this.setState({
+        categoryCountsRow: cRow,
+        categoryCountsWidths: cWidths,
+      });
+      // demographics counts-distribution-AgeBins charts
+      const catsNoAgeBin = cats.filter(
+        (category) => category !== Category.AgeBin
+      );
 
-      // this.setState({ newChartData: newChartData });
+      const cRow2 = [];
+      if (domain) {
+        Object.values(catsNoAgeBin).forEach((category) => {
+          cRow2.push(
+            getChartCategoryCountsByAgeBin(
+              newChartData,
+              Domain[domain],
+              category
+            )
+          );
+        });
+      } else {
+        Object.values(catsNoAgeBin).forEach((category) => {
+          cRow2.push(
+            getChartCategoryCountsByAgeBin(
+              newChartData,
+              Domain.PERSON,
+              category
+            )
+          );
+        });
+      }
 
-      this.setState({ chartRow: cRow, chartWidths: chartWidths });
+      const cWidths2 = await this.getChartWidths(cRow2);
+      this.setState({
+        categoryCountsAgeBinRow: cRow2,
+        categoryCountsAgeBinWidths: cWidths2,
+      });
 
       await this.getChartDataOld();
     }
@@ -436,35 +481,56 @@ export const Chart = withCurrentWorkspace()(
       Object.keys(swapped).map((key) => {
         swapped[key].chart.inverted = true;
       });
-      const { chartRow, chartWidths } = this.state;
       const { domain } = this.props;
-
-      const canned = getCanned();
+      const { categoryCountsRow, categoryCountsWidths } = this.state;
+      const { categoryCountsAgeBinRow, categoryCountsAgeBinWidths } =
+        this.state;
 
       return (
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            {getSeperatorDiv('Canned Frequency counts - one category')}
+            {getSeperatorDiv('Canned Frequency counts')}
             <div style={styles.row}>
-              <HighchartsReact
-                highcharts={highCharts}
-                options={canned}
-                callback={getChartObj}
-              />
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 30%',
+                  maxWidth: '30%',
+                }}
+              >
+                <HighchartsReact
+                  highcharts={highCharts}
+                  options={getCannedCategoryCounts()}
+                  callback={getChartObj}
+                />
+              </div>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 30%',
+                  maxWidth: '30%',
+                }}
+              >
+                <HighchartsReact
+                  highcharts={highCharts}
+                  options={getCannedCategoryCountsByAgeBin()}
+                  callback={getChartObj}
+                />
+              </div>
             </div>
             {getSeperatorDiv(
               'Demographics Frequency counts - one category (' + domain + ')'
             )}
             <div style={styles.row}>
-              {chartRow &&
-                Object.values(chartRow).map((value, index) => (
+              {categoryCountsRow &&
+                Object.values(categoryCountsRow).map((value, index) => (
                   <div
                     key={index}
                     style={{
                       ...styles.col,
-                      flex: '0 0 ' + chartWidths[index] + '%',
-                      maxWidth: chartWidths[index] + '%',
+                      flex: '0 0 ' + categoryCountsWidths[index] + '%',
+                      maxWidth: categoryCountsWidths[index] + '%',
                     }}
                   >
                     <HighchartsReact
@@ -475,7 +541,30 @@ export const Chart = withCurrentWorkspace()(
                   </div>
                 ))}
             </div>
-
+            {getSeperatorDiv(
+              'Demographics Frequency/ counts Distribution by Ager Range - one category (' +
+                domain +
+                ')'
+            )}
+            <div style={styles.row}>
+              {categoryCountsAgeBinRow &&
+                Object.values(categoryCountsAgeBinRow).map((value2, index2) => (
+                  <div
+                    key={index2}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + categoryCountsAgeBinWidths[index2] + '%',
+                      maxWidth: categoryCountsAgeBinWidths[index2] + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value2}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
             <div style={styles.row}>
               {chartsGenderRaceByAgeMap &&
                 Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (
