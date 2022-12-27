@@ -5,7 +5,13 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
+// Import Highcharts
+import HighchartsMap from "highcharts/modules/map";
 import HighchartsReact from 'highcharts-react-official';
+
+import mapData from 'highcharts/'
+
+HighchartsMap(highCharts);
 
 import { ChartData, Domain } from 'generated/fetch';
 
@@ -19,6 +25,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   getCannedCategoryCounts,
   getCannedCategoryCountsByAgeBin,
+  getCannedTopology,
 } from './highcharts-canned';
 import {
   Category,
@@ -159,7 +166,7 @@ export const Chart = withCurrentWorkspace()(
 
     async componentDidMount() {
       // this.getChartDataOld();
-      await this.doCharts();
+     // await this.doCharts();
     }
 
     async componentDidUpdate(prevProps: Readonly<ChartProps>) {
@@ -167,7 +174,7 @@ export const Chart = withCurrentWorkspace()(
 
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
-        await this.doCharts();
+      //  await this.doCharts();
       }
     }
 
@@ -486,6 +493,9 @@ export const Chart = withCurrentWorkspace()(
       const { categoryCountsAgeBinRow, categoryCountsAgeBinWidths } =
         this.state;
 
+      const cannedTopology = getCannedTopology();
+      console.log('cannedTopology:', cannedTopology);
+
       return (
         <React.Fragment>
           <style>{css}</style>
@@ -518,116 +528,130 @@ export const Chart = withCurrentWorkspace()(
                   callback={getChartObj}
                 />
               </div>
-            </div>
-            {getSeperatorDiv(
-              'Demographics Frequency counts - one category (' + domain + ')'
-            )}
-            <div style={styles.row}>
-              {categoryCountsRow &&
-                Object.values(categoryCountsRow).map((value, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...styles.col,
-                      flex: '0 0 ' + categoryCountsWidths[index] + '%',
-                      maxWidth: categoryCountsWidths[index] + '%',
-                    }}
-                  >
-                    <HighchartsReact
-                      highcharts={highCharts}
-                      options={value}
-                      callback={getChartObj}
-                    />
-                  </div>
-                ))}
-            </div>
-            {getSeperatorDiv(
-              'Demographics Frequency/ counts Distribution by Age Range - one category (' +
-                domain +
-                ')'
-            )}
-            <div style={styles.row}>
-              {categoryCountsAgeBinRow &&
-                Object.values(categoryCountsAgeBinRow).map((value2, index2) => (
-                  <div
-                    key={index2}
-                    style={{
-                      ...styles.col,
-                      flex: '0 0 ' + categoryCountsAgeBinWidths[index2] + '%',
-                      maxWidth: categoryCountsAgeBinWidths[index2] + '%',
-                    }}
-                  >
-                    <HighchartsReact
-                      highcharts={highCharts}
-                      options={value2}
-                      callback={getChartObj}
-                    />
-                  </div>
-                ))}
-            </div>
-            <div style={styles.row}>
-              {chartsGenderRaceByAgeMap &&
-                Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...styles.col,
-                      flex: '0 0 33%',
-                      maxWidth: '33%',
-                    }}
-                  >
-                    <div>
-                      <span style={styles.chartTitle}>{key}</span>
-                    </div>
-                    <HighchartsReact
-                      highcharts={highCharts}
-                      options={chartsGenderRaceByAgeMap[key]}
-                      callback={getChartObj}
-                    />
-                  </div>
-                ))}
-            </div>
-            <hr></hr>
-            <div style={styles.row}>
-              {swapped &&
-                Object.keys(swapped).map((key, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...styles.col,
-                      flex: '0 0 33%',
-                      maxWidth: '33%',
-                    }}
-                  >
-                    <div>
-                      <span style={styles.chartTitle}>{key}</span>
-                    </div>
-                    <HighchartsReact
-                      highcharts={highCharts}
-                      options={swapped[key]}
-                      callback={getChartObj}
-                    />
-                  </div>
-                ))}
-            </div>
-            <hr></hr>
-            <div style={styles.row}>
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 100%',
-                  maxWidth: '100%',
+                  flex: '0 0 30%',
+                  maxWidth: '30%',
                 }}
               >
-                {chartPopPyramid && (
-                  <HighchartsReact
-                    highcharts={highCharts}
-                    options={chartPopPyramid}
-                    callback={getChartObj}
-                  />
-                )}
+                <HighchartsReact
+                  highcharts={highCharts}
+                  constructorType={'mapChart'}
+                  options={cannedTopology}
+                  callback={getChartObj}
+                />
               </div>
             </div>
+            {/*{getSeperatorDiv(*/}
+            {/*  'Demographics Frequency counts - one category (' + domain + ')'*/}
+            {/*)}*/}
+            {/*<div style={styles.row}>*/}
+            {/*  {categoryCountsRow &&*/}
+            {/*    Object.values(categoryCountsRow).map((value, index) => (*/}
+            {/*      <div*/}
+            {/*        key={index}*/}
+            {/*        style={{*/}
+            {/*          ...styles.col,*/}
+            {/*          flex: '0 0 ' + categoryCountsWidths[index] + '%',*/}
+            {/*          maxWidth: categoryCountsWidths[index] + '%',*/}
+            {/*        }}*/}
+            {/*      >*/}
+            {/*        <HighchartsReact*/}
+            {/*          highcharts={highCharts}*/}
+            {/*          options={value}*/}
+            {/*          callback={getChartObj}*/}
+            {/*        />*/}
+            {/*      </div>*/}
+            {/*    ))}*/}
+            {/*</div>*/}
+            {/*{getSeperatorDiv(*/}
+            {/*  'Demographics Frequency/ counts Distribution by Age Range - one category (' +*/}
+            {/*    domain +*/}
+            {/*    ')'*/}
+            {/*)}*/}
+            {/*<div style={styles.row}>*/}
+            {/*  {categoryCountsAgeBinRow &&*/}
+            {/*    Object.values(categoryCountsAgeBinRow).map((value2, index2) => (*/}
+            {/*      <div*/}
+            {/*        key={index2}*/}
+            {/*        style={{*/}
+            {/*          ...styles.col,*/}
+            {/*          flex: '0 0 ' + categoryCountsAgeBinWidths[index2] + '%',*/}
+            {/*          maxWidth: categoryCountsAgeBinWidths[index2] + '%',*/}
+            {/*        }}*/}
+            {/*      >*/}
+            {/*        <HighchartsReact*/}
+            {/*          highcharts={highCharts}*/}
+            {/*          options={value2}*/}
+            {/*          callback={getChartObj}*/}
+            {/*        />*/}
+            {/*      </div>*/}
+            {/*    ))}*/}
+            {/*</div>*/}
+            {/*<div style={styles.row}>*/}
+            {/*  {chartsGenderRaceByAgeMap &&*/}
+            {/*    Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (*/}
+            {/*      <div*/}
+            {/*        key={index}*/}
+            {/*        style={{*/}
+            {/*          ...styles.col,*/}
+            {/*          flex: '0 0 33%',*/}
+            {/*          maxWidth: '33%',*/}
+            {/*        }}*/}
+            {/*      >*/}
+            {/*        <div>*/}
+            {/*          <span style={styles.chartTitle}>{key}</span>*/}
+            {/*        </div>*/}
+            {/*        <HighchartsReact*/}
+            {/*          highcharts={highCharts}*/}
+            {/*          options={chartsGenderRaceByAgeMap[key]}*/}
+            {/*          callback={getChartObj}*/}
+            {/*        />*/}
+            {/*      </div>*/}
+            {/*    ))}*/}
+            {/*</div>*/}
+            {/*<hr></hr>*/}
+            {/*<div style={styles.row}>*/}
+            {/*  {swapped &&*/}
+            {/*    Object.keys(swapped).map((key, index) => (*/}
+            {/*      <div*/}
+            {/*        key={index}*/}
+            {/*        style={{*/}
+            {/*          ...styles.col,*/}
+            {/*          flex: '0 0 33%',*/}
+            {/*          maxWidth: '33%',*/}
+            {/*        }}*/}
+            {/*      >*/}
+            {/*        <div>*/}
+            {/*          <span style={styles.chartTitle}>{key}</span>*/}
+            {/*        </div>*/}
+            {/*        <HighchartsReact*/}
+            {/*          highcharts={highCharts}*/}
+            {/*          options={swapped[key]}*/}
+            {/*          callback={getChartObj}*/}
+            {/*        />*/}
+            {/*      </div>*/}
+            {/*    ))}*/}
+            {/*</div>*/}
+            {/*<hr></hr>*/}
+            {/*<div style={styles.row}>*/}
+            {/*  <div*/}
+            {/*    style={{*/}
+            {/*      ...styles.col,*/}
+            {/*      flex: '0 0 100%',*/}
+            {/*      maxWidth: '100%',*/}
+            {/*    }}*/}
+            {/*  >*/}
+            {/*    {chartPopPyramid && (*/}
+            {/*      <HighchartsReact*/}
+            {/*        highcharts={highCharts}*/}
+            {/*        options={chartPopPyramid}*/}
+            {/*        callback={getChartObj}*/}
+            {/*      />*/}
+            {/*    )}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
           </div>
         </React.Fragment>
       );
