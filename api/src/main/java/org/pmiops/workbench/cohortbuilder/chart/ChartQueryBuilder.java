@@ -347,9 +347,14 @@ public class ChartQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     // 1. build cohort pids SQL
     StringBuilder cohortIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
-    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, cohortIdsSqlBuilder, params);
-    addDataFilters(
-        participantCriteria.getCohortDefinition().getDataFilters(), cohortIdsSqlBuilder, params);
+    if (participantCriteria.getCohortDefinition() == null) {
+      // for whole CDR remove the 'WHERE' clause alternately add ' 1 = 1 \n'
+      cohortIdsSqlBuilder.append(" 1 = 1 \n");
+    } else {
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, cohortIdsSqlBuilder, params);
+      addDataFilters(
+          participantCriteria.getCohortDefinition().getDataFilters(), cohortIdsSqlBuilder, params);
+    }
     // 2.build temp demographics table from cohort_pids sql - no grouping is done
     String withCohortIdsDemoSql =
         new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, cohortIdsSqlBuilder))
@@ -376,6 +381,7 @@ public class ChartQueryBuilder extends QueryBuilder {
     }
 
     String temp = domain != null ? domain.toString() : "Demographics";
+    temp += participantCriteria.getCohortDefinition() == null ? " (for CDR)" : "(for Cohort)";
     System.out.println("*******Chart SQL and params******: " + temp);
     System.out.println(chartSql);
     System.out.println("*******Chart SQL - params******: " + temp);
