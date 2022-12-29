@@ -31,7 +31,7 @@ export function getAvailableCategories(dataForCharts: Array<ChartData>) {
     categoryNames[key] = CHART_CATEGORY_KEY_NAME[key];
     categoryValues[key] = Array.from(
       new Set(dataForCharts.map((dat) => dat[key]))
-    ).sort((a, b) => (a > b ? 1 : -1));
+    ).sort((a, b) => (a > b ? -1 : 1));
   });
   return { categoryNames, categoryValues };
 }
@@ -80,13 +80,15 @@ function getYAxis(titleText?) {
         return Math.abs(this.value) + '%';
       },
     },
+    reversedStacks: true,
   };
 }
 
 export function getChartCategoryCounts(
   dataForCharts: Array<ChartData>,
   domain: Domain,
-  category: Category
+  category: Category,
+  categoryVals: []
 ) {
   const categoryProp = category.toString();
   let total = 0;
@@ -94,7 +96,6 @@ export function getChartCategoryCounts(
     .reduce((accum, record) => {
       const key = record[categoryProp];
       const rec = accum.find((item) => item.categoryName === key);
-      // console.log('key:',key,'rec:',rec);
       if (!rec) {
         accum.push({
           category: categoryProp,
@@ -121,7 +122,10 @@ export function getChartCategoryCounts(
     rec.x = i;
     rec.y = (100 * rec.categoryCount) / total;
     rec.total = total;
-    rec.color = hcColors.hcColors[categoryProp][i];
+    const colorIndex = categoryVals.findIndex(
+      (value) => value === rec.categoryName
+    );
+    rec.color = hcColors.hcColors[categoryProp][colorIndex];
     accum.push({
       name: rec.categoryName,
       color: rec.color,
@@ -129,7 +133,6 @@ export function getChartCategoryCounts(
     });
     return accum;
   }, []);
-  // console.log('series:', series);
 
   return {
     chart: {
@@ -158,6 +161,7 @@ export function getChartCategoryCounts(
     },
     tooltip: {
       formatter: function () {
+
         return (
           '<b>' +
           CHART_CATEGORY_KEY_NAME[categoryProp] +
@@ -183,15 +187,15 @@ export function getChartCategoryCounts(
 export function getChartCategoryCountsByAgeBin(
   dataForCharts: Array<ChartData>,
   domain: Domain,
-  category: Category
+  category: Category,
+  categoryVals: []
 ) {
   const categories = Array.from(
     new Set(dataForCharts.map((dat) => dat.ageBin))
   ).sort((a, b) => (a > b ? 1 : -1));
 
   const categoryProp = category.toString();
-  const total = {};
-  let categoryColorIndex = -1;
+  const categoryTotal = {};
   interface ReduceReturnType {
     id: number; // 👈️ 👈️ 👈️ no longer optional
     name: string;
@@ -205,10 +209,11 @@ export function getChartCategoryCountsByAgeBin(
       const key = record[categoryProp];
       const ageBin = record.ageBin;
       const rec = accum[key]; // accum['Female']
-      // console.log('key:',key,'rec:',rec);
+      const categoryColorIndex = categoryVals.findIndex(
+        (value) => value === key
+      );
       if (!rec) {
         // 1st data record
-        categoryColorIndex += 1;
         const seriesObj = {
           name: key,
           color: hcColors.hcColors[categoryProp][categoryColorIndex],
@@ -223,7 +228,7 @@ export function getChartCategoryCountsByAgeBin(
           ],
         };
         accum[key] = seriesObj;
-        total[key] = record.count;
+        categoryTotal[key] = record.count;
       } else {
         const dataRec = accum[key].data.find((item) => item.ageBin === ageBin);
         if (!dataRec) {
@@ -237,24 +242,32 @@ export function getChartCategoryCountsByAgeBin(
         } else {
           dataRec.categoryCount += record.count;
         }
-        total[key] += record.count;
+        categoryTotal[key] += record.count;
       }
       return accum;
     },
     {} as ReduceReturnType
   );
   // compute %
-  // categoryTotal * 100 / sum(categoryTotal)
-  Object.values(categoryCounts).reduce((accum, serObj) => {
-    serObj.data.reduce((recAccum, rec) => {
-      rec.categoryTotal = total[serObj.name];
-      rec.x = categories.findIndex((cat) => rec.ageBin === cat);
-      rec.y = (rec.categoryCount * 100) / total[serObj.name];
-    }, []);
-  }, {});
-  const series = Object.values(categoryCounts).sort((a, b) =>
-    b.sortKey.localeCompare(a.sortKey)
-  );
+  // categoryCount * 100 / sum(categoryTotal)
+  const sumCategoryTotal = Object.keys(categoryTotal).reduce((accum, key) => {
+    return accum + categoryTotal[key];
+  }, 0);
+  const series = Object.values(categoryCounts)
+    .reduce((accum, serObj) => {
+      serObj.data.reduce((recAccum, rec) => {
+        rec.categoryTotal = categoryTotal[serObj.name];
+        rec.sumCategoryTotal = sumCategoryTotal;
+        rec.x = categories.findIndex((cat) => rec.ageBin === cat);
+        rec.y = (rec.categoryCount * 100) / sumCategoryTotal;
+      }, []);
+      accum.push(serObj);
+      return accum;
+    }, [])
+    .sort((a, b) => a.sortKey === b.sortKey);
+  // set reversedStacks:false on yaxis
+  const yaxis = getYAxis('Percent(%)');
+  yaxis.reversedStacks = false;
 
   return {
     chart: {
@@ -265,7 +278,7 @@ export function getChartCategoryCountsByAgeBin(
       text: CHART_CATEGORY_KEY_NAME[categoryProp],
     },
     xAxis: [getXAxis(categories, false, 'Age Range(Y)')],
-    yAxis: [getYAxis('Percent(%)')],
+    yAxis: [yaxis],
     legend: {
       layout: 'horizontal',
       // align: 'right',
@@ -286,7 +299,7 @@ export function getChartCategoryCountsByAgeBin(
         let tip = this.point.ageBin + '(y), ';
         tip += this.point.categoryName + ', <br/>';
         tip += 'counts: (' + this.point.categoryCount;
-        tip += '/' + this.point.categoryTotal + ')<br/>';
+        tip += '/' + this.point.sumCategoryTotal + ')<br/>';
         return tip + 'percent:' + parseFloat(this.point.y).toFixed(2) + '%';
       },
     },

@@ -53,14 +53,19 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
       domainEnum = getValidDomain(domain);
     }
     //
-    CohortDefinition cohortDefinition = getCohortDefinition(dbWorkspace.getWorkspaceId(), cohortId);
+    CohortDefinition cohortDefinition = null;
+    if (cohortId > 0) {
+      cohortDefinition = getCohortDefinition(dbWorkspace.getWorkspaceId(), cohortId);
+      System.out.println("cohortDefinition:" + cohortDefinition);
+    }
     ChartDataListResponse response = new ChartDataListResponse();
-    System.out.println("cohortDefinition:" + cohortDefinition);
+
     return ResponseEntity.ok(
         response.items(chartService.getChartData(cohortDefinition, domainEnum)));
   }
 
   private Domain getValidDomain(String domain) {
+    // change to valid chart domain... not all domains are valid for chart
     return Arrays.stream(Domain.values())
         .filter(domainType -> domainType.toString().equalsIgnoreCase(domain))
         .findFirst()

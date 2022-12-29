@@ -6,10 +6,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
 // Import Highcharts
-import HighchartsMap from "highcharts/modules/map";
+import HighchartsMap from 'highcharts/modules/map';
 import HighchartsReact from 'highcharts-react-official';
-
-import mapData from 'highcharts/'
 
 HighchartsMap(highCharts);
 
@@ -111,13 +109,20 @@ export interface ChartState {
   chartsGenderRaceByAgeMap: {};
   categoryNames: {};
   categoryValues: {};
+  categoryCountsRowCdr: any;
   categoryCountsRow: any;
   categoryCountsWidths: any;
   categoryCountsAgeBinRow: any;
   categoryCountsAgeBinWidths: any;
 }
 
-function getSeperatorDiv(seperatorText) {
+function getSeparatorDiv(
+  cohortOrCdrStr: string,
+  domainStr: string,
+  textStr: string
+) {
+  const startStr = cohortOrCdrStr === null ? 'Canned' : cohortOrCdrStr;
+  const dStr = domainStr === null ? '' : domainStr;
   return (
     <div style={styles.row}>
       <div
@@ -129,7 +134,13 @@ function getSeperatorDiv(seperatorText) {
       >
         <hr style={{ ...styles.col, color: '#FF0000' }}></hr>
         <div style={styles.chartTitle}>
-          <h1>{seperatorText}</h1>
+          <h1>
+            <b>{startStr}</b>{' '}
+            <b>
+              <i>{dStr}</i>
+            </b>{' '}
+            {textStr}
+          </h1>
         </div>
         <hr style={{ ...styles.col, color: '#FF00FF' }}></hr>
       </div>
@@ -157,6 +168,7 @@ export const Chart = withCurrentWorkspace()(
           conceptName: 'Concept Name',
         },
         categoryValues: {},
+        categoryCountsRowCdr: null,
         categoryCountsRow: null,
         categoryCountsWidths: null,
         categoryCountsAgeBinRow: null,
@@ -165,8 +177,7 @@ export const Chart = withCurrentWorkspace()(
     }
 
     async componentDidMount() {
-      // this.getChartDataOld();
-     // await this.doCharts();
+      await this.doCharts();
     }
 
     async componentDidUpdate(prevProps: Readonly<ChartProps>) {
@@ -174,18 +185,25 @@ export const Chart = withCurrentWorkspace()(
 
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
-      //  await this.doCharts();
+        await this.doCharts();
       }
     }
 
     async doCharts() {
       // get new chart data
-      const newChartData = await this.fetchChartData().then((result) => {
+      const cohortChartData = await this.fetchChartData(false).then(
+        (result) => {
+          return result.items;
+        }
+      );
+
+      const cdrChartData = await this.fetchChartData(true).then((result) => {
         return result.items;
       });
 
-      // get available categories and their valueMap
-      getAvailableCategories(newChartData);
+      // get available categories and their valueMap => used for getting color-index
+      const { categoryNames, categoryValues } =
+        getAvailableCategories(cdrChartData);
 
       const cats = [
         Category.AgeBin,
@@ -197,28 +215,58 @@ export const Chart = withCurrentWorkspace()(
       const { domain } = this.props;
       // demographics counts charts
       const cRow = [];
+      const cdrRow = [];
       if (domain) {
         Object.values(cats).forEach((category) => {
           cRow.push(
-            getChartCategoryCounts(newChartData, Domain[domain], category)
+            getChartCategoryCounts(
+              cohortChartData,
+              Domain[domain],
+              category,
+              categoryValues[category.toString()]
+            )
+          );
+        });
+        Object.values(cats).forEach((category) => {
+          cdrRow.push(
+            getChartCategoryCounts(
+              cdrChartData,
+              Domain[domain],
+              category,
+              categoryValues[category.toString()]
+            )
           );
         });
       } else {
         Object.values(cats).forEach((category) => {
           cRow.push(
-            getChartCategoryCounts(newChartData, Domain.PERSON, category)
+            getChartCategoryCounts(
+              cohortChartData,
+              Domain.PERSON,
+              category,
+              categoryValues[category.toString()]
+            )
+          );
+        });
+        Object.values(cats).forEach((category) => {
+          cdrRow.push(
+            getChartCategoryCounts(
+              cdrChartData,
+              Domain.PERSON,
+              category,
+              categoryValues[category.toString()]
+            )
           );
         });
       }
-      const cWidths = await this.getChartWidths(cRow);
+      // cdrRow -> as it contains all genders, races, ethnicities etc...
+      const cWidths = await this.getChartWidths(cdrRow);
       this.setState({
         categoryCountsRow: cRow,
+        categoryCountsRowCdr: cdrRow,
         categoryCountsWidths: cWidths,
       });
-      this.setState({
-        categoryCountsRow: cRow,
-        categoryCountsWidths: cWidths,
-      });
+
       // demographics counts-distribution-AgeBins charts
       const catsNoAgeBin = cats.filter(
         (category) => category !== Category.AgeBin
@@ -229,9 +277,10 @@ export const Chart = withCurrentWorkspace()(
         Object.values(catsNoAgeBin).forEach((category) => {
           cRow2.push(
             getChartCategoryCountsByAgeBin(
-              newChartData,
+              cohortChartData,
               Domain[domain],
-              category
+              category,
+              categoryValues[category.toString()]
             )
           );
         });
@@ -239,9 +288,10 @@ export const Chart = withCurrentWorkspace()(
         Object.values(catsNoAgeBin).forEach((category) => {
           cRow2.push(
             getChartCategoryCountsByAgeBin(
-              newChartData,
+              cohortChartData,
               Domain.PERSON,
-              category
+              category,
+              categoryValues[category.toString()]
             )
           );
         });
@@ -256,14 +306,15 @@ export const Chart = withCurrentWorkspace()(
       await this.getChartDataOld();
     }
 
-    async fetchChartData() {
+    async fetchChartData(forCdr: boolean) {
       const {
         domain,
         cohortId,
         workspace: { id, namespace },
       } = this.props;
-
-      return chartBuilderApi().getChartData(namespace, id, +cohortId, domain);
+      return forCdr
+        ? chartBuilderApi().getChartData(namespace, id, 0, '')
+        : chartBuilderApi().getChartData(namespace, id, +cohortId, domain);
     }
 
     async getChartDataOld() {
@@ -489,18 +540,26 @@ export const Chart = withCurrentWorkspace()(
         swapped[key].chart.inverted = true;
       });
       const { domain } = this.props;
-      const { categoryCountsRow, categoryCountsWidths } = this.state;
+
+      const domainStrForChart =
+        domain === null || domain.length === 0
+          ? '(PERSON)'
+          : domain + ' - top 10';
+
+      const { categoryCountsRowCdr, categoryCountsRow, categoryCountsWidths } =
+        this.state;
       const { categoryCountsAgeBinRow, categoryCountsAgeBinWidths } =
         this.state;
 
+      console.log('categoryCountsAgeBinRow:',categoryCountsAgeBinRow);
+
       const cannedTopology = getCannedTopology();
-      console.log('cannedTopology:', cannedTopology);
 
       return (
         <React.Fragment>
           <style>{css}</style>
           <div style={{ ...styles.container, margin: 0 }}>
-            {getSeperatorDiv('Canned Frequency counts')}
+            {getSeparatorDiv(null, null, 'Frequency counts')}
             <div style={styles.row}>
               <div
                 style={{
@@ -543,115 +602,141 @@ export const Chart = withCurrentWorkspace()(
                 />
               </div>
             </div>
-            {/*{getSeperatorDiv(*/}
-            {/*  'Demographics Frequency counts - one category (' + domain + ')'*/}
-            {/*)}*/}
-            {/*<div style={styles.row}>*/}
-            {/*  {categoryCountsRow &&*/}
-            {/*    Object.values(categoryCountsRow).map((value, index) => (*/}
-            {/*      <div*/}
-            {/*        key={index}*/}
-            {/*        style={{*/}
-            {/*          ...styles.col,*/}
-            {/*          flex: '0 0 ' + categoryCountsWidths[index] + '%',*/}
-            {/*          maxWidth: categoryCountsWidths[index] + '%',*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        <HighchartsReact*/}
-            {/*          highcharts={highCharts}*/}
-            {/*          options={value}*/}
-            {/*          callback={getChartObj}*/}
-            {/*        />*/}
-            {/*      </div>*/}
-            {/*    ))}*/}
-            {/*</div>*/}
-            {/*{getSeperatorDiv(*/}
-            {/*  'Demographics Frequency/ counts Distribution by Age Range - one category (' +*/}
-            {/*    domain +*/}
-            {/*    ')'*/}
-            {/*)}*/}
-            {/*<div style={styles.row}>*/}
-            {/*  {categoryCountsAgeBinRow &&*/}
-            {/*    Object.values(categoryCountsAgeBinRow).map((value2, index2) => (*/}
-            {/*      <div*/}
-            {/*        key={index2}*/}
-            {/*        style={{*/}
-            {/*          ...styles.col,*/}
-            {/*          flex: '0 0 ' + categoryCountsAgeBinWidths[index2] + '%',*/}
-            {/*          maxWidth: categoryCountsAgeBinWidths[index2] + '%',*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        <HighchartsReact*/}
-            {/*          highcharts={highCharts}*/}
-            {/*          options={value2}*/}
-            {/*          callback={getChartObj}*/}
-            {/*        />*/}
-            {/*      </div>*/}
-            {/*    ))}*/}
-            {/*</div>*/}
-            {/*<div style={styles.row}>*/}
-            {/*  {chartsGenderRaceByAgeMap &&*/}
-            {/*    Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (*/}
-            {/*      <div*/}
-            {/*        key={index}*/}
-            {/*        style={{*/}
-            {/*          ...styles.col,*/}
-            {/*          flex: '0 0 33%',*/}
-            {/*          maxWidth: '33%',*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        <div>*/}
-            {/*          <span style={styles.chartTitle}>{key}</span>*/}
-            {/*        </div>*/}
-            {/*        <HighchartsReact*/}
-            {/*          highcharts={highCharts}*/}
-            {/*          options={chartsGenderRaceByAgeMap[key]}*/}
-            {/*          callback={getChartObj}*/}
-            {/*        />*/}
-            {/*      </div>*/}
-            {/*    ))}*/}
-            {/*</div>*/}
-            {/*<hr></hr>*/}
-            {/*<div style={styles.row}>*/}
-            {/*  {swapped &&*/}
-            {/*    Object.keys(swapped).map((key, index) => (*/}
-            {/*      <div*/}
-            {/*        key={index}*/}
-            {/*        style={{*/}
-            {/*          ...styles.col,*/}
-            {/*          flex: '0 0 33%',*/}
-            {/*          maxWidth: '33%',*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        <div>*/}
-            {/*          <span style={styles.chartTitle}>{key}</span>*/}
-            {/*        </div>*/}
-            {/*        <HighchartsReact*/}
-            {/*          highcharts={highCharts}*/}
-            {/*          options={swapped[key]}*/}
-            {/*          callback={getChartObj}*/}
-            {/*        />*/}
-            {/*      </div>*/}
-            {/*    ))}*/}
-            {/*</div>*/}
-            {/*<hr></hr>*/}
-            {/*<div style={styles.row}>*/}
-            {/*  <div*/}
-            {/*    style={{*/}
-            {/*      ...styles.col,*/}
-            {/*      flex: '0 0 100%',*/}
-            {/*      maxWidth: '100%',*/}
-            {/*    }}*/}
-            {/*  >*/}
-            {/*    {chartPopPyramid && (*/}
-            {/*      <HighchartsReact*/}
-            {/*        highcharts={highCharts}*/}
-            {/*        options={chartPopPyramid}*/}
-            {/*        callback={getChartObj}*/}
-            {/*      />*/}
-            {/*    )}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
+            {getSeparatorDiv(
+              'CDR ',
+              domainStrForChart,
+              'Demographics Frequency counts - one category'
+            )}
+            <div style={styles.row}>
+              {categoryCountsRowCdr &&
+                Object.values(categoryCountsRowCdr).map((value, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + categoryCountsWidths[index] + '%',
+                      maxWidth: categoryCountsWidths[index] + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>{' '}
+            {getSeparatorDiv(
+              'Cohort ',
+              domainStrForChart,
+              'Demographics Frequency counts - one category'
+            )}
+            <div style={styles.row}>
+              {categoryCountsRow &&
+                Object.values(categoryCountsRow).map((value, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + categoryCountsWidths[index] + '%',
+                      maxWidth: categoryCountsWidths[index] + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
+            {getSeparatorDiv(
+              'Cohort',
+              domainStrForChart,
+              'Demographics Frequency/ counts Distribution by Age Range - one category'
+            )}
+            <div style={styles.row}>
+              {categoryCountsAgeBinRow &&
+                Object.values(categoryCountsAgeBinRow).map((value2, index2) => (
+                  <div
+                    key={index2}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + categoryCountsAgeBinWidths[index2] + '%',
+                      maxWidth: categoryCountsAgeBinWidths[index2] + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value2}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
+            <div style={styles.row}>
+              {chartsGenderRaceByAgeMap &&
+                Object.keys(chartsGenderRaceByAgeMap).map((key, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 33%',
+                      maxWidth: '33%',
+                    }}
+                  >
+                    <div>
+                      <span style={styles.chartTitle}>{key}</span>
+                    </div>
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={chartsGenderRaceByAgeMap[key]}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
+            <hr></hr>
+            <div style={styles.row}>
+              {swapped &&
+                Object.keys(swapped).map((key, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 33%',
+                      maxWidth: '33%',
+                    }}
+                  >
+                    <div>
+                      <span style={styles.chartTitle}>{key}</span>
+                    </div>
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={swapped[key]}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>
+            <hr></hr>
+            <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 100%',
+                  maxWidth: '100%',
+                }}
+              >
+                {chartPopPyramid && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={chartPopPyramid}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </React.Fragment>
       );

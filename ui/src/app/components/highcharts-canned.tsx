@@ -1,4 +1,4 @@
-import ustopo from "@highcharts/map-collection/countries/us/us-all.topo.json";
+import ustopo from '@highcharts/map-collection/countries/us/us-all.topo.json';
 
 export function getCannedCategoryCounts() {
   // http://jsfiddle.net/Moonbird_IT/30Luzmya/2/
@@ -382,11 +382,8 @@ export function getCannedCategoryCountsByAgeBin() {
 }
 
 export function getCannedTopology() {
-  //const topology = require('assets/json/us-all-territories.topo.json');
-
-  // Prepare demo data. The data is joined to map using value of 'hc-key'
-  // property by default. See API docs for 'joinBy' for more info on linking
-  // data and map.
+  // The data is joined to map using value of 'hc-key' property by default.
+  // See API docs for 'joinBy' for more info on linking data and map.
   const data = [
     ['us-ma', 10],
     ['us-wa', 11],
@@ -453,7 +450,7 @@ export function getCannedTopology() {
 
   // Create the chart
   return {
-    chart:{
+    chart: {
       map: ustopo,
     },
     title: {
@@ -480,6 +477,7 @@ export function getCannedTopology() {
     series: [
       {
         data: data,
+        joinBy: ['hc-key'],
         name: 'Random data',
         states: {
           hover: {
