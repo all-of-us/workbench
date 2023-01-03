@@ -214,7 +214,7 @@ describe('HelpSidebar', () => {
     expect(
       wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style')
         .width
-    ).toBe('calc(14rem + 70px)');
+    ).toBe('calc(21rem + 70px)');
 
     await setActiveIcon(wrapper, null);
     expect(

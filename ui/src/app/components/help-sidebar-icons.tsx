@@ -41,28 +41,28 @@ import { RuntimeStatusIcon } from './runtime-status-icon';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
-    width: '.5rem',
-    height: '.5rem',
+    width: '.75rem',
+    height: '.75rem',
     zIndex: 2,
   },
   statusIconContainer: {
     alignSelf: 'flex-end',
-    margin: '0 .1rem .1rem auto',
+    margin: '0 .15rem .15rem auto',
   },
   rotate: {
     animation: 'rotation 2s infinite linear',
   },
   criteriaCount: {
     position: 'absolute',
-    height: '0.8rem',
-    width: '0.8rem',
-    top: '1rem',
-    left: '0.55rem',
+    height: '1.2rem',
+    width: '1.2rem',
+    top: '1.5rem',
+    left: '0.825rem',
     textAlign: 'center',
     backgroundColor: colors.danger,
     borderRadius: '50%',
     display: 'inline-block',
-    fontSize: '0.4rem',
+    fontSize: '0.6rem',
   },
   icon: {
     background: colorWithWhiteness(colors.primary, 0.48),
@@ -516,7 +516,7 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       style: {
         height: '22px',
         width: '22px',
-        marginTop: '0.25rem',
+        marginTop: '0.375rem',
         position: 'absolute',
       } as CSSProperties,
       tooltip: 'Genomic Extraction History',

@@ -95,7 +95,7 @@ const formatDuration = (durationMoment) => {
   return (hours > 0 ? hours + ' hr, ' : '') + minStr;
 };
 
-const MissingCell = () => <span style={{ fontSize: '.4rem' }}>&mdash;</span>;
+const MissingCell = () => <span style={{ fontSize: '.6rem' }}>&mdash;</span>;
 
 const mapJobToTableRow = (
   job: GenomicExtractionJob,
@@ -137,8 +137,8 @@ const mapJobToTableRow = (
             icon={iconConfig.icon}
             style={{
               ...iconConfig.style,
-              fontSize: '.7rem',
-              marginLeft: '.4rem',
+              fontSize: '1.05rem',
+              marginLeft: '.6rem',
               display: 'block',
             }}
           />
@@ -165,7 +165,7 @@ const mapJobToTableRow = (
 };
 
 const EmptyTableMessage = () => (
-  <TextColumn style={{ fontSize: '0.5rem', paddingTop: '0.5rem' }}>
+  <TextColumn style={{ fontSize: '0.75rem', paddingTop: '0.75rem' }}>
     <span>
       This will be the location to find any extracted genomics files you may
       need for your research.
@@ -183,18 +183,18 @@ const FailedRequestMessage = () => (
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        margin: '2rem auto',
+        margin: '3rem auto',
       }}
     >
       <FontAwesomeIcon
         icon={faExclamationTriangle}
         style={{
           color: colors.danger,
-          fontSize: '.8rem',
+          fontSize: '1.2rem',
         }}
       />
       <TextColumn
-        style={{ textAlign: 'left', marginLeft: '0.5rem', marginBottom: 0 }}
+        style={{ textAlign: 'left', marginLeft: '0.75rem', marginBottom: 0 }}
       >
         <span>Failed to retrieve genomic extraction jobs.</span>
         <span>
@@ -236,7 +236,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
               }}
             >
               {!jobs ? (
-                <Spinner style={{ display: 'block', margin: '3rem auto' }} />
+                <Spinner style={{ display: 'block', margin: '4.5rem auto' }} />
               ) : error ? (
                 <FailedRequestMessage />
               ) : (
@@ -250,7 +250,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                       mutate();
                     })
                   )}
-                  style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
+                  style={{ marginLeft: '0.75rem', marginRight: '0.75rem' }}
                 >
                   <Column
                     header='Dataset Name'
@@ -258,7 +258,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                     sortable
                     sortField='datasetName'
                     style={{
-                      maxWidth: '8rem',
+                      maxWidth: '12rem',
                       textOverflow: 'ellipsis',
                       overflow: 'hidden',
                       whiteSpace: 'nowrap',
