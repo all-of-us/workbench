@@ -38,16 +38,16 @@ const styles = reactStyles({
   card: {
     background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
-    borderRadius: '0.2rem',
-    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(
+    borderRadius: '0.3rem',
+    boxShadow: `0 0.1875rem 0.1875rem 0 ${colorWithWhiteness(
       colors.black,
       0.85
     )}`,
-    margin: '0 0 0.6rem',
+    margin: '0 0 0.9rem',
   },
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.75rem 1.125rem',
   },
   cardHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.3),
@@ -55,15 +55,15 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     minWidth: '100%',
-    padding: '0.5rem 0.75rem',
+    padding: '0.75rem 1.125rem',
   },
   circle: {
     backgroundColor: 'rgb(226, 226, 233)',
     borderRadius: '50%',
-    width: '2.5rem',
-    height: '2.5rem',
-    marginBottom: '0.5rem',
-    lineHeight: '2.5rem',
+    width: '3.75rem',
+    height: '3.75rem',
+    marginBottom: '0.75rem',
+    lineHeight: '3.75rem',
     textAlign: 'center',
   },
   circleWrapper: {
@@ -229,7 +229,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace())(
           <div style={styles.card}>
             {/* Group Header */}
             <div style={styles.cardHeader}>
-              <div style={{ marginLeft: '1.15rem' }}>
+              <div style={{ marginLeft: '1.725rem' }}>
                 Group {groups.length + index + 1}
               </div>
             </div>

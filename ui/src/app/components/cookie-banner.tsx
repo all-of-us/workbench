@@ -16,7 +16,7 @@ const styles = reactStyles({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    padding: '0.5rem 1rem',
+    padding: '0.75rem 1.5rem',
     borderTop: `7px solid ${colors.secondary}`,
     bottom: 0,
     backgroundColor: colors.light,
@@ -67,7 +67,7 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
         <div style={styles.cookiePolicyMessage}>
           <FlexRow style={{ alignItems: 'center' }}>
             <img src={cookies} />
-            <div style={{ paddingLeft: '1rem', color: colors.primary }}>
+            <div style={{ paddingLeft: '1.5rem', color: colors.primary }}>
               We use cookies to help provide you with the best experience we
               can. By continuing to use our site, you consent to our{' '}
               <StyledRouterLink path='/cookie-policy' target='_blank'>

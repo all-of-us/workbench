@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from 'app/components/buttons';
 import {
@@ -21,7 +21,7 @@ const styles = {
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
-    marginBottom: '0.25rem',
+    marginBottom: '0.375rem',
     padding: '3px 5px',
   },
   invalid: {
@@ -30,7 +30,7 @@ const styles = {
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
-    marginBottom: '0.25rem',
+    marginBottom: '0.375rem',
     padding: '3px 5px',
   },
 };
@@ -91,7 +91,7 @@ export const CreateModal = ({
       <ModalTitle style={inputErrorMsg ? { marginBottom: 0 } : {}}>
         {title || `Create ${entityName}`}
       </ModalTitle>
-      <ModalBody style={{ marginTop: '0.2rem' }}>
+      <ModalBody style={{ marginTop: '0.3rem' }}>
         {saveErrorMsg && (
           <div style={styles.error}>
             <ClrIcon
@@ -105,7 +105,7 @@ export const CreateModal = ({
         {inputErrorMsg && <div style={styles.invalid}>{inputErrorMsg}</div>}
 
         <TextInput
-          style={{ marginBottom: '0.5rem' }}
+          style={{ marginBottom: '0.75rem' }}
           value={name}
           placeholder={entityName.toUpperCase() + ' NAME'}
           onChange={(v) => {
@@ -135,7 +135,7 @@ export const CreateModal = ({
           disabled={disableSaveButton}
           onClick={() => onSave()}
         >
-          {saving && <Spinner style={{ marginRight: '0.25rem' }} size={18} />}
+          {saving && <Spinner style={{ marginRight: '0.375rem' }} size={18} />}
           Save
         </Button>
       </ModalFooter>
