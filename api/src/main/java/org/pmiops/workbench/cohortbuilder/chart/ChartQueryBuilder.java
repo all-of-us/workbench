@@ -346,18 +346,18 @@ public class ChartQueryBuilder extends QueryBuilder {
     final int limit = 10; // limit to top 10
     Map<String, QueryParameterValue> params = new HashMap<>();
     // 1. build cohort pids SQL
-    StringBuilder cohortIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
+    StringBuilder personIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
     if (participantCriteria.getCohortDefinition() == null) {
       // for whole CDR remove the 'WHERE' clause alternately add ' 1 = 1 \n'
-      cohortIdsSqlBuilder.append(" 1 = 1 \n");
+      personIdsSqlBuilder.append(" 1 = 1 \n");
     } else {
-      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, cohortIdsSqlBuilder, params);
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, personIdsSqlBuilder, params);
       addDataFilters(
-          participantCriteria.getCohortDefinition().getDataFilters(), cohortIdsSqlBuilder, params);
+          participantCriteria.getCohortDefinition().getDataFilters(), personIdsSqlBuilder, params);
     }
     // 2.build temp demographics table from cohort_pids sql - no grouping is done
-    String withCohortIdsDemoSql =
-        new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, cohortIdsSqlBuilder))
+    String withPersonIdsDemographicsSql =
+        new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, personIdsSqlBuilder))
             .append(",\n")
             .append(WITH_TMP_DEMO_SQL)
             .toString();
@@ -366,10 +366,10 @@ public class ChartQueryBuilder extends QueryBuilder {
     StringBuilder chartSql = new StringBuilder();
     if (domain == null) {
       // 3. For demographics chart: append sql for grouping using tables in WITH
-      chartSql.append(withCohortIdsDemoSql).append("\n").append(NEW_CHART_DEMO_SQL);
+      chartSql.append(withPersonIdsDemographicsSql).append("\n").append(NEW_CHART_DEMO_SQL);
     } else {
-      // if domain then to withCohortIdsDemoSql append as temp tables:
-      chartSql.append(withCohortIdsDemoSql);
+      // if domain then to withPersonIdsDemographicsSql append as temp tables:
+      chartSql.append(withPersonIdsDemographicsSql);
       // 3. sql for top 10 concepts for domain
       chartSql.append(",\n").append(WITH_TEMP_TOP_N_SQL);
       params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.toString()));
@@ -386,7 +386,7 @@ public class ChartQueryBuilder extends QueryBuilder {
     System.out.println(chartSql);
     System.out.println("*******Chart SQL - params******: " + temp);
     System.out.println(params);
-    System.out.println("*******Chart SQL and params******: " + temp);
+    System.out.println("*******Chart SQL and params******\n\n" + temp);
 
     return QueryJobConfiguration.newBuilder(chartSql.toString())
         .setNamedParameters(params)

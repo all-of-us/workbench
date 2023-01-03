@@ -30,6 +30,7 @@ import {
   getAvailableCategories,
   getChartCategoryCounts,
   getChartCategoryCountsByAgeBin,
+  getChartCategoryCountsByConceptRank,
 } from './highcharts-utils';
 
 const css = `
@@ -219,7 +220,7 @@ export const Chart = withCurrentWorkspace()(
       if (domain) {
         Object.values(cats).forEach((category) => {
           cRow.push(
-            getChartCategoryCounts(
+            getChartCategoryCountsByConceptRank(
               cohortChartData,
               Domain[domain],
               category,
@@ -229,7 +230,7 @@ export const Chart = withCurrentWorkspace()(
         });
         Object.values(cats).forEach((category) => {
           cdrRow.push(
-            getChartCategoryCounts(
+            getChartCategoryCountsByConceptRank(
               cdrChartData,
               Domain[domain],
               category,
@@ -313,7 +314,7 @@ export const Chart = withCurrentWorkspace()(
         workspace: { id, namespace },
       } = this.props;
       return forCdr
-        ? chartBuilderApi().getChartData(namespace, id, 0, '')
+        ? chartBuilderApi().getChartData(namespace, id, 0, domain)
         : chartBuilderApi().getChartData(namespace, id, +cohortId, domain);
     }
 
@@ -551,7 +552,7 @@ export const Chart = withCurrentWorkspace()(
       const { categoryCountsAgeBinRow, categoryCountsAgeBinWidths } =
         this.state;
 
-      console.log('categoryCountsAgeBinRow:',categoryCountsAgeBinRow);
+      console.log('categoryCountsAgeBinRow:', categoryCountsAgeBinRow);
 
       const cannedTopology = getCannedTopology();
 
