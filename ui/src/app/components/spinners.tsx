@@ -20,7 +20,7 @@ const styles = reactStyles({
   square: {
     display: 'flex',
     borderRadius: 4,
-    padding: '0.5rem',
+    padding: '0.75rem',
   },
   darkBackground: {
     stroke: colors.white,

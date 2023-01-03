@@ -6,6 +6,6 @@ export const surveyStyles = reactStyles({
     fontWeight: 'bold',
     color: colors.primary,
     fontSize: '18px',
-    lineHeight: '1.25rem',
+    lineHeight: '1.875rem',
   },
 });

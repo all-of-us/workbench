@@ -69,7 +69,9 @@ export const withProfileErrorWrapper = (WrappedComponent) => {
         An error occurred while saving your profile. The following message was
         returned:
       </div>
-      <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>"{message}"</div>
+      <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+        "{message}"
+      </div>
       <div>
         Please try again or contact <SupportMailto />.
       </div>

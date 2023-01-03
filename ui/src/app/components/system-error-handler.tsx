@@ -36,11 +36,11 @@ const styles = reactStyles({
   },
   errorHandler: {
     position: 'fixed',
-    bottom: '1rem',
+    bottom: '1.5rem',
     background: colors.white,
-    padding: '0.6rem',
+    padding: '0.9rem',
     border: `1px solid ${colors.black}`,
-    width: '12rem',
+    width: '18rem',
   },
   iconStyles: {
     cursor: 'pointer',
@@ -48,7 +48,7 @@ const styles = reactStyles({
     width: 17,
   },
   serverStatusList: {
-    margin: '0.5rem 0',
+    margin: '0.75rem 0',
   },
 });
 

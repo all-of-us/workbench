@@ -7,7 +7,7 @@ const style = {
   color: colors.primary,
   fontSize: '14px',
   lineHeight: '22px',
-  marginBottom: '0.5rem',
+  marginBottom: '0.75rem',
 };
 
 export const TextColumn = (props) => {

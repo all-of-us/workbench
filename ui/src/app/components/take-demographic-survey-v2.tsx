@@ -52,7 +52,7 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
         buttonText='Take Survey'
         buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
         buttonDisabled={location.pathname === DEMOGRAPHIC_SURVEY_V2_PATH}
-        bannerTextWidth='26rem'
+        bannerTextWidth='39rem'
       />
     )
   );
