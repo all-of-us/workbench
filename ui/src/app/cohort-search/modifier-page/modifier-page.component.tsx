@@ -3,8 +3,6 @@ import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
-const { useEffect, useState } = React;
-
 import {
   CdrVersionTiersResponse,
   Criteria,
@@ -36,13 +34,15 @@ import { MatchParams, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
 
+const { useEffect, useState } = React;
+
 const styles = reactStyles({
   header: {
     color: '#262262',
     fontWeight: 600,
     fontSize: '16px',
     borderBottom: '1px solid #262262',
-    paddingBottom: '0.5rem',
+    paddingBottom: '0.75rem',
   },
   errors: {
     background: '#f5dbd9',
@@ -50,7 +50,7 @@ const styles = reactStyles({
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '3px 5px',
   },
   errorItem: {
@@ -61,54 +61,54 @@ const styles = reactStyles({
     fontWeight: 500,
   },
   modifier: {
-    marginTop: '0.4rem',
+    marginTop: '0.6rem',
   },
   select: {
-    width: '12rem',
-    height: '1.6rem',
-    paddingLeft: '0.5rem',
-    marginRight: '1rem',
+    width: '18rem',
+    height: '2.4rem',
+    paddingLeft: '0.75rem',
+    marginRight: '1.5rem',
   },
   date: {
-    width: '6.5rem',
+    width: '9.75rem',
     display: 'inline-block',
   },
   count: {
     display: 'inline-flex',
-    height: '0.625rem',
+    height: '0.9375rem',
     background: '#0079b8',
     color: '#ffffff',
     fontSize: '10px',
-    padding: '0 0.166667rem',
+    padding: '0 0.25rem',
     borderRadius: '10px',
     verticalAlign: 'middle',
     alignItems: 'center',
   },
   info: {
     color: '#0077b7',
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
   },
   footer: {
     position: 'absolute',
-    bottom: '1rem',
+    bottom: '1.5rem',
   },
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    marginRight: '-.5rem',
-    marginLeft: '-.5rem',
+    marginRight: '-.75rem',
+    marginLeft: '-.75rem',
   },
   col: {
     position: 'relative',
     minHeight: '1px',
     width: '100%',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    paddingLeft: '0.75rem',
+    paddingRight: '0.75rem',
   },
   button: {
     color: '#ffffff',
-    height: '1.5rem',
-    margin: '0.25rem 0.5rem 0.25rem 0',
+    height: '2.25rem',
+    margin: '0.375rem 0.75rem 0.375rem 0',
     borderRadius: '3px',
   },
   previewCount: {
@@ -123,14 +123,14 @@ const styles = reactStyles({
     textAlign: 'left',
     border: '1px solid #ebafa6',
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
   addButton: {
-    height: '2rem',
+    height: '3rem',
     borderRadius: '5px',
     fontWeight: 600,
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
 });
 
@@ -563,7 +563,7 @@ export const ModifierPage = fp.flow(
         case 'number':
           return (
             <NumberInput
-              style={{ padding: '0 0.25rem', width: '3rem' }}
+              style={{ padding: '0 0.375rem', width: '4.5rem' }}
               value={values[field]}
               min={0}
               onChange={(v) => inputChange(index, field, v)}
@@ -588,7 +588,7 @@ export const ModifierPage = fp.flow(
         <h3 style={{ ...styles.header, marginTop: 0 }}>
           Apply optional Modifiers
         </h3>
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: '1.5rem' }}>
           <div>
             The following modifiers are optional and apply to all selected
             criteria
@@ -596,7 +596,7 @@ export const ModifierPage = fp.flow(
           {calculateError && (
             <div style={styles.error}>
               <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem' }}
+                style={{ margin: '0 0.75rem 0 0.375rem' }}
                 className='is-solid'
                 shape='exclamation-triangle'
                 size='22'
@@ -615,7 +615,7 @@ export const ModifierPage = fp.flow(
             </div>
           )}
           {loading ? (
-            <div style={{ margin: '1rem 0 2rem', textAlign: 'center' }}>
+            <div style={{ margin: '1.5rem 0 3rem', textAlign: 'center' }}>
               <Spinner />
             </div>
           ) : (
@@ -625,7 +625,7 @@ export const ModifierPage = fp.flow(
                 <div
                   data-test-id={name}
                   key={i}
-                  style={{ marginTop: '0.75rem' }}
+                  style={{ marginTop: '1.125rem' }}
                 >
                   <label style={styles.label}>{label}</label>
                   {name === ModifierType.EVENTDATE && (
@@ -650,11 +650,11 @@ export const ModifierPage = fp.flow(
                       ![ModifierType.CATI, ModifierType.ENCOUNTERS].includes(
                         name
                       ) && (
-                        <div style={{ paddingTop: '1rem' }}>
+                        <div style={{ paddingTop: '1.5rem' }}>
                           {renderInput(i, '0', mod.type)}
                           {operator === Operator.BETWEEN && (
                             <React.Fragment>
-                              <span style={{ margin: '0 0.25rem' }}>and</span>
+                              <span style={{ margin: '0 0.375rem' }}>and</span>
                               {renderInput(i, '1', mod.type)}
                             </React.Fragment>
                           )}

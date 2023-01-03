@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-const { useEffect, useRef, useState } = React;
-
 import { AlertDanger } from 'app/components/alert';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
@@ -15,10 +13,12 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 
+const { useEffect, useRef, useState } = React;
+
 const styles = reactStyles({
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.75rem 1.125rem',
     position: 'relative',
   },
   count: {
@@ -28,17 +28,17 @@ const styles = reactStyles({
     color: colors.white,
     display: 'inline-flex',
     fontSize: '10px',
-    height: '0.625rem',
+    height: '0.9375rem',
     lineHeight: 'normal',
-    minWidth: '0.675rem',
+    minWidth: '1.0125rem',
     padding: '0 4px',
     float: 'right',
-    marginTop: '0.55rem',
+    marginTop: '0.825rem',
   },
   error: {
     width: '99%',
-    marginTop: '2.75rem',
-    padding: '0.25rem',
+    marginTop: '4.125rem',
+    padding: '0.375rem',
     background: colors.warning,
     color: colors.white,
     fontSize: '12px',
@@ -47,15 +47,15 @@ const styles = reactStyles({
   menuButton: {
     background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
-    borderRadius: '0.125rem',
+    borderRadius: '0.1875rem',
     color: colorWithWhiteness(colors.black, 0.45),
     cursor: 'pointer',
     fontSize: '12px',
     fontWeight: 100,
-    height: '1.5rem',
+    height: '2.25rem',
     letterSpacing: '1px',
-    lineHeight: '1.5rem',
-    padding: '0 0.5rem',
+    lineHeight: '2.25rem',
+    padding: '0 0.75rem',
     textTransform: 'uppercase',
     verticalAlign: 'middle',
   },
@@ -68,15 +68,15 @@ const styles = reactStyles({
   searchBar: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     borderRadius: '5px',
-    height: '1.67rem',
-    marginTop: '0.25rem',
-    padding: '0.3rem',
+    height: '2.505rem',
+    marginTop: '0.375rem',
+    padding: '0.45rem',
   },
   searchInput: {
     background: 'transparent',
     border: 0,
-    height: '1rem',
-    marginLeft: '0.25rem',
+    height: '1.5rem',
+    marginLeft: '0.375rem',
     outline: 'none',
     padding: '0',
     width: '84%',
@@ -87,22 +87,22 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     background: colors.white,
-    padding: '.25rem 0',
+    padding: '.375rem 0',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
-    marginTop: '-0.5rem',
-    minHeight: '1.25rem',
-    width: '15rem',
-    borderRadius: '.125rem',
+    boxShadow: '0 1px 0.1875rem hsla(0,0%,45%,.25)',
+    marginTop: '-0.75rem',
+    minHeight: '1.875rem',
+    width: '22.5rem',
+    borderRadius: '.1875rem',
     zIndex: 103,
   },
   dropdownHeader: {
-    height: '1.75rem',
-    lineHeight: '1.75rem',
+    height: '2.625rem',
+    lineHeight: '2.625rem',
     backgroundColor: colorWithWhiteness(colors.light, 0),
     borderTop: '1px solid #cccccc',
     margin: 0,
-    padding: '0 0.5rem',
+    padding: '0 0.75rem',
     width: '100%',
   },
   dropdownHeaderText: {
@@ -112,8 +112,8 @@ const styles = reactStyles({
     verticalAlign: 'middle',
   },
   dropdownItem: {
-    height: '1.75rem',
-    lineHeight: '1.75rem',
+    height: '2.625rem',
+    lineHeight: '2.625rem',
     background: 'transparent',
     borderTop: '1px solid #cccccc',
     cursor: 'pointer',
@@ -124,50 +124,50 @@ const styles = reactStyles({
     color: colors.black,
     fontSize: '12px',
     textDecoration: 'none',
-    padding: '0 0.5rem 0 1.25rem',
+    padding: '0 0.75rem 0 1.875rem',
     width: '90%',
   },
   subMenu: {
     position: 'absolute',
-    top: 'calc(100% - 3.75rem)',
+    top: 'calc(100% - 5.625rem)',
     left: '100%',
     display: 'flex',
     flexDirection: 'column',
     background: colors.white,
-    padding: '.25rem 0',
+    padding: '.375rem 0',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
-    minHeight: '1.25rem',
-    width: '15rem',
-    borderRadius: '.125rem',
+    boxShadow: '0 1px 0.1875rem hsla(0,0%,45%,.25)',
+    minHeight: '1.875rem',
+    width: '22.5rem',
+    borderRadius: '.1875rem',
     zIndex: 103,
   },
   subMenuIcon: {
     color: colors.secondary,
     float: 'right',
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     transform: 'rotate(-90deg)',
   },
   subMenuItem: {
     color: colors.black,
     display: 'block',
     fontSize: '12px',
-    height: '1.25rem',
-    lineHeight: '1.25rem',
+    height: '1.875rem',
+    lineHeight: '1.875rem',
     cursor: 'pointer',
     margin: 0,
-    padding: '0 1.25rem',
+    padding: '0 1.875rem',
     textDecoration: 'none',
     width: '100%',
   },
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
   },
 });
 const searchTrigger = 2;
 const searchTooltip = (
-  <div style={{ marginLeft: '0.5rem' }}>
+  <div style={{ marginLeft: '0.75rem' }}>
     The following special operators can be used to augment search terms:
     <ul style={{ listStylePosition: 'outside' }}>
       <li>
@@ -343,7 +343,7 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                 {domainCountsError && (
                   <div style={styles.error}>
                     <ClrIcon
-                      style={{ margin: '0 0.5rem 0 0.25rem' }}
+                      style={{ margin: '0 0.75rem 0 0.375rem' }}
                       className='is-solid'
                       shape='exclamation-triangle'
                       size='22'
@@ -355,13 +355,16 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
                 {!!inputError && (
                   <AlertDanger
                     data-test-id='criteria-menu-input-alert'
-                    style={{ margin: '0 0.5rem 0.25rem', padding: '0.25rem' }}
+                    style={{
+                      margin: '0 0.75rem 0.375rem',
+                      padding: '0.375rem',
+                    }}
                   >
                     <span>{inputError}</span>
                   </AlertDanger>
                 )}
                 {domainCounts?.length === 0 ? (
-                  <div style={{ padding: '0.25rem 0.5rem' }}>
+                  <div style={{ padding: '0.375rem 0.75rem' }}>
                     No results found
                   </div>
                 ) : menuOptions.length === 0 ? (

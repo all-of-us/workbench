@@ -38,8 +38,8 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
   menu: {
-    minWidth: '5rem',
-    maxWidth: '15rem',
+    minWidth: '7.5rem',
+    maxWidth: '22.5rem',
     width: 'auto',
   },
   lineItem: {
@@ -59,8 +59,8 @@ const styles = reactStyles({
   },
   link: {
     height: 'auto',
-    minWidth: '2rem',
-    marginLeft: '0.25rem',
+    minWidth: '3rem',
+    marginLeft: '0.375rem',
     padding: 0,
     fontSize: '12px',
     fontWeight: 600,
@@ -98,11 +98,11 @@ const styles = reactStyles({
 
 const itemStyles = `
   body .p-menu .p-menu-list {
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
   }
   body .p-menu .p-menuitem-link {
-   padding: 0 1rem;
-   line-height: 1.25rem;
+   padding: 0 1.5rem;
+   line-height: 1.875rem;
   }
   .item-title:hover {
     cursor: pointer;
@@ -472,7 +472,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
                     ref={(el) => (this.actionsMenu = el)}
                   />
                   <Clickable
-                    style={{ display: 'inline-block', paddingRight: '0.5rem' }}
+                    style={{ display: 'inline-block', paddingRight: '0.75rem' }}
                     onClick={(event) => this.actionsMenu.toggle(event)}
                   >
                     <ClrIcon shape='ellipsis-vertical' />
@@ -557,7 +557,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           <div
             style={{
               ...styles.parameterList,
-              maxHeight: paramListOpen ? '15rem' : 0,
+              maxHeight: paramListOpen ? '22.5rem' : 0,
             }}
           >
             {searchParameters.slice(0, 5).map((param, p) => (
@@ -573,7 +573,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
             )}
             {!!modifiers && modifiers.length > 0 && (
               <React.Fragment>
-                <h3 style={{ fontSize: '14px', marginTop: '0.25rem' }}>
+                <h3 style={{ fontSize: '14px', marginTop: '0.375rem' }}>
                   Modifiers
                 </h3>
                 {modifiers.map((mod, m) => (
