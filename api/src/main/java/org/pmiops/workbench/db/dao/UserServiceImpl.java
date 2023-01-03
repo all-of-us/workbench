@@ -819,6 +819,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     directoryService.signOut(user.getUsername());
   }
 
+  @Override
+  public List<DbUser> sendTerraTosReminderEmails() {
+    return accessTierService.getAllRegisteredTierUsers();
+  }
+
   /**
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.

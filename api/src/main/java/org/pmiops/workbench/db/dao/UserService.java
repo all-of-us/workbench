@@ -158,4 +158,6 @@ public interface UserService {
 
   /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
+
+  List<DbUser> sendTerraTosReminderEmails();
 }
