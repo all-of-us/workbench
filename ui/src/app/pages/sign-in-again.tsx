@@ -12,17 +12,17 @@ import { reactStyles } from 'app/utils';
 const styles = reactStyles({
   button: {
     fontSize: '16px',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   textSection: {
     color: colors.primary,
     fontSize: '18px',
-    marginTop: '.5rem',
+    marginTop: '.75rem',
   },
   noteSection: {
     color: colors.primary,
     fontSize: '14px',
-    marginTop: '2rem',
+    marginTop: '3rem',
   },
 });
 

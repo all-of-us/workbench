@@ -78,7 +78,7 @@ export const DataProcConfigSelector = ({
     : undefined;
 
   return (
-    <fieldset style={{ marginTop: '0.75rem' }}>
+    <fieldset style={{ marginTop: '1.125rem' }}>
       <legend style={styles.sectionTitle}>Worker Configuration</legend>
       <div style={styles.formGrid3}>
         <FlexRow style={styles.labelAndInput}>
@@ -107,7 +107,7 @@ export const DataProcConfigSelector = ({
                 Google Cloud for other tasks. This may affect job stability'
             >
               <InfoIcon
-                style={{ marginLeft: '0.1rem', height: '18px', width: '18px' }}
+                style={{ marginLeft: '0.15rem', height: '18px', width: '18px' }}
               />
             </TooltipTrigger>
           </label>
@@ -131,8 +131,8 @@ export const DataProcConfigSelector = ({
           disabled={disabled}
           validMachineTypes={validLeoDataprocWorkerMachineTypes}
           idPrefix='worker'
-          cpuLabelStyles={{ minWidth: '2.5rem' }} // width of 'Workers' label above
-          ramLabelStyles={{ minWidth: '3.75rem' }} // width of 'Preemptible' label above
+          cpuLabelStyles={{ minWidth: '3.75rem' }} // width of 'Workers' label above
+          ramLabelStyles={{ minWidth: '5.625rem' }} // width of 'Preemptible' label above
         />
         <DiskSizeSelector
           diskSize={workerDiskSize}

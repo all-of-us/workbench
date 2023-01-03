@@ -111,7 +111,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
   }
 
   return profile ? (
-    <div style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}>
+    <div style={{ marginTop: '1.5rem', paddingLeft: '1.5rem', width: '48rem' }}>
       <DemographicSurveyComponent
         profile={profile}
         onUpdate={(prop, value) =>
@@ -133,7 +133,7 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
           disabled={!!errors || !changed || submitting}
           type='primary'
           onClick={handleSubmit}
-          style={{ margin: '1rem 0rem' }}
+          style={{ margin: '1.5rem 0rem' }}
         >
           Submit
         </Button>
@@ -142,13 +142,13 @@ export const DemographicSurvey = (props: WithSpinnerOverlayProps) => {
         <Button
           type='secondary'
           onClick={dismissAndContinue}
-          style={{ marginLeft: '2rem' }}
+          style={{ marginLeft: '3rem' }}
         >
           Maybe Later
         </Button>
       )}
     </div>
   ) : (
-    <div style={{ marginTop: '1rem' }}>Profile failed to load.</div>
+    <div style={{ marginTop: '1.5rem' }}>Profile failed to load.</div>
   );
 };

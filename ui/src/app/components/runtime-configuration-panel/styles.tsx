@@ -5,7 +5,7 @@ export const styles = reactStyles({
   baseHeader: {
     color: colors.primary,
     fontSize: '16px',
-    lineHeight: '1rem',
+    lineHeight: '1.5rem',
     margin: 0,
   },
   sectionHeader: {
@@ -17,7 +17,7 @@ export const styles = reactStyles({
   },
   label: {
     fontWeight: 600,
-    marginRight: '.5rem',
+    marginRight: '.75rem',
   },
   labelAndInput: {
     alignItems: 'center',
@@ -25,7 +25,7 @@ export const styles = reactStyles({
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, 0.75)),
     borderRadius: '3px',
-    padding: '.75rem',
+    padding: '1.125rem',
   },
   presetMenuItem: {
     color: colors.primary,
@@ -34,30 +34,30 @@ export const styles = reactStyles({
   formGrid2: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gridGap: '1rem',
+    gridGap: '1.5rem',
     alignItems: 'center',
   },
   formGrid3: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gridGap: '1rem',
+    gridGap: '1.5rem',
     alignItems: 'center',
   },
   sectionTitle: {
     fontWeight: 600,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
   inputNumber: {
     backgroundColor: colors.white,
-    padding: '.75rem .5rem',
-    width: '2rem',
+    padding: '1.125rem .75rem',
+    width: '3rem',
   },
   errorMessage: {
     backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     color: colors.primary,
     fontSize: '14px',
-    padding: '0.5rem',
+    padding: '0.75rem',
     borderRadius: '0.5em',
   },
   costPredictorWrapper: {
@@ -71,13 +71,13 @@ export const styles = reactStyles({
     color: colors.dark,
   },
   costComparison: {
-    padding: '.25rem .5rem',
+    padding: '.375rem .75rem',
     width: '400px',
   },
   costsDrawnFrom: {
     borderLeft: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
     fontSize: '12px',
-    padding: '.33rem .5rem',
+    padding: '.495rem .75rem',
     width: '200px',
   },
   deleteLink: {
@@ -90,13 +90,13 @@ export const styles = reactStyles({
     border: `1px solid ${colors.warning}`,
     borderRadius: '5px',
     display: 'grid',
-    gridColumnGap: '.4rem',
-    gridRowGap: '.7rem',
+    gridColumnGap: '.6rem',
+    gridRowGap: '1.05rem',
     fontSize: '14px',
     fontWeight: 500,
-    padding: '.5rem',
-    marginTop: '1rem',
-    marginBottom: '1rem',
+    padding: '.75rem',
+    marginTop: '1.5rem',
+    marginBottom: '1.5rem',
   },
   confirmWarningText: {
     color: colors.primary,
@@ -111,7 +111,7 @@ export const styles = reactStyles({
   },
   gpuSection: {
     gap: '10px',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   sparkConsoleHeader: {
     color: '#333F52',
