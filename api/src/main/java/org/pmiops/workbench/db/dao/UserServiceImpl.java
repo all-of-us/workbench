@@ -825,7 +825,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .filter(u -> shouldSendTerraTosReminderEmail(u.getUserId()))
             .collect(Collectors.toList());
 
-    usersToRemind.forEach(this::sendTerraTosReminderEmail);
+    // TODO
+    // usersToRemind.forEach(this::sendTerraTosReminderEmail);
 
     return usersToRemind;
   }
@@ -845,9 +846,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // send emails to noncompliant users
     return !userIsCompliant;
   }
-
-  // STUB METHOD until we have an email ready
-  private void sendTerraTosReminderEmail(DbUser user) {}
 
   /**
    * Return the user's registered tier access expiration time, for the purpose of sending an access
