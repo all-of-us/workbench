@@ -42,22 +42,22 @@ const MessageWithIcon = ({
         border: `1px solid ${color[messageType]}`,
         borderRadius: '5px',
         color: colors.dark,
-        marginTop: '.5rem',
-        padding: '.5rem 0px',
+        marginTop: '.75rem',
+        padding: '.75rem 0px',
       }}
     >
       <ClrIcon
         style={{
           color: color[messageType],
           flex: '0 0 auto',
-          marginLeft: '.5rem',
+          marginLeft: '.75rem',
           ...position[iconPosition],
         }}
         shape={icon[messageType]}
         size={iconSize}
         class={'is-solid'}
       />
-      <div style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+      <div style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
         {children}
       </div>
     </FlexRow>

@@ -102,7 +102,7 @@ const CostInfo = ({
     <FlexRow data-test-id='cost-estimator'>
       <div
         style={{
-          padding: '.33rem .5rem',
+          padding: '.495rem .75rem',
           ...(runtimeChanged
             ? {
                 backgroundColor: colorWithWhiteness(colors.warning, 0.9),
@@ -615,7 +615,7 @@ const PanelMain = fp.flow(
               panelContent
             ),
             () => (
-              <div style={{ marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
                 Your analysis environment consists of an application and compute
                 resources. Your cloud environment is unique to this workspace
                 and not shared with other users.
@@ -638,7 +638,7 @@ const PanelMain = fp.flow(
                   analysisConfig={analysisConfig}
                 />
                 <FlexRow
-                  style={{ justifyContent: 'flex-end', marginTop: '1rem' }}
+                  style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
                 >
                   {renderCreateButton()}
                 </FlexRow>
@@ -799,7 +799,7 @@ const PanelMain = fp.flow(
                     )}
                   <FlexRow
                     style={{
-                      marginTop: '1rem',
+                      marginTop: '1.5rem',
                       justifyContent: 'space-between',
                     }}
                   >
@@ -811,7 +811,7 @@ const PanelMain = fp.flow(
                         <Dropdown
                           id='runtime-compute'
                           disabled={!allowDataproc || disableControls}
-                          style={{ width: '10rem' }}
+                          style={{ width: '15rem' }}
                           options={[ComputeType.Standard, ComputeType.Dataproc]}
                           value={
                             analysisConfig.computeType || ComputeType.Standard
@@ -866,7 +866,7 @@ const PanelMain = fp.flow(
                   )}
                   <FlexRow
                     style={{
-                      marginTop: '1rem',
+                      marginTop: '1.5rem',
                       justifyContent: 'space-between',
                     }}
                   >
@@ -877,7 +877,7 @@ const PanelMain = fp.flow(
                       <Dropdown
                         id='runtime-autopause'
                         disabled={disableControls}
-                        style={{ width: '10rem' }}
+                        style={{ width: '15rem' }}
                         options={Array.from(
                           AutopauseMinuteThresholds.entries()
                         ).map((entry) => ({
@@ -943,7 +943,7 @@ const PanelMain = fp.flow(
                   <FlexRow
                     style={{
                       justifyContent: 'space-between',
-                      marginTop: '.75rem',
+                      marginTop: '1.125rem',
                     }}
                   >
                     <LinkButton
@@ -969,7 +969,7 @@ const PanelMain = fp.flow(
                   <FlexRow
                     style={{
                       justifyContent: 'space-between',
-                      marginTop: '.75rem',
+                      marginTop: '1.125rem',
                     }}
                   >
                     <LinkButton
@@ -1053,7 +1053,7 @@ export const RuntimeConfigurationPanel = ({
 }) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
-    return <Spinner style={{ width: '100%', marginTop: '5rem' }} />;
+    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
   }
 
   // TODO: can we remove this indirection?

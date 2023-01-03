@@ -91,7 +91,7 @@ export const NewUserSatisfactionSurveyModal = ({
       onRequestClose={onCancel}
       shouldCloseOnOverlayClick={false}
     >
-      <FlexColumn style={{ gap: '0.5rem' }}>
+      <FlexColumn style={{ gap: '0.75rem' }}>
         <MultipleChoiceQuestion
           question='How would you rate your overall satisfaction with the Researcher Workbench?'
           options={orderedSatisfactionOptions}
@@ -104,7 +104,7 @@ export const NewUserSatisfactionSurveyModal = ({
               },
             });
           }}
-          questionStyle={{ marginBottom: '0.5rem' }}
+          questionStyle={{ marginBottom: '0.75rem' }}
         />
         <label
           htmlFor='new-user-satisfaction-survey-additional-info'
@@ -126,7 +126,7 @@ export const NewUserSatisfactionSurveyModal = ({
           }}
           initialText={newUserSatisfactionSurveyData.additionalInfo}
           textBoxStyleOverrides={{ width: '100%' }}
-          heightOverride={{ height: '7rem' }}
+          heightOverride={{ height: '10.5rem' }}
           maxCharacters={ADDITIONAL_INFO_MAX_CHARACTERS}
         />
         <FlexRow style={{ justifyContent: 'flex-end' }}>
@@ -136,7 +136,7 @@ export const NewUserSatisfactionSurveyModal = ({
             </ErrorMessage>
           )}
         </FlexRow>
-        <FlexRow style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
+        <FlexRow style={{ justifyContent: 'flex-end', gap: '0.75rem' }}>
           <Button type='secondary' onClick={onCancel} aria-label='cancel'>
             Cancel
           </Button>

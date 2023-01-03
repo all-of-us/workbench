@@ -10,7 +10,7 @@ const styles = {
   tooltip: {
     background: colors.dark,
     color: colors.white,
-    padding: '0.5rem',
+    padding: '0.75rem',
     // Keep z-index in sync with modals.tsx.
     position: 'fixed',
     top: 0,
