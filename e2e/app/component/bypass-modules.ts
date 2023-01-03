@@ -77,7 +77,7 @@ export default class BypassPopup extends BaseMenu {
 
   // click the cancel icon to close the bypass-popup
   async clickCancelBypass(): Promise<void> {
-    const xpath = `${this.getXpath()}//*[local-name()='svg' and @data-icon='xmark']`;
+    const xpath = `${this.getXpath()}//*[@role='button' and text()='Cancel']`;
     await new Checkbox(this.page, xpath).click();
   }
 }
