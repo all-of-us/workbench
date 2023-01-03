@@ -22,6 +22,7 @@ import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.TerraTosReminderEmailsResponse;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.http.ResponseEntity;
@@ -119,5 +120,12 @@ public class UserAdminController implements UserAdminApiDelegate {
                     userService.findUsersByUsernames(request.getUsernames()).stream()
                         .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.COMMUNICATIONS_ADMIN})
+  public ResponseEntity<TerraTosReminderEmailsResponse> sendTerraTosReminderEmails() {
+    return ResponseEntity.ok(
+        new TerraTosReminderEmailsResponse());
   }
 }

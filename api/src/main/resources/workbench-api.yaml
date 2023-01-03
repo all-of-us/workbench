@@ -1673,6 +1673,25 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/sendTerraTosReminderEmails":
+    post:
+      tags:
+        - userAdmin
+      consumes:
+        - application/json
+      description: >
+        Send emails to currently-registered users who have not yet agreed to the most recent
+        version of Terra's Terms of Service. Requires COMMUNICATIONS_ADMIN Authority.
+      operationId: sendTerraTosReminderEmails
+      responses:
+        200:
+          description: 'A response containing the emails of the users who were notified'
+          schema:
+            "$ref": "#/definitions/TerraTosReminderEmailsResponse"
+        403:
+          description: User doesn't have the COMMUNICATIONS_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -9878,7 +9897,7 @@ definitions:
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
       registeredTierRequirement:
-        description: Institution tegisted tier requirement.
+        description: Institution registered tier requirement.
         "$ref": "#/definitions/InstitutionMembershipRequirement"
   ReportingNewUserSatisfactionSurvey:
     type: object
@@ -10349,3 +10368,16 @@ definitions:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
+
+  TerraTosReminderEmailsResponse:
+    type: object
+    properties:
+      users:
+        type: array
+        items:
+          type: object
+          properties:
+            username:
+              type: string
+            contactEmail:
+              type: string
