@@ -18,8 +18,6 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
-  int LATEST_AOU_TOS_VERSION = 1;
-
   /**
    * Updates a user record with a modifier function.
    *
@@ -159,5 +157,6 @@ public interface UserService {
   /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
 
+  /** Send reminder emails to all registered users who have not signed the latest Terra ToS */
   List<DbUser> sendTerraTosReminderEmails();
 }

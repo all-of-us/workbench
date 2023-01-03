@@ -15,7 +15,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -282,7 +281,7 @@ public class ProfileControllerTest extends BaseControllerTest {
             .zipCode(ZIP_CODE));
 
     createAccountRequest = new CreateAccountRequest();
-    createAccountRequest.setTermsOfServiceVersion(LATEST_AOU_TOS_VERSION);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
 
@@ -414,18 +413,19 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_withTosVersion() {
-    createAccountRequest.setTermsOfServiceVersion(LATEST_AOU_TOS_VERSION);
+    createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion);
     createAccountAndDbUserWithAffiliation();
 
     final DbUser dbUser = userDao.findUserByUsername(FULL_USER_NAME);
     final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
     assertThat(tosRows.size()).isEqualTo(1);
-    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
+    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(config.termsOfService.latestAouVersion);
     assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
     assertThat(tosRows.get(0).getAouAgreementTime()).isNotNull();
     assertThat(tosRows.get(0).getTerraAgreementTime()).isNull();
     Profile profile = profileService.getProfile(dbUser);
-    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
+    assertThat(profile.getLatestTermsOfServiceVersion())
+        .isEqualTo(config.termsOfService.latestAouVersion);
   }
 
   @Test
@@ -433,7 +433,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          createAccountRequest.setTermsOfServiceVersion(LATEST_AOU_TOS_VERSION - 1);
+          createAccountRequest.setTermsOfServiceVersion(config.termsOfService.latestAouVersion - 1);
           createAccountAndDbUserWithAffiliation();
         });
   }

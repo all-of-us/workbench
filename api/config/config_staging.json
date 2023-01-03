@@ -170,5 +170,9 @@
       "puppeteer-egress-1@staging.fake-research-aou.org",
       "puppetcitester4@staging.fake-research-aou.org"
     ]
+  },
+  "termsOfService": {
+    "latestAouVersion": 1,
+    "latestTerraTosTimestamp": "2024-12-31T12:34:56Z"
   }
 }

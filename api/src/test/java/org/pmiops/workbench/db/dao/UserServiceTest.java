@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -152,6 +151,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
+    providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -417,18 +417,21 @@ public class UserServiceTest {
 
   @Test
   public void testSubmitAouTermsOfService() {
+    int latestVersion = providedWorkbenchConfig.termsOfService.latestAouVersion;
+
     // confirm empty to start
     assertThat(StreamSupport.stream(userTermsOfServiceDao.findAll().spliterator(), false).count())
         .isEqualTo(0);
 
     DbUser user = userDao.findUserByUsername(USERNAME);
-    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
-    verify(mockUserServiceAuditAdapter).fireAcknowledgeTermsOfService(any(DbUser.class), eq(1));
+    userService.submitAouTermsOfService(user, latestVersion);
+    verify(mockUserServiceAuditAdapter)
+        .fireAcknowledgeTermsOfService(any(DbUser.class), eq(latestVersion));
 
     Optional<DbUserTermsOfService> tosMaybe =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     assertThat(tosMaybe).isPresent();
-    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
+    assertThat(tosMaybe.get().getTosVersion()).isEqualTo(latestVersion);
     assertThat(tosMaybe.get().getAouAgreementTime()).isNotNull();
     assertThat(tosMaybe.get().getTerraAgreementTime()).isNull();
   }
@@ -441,7 +444,8 @@ public class UserServiceTest {
 
     // need to do this first
     DbUser user = userDao.findUserByUsername(USERNAME);
-    userService.submitAouTermsOfService(user, LATEST_AOU_TOS_VERSION);
+    userService.submitAouTermsOfService(
+        user, providedWorkbenchConfig.termsOfService.latestAouVersion);
 
     userService.acceptTerraTermsOfService(userDao.findUserByUsername(USERNAME));
     verify(mockFireCloudService).acceptTermsOfService();
@@ -554,7 +558,8 @@ public class UserServiceTest {
   @Test
   public void test_validateAllOfUsTermsOfService() {
     // does not throw
-    userService.validateAllOfUsTermsOfService(LATEST_AOU_TOS_VERSION);
+    userService.validateAllOfUsTermsOfService(
+        providedWorkbenchConfig.termsOfService.latestAouVersion);
   }
 
   @Test
@@ -568,18 +573,22 @@ public class UserServiceTest {
   public void test_validateAllOfUsTermsOfService_wrong_version() {
     assertThrows(
         BadRequestException.class,
-        () -> userService.validateAllOfUsTermsOfService(LATEST_AOU_TOS_VERSION - 1));
+        () ->
+            userService.validateAllOfUsTermsOfService(
+                providedWorkbenchConfig.termsOfService.latestAouVersion - 1));
   }
 
   @Test
   public void test_validateAllOfUsTermsOfServiceVersion() {
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
     assertThat(userService.validateAllOfUsTermsOfServiceVersion(user)).isTrue();
   }
 
   @Test
   public void test_validateAllOfUsTermsOfServiceVersion_incorrectVersion() {
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
     assertThat(userService.validateAllOfUsTermsOfServiceVersion(user)).isFalse();
   }
 
@@ -593,7 +602,8 @@ public class UserServiceTest {
   public void test_validateTermsOfService_dbUser_hasNotAcceptedTerraTOS()
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
 
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
@@ -602,13 +612,13 @@ public class UserServiceTest {
   public void test_validateTermsOfService_dbUser()
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion);
     assertThat(userService.validateTermsOfService(user)).isTrue();
   }
 
   @Test
-  public void test_validateTermsOfService_dbUser_missing_version()
-      throws org.pmiops.workbench.firecloud.ApiException {
+  public void test_validateTermsOfService_dbUser_missing_version() {
     DbUser user = userDao.findUserByUsername(USERNAME);
     userTermsOfServiceDao.save(new DbUserTermsOfService().setUserId(user.getUserId()));
     assertThat(userService.validateTermsOfService(user)).isFalse();
@@ -618,7 +628,8 @@ public class UserServiceTest {
   public void test_validateTermsOfService_dbUser_wrong_aou_version_acceptedTerra()
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(true);
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
@@ -626,7 +637,8 @@ public class UserServiceTest {
   public void test_validateTermsOfService_dbUser_wrong_aou_version_hasNot_acceptedTerra()
       throws org.pmiops.workbench.firecloud.ApiException {
     when(mockFireCloudService.getUserTermsOfServiceStatus()).thenReturn(false);
-    DbUser user = createUserWithAoUTOSVersion(LATEST_AOU_TOS_VERSION - 1);
+    DbUser user =
+        createUserWithAoUTOSVersion(providedWorkbenchConfig.termsOfService.latestAouVersion - 1);
     assertThat(userService.validateTermsOfService(user)).isFalse();
   }
 
