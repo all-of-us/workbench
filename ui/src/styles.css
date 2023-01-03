@@ -128,7 +128,7 @@ html {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   color: #565656;
-  font-size: 24px;
+  font-size: 100%; /* Sets font-size to 100% of browser's font-size.*/
 }
 
 h1, h1 > *,
