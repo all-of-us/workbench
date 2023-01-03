@@ -37,8 +37,9 @@ export function getAvailableCategories(dataForCharts: Array<ChartData>) {
 }
 
 export function formattedRank(rank: number) {
-  const fr = '00' + String(rank);
-  return fr.slice(fr.length - 2);
+  // const fr = '00' + String(rank);
+  // return fr.slice(fr.length - 2);
+  return String(rank);
 }
 
 function getCategorySortKey(
@@ -54,7 +55,7 @@ function getCategorySortKey(
       return key;
     }
   } else {
-    return `${(formattedRank(record.conceptRank), record.conceptName)}`;
+    return formattedRank(record.conceptRank) + ':' + record.conceptName;
   }
 }
 
@@ -161,7 +162,6 @@ export function getChartCategoryCounts(
     },
     tooltip: {
       formatter: function () {
-
         return (
           '<b>' +
           CHART_CATEGORY_KEY_NAME[categoryProp] +
@@ -297,6 +297,143 @@ export function getChartCategoryCountsByAgeBin(
     tooltip: {
       formatter: function () {
         let tip = this.point.ageBin + '(y), ';
+        tip += this.point.categoryName + ', <br/>';
+        tip += 'counts: (' + this.point.categoryCount;
+        tip += '/' + this.point.sumCategoryTotal + ')<br/>';
+        return tip + 'percent:' + parseFloat(this.point.y).toFixed(2) + '%';
+      },
+    },
+    series: series,
+  };
+}
+
+export function getChartCategoryCountsByConceptRank(
+  dataForCharts: Array<ChartData>,
+  domain: Domain,
+  category: Category,
+  categoryVals: []
+) {
+  // for x-axis instead of ageBin use [conceptRank,conceptName]
+  const categories = Array.from(
+    new Set(dataForCharts.map((dat) => dat.conceptRank + ':' + dat.conceptName))
+  ).sort((a, b) =>
+    +a.substring(0, a.indexOf(':')) > +b.substring(0, b.indexOf(':')) ? 1 : -1
+  );
+  // use counts for categoryProperty (gender, race,...)
+  const categoryProp = category.toString();
+  const categoryTotal = {};
+  interface ReduceReturnType {
+    id: number; // 👈️ 👈️ 👈️ no longer optional
+    name: string;
+    color: string;
+    sortKey: any;
+    data: [any];
+  }
+
+  const categoryCounts = dataForCharts.reduce<ReduceReturnType>(
+    (accum, record) => {
+      const key = record[categoryProp];
+      const conceptRankName =
+        formattedRank(record.conceptRank) + ':' + record.conceptName;
+      const rec = accum[key]; // accum['Female']
+      const categoryColorIndex = categoryVals.findIndex(
+        (value) => value === key
+      );
+      if (!rec) {
+        // 1st data record
+        const seriesObj = {
+          name: key,
+          color: hcColors.hcColors[categoryProp][categoryColorIndex],
+          sortKey: getCategorySortKey(domain, categoryProp, record),
+          data: [
+            {
+              conceptRankName:
+                formattedRank(record.conceptRank) + ':' + record.conceptName,
+              conceptRank: record.conceptRank,
+              conceptName: record.conceptName,
+              category: categoryProp,
+              categoryName: key,
+              categoryCount: record.count,
+            },
+          ],
+        };
+        accum[key] = seriesObj;
+        categoryTotal[key] = record.count;
+      } else {
+        const dataRec = accum[key].data.find(
+          (item) =>
+            formattedRank(item.conceptRank) + ':' + item.conceptName ===
+            conceptRankName
+        );
+        if (!dataRec) {
+          // next data record
+          accum[key].data.push({
+            conceptRankName:
+              formattedRank(record.conceptRank) + ':' + record.conceptName,
+            conceptRank: record.conceptRank,
+            conceptName: record.conceptName,
+            category: categoryProp,
+            categoryName: key,
+            categoryCount: record.count,
+          });
+        } else {
+          dataRec.categoryCount += record.count;
+        }
+        categoryTotal[key] += record.count;
+      }
+      return accum;
+    },
+    {} as ReduceReturnType
+  );
+  // compute %
+  // categoryCount * 100 / sum(categoryTotal)
+  const sumCategoryTotal = Object.keys(categoryTotal).reduce((accum, key) => {
+    return accum + categoryTotal[key];
+  }, 0);
+  const series = Object.values(categoryCounts)
+    .reduce((accum, serObj) => {
+      serObj.data.reduce((recAccum, rec) => {
+        rec.categoryTotal = categoryTotal[serObj.name];
+        rec.sumCategoryTotal = sumCategoryTotal;
+        rec.x = categories.findIndex((cat) => rec.conceptRankName === cat);
+        rec.y = (rec.categoryCount * 100) / sumCategoryTotal;
+      }, []);
+      accum.push(serObj);
+      return accum;
+    }, [])
+    .sort((a, b) => (a.conceptRank > b.conceptRank ? -1 : 1));
+  // set reversedStacks:false on yaxis
+  const yaxis = getYAxis('Percent(%)');
+  yaxis.reversedStacks = false;
+
+  return {
+    chart: {
+      type: 'column',
+      inverted: true,
+    },
+    title: {
+      text: CHART_CATEGORY_KEY_NAME[categoryProp],
+    },
+    xAxis: [getXAxis(categories, false, 'Ranked Concept Name')],
+    yAxis: [yaxis],
+    legend: {
+      layout: 'horizontal',
+      // align: 'right',
+      verticalAlign: 'top',
+      itemMarginBottom: 5,
+      useHTML: true,
+      labelFormatter: function () {
+        return this.name.slice(0, 15) + (this.name.length > 15 ? '...' : '');
+      },
+    },
+    plotOptions: {
+      series: {
+        stacking: 'normal', // 'normal',
+      },
+    },
+    tooltip: {
+      formatter: function () {
+        let tip = this.point.conceptRank + ': ' + this.point.conceptName;
         tip += this.point.categoryName + ', <br/>';
         tip += 'counts: (' + this.point.categoryCount;
         tip += '/' + this.point.sumCategoryTotal + ')<br/>';
