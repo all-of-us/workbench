@@ -127,7 +127,7 @@ public class LeonardoApiClientTest {
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.app.rStudioDescriptorPath = RSTUDIO_DESCRIPTOR_PATH;
+    config.firecloud.userApps.rStudioDescriptorPath = RSTUDIO_DESCRIPTOR_PATH;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 

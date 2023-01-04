@@ -545,7 +545,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     if (appType.equals(AppType.RSTUDIO)) {
       leonardoCreateAppRequest.descriptorPath(
-          workbenchConfigProvider.get().app.rStudioDescriptorPath);
+          workbenchConfigProvider.get().firecloud.userApps.rStudioDescriptorPath);
     }
 
     leonardoRetryHandler.run(
