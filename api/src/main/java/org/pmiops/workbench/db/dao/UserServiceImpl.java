@@ -831,7 +831,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return usersToRemind;
   }
 
-  private boolean shouldSendTerraTosReminderEmail(long userId) {
+  @Override
+  public boolean shouldSendTerraTosReminderEmail(long userId) {
     Timestamp latestTerraTosTime =
         Timestamp.from(Instant.parse(configProvider.get().termsOfService.latestTerraTosTimestamp));
 

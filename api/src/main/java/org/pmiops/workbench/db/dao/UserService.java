@@ -159,4 +159,6 @@ public interface UserService {
 
   /** Send reminder emails to all registered users who have not signed the latest Terra ToS */
   List<DbUser> sendTerraTosReminderEmails();
+
+  boolean shouldSendTerraTosReminderEmail(long userId);
 }
