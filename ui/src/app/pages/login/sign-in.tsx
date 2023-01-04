@@ -59,7 +59,7 @@ export const backgroundStyleTemplate = (
   }
 
   function calculateBackgroundPosition() {
-    let position = 'bottom right -1rem';
+    let position = 'bottom right -1.5rem';
     if (
       windowSize.width > bgWidthMinPx &&
       windowSize.width <= bgWidthSmallLimitPx
@@ -378,7 +378,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       case SignInStep.DEMOGRAPHIC_SURVEY:
         return (
           <div
-            style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
+            style={{
+              marginTop: '1.5rem',
+              paddingLeft: '1.5rem',
+              width: '48rem',
+            }}
           >
             <DemographicSurvey
               onError={(value) => handleUpdate(fp.set(['errors'], value))}
@@ -442,13 +446,13 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       return (
         <div
           style={{
-            marginTop: '2rem',
-            marginBottom: '1rem',
-            marginLeft: '1rem',
+            marginTop: '3rem',
+            marginBottom: '1.5rem',
+            marginLeft: '1.5rem',
           }}
         >
           {environment.enableCaptcha && (
-            <div style={{ paddingBottom: '1rem' }}>
+            <div style={{ paddingBottom: '1.5rem' }}>
               <ReCAPTCHA
                 sitekey={environment.captchaSiteKey}
                 ref={this.captchaRef}
@@ -460,7 +464,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             <Button
               aria-label='Previous'
               type='secondary'
-              style={{ marginRight: '1rem' }}
+              style={{ marginRight: '1.5rem' }}
               onClick={() => {
                 this.setState({
                   currentStep: this.getPreviousStep(currentStep),

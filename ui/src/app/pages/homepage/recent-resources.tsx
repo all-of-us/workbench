@@ -65,7 +65,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           )}
           <div
             data-test-id='recent-resources-table'
-            style={{ paddingTop: '1rem' }}
+            style={{ paddingTop: '1.5rem' }}
           >
             <ResourceList
               recentResourceSource
