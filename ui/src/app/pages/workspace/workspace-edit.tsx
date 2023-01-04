@@ -108,16 +108,16 @@ export const styles = reactStyles({
   categoryRow: {
     display: 'flex',
     flexDirection: 'row',
-    padding: '0.6rem 0',
+    padding: '0.9rem 0',
     width: '95%',
   },
   checkboxRow: {
     display: 'inline-block',
-    padding: '0.2rem 0',
-    marginRight: '1rem',
+    padding: '0.3rem 0',
+    marginRight: '1.5rem',
   },
   checkboxStyle: {
-    marginRight: '.31667rem',
+    marginRight: '.475rem',
     zoom: '1.5',
   },
   header: {
@@ -130,32 +130,32 @@ export const styles = reactStyles({
     lineHeight: '24px',
     color: colors.primary,
     fontSize: 14,
-    marginBottom: '0.2rem',
+    marginBottom: '0.3rem',
   },
   flexColumnBy2: {
     flex: '1 1 0',
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
   },
   infoIcon: {
     height: '16px',
-    marginLeft: '0.2rem',
+    marginLeft: '0.3rem',
     width: '16px',
   },
   longDescription: {
     position: 'relative',
     display: 'inline-block',
-    minHeight: '1rem',
+    minHeight: '1.5rem',
     cursor: 'text',
-    lineHeight: '1rem',
+    lineHeight: '1.5rem',
     width: '100%',
   },
   researchPurposeRow: {
     backgroundColor: colors.white,
     borderColor: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
-    marginLeft: '-1rem',
-    paddingTop: '0.3rem',
-    paddingBottom: '0.3rem',
+    marginLeft: '-1.5rem',
+    paddingTop: '0.45rem',
+    paddingBottom: '0.45rem',
   },
   select: {
     display: 'inline-block',
@@ -187,7 +187,7 @@ export const styles = reactStyles({
     lineHeight: '24px',
   },
   textInput: {
-    width: '20rem',
+    width: '30rem',
     borderColor: 'rgb(151, 151, 151)',
     borderRadius: '6px',
     marginRight: '20px',
@@ -196,10 +196,10 @@ export const styles = reactStyles({
   selectInput: {
     borderColor: 'rgb(151, 151, 151)',
     borderRadius: '6px',
-    height: '1.5rem',
+    height: '2.25rem',
   },
   researchPurposeDescription: {
-    marginLeft: '-0.9rem',
+    marginLeft: '-1.35rem',
     fontSize: 14,
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
   },
@@ -817,7 +817,7 @@ export const WorkspaceEdit = fp.flow(
             }
             disabled={!this.state.workspace.researchPurpose.otherPurpose}
             data-test-id='otherPrimaryPurposeText'
-            style={{ marginTop: '0.5rem' }}
+            style={{ marginTop: '0.75rem' }}
           />
         );
       }
@@ -831,7 +831,7 @@ export const WorkspaceEdit = fp.flow(
             checked={!!this.state.workspace.researchPurpose[rp.shortName]}
             onChange={(e) => this.updatePrimaryPurpose(rp.shortName, e)}
           />
-          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+          <FlexColumn style={{ marginTop: '-0.3rem' }}>
             <label
               style={{ ...styles.shortDescription, fontSize: 14 }}
               htmlFor={rp.uniqueId}
@@ -880,7 +880,7 @@ export const WorkspaceEdit = fp.flow(
             disabled={
               !this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)
             }
-            style={{ marginTop: '0.5rem', width: '16rem' }}
+            style={{ marginTop: '0.75rem', width: '24rem' }}
           />
         );
       }
@@ -899,7 +899,7 @@ export const WorkspaceEdit = fp.flow(
               )
             }
           />
-          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+          <FlexColumn style={{ marginTop: '-0.3rem' }}>
             <label style={styles.text}>{rp.label}</label>
             {children}
           </FlexColumn>
@@ -914,7 +914,7 @@ export const WorkspaceEdit = fp.flow(
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
       return (
         <div key={item.label}>
-          <div style={{ fontWeight: 'bold', marginBottom: '0.3rem' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '0.45rem' }}>
             {item.label} *
           </div>
           {item.subCategory.map((sub) => (
@@ -926,7 +926,7 @@ export const WorkspaceEdit = fp.flow(
                 manageOwnState={false}
                 wrapperStyle={styles.checkboxRow}
                 data-test-id={sub.shortName + '-checkbox'}
-                style={{ ...styles.checkboxStyle, marginTop: '0.1rem' }}
+                style={{ ...styles.checkboxStyle, marginTop: '0.15rem' }}
                 key={sub.label}
                 checked={this.specificPopulationCheckboxSelected(sub.shortName)}
                 onChange={(v) =>
@@ -955,7 +955,7 @@ export const WorkspaceEdit = fp.flow(
               this.updateAttribute('researchOutcomeList', item.shortName, v)
             }
           />
-          <FlexColumn style={{ marginTop: '-0.2rem' }}>
+          <FlexColumn style={{ marginTop: '-0.3rem' }}>
             <label style={styles.text}>{item.label}</label>
           </FlexColumn>
         </div>
@@ -1468,7 +1468,9 @@ export const WorkspaceEdit = fp.flow(
 
       const errors = this.validate();
       return (
-        <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+        <FadeBox
+          style={{ margin: 'auto', marginTop: '1.5rem', width: '95.7%' }}
+        >
           <div style={{ width: '1120px' }}>
             {loading && (
               <SpinnerOverlay overrideStylesOverlay={styles.spinner} />
@@ -1672,7 +1674,7 @@ export const WorkspaceEdit = fp.flow(
                           <Dropdown
                             data-test-id='billing-dropdown'
                             disabled={this.state.fetchBillingAccountError}
-                            style={{ width: '20rem' }}
+                            style={{ width: '30rem' }}
                             value={billingAccountName}
                             options={this.buildBillingAccountOptions()}
                             onChange={(e) => {
@@ -1707,7 +1709,7 @@ export const WorkspaceEdit = fp.flow(
                       </FlexColumn>
                       {this.state.fetchBillingAccountError && (
                         <FlexColumn
-                          style={{ alignSelf: 'center', marginLeft: '0.5rem' }}
+                          style={{ alignSelf: 'center', marginLeft: '0.75rem' }}
                         >
                           <TooltipTrigger content={tooltipTextBillingWarning}>
                             <WarningIcon style={styles.infoIcon} />
@@ -1719,7 +1721,7 @@ export const WorkspaceEdit = fp.flow(
                 )}
               </WorkspaceEditSection>
             )}
-            <hr style={{ marginTop: '1rem' }} />
+            <hr style={{ marginTop: '1.5rem' }} />
             <WorkspaceEditSection
               header={
                 <FlexRow style={{ alignItems: 'center' }}>
@@ -1728,7 +1730,7 @@ export const WorkspaceEdit = fp.flow(
                     href={supportUrls.researchPurpose}
                     target='_blank'
                     style={{
-                      marginLeft: '1rem',
+                      marginLeft: '1.5rem',
                       fontSize: 14,
                       lineHeight: '18px',
                       fontWeight: 400,
@@ -1741,7 +1743,7 @@ export const WorkspaceEdit = fp.flow(
               largeHeader={true}
               description={
                 <div style={styles.researchPurposeDescription}>
-                  <div style={{ margin: '0.5rem', paddingTop: '0.5rem' }}>
+                  <div style={{ margin: '0.75rem', paddingTop: '0.75rem' }}>
                     {ResearchPurposeDescription}
                     <br />
                     <br />
@@ -1767,7 +1769,7 @@ export const WorkspaceEdit = fp.flow(
                         manageOwnState={false}
                         style={{
                           ...styles.checkboxStyle,
-                          margin: '0.1rem 0.25rem 0 0.6rem',
+                          margin: '0.15rem 0.375rem 0 0.9rem',
                         }}
                         checked={this.researchPurposeCheck}
                         onChange={(v) => this.onResearchPurposeChange(v)}
@@ -1794,10 +1796,10 @@ export const WorkspaceEdit = fp.flow(
                     </FlexRow>
                     {showResearchPurpose && (
                       <FlexColumn data-test-id='research-purpose-categories'>
-                        <div style={{ ...styles.text, marginLeft: '1.9rem' }}>
+                        <div style={{ ...styles.text, marginLeft: '2.85rem' }}>
                           Choose options below to describe your research purpose
                         </div>
-                        <div style={{ marginLeft: '2rem' }}>
+                        <div style={{ marginLeft: '3rem' }}>
                           {ResearchPurposeItems.map((rp, i) =>
                             this.makePrimaryPurposeForm(rp, i)
                           )}
@@ -1818,7 +1820,7 @@ export const WorkspaceEdit = fp.flow(
               indent={true}
               publiclyDisplayed={true}
               description={researchPurposeQuestions[1].description}
-              style={{ width: '48rem' }}
+              style={{ width: '72rem' }}
               index='2.'
             >
               <FlexColumn>
@@ -1860,7 +1862,7 @@ export const WorkspaceEdit = fp.flow(
             <WorkspaceEditSection
               header={researchPurposeQuestions[5].header}
               description={researchPurposeQuestions[5].description}
-              style={{ width: '48rem' }}
+              style={{ width: '72rem' }}
               index='3.'
             >
               <FlexRow>
@@ -1882,9 +1884,9 @@ export const WorkspaceEdit = fp.flow(
               header={researchPurposeQuestions[6].header}
               index='4.'
               description={researchPurposeQuestions[6].description}
-              style={{ width: '48rem' }}
+              style={{ width: '72rem' }}
             >
-              <FlexRow style={{ marginLeft: '1rem' }}>
+              <FlexRow style={{ marginLeft: '1.5rem' }}>
                 <FlexColumn style={{ flex: '1 1 0' }}>
                   {researchOutcomes.map((rp, i) =>
                     this.makeOutcomingResearchForm(rp, i)
@@ -1899,7 +1901,7 @@ export const WorkspaceEdit = fp.flow(
               index='5.'
               indent={true}
               description={researchPurposeQuestions[7].description}
-              style={{ width: '48rem' }}
+              style={{ width: '72rem' }}
               publiclyDisplayed={true}
             >
               <div style={styles.header}>
@@ -1909,7 +1911,7 @@ export const WorkspaceEdit = fp.flow(
               <div>
                 <RadioButton
                   name='population'
-                  style={{ marginRight: '0.5rem' }}
+                  style={{ marginRight: '0.75rem' }}
                   data-test-id='specific-population-yes'
                   onChange={() => this.setState({ populationChecked: true })}
                   checked={populationChecked ?? false}
@@ -1920,10 +1922,10 @@ export const WorkspaceEdit = fp.flow(
                   comparison to other groups.
                 </label>
               </div>
-              <div style={{ ...styles.text, marginLeft: '1.2rem' }}>
+              <div style={{ ...styles.text, marginLeft: '1.8rem' }}>
                 If <strong>"Yes,"</strong>&nbsp;please indicate your
                 underrepresented population(s) of interest:
-                <FlexRow style={{ flex: '1 1 0', marginTop: '0.5rem' }}>
+                <FlexRow style={{ flex: '1 1 0', marginTop: '0.75rem' }}>
                   <FlexColumn>
                     {SpecificPopulationItems.slice(
                       0,
@@ -1982,7 +1984,7 @@ export const WorkspaceEdit = fp.flow(
                 </FlexRow>
                 <hr />
                 <FlexRow>
-                  <div style={{ marginRight: '0.2rem' }}>*</div>
+                  <div style={{ marginRight: '0.3rem' }}>*</div>
                   <div>
                     Demographic variables for which data elements have been
                     altered, partially suppressed, or generalized in the
@@ -1992,10 +1994,10 @@ export const WorkspaceEdit = fp.flow(
                 </FlexRow>
                 <hr />
               </div>
-              <FlexRow style={{ marginTop: '0.5rem' }}>
+              <FlexRow style={{ marginTop: '0.75rem' }}>
                 <RadioButton
                   name='population'
-                  style={{ marginRight: '0.5rem', marginTop: '0.3rem' }}
+                  style={{ marginRight: '0.75rem', marginTop: '0.45rem' }}
                   data-test-id='specific-population-no'
                   onChange={() => this.setState({ populationChecked: false })}
                   checked={populationChecked === false}
@@ -2059,9 +2061,9 @@ export const WorkspaceEdit = fp.flow(
                   review, you may begin working in your workspace.
                 </div>
               </FlexRow>
-              <FlexRow style={{ paddingTop: '0.3rem' }}>
+              <FlexRow style={{ paddingTop: '0.45rem' }}>
                 <FlexColumn>
-                  <label style={{ ...styles.header, marginBottom: '0.2rem' }}>
+                  <label style={{ ...styles.header, marginBottom: '0.3rem' }}>
                     Would you like to request a review of your research purpose
                     statement by the Resource Access Board?
                   </label>
@@ -2073,7 +2075,7 @@ export const WorkspaceEdit = fp.flow(
                     <FlexRow>
                       <RadioButton
                         aria-label='Request Review'
-                        style={{ marginTop: '0.2rem' }}
+                        style={{ marginTop: '0.3rem' }}
                         name='reviewRequested'
                         data-test-id='review-request-btn-true'
                         onChange={() => {
@@ -2081,7 +2083,7 @@ export const WorkspaceEdit = fp.flow(
                         }}
                         checked={reviewRequested ?? false}
                       />
-                      <label style={{ ...styles.text, marginLeft: '0.5rem' }}>
+                      <label style={{ ...styles.text, marginLeft: '0.75rem' }}>
                         Yes, I would like to request a review of my research
                         purpose.
                       </label>
@@ -2089,7 +2091,7 @@ export const WorkspaceEdit = fp.flow(
                     <FlexRow>
                       <RadioButton
                         aria-label='Do Not Request Review'
-                        style={{ marginTop: '0.2rem' }}
+                        style={{ marginTop: '0.3rem' }}
                         name='reviewRequested'
                         data-test-id='review-request-btn-false'
                         onChange={() => {
@@ -2100,8 +2102,8 @@ export const WorkspaceEdit = fp.flow(
                       <label
                         style={{
                           ...styles.text,
-                          marginLeft: '0.5rem',
-                          marginRight: '3rem',
+                          marginLeft: '0.75rem',
+                          marginRight: '4.5rem',
                         }}
                       >
                         No, I have no concerns at this time about potential
@@ -2109,17 +2111,17 @@ export const WorkspaceEdit = fp.flow(
                       </label>
                     </FlexRow>
                   </FlexColumn>
-                  <label style={{ ...styles.text, paddingTop: '0.5rem' }}>
+                  <label style={{ ...styles.text, paddingTop: '0.75rem' }}>
                     {RequestForReviewFooter}
                   </label>
                 </FlexColumn>
               </FlexRow>
             </WorkspaceEditSection>
             <div>
-              <FlexRow style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+              <FlexRow style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
                 <Button
                   type='secondary'
-                  style={{ marginRight: '1rem' }}
+                  style={{ marginRight: '1.5rem' }}
                   onClick={() => this.cancel()}
                 >
                   Cancel
@@ -2242,7 +2244,7 @@ export const WorkspaceEdit = fp.flow(
                   <Button
                     onClick={() => this.cancel()}
                     type='secondary'
-                    style={{ marginRight: '2rem' }}
+                    style={{ marginRight: '3rem' }}
                   >
                     Cancel
                     {this.props.workspaceEditMode === WorkspaceEditMode.Create
@@ -2284,7 +2286,7 @@ export const WorkspaceEdit = fp.flow(
                   <Button
                     type='secondary'
                     onClick={() => this.cancel()}
-                    style={{ marginRight: '2rem' }}
+                    style={{ marginRight: '3rem' }}
                   >
                     Cancel Creation
                   </Button>
@@ -2327,8 +2329,8 @@ export const WorkspaceEdit = fp.flow(
                 <ModalBody
                   style={{
                     color: colors.primary,
-                    lineHeight: '1rem',
-                    marginTop: '0.25rem',
+                    lineHeight: '1.5rem',
+                    marginTop: '0.375rem',
                   }}
                 >
                   {loading && (
@@ -2336,7 +2338,7 @@ export const WorkspaceEdit = fp.flow(
                   )}
                   {this.isMode(WorkspaceEditMode.Create) ||
                     (this.isMode(WorkspaceEditMode.Duplicate) && (
-                      <div style={{ marginBottom: '1rem' }}>
+                      <div style={{ marginBottom: '1.5rem' }}>
                         <b>
                           Note: this workspace will take approximately one
                           minute to create.
@@ -2344,7 +2346,7 @@ export const WorkspaceEdit = fp.flow(
                       </div>
                     ))}
                   <div>Your responses to these questions:</div>
-                  <div style={{ margin: '0.25rem 0 0.25rem 1rem' }}>
+                  <div style={{ margin: '0.375rem 0 0.375rem 1.5rem' }}>
                     <span style={{ fontWeight: 600 }}>
                       Primary purpose of your project
                     </span>{' '}
@@ -2361,7 +2363,7 @@ export const WorkspaceEdit = fp.flow(
                     (Question 5)
                     <br />
                   </div>
-                  <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ marginBottom: '1.5rem' }}>
                     Will be
                     <a
                       style={{ color: colors.accent }}
@@ -2385,7 +2387,7 @@ export const WorkspaceEdit = fp.flow(
                     aria-label='Cancel'
                     type='secondary'
                     disabled={errors || loading}
-                    style={{ marginRight: '1rem' }}
+                    style={{ marginRight: '1.5rem' }}
                     onClick={() =>
                       this.setState({ showConfirmationModal: false })
                     }

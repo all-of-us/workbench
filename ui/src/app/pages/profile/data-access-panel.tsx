@@ -62,7 +62,7 @@ export const DataAccessPanel = (props: DataAccessPanelProps) => {
 
   const sectionId = useId();
   return (
-    <section aria-labelledby={sectionId} style={{ marginLeft: '1rem' }}>
+    <section aria-labelledby={sectionId} style={{ marginLeft: '1.5rem' }}>
       <FlexRow id={sectionId}>
         <div style={styles.title}>Data access</div>
         <Link style={{ marginLeft: 'auto' }} to={DATA_ACCESS_REQUIREMENTS_PATH}>

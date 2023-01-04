@@ -65,9 +65,9 @@ const styles = reactStyles({
   },
   rightSidebar: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.85),
-    marginRight: '-0.6rem',
-    paddingLeft: '0.5rem',
-    paddingTop: '1rem',
+    marginRight: '-0.9rem',
+    paddingLeft: '0.75rem',
+    paddingTop: '1.5rem',
     width: '22%',
     display: 'flex',
     flexDirection: 'column',
@@ -76,22 +76,22 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingRight: '0.5rem',
-    paddingBottom: '0.5rem',
+    paddingRight: '0.75rem',
+    paddingBottom: '0.75rem',
   },
   infoBox: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.75),
-    width: '6rem',
+    width: '9rem',
     borderRadius: '5px',
-    padding: '0.4rem',
-    marginRight: '0.5rem',
-    marginBottom: '0.5rem',
+    padding: '0.6rem',
+    marginRight: '0.75rem',
+    marginBottom: '0.75rem',
     color: colors.primary,
     lineHeight: '14px',
   },
   infoBoxHeader: {
     textTransform: 'uppercase',
-    fontSize: '0.4rem',
+    fontSize: '0.6rem',
   },
   lockMessage: {
     padding: '16px',
@@ -106,7 +106,7 @@ const styles = reactStyles({
     borderColor: colors.warning,
     backgroundColor: colorWithWhiteness(colors.warning, 0.65),
     maxWidth: 'fit-content',
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
   },
 });
 
@@ -302,11 +302,11 @@ export const WorkspaceAbout = fp.flow(
       const published = workspace?.published;
       return (
         <div style={styles.mainPage}>
-          <FlexColumn style={{ margin: '1rem', width: '98%' }}>
+          <FlexColumn style={{ margin: '1.5rem', width: '98%' }}>
             {workspace?.adminLocked && (
               <div data-test-id='lock-workspace-msg' style={styles.lockMessage}>
                 <FlexRow>
-                  <div style={{ marginRight: '1rem', color: colors.warning }}>
+                  <div style={{ marginRight: '1.5rem', color: colors.warning }}>
                     <FontAwesomeIcon size={'2x'} icon={faLockAlt} />
                   </div>
                   <div>
@@ -323,7 +323,7 @@ export const WorkspaceAbout = fp.flow(
                     {workspace.adminLockedReason && (
                       <div
                         style={{
-                          fontSize: '0.6rem',
+                          fontSize: '0.9rem',
                           paddingLeft: '1em',
                           paddingBottom: '1em',
                         }}
@@ -365,7 +365,7 @@ export const WorkspaceAbout = fp.flow(
                   onClick={() => this.publishUnpublishWorkspace(true)}
                   disabled={publishing || published}
                   type={published ? 'secondary' : 'primary'}
-                  style={{ marginLeft: '0.5rem' }}
+                  style={{ marginLeft: '0.75rem' }}
                 >
                   Publish
                 </Button>
@@ -376,7 +376,7 @@ export const WorkspaceAbout = fp.flow(
             <div style={styles.shareHeader}>
               <h3 style={{ marginTop: 0 }}>Collaborators:</h3>
               <TooltipTrigger content={ShareTooltipText()}>
-                <InfoIcon style={{ margin: '0 0.3rem' }} />
+                <InfoIcon style={{ margin: '0 0.45rem' }} />
               </TooltipTrigger>
               <TooltipTrigger
                 content={<div>Workspace compliance action is required</div>}
@@ -386,7 +386,7 @@ export const WorkspaceAbout = fp.flow(
                   style={{
                     height: '22px',
                     fontSize: 12,
-                    marginRight: '0.5rem',
+                    marginRight: '0.75rem',
                     maxWidth: '13px',
                   }}
                   disabled={
@@ -414,15 +414,15 @@ export const WorkspaceAbout = fp.flow(
               />
             )}
             <div>
-              <h3 style={{ marginBottom: '0.5rem' }}>
+              <h3 style={{ marginBottom: '0.75rem' }}>
                 Workspace Information:
                 <TooltipTrigger content={WorkspaceInfoTooltipText()}>
-                  <InfoIcon style={{ margin: '0 0.3rem' }} />
+                  <InfoIcon style={{ margin: '0 0.45rem' }} />
                 </TooltipTrigger>
               </h3>
               <div style={styles.infoBox} data-test-id='cdrVersion'>
                 <div style={styles.infoBoxHeader}>Dataset</div>
-                <div style={{ fontSize: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem' }}>
                   {workspace
                     ? getCdrVersion(workspace, cdrVersionTiersResponse).name
                     : 'Loading...'}
@@ -430,19 +430,19 @@ export const WorkspaceAbout = fp.flow(
               </div>
               <div style={styles.infoBox} data-test-id='creationDate'>
                 <div style={styles.infoBoxHeader}>Creation Date</div>
-                <div style={{ fontSize: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem' }}>
                   {this.workspaceCreationTime}
                 </div>
               </div>
               <div style={styles.infoBox} data-test-id='lastUpdated'>
                 <div style={styles.infoBoxHeader}>Last Updated</div>
-                <div style={{ fontSize: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem' }}>
                   {this.workspaceLastModifiedTime}
                 </div>
               </div>
               <div style={styles.infoBox} data-test-id='accessTierShortName'>
                 <div style={styles.infoBoxHeader}>Data Access Tier</div>
-                <div style={{ fontSize: '0.5rem' }}>
+                <div style={{ fontSize: '0.75rem' }}>
                   {workspace
                     ? fp.capitalize(workspace.accessTierShortName)
                     : 'Loading...'}
@@ -451,11 +451,11 @@ export const WorkspaceAbout = fp.flow(
               {workspace &&
                 WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
                 isUsingFreeTierBillingAccount(workspace) && (
-                  <div style={{ ...styles.infoBox, height: '2.5rem' }}>
+                  <div style={{ ...styles.infoBox, height: '3.75rem' }}>
                     <div style={styles.infoBoxHeader}>
                       Workspace Initial Credit Usage
                     </div>
-                    <div style={{ fontSize: '0.5rem' }}>
+                    <div style={{ fontSize: '0.75rem' }}>
                       {this.state.workspaceInitialCreditsUsage !== undefined ? (
                         '$' + this.state.workspaceInitialCreditsUsage.toFixed(2)
                       ) : (
@@ -474,7 +474,7 @@ export const WorkspaceAbout = fp.flow(
               }
             >
               <div>
-                <h3 style={{ marginBottom: '0.5rem' }}>Billing</h3>
+                <h3 style={{ marginBottom: '0.75rem' }}>Billing</h3>
                 <StyledExternalLink
                   data-test-id='workspace-billing-report'
                   href={this.workspaceGcpBillingSpendUrl}
@@ -491,7 +491,7 @@ export const WorkspaceAbout = fp.flow(
               </div>
             </TooltipTrigger>
             <div>
-              <h3 style={{ marginBottom: '0.5rem' }}>File Management</h3>
+              <h3 style={{ marginBottom: '0.75rem' }}>File Management</h3>
               <StyledExternalLink
                 data-test-id='workspace-bucket-url'
                 href={this.workspaceBucketUrl}
