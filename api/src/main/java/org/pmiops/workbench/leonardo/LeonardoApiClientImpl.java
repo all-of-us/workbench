@@ -50,11 +50,11 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
@@ -531,7 +531,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     appTypeToLabelValue(createAppRequest.getAppType())));
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
-      diskRequest.setName(userProvider.get().generatePDNameForApp(appType));
+      diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 
     leonardoCreateAppRequest
@@ -552,14 +552,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         (context) -> {
           appsApi.createApp(
               dbWorkspace.getGoogleProject(),
-              userProvider.get().generateAppName(appType),
+              userProvider.get().generateUserAppName(appType),
               leonardoCreateAppRequest);
           return null;
         });
   }
 
   @Override
-  public App getAppByNameByProjectId(String googleProjectId, String appName) {
+  public UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName) {
     AppsApi appsApi = appsApiProvider.get();
 
     LeonardoGetAppResponse leonardoGetAppResponse =
@@ -568,7 +568,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<App> listAppsInProject(String googleProjectId) {
+  public List<UserAppEnvironment> listAppsInProject(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(

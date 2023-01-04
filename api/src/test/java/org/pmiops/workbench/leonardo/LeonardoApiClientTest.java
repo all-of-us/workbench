@@ -33,12 +33,12 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -116,7 +116,7 @@ public class LeonardoApiClientTest {
   private static DbUser user = new DbUser();
 
   private DbWorkspace testWorkspace;
-  private App testApp;
+  private UserAppEnvironment testApp;
   private CreateAppRequest createAppRequest;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
@@ -139,7 +139,7 @@ public class LeonardoApiClientTest {
     leonardoPersistentDiskRequest =
         new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
     testApp =
-        new App()
+        new UserAppEnvironment()
             .appType(AppType.RSTUDIO)
             .googleProject(GOOGLE_PROJECT_ID)
             .kubernetesRuntimeConfig(kubernetesRuntimeConfig);

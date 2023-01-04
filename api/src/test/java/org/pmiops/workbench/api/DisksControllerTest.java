@@ -136,19 +136,19 @@ public class DisksControllerTest {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
-            user.generatePDNameForApp(AppType.RSTUDIO),
+            user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(100).toString(),
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse newestRstudioDisk =
         newListPdResponse(
-            user.generatePDNameForApp(AppType.RSTUDIO),
+            user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.toString(),
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse olderRstudioDisk =
         newListPdResponse(
-            user.generatePDNameForApp(AppType.RSTUDIO),
+            user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(200).toString(),
             AppType.RSTUDIO);
@@ -179,13 +179,13 @@ public class DisksControllerTest {
     // Cromwell Disk: both are inactive, nothing to return.
     LeonardoListPersistentDiskResponse oldInactiveCromwellDisk =
         newListPdResponse(
-            user.generatePDNameForApp(AppType.CROMWELL),
+            user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
             AppType.CROMWELL);
     LeonardoListPersistentDiskResponse newerCromwellDisk =
         newListPdResponse(
-            user.generatePDNameForApp(AppType.CROMWELL),
+            user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETED,
             NOW.toString(),
             AppType.CROMWELL);

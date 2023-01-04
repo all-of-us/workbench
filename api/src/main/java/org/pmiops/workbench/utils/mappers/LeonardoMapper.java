@@ -34,7 +34,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -49,6 +48,7 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeStatus;
+import org.pmiops.workbench.model.UserAppEnvironment;
 
 @Mapper(config = MapStructConfig.class)
 public interface LeonardoMapper {
@@ -205,18 +205,18 @@ public interface LeonardoMapper {
   @Mapping(target = "appName", source = "appName")
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   @Mapping(target = "autopauseThreshold", ignore = true)
-  App toApiApp(LeonardoGetAppResponse app);
+  UserAppEnvironment toApiApp(LeonardoGetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
-  App toApiApp(LeonardoListAppResponse app);
+  UserAppEnvironment toApiApp(LeonardoListAppResponse app);
 
   @AfterMapping
   default void getAppAfterMapper(
-      @MappingTarget App app, LeonardoGetAppResponse leonardoGetAppResponse) {
+      @MappingTarget UserAppEnvironment app, LeonardoGetAppResponse leonardoGetAppResponse) {
     app.appName(leonardoGetAppResponse.getAppName())
         .googleProject(leonardoGetAppResponse.getCloudContext().getCloudResource());
     mapAppType(app, leonardoGetAppResponse.getAppName());
@@ -224,11 +224,11 @@ public interface LeonardoMapper {
 
   @AfterMapping
   default void listAppAfterMapper(
-      @MappingTarget App app, LeonardoListAppResponse leonardoListAppResponse) {
+      @MappingTarget UserAppEnvironment app, LeonardoListAppResponse leonardoListAppResponse) {
     mapAppType(app, leonardoListAppResponse.getAppName());
   }
 
-  default void mapAppType(App app, String appName) {
+  default void mapAppType(UserAppEnvironment app, String appName) {
     // App name format is all-of-us-{user-id}-{appType}.
     app.appType(AppType.fromValue(appName.substring(appName.lastIndexOf('-') + 1).toUpperCase()));
   }
