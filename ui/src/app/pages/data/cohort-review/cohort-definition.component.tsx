@@ -40,25 +40,25 @@ const styles = reactStyles({
   },
   exclude: {
     backgroundColor: colorWithWhiteness(colors.light, -0.5),
-    borderRadius: '1rem',
-    width: '4.5rem',
-    height: '2.2rem',
-    lineHeight: '2.2rem',
+    borderRadius: '1.5rem',
+    width: '6.75rem',
+    height: '3.3rem',
+    lineHeight: '3.3rem',
     textAlign: 'center',
   },
   andCircle: {
     backgroundColor: colorWithWhiteness(colors.light, -0.5),
     borderRadius: '50%',
-    width: '2.5rem',
-    height: '2.5rem',
-    lineHeight: '2.5rem',
+    width: '3.75rem',
+    height: '3.75rem',
+    lineHeight: '3.75rem',
     textAlign: 'center',
   },
   groupBackground: {
     backgroundColor: colorWithWhiteness(colors.light, -0.5),
     color: colors.primary,
-    padding: '0.3rem 0.6rem',
-    margin: '0.7rem 0rem',
+    padding: '0.45rem 0.9rem',
+    margin: '1.05rem 0rem',
     display: 'inline-block',
   },
 });
@@ -221,7 +221,7 @@ export const CohortDefinitionComponent = withRouter(
     render() {
       const { definition } = this.state;
       return (
-        <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+        <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
           <style>{css}</style>
           <div style={styles.definitionTitle}>Cohort Definition</div>
           {definition?.map((role, r) => (

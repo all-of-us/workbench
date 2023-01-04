@@ -110,8 +110,8 @@ const styles = reactStyles({
   main: {
     display: 'flex',
     flexDirection: 'column',
-    marginLeft: '3rem',
-    paddingTop: '1rem',
+    marginLeft: '4.5rem',
+    paddingTop: '1.5rem',
     width: '780px',
   },
   progressCard: {
@@ -123,7 +123,7 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '1rem',
+    padding: '1.5rem',
   },
   progressIcon: {
     height: '46px',
@@ -142,7 +142,7 @@ const styles = reactStyles({
     marginTop: '10px',
   },
   reminderText: {
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     fontSize: 14,
     color: colors.primary,
   },
@@ -752,7 +752,7 @@ export const LeonardoAppLauncher = fp.flow(
                 style={{
                   display: 'flex',
                   flexDirection: 'row',
-                  marginTop: '1rem',
+                  marginTop: '1.5rem',
                 }}
               >
                 {Array.from(progressCardStates, ([key, _], index) => {
@@ -771,9 +771,9 @@ export const LeonardoAppLauncher = fp.flow(
               <FlexRow style={styles.reminderText}>
                 <ReminderIcon
                   style={{
-                    width: '1.75rem',
-                    height: '1.75rem',
-                    marginRight: '0.5rem',
+                    width: '2.625rem',
+                    height: '2.625rem',
+                    marginRight: '0.75rem',
                   }}
                 />
                 <div>
@@ -781,13 +781,13 @@ export const LeonardoAppLauncher = fp.flow(
                   any way to remove participant-level data from the workbench.
                 </div>
               </FlexRow>
-              <div style={{ marginLeft: '2rem', ...styles.reminderText }}>
+              <div style={{ marginLeft: '3rem', ...styles.reminderText }}>
                 You are also prohibited from publishing or otherwise
                 distributing any data or aggregate statistics corresponding to
                 fewer than 20 participants unless expressly permitted by our
                 data use policies.
               </div>
-              <div style={{ marginLeft: '2rem', ...styles.reminderText }}>
+              <div style={{ marginLeft: '3rem', ...styles.reminderText }}>
                 For more information, please see our{' '}
                 <StyledRouterLink path='/data-code-of-conduct'>
                   Data Use Policies.

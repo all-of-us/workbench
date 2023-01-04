@@ -129,7 +129,7 @@ export const NewNotebookModal = (props: Props) => {
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
-            style={{ marginLeft: '0.5rem' }}
+            style={{ marginLeft: '0.75rem' }}
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);

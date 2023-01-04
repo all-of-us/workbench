@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useParams } from 'react-router';
 
-const { useEffect, useState } = React;
-
 import { Domain } from 'generated/fetch';
 
 import { ComboChart } from 'app/components/combo-chart.component';
@@ -15,6 +13,8 @@ import { MatchParams } from 'app/utils/stores';
 
 import { ParticipantsCharts } from './participants-charts';
 
+const { useEffect, useState } = React;
+
 const styles = reactStyles({
   domainButton: {
     background: colors.accent,
@@ -24,8 +24,8 @@ const styles = reactStyles({
     cursor: 'pointer',
     fontSize: '10px',
     fontWeight: 600,
-    height: '1.25rem',
-    width: '5rem',
+    height: '1.875rem',
+    width: '7.5rem',
   },
   get activeButton() {
     return {
@@ -38,13 +38,13 @@ const styles = reactStyles({
   overviewContainer: {
     borderRadius: '3px',
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
   overviewHeader: {
     cursor: 'pointer',
     fontWeight: 600,
-    lineHeight: '2rem',
-    margin: '0 0.5rem',
+    lineHeight: '3rem',
+    margin: '0 0.75rem',
   },
   graphContainer: {
     flex: '0 0 80%',
@@ -52,8 +52,8 @@ const styles = reactStyles({
   },
   tabsContainer: {
     flex: '0 0 20%',
-    marginTop: '-1rem',
-    padding: '2rem 0 0 1rem',
+    marginTop: '-1.5rem',
+    padding: '3rem 0 0 1.5rem',
   },
 });
 
@@ -106,7 +106,7 @@ export const CohortReviewOverview = ({ cohortReview }) => {
         Overview for{' '}
         <span style={{ color: colors.accent }}>{cohortReview.cohortName}</span>
         <ClrIcon
-          style={{ marginLeft: '0.5rem' }}
+          style={{ marginLeft: '0.75rem' }}
           shape='angle'
           dir={panelOpen ? 'up' : 'down'}
         />
@@ -116,7 +116,7 @@ export const CohortReviewOverview = ({ cohortReview }) => {
           <div style={{ display: 'flex' }}>
             <div style={styles.tabsContainer}>
               {domainTabs.map(({ displayText, domain }, index) => (
-                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                <div key={index} style={{ marginBottom: '0.75rem' }}>
                   <button
                     style={
                       activeTab === domain

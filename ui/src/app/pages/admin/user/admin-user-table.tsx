@@ -31,7 +31,7 @@ const styles = reactStyles({
   colStyle: {
     fontSize: 12,
     height: '60px',
-    lineHeight: '0.5rem',
+    lineHeight: '0.75rem',
     overflow: 'hidden',
     padding: '.5em',
     textOverflow: 'ellipsis',
@@ -260,7 +260,7 @@ export const AdminUserTable = withUserProfile()(
               opacity={0.6}
               overrideStylesOverlay={{
                 alignItems: 'flex-start',
-                marginTop: '2rem',
+                marginTop: '3rem',
               }}
             />
           )}
