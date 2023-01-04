@@ -33,13 +33,14 @@ import {
 } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
+
 const styles = reactStyles({
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
-    height: '3rem',
+    height: '4.5rem',
     width: '64.3%',
     lineHeight: '19px',
-    paddingLeft: '2rem',
+    paddingLeft: '3rem',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.85),
     fontSize: '16px',
   },
@@ -52,22 +53,22 @@ const styles = reactStyles({
     color: colors.accent,
     lineHeight: '18px',
     fontWeight: 400,
-    letterSpacing: '0.05rem',
+    letterSpacing: '0.075rem',
   },
   conceptText: {
-    marginTop: '0.3rem',
+    marginTop: '0.45rem',
     fontSize: '14px',
     fontWeight: 400,
     color: colors.primary,
     display: 'flex',
     flexDirection: 'column',
-    marginBottom: '0.3rem',
+    marginBottom: '0.45rem',
   },
   clearSearchIcon: {
     fill: colors.accent,
-    height: '1rem',
-    width: '1rem',
-    marginLeft: '-1.5rem',
+    height: '1.5rem',
+    width: '1.5rem',
+    marginLeft: '-2.25rem',
   },
   sectionHeader: {
     height: 24,
@@ -76,8 +77,8 @@ const styles = reactStyles({
     fontSize: 20,
     fontWeight: 600,
     lineHeight: '24px',
-    marginBottom: '1rem',
-    marginTop: '2.5rem',
+    marginBottom: '1.5rem',
+    marginTop: '3.75rem',
   },
   cardList: {
     display: 'flex',
@@ -93,23 +94,23 @@ const styles = reactStyles({
     textAlign: 'left',
     border: '1px solid #ebafa6',
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
   inputAlert: {
     justifyContent: 'space-between',
-    padding: '0.2rem',
+    padding: '0.3rem',
     width: '64.3%',
   },
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
   },
 });
 
 const searchTrigger = 2;
 const searchTooltip = (
-  <div style={{ marginLeft: '0.5rem' }}>
+  <div style={{ marginLeft: '0.75rem' }}>
     The following special operators can be used to augment search terms:
     <ul style={{ listStylePosition: 'outside' }}>
       <li>
@@ -143,7 +144,7 @@ const DomainCard: React.FunctionComponent<{
   const { name, participantCount } = conceptDomainCard;
   return (
     <DomainCardBase
-      style={{ width: 'calc(25% - 1rem)' }}
+      style={{ width: 'calc(25% - 1.5rem)' }}
       data-test-id='domain-box'
     >
       <Clickable
@@ -172,7 +173,7 @@ const SurveyCard: React.FunctionComponent<{
   browseSurvey: Function;
 }> = ({ survey, browseSurvey }) => {
   return (
-    <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1rem)' }}>
+    <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1.5rem)' }}>
       <Clickable
         style={styles.domainBoxHeader}
         onClick={browseSurvey}
@@ -189,7 +190,7 @@ const SurveyCard: React.FunctionComponent<{
           <b>{survey.participantCount.toLocaleString()}</b> participants
         </div>
       </div>
-      <div style={{ ...styles.conceptText, height: '3.5rem' }}>
+      <div style={{ ...styles.conceptText, height: '5.25rem' }}>
         {survey.description}
       </div>
       <Clickable style={{ ...styles.domainBoxLink }} onClick={browseSurvey}>
@@ -206,7 +207,7 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{
   const conceptCount = physicalMeasurementCard.conceptCount;
   const { description, name, participantCount } = physicalMeasurementCard;
   return (
-    <DomainCardBase style={{ maxHeight: 'auto', width: '11.5rem' }}>
+    <DomainCardBase style={{ maxHeight: 'auto', width: '17.25rem' }}>
       <Clickable
         style={styles.domainBoxHeader}
         onClick={browsePhysicalMeasurements}
@@ -414,7 +415,7 @@ export const ConceptHomepage = fp.flow(
       return (
         <div style={styles.error}>
           <ClrIcon
-            style={{ margin: '0 0.5rem 0 0.25rem' }}
+            style={{ margin: '0 0.75rem 0 0.375rem' }}
             className='is-solid'
             shape='exclamation-triangle'
             size='22'
@@ -447,17 +448,17 @@ export const ConceptHomepage = fp.flow(
       return (
         <React.Fragment>
           <FadeBox
-            style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}
+            style={{ margin: 'auto', paddingTop: '1.5rem', width: '95.7%' }}
           >
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <ClrIcon
                 shape='search'
                 style={{
                   position: 'absolute',
-                  height: '1rem',
-                  width: '1rem',
+                  height: '1.5rem',
+                  width: '1.5rem',
                   fill: colors.accent,
-                  left: 'calc(1rem + 3.5%)',
+                  left: 'calc(1.5rem + 3.5%)',
                 }}
               />
               <TextInput
@@ -502,7 +503,7 @@ export const ConceptHomepage = fp.flow(
               </AlertDanger>
             )}
             {currentInputString === '' && loadingConceptCounts ? (
-              <div style={{ position: 'relative', minHeight: '10rem' }}>
+              <div style={{ position: 'relative', minHeight: '15rem' }}>
                 <SpinnerOverlay />
               </div>
             ) : (
@@ -565,7 +566,7 @@ export const ConceptHomepage = fp.flow(
                     <div style={styles.sectionHeader}>
                       Program Physical Measurements
                     </div>
-                    <div style={{ ...styles.cardList, marginBottom: '1rem' }}>
+                    <div style={{ ...styles.cardList, marginBottom: '1.5rem' }}>
                       {conceptCountInfoError || domainInfoError ? (
                         this.errorMessage()
                       ) : loadingConceptCounts ? (

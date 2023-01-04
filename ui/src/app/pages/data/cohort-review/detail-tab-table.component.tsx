@@ -35,14 +35,14 @@ import moment from 'moment';
 const styles = reactStyles({
   container: {
     position: 'relative',
-    minHeight: '15rem',
+    minHeight: '22.5rem',
   },
   table: {
     fontSize: '12px',
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
   },
   columnHeader: {
     display: 'inline-block',
@@ -53,13 +53,13 @@ const styles = reactStyles({
   },
   columnBody: {
     background: colors.white,
-    padding: '0.5rem 0.5rem 0.3rem',
+    padding: '0.75rem 0.75rem 0.45rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
     borderBottom: 'none',
-    lineHeight: '0.6rem',
+    lineHeight: '0.9rem',
   },
   graphColumnBody: {
     background: colors.white,
@@ -68,8 +68,8 @@ const styles = reactStyles({
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
-    lineHeight: '0.6rem',
-    width: '2rem',
+    lineHeight: '0.9rem',
+    width: '3rem',
   },
   filterIcon: {
     marginTop: '2px',
@@ -81,41 +81,41 @@ const styles = reactStyles({
   sortIcon: {
     marginTop: '4px',
     color: colors.accent,
-    fontSize: '0.5rem',
+    fontSize: '0.75rem',
     float: 'right',
   },
   overlayHeader: {
-    padding: '0.3rem',
+    padding: '0.45rem',
   },
   caretIcon: {
-    fontSize: '0.6rem',
-    paddingLeft: '0.4rem',
+    fontSize: '0.9rem',
+    paddingLeft: '0.6rem',
     color: colors.accent,
     cursor: 'pointer',
   },
   filterBorder: {
-    paddingTop: '0.5rem',
+    paddingTop: '0.75rem',
     borderTop: '1px solid #ccc',
   },
   graphStyle: {
     borderLeft: 'none',
-    width: '2rem',
+    width: '3rem',
   },
   headerStyle: {
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 'bold',
-    width: '20rem',
+    width: '30rem',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     margin: 'auto',
-    paddingTop: '0.5rem',
+    paddingTop: '0.75rem',
     textAlign: 'center',
   },
   unitsLabel: {
-    width: '22rem',
-    margin: '0 0 -1.65rem 12.5rem',
+    width: '33rem',
+    margin: '0 0 -2.475rem 18.75rem',
     color: colors.accent,
   },
   textSearch: {
@@ -132,8 +132,8 @@ const styles = reactStyles({
     outline: 'none',
   },
   noResults: {
-    paddingLeft: '0.5rem',
-    lineHeight: '1.25rem',
+    paddingLeft: '0.75rem',
+    lineHeight: '1.875rem',
     opacity: 0.5,
   },
   nameWrapper: {
@@ -144,7 +144,7 @@ const styles = reactStyles({
   nameContent: {
     margin: 0,
     fontSize: '12px',
-    lineHeight: '0.6rem',
+    lineHeight: '0.9rem',
   },
   showMore: {
     width: '70px',
@@ -166,7 +166,7 @@ const styles = reactStyles({
     fontWeight: 500,
     textAlign: 'left',
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
 });
@@ -229,7 +229,7 @@ class NameContainer extends React.Component<
     return (
       <div
         ref={(e) => (this.container = e)}
-        style={{ overflow: 'hidden', maxHeight: '1.2rem' }}
+        style={{ overflow: 'hidden', maxHeight: '1.8rem' }}
       >
         <div style={styles.nameWrapper}>
           <p style={styles.nameContent}>{data[`${vocab}Name`]}</p>
@@ -245,7 +245,7 @@ class NameContainer extends React.Component<
               showCloseIcon={true}
               dismissable={true}
             >
-              <div style={{ paddingBottom: '0.2rem' }}>
+              <div style={{ paddingBottom: '0.3rem' }}>
                 {data[`${vocab}Name`]}
               </div>
             </OverlayPanel>
@@ -708,7 +708,7 @@ export const DetailTabTable = fp.flow(
               dismissable={true}
             >
               {rowData.refRange && column.field === 'value' && (
-                <div style={{ paddingBottom: '0.2rem' }}>
+                <div style={{ paddingBottom: '0.3rem' }}>
                   Reference Range: {rowData.refRange}
                 </div>
               )}
@@ -864,7 +864,7 @@ export const DetailTabTable = fp.flow(
       return (
         <div style={styles.error}>
           <ClrIcon
-            style={{ margin: '0 0.5rem 0 0.25rem' }}
+            style={{ margin: '0 0.75rem 0 0.375rem' }}
             className='is-solid'
             shape='exclamation-triangle'
             size='22'
@@ -948,9 +948,9 @@ export const DetailTabTable = fp.flow(
               acc.push(
                 <React.Fragment key={i}>
                   {opt.name !== 'Select All' && (
-                    <div style={{ padding: '0.3rem 0 0.3rem 0.4rem' }}>
+                    <div style={{ padding: '0.45rem 0 0.45rem 0.6rem' }}>
                       <input
-                        style={{ width: '0.7rem', height: '0.7rem' }}
+                        style={{ width: '1.05rem', height: '1.05rem' }}
                         type='checkbox'
                         name={opt.name}
                         checked={columnFilters[column].includes(opt.name)}
@@ -999,10 +999,13 @@ export const DetailTabTable = fp.flow(
               {checkboxes}
             </div>
             <div
-              style={{ borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem' }}
+              style={{
+                borderTop: '1px solid #ccc',
+                padding: '0.75rem 0.75rem',
+              }}
             >
               <input
-                style={{ width: '0.7rem', height: '0.7rem' }}
+                style={{ width: '1.05rem', height: '1.05rem' }}
                 type='checkbox'
                 name='Select All'
                 checked={columnFilters[column].includes('Select All')}

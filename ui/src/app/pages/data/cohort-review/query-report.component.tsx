@@ -41,7 +41,7 @@ import moment from 'moment';
 
 const css = `
   .stats-left-padding {
-    padding-left: 6rem;
+    padding-left: 9rem;
   }
   @media print{
     .doNotPrint{
@@ -52,7 +52,7 @@ const css = `
       page-break-inside:auto;
     }
     .stats-left-padding {
-      padding-left: 2rem;
+      padding-left: 3rem;
     }
   }
 `;
@@ -70,26 +70,26 @@ const styles = reactStyles({
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    paddingLeft: '0.75rem',
+    paddingRight: '0.75rem',
   },
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    marginRight: '-.5rem',
-    marginLeft: '-.5rem',
+    marginRight: '-.75rem',
+    marginLeft: '-.75rem',
   },
   col: {
     position: 'relative',
     minHeight: '1px',
     width: '100%',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    paddingLeft: '0.75rem',
+    paddingRight: '0.75rem',
   },
   reportBackground: {
     backgroundColor: colors.white,
-    paddingTop: '1rem',
-    marginTop: '0.5rem',
+    paddingTop: '1.5rem',
+    marginTop: '0.75rem',
   },
   queryHeader: {
     fontSize: '18px',
@@ -107,30 +107,30 @@ const styles = reactStyles({
     fontSize: '13px',
     color: colors.primary,
     lineHeight: '30px',
-    paddingBottom: '0.6rem',
+    paddingBottom: '0.9rem',
   },
   containerMargin: {
     margin: 0,
     minWidth: '100%',
   },
   chartTitle: {
-    marginLeft: '0.4rem',
-    paddingBottom: '0.5rem',
+    marginLeft: '0.6rem',
+    paddingBottom: '0.75rem',
     fontSize: '16px',
     fontWeight: 600,
     color: colors.primary,
     lineHeight: '22px',
   },
   graphBorder: {
-    minHeight: '10rem',
+    minHeight: '15rem',
     marginLeft: '23%',
-    padding: '0.3rem',
+    padding: '0.45rem',
   },
   groupHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.5),
-    padding: '0.2rem',
+    padding: '0.3rem',
     color: colors.primary,
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   groupText: {
     display: 'inline-block',
@@ -139,8 +139,8 @@ const styles = reactStyles({
     textTransform: 'capitalize',
   },
   groupContent: {
-    paddingTop: '0.2rem',
-    paddingLeft: '0.75rem',
+    paddingTop: '0.3rem',
+    paddingLeft: '1.125rem',
     color: colors.primary,
     fontSize: '13px',
   },
@@ -197,8 +197,8 @@ const columns = {
 };
 const demoTitle = {
   ...styles.chartTitle,
-  marginLeft: '0.4rem',
-  paddingBottom: '0.5rem',
+  marginLeft: '0.6rem',
+  paddingBottom: '0.75rem',
 };
 
 const domains = [
@@ -582,7 +582,7 @@ export const QueryReport = fp.flow(
                       </div>
                     </div>
                     <div style={{ ...styles.container, margin: 0 }}>
-                      <div style={{ ...styles.row, paddingTop: '1rem' }}>
+                      <div style={{ ...styles.row, paddingTop: '1.5rem' }}>
                         <div
                           style={{
                             ...styles.col,
@@ -610,7 +610,7 @@ export const QueryReport = fp.flow(
                               <div
                                 key={i}
                                 style={{
-                                  minHeight: '10rem',
+                                  minHeight: '15rem',
                                   position: 'relative',
                                 }}
                               >
