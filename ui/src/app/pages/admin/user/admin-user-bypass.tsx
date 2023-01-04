@@ -146,7 +146,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
         }}
         onOpen={() => this.setState({ isPopupOpen: true })}
         content={
-          <FlexColumn style={{ padding: '1rem' }}>
+          <FlexColumn style={{ padding: '1.5rem' }}>
             {enableComplianceTraining && (
               <Toggle
                 name='RT Compliance Training'

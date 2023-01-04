@@ -245,7 +245,7 @@ const EditableFields = ({
           />
           {showGoToInstitutionLink && (
             <StyledRouterLink
-              style={{ paddingTop: '2.3rem', paddingLeft: '0.6rem' }}
+              style={{ paddingTop: '3.45rem', paddingLeft: '0.9rem' }}
               path={getAdminUrl(
                 updatedProfile.verifiedInstitutionalAffiliation
                   ?.institutionShortName
@@ -286,7 +286,7 @@ const EditableFields = ({
         <FlexRow>
           <FlexSpacer />
           <InstitutionalRoleOtherTextInput
-            containerStyle={{ marginRight: '1.1rem' }}
+            containerStyle={{ marginRight: '1.65rem' }}
             affiliation={updatedProfile.verifiedInstitutionalAffiliation}
             previousOtherText={
               oldProfile.verifiedInstitutionalAffiliation

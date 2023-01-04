@@ -14,7 +14,7 @@ import twoFactorAuthModalImage from 'assets/images/2sv-image.png';
 
 const styles = reactStyles({
   twoFactorAuthModalCancelButton: {
-    marginRight: '1rem',
+    marginRight: '1.5rem',
   },
   twoFactorAuthModalHeader: {
     color: colors.primary,
@@ -25,9 +25,9 @@ const styles = reactStyles({
   },
   twoFactorAuthModalImage: {
     border: `1px solid ${colors.light}`,
-    height: '6rem',
+    height: '9rem',
     width: '100%',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   twoFactorAuthModalText: {
     color: colors.primary,

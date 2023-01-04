@@ -49,31 +49,31 @@ const styles = reactStyles({
     width: '300px',
     minWidth: '180px',
     textAlign: 'right',
-    marginRight: '1rem',
+    marginRight: '1.5rem',
   },
   infoValue: {
     flex: 1,
     wordWrap: 'break-word',
   },
   wideWithMargin: {
-    width: '20rem',
-    marginRight: '1rem',
+    width: '30rem',
+    marginRight: '1.5rem',
   },
   narrowWithMargin: {
-    width: '10rem',
-    marginRight: '1rem',
+    width: '15rem',
+    marginRight: '1.5rem',
   },
   fileDetailsTable: {
     maxWidth: '1000px',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   accessReasonText: {
     maxWidth: '1000px',
-    height: '3rem',
+    height: '4.5rem',
   },
   previewButton: {
     marginLeft: '20px',
-    height: '1rem',
+    height: '1.5rem',
   },
 });
 
@@ -452,7 +452,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       loadingWorkspaceAdminLockedStatus,
     } = this.state;
     return (
-      <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+      <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
         {showLockWorkspaceModal && (
           <AdminLockRequest
             workspace={workspace.namespace}
@@ -480,7 +480,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                   Workspace
                 </FlexColumn>
                 <FlexColumn
-                  style={{ justifyContent: 'flex-end', marginRight: '3rem' }}
+                  style={{ justifyContent: 'flex-end', marginRight: '4.5rem' }}
                 >
                   <Button
                     data-test-id='lockUnlockButton'
@@ -491,7 +491,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                     }
                   >
                     <FlexRow>
-                      <div style={{ paddingRight: '0.3rem' }}>
+                      <div style={{ paddingRight: '0.45rem' }}>
                         {loadingWorkspaceAdminLockedStatus && (
                           <Spinner style={{ width: 20, height: 18 }} />
                         )}
@@ -505,7 +505,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               </FlexRow>
             </h2>
             <h3>Basic Information</h3>
-            <div className='basic-info' style={{ marginTop: '1rem' }}>
+            <div className='basic-info' style={{ marginTop: '1.5rem' }}>
               <WorkspaceInfoField labelText='Workspace Name'>
                 {workspace.name}
               </WorkspaceInfoField>
@@ -544,7 +544,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               </WorkspaceInfoField>
             </div>
             <h3>Collaborators</h3>
-            <div className='collaborators' style={{ marginTop: '1rem' }}>
+            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
               {collaborators.map((workspaceUserAdminView, i) => (
                 <div key={i}>
                   {workspaceUserAdminView.userModel.userName +
@@ -554,7 +554,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               ))}
             </div>
             <h3>Cohort Builder</h3>
-            <div className='cohort-builder' style={{ marginTop: '1rem' }}>
+            <div className='cohort-builder' style={{ marginTop: '1.5rem' }}>
               <WorkspaceInfoField labelText='# of Cohorts'>
                 {resources.workspaceObjects.cohortCount}
               </WorkspaceInfoField>
@@ -568,7 +568,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             <h3>Cloud Storage Objects</h3>
             <div
               className='cloud-storage-objects'
-              style={{ marginTop: '1rem' }}
+              style={{ marginTop: '1.5rem' }}
             >
               <div
                 style={{
@@ -602,7 +602,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               />
             )}
             <h3>Research Purpose</h3>
-            <div className='research-purpose' style={{ marginTop: '1rem' }}>
+            <div className='research-purpose' style={{ marginTop: '1.5rem' }}>
               <WorkspaceInfoField labelText='Primary purpose of project'>
                 {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map(
                   (researchPurposeItem, i) => (
@@ -726,7 +726,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 Cancel
               </Button>
               <Button
-                style={{ marginLeft: '0.5rem' }}
+                style={{ marginLeft: '0.75rem' }}
                 onClick={() => {
                   this.setState({ confirmDeleteRuntime: false });
                   this.deleteRuntime();

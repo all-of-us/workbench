@@ -16,7 +16,7 @@ export const UserDisabledImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     <PublicLayout>
       <BoldHeader>Your account has been disabled</BoldHeader>
       <section
-        style={{ color: colors.primary, fontSize: '18px', marginTop: '.5rem' }}
+        style={{ color: colors.primary, fontSize: '18px', marginTop: '.75rem' }}
       >
         Contact <SupportMailto /> for more information.
       </section>

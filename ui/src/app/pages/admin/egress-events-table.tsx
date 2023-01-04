@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -176,7 +176,7 @@ export const EgressEventsTable = ({
       />
       <Column
         rowEditor
-        headerStyle={{ width: '10%', minWidth: '8rem' }}
+        headerStyle={{ width: '10%', minWidth: '12rem' }}
         bodyStyle={{ textAlign: 'center' }}
       ></Column>
     </DataTable>
