@@ -840,7 +840,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     boolean userIsCompliant =
         userTermsOfServiceDao
             .findFirstByUserIdOrderByTosVersionDesc(userId)
-            .map(tos -> tos.getTerraAgreementTime().after(latestTerraTosTime))
+            .flatMap(dbTos -> Optional.ofNullable(dbTos.getTerraAgreementTime()))
+            .map(userAgreementTime -> userAgreementTime.after(latestTerraTosTime))
             .orElse(false);
 
     // send emails to noncompliant users
