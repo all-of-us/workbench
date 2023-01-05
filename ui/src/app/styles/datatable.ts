@@ -11,7 +11,7 @@ export const datatableStyles = `
     border: 0;
     border-bottom: 1px solid #c8c8c8;
     border-left: 1px solid #c8c8c8;
-    line-height: .6rem;
+    line-height: .9rem;
   }
   body .p-datatable .p-datatable-thead > tr > th:first-of-type {
     border-left: 0;
@@ -52,7 +52,7 @@ export const datatableStyles = `
     min-width: 0;
     padding: 7px;
     margin: 0 2px;
-    line-height: 0.5rem;
+    line-height: 0.75rem;
   }
   body .p-paginator .p-paginator-prev,
   body .p-paginator .p-paginator-next {
@@ -74,9 +74,9 @@ export const datatableStyles = `
     color: #0086C1;
   }
   body .labOverlay.p-overlaypanel {
-    top: 1.25rem!important;
-    left: -2.75rem!important;
-    width:9.5rem;
+    top: 1.875rem!important;
+    left: -4.125rem!important;
+    width:14.25rem;
   }
   body .labOverlay.p-overlaypanel .p-overlaypanel-close:hover {
     top: 0.231em;
@@ -85,19 +85,19 @@ export const datatableStyles = `
     color: #0086C1;
   }
   body .labOverlay.p-overlaypanel .p-overlaypanel-content {
-    padding: 0.6rem 0.6rem;
+    padding: 0.9rem 0.9rem;
     font-size: 13px;
   }
   .pi-chevron-right:before {
     content: "\\E96D";
     color: rgb(0, 134, 193);
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     line-height: 0rem;
   }
  .pi-chevron-down:before {
     content: "\\E96D";
     color: rgb(0, 134, 193);
-    font-size: 0.8rem;
+    font-size: 1.2rem;
     line-height: 0rem;
   }
   .graphExpander .pi-chevron-right {
@@ -109,7 +109,7 @@ export const datatableStyles = `
   body .unitTab.p-tabview.p-tabview-bottom,
   body .unitTab.p-tabview.p-tabview-left, body
   .unitTab.p-tabview.p-tabview-right {
-    margin: 0rem 11rem;
+    margin: 0rem 16.5rem;
     background-color: transparent;
   }
 
@@ -185,7 +185,7 @@ export const datatableStyles = `
     background-color: transparent;
   }
   body .unitTab.p-tabview.p-tabview-top .p-tabview-nav {
-    margin-left: 3rem;
+    margin-left: 4.5rem;
     border-bottom: 1px solid #007ad9;
   }
 
@@ -213,9 +213,9 @@ export const datatableStyles = `
     color: #0086C1;
   }
   body .filterOverlay.p-overlaypanel {
-    top: 1.6rem!important;
+    top: 2.4rem!important;
     left: auto!important;
-    width:9.5rem;
+    width:14.25rem;
   }
   body .filterOverlay.p-overlaypanel .p-overlaypanel-close:hover {
     top: 0.231em;

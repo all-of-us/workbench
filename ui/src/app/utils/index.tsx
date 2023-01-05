@@ -195,7 +195,7 @@ export const summarizeErrors = (errors) => {
   if (errorList.length) {
     return errorList.map((v, i) => {
       return (
-        <div key={i} style={{ marginTop: i !== 0 ? '0.25rem' : undefined }}>
+        <div key={i} style={{ marginTop: i !== 0 ? '0.375rem' : undefined }}>
           {v}
         </div>
       );
