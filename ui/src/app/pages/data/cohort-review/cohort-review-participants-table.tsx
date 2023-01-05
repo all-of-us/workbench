@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import {DataTable, DataTableSortOrderType} from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
@@ -214,7 +214,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
   });
   const [sortState, setSortState] = useState({
     sortField: 'participantId',
-    sortOrder: 1,
+    sortOrder: 1 as DataTableSortOrderType,
   });
   const [totalCount, setTotalCount] = useState(null);
   const initialRender = useRef(true);

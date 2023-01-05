@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { DataTable, DataTableSortOrderType } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { TabPanel, TabView } from 'primereact/tabview';
 
@@ -276,7 +276,7 @@ interface State {
   page: number;
   start: number;
   sortField: string;
-  sortOrder: number;
+  sortOrder: DataTableSortOrderType;
   expandedRows: Array<any>;
   codeResults: any;
   error: boolean;
