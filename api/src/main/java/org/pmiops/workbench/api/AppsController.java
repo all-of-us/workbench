@@ -89,13 +89,13 @@ public class AppsController implements AppsApiDelegate {
   }
 
   /**
-   * Validates user is allowed to perform APP action.
+   * Validates user is allowed to perform User App actions.
    *
-   * <p>App ACTION requires:
+   * <p>User App actions require:
    *
    * <ul>
-   *   <li>Feature is enabled
-   *   <li>User compute is not suspend due to security reason (e.g. egress alert)
+   *   <li>The User Apps feature is enabled (FF enableGkeApp)
+   *   <li>User compute is not suspended due to security reasons (e.g. egress alert)
    *   <li>User is OWNER or WRITER of the workspace
    * </ul>
    */
