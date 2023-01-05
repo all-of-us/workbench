@@ -165,6 +165,8 @@ VALUES
     ($MAX_ID + 9, 'ETHNICITY', 'p_ethnicity_concept.concept_name as ethnicity', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_ethnicity_concept ON person.ethnicity_concept_id = p_ethnicity_concept.concept_id', 'Person'),
     ($MAX_ID + 10, 'SEX_AT_BIRTH_CONCEPT_ID', 'person.sex_at_birth_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
     ($MAX_ID + 11, 'SEX_AT_BIRTH', 'p_sex_at_birth_concept.concept_name as sex_at_birth', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_sex_at_birth_concept ON person.sex_at_birth_concept_id = p_sex_at_birth_concept.concept_id', 'Person')"
+    ($MAX_ID + 12, 'STATE_OF_RESIDENCE_CONCEPT_ID', 'person.state_of_residence_concept_id', 'FROM \`\${projectId}.\${dataSetId}.person\` person', 'Person'),
+    ($MAX_ID + 13, 'STATE_OF_RESIDENCE', 'p_state_of_residence_concept.concept_name as state_of_residence', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_state_of_residence_concept ON person.state_of_residence_concept_id = p_state_of_residence_concept.concept_id', 'Person')"
 
 echo "ds_linking - inserting procedure data"
 MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
