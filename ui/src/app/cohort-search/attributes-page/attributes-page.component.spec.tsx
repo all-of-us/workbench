@@ -213,6 +213,8 @@ describe('AttributesPageV2', () => {
       originalEvent: undefined,
       value: Operator.EQUAL,
       target: { id: '', name: '', value: Operator.EQUAL },
+      stopPropagation: () => {},
+      preventDefault: () => {}
     });
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(2);
