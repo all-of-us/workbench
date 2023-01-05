@@ -15,7 +15,7 @@ import { reactStyles } from 'app/utils';
 
 export const styles = reactStyles({
   checkbox: {
-    marginRight: '.31667rem',
+    marginRight: '.475rem',
     zoom: '1.5',
   },
   text: {

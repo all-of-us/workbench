@@ -1,7 +1,7 @@
 .card {
-  padding: 1rem;
-  border-radius: 0.2rem;
-  box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
+  padding: 1.5rem;
+  border-radius: 0.3rem;
+  box-shadow: 0 0.1875rem 0.1875rem 0 #d7d7d7;
 }
 
 .card * {
@@ -11,16 +11,16 @@
 .card.item-card {
   width: 200px;
   height: 223px;
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 0.75rem;
+  padding: 1.125rem;
 }
 
 .card.add-card {
   width: 200px;
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -28,7 +28,7 @@
   padding: 0px;
   height: 105px;
   color: #2691D0;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .card.add-card.disabled {
@@ -102,11 +102,11 @@
   display: inline-block;
   line-height: 14px;
   font-weight: 300;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
 }
 
 .card.item-card .description {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   font-size: 14px;
   color: #4A4A4A;
   font-weight: 300;

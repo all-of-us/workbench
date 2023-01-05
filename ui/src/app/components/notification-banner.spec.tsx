@@ -14,6 +14,7 @@ describe('NotificationBanner', () => {
           buttonText='BLAH'
           buttonPath='yahoo.com'
           buttonDisabled={true}
+          bannerTextWidth='177px'
         />
       </MemoryRouter>
     );

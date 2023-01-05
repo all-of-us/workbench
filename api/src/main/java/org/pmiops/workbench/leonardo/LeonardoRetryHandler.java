@@ -2,17 +2,19 @@ package org.pmiops.workbench.leonardo;
 
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
-import org.pmiops.workbench.utils.RetryHandler;
+import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LeonardoRetryHandler extends RetryHandler<ApiException> {
+public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(LeonardoRetryHandler.class.getName());
 
@@ -58,12 +60,14 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
   }
 
   @Autowired
-  public LeonardoRetryHandler(BackOffPolicy backoffPolicy) {
-    super(backoffPolicy, new LeonardoRetryPolicy());
+  public LeonardoRetryHandler(
+      BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
+    super(backoffPolicy, new LeonardoRetryPolicy(), termsOfServiceApiProvider);
   }
 
   @Override
   protected WorkbenchException convertException(ApiException exception) {
-    return ExceptionUtils.convertLeonardoException(exception);
+    return maybeConvertMessageForTos(exception.getCode())
+        .orElseGet(() -> ExceptionUtils.convertLeonardoException(exception));
   }
 }

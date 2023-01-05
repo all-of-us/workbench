@@ -2,7 +2,10 @@ import * as React from 'react';
 import { useState } from 'react';
 import validate from 'validate.js';
 
-import { NewUserSatisfactionSurveySatisfaction } from 'generated/fetch';
+import {
+  CreateNewUserSatisfactionSurvey,
+  NewUserSatisfactionSurveySatisfaction,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -14,7 +17,6 @@ import { Modal } from 'app/components/modals';
 import { MultipleChoiceQuestion } from 'app/components/multiple-choice-question';
 import { TooltipTrigger } from 'app/components/popups';
 import { surveyStyles } from 'app/components/surveys';
-import { surveysApi } from 'app/services/swagger-fetch-clients';
 import {
   createNewUserSatisfactionSurveyStore,
   useStore,
@@ -48,6 +50,9 @@ export const ADDITIONAL_INFO_MAX_CHARACTERS = 500;
 export interface NewUserSatisfactionSurveyModalProps {
   onCancel: () => void;
   onSubmitSuccess: () => void;
+  createSurveyApiCall: (
+    newUserSatisfactionSurveyData: CreateNewUserSatisfactionSurvey
+  ) => Promise<any>;
 }
 
 const validationCheck = {
@@ -67,6 +72,7 @@ const validationCheck = {
 export const NewUserSatisfactionSurveyModal = ({
   onCancel,
   onSubmitSuccess,
+  createSurveyApiCall,
 }: NewUserSatisfactionSurveyModalProps) => {
   const { newUserSatisfactionSurveyData } = useStore(
     createNewUserSatisfactionSurveyStore
@@ -80,8 +86,12 @@ export const NewUserSatisfactionSurveyModal = ({
   );
 
   return (
-    <Modal width={850} onRequestClose={onCancel}>
-      <FlexColumn style={{ gap: '0.5rem' }}>
+    <Modal
+      width={850}
+      onRequestClose={onCancel}
+      shouldCloseOnOverlayClick={false}
+    >
+      <FlexColumn style={{ gap: '0.75rem' }}>
         <MultipleChoiceQuestion
           question='How would you rate your overall satisfaction with the Researcher Workbench?'
           options={orderedSatisfactionOptions}
@@ -94,7 +104,7 @@ export const NewUserSatisfactionSurveyModal = ({
               },
             });
           }}
-          questionStyle={{ marginBottom: '0.5rem' }}
+          questionStyle={{ marginBottom: '0.75rem' }}
         />
         <label
           htmlFor='new-user-satisfaction-survey-additional-info'
@@ -116,7 +126,7 @@ export const NewUserSatisfactionSurveyModal = ({
           }}
           initialText={newUserSatisfactionSurveyData.additionalInfo}
           textBoxStyleOverrides={{ width: '100%' }}
-          heightOverride={{ height: '7rem' }}
+          heightOverride={{ height: '10.5rem' }}
           maxCharacters={ADDITIONAL_INFO_MAX_CHARACTERS}
         />
         <FlexRow style={{ justifyContent: 'flex-end' }}>
@@ -126,8 +136,8 @@ export const NewUserSatisfactionSurveyModal = ({
             </ErrorMessage>
           )}
         </FlexRow>
-        <FlexRow style={{ justifyContent: 'flex-end', gap: '0.5rem' }}>
-          <Button type='secondary' onClick={onCancel}>
+        <FlexRow style={{ justifyContent: 'flex-end', gap: '0.75rem' }}>
+          <Button type='secondary' onClick={onCancel} aria-label='cancel'>
             Cancel
           </Button>
           <TooltipTrigger
@@ -149,19 +159,21 @@ export const NewUserSatisfactionSurveyModal = ({
           >
             <Button
               type='primary'
+              aria-label='submit'
               disabled={!!validationErrors || submittingRequest}
               onClick={async () => {
                 setSubmittingRequest(true);
                 try {
-                  await surveysApi().createNewUserSatisfactionSurvey(
-                    newUserSatisfactionSurveyData
-                  );
+                  await createSurveyApiCall(newUserSatisfactionSurveyData);
+                  setSubmittingRequest(false);
                   setError(false);
+                  window.dispatchEvent(
+                    new Event('new-user-satisfaction-survey-submitted')
+                  );
                   onSubmitSuccess();
                 } catch {
-                  setError(true);
-                } finally {
                   setSubmittingRequest(false);
+                  setError(true);
                 }
               }}
             >

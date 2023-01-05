@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { SpinnerOverlay } from 'app/components/spinners';
-import { withWindowSize } from 'app/utils';
-import { WindowSizeProps } from 'app/utils';
+import { WindowSizeProps, withWindowSize } from 'app/utils';
 
 // for query selection of the last document element
 export const MS_WORD_PARAGRAPH_CLASS = '.MsoNormal';
@@ -95,7 +94,7 @@ export const HtmlViewer = withWindowSize()(
               style={{
                 border: 'none',
                 position: 'absolute',
-                padding: '0 2rem',
+                padding: '0 3rem',
                 bottom: 0,
                 top: 0,
                 height: '100%',

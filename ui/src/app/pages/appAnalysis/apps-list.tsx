@@ -26,12 +26,12 @@ import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 const styles = reactStyles({
   fadeBox: {
     margin: 'auto',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     width: '95.7%',
   },
   startButton: {
-    paddingLeft: '0.5rem',
-    height: '2rem',
+    paddingLeft: '0.75rem',
+    height: '3rem',
     backgroundColor: colors.secondary,
   },
   appsLabel: {
@@ -39,7 +39,7 @@ const styles = reactStyles({
     fontWeight: 600,
     fontSize: '14px',
     lineHeight: '24px',
-    paddingBottom: '0.5rem',
+    paddingBottom: '0.75rem',
   },
 });
 
@@ -90,10 +90,11 @@ export const AppsList = withCurrentWorkspace()((props) => {
       <FadeBox style={styles.fadeBox}>
         <FlexColumn>
           <FlexRow>
-            <ListPageHeader style={{ paddingRight: '1.5rem' }}>
+            <ListPageHeader style={{ paddingRight: '2.25rem' }}>
               Your Analysis
             </ListPageHeader>
             <Button
+              aria-label='start'
               data-test-id='start-button'
               style={styles.startButton}
               onClick={() => {
@@ -104,39 +105,45 @@ export const AppsList = withCurrentWorkspace()((props) => {
                 !canWrite()
               }
             >
-              <div style={{ paddingRight: '0.5rem' }}>Start</div>
-              <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+              <div style={{ paddingRight: '0.75rem' }}>Start</div>
+              <FontAwesomeIcon icon={faPlusCircle} />
             </Button>
           </FlexRow>
         </FlexColumn>
       </FadeBox>
       {showSelectAppModal && (
-        <Modal data-test-id='select-application-modal'>
+        <Modal
+          data-test-id='select-application-modal'
+          aria={{
+            label: 'Select Applications Modal',
+          }}
+        >
           <ModalTitle>Analyze Data</ModalTitle>
           <ModalBody>
             <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
-              data-test-id={'application-list-dropdown'}
+              data-test-id='application-list-dropdown'
+              ariaLabel='Application List Dropdown'
               value={selectedApp}
               options={APP_LIST}
-              placeholder={'Choose One'}
+              placeholder='Choose One'
               onChange={(e) => setSelectedApp(e.value)}
-              style={{ width: '9rem' }}
+              style={{ width: '13.5rem' }}
             />
           </ModalBody>
-          <ModalFooter style={{ paddingTop: '2rem' }}>
+          <ModalFooter style={{ paddingTop: '3rem' }}>
             <Button
-              style={{ marginRight: '2rem' }}
-              type={'secondary'}
-              label={'Close'}
+              style={{ marginRight: '3rem' }}
+              type='secondary'
+              aria-label='close'
               onClick={() => onClose()}
             >
               Close
             </Button>
             <Button
-              data-test-id={'next-btn'}
-              type={'primary'}
-              label={'Next'}
+              data-test-id='next-btn'
+              type='primary'
+              aria-label='next'
               onClick={() => onNext()}
               disabled={selectedApp === ''}
             >
@@ -147,7 +154,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
       )}
       {showJupyterModal && !showSelectAppModal && (
         <NewNotebookModal
-          data-test-id={'jupyter-modal'}
+          data-test-id='jupyter-modal'
           onClose={() => onClose()}
           workspace={props.workspace}
           existingNameList={null}

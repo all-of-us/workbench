@@ -92,15 +92,15 @@ export const AdminLockRequest = (props: Props) => {
             Enter reason for researchers on why workspace access is locked
           </label>
         </div>
-        <div style={{ paddingTop: '0.3rem', paddingBottom: '1rem' }}>
-          <label style={{ color: colors.primary, paddingBottom: '0.3rem' }}>
+        <div style={{ paddingTop: '0.45rem', paddingBottom: '1.5rem' }}>
+          <label style={{ color: colors.primary, paddingBottom: '0.45rem' }}>
             <i>
               Any message in the input box will automatically be sent to
               researchers when the workspace is locked
             </i>
           </label>
           <TextAreaWithLengthValidationMessage
-            textBoxStyleOverrides={{ width: '16rem' }}
+            textBoxStyleOverrides={{ width: '24rem' }}
             id='LOCKED-REASON'
             initialText=''
             maxCharacters={MAX_REASON}
@@ -119,7 +119,7 @@ export const AdminLockRequest = (props: Props) => {
             style={{
               fontWeight: 'bold',
               color: colors.primary,
-              paddingBottom: '0.3rem',
+              paddingBottom: '0.45rem',
             }}
           >
             Add date of RAB request
@@ -140,7 +140,7 @@ export const AdminLockRequest = (props: Props) => {
       <ModalFooter>
         <Button
           type='secondary'
-          style={{ marginRight: '0.5rem' }}
+          style={{ marginRight: '0.75rem' }}
           onClick={() => props.onCancel()}
         >
           CANCEL

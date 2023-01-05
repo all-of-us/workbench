@@ -72,8 +72,8 @@ public class FirecloudApiClientFactory {
    * </ol>
    *
    * Note that impersonated API calls are subject to the same constraints as end user calls,
-   * including access tier membership and eventually Terra ToS enforcement (all Terra requests will
-   * fail for accounts that have not completed the latest ToS).
+   * including access tier membership and Terra ToS enforcement (all Terra requests will fail for
+   * accounts that have not completed the latest ToS).
    */
   public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds = getDelegatedUserCredentials(userEmail);

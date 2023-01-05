@@ -13,16 +13,16 @@ const styles = reactStyles({
     color: colors.accent,
     fontSize: '20px',
     lineHeight: '24px',
-    height: '1.5rem',
-    padding: '0 .5rem',
+    height: '2.25rem',
+    padding: '0 .75rem',
     textAlign: 'center',
-    letterSpacing: '0.12rem',
+    letterSpacing: '0.18rem',
     textDecoration: 'none',
   },
   infoIcon: {
     color: colors.accent,
     cursor: 'pointer',
-    marginLeft: '0.2rem',
+    marginLeft: '0.3rem',
     height: '20px',
     width: '20px',
   },
@@ -82,7 +82,7 @@ export const ConceptNavigationBar: React.FunctionComponent<{
           ...(showConcepts
             ? styles.headerLinks
             : activatedStyles.headerActivated),
-          marginLeft: '1rem',
+          marginLeft: '1.5rem',
         }}
         onClick={() =>
           navigate(['workspaces', ns, wsId, 'data', 'concepts', 'sets'])

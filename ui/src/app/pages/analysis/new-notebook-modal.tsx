@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { validate } from 'validate.js';
 
 import { ResourceType, Workspace } from 'generated/fetch';
@@ -82,7 +82,12 @@ export const NewNotebookModal = (props: Props) => {
   };
 
   return (
-    <Modal onRequestClose={onClose}>
+    <Modal
+      onRequestClose={onClose}
+      aria={{
+        label: 'New Notebook Modal',
+      }}
+    >
       <ModalTitle>New Notebook</ModalTitle>
       <ModalBody>
         <div style={headerStyles.formLabel}>Name:</div>
@@ -124,7 +129,7 @@ export const NewNotebookModal = (props: Props) => {
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
-            style={{ marginLeft: '0.5rem' }}
+            style={{ marginLeft: '0.75rem' }}
             disabled={!!errors}
             onClick={() => {
               AnalyticsTracker.Notebooks.Create(Kernels[kernel]);

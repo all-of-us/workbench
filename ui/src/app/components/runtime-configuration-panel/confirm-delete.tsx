@@ -1,5 +1,4 @@
 import * as React from 'react';
-const { useState, Fragment } = React;
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -7,6 +6,8 @@ import { ClrIcon } from 'app/components/icons';
 import colors from 'app/styles/colors';
 
 import { styles } from './styles';
+
+const { useState, Fragment } = React;
 
 export const ConfirmDelete = ({ onCancel, onConfirm }) => {
   const [deleting, setDeleting] = useState(false);
@@ -47,7 +48,7 @@ export const ConfirmDelete = ({ onCancel, onConfirm }) => {
           type='secondaryLight'
           aria-label={'Cancel'}
           disabled={deleting}
-          style={{ marginRight: '.6rem' }}
+          style={{ marginRight: '.9rem' }}
           onClick={() => onCancel()}
         >
           Cancel

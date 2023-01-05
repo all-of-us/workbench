@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Button } from 'app/components/buttons';
-import { StyledExternalLink } from 'app/components/buttons';
+import { Button, StyledExternalLink } from 'app/components/buttons';
 import { CookieBanner } from 'app/components/cookie-banner';
 import { GoogleSignInButton } from 'app/components/google-sign-in';
 import { Header, SmallHeader } from 'app/components/headers';
@@ -21,10 +20,10 @@ export const styles = reactStyles({
   },
   createAccountButton: {
     fontSize: '12px',
-    margin: '.5rem .5rem .25rem 0',
+    margin: '.75rem .75rem .375rem 0',
     border: `1px solid ${colors.primary}`,
     height: '48px',
-    width: '6.5rem',
+    width: '9.75rem',
   },
   fismaCommon: {
     fontSize: '10px',
@@ -37,7 +36,7 @@ export const styles = reactStyles({
   },
   fismaSection: {
     fontWeight: 400,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
 });
 
@@ -49,13 +48,13 @@ export const LoginReactComponent: React.FunctionComponent<{
       <div
         data-test-id='login'
         style={{
-          marginBottom: '.5rem',
-          marginTop: '5.5rem',
-          paddingLeft: '3rem',
+          marginBottom: '.75rem',
+          marginTop: '8.25rem',
+          paddingLeft: '4.5rem',
         }}
       >
         <div>
-          <Header style={{ width: '14rem', lineHeight: '30px' }}>
+          <Header style={{ width: '21rem', lineHeight: '30px' }}>
             Already have a Researcher Workbench account?
           </Header>
           <div>
@@ -64,12 +63,12 @@ export const LoginReactComponent: React.FunctionComponent<{
           <StyledExternalLink
             target='_blank'
             href='https://www.researchallofus.org/faq/what-if-i-have-trouble-signing-in-to-the-workbench'
-            style={{ marginTop: '0.625rem', lineHeight: '0.75rem' }}
+            style={{ marginTop: '0.9375rem', lineHeight: '1.125rem' }}
           >
             Trouble Signing In?
           </StyledExternalLink>
         </div>
-        <div style={{ paddingTop: '1.25rem' }}>
+        <div style={{ paddingTop: '1.875rem' }}>
           <SmallHeader>Don't have an account?</SmallHeader>
           <Button
             aria-label='Create Account'

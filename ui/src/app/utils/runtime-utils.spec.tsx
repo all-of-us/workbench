@@ -24,7 +24,7 @@ const WORKSPACE_NS = 'test';
 const Runtime = ({ id }) => {
   const [{ currentRuntime }] = useCustomRuntime(
     WORKSPACE_NS,
-    diskStore.get().persistentDisk
+    diskStore.get().gcePersistentDisk
   );
   const { runtimeName = '' } = currentRuntime || {};
   return <div id={id}>{runtimeName}</div>;
@@ -61,7 +61,7 @@ describe('runtime-utils', () => {
     if (enablePd) {
       diskStore.set({
         workspaceNamespace: WORKSPACE_NS,
-        persistentDisk: undefined,
+        gcePersistentDisk: undefined,
       });
     }
     jest.useFakeTimers();

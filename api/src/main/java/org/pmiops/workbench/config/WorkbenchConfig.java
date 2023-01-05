@@ -37,6 +37,7 @@ public class WorkbenchConfig {
   public OfflineBatchConfig offlineBatch;
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
   public App app;
+  public E2ETestUserConfig e2eTestUsers;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -67,6 +68,7 @@ public class WorkbenchConfig {
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
     config.app = new App();
+    config.e2eTestUsers = new E2ETestUserConfig();
     return config;
   }
 
@@ -436,5 +438,9 @@ public class WorkbenchConfig {
   public static class App {
     /** The descriptor path which defines RStudio application configuration. */
     public String rStudioDescriptorPath;
+  }
+
+  public static class E2ETestUserConfig {
+    public List<String> testUserEmails;
   }
 }

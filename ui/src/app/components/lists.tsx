@@ -21,7 +21,7 @@ export const CustomBulletListItem = ({ bullet, children }) => {
 const styles = reactStyles({
   bulletAlignedList: {
     listStylePosition: 'outside',
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
   },
 });
 

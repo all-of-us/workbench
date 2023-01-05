@@ -26,7 +26,7 @@ export const signInGuard: Guard = {
   allowed: (): boolean => {
     return authStore.get().isSignedIn;
   },
-  redirectPath: '/login',
+  redirectPath: '/login' + window.location.search,
 };
 
 export const userIsDisabled = (userDisabledInDb: boolean) =>
@@ -36,7 +36,7 @@ export const userIsDisabled = (userDisabledInDb: boolean) =>
 export const disabledGuard = (userDisabledInDb: boolean): Guard => ({
   // Show disabled screen when user account is disabled by admin or removed from institution registered tier requirement.
   allowed: (): boolean => !userIsDisabled(userDisabledInDb),
-  redirectPath: '/user-disabled',
+  redirectPath: '/user-disabled' + window.location.search,
 });
 
 export const userDisabledPageGuard = (userDisabledInDb: boolean): Guard => ({

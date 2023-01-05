@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -14,7 +15,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAdminController implements UserAdminApiDelegate {
 
   private final AccessModuleService accessModuleService;
+  private final AccessSyncService accessSyncService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
@@ -40,6 +41,7 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   public UserAdminController(
       AccessModuleService accessModuleService,
+      AccessSyncService accessSyncService,
       ActionAuditQueryService actionAuditQueryService,
       ProfileService profileService,
       Provider<DbUser> userProvider,
@@ -47,6 +49,7 @@ public class UserAdminController implements UserAdminApiDelegate {
       TaskQueueService taskQueueService,
       UserService userService) {
     this.accessModuleService = accessModuleService;
+    this.accessSyncService = accessSyncService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.profileService = profileService;
     this.taskQueueService = taskQueueService;
@@ -90,26 +93,13 @@ public class UserAdminController implements UserAdminApiDelegate {
   }
 
   @Override
-  @Deprecated // unsafeSelfBypassAccessRequirements() handles all modules at once
-  public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirement(
-      AccessBypassRequest request) {
-    if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
-      throw new ForbiddenException("Self bypass is disallowed in this environment.");
-    }
-    final DbUser user = userProvider.get();
-    accessModuleService.updateBypassTime(user.getUserId(), request);
-    userService.updateUserAccessTiers(user, Agent.asUser(user));
-    return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
   public ResponseEntity<EmptyResponse> unsafeSelfBypassAccessRequirements() {
     if (!workbenchConfigProvider.get().access.unsafeAllowSelfBypass) {
       throw new ForbiddenException("Self bypass is disallowed in this environment.");
     }
     final DbUser user = userProvider.get();
     accessModuleService.updateAllBypassTimes(user.getUserId());
-    userService.updateUserAccessTiers(user, Agent.asUser(user));
+    accessSyncService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }
 

@@ -54,9 +54,9 @@ const styles = reactStyles({
     justifyContent: 'space-between',
   },
   saveButton: {
-    height: '1.5rem',
+    height: '2.25rem',
     fontSize: '12px',
-    padding: '0 0.75rem',
+    padding: '0 1.125rem',
     borderRadius: '3px',
     float: 'right',
   },
@@ -68,13 +68,13 @@ const styles = reactStyles({
   totalError: {
     background: '#f7981c',
     color: colors.white,
-    padding: '0.25rem 0.5rem',
+    padding: '0.375rem 0.75rem',
     borderRadius: '5px',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
   actionIcon: {
     float: 'right',
-    margin: '0 0.7rem 0 0',
+    margin: '0 1.05rem 0 0',
     minWidth: 0,
     padding: 0,
     color: colors.primary,
@@ -86,7 +86,7 @@ const styles = reactStyles({
     pointerEvents: 'none',
   },
   cardContainer: {
-    boxShadow: '0 0.125rem 0 0 #d7d7d7',
+    boxShadow: '0 0.1875rem 0 0 #d7d7d7',
     border: '1px solid #d7d7d7',
     borderBottom: 'none',
     borderTop: 'none',
@@ -96,14 +96,14 @@ const styles = reactStyles({
     background: colors.white,
     marginBottom: 0,
     marginTop: 0,
-    padding: '0 0.4rem',
+    padding: '0 0.6rem',
   },
   cardHeader: {
     color: colors.primary,
     fontSize: '12px',
     fontWeight: 600,
     borderBottom: 'none',
-    padding: '0.5rem 0',
+    padding: '0.75rem 0',
   },
   chartSpinner: {
     marginLeft: 'calc(50% - 50px)',
@@ -112,15 +112,15 @@ const styles = reactStyles({
   menuButton: {
     background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    borderRadius: '0.125rem',
+    borderRadius: '0.1875rem',
     color: colors.primary,
     cursor: 'pointer',
     fontSize: '11px',
     fontWeight: 100,
-    height: '1.25rem',
-    lineHeight: '0.75rem',
-    marginRight: '0.25rem',
-    padding: '0.25rem',
+    height: '1.875rem',
+    lineHeight: '1.125rem',
+    marginRight: '0.375rem',
+    padding: '0.375rem',
     textAlign: 'left',
     verticalAlign: 'middle',
     width: '35%',
@@ -579,7 +579,7 @@ export const ListOverview = fp.flow(
                 {!!cohort.id ? (
                   <React.Fragment>
                     <Menu
-                      style={{ width: 'fit-content', minWidth: '7.25rem' }}
+                      style={{ width: 'fit-content', minWidth: '10.875rem' }}
                       appendTo={document.body}
                       model={this.saveItems}
                       popup={true}
@@ -613,7 +613,7 @@ export const ListOverview = fp.flow(
                       style={{
                         color: '#F57600',
                         float: 'right',
-                        margin: '0.25rem 0.5rem 0 0',
+                        margin: '0.375rem 0.75rem 0 0',
                       }}
                       shape='warning-standard'
                       size={24}
@@ -785,7 +785,7 @@ export const ListOverview = fp.flow(
                     </button>
                   </div>
                   {refreshing ? (
-                    <div style={{ height: '15rem' }}>
+                    <div style={{ height: '22.5rem' }}>
                       <Spinner style={styles.chartSpinner} size={75} />
                     </div>
                   ) : (
@@ -795,7 +795,7 @@ export const ListOverview = fp.flow(
                           currentGraphOptions.genderOrSexType
                         )}
                       </div>
-                      <div style={{ padding: '0.5rem 0.75rem' }}>
+                      <div style={{ padding: '0.75rem 1.125rem' }}>
                         {!!chartData.length && <GenderChart data={chartData} />}
                       </div>
                       <div style={styles.cardHeader}>
@@ -809,7 +809,7 @@ export const ListOverview = fp.flow(
                           onClick={() => this.toggleChartMode()}
                         />
                       </div>
-                      <div style={{ padding: '0.5rem 0.75rem' }}>
+                      <div style={{ padding: '0.75rem 1.125rem' }}>
                         {!!chartData.length && (
                           <ComboChart
                             mode={stackChart ? 'stacked' : 'normalized'}

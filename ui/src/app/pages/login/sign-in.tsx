@@ -17,6 +17,7 @@ import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
 } from 'app/components/with-error-modal-wrapper';
+import { withNewUserSatisfactionSurveyModal } from 'app/components/with-new-user-satisfaction-survey-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AccountCreation } from 'app/pages/login/account-creation/account-creation';
 import { AccountCreationInstitution } from 'app/pages/login/account-creation/account-creation-institution';
@@ -27,13 +28,10 @@ import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError, reportError } from 'app/utils/errors';
-import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
 import landingBackgroundImage from 'assets/images/login-group.png';
 import landingSmallerBackgroundImage from 'assets/images/login-standing.png';
-
-import { AccountCreationSurvey } from './account-creation/account-creation-survey';
 
 // A template function which returns the appropriate style config based on window size and
 // background images.
@@ -61,7 +59,7 @@ export const backgroundStyleTemplate = (
   }
 
   function calculateBackgroundPosition() {
-    let position = 'bottom right -1rem';
+    let position = 'bottom right -1.5rem';
     if (
       windowSize.width > bgWidthMinPx &&
       windowSize.width <= bgWidthSmallLimitPx
@@ -378,9 +376,13 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
-        return serverConfigStore.get().config.enableUpdatedDemographicSurvey ? (
+        return (
           <div
-            style={{ marginTop: '1rem', paddingLeft: '1rem', width: '32rem' }}
+            style={{
+              marginTop: '1.5rem',
+              paddingLeft: '1.5rem',
+              width: '48rem',
+            }}
           >
             <DemographicSurvey
               onError={(value) => handleUpdate(fp.set(['errors'], value))}
@@ -392,13 +394,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
               profile={this.state.profile}
             />
           </div>
-        ) : (
-          <AccountCreationSurvey
-            {...{ onComplete }}
-            profile={this.state.profile}
-            termsOfServiceVersion={this.state.termsOfServiceVersion}
-            onPreviousClick={onPrevious}
-          />
         );
       case SignInStep.SUCCESS_PAGE:
         return <AccountCreationSuccess profile={this.state.profile} />;
@@ -446,21 +441,18 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private renderNavigation(currentStep: SignInStep) {
-    if (
-      serverConfigStore.get().config.enableUpdatedDemographicSurvey &&
-      currentStep === SignInStep.DEMOGRAPHIC_SURVEY
-    ) {
+    if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
       const { captcha, errors, loading } = this.state;
       return (
         <div
           style={{
-            marginTop: '2rem',
-            marginBottom: '1rem',
-            marginLeft: '1rem',
+            marginTop: '3rem',
+            marginBottom: '1.5rem',
+            marginLeft: '1.5rem',
           }}
         >
           {environment.enableCaptcha && (
-            <div style={{ paddingBottom: '1rem' }}>
+            <div style={{ paddingBottom: '1.5rem' }}>
               <ReCAPTCHA
                 sitekey={environment.captchaSiteKey}
                 ref={this.captchaRef}
@@ -472,7 +464,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             <Button
               aria-label='Previous'
               type='secondary'
-              style={{ marginRight: '1rem' }}
+              style={{ marginRight: '1.5rem' }}
               onClick={() => {
                 this.setState({
                   currentStep: this.getPreviousStep(currentStep),
@@ -496,7 +488,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
                 aria-label='Submit'
                 disabled={!!errors || !this.state.captcha || loading}
                 type='primary'
-                data-test-id={'submit-button'}
+                data-test-id='submit-button'
                 onClick={this.onSubmit}
               >
                 Submit
@@ -513,5 +505,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
 export const SignIn = fp.flow(
   withWindowSize(),
-  withProfileErrorModal
+  withProfileErrorModal,
+  withNewUserSatisfactionSurveyModal
 )(SignInImpl);

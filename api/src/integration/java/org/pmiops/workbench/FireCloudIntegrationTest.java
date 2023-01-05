@@ -2,6 +2,9 @@ package org.pmiops.workbench;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER;
+import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER_SUBJECT_ID;
+import static org.pmiops.workbench.firecloud.IntegrationTestUsers.NON_COMPLIANT_USER;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -20,14 +23,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
-  // RW-8212: This test requires that these two users keep their Terra-ToS compliance statuses
-  // integration-test-user (created by gjordan) is non-compliant
-  // integration-test-user-with-tos (created by thibault) is compliant
-  private static final String NON_COMPLIANT_USER = "integration-test-user@fake-research-aou.org";
-  private static final String COMPLIANT_USER =
-      "integration-test-user-with-tos@fake-research-aou.org";
-  private static final String COMPLIANT_USER_SUBJECT_ID = "265045784107300a16ccd";
-
   @Autowired private FireCloudService service;
   @Autowired private FirecloudApiClientFactory firecloudApiClientFactory;
 

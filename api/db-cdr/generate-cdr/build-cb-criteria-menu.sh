@@ -27,6 +27,10 @@ query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\
 where has_array_data = 1"
 arrayCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
+echo "Getting Structural Variant data count"
+query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
+where has_structural_variant_data = 1"
+structuralVariantDataCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 ###############################
 # CREATE cb_criteria_menu TABLE
@@ -67,6 +71,12 @@ if [[ $arrayCount > 0 ]];
 then
   echo "Insert array data into cb_criteria_menu"
   insertCriteriaMenu "($((++ID)),0,'Program Data','ARRAY_DATA','','Global Diversity Array',0,$ID)"
+fi
+
+if [[ $structuralVariantDataCount > 0 ]];
+then
+  echo "Insert Structural Variant data into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),0,'Program Data','STRUCTURAL_VARIANT_DATA','','Structural Variant Data',0,$ID)"
 fi
 
 echo "Insert cb_criteria_menu"

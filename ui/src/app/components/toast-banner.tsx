@@ -12,9 +12,9 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.accent, 0.9),
     color: colors.primary,
     fontSize: '12px',
-    marginRight: '1rem',
-    marginTop: '1rem',
-    padding: '0.5rem',
+    marginRight: '1.5rem',
+    marginTop: '1.5rem',
+    padding: '0.75rem',
     width: '300px',
     borderRadius: '0.5em',
     position: 'absolute',
@@ -29,23 +29,23 @@ const styles = reactStyles({
   },
   message: {
     lineHeight: '20px',
-    marginTop: '.3rem',
-    paddingRight: '.2rem',
+    marginTop: '.45rem',
+    paddingRight: '.3rem',
     fontSize: '14px',
   },
   footer: {
-    marginTop: '.5rem',
+    marginTop: '.75rem',
   },
   closeIcon: {
     position: 'absolute',
-    top: '.3rem',
-    right: '.3rem',
+    top: '.45rem',
+    right: '.45rem',
     colors: colors.accent,
   },
   warningIcon: {
     color: colors.warning,
     flex: '0 0 auto',
-    marginRight: '0.4rem',
+    marginRight: '0.6rem',
   },
 });
 
@@ -95,7 +95,7 @@ export const ToastBanner = (props: ToastProps) => {
   const { title, message, onClose, toastType, zIndex, footer } = props;
   return ReactDOM.createPortal(
     <FlexColumn style={styleForType(toastType, zIndex)}>
-      <FlexRow style={{ alignItems: 'center', marginTop: '.1rem' }}>
+      <FlexRow style={{ alignItems: 'center', marginTop: '.15rem' }}>
         {toastType === ToastType.WARNING && warningIcon}
         <div style={styles.title}>{title}</div>
       </FlexRow>

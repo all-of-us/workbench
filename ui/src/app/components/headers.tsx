@@ -10,17 +10,17 @@ export const styles = reactStyles({
   h1: {
     color: colors.primary,
     fontWeight: 500,
-    fontSize: '1.6rem',
+    fontSize: '2.4rem',
   },
   h2: {
     color: colors.primary,
     fontWeight: 800,
-    fontSize: '1.25rem',
+    fontSize: '1.875rem',
   },
   h3: {
     color: colors.primary,
     fontWeight: 800,
-    fontSize: '1rem',
+    fontSize: '1.5rem',
   },
   semiBold: {
     fontWeight: 600,
@@ -32,8 +32,8 @@ export const styles = reactStyles({
   formLabel: {
     color: colors.primary,
     fontWeight: 600,
-    marginTop: '0.5rem',
-    marginBottom: '0.125rem',
+    marginTop: '0.75rem',
+    marginBottom: '0.1875rem',
   },
   listPageHeader: {
     color: colors.primary,
@@ -41,7 +41,7 @@ export const styles = reactStyles({
     lineHeight: '24px',
     fontWeight: 600,
     marginTop: 0,
-    paddingTop: '0.5rem',
+    paddingTop: '0.75rem',
   },
   pageHeader: {
     color: colors.primary,
@@ -51,15 +51,15 @@ export const styles = reactStyles({
   headerImageSignedIn: {
     height: 57,
     width: 155,
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
   },
   headerImagePublic: {
-    height: '1.75rem',
-    marginLeft: '1rem',
-    marginTop: '1rem',
+    height: '2.625rem',
+    marginLeft: '1.5rem',
+    marginTop: '1.5rem',
   },
   displayTagSignedIn: {
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
     height: 12,
     width: 155,
     borderRadius: 2,
@@ -71,7 +71,7 @@ export const styles = reactStyles({
     textAlign: 'center',
   },
   displayTagPublic: {
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
     height: 12,
     width: 135,
     borderRadius: 2,

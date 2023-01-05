@@ -36,7 +36,7 @@ const styles = {
   lastLink: {
     color: colors.primary,
     fontWeight: 600,
-    fontSize: '1rem',
+    fontSize: '1.5rem',
     textDecoration: 'none',
   },
 };
@@ -361,7 +361,7 @@ export const Breadcrumb = fp.flow(
 
           <div
             style={{
-              marginLeft: '3.25rem',
+              marginLeft: '4.875rem',
               display: 'inline-block',
             }}
           >

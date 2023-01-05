@@ -33,7 +33,7 @@ const styles = {
     width: '33%',
     justifyContent: 'flex-start',
     maxWidth: 'none',
-    margin: '1.9rem 1rem 0 0',
+    margin: '2.85rem 1.5rem 0 0',
     minHeight: '325px',
     maxHeight: '325px',
   },
@@ -44,8 +44,8 @@ const styles = {
     return {
       color: disabled ? colorWithWhiteness(colors.dark, 0.4) : colors.accent,
       fontSize: '20px',
-      marginRight: '0.5rem',
-      marginTop: '0.5rem',
+      marginRight: '0.75rem',
+      marginTop: '0.75rem',
     };
   },
   cardText: {
@@ -58,7 +58,7 @@ const styles = {
     justifyContent: 'flex-start',
     alignItems: 'center',
     width: '100%',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
 };
 
@@ -143,7 +143,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
 
   return (
     <React.Fragment>
-      <div style={{ paddingLeft: '1.5rem' }}>
+      <div style={{ paddingLeft: '2.25rem' }}>
         <div style={styles.cardButtonArea}>
           <TooltipTrigger
             content={
@@ -178,7 +178,11 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
               {/* Because the container can stretch based on window size, but the height
               can't we set a max width to cap the height based on aspect ratio*/}
               <div
-                style={{ width: '100%', maxWidth: '425px', paddingTop: '1rem' }}
+                style={{
+                  width: '100%',
+                  maxWidth: '425px',
+                  paddingTop: '1.5rem',
+                }}
               >
                 <img data-test-id={'cohort-diagram'} src={cohortImg} />
               </div>
@@ -225,7 +229,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
                 style={{
                   width: '100%',
                   maxWidth: '425px',
-                  paddingTop: '1.5rem',
+                  paddingTop: '2.25rem',
                 }}
               >
                 <img data-test-id={'dataset-diagram'} src={dataSetImg} />
@@ -234,7 +238,7 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
           </TooltipTrigger>
         </div>
       </div>
-      <FadeBox style={{ marginTop: '1rem' }}>
+      <FadeBox style={{ marginTop: '1.5rem' }}>
         <div style={styles.tabContainer}>
           <h2
             style={{
@@ -284,8 +288,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
         <div
           style={{
             borderBottom: `1px solid ${colors.dark}`,
-            marginLeft: '-1rem',
-            marginRight: '-1rem',
+            marginLeft: '-1.5rem',
+            marginRight: '-1.5rem',
             opacity: 0.24,
           }}
         ></div>
@@ -295,8 +299,8 @@ export const DataComponent = withCurrentWorkspace()((props: Props) => {
             flexWrap: 'wrap',
             position: 'relative',
             minHeight: 247,
-            padding: '0 0.5rem 1rem',
-            paddingTop: '1.5rem',
+            padding: '0 0.75rem 1.5rem',
+            paddingTop: '2.25rem',
           }}
         >
           {

@@ -43,7 +43,7 @@ const styles = reactStyles({
   },
   modifiedDateColumn: {
     textAlign: 'left',
-    width: '9rem',
+    width: '13.5rem',
   },
   menu: {
     width: '30px',
@@ -145,7 +145,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
     return (
       <TooltipTrigger content={<div>Workspace compliance action required</div>}>
         <FontAwesomeIcon
-          style={{ color: colors.warning, marginRight: '0.5rem' }}
+          style={{ color: colors.warning, marginRight: '0.75rem' }}
           size={'sm'}
           icon={faLockAlt}
         />

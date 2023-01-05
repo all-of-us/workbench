@@ -13,7 +13,6 @@ import {
 
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { DemographicSurvey } from 'app/components/demographic-survey';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ExclamationTriangle } from 'app/components/icons';
 import {
@@ -22,7 +21,7 @@ import {
   ValidationError,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
-import { Modal, withErrorModal, withSuccessModal } from 'app/components/modals';
+import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
 import {
@@ -43,7 +42,6 @@ import {
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
 import { convertAPIError, reportError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -78,7 +76,6 @@ interface ProfilePageProps
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
-  showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 export const ProfileComponent = fp.flow(
@@ -94,7 +91,6 @@ export const ProfileComponent = fp.flow(
       this.state = {
         currentProfile: this.initializeProfile(),
         institutions: [],
-        showDemographicSurveyModal: false,
         updating: false,
       };
     }
@@ -244,8 +240,7 @@ export const ProfileComponent = fp.flow(
       const {
         profileState: { profile },
       } = this.props;
-      const { currentProfile, updating, showDemographicSurveyModal } =
-        this.state;
+      const { currentProfile, updating } = this.state;
       const {
         givenName,
         familyName,
@@ -365,9 +360,6 @@ export const ProfileComponent = fp.flow(
         );
       };
 
-      const enableUpdatedDemographicSurvey =
-        serverConfigStore.get().config.enableUpdatedDemographicSurvey;
-
       /* API returns completion time as a Date object but creates that Date object with a
        * seconds representation instead of a milliseconds representation, so it needs to be adjusted
        * */
@@ -380,7 +372,7 @@ export const ProfileComponent = fp.flow(
         <FadeBox style={styles.fadebox}>
           <div style={{ width: '95%' }}>
             {(!profile || updating) && <SpinnerOverlay />}
-            <div style={{ ...styles.h1, marginBottom: '0.7rem' }}>Profile</div>
+            <div style={{ ...styles.h1, marginBottom: '1.05rem' }}>Profile</div>
             <FlexRow style={{ justifyContent: 'spaceBetween' }}>
               <div>
                 {(hasExpired ||
@@ -389,7 +381,7 @@ export const ProfileComponent = fp.flow(
                     <ExclamationTriangle
                       size={25}
                       color={colors.warning}
-                      style={{ margin: '0.5rem' }}
+                      style={{ margin: '0.75rem' }}
                     />
                     <div style={{ color: colors.primary, fontWeight: 600 }}>
                       Please update or verify your profile.
@@ -397,7 +389,7 @@ export const ProfileComponent = fp.flow(
                     <a
                       onClick={() => this.confirmProfile()}
                       style={{
-                        margin: '0 0.5rem 0 auto',
+                        margin: '0 0.75rem 0 auto',
                         textDecoration: 'underline',
                       }}
                     >
@@ -407,7 +399,7 @@ export const ProfileComponent = fp.flow(
                 )}
                 <div style={styles.title}>Public displayed Information</div>
                 <hr style={{ ...styles.verticalLine, width: '64%' }} />
-                <FlexRow style={{ marginTop: '1rem' }}>
+                <FlexRow style={{ marginTop: '1.5rem' }}>
                   {makeProfileInput({
                     title: 'First Name',
                     valueKey: 'givenName',
@@ -437,7 +429,7 @@ export const ProfileComponent = fp.flow(
                     <div style={styles.inputLabel}>Your Role</div>
                     {profile.verifiedInstitutionalAffiliation && (
                       <Dropdown
-                        style={{ width: '12.5rem' }}
+                        style={{ width: '18.75rem' }}
                         data-test-id='role-dropdown'
                         placeholder='Your Role'
                         options={this.getRoleOptions()}
@@ -460,7 +452,7 @@ export const ProfileComponent = fp.flow(
                               'verifiedInstitutionalAffiliation',
                               'institutionalRoleOtherText',
                             ],
-                            style: { marginTop: '1rem' },
+                            style: { marginTop: '1.5rem' },
                             disabled: true,
                           })}
                         </div>
@@ -472,7 +464,7 @@ export const ProfileComponent = fp.flow(
                   {makeProfileInput({
                     title: 'Professional URL',
                     valueKey: 'professionalUrl',
-                    style: { width: '26rem' },
+                    style: { width: '39rem' },
                   })}
                 </FlexRow>
                 <FlexRow>
@@ -493,13 +485,13 @@ export const ProfileComponent = fp.flow(
                     maxCharacters: 2000,
                     valueKey: 'areaOfResearch',
                     isLong: true,
-                    style: { width: '26rem' },
+                    style: { width: '39rem' },
                   })}
                 </FlexRow>
-                <div style={{ width: '65%', marginTop: '0.5rem' }}>
+                <div style={{ width: '65%', marginTop: '0.75rem' }}>
                   <div style={styles.title}>Private Information</div>
-                  <hr style={{ ...styles.verticalLine, width: '26rem' }} />
-                  <FlexRow style={{ marginTop: '1rem' }}>
+                  <hr style={{ ...styles.verticalLine, width: '39rem' }} />
+                  <FlexRow style={{ marginTop: '1.5rem' }}>
                     {makeProfileInput({
                       title: 'User name',
                       valueKey: 'username',
@@ -549,8 +541,8 @@ export const ProfileComponent = fp.flow(
                   </FlexRow>
                 </div>
               </div>
-              <div style={{ width: '20rem', marginRight: '4rem' }}>
-                <div style={{ marginLeft: '1rem' }}>
+              <div style={{ width: '30rem', marginRight: '6rem' }}>
+                <div style={{ marginLeft: '1.5rem' }}>
                   <div style={styles.title}>Initial credits balance</div>
                   <hr style={{ ...styles.verticalLine }} />
                   {profile && (
@@ -565,13 +557,7 @@ export const ProfileComponent = fp.flow(
                 />
                 <DemographicSurveyPanel
                   demographicSurveyCompletionTime={
-                    enableUpdatedDemographicSurvey
-                      ? demographicSurveyV2CompletionTimeMillis
-                      : profile.demographicSurveyCompletionTime
-                  }
-                  firstSignInTime={profile.firstSignInTime}
-                  onClick={() =>
-                    this.setState({ showDemographicSurveyModal: true })
+                    demographicSurveyV2CompletionTimeMillis
                   }
                 />
                 {canRenderSignedDucc(profile.duccSignedVersion) && (
@@ -582,7 +568,7 @@ export const ProfileComponent = fp.flow(
               </div>
             </FlexRow>
             <div style={{ display: 'flex' }}>
-              <div style={{ display: 'flex', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', marginBottom: '3rem' }}>
                 <Button
                   type='link'
                   onClick={() => this.setState({ currentProfile: profile })}
@@ -611,23 +597,6 @@ export const ProfileComponent = fp.flow(
                 </TooltipTrigger>
               </div>
             </div>
-            {showDemographicSurveyModal && (
-              <Modal width={850}>
-                <DemographicSurvey
-                  profile={currentProfile}
-                  onCancelClick={() => {
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  saveProfile={(profileWithDemoSurvey) => {
-                    this.saveProfile(profileWithDemoSurvey);
-                    this.setState({ showDemographicSurveyModal: false });
-                  }}
-                  enableCaptcha={false}
-                  enablePrevious={false}
-                  showStepCount={false}
-                />
-              </Modal>
-            )}
           </div>
         </FadeBox>
       );

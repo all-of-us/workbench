@@ -79,7 +79,7 @@ export const NotebookFrameError = ({
           <ClrIcon
             style={{
               color: colors.warning,
-              margin: '0 0.5rem 0 0.25rem',
+              margin: '0 0.75rem 0 0.375rem',
               flexShrink: 0,
             }}
             className='is-solid'
@@ -93,7 +93,7 @@ export const NotebookFrameError = ({
       return (
         <div style={{ ...styles.previewMessageBase, ...styles.previewError }}>
           <ClrIcon
-            style={{ margin: '0 0.5rem 0 0.25rem', flexShrink: 0 }}
+            style={{ margin: '0 0.75rem 0 0.375rem', flexShrink: 0 }}
             className='is-solid'
             shape='exclamation-triangle'
             size='30'

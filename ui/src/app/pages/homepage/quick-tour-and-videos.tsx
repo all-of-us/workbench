@@ -21,20 +21,20 @@ import { QuickTourReact } from './quick-tour-modal';
 export const styles = reactStyles({
   quickTourCardsRow: {
     justifyContent: 'flex-start',
-    maxHeight: '26rem',
-    marginTop: '0.5rem',
-    marginBottom: '1rem',
-    marginLeft: '-1rem',
-    paddingLeft: '1rem',
+    maxHeight: '39rem',
+    marginTop: '0.75rem',
+    marginBottom: '1.5rem',
+    marginLeft: '-1.5rem',
+    paddingLeft: '1.5rem',
     position: 'relative',
   },
   quickTourAndVideosLabel: {
     fontSize: 22,
     lineHeight: '34px',
     color: colors.primary,
-    paddingRight: '2.3rem',
+    paddingRight: '3.45rem',
     fontWeight: 600,
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     width: '33%',
   },
 });
@@ -152,7 +152,7 @@ export const QuickTourAndVideos = (props: Props) => {
                         }
                       >
                         <img
-                          style={{ width: '11rem', marginRight: '0.5rem' }}
+                          style={{ width: '16.6rem', marginRight: '0.75rem' }}
                           src={resource.src}
                         />
                       </Clickable>
@@ -166,7 +166,7 @@ export const QuickTourAndVideos = (props: Props) => {
                   onClick={() =>
                     setQuickTourResourceOffset(quickTourResourceOffset - 1)
                   }
-                  style={{ left: 0, marginTop: '2rem', position: 'absolute' }}
+                  style={{ left: 0, marginTop: '3rem', position: 'absolute' }}
                 />
               )}
               {quickTourResourceOffset + limit() <
@@ -177,7 +177,7 @@ export const QuickTourAndVideos = (props: Props) => {
                   onClick={() =>
                     setQuickTourResourceOffset(quickTourResourceOffset + 1)
                   }
-                  style={{ marginTop: '2rem', position: 'absolute', right: 0 }}
+                  style={{ marginTop: '3rem', position: 'absolute', right: 0 }}
                 />
               )}
             </FlexRow>

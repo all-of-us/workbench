@@ -8,7 +8,7 @@ import { PublicAouHeaderWithDisplayTag } from './headers';
 const styles = reactStyles({
   content: {
     color: colors.primary,
-    margin: '1rem',
+    margin: '1.5rem',
   },
 });
 
@@ -22,7 +22,7 @@ export const PublicLayout = ({ contentStyle = {}, children }) => {
       <div
         style={{
           width: '100%',
-          height: '3.5rem',
+          height: '5.25rem',
           borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
         }}
       >

@@ -42,7 +42,7 @@ export const InvalidBillingBanner = fp.flow(
         Request Extension
       </Button>
       <a
-        style={{ marginTop: '.5rem', marginLeft: '.2rem' }}
+        style={{ marginTop: '.75rem', marginLeft: '.3rem' }}
         onClick={() => {
           props.navigate([
             'workspaces',

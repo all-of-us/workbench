@@ -34,7 +34,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 const styles = reactStyles({
   label: {
     color: colors.primary,
-    paddingLeft: '0.5rem',
+    paddingLeft: '0.75rem',
     lineHeight: '19px',
     fontSize: '14px',
     fontWeight: 400,
@@ -309,7 +309,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     <RadioButton
                       value={!addingToExistingSet}
                       checked={!addingToExistingSet}
-                      style={{ marginLeft: '0.7rem' }}
+                      style={{ marginLeft: '1.05rem' }}
                       data-test-id='toggle-new-set'
                       onChange={() => {
                         this.setState({ addingToExistingSet: false });
@@ -324,8 +324,8 @@ export const ConceptAddModal = withCurrentWorkspace()(
                   <select
                     data-test-id='existing-set-select'
                     style={{
-                      marginTop: '1rem',
-                      height: '1.5rem',
+                      marginTop: '1.5rem',
+                      height: '2.25rem',
                       width: '100%',
                     }}
                     placeholder='Select Concept Set'
@@ -354,7 +354,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     {summarizeErrors(nameTouched && errors && errors.name)}
                   </ValidationError>
                   <textarea
-                    style={{ marginTop: '1rem' }}
+                    style={{ marginTop: '1.5rem' }}
                     placeholder='Add a Description'
                     value={newSetDescription}
                     onChange={(v) => {
@@ -386,7 +386,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
                   disabled={!this.disableSave(errors)}
                 >
                   <Button
-                    style={{ marginLeft: '0.5rem' }}
+                    style={{ marginLeft: '0.75rem' }}
                     disabled={this.disableSave(errors)}
                     data-test-id='save-concept-set'
                     onClick={() => this.saveConcepts()}

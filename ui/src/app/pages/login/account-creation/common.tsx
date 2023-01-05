@@ -13,8 +13,8 @@ export const commonStyles = reactStyles({
   asideContainer: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.85),
     borderRadius: 8,
-    width: '18rem',
-    padding: '0.5rem',
+    width: '27rem',
+    padding: '0.75rem',
   },
   asideHeader: {
     color: colors.primary,
@@ -45,14 +45,14 @@ export const commonStyles = reactStyles({
     fontWeight: 600,
   },
   sectionHeader: {
-    width: '26rem',
+    width: '39rem',
     color: colors.primary,
     fontWeight: 600,
     fontSize: 18,
   },
   sectionInput: {
-    width: '12rem',
-    height: '1.5rem',
+    width: '18rem',
+    height: '2.25rem',
   },
 });
 
@@ -109,7 +109,7 @@ export const Section = (props) => {
             style={{
               color: colors.primary,
               fontSize: '12px',
-              marginLeft: '.25rem',
+              marginLeft: '.375rem',
               ...props.subHeaderStyle,
             }}
           >
@@ -117,7 +117,7 @@ export const Section = (props) => {
           </label>
         )}
       </div>
-      <Divider style={{ marginTop: '.25rem' }} />
+      <Divider style={{ marginTop: '.375rem' }} />
       {props.children}
     </FormSection>
   );

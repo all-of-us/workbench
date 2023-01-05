@@ -28,8 +28,8 @@ const styles = reactStyles({
   pageHeader: {
     fontSize: '18px',
     lineHeight: '22px',
-    marginBottom: '1rem',
-    marginTop: '0.5rem',
+    marginBottom: '1.5rem',
+    marginTop: '0.75rem',
   },
   header: {
     fontSize: '14px',
@@ -37,9 +37,9 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '18px',
     color: colors.primary,
-    width: '3rem',
+    width: '4.5rem',
     textAlign: 'start',
-    height: '4rem',
+    height: '6rem',
   },
   text: {
     fontSize: '14px',
@@ -49,8 +49,8 @@ const styles = reactStyles({
     verticalAlign: 'top',
     textOverflow: 'ellipsis',
     overflow: 'auto',
-    height: '4rem',
-    width: '5rem',
+    height: '6rem',
+    width: '7.5rem',
   },
 });
 
@@ -137,14 +137,14 @@ export const AdminInstitution = fp.flow(withNavigation)(
         this.state;
       return (
         <div>
-          <FadeBox style={{ marginTop: '1rem', marginLeft: '1rem' }}>
+          <FadeBox style={{ marginTop: '1.5rem', marginLeft: '1.5rem' }}>
             <SemiBoldHeader style={styles.pageHeader}>
               <label>Institution admin table</label>
               <Button
                 type='secondaryLight'
                 style={{
                   padding: '0rem',
-                  marginTop: '0.3rem',
+                  marginTop: '0.45rem',
                   verticalAlign: 'sub',
                 }}
                 onClick={() =>
@@ -166,7 +166,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
               paginator={true}
               rows={500}
               scrollable={true}
-              frozenWidth='7rem'
+              frozenWidth='10.5rem'
               loading={loadingInstitutions}
               paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink  RowsPerPageDropdown'
               currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
@@ -198,14 +198,14 @@ export const AdminInstitution = fp.flow(withNavigation)(
                 header='User Email Instruction'
                 body={this.renderInstitutionInstructions}
                 bodyStyle={styles.text}
-                headerStyle={{ ...styles.header, width: '5rem' }}
+                headerStyle={{ ...styles.header, width: '7.5rem' }}
               />
               <Column
                 field='requestAccessUrl'
                 header='Custom Request Access URL'
                 body={this.renderRequestAccessUrl}
                 bodyStyle={styles.text}
-                headerStyle={{ ...styles.header, width: '5rem' }}
+                headerStyle={{ ...styles.header, width: '7.5rem' }}
               />
             </DataTable>
           </FadeBox>

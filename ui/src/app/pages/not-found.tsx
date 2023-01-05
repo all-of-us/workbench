@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import * as React from 'react';
+import { useEffect } from 'react';
 
 import { RouteLink } from 'app/components/app-router';
 import { BoldHeader } from 'app/components/headers';
@@ -14,7 +14,7 @@ export const NotFound = (spinnerProps: WithSpinnerOverlayProps) => {
     <PublicLayout>
       <BoldHeader>Page Not Found</BoldHeader>
       <section
-        style={{ color: colors.primary, fontSize: '18px', marginTop: '.5rem' }}
+        style={{ color: colors.primary, fontSize: '18px', marginTop: '.75rem' }}
       >
         Please try navigating to the{' '}
         <RouteLink

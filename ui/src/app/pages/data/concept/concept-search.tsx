@@ -70,14 +70,14 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: 20,
     fontWeight: 600,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     display: 'flex',
     flexDirection: 'row',
   },
   conceptSetMetadataWrapper: {
     flexDirection: 'column',
     alignItems: 'space-between',
-    marginLeft: '0.5rem',
+    marginLeft: '0.75rem',
   },
   conceptSetData: {
     display: 'flex',
@@ -89,7 +89,7 @@ const styles = reactStyles({
     background: colors.white,
     color: colors.accent,
     cursor: 'pointer',
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
   },
 });
 
@@ -462,7 +462,7 @@ export const ConceptSearch = fp.flow(
           />
 
           <FadeBox
-            style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}
+            style={{ margin: 'auto', paddingTop: '1.5rem', width: '95.7%' }}
           >
             {loading ? (
               <SpinnerOverlay />
@@ -488,7 +488,7 @@ export const ConceptSearch = fp.flow(
                                 value={editName}
                                 disabled={editSaving}
                                 id='edit-name'
-                                style={{ marginBottom: '0.5rem' }}
+                                style={{ marginBottom: '0.75rem' }}
                                 data-test-id='edit-name'
                                 onChange={(v) => this.setState({ editName: v })}
                               />
@@ -504,14 +504,14 @@ export const ConceptSearch = fp.flow(
                                   this.setState({ editDescription: v })
                                 }
                               />
-                              <div style={{ margin: '0.5rem 0' }}>
+                              <div style={{ margin: '0.75rem 0' }}>
                                 <TooltipTrigger
                                   content={this.tooltipContent(errors)}
                                   disabled={!errors}
                                 >
                                   <Button
                                     type='primary'
-                                    style={{ marginRight: '0.5rem' }}
+                                    style={{ marginRight: '0.75rem' }}
                                     data-test-id='save-edit-concept-set'
                                     disabled={editSaving || errors}
                                     onClick={() => this.submitEdits()}
@@ -548,7 +548,7 @@ export const ConceptSearch = fp.flow(
                                       accessLevel
                                     )
                                   }
-                                  style={{ marginLeft: '.5rem' }}
+                                  style={{ marginLeft: '.75rem' }}
                                   data-test-id='edit-concept-set'
                                   onClick={() => this.onEditOpen()}
                                 >
@@ -559,13 +559,13 @@ export const ConceptSearch = fp.flow(
                                         accessLevel
                                       )
                                     }
-                                    style={{ marginTop: '0.1rem' }}
+                                    style={{ marginTop: '0.15rem' }}
                                   />
                                 </Clickable>
                               </div>
                               <div
                                 style={{
-                                  marginBottom: '1.5rem',
+                                  marginBottom: '2.25rem',
                                   color: colors.primary,
                                 }}
                                 data-test-id='concept-set-description'
@@ -597,7 +597,7 @@ export const ConceptSearch = fp.flow(
                                 : ''}
                             </div>
                             <div
-                              style={{ marginLeft: '2rem' }}
+                              style={{ marginLeft: '3rem' }}
                               data-test-id='concept-set-domain'
                             >
                               Domain: {this.displayDomainName}
@@ -624,7 +624,7 @@ export const ConceptSearch = fp.flow(
                   }
                 />
                 <Button
-                  style={{ float: 'right', marginBottom: '2rem' }}
+                  style={{ float: 'right', marginBottom: '3rem' }}
                   disabled={this.disableFinishButton}
                   onClick={() => setSidebarActiveIconStore.next('concept')}
                 >

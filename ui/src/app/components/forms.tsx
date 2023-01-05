@@ -2,8 +2,8 @@ import { withStyle } from 'app/utils/index';
 
 export const styles = {
   formSection: {
-    marginTop: '1rem',
-    minWidth: '29rem',
+    marginTop: '1.5rem',
+    minWidth: '43.5rem',
   },
 };
 

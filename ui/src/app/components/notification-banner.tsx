@@ -12,13 +12,15 @@ const styles = reactStyles({
   box: {
     boxSizing: 'border-box',
     height: '56.5px',
-    width: '380.5px',
     border: '0.5px solid rgba(38,34,98,0.5)',
     borderRadius: '5px',
     backgroundColor: colorWithWhiteness(colors.warning, 0.9),
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 'auto',
+    gap: '24.5px',
+    paddingLeft: '24.5px',
+    paddingRight: '24.5px',
   },
   icon: {
     height: '25px',
@@ -28,19 +30,16 @@ const styles = reactStyles({
     fontSize: '25px',
     letterSpacing: 0,
     lineHeight: '25px',
-    marginLeft: 'auto',
     alignItems: 'center',
   },
   text: {
     height: '40px',
-    width: '177px',
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 600,
     letterSpacing: 0,
     lineHeight: '20px',
-    marginLeft: 'auto',
   },
   button: {
     boxSizing: 'border-box',
@@ -48,8 +47,6 @@ const styles = reactStyles({
     width: '102px',
     border: '0.8px solid #216FB4',
     borderRadius: '1.6px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
   },
   buttonText: {
     height: '20px',
@@ -67,12 +64,15 @@ interface NotificationProps {
   dataTestId: string;
   text: string | JSX.Element;
   buttonText: string;
-  buttonPath: string;
-  buttonDisabled: boolean;
+  buttonPath?: string;
+  buttonDisabled?: boolean;
   useLocationLink?: boolean;
   boxStyle?: CSSProperties;
   textStyle?: CSSProperties;
   buttonStyle?: CSSProperties;
+  buttonOnClick?: () => void;
+  bannerTextWidth: CSSProperties['width'];
+  buttonAriaLabel?: string;
 }
 
 export const NotificationBanner = ({
@@ -85,17 +85,24 @@ export const NotificationBanner = ({
   boxStyle,
   textStyle,
   buttonStyle,
+  buttonOnClick,
+  buttonAriaLabel,
+  bannerTextWidth,
 }: NotificationProps) => {
   return (
     <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
       <AlarmExclamation style={styles.icon} />
-      <div style={{ ...styles.text, ...textStyle }}>{text}</div>
+      <div style={{ ...styles.text, ...textStyle, width: bannerTextWidth }}>
+        {text}
+      </div>
       {useLocationLink ? (
         <ButtonWithLocationState
           type='primary'
           style={{ ...styles.button, ...buttonStyle }}
           path={buttonPath}
           disabled={buttonDisabled}
+          onClick={buttonOnClick}
+          aria-label={buttonAriaLabel}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </ButtonWithLocationState>
@@ -105,6 +112,8 @@ export const NotificationBanner = ({
           style={styles.button}
           path={buttonPath}
           disabled={buttonDisabled}
+          onClick={buttonOnClick}
+          aria-label={buttonAriaLabel}
         >
           <div style={styles.buttonText}>{buttonText}</div>
         </Button>

@@ -5,8 +5,8 @@
     overflow: hidden;
     background-color: white;
     border-radius: 6px;
-    padding-top: 0.2rem;
-    padding-bottom: 1rem;
+    padding-top: 0.3rem;
+    padding-bottom: 1.5rem;
 }
 
 .extraction-data-table-container tr.p-datatable-row,thead>tr {
@@ -17,9 +17,9 @@
 .extraction-data-table-container .p-datatable .p-datatable-tbody > tr > td {
     background-color: white;
     border: 0px;
-    padding: .3rem 1rem 0.3rem 0;
+    padding: .45rem 1.5rem 0.45rem 0;
     color: #262262;
-    font-size: .5rem;
+    font-size: .75rem;
 }
 
 .extraction-data-table-container td:last-child {
@@ -27,8 +27,8 @@
 }
 
 .extraction-data-table-container .p-datatable .p-datatable-thead > tr > th {
-    padding-bottom: .1rem;
-    font-size: .4rem;
+    padding-bottom: .15rem;
+    font-size: .6rem;
     font-weight: 500;
     text-transform: uppercase;
 }
@@ -46,7 +46,7 @@
     color: #216FB4;
     font-size: 18px;
     line-height: 1.2;
-    margin-left: .1rem;
+    margin-left: .15rem;
 }
 
 .extraction-data-table-container .pi-sort-amount-up-alt:before {
@@ -78,15 +78,15 @@
 .slim-scroll-bar {
     overflow: auto;
     height: 100%;
-    margin-right: 0.1rem;
+    margin-right: 0.15rem;
 }
 
 .slim-scroll-bar::-webkit-scrollbar {
-    width: .3rem;
+    width: .45rem;
 }
 
 .extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar-track-piece:start {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .slim-scroll-bar::-webkit-scrollbar-thumb {

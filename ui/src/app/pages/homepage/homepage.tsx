@@ -33,15 +33,15 @@ export const styles = reactStyles({
     width: '100%',
     display: 'flex',
     backgroundColor: colors.primary,
-    paddingLeft: '3.5rem',
+    paddingLeft: '5.25rem',
     alignItems: 'center',
-    marginTop: '2rem',
+    marginTop: '3rem',
   },
   bottomLinks: {
     color: colors.white,
-    fontSize: '.5rem',
-    height: '1rem',
-    marginLeft: '2.5rem',
+    fontSize: '.75rem',
+    height: '1.5rem',
+    marginLeft: '3.75rem',
     fontWeight: 400,
   },
   contentWrapperLeft: {
@@ -53,13 +53,13 @@ export const styles = reactStyles({
     width: '60%',
   },
   fadeBox: {
-    margin: '1rem 0 0 3%',
+    margin: '1.5rem 0 0 3%',
     width: '95%',
-    padding: '0 0.1rem',
+    padding: '0 0.15rem',
   },
   logo: {
-    height: '3.5rem',
-    width: '7rem',
+    height: '5.25rem',
+    width: '10.5rem',
     lineHeight: '85px',
   },
   mainHeader: {
@@ -69,14 +69,14 @@ export const styles = reactStyles({
     letterSpacing: 'normal',
   },
   pageWrapper: {
-    marginLeft: '-1rem',
-    marginRight: '-0.6rem',
+    marginLeft: '-1.5rem',
+    marginRight: '-0.9rem',
     justifyContent: 'space-between',
     fontSize: '1.2em',
   },
   welcomeMessageIcon: {
-    height: '2.25rem',
-    width: '2.75rem',
+    height: '3.375rem',
+    width: '4.125rem',
   },
 });
 
@@ -89,22 +89,22 @@ const WelcomeHeader = () => {
             style={{
               fontWeight: 500,
               color: colors.secondary,
-              fontSize: '0.92rem',
+              fontSize: '1.38rem',
             }}
           >
             Welcome to the
           </Header>
-          <Header style={{ textTransform: 'uppercase', marginTop: '0.2rem' }}>
+          <Header style={{ textTransform: 'uppercase', marginTop: '0.3rem' }}>
             Researcher Workbench
           </Header>
         </FlexColumn>
-        <FlexRow style={{ alignItems: 'flex-end', marginLeft: '1rem' }}>
+        <FlexRow style={{ alignItems: 'flex-end', marginLeft: '1.5rem' }}>
           <img style={styles.welcomeMessageIcon} src={workspaceIcon} />
           <img style={styles.welcomeMessageIcon} src={cohortIcon} />
           <img style={styles.welcomeMessageIcon} src={analysisIcon} />
         </FlexRow>
       </FlexRow>
-      <SmallHeader style={{ color: colors.primary, marginTop: '0.25rem' }}>
+      <SmallHeader style={{ color: colors.primary, marginTop: '0.375rem' }}>
         The secure platform to analyze <AoU /> data
       </SmallHeader>
     </FlexColumn>
@@ -130,7 +130,7 @@ const Workspaces = () => {
             className={'is-solid'}
             style={{
               color: colors.accent,
-              marginLeft: '1rem',
+              marginLeft: '1.5rem',
               cursor: 'pointer',
             }}
             onClick={() => {
