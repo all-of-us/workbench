@@ -28,8 +28,8 @@ import {
 } from 'app/components/modals';
 import {
   CriteriaSearch,
-  toastCSS,
   LOCAL_STORAGE_KEY_COHORT_CONTEXT,
+  toastCSS,
 } from 'app/pages/data/criteria-search';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withCurrentCohortSearchContext } from 'app/utils';
