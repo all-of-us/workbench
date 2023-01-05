@@ -14,7 +14,7 @@ const styles = {
     marginLeft: 6,
     marginTop: 6,
     height: 'auto',
-    padding: '0.5rem',
+    padding: '0.75rem',
     backgroundColor: colorWithWhiteness(colors.dark, 0.92),
     borderRadius: 5,
   },
@@ -37,10 +37,10 @@ const styles = {
   smallHeader: {
     fontSize: 16,
     fontWeight: 600,
-    marginTop: '.5rem',
+    marginTop: '.75rem',
   },
   textSection: {
-    marginTop: '.25rem',
+    marginTop: '.375rem',
   },
 };
 
@@ -61,7 +61,7 @@ export class CookiePolicy extends React.Component<WithSpinnerOverlayProps, {}> {
         <FadeBox
           style={{
             margin: 'auto',
-            marginTop: '1rem',
+            marginTop: '1.5rem',
             width: '100%',
             color: colors.primary,
           }}

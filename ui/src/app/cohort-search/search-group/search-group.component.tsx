@@ -39,16 +39,16 @@ const styles = reactStyles({
   card: {
     background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
-    borderRadius: '0.2rem',
-    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(
+    borderRadius: '0.3rem',
+    boxShadow: `0 0.1875rem 0.1875rem 0 ${colorWithWhiteness(
       colors.black,
       0.85
     )}`,
-    margin: '0 0 0.6rem',
+    margin: '0 0 0.9rem',
   },
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.75rem 1.125rem',
   },
   cardHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.3),
@@ -56,7 +56,7 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     minWidth: '100%',
-    padding: '0.5rem 0.75rem',
+    padding: '0.75rem 1.125rem',
   },
   overlay: {
     background: colors.white,
@@ -80,7 +80,7 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     letterSpacing: 0,
-    margin: '0.25rem 0',
+    margin: '0.375rem 0',
   },
   itemOr: {
     background: colors.white,
@@ -90,47 +90,47 @@ const styles = reactStyles({
     padding: '0 10px',
   },
   menu: {
-    maxWidth: '15rem',
-    minWidth: '5rem',
+    maxWidth: '22.5rem',
+    minWidth: '7.5rem',
     width: 'auto',
   },
   searchItem: {
     borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
-    margin: '0 0.5rem',
-    padding: '0.5rem 0.25rem',
+    margin: '0 0.75rem',
+    padding: '0.75rem 0.375rem',
   },
   menuButton: {
     background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, 0.75)}`,
-    borderRadius: '0.125rem',
+    borderRadius: '0.1875rem',
     color: colorWithWhiteness(colors.black, 0.45),
     cursor: 'pointer',
     fontSize: '12px',
     fontWeight: 100,
-    height: '1.5rem',
+    height: '2.25rem',
     letterSpacing: '1px',
-    lineHeight: '1.5rem',
-    padding: '0 0.5rem',
+    lineHeight: '2.25rem',
+    padding: '0 0.75rem',
     textTransform: 'uppercase',
     verticalAlign: 'middle',
   },
   row: {
     display: 'flex',
     flexWrap: 'wrap',
-    marginLeft: '-0.5rem',
-    marginRight: '-0.5rem',
+    marginLeft: '-0.75rem',
+    marginRight: '-0.75rem',
   },
   col6: {
     flex: '0 0 50%',
     maxWidth: '50%',
-    padding: '0 0.25rem',
+    padding: '0 0.375rem',
   },
   timeInput: {
-    height: '1.4rem',
-    marginLeft: '0.5rem',
-    padding: '0 0.25rem',
+    height: '2.1rem',
+    marginLeft: '0.75rem',
+    padding: '0 0.375rem',
     verticalAlign: 'middle',
-    width: '3rem',
+    width: '4.5rem',
   },
   inputError: {
     background: colorWithWhiteness(colors.danger, 0.85),
@@ -139,7 +139,7 @@ const styles = reactStyles({
     color: colorWithWhiteness(colors.dark, 0.1),
     fontSize: '11px',
     lineHeight: '16px',
-    marginBottom: '0.25rem',
+    marginBottom: '0.375rem',
     padding: '5px 3px',
   },
 });
@@ -607,7 +607,7 @@ export const SearchGroup = withCurrentWorkspace()(
                 ref={(el) => (this.groupMenu = el)}
               />
               <Clickable
-                style={{ display: 'inline-block', paddingRight: '0.5rem' }}
+                style={{ display: 'inline-block', paddingRight: '0.75rem' }}
                 onClick={(e) => this.groupMenu.toggle(e)}
               >
                 <ClrIcon
@@ -738,7 +738,7 @@ export const SearchGroup = withCurrentWorkspace()(
                       disabled={this.disableTemporal}
                       onChange={(e) => this.handleTemporalChange(e)}
                     />
-                    <div style={{ paddingLeft: '0.5rem' }}>Temporal</div>
+                    <div style={{ paddingLeft: '0.75rem' }}>Temporal</div>
                   </div>
                   <div style={{ ...styles.col6, textAlign: 'right' }}>
                     <div>

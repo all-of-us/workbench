@@ -57,7 +57,7 @@ export class ConfirmDeleteModal extends React.Component<
           <ModalTitle style={{ lineHeight: '28px' }}>
             Warning — All work in this workspace will be lost.
           </ModalTitle>
-          <ModalBody style={{ marginTop: '0.2rem', lineHeight: '28.px' }}>
+          <ModalBody style={{ marginTop: '0.3rem', lineHeight: '28.px' }}>
             <div>
               <div>
                 Are you sure you want to delete{' '}
@@ -74,13 +74,13 @@ export class ConfirmDeleteModal extends React.Component<
               </div>
               <TextInput
                 placeholder='type DELETE to confirm'
-                style={{ marginTop: '0.5rem' }}
+                style={{ marginTop: '0.75rem' }}
                 onChange={this.validateDeleteText}
                 onBlur=''
               />
             </div>
           </ModalBody>
-          <ModalFooter style={{ paddingTop: '1rem' }}>
+          <ModalFooter style={{ paddingTop: '1.5rem' }}>
             <Button
               aria-label='Cancel'
               type='secondary'
@@ -91,7 +91,7 @@ export class ConfirmDeleteModal extends React.Component<
             <Button
               aria-label='Confirm Delete'
               disabled={this.state.loading || this.state.deleteDisabled}
-              style={{ marginLeft: '0.5rem' }}
+              style={{ marginLeft: '0.75rem' }}
               data-test-id='confirm-delete'
               onClick={() => this.emitDelete()}
             >
@@ -107,7 +107,7 @@ export class ConfirmDeleteModal extends React.Component<
             Are you sure you want to delete {toDisplay(this.props.resourceType)}
             : {this.props.resourceName}?
           </ModalTitle>
-          <ModalBody style={{ marginTop: '0.2rem', lineHeight: '28.px' }}>
+          <ModalBody style={{ marginTop: '0.3rem', lineHeight: '28.px' }}>
             This will permanently delete the{' '}
             {toDisplay(this.props.resourceType)}
             {this.props.resourceType === ResourceType.COHORT && (
@@ -115,13 +115,13 @@ export class ConfirmDeleteModal extends React.Component<
             )}
             .
           </ModalBody>
-          <ModalFooter style={{ paddingTop: '1rem' }}>
+          <ModalFooter style={{ paddingTop: '1.5rem' }}>
             <Button type='secondary' onClick={() => this.props.closeFunction()}>
               Cancel
             </Button>
             <Button
               disabled={this.state.loading}
-              style={{ marginLeft: '0.5rem' }}
+              style={{ marginLeft: '0.75rem' }}
               data-test-id='confirm-delete'
               onClick={() => this.emitDelete()}
             >

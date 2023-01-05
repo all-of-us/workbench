@@ -39,9 +39,9 @@ const styles = reactStyles({
   cohortError: {
     background: colors.warning,
     color: colors.white,
-    padding: '0.25rem 0.5rem',
+    padding: '0.375rem 0.75rem',
     borderRadius: '5px',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
 });
 
@@ -50,7 +50,7 @@ const colStyle = (percentage: string) => {
     flex: `0 0 ${percentage}%`,
     maxWidth: `${percentage}%`,
     minHeight: '1px',
-    padding: '0 0.5rem',
+    padding: '0 0.75rem',
     position: 'relative',
     width: '100%',
   } as React.CSSProperties;
@@ -107,7 +107,7 @@ export const CohortPage = fp.flow(
         cohortError: false,
         criteria: { dataFilters: [], includes: [], excludes: [] },
         loading: false,
-        minHeight: '10rem',
+        minHeight: '15rem',
         overview: false,
         searchContext: undefined,
         unsavedSelections: false,
@@ -317,7 +317,7 @@ export const CohortPage = fp.flow(
             message={this.unsavedChangesMessage()}
           />
 
-          <div style={{ minHeight: '28rem', padding: '0.5rem' }}>
+          <div style={{ minHeight: '42rem', padding: '0.75rem' }}>
             {cohortError ? (
               <div style={styles.cohortError}>
                 <ClrIcon
@@ -332,17 +332,17 @@ export const CohortPage = fp.flow(
               <React.Fragment>
                 <FlexRowWrap
                   style={{
-                    margin: '1rem 0 2rem',
+                    margin: '1.5rem 0 3rem',
                     ...(this.showCohortSearch ? { display: 'none' } : {}),
                   }}
                 >
                   <div style={colStyle('66.66667')}>
-                    <FlexRowWrap style={{ margin: '0 -0.5rem' }}>
+                    <FlexRowWrap style={{ margin: '0 -0.75rem' }}>
                       {!!cohort && !!cohort.name && (
                         <div
                           style={{
-                            height: '1.5rem',
-                            padding: '0 0.5rem',
+                            height: '2.25rem',
+                            padding: '0 0.75rem',
                             width: '100%',
                           }}
                         >

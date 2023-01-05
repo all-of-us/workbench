@@ -25,12 +25,12 @@ const VERSIONS: VersionInfo[] = [
   {
     version: 3,
     path: '/data-user-code-of-conduct-v3.html',
-    height: '90rem', // no inner vertical scrollbars at min width, via trial and error
+    height: '135rem', // no inner vertical scrollbars at min width, via trial and error
   },
   {
     version: 4,
     path: '/data-user-code-of-conduct-v4.html',
-    height: '90rem', // no inner vertical scrollbars at min width, via trial and error
+    height: '135rem', // no inner vertical scrollbars at min width, via trial and error
   },
   {
     version: 5,

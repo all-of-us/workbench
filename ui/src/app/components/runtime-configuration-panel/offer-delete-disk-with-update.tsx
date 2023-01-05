@@ -26,9 +26,9 @@ export const OfferDeleteDiskWithUpdate = ({
   const [deleteDetachedDisk, setDeleteDetachedDisk] = useState(false);
   return (
     <Fragment>
-      <div style={{ display: 'flex', marginRight: '0.5rem' }}>
+      <div style={{ display: 'flex', marginRight: '0.75rem' }}>
         <ClrIcon
-          style={{ color: colors.warning, marginRight: '0.25rem' }}
+          style={{ color: colors.warning, marginRight: '0.375rem' }}
           className='is-solid'
           shape='exclamation-triangle'
           size='20'
@@ -51,10 +51,10 @@ export const OfferDeleteDiskWithUpdate = ({
           >
             <div
               data-test-id='keep-pd'
-              style={{ display: 'inline-block', marginRight: '0.5rem' }}
+              style={{ display: 'inline-block', marginRight: '0.75rem' }}
             >
               <RadioButton
-                style={{ marginRight: '0.25rem' }}
+                style={{ marginRight: '0.375rem' }}
                 onChange={() => setDeleteDetachedDisk(false)}
                 checked={!deleteDetachedDisk}
               />
@@ -81,10 +81,10 @@ export const OfferDeleteDiskWithUpdate = ({
           >
             <div
               data-test-id='delete-pd'
-              style={{ display: 'inline-block', marginRight: '0.5rem' }}
+              style={{ display: 'inline-block', marginRight: '0.75rem' }}
             >
               <RadioButton
-                style={{ marginRight: '0.25rem' }}
+                style={{ marginRight: '0.375rem' }}
                 onChange={() => setDeleteDetachedDisk(true)}
                 checked={deleteDetachedDisk}
               />
@@ -104,7 +104,7 @@ export const OfferDeleteDiskWithUpdate = ({
         <Button
           type='secondaryLight'
           aria-label={'Cancel'}
-          style={{ marginRight: '.6rem' }}
+          style={{ marginRight: '.9rem' }}
           onClick={() => onCancel()}
         >
           Cancel

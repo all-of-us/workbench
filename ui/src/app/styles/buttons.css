@@ -6,14 +6,14 @@
 .btn.btn-primary {
   background-color: #262262;
   border: none;
-  padding: 0rem 0.77rem;
-  border-radius: 0.3rem;
+  padding: 0rem 1.155rem;
+  border-radius: 0.45rem;
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
   color: #fff;
-  letter-spacing: 0.02rem;
-  line-height: 0.77rem;
+  letter-spacing: 0.03rem;
+  line-height: 1.155rem;
 }
 
 .btn.btn-primary:hover {
@@ -30,14 +30,14 @@
 .btn.btn-secondary,
 .btn.btn-outline {
   border: 2px solid #262262;
-  padding: 0rem 0.77rem;
-  border-radius: 0.2rem;
+  padding: 0rem 1.155rem;
+  border-radius: 0.3rem;
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
   color: #262262;
-  letter-spacing: 0.02rem;
-  line-height: 0.77rem;
+  letter-spacing: 0.03rem;
+  line-height: 1.155rem;
 }
 
 .btn.btn-secondary:active {
@@ -63,7 +63,7 @@
 }
 
 .btn.btn-lg {
-  height: 2.5rem;
+  height: 3.75rem;
 }
 
 .btn.btn-link {
@@ -87,6 +87,6 @@
   font-weight: 300;
   color: #4A4A4A;
   line-height: 24px;
-  height: 1.5rem;
+  height: 2.25rem;
   text-transform: none;
 }

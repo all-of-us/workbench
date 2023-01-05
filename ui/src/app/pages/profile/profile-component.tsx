@@ -372,7 +372,7 @@ export const ProfileComponent = fp.flow(
         <FadeBox style={styles.fadebox}>
           <div style={{ width: '95%' }}>
             {(!profile || updating) && <SpinnerOverlay />}
-            <div style={{ ...styles.h1, marginBottom: '0.7rem' }}>Profile</div>
+            <div style={{ ...styles.h1, marginBottom: '1.05rem' }}>Profile</div>
             <FlexRow style={{ justifyContent: 'spaceBetween' }}>
               <div>
                 {(hasExpired ||
@@ -381,7 +381,7 @@ export const ProfileComponent = fp.flow(
                     <ExclamationTriangle
                       size={25}
                       color={colors.warning}
-                      style={{ margin: '0.5rem' }}
+                      style={{ margin: '0.75rem' }}
                     />
                     <div style={{ color: colors.primary, fontWeight: 600 }}>
                       Please update or verify your profile.
@@ -389,7 +389,7 @@ export const ProfileComponent = fp.flow(
                     <a
                       onClick={() => this.confirmProfile()}
                       style={{
-                        margin: '0 0.5rem 0 auto',
+                        margin: '0 0.75rem 0 auto',
                         textDecoration: 'underline',
                       }}
                     >
@@ -399,7 +399,7 @@ export const ProfileComponent = fp.flow(
                 )}
                 <div style={styles.title}>Public displayed Information</div>
                 <hr style={{ ...styles.verticalLine, width: '64%' }} />
-                <FlexRow style={{ marginTop: '1rem' }}>
+                <FlexRow style={{ marginTop: '1.5rem' }}>
                   {makeProfileInput({
                     title: 'First Name',
                     valueKey: 'givenName',
@@ -429,7 +429,7 @@ export const ProfileComponent = fp.flow(
                     <div style={styles.inputLabel}>Your Role</div>
                     {profile.verifiedInstitutionalAffiliation && (
                       <Dropdown
-                        style={{ width: '12.5rem' }}
+                        style={{ width: '18.75rem' }}
                         data-test-id='role-dropdown'
                         placeholder='Your Role'
                         options={this.getRoleOptions()}
@@ -452,7 +452,7 @@ export const ProfileComponent = fp.flow(
                               'verifiedInstitutionalAffiliation',
                               'institutionalRoleOtherText',
                             ],
-                            style: { marginTop: '1rem' },
+                            style: { marginTop: '1.5rem' },
                             disabled: true,
                           })}
                         </div>
@@ -464,7 +464,7 @@ export const ProfileComponent = fp.flow(
                   {makeProfileInput({
                     title: 'Professional URL',
                     valueKey: 'professionalUrl',
-                    style: { width: '26rem' },
+                    style: { width: '39rem' },
                   })}
                 </FlexRow>
                 <FlexRow>
@@ -485,13 +485,13 @@ export const ProfileComponent = fp.flow(
                     maxCharacters: 2000,
                     valueKey: 'areaOfResearch',
                     isLong: true,
-                    style: { width: '26rem' },
+                    style: { width: '39rem' },
                   })}
                 </FlexRow>
-                <div style={{ width: '65%', marginTop: '0.5rem' }}>
+                <div style={{ width: '65%', marginTop: '0.75rem' }}>
                   <div style={styles.title}>Private Information</div>
-                  <hr style={{ ...styles.verticalLine, width: '26rem' }} />
-                  <FlexRow style={{ marginTop: '1rem' }}>
+                  <hr style={{ ...styles.verticalLine, width: '39rem' }} />
+                  <FlexRow style={{ marginTop: '1.5rem' }}>
                     {makeProfileInput({
                       title: 'User name',
                       valueKey: 'username',
@@ -541,8 +541,8 @@ export const ProfileComponent = fp.flow(
                   </FlexRow>
                 </div>
               </div>
-              <div style={{ width: '20rem', marginRight: '4rem' }}>
-                <div style={{ marginLeft: '1rem' }}>
+              <div style={{ width: '30rem', marginRight: '6rem' }}>
+                <div style={{ marginLeft: '1.5rem' }}>
                   <div style={styles.title}>Initial credits balance</div>
                   <hr style={{ ...styles.verticalLine }} />
                   {profile && (
@@ -568,7 +568,7 @@ export const ProfileComponent = fp.flow(
               </div>
             </FlexRow>
             <div style={{ display: 'flex' }}>
-              <div style={{ display: 'flex', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', marginBottom: '3rem' }}>
                 <Button
                   type='link'
                   onClick={() => this.setState({ currentProfile: profile })}

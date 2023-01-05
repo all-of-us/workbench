@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import * as React from 'react';
+import { useState } from 'react';
 import { faCheck, faClipboard } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -45,7 +45,7 @@ export const CopySnippetModal = ({ title, copyText, closeFunction }: Props) => {
             <React.Fragment>
               <FontAwesomeIcon
                 icon={faCheck}
-                style={{ marginRight: '0.4rem' }}
+                style={{ marginRight: '0.6rem' }}
               />
               Copied to Clipboard
             </React.Fragment>
@@ -53,7 +53,7 @@ export const CopySnippetModal = ({ title, copyText, closeFunction }: Props) => {
             <React.Fragment>
               <FontAwesomeIcon
                 icon={faClipboard}
-                style={{ marginRight: '0.4rem' }}
+                style={{ marginRight: '0.6rem' }}
               />
               Copy Snippet
             </React.Fragment>

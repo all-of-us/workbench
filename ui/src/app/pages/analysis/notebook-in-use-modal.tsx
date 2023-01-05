@@ -51,7 +51,7 @@ export class NotebookInUseModal extends React.Component<Props, State> {
         <ModalFooter style={{ alignItems: 'center' }}>
           <Button
             type='secondary'
-            style={{ width: '6rem', margin: '0 10px' }}
+            style={{ width: '9rem', margin: '0 10px' }}
             onClick={() => {
               this.props.onCancel();
             }}
@@ -60,7 +60,7 @@ export class NotebookInUseModal extends React.Component<Props, State> {
           </Button>
           <Button
             type='secondary'
-            style={{ width: '8rem', margin: '0 10px' }}
+            style={{ width: '12rem', margin: '0 10px' }}
             onClick={() => {
               this.setState({ copyLoading: true });
               this.props.onCopy();
@@ -69,12 +69,12 @@ export class NotebookInUseModal extends React.Component<Props, State> {
             Make a copy{' '}
             {this.state.copyLoading && (
               <Spinner
-                style={{ marginLeft: '0.3rem', height: '21px', width: '21px' }}
+                style={{ marginLeft: '0.45rem', height: '21px', width: '21px' }}
               />
             )}
           </Button>
           <Button
-            style={{ width: '10rem', margin: '0 10px' }}
+            style={{ width: '15rem', margin: '0 10px' }}
             onClick={() => {
               this.props.onPlaygroundMode();
             }}

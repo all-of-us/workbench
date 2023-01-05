@@ -16,15 +16,15 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 
 const styles = reactStyles({
   ageContainer: {
-    margin: '0.5rem 1rem',
-    maxHeight: '15rem',
-    padding: '0.5rem 0 1.5rem 1rem',
+    margin: '0.75rem 1.5rem',
+    maxHeight: '22.5rem',
+    padding: '0.75rem 0 2.25rem 1.5rem',
     width: '80%',
   },
   ageInput: {
     fontSize: '13px',
-    marginTop: '0.25rem',
-    padding: '0 0 0 0.5rem',
+    marginTop: '0.375rem',
+    padding: '0 0 0 0.75rem',
   },
   count: {
     alignItems: 'center',
@@ -33,18 +33,18 @@ const styles = reactStyles({
     color: colors.white,
     display: 'inline-flex',
     fontSize: '10px',
-    height: '0.625rem',
+    height: '0.9375rem',
     justifyContent: 'center',
     lineHeight: 'normal',
-    margin: '0 0.25rem',
-    minWidth: '0.675rem',
+    margin: '0 0.375rem',
+    minWidth: '1.0125rem',
     padding: '0 4px',
     verticalAlign: 'middle',
   },
   countPreview: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
-    padding: '0.5rem',
-    margin: '0.5rem',
+    padding: '0.75rem',
+    margin: '0.75rem',
     width: '35%',
   },
   option: {
@@ -52,13 +52,13 @@ const styles = reactStyles({
     cursor: 'pointer',
     fontSize: '13px',
     fontWeight: 400,
-    marginBottom: '0.5rem',
-    padding: '0 0.25rem',
+    marginBottom: '0.75rem',
+    padding: '0 0.375rem',
     textTransform: 'capitalize',
   },
   selectIcon: {
     color: colors.select,
-    marginRight: '0.25rem',
+    marginRight: '0.375rem',
   },
   selected: {
     cursor: 'not-allowed',
@@ -66,21 +66,21 @@ const styles = reactStyles({
   },
   selectList: {
     alignItems: 'center',
-    marginRight: '1rem',
-    maxHeight: '15rem',
+    marginRight: '1.5rem',
+    maxHeight: '22.5rem',
     overflow: 'auto',
-    padding: '0.5rem 0 0 0.25rem',
+    padding: '0.75rem 0 0 0.375rem',
   },
   slider: {
     flex: 1,
-    padding: '0 0.5rem',
-    margin: '0 1rem',
+    padding: '0 0.75rem',
+    margin: '0 1.5rem',
   },
   sliderContainer: {
     alignItems: 'center',
     display: 'flex',
-    marginRight: '1rem',
-    paddingLeft: '1rem',
+    marginRight: '1.5rem',
+    paddingLeft: '1.5rem',
   },
 });
 // Template node used for age selections
@@ -385,13 +385,13 @@ export class Demographics extends React.Component<Props, State> {
       this.state;
     return loading ? (
       <div style={{ textAlign: 'center' }}>
-        <Spinner style={{ marginTop: '3rem' }} />
+        <Spinner style={{ marginTop: '4.5rem' }} />
       </div>
     ) : criteriaType === CriteriaType.AGE ? (
       // Age slider with number inputs
       <div style={styles.ageContainer}>
         <div style={styles.sliderContainer}>
-          <div style={{ width: '2.5rem' }}>
+          <div style={{ width: '3.75rem' }}>
             <NumberInput
               style={styles.ageInput}
               min={defaultMinAge}
@@ -401,7 +401,7 @@ export class Demographics extends React.Component<Props, State> {
               onChange={(v) => this.onMinChange(v)}
             />
           </div>
-          <div style={{ ...styles.slider, marginBottom: '0.75rem' }}>
+          <div style={{ ...styles.slider, marginBottom: '1.125rem' }}>
             <div ref={(el) => (this.ageWrapper = el)} id='count-wrapper'>
               {calculating ? (
                 <Spinner size={16} />
@@ -421,7 +421,7 @@ export class Demographics extends React.Component<Props, State> {
               step={1}
             />
           </div>
-          <div style={{ width: '2.5rem' }}>
+          <div style={{ width: '3.75rem' }}>
             <NumberInput
               style={styles.ageInput}
               min={minAge}
@@ -432,7 +432,7 @@ export class Demographics extends React.Component<Props, State> {
             />
           </div>
           <Button
-            style={{ marginLeft: '1rem' }}
+            style={{ marginLeft: '1.5rem' }}
             type='primary'
             disabled={selectedIds.includes(this.ageParameterId)}
             onClick={() => this.addAgeSelection()}
@@ -440,15 +440,15 @@ export class Demographics extends React.Component<Props, State> {
             Add Selection
           </Button>
         </div>
-        <div style={{ marginLeft: '1rem' }}>
+        <div style={{ marginLeft: '1.5rem' }}>
           {ageTypes.map((ageTypeRadio, index) => (
             <div
               key={index}
-              style={{ display: 'inline-block', marginRight: '0.5rem' }}
+              style={{ display: 'inline-block', marginRight: '0.75rem' }}
             >
               <RadioButton
                 name='ageType'
-                style={{ marginRight: '0.25rem' }}
+                style={{ marginRight: '0.375rem' }}
                 onChange={() => this.onRadioChange(ageTypeRadio.type)}
                 checked={ageTypeRadio.type === ageType}
               />
@@ -462,7 +462,9 @@ export class Demographics extends React.Component<Props, State> {
       <React.Fragment>
         <style>{scrollbarCSS}</style>
         <div className='show-scrollbar' style={styles.selectList}>
-          <div style={{ margin: '0.25rem 0', overflow: 'auto', width: '100%' }}>
+          <div
+            style={{ margin: '0.375rem 0', overflow: 'auto', width: '100%' }}
+          >
             {nodes.map((opt, o) => (
               <div key={o} style={styles.option}>
                 {selectedIds.includes(opt.parameterId) ? (

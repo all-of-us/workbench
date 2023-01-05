@@ -1,6 +1,8 @@
 import * as React from 'react';
-import { faExclamationTriangle } from '@fortawesome/pro-solid-svg-icons';
-import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons';
+import {
+  faExclamationTriangle,
+  faPlusCircle,
+} from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { BillingStatus, FileDetail, ResourceType } from 'generated/fetch';
@@ -45,7 +47,7 @@ const styles = {
     color: colors.primary,
     fontSize: '12px',
     fontWeight: 600,
-    paddingTop: '0.5rem',
+    paddingTop: '0.75rem',
   },
 };
 
@@ -194,7 +196,9 @@ export const NotebookList = withCurrentWorkspace()(
         showWaitingForNotebookTransferMsg,
       } = this.state;
       return (
-        <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+        <FadeBox
+          style={{ margin: 'auto', marginTop: '1.5rem', width: '95.7%' }}
+        >
           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
             <div
               style={{
@@ -204,7 +208,7 @@ export const NotebookList = withCurrentWorkspace()(
               }}
             >
               {showWaitingForNotebookTransferMsg ? (
-                <FlexColumn style={{ paddingTop: '0.5rem' }}>
+                <FlexColumn style={{ paddingTop: '0.75rem' }}>
                   <div>
                     <FontAwesomeIcon
                       style={{ color: colors.warning }}
@@ -220,12 +224,15 @@ export const NotebookList = withCurrentWorkspace()(
               ) : (
                 <FlexColumn>
                   <FlexRow
-                    style={{ ...styles.heading, paddingBottom: '0.5rem' }}
+                    style={{ ...styles.heading, paddingBottom: '0.75rem' }}
                   >
                     {/* disable if user does not have write permission*/}
                     <TooltipTrigger content={this.disabledCreateButtonText()}>
                       <Clickable
-                        style={{ paddingTop: '0.5rem', paddingRight: '0.5rem' }}
+                        style={{
+                          paddingTop: '0.75rem',
+                          paddingRight: '0.75rem',
+                        }}
                         onClick={() => {
                           AnalyticsTracker.Notebooks.OpenCreateModal();
                           this.setState({ creating: true });
@@ -240,7 +247,7 @@ export const NotebookList = withCurrentWorkspace()(
                     </TooltipTrigger>
                     <ListPageHeader>Create a New Notebook</ListPageHeader>
                     <div
-                      style={{ paddingTop: '0.4rem', paddingLeft: '0.5rem' }}
+                      style={{ paddingTop: '0.6rem', paddingLeft: '0.75rem' }}
                     >
                       <TooltipTrigger
                         side={'right'}

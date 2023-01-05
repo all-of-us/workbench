@@ -15,13 +15,13 @@ const baseCheckboxLabelStyle = {
   fontFamily: 'Montserrat',
   fontSize: '14px',
   fontWeight: 400,
-  paddingLeft: '0.25rem',
-  paddingRight: '0.5rem',
+  paddingLeft: '0.375rem',
+  paddingRight: '0.75rem',
 };
 
 const styles = reactStyles({
   checkbox: {
-    marginRight: '.31667rem',
+    marginRight: '0.475rem',
     zoom: '1.5',
   },
   checkboxLabel: baseCheckboxLabelStyle,
@@ -76,13 +76,17 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
     return (
       <FlexColumn
         data-test-id='terms-of-service'
-        style={{ flex: 1, padding: '1rem 3rem 0 3rem', ...this.props.style }}
+        style={{
+          flex: 1,
+          padding: '1.5rem 4.5rem 0 4.5rem',
+          ...this.props.style,
+        }}
       >
         {this.props.showReAcceptNotification && (
           <div
             style={{
-              marginBottom: '0.5rem',
-              padding: '0.75rem',
+              marginBottom: '0.75rem',
+              padding: '1.125rem',
               backgroundColor: 'aliceblue',
               borderRadius: 4,
               boxShadow: '1px 1px 6px gray',
@@ -92,7 +96,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               Please review and re-accept the <AoU /> Research Program
               Researcher Workbench Terms of Use and Privacy Statement
             </h3>
-            <p className='h-color' style={{ marginTop: '0.25rem' }}>
+            <p className='h-color' style={{ marginTop: '0.375rem' }}>
               The Terra Platform terms, which are incorporated by reference into
               the <AoU /> terms, have been updated. This update replaces
               references to specific federal datasets with a more broad
@@ -110,7 +114,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
         <FlexRow
           style={{
             display: 'inline-flex',
-            padding: '1rem',
+            padding: '1.5rem',
             maxWidth: '1000px',
             margin: 'auto',
           }}
@@ -119,8 +123,8 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
             <div
               style={{
                 ...styles.noticeText,
-                marginBottom: '.5rem',
-                height: '3rem',
+                marginBottom: '.75rem',
+                height: '4.5rem',
               }}
             >
               <div>Please read through the entire agreement to continue.</div>
@@ -145,7 +149,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
                     ? styles.checkboxLabel
                     : styles.disabledCheckboxLabel
                 }
-                wrapperStyle={{ marginBottom: '0.5rem', display: 'flex' }}
+                wrapperStyle={{ marginBottom: '0.75rem', display: 'flex' }}
                 label={
                   <span>
                     I have read, understand, and agree to the <AoU /> Terms of
@@ -157,7 +161,7 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
           </div>
           <FlexColumn
             style={{
-              paddingLeft: '3rem',
+              paddingLeft: '4.5rem',
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -166,9 +170,9 @@ export class TermsOfService extends React.Component<TosProps, TosState> {
               aria-label='Next'
               data-test-id='next-button'
               style={{
-                width: '5rem',
-                height: '2rem',
-                margin: '.25rem .5rem .25rem 0',
+                width: '7.5rem',
+                height: '3rem',
+                margin: '.375rem .75rem .375rem 0',
               }}
               disabled={
                 !hasReadEntireAgreement || !hasAckedAgreement || hasClickedNext

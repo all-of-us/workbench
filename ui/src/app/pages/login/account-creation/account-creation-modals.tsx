@@ -35,7 +35,7 @@ export class AccountCreationResendModal extends React.Component<AccountCreationR
           <Button type='secondary' onClick={onClose}>
             Cancel
           </Button>
-          <Button style={{ marginLeft: '0.5rem' }} onClick={() => this.send()}>
+          <Button style={{ marginLeft: '0.75rem' }} onClick={() => this.send()}>
             Send
           </Button>
         </ModalFooter>
@@ -107,7 +107,7 @@ export class AccountCreationUpdateModal extends React.Component<
             Cancel
           </Button>
           <Button
-            style={{ marginLeft: '0.5rem' }}
+            style={{ marginLeft: '0.75rem' }}
             disabled={!emailValid}
             onClick={() => this.updateAndSend()}
           >

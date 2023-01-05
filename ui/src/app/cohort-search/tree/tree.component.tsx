@@ -41,19 +41,19 @@ const styles = reactStyles({
     textAlign: 'left',
     border: `1px solid ${colorWithWhiteness(colors.danger, 0.5)}`,
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
   ingredients: {
     float: 'left',
     fontWeight: 'bold',
-    padding: '0.5rem',
+    padding: '0.75rem',
   },
   arrowIcon: {
-    height: '0.7rem',
-    marginTop: '-0.2rem',
-    width: '0.7rem',
-    marginRight: '0.5rem',
+    height: '1.05rem',
+    marginTop: '-0.3rem',
+    width: '1.05rem',
+    marginRight: '0.75rem',
   },
   returnLink: {
     backgroundColor: colorWithWhiteness(colors.accent, 0.87),
@@ -62,16 +62,16 @@ const styles = reactStyles({
     cursor: 'pointer',
     float: 'left',
     fontSize: '14px',
-    height: '2rem',
-    padding: '0 0.5rem',
-    marginRight: '0.7rem',
+    height: '3rem',
+    padding: '0 0.75rem',
+    marginRight: '1.05rem',
     fontWeight: 600,
   },
   searchBarContainer: {
     width: '80%',
     marginTop: '-1px',
     display: 'flex',
-    padding: '0.4rem 0',
+    padding: '0.6rem 0',
     backgroundColor: 'transparent',
     zIndex: 1,
   },
@@ -83,7 +83,7 @@ const styles = reactStyles({
     borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
   },
   node: {
-    height: '16rem',
+    height: '24rem',
     overflow: 'auto',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     borderTop: 'none',
@@ -92,10 +92,10 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     borderRadius: '50%',
     color: colors.white,
-    width: '1.25rem',
-    height: '1.25rem',
-    margin: '0.5rem 2rem',
-    lineHeight: '1.25rem',
+    width: '1.875rem',
+    height: '1.875rem',
+    margin: '0.75rem 3rem',
+    lineHeight: '1.875rem',
     textAlign: 'center',
     fontSize: '11px',
     fontWeight: 600,
@@ -475,7 +475,7 @@ export const CriteriaTree = fp.flow(
           {!loading && (
             <div
               style={{
-                paddingTop: this.showHeader ? '1.5rem' : 0,
+                paddingTop: this.showHeader ? '2.25rem' : 0,
                 width: '99%',
               }}
             >
@@ -520,14 +520,14 @@ export const CriteriaTree = fp.flow(
                 className='show-scrollbar'
               >
                 {domain === Domain.PHYSICALMEASUREMENT && (
-                  <div style={{ margin: '0.5rem 0 0 0.5rem' }}>
+                  <div style={{ margin: '0.75rem 0 0 0.75rem' }}>
                     <CheckBox
                       manageOwnState={false}
                       checked={hasAnyPM}
                       onChange={() => this.onHasAnyPMChange()}
                     />
                     <span
-                      style={{ color: colors.primary, marginLeft: '0.5rem' }}
+                      style={{ color: colors.primary, marginLeft: '0.75rem' }}
                     >
                       Has Any Physical Measurements Data
                     </span>

@@ -27,7 +27,7 @@ import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
   editIcon: {
-    marginTop: '0.1rem',
+    marginTop: '0.15rem',
     height: 22,
     width: 22,
     fill: colors.light,
@@ -39,49 +39,49 @@ const styles = reactStyles({
     fontSize: '16px',
     fontWeight: 600,
     color: colors.primary,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
   },
   sectionContentContainer: {
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
   },
   sectionHeader: {
     fontSize: '16px',
     fontWeight: 600,
     color: colors.primary,
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   sectionItemWithBackground: {
     padding: '10px',
     backgroundColor: colors.white,
     color: colors.primary,
-    marginLeft: '0.5rem',
+    marginLeft: '0.75rem',
     borderRadius: '3px',
   },
   sectionSubHeader: {
     fontSize: '14px',
     fontWeight: 600,
     color: colors.primary,
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
   },
   sectionText: {
     fontSize: '14px',
     lineHeight: '24px',
     color: colors.primary,
-    marginTop: '0.3rem',
+    marginTop: '0.45rem',
   },
   reviewPurposeReminder: {
-    marginTop: '0.3rem',
+    marginTop: '0.45rem',
     borderStyle: 'solid',
-    height: '2.5rem',
+    height: '3.75rem',
     color: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderColor: colors.warning,
-    borderRadius: '0.4rem',
-    borderWidth: '0.1rem',
+    borderRadius: '0.6rem',
+    borderWidth: '0.15rem',
     backgroundColor: colorWithWhiteness(colors.highlight, 0.7),
   },
 });
@@ -131,7 +131,11 @@ export const ResearchPurpose = fp.flow(
         Primary purpose of project
         <Clickable
           disabled={!isOwner}
-          style={{ display: 'flex', alignItems: 'center', marginLeft: '.5rem' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginLeft: '.75rem',
+          }}
           data-test-id='edit-workspace'
           onClick={() =>
             navigate(['workspaces', workspace.namespace, workspace.id, 'edit'])
@@ -149,15 +153,15 @@ export const ResearchPurpose = fp.flow(
         workspace.researchPurpose.needsReviewPrompt && (
           <FlexRow style={styles.reviewPurposeReminder}>
             <ClrIcon
-              style={{ color: colors.warning, marginLeft: '0.3rem' }}
+              style={{ color: colors.warning, marginLeft: '0.45rem' }}
               className='is-solid'
               shape='exclamation-triangle'
               size='25'
             />
             <FlexColumn
               style={{
-                paddingRight: '0.5rem',
-                paddingLeft: '0.5rem',
+                paddingRight: '0.75rem',
+                paddingLeft: '0.75rem',
                 color: colors.primary,
               }}
             >
@@ -176,16 +180,16 @@ export const ResearchPurpose = fp.flow(
                 for participants and public to review.
               </label>
             </FlexColumn>
-            <div style={{ marginLeft: 'auto', marginRight: '0.5rem' }}>
+            <div style={{ marginLeft: 'auto', marginRight: '0.75rem' }}>
               <a
-                style={{ marginRight: '0.5rem' }}
+                style={{ marginRight: '0.75rem' }}
                 onClick={() => looksGoodEvent()}
               >
                 Looks Good
               </a>
               |
               <a
-                style={{ marginLeft: '0.5rem' }}
+                style={{ marginLeft: '0.75rem' }}
                 onClick={() => updateWorkspaceEvent()}
               >
                 Update
@@ -203,8 +207,8 @@ export const ResearchPurpose = fp.flow(
             <div
               data-test-id='primaryResearchPurpose'
               style={{
-                marginTop: i > 0 ? '1rem' : '0.3rem',
-                marginLeft: '1rem',
+                marginTop: i > 0 ? '1.5rem' : '0.45rem',
+                marginLeft: '1.5rem',
               }}
             >
               {selectedResearchPurposeItem}
@@ -215,7 +219,7 @@ export const ResearchPurpose = fp.flow(
       <div style={styles.sectionContentContainer}>
         {selectedPrimaryPurposeItems.map((selectedPrimaryPurposeItem, i) => (
           <div key={i}>
-            <div data-test-id='primaryPurpose' style={{ marginTop: '1rem' }}>
+            <div data-test-id='primaryPurpose' style={{ marginTop: '1.5rem' }}>
               {selectedPrimaryPurposeItem}
             </div>
           </div>
@@ -257,7 +261,7 @@ export const ResearchPurpose = fp.flow(
               key={i}
               style={{
                 ...styles.sectionItemWithBackground,
-                marginTop: '0.5rem',
+                marginTop: '0.75rem',
               }}
             >
               {
@@ -281,7 +285,7 @@ export const ResearchPurpose = fp.flow(
               key={i}
               style={{
                 ...styles.sectionItemWithBackground,
-                marginTop: '0.5rem',
+                marginTop: '0.75rem',
               }}
             >
               {
@@ -299,7 +303,7 @@ export const ResearchPurpose = fp.flow(
         <React.Fragment>
           <div style={styles.sectionHeader}>Population of interest</div>
           <div style={styles.sectionContentContainer}>
-            <div style={{ marginTop: '0.5rem' }}>
+            <div style={{ marginTop: '0.75rem' }}>
               {getSelectedPopulations(workspace.researchPurpose)}
             </div>
           </div>

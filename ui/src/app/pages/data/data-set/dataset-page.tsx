@@ -83,7 +83,7 @@ export const styles = reactStyles({
     fontSize: '13px',
     fontWeight: 600,
     color: colors.primary,
-    paddingTop: '0.5rem',
+    paddingTop: '0.75rem',
   },
 
   dataDictionaryText: {
@@ -94,21 +94,21 @@ export const styles = reactStyles({
 
   selectBoxHeader: {
     fontSize: '16px',
-    height: '2rem',
-    lineHeight: '2rem',
-    paddingRight: '0.55rem',
+    height: '3rem',
+    lineHeight: '3rem',
+    paddingRight: '0.825rem',
     color: colors.primary,
     borderBottom: `1px solid ${colors.light}`,
     display: 'flex',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    minWidth: '15rem',
+    minWidth: '22.5rem',
   },
 
   listItem: {
     border: `0.5px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
-    margin: '.4rem .4rem .4rem .55rem',
-    height: '1.5rem',
+    margin: '.6rem .6rem .6rem .825rem',
+    height: '2.25rem',
     display: 'flex',
   },
 
@@ -131,9 +131,9 @@ export const styles = reactStyles({
 
   subheader: {
     fontWeight: 400,
-    fontSize: '0.6rem',
-    marginTop: '0.5rem',
-    paddingLeft: '0.55rem',
+    fontSize: '0.9rem',
+    marginTop: '0.75rem',
+    paddingLeft: '0.825rem',
     color: colors.primary,
   },
 
@@ -142,8 +142,8 @@ export const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    marginTop: '2.675rem',
-    marginBottom: '2rem',
+    marginTop: '4.0125rem',
+    marginBottom: '3rem',
   },
 
   previewDataHeaderBox: {
@@ -151,10 +151,10 @@ export const styles = reactStyles({
     flexDirection: 'row',
     position: 'relative',
     lineHeight: 'auto',
-    paddingTop: '0.5rem',
-    paddingBottom: '0.5rem',
-    paddingLeft: '0.5rem',
-    paddingRight: '0.5rem',
+    paddingTop: '0.75rem',
+    paddingBottom: '0.75rem',
+    paddingLeft: '0.75rem',
+    paddingRight: '0.75rem',
     borderBottom: `1px solid ${colors.light}`,
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -168,8 +168,8 @@ export const styles = reactStyles({
     fontFamily: 'Montserrat',
     fontSize: '16px',
     fontWeight: 600,
-    marginBottom: '1rem',
-    paddingRight: '1.5rem',
+    marginBottom: '1.5rem',
+    paddingRight: '2.25rem',
     justifyContent: 'space-between',
     display: 'flex',
   },
@@ -178,10 +178,10 @@ export const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '10rem',
-    width: '40rem',
+    height: '15rem',
+    width: '60rem',
     alignSelf: 'center',
-    marginTop: '2rem',
+    marginTop: '3rem',
     fontSize: 18,
     fontWeight: 600,
     color: colorWithWhiteness(colors.dark, 0.6),
@@ -193,9 +193,9 @@ export const styles = reactStyles({
     alignItems: 'center',
   },
   previewLink: {
-    marginTop: '0.5rem',
-    height: '1.8rem',
-    width: '6.5rem',
+    marginTop: '0.75rem',
+    height: '2.7rem',
+    width: '9.75rem',
     color: colors.secondary,
   },
   stickyFooter: {
@@ -212,7 +212,7 @@ export const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.highlight, 0.5),
     color: colors.primary,
     fontSize: '12px',
-    padding: '0.5rem',
+    padding: '0.75rem',
     borderRadius: '0.5em',
   },
   cohortItemName: {
@@ -221,7 +221,7 @@ export const styles = reactStyles({
     whiteSpace: 'nowrap',
   },
   listItemName: {
-    lineHeight: '1.5rem',
+    lineHeight: '2.25rem',
     color: colors.primary,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -237,11 +237,11 @@ const stylesFunction = {
   },
   selectDomainForPreviewButton: (selected) => {
     return {
-      marginLeft: '0.2rem',
+      marginLeft: '0.3rem',
       color: colors.accent,
-      marginRight: '0.25rem',
-      paddingBottom: '0.25rem',
-      width: '7rem',
+      marginRight: '0.375rem',
+      paddingBottom: '0.375rem',
+      width: '10.5rem',
       borderBottom: selected ? '4px solid ' + colors.accent : '',
       fontWeight: selected ? 600 : 400,
       fontSize: '18px',
@@ -331,7 +331,7 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
       />
       <FlexRow
         style={{
-          lineHeight: '1.5rem',
+          lineHeight: '2.25rem',
           color: colors.primary,
           width: '100%',
           minWidth: 0,
@@ -347,7 +347,7 @@ const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
             {name}
           </div>
         </TooltipTrigger>
-        <div style={{ marginLeft: 'auto', paddingRight: '1rem' }}>
+        <div style={{ marginLeft: 'auto', paddingRight: '1.5rem' }}>
           <StyledRouterLink
             path={`/workspaces/${namespace}/${wid}/data/cohorts/${cohortId}/reviews/cohort-description`}
             target='_blank'
@@ -381,7 +381,7 @@ const DataDictionaryDescription: React.FunctionComponent<
       }}
     >
       {dataDictionaryEntry ? (
-        <FlexColumn style={{ padding: '0.5rem' }}>
+        <FlexColumn style={{ padding: '0.75rem' }}>
           <div style={{ ...styles.dataDictionarySubheader, paddingTop: 0 }}>
             Description
           </div>
@@ -406,7 +406,7 @@ const DataDictionaryDescription: React.FunctionComponent<
         </FlexColumn>
       ) : (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <Spinner style={{ height: 36, width: 36, margin: '0.5rem' }} />
+          <Spinner style={{ height: 36, width: 36, margin: '0.75rem' }} />
         </div>
       )}
     </div>
@@ -510,7 +510,7 @@ export class ValueListItem extends React.Component<
             >
               <div
                 style={{
-                  lineHeight: '1.5rem',
+                  lineHeight: '2.25rem',
                   paddingLeft: 10,
                   wordWrap: 'break-word',
                   color: colors.primary,
@@ -609,17 +609,19 @@ const BoxHeader = ({
 }) => {
   return (
     <div style={styles.selectBoxHeader}>
-      <div style={{ display: 'flex', marginLeft: '0.2rem' }}>
-        <StepNumber step={step} style={{ marginTop: '0.5rem' }} />
+      <div style={{ display: 'flex', marginLeft: '0.3rem' }}>
+        <StepNumber step={step} style={{ marginTop: '0.75rem' }} />
         <label
           style={{
-            marginLeft: '0.5rem',
+            marginLeft: '0.75rem',
             color: colors.primary,
             display: 'flex',
             ...style,
           }}
         >
-          <div style={{ fontWeight: 600, marginRight: '0.3rem' }}>{header}</div>
+          <div style={{ fontWeight: 600, marginRight: '0.45rem' }}>
+            {header}
+          </div>
           ({subHeader})
         </label>
       </div>
@@ -1322,7 +1324,7 @@ export const DatasetPage = fp.flow(
                   flex: '0 0 auto',
                 }}
               />
-              <div style={{ paddingLeft: '0.25rem' }}>
+              <div style={{ paddingLeft: '0.375rem' }}>
                 The preview table could not be loaded. Please try again by
                 clicking the ‘View Preview Table’ as some queries take longer to
                 load. If the error keeps happening, please{' '}
@@ -1505,8 +1507,8 @@ export const DatasetPage = fp.flow(
             <Column
               key={value}
               header={getHeaderValue(value)}
-              headerStyle={{ textAlign: 'left', width: '5rem' }}
-              style={{ width: '5rem' }}
+              headerStyle={{ textAlign: 'left', width: '7.5rem' }}
+              style={{ width: '7.5rem' }}
               bodyStyle={{ hyphens: 'auto' }}
               field={value}
             />
@@ -1594,7 +1596,7 @@ export const DatasetPage = fp.flow(
       <React.Fragment>
         {savingDataset && <SpinnerOverlay opacity={0.3} />}
 
-        <FadeBox style={{ paddingTop: '1rem' }}>
+        <FadeBox style={{ paddingTop: '1.5rem' }}>
           <h2 style={{ paddingTop: 0, marginTop: 0 }}>
             Datasets
             {!!dataSet && ' - ' + dataSet.name}
@@ -1604,7 +1606,7 @@ export const DatasetPage = fp.flow(
             more of your cohorts. Then export the completed dataset to Notebooks
             where you can perform your analysis
           </div>
-          <div style={{ display: 'flex', paddingTop: '1rem' }}>
+          <div style={{ display: 'flex', paddingTop: '1.5rem' }}>
             <div
               style={{
                 width: '31%',
@@ -1629,7 +1631,7 @@ export const DatasetPage = fp.flow(
                     disable={!canWrite()}
                   />
                 </BoxHeader>
-                <div style={{ height: '9rem', overflowY: 'auto' }}>
+                <div style={{ height: '13.5rem', overflowY: 'auto' }}>
                   <Subheader>Prepackaged Cohorts</Subheader>
                   <ImmutableListItem
                     name='All Participants'
@@ -1655,8 +1657,8 @@ export const DatasetPage = fp.flow(
                     <Spinner
                       style={{
                         position: 'relative',
-                        top: '0.5rem',
-                        left: '7rem',
+                        top: '0.75rem',
+                        left: '10.5rem',
                       }}
                     />
                   )}
@@ -1667,7 +1669,7 @@ export const DatasetPage = fp.flow(
               style={{
                 width: '34.5%',
                 height: '80%',
-                marginLeft: '0.75rem',
+                marginLeft: '1.125rem',
                 minWidth: styles.selectBoxHeader.minWidth,
               }}
             >
@@ -1681,7 +1683,7 @@ export const DatasetPage = fp.flow(
                   step='2'
                   header='Select Concept Sets'
                   subHeader='Rows'
-                  style={{ paddingRight: '1rem' }}
+                  style={{ paddingRight: '1.5rem' }}
                 >
                   <PlusLink
                     dataTestId='concept-sets-link'
@@ -1691,7 +1693,7 @@ export const DatasetPage = fp.flow(
                 </BoxHeader>
                 <div
                   style={{
-                    height: '9rem',
+                    height: '13.5rem',
                     overflowY: 'auto',
                     pointerEvents:
                       domainValueSetIsLoading.size > 0 ? 'none' : 'auto',
@@ -1739,8 +1741,8 @@ export const DatasetPage = fp.flow(
                     <Spinner
                       style={{
                         position: 'relative',
-                        top: '2rem',
-                        left: '10rem',
+                        top: '3rem',
+                        left: '15rem',
                       }}
                     />
                   )}
@@ -1751,7 +1753,7 @@ export const DatasetPage = fp.flow(
               style={{
                 width: '31.5%',
                 height: '80%',
-                marginLeft: '0.75rem',
+                marginLeft: '1.125rem',
                 minWidth: styles.selectBoxHeader.minWidth,
               }}
             >
@@ -1773,7 +1775,7 @@ export const DatasetPage = fp.flow(
                     />
                     <div
                       style={{
-                        marginLeft: '0.25rem',
+                        marginLeft: '0.375rem',
                         fontSize: '13px',
                         lineHeight: '17px',
                       }}
@@ -1784,7 +1786,7 @@ export const DatasetPage = fp.flow(
                 </BoxHeader>
                 <div
                   style={{
-                    height: selectedDomains.size > 0 ? '7.625rem' : '9rem',
+                    height: selectedDomains.size > 0 ? '11.4375rem' : '13.5rem',
                     overflowY: 'auto',
                   }}
                 >
@@ -1792,7 +1794,7 @@ export const DatasetPage = fp.flow(
                     <Spinner
                       style={{
                         position: 'relative',
-                        top: '2rem',
+                        top: '3rem',
                         left: 'calc(50% - 36px)',
                       }}
                     />
@@ -1834,10 +1836,10 @@ export const DatasetPage = fp.flow(
                   <FlexRow
                     style={{
                       width: '100%',
-                      height: '1.375rem',
+                      height: '2.0625rem',
                       backgroundColor: colorWithWhiteness(colors.dark, 0.9),
                       color: colors.primary,
-                      paddingLeft: '0.4rem',
+                      paddingLeft: '0.6rem',
                       fontSize: '13px',
                       lineHeight: '16px',
                       alignItems: 'center',
@@ -1868,7 +1870,7 @@ export const DatasetPage = fp.flow(
             </AlertInfo>
           )}
         </FadeBox>
-        <FadeBox style={{ marginTop: '1rem' }}>
+        <FadeBox style={{ marginTop: '1.5rem' }}>
           <div
             style={{
               backgroundColor: 'white',
@@ -1883,7 +1885,7 @@ export const DatasetPage = fp.flow(
                       <StepNumber step='4' />
                     </div>
                     <label
-                      style={{ marginLeft: '0.5rem', color: colors.primary }}
+                      style={{ marginLeft: '0.75rem', color: colors.primary }}
                     >
                       Preview Dataset
                     </label>
@@ -1904,10 +1906,10 @@ export const DatasetPage = fp.flow(
               <Clickable
                 data-test-id='preview-button'
                 style={{
-                  marginTop: '0.5rem',
+                  marginTop: '0.75rem',
                   cursor: disableSave() ? 'not-allowed' : 'pointer',
-                  height: '1.8rem',
-                  width: '6.5rem',
+                  height: '2.7rem',
+                  width: '9.75rem',
                   color: disableSave()
                     ? colorWithWhiteness(colors.dark, 0.6)
                     : colors.accent,
@@ -1923,7 +1925,7 @@ export const DatasetPage = fp.flow(
             </div>
             {fp.toPairs(previewList).length > 0 && (
               <FlexColumn>
-                <FlexRow style={{ paddingTop: '0.5rem' }}>
+                <FlexRow style={{ paddingTop: '0.75rem' }}>
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     // Strip underscores so we get the correct enum value
@@ -1999,7 +2001,7 @@ export const DatasetPage = fp.flow(
           >
             {!dataSet ? (
               <Button
-                style={{ marginBottom: '2rem', marginRight: '1rem' }}
+                style={{ marginBottom: '3rem', marginRight: '1.5rem' }}
                 data-test-id='save-button'
                 onClick={() => setModalState(ModalState.Create)}
                 disabled={disableSave() || !canWrite() || !dataSetTouched}
@@ -2008,7 +2010,7 @@ export const DatasetPage = fp.flow(
               </Button>
             ) : (
               <Button
-                style={{ marginBottom: '2rem', marginRight: '1rem' }}
+                style={{ marginBottom: '3rem', marginRight: '1.5rem' }}
                 data-test-id='save-button'
                 onClick={() => saveDataset()}
                 disabled={
@@ -2029,7 +2031,7 @@ export const DatasetPage = fp.flow(
             disabled={!exportError}
           >
             <Button
-              style={{ marginBottom: '2rem' }}
+              style={{ marginBottom: '3rem' }}
               data-test-id='analyze-button'
               onClick={() => onClickExport()}
               disabled={disableSave() || !!exportError}

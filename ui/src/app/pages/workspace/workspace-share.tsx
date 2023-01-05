@@ -32,32 +32,32 @@ import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 const styles = reactStyles({
   tooltipLabel: {
-    paddingBottom: '0.5rem',
+    paddingBottom: '0.75rem',
     wordWrap: 'break-word',
   },
 
   modalTitle: {
     margin: '0',
-    fontSize: '.91667rem',
+    fontSize: '1.375rem',
     fontWeight: 600,
-    paddingBottom: '0.25rem',
+    paddingBottom: '0.375rem',
   },
 
   tooltipPoint: {
     listStylePosition: 'outside',
-    marginLeft: '0.6rem',
+    marginLeft: '0.9rem',
   },
 
   collabUser: {
-    fontSize: '.66667rem',
-    marginTop: '1rem',
+    fontSize: '1rem',
+    marginTop: '1.5rem',
     letterSpacing: '.01em',
     color: colors.primary,
   },
 
   dropdown: {
     width: '100%',
-    height: '1.75rem',
+    height: '2.625rem',
     marginTop: '0',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.85),
     borderRadius: '5px',
@@ -86,19 +86,19 @@ const styles = reactStyles({
 
   dropdownMenu: {
     display: 'block',
-    maxHeight: '12rem',
+    maxHeight: '18rem',
     minHeight: '30px',
     visibility: 'visible',
     overflowY: 'scroll',
-    maxWidth: 'calc(100% - 2.25rem)',
+    maxWidth: 'calc(100% - 3.375rem)',
     width: '100%',
-    marginTop: '.25rem',
+    marginTop: '.375rem',
     zIndex: 100,
   },
 
   wrapper: {
     display: 'grid',
-    gridTemplateColumns: '9rem 0.1rem 0.1rem',
+    gridTemplateColumns: '13.5rem 0.15rem 0.15rem',
     gridGap: '10px',
     alignItems: 'center',
     height: '6.38%',
@@ -106,23 +106,23 @@ const styles = reactStyles({
 
   box: {
     borderRadius: '5px',
-    paddingTop: '0.2rem',
-    paddingLeft: '0.2rem',
+    paddingTop: '0.3rem',
+    paddingLeft: '0.3rem',
   },
 
   userName: {
     marginTop: '0',
     paddingTop: '0',
-    fontSize: '0.58333rem',
+    fontSize: '0.875rem',
     height: '4.5%',
     color: colors.primary,
     fontFamily: 'Montserrat',
-    lineHeight: '1rem',
+    lineHeight: '1.5rem',
     whiteSpace: 'nowrap',
   },
 
   collaboratorIcon: {
-    margin: '0 0 0 5rem',
+    margin: '0 0 0 7.5rem',
     color: colors.accent,
     cursor: 'pointer',
   },
@@ -131,7 +131,7 @@ const styles = reactStyles({
     maxHeight: '70vh',
     overflowY: 'hidden',
     overflowX: 'visible',
-    padding: '0 .125rem',
+    padding: '0 .1875rem',
     display: 'flex',
     flexDirection: 'column',
   },
@@ -483,7 +483,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                       style={{
                         width: '14px',
                         height: '14px',
-                        marginLeft: '.4rem',
+                        marginLeft: '.6rem',
                       }}
                     />
                   </TooltipTrigger>
@@ -579,7 +579,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                               style={{
                                 borderTop: '1px solid grey',
                                 width: '100%',
-                                marginTop: '.5rem',
+                                marginTop: '.75rem',
                               }}
                             />
                           </div>
@@ -600,7 +600,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                 {this.state.loadingUserRoles ? (
                   <Spinner
                     size={36}
-                    style={{ margin: 'auto', marginTop: '1rem' }}
+                    style={{ margin: 'auto', marginTop: '1.5rem' }}
                   />
                 ) : (
                   <div
@@ -681,7 +681,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
                               style={{
                                 borderTop: '1px solid grey',
                                 width: '100%',
-                                marginTop: '.5rem',
+                                marginTop: '.75rem',
                               }}
                             />
                           )}
@@ -694,7 +694,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
               <ModalFooter style={{ alignItems: 'center' }}>
                 <Button
                   type='link'
-                  style={{ marginRight: '.8rem', border: 'none' }}
+                  style={{ marginRight: '1.2rem', border: 'none' }}
                   onClick={() => this.onCancel()}
                 >
                   Cancel

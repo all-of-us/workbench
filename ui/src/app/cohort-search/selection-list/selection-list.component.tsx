@@ -38,16 +38,16 @@ const styles = reactStyles({
   buttonContainer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    marginTop: '0.5rem',
-    padding: '0.45rem 0rem',
+    marginTop: '0.75rem',
+    padding: '0.675rem 0rem',
   },
   button: {
     fontSize: '12px',
-    height: '1.5rem',
-    letterSpacing: '0.02rem',
-    lineHeight: '0.75rem',
-    margin: '0.25rem 0.5rem',
-    padding: '0rem 0.75rem',
+    height: '2.25rem',
+    letterSpacing: '0.03rem',
+    lineHeight: '1.125rem',
+    margin: '0.375rem 0.75rem',
+    padding: '0rem 1.125rem',
   },
   itemInfo: {
     width: '100%',
@@ -64,33 +64,33 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
   },
   modifierButtonContainer: {
-    bottom: '0.5rem',
-    paddingLeft: '0.5rem',
+    bottom: '0.75rem',
+    paddingLeft: '0.75rem',
     position: 'absolute',
-    width: 'calc(100% - 1.5rem)',
+    width: 'calc(100% - 2.25rem)',
   },
   removeSelection: {
     background: 'none',
     border: 0,
     color: colors.danger,
     cursor: 'pointer',
-    marginRight: '0.25rem',
+    marginRight: '0.375rem',
     padding: 0,
   },
   saveButton: {
-    height: '2rem',
+    height: '3rem',
     borderRadius: '5px',
     fontWeight: 600,
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
   selectionContainer: {
     background: colors.white,
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
     height: '80%',
-    lineHeight: '0.75rem',
-    marginTop: '0.5rem',
-    padding: '0.5rem',
+    lineHeight: '1.125rem',
+    marginTop: '0.75rem',
+    padding: '0.75rem',
     position: 'relative',
   },
   selectionItem: {
@@ -103,23 +103,23 @@ const styles = reactStyles({
   selectionList: {
     height: '100%',
     overflow: 'hidden auto',
-    paddingLeft: '0.5rem',
+    paddingLeft: '0.75rem',
   },
   selectionPanel: {
-    height: '35rem',
-    paddingTop: '0.5rem',
+    height: '52.5rem',
+    paddingTop: '0.75rem',
   },
   selectionTitle: {
     color: colors.primary,
     margin: 0,
-    padding: '0.5rem 0',
+    padding: '0.75rem 0',
   },
   modifierButton: {
-    height: '1.75rem',
+    height: '2.625rem',
     maxWidth: '100%',
     width: '100%',
     backgroundColor: colors.white,
-    border: '0.1rem solid' + colors.accent,
+    border: '0.15rem solid' + colors.accent,
     color: colors.accent,
   },
   selectionHeader: {
@@ -128,17 +128,17 @@ const styles = reactStyles({
     display: 'inline-block',
     fontSize: '13px',
     fontWeight: 600,
-    paddingRight: '0.25rem',
+    paddingRight: '0.375rem',
   },
   sectionTitle: {
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     fontWeight: 600,
     color: colors.primary,
   },
   navIcons: {
     position: 'absolute',
     right: '0',
-    top: '0.75rem',
+    top: '1.125rem',
   },
 });
 
@@ -205,7 +205,7 @@ export class SelectionInfo extends React.Component<
     return (
       <FlexColumn style={styles.selectionItem}>
         {index > 0 && (
-          <div style={{ padding: '0.3rem 0rem 0.3rem 1rem' }}>OR&nbsp;</div>
+          <div style={{ padding: '0.45rem 0rem 0.45rem 1.5rem' }}>OR&nbsp;</div>
         )}
         <FlexRow style={{ alignItems: 'baseline' }}>
           <button
@@ -214,7 +214,7 @@ export class SelectionInfo extends React.Component<
           >
             <ClrIcon shape='times-circle' />
           </button>
-          <FlexColumn style={{ width: 'calc(100% - 1rem)' }}>
+          <FlexColumn style={{ width: 'calc(100% - 1.5rem)' }}>
             {selection.group && <div>Group</div>}
             <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
               <div style={styles.itemName} ref={(e) => (this.name = e)}>
@@ -377,7 +377,7 @@ export const SelectionList = fp.flow(
         return (
           <React.Fragment>
             {standardConcepts.length > 0 && (
-              <div style={{ marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
                 <div style={styles.selectionHeader}>Standard Concepts</div>
                 {standardConcepts.map((selection, index) => (
                   <SelectionInfo
@@ -425,7 +425,7 @@ export const SelectionList = fp.flow(
           <FlexRow style={styles.navIcons}>
             {showModifiersSlide && (
               <Clickable
-                style={{ marginRight: '1rem' }}
+                style={{ marginRight: '1.5rem' }}
                 onClick={() => this.setState({ showModifiersSlide: false })}
               >
                 <img
@@ -436,7 +436,7 @@ export const SelectionList = fp.flow(
               </Clickable>
             )}
             <Clickable
-              style={{ marginRight: '1rem' }}
+              style={{ marginRight: '1.5rem' }}
               onClick={() => this.closeSidebar()}
             >
               <img
@@ -458,7 +458,7 @@ export const SelectionList = fp.flow(
                       this.showModifierButton
                         ? {
                             ...styles.selectionList,
-                            height: 'calc(100% - 2rem)',
+                            height: 'calc(100% - 3rem)',
                           }
                         : styles.selectionList
                     }
@@ -487,7 +487,7 @@ export const SelectionList = fp.flow(
                 )}
               </div>
               <FlexRowWrap
-                style={{ flexDirection: 'row-reverse', marginTop: '1rem' }}
+                style={{ flexDirection: 'row-reverse', marginTop: '1.5rem' }}
               >
                 <Button
                   type='primary'
@@ -499,7 +499,7 @@ export const SelectionList = fp.flow(
                 </Button>
                 <Button
                   type='link'
-                  style={{ color: colors.primary, marginRight: '0.5rem' }}
+                  style={{ color: colors.primary, marginRight: '0.75rem' }}
                   onClick={() => back()}
                 >
                   Back

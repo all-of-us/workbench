@@ -56,7 +56,7 @@ const styles = reactStyles({
     display: 'inline-flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: '1rem',
+    marginRight: '1.5rem',
     color: colors.primary,
   },
 });
@@ -218,7 +218,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
         style={styles.radioButtonLabel}
       >
         <RadioButton
-          style={{ marginRight: '0.25rem' }}
+          style={{ marginRight: '0.375rem' }}
           disabled={loadingNotebook}
           data-test-id={'genomics-tool-' + genomicsTool}
           checked={genomicsAnalysisTool === genomicsTool}
@@ -283,10 +283,10 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       width={!codePreview ? 450 : 1200}
     >
       <FlexRow>
-        <div style={{ width: 'calc(450px - 2rem)' }}>
+        <div style={{ width: 'calc(450px - 3rem)' }}>
           <ModalTitle>Export Dataset</ModalTitle>
           <ModalBody>
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{ marginTop: '1.5rem' }}>
               <Select
                 value={creatingNewNotebook ? '' : notebookNameWithoutSuffix}
                 data-test-id='select-notebook'
@@ -297,7 +297,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
 
             {creatingNewNotebook && (
               <React.Fragment>
-                <SmallHeader style={{ fontSize: 14, marginTop: '1rem' }}>
+                <SmallHeader style={{ fontSize: 14, marginTop: '1.5rem' }}>
                   Notebook Name
                 </SmallHeader>
                 <TextInput
@@ -316,7 +316,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
               .map((kernelTypeEnum, i) => (
                 <label key={i} style={styles.radioButtonLabel}>
                   <RadioButton
-                    style={{ marginRight: '0.25rem' }}
+                    style={{ marginRight: '0.375rem' }}
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     disabled={loadingNotebook || !creatingNewNotebook}
                     checked={kernelType === kernelTypeEnum}
@@ -346,7 +346,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
               </React.Fragment>
             )}
 
-            <FlexRow style={{ marginTop: '1rem', alignItems: 'center' }}>
+            <FlexRow style={{ marginTop: '1.5rem', alignItems: 'center' }}>
               <Button
                 type={'secondarySmall'}
                 disabled={loadingNotebook}
@@ -356,7 +356,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
                 {codePreview ? 'Hide Code Preview' : 'See Code Preview'}
               </Button>
               {loadingNotebook && (
-                <Spinner size={24} style={{ marginLeft: '0.5rem' }} />
+                <Spinner size={24} style={{ marginLeft: '0.75rem' }} />
               )}
             </FlexRow>
 
@@ -369,7 +369,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
               type='secondary'
               data-test-id='export-dataset-modal-cancel-button'
               onClick={closeFunction}
-              style={{ marginRight: '2rem' }}
+              style={{ marginRight: '3rem' }}
             >
               Cancel
             </Button>
@@ -390,7 +390,7 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
         </div>
 
         {codePreview && (
-          <div style={{ flex: 1, marginLeft: '1rem' }}>{codePreview}</div>
+          <div style={{ flex: 1, marginLeft: '1.5rem' }}>{codePreview}</div>
         )}
       </FlexRow>
     </AnimatedModal>

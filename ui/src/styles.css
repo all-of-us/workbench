@@ -76,38 +76,38 @@ section {
 h1, h2, h3, h4 {
   font-weight: 200;
   letter-spacing: normal;
-  line-height: 2rem;
-  margin-top: 1rem;
+  line-height: 3rem;
+  margin-top: 1.5rem;
   margin-bottom: 0;
 }
 
 h3 {
-  line-height: 1rem;
+  line-height: 1.5rem;
 }
 
 h4 {
   color: #000;
-  font-size: 0.75rem;
+  font-size: 1.125rem;
   letter-spacing: normal;
-  line-height: 1rem;
+  line-height: 1.5rem;
 }
 
 h5 {
   color: #565656;
   font-weight: 400;
-  font-size: 0.66667rem;
-  letter-spacing: 0.01em;
-  line-height: 1rem;
-  margin-top: 1rem;
+  font-size: 1rem;
+  letter-spacing: 0.015em;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
   margin-bottom: 0;
 }
 
 h6 {
   font-weight: 500;
-  font-size: 0.58333rem;
+  font-size: 0.875rem;
   letter-spacing: normal;
-  line-height: 1rem;
-  margin-top: 1rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
   margin-bottom: 0;
   color: #313131;
 }
@@ -115,10 +115,10 @@ h6 {
 
 body p {
   color: #565656;
-  font-size: 0.58333rem;
+  font-size: 0.875rem;
   letter-spacing: normal;
-  line-height: 1rem;
-  margin-top: 1rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
   margin-bottom: 0;
 }
 
@@ -128,7 +128,7 @@ html {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   color: #565656;
-  font-size: 24px;
+  font-size: 16px;
 }
 
 h1, h1 > *,
@@ -182,9 +182,9 @@ a:hover {
 
 body {
   margin: 0;
-  font-size: 0.58333rem;
+  font-size: 0.875rem;
   letter-spacing: normal;
-  line-height: 1rem;
+  line-height: 1.5rem;
   background-color: #FAFBFC;
   min-height: 100vh;
   width: 100%;
@@ -194,7 +194,7 @@ body {
 textarea {
   height: 10em;
   resize: none;
-  padding: 0.1rem 0.2rem;
+  padding: 0.15rem 0.3rem;
   overflow: auto;
 }
 
@@ -218,12 +218,12 @@ input[type=text]:focus, input[type=password]:focus {
 }
 
 .loading-text {
-  padding-left: 0.3rem;
+  padding-left: 0.45rem;
   color: #888;
 }
 
 .loading-area {
-  padding-top: 0.3rem;
+  padding-top: 0.45rem;
 }
 
 .required::after {
@@ -242,7 +242,7 @@ input[type=text]:focus, input[type=password]:focus {
  */
 .ngxp__container {
   background: #fff;
-  max-width: 12rem;
+  max-width: 18rem;
   /* I dunno why THEY don't set these /whatever */
   position: relative;
   z-index: 999;
@@ -361,7 +361,7 @@ iframe#launcher {
  * CSS class and specify style overrides here.
  */
 .pdf-page {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .pdf-page > canvas {
@@ -417,14 +417,14 @@ iframe#launcher {
 }
 
 .p-paginator {
-  height: 2rem;
+  height: 3rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .p-paginator .p-dropdown.p-component.p-inputwrapper-filled {
-  height: 1.5rem;
+  height: 2.25rem;
 }
 
 body .p-paginator .p-paginator-pages {

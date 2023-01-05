@@ -29,7 +29,7 @@ export const NewUserSatisfactionSurveyBannerMaybe = () => {
           }
           buttonText='Take Survey'
           buttonOnClick={() => setShowModal(true)}
-          bannerTextWidth='20rem'
+          bannerTextWidth='30rem'
           buttonAriaLabel='take satisfaction survey'
         />
       )}

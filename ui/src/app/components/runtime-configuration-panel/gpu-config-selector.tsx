@@ -65,14 +65,14 @@ export const GpuConfigSelector = ({
         <FlexRow style={styles.formGrid2}>
           <FlexRow style={styles.labelAndInput}>
             <label
-              style={{ ...styles.label, minWidth: '3.0rem' }}
+              style={{ ...styles.label, minWidth: '4.5rem' }}
               htmlFor='gpu-type'
             >
               Gpu Type
             </label>
             <Dropdown
               id={'gpu-type'}
-              style={{ width: '7rem' }}
+              style={{ width: '10.5rem' }}
               options={validGpuNames}
               onChange={({ value }) => {
                 setSelectedGpuType(
@@ -85,7 +85,7 @@ export const GpuConfigSelector = ({
           </FlexRow>
           <FlexRow style={styles.labelAndInput}>
             <label
-              style={{ ...styles.label, minWidth: '2.0rem' }}
+              style={{ ...styles.label, minWidth: '3.0rem' }}
               htmlFor='gpu-num'
             >
               GPUs

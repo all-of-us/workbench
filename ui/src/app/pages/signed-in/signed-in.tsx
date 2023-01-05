@@ -35,8 +35,8 @@ import backgroundImage from 'assets/images/BG-Pattern.png';
 const styles = reactStyles({
   appContainer: {
     width: '100%',
-    paddingRight: '0.6rem',
-    paddingLeft: '0.6rem',
+    paddingRight: '0.9rem',
+    paddingLeft: '0.9rem',
     flexGrow: 1,
     /* Needed for absolute positioned child elements, e.g. spinner. */
     position: 'relative',

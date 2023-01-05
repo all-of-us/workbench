@@ -29,8 +29,7 @@ import {
 } from 'app/components/help-sidebar-icons';
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
-import { TooltipTrigger } from 'app/components/popups';
-import { PopupTrigger } from 'app/components/popups';
+import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
@@ -124,7 +123,7 @@ const styles = reactStyles({
   footer: {
     position: 'absolute',
     bottom: 0,
-    padding: '1.25rem 0.75rem',
+    padding: '1.875rem 1.125rem',
     background: colorWithWhiteness(colors.primary, 0.8),
   },
   link: {
@@ -354,13 +353,13 @@ export const HelpSidebar = fp.flow(
     get sidebarStyle() {
       return {
         ...styles.sidebar,
-        width: `${this.sidebarWidth}.5rem`,
+        width: `${Number(this.sidebarWidth) + 0.75}rem`,
       };
     }
 
     get sidebarWidth() {
       const { activeIcon } = this.state;
-      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(activeIcon));
+      return fp.getOr('21', 'bodyWidthRem', this.sidebarContent(activeIcon));
     }
 
     sidebarContent(
@@ -380,7 +379,7 @@ export const HelpSidebar = fp.flow(
       switch (activeIcon) {
         case 'help':
           return {
-            headerPadding: '0.5rem',
+            headerPadding: '0.75rem',
             renderHeader: () => (
               <h3
                 style={{
@@ -402,7 +401,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'runtimeConfig':
           return {
-            headerPadding: '0.75rem',
+            headerPadding: '1.125rem',
             renderHeader: () => (
               <div>
                 <h3
@@ -415,8 +414,8 @@ export const HelpSidebar = fp.flow(
                 </h3>
               </div>
             ),
-            bodyWidthRem: '30',
-            bodyPadding: '0 1.25rem',
+            bodyWidthRem: '45',
+            bodyPadding: '0 1.875rem',
             renderBody: () => (
               <RuntimeConfigurationPanel
                 onClose={() => this.setActiveIcon(null)}
@@ -427,7 +426,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'apps':
           return {
-            bodyWidthRem: '19',
+            bodyWidthRem: '28.5',
             renderBody: () => (
               <AppsPanel
                 {...{ workspace }}
@@ -444,7 +443,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'notebooksHelp':
           return {
-            headerPadding: '0.5rem',
+            headerPadding: '0.75rem',
             renderHeader: () => (
               <h3 style={styles.sectionTitle}>Workspace storage</h3>
             ),
@@ -455,7 +454,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'annotations':
           return {
-            headerPadding: '0.5rem 0.5rem 0 0.5rem',
+            headerPadding: '0.75rem 0.75rem 0 0.75rem',
             renderHeader: () =>
               this.state.participant && (
                 <div style={{ fontSize: 18, color: colors.primary }}>
@@ -466,26 +465,26 @@ export const HelpSidebar = fp.flow(
               this.state.participant ? (
                 <SidebarContent participant={this.state.participant} />
               ) : (
-                <Spinner style={{ display: 'block', margin: '3rem auto' }} />
+                <Spinner style={{ display: 'block', margin: '4.5rem auto' }} />
               ),
             showFooter: true,
           };
         case 'concept':
           return {
-            headerPadding: '0.75rem',
+            headerPadding: '1.125rem',
             renderHeader: () => (
               <h3 style={styles.sectionTitle}>Selected Concepts</h3>
             ),
-            bodyWidthRem: '20',
-            bodyPadding: '0.75rem 0.75rem 0',
+            bodyWidthRem: '30',
+            bodyPadding: '1.125rem 1.125rem 0',
             renderBody: () =>
               !!currentConceptStore.getValue() && <ConceptListPage />,
             showFooter: false,
           };
         case 'criteria':
           return {
-            bodyWidthRem: '20',
-            bodyPadding: '0.75rem 0.75rem 0',
+            bodyWidthRem: '30',
+            bodyPadding: '1.125rem 1.125rem 0',
             renderBody: () =>
               !!cohortContext && (
                 <SelectionList
@@ -498,11 +497,11 @@ export const HelpSidebar = fp.flow(
         case 'genomicExtractions':
           return {
             overflow: 'visible',
-            headerPadding: '0.75rem',
+            headerPadding: '1.125rem',
             renderHeader: () => (
               <h3 style={styles.sectionTitle}>Genomic Extractions</h3>
             ),
-            bodyWidthRem: '30',
+            bodyWidthRem: '45',
             renderBody: () => <GenomicsExtractionTable />,
             showFooter: false,
           };
@@ -649,7 +648,7 @@ export const HelpSidebar = fp.flow(
                           style={{
                             flex: 1,
                             padding:
-                              sidebarContent.bodyPadding || '0 0.5rem 5.5rem',
+                              sidebarContent.bodyPadding || '0 0.75rem 8.25em',
                           }}
                         >
                           {sidebarContent.renderBody()}

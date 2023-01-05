@@ -79,7 +79,7 @@ const styles = reactStyles({
     color: colors.primary,
   },
   description: {
-    margin: '0.5rem 0',
+    margin: '0.75rem 0',
     color: colors.primary,
   },
   headerSection: {
@@ -106,7 +106,7 @@ const styles = reactStyles({
   },
   filterHeader: {
     height: '38%',
-    marginBottom: '0.3rem',
+    marginBottom: '0.45rem',
     borderBottom: '1px solid #216fb4',
   },
   filterTab: {
@@ -121,12 +121,12 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   filterBody: {
-    paddingLeft: '0.5rem',
+    paddingLeft: '0.75rem',
     fontSize: '12px',
   },
   filterDiv: {
     float: 'left',
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
   resetBtn: {
     float: 'right',
@@ -149,19 +149,19 @@ const otherStyles = {
   navigation: {
     ...styles.headerSection,
     width: '22%',
-    minWidth: '8.5rem',
-    padding: '1.15rem 0.4rem',
+    minWidth: '12.75rem',
+    padding: '1.725rem 0.6rem',
   },
   filters: {
     ...styles.headerSection,
-    minWidth: '16rem',
+    minWidth: '24rem',
   },
   radios: {
     ...styles.headerSection,
     fontSize: '12px',
     width: '24%',
-    minWidth: '8.5rem',
-    padding: '0.5rem 0 0.5rem 0.5rem',
+    minWidth: '12.75rem',
+    padding: '0.75rem 0 0.75rem 0.75rem',
   },
   navBtnActive: {
     ...styles.navBtn,
@@ -190,7 +190,7 @@ const otherStyles = {
   },
   filterSelect: {
     ...styles.filterDiv,
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
     width: '70%',
   },
   filterText: {
@@ -502,7 +502,7 @@ export const DetailHeader = fp.flow(
               </ValidationError>
             </div>
           )}
-          <div style={{ height: '3.5rem' }}>
+          <div style={{ height: '5.25rem' }}>
             <div style={{ ...otherStyles.navigation, textAlign: 'center' }}>
               <button
                 style={{
@@ -640,7 +640,7 @@ export const DetailHeader = fp.flow(
               </div>
             </div>
             <div style={{ ...otherStyles.radios, marginRight: 0 }}>
-              <div style={{ marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
                 <RadioButton
                   name='vocab'
                   value='source'

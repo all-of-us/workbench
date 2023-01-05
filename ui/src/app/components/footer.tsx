@@ -30,8 +30,8 @@ const styles = reactStyles({
     alignSelf: 'center',
   },
   footerImage: {
-    width: '6rem',
-    height: '2rem',
+    width: '9rem',
+    height: '3rem',
   },
   footerSectionHeader: {
     color: colors.white,
@@ -42,21 +42,21 @@ const styles = reactStyles({
   },
   footerSectionDivider: {
     borderBottom: `1px solid ${colors.white}`,
-    marginBottom: '.2rem',
-    paddingBottom: '.2rem',
+    marginBottom: '.3rem',
+    paddingBottom: '.3rem',
   },
   footerTemplate: {
     width: '100%',
     backgroundColor: colors.primary,
-    padding: '1rem',
+    padding: '1.5rem',
     // Must be higher than the side helpbar index for now. See help-bar.tsx.
     // Eventually the footer should be reflowed beneath this, per RW-5110. The footer
     // should be beneath any other floating elements, such as modals.
     zIndex: 102,
   },
   workbenchFooterItem: {
-    width: '12rem',
-    marginRight: '3rem',
+    width: '18rem',
+    marginRight: '4.5rem',
   },
 });
 
@@ -109,14 +109,14 @@ const FooterTemplate = ({ style = {}, ...props }) => {
   return (
     <div style={{ ...styles.footerTemplate, ...style }} {...props}>
       <FlexRow>
-        <FlexColumn style={{ height: '4rem', justifyContent: 'space-between' }}>
+        <FlexColumn style={{ height: '6rem', justifyContent: 'space-between' }}>
           <img style={styles.footerImage} src={aouFooterLogo} />
           <img
-            style={{ ...styles.footerImage, height: '1rem' }}
+            style={{ ...styles.footerImage, height: '1.5rem' }}
             src={nihFooterLogo}
           />
         </FlexColumn>
-        <div style={{ marginLeft: '1.5rem', width: '100%' }}>
+        <div style={{ marginLeft: '2.25rem', width: '100%' }}>
           {props.children}
           <div style={{ ...styles.footerAside, marginTop: '20px' }}>
             The <AoU /> logo is a service mark of the&nbsp;
@@ -260,12 +260,12 @@ const RegistrationFooter = ({ ...props }) => {
           style={{
             ...styles.footerSectionDivider,
             color: colors.white,
-            width: '25rem',
+            width: '37.5rem',
           }}
         >
           <DataBrowserLink />
-          <ResearchHubLink style={{ marginLeft: '1.5rem' }} />
-          <div style={{ fontSize: 12, marginLeft: '1.5rem' }}>
+          <ResearchHubLink style={{ marginLeft: '2.25rem' }} />
+          <div style={{ fontSize: 12, marginLeft: '2.25rem' }}>
             Contact Us:{' '}
             <FooterAnchorTag
               href={`mailto:${SUPPORT_EMAIL}`}

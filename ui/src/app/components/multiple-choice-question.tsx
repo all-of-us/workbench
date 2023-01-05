@@ -12,8 +12,8 @@ import { LinkButton } from './buttons';
 import { ClrIcon } from './icons';
 
 const styles = reactStyles({
-  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
-  container: { marginBottom: '1.0rem' },
+  answer: { margin: '0.0rem 0.375rem', color: colors.primary },
+  container: { marginBottom: '1.5rem' },
   expansionButton: {
     fontSize: 12,
     textDecoration: 'underline',
@@ -176,7 +176,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
             <ClrIcon
               shape='angle'
               style={{
-                marginRight: '0.5rem',
+                marginRight: '0.75rem',
                 cursor: 'pointer',
                 transform: showSubOptions ? 'rotate(180deg)' : 'rotate(0deg)',
               }}
@@ -191,7 +191,7 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
               data-test-id='search'
               style={{
                 marginBottom: '.5em',
-                marginLeft: '0.75rem',
+                marginLeft: '1.125rem',
                 width: '300px',
               }}
               type='text'
@@ -208,8 +208,8 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
               style={{
                 flex: 1,
                 flexWrap: 'wrap',
-                gap: '0.5rem',
-                marginLeft: '2.0rem',
+                gap: '0.75rem',
+                marginLeft: '3.0rem',
               }}
             >
               {subOptions.map((so) => renderOption(so, value))}
@@ -218,8 +218,8 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
             <FlexColumn
               style={{
                 flex: 1,
-                gap: '0.5rem',
-                marginLeft: '2.0rem',
+                gap: '0.75rem',
+                marginLeft: '3.0rem',
               }}
             >
               {subOptions.map((so) => renderOption(so, value))}
@@ -273,11 +273,11 @@ export const MultipleChoiceQuestion = (props: MultipleChoiceQuestionProps) => {
       </FlexRow>
 
       {horizontalOptions ? (
-        <FlexRow style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+        <FlexRow style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
           {optionComponents}
         </FlexRow>
       ) : (
-        <FlexColumn style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+        <FlexColumn style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
           {optionComponents}
         </FlexColumn>
       )}

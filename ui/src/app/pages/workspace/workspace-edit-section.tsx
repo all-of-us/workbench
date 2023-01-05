@@ -15,7 +15,7 @@ export const styles = reactStyles({
   },
   infoIcon: {
     height: '16px',
-    marginLeft: '0.2rem',
+    marginLeft: '0.3rem',
     width: '16px',
   },
   requiredText: {
@@ -23,7 +23,7 @@ export const styles = reactStyles({
     fontStyle: 'italic',
     fontWeight: 400,
     color: colors.primary,
-    marginLeft: '0.2rem',
+    marginLeft: '0.3rem',
   },
   text: {
     fontSize: '14px',
@@ -51,7 +51,7 @@ interface Props {
 
 export const WorkspaceEditSection = (props: Props) => {
   return (
-    <div key={props.header} style={{ ...props.style, marginBottom: '0.5rem' }}>
+    <div key={props.header} style={{ ...props.style, marginBottom: '0.75rem' }}>
       <FlexRow
         style={{
           marginBottom: props.largeHeader ? 12 : 0,
@@ -62,7 +62,7 @@ export const WorkspaceEditSection = (props: Props) => {
           <FlexRow
             style={{ ...styles.header, fontSize: props.largeHeader ? 18 : 14 }}
           >
-            <div style={{ marginRight: '0.4rem', ...props.indexStyle }}>
+            <div style={{ marginRight: '0.6rem', ...props.indexStyle }}>
               {props.index}
             </div>
             <div
@@ -75,7 +75,7 @@ export const WorkspaceEditSection = (props: Props) => {
             </div>
             {props.publiclyDisplayed && (
               <PubliclyDisplayed
-                style={{ marginLeft: '1.5rem', marginTop: '-0.1rem' }}
+                style={{ marginLeft: '2.25rem', marginTop: '-0.15rem' }}
               />
             )}
           </FlexRow>
@@ -90,7 +90,7 @@ export const WorkspaceEditSection = (props: Props) => {
         {props.required && <div style={styles.requiredText}>(Required)</div>}
         {props.tooltip && (
           <TooltipTrigger content={props.tooltip}>
-            <InfoIcon style={{ ...styles.infoIcon, marginTop: '0.2rem' }} />
+            <InfoIcon style={{ ...styles.infoIcon, marginTop: '0.3rem' }} />
           </TooltipTrigger>
         )}
       </FlexRow>
@@ -102,7 +102,7 @@ export const WorkspaceEditSection = (props: Props) => {
       <div
         style={{
           ...styles.text,
-          marginLeft: '0.9rem',
+          marginLeft: '1.35rem',
           ...props.descriptionStyle,
         }}
       >
@@ -110,8 +110,8 @@ export const WorkspaceEditSection = (props: Props) => {
       </div>
       <div
         style={{
-          marginTop: '0.5rem',
-          marginLeft: props.indent ? '0.9rem' : '0rem',
+          marginTop: '0.75rem',
+          marginLeft: props.indent ? '1.35rem' : '0rem',
         }}
       >
         {props.children}

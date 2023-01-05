@@ -5,14 +5,14 @@ const cardBorderColor = colorWithWhiteness(colors.dark, 0.6);
 
 export const baseStyles = reactStyles({
   card: {
-    margin: '0 1rem 1rem 0',
-    borderRadius: '0.2rem',
-    boxShadow: `0 0.125rem 0.125rem 0 ${cardBorderColor}`,
+    margin: '0 1.5rem 1.5rem 0',
+    borderRadius: '0.3rem',
+    boxShadow: `0 0.1875rem 0.1875rem 0 ${cardBorderColor}`,
     backgroundColor: colors.white,
     border: `1px solid ${cardBorderColor}`,
     display: 'flex',
     flexDirection: 'column',
-    padding: '1rem',
+    padding: '1.5rem',
   },
 });
 
@@ -43,7 +43,7 @@ export const styles = reactStyles({
   cohortActionCard: {
     ...baseStyles.card,
     width: '30%',
-    height: '12rem',
+    height: '18rem',
   },
   actionAuditCardBase: {
     ...baseStyles.card,

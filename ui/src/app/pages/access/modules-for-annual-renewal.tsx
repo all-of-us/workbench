@@ -75,62 +75,62 @@ interface RenewalCardProps {
 
 const renewalStyle = {
   h1: {
-    fontSize: '0.83rem',
+    fontSize: '1.245rem',
     fontWeight: 600,
     color: colors.primary,
   },
   h2: {
-    fontSize: '0.75rem',
+    fontSize: '1.05rem',
     fontWeight: 600,
   },
   h3: {
-    fontSize: '0.675rem',
+    fontSize: '1.0125rem',
     fontWeight: 600,
   },
   dates: {
     color: colors.primary,
-    margin: '0.5rem 0',
+    margin: '0.75rem 0',
     display: 'grid',
-    columnGap: '1rem',
+    columnGap: '1.5rem',
     gridTemplateColumns: 'auto auto',
   },
   completedButton: {
-    height: '1.6rem',
+    height: '2.4rem',
     marginTop: 'auto',
     backgroundColor: colors.success,
     width: 'max-content',
     cursor: 'default',
   },
   completionBox: {
-    height: '3.5rem',
+    height: '5.25rem',
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: 5,
-    marginTop: '0.5rem',
-    padding: '0.75rem',
+    marginTop: '0.75rem',
+    padding: '1.05rem',
   },
   card: {
     backgroundColor: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
-    borderRadius: '0.2rem',
+    borderRadius: '0.3rem',
     display: 'flex',
-    fontSize: '0.58rem',
-    height: '15.375rem',
+    fontSize: '0.87rem',
+    height: '23.0625rem',
     lineHeight: '22px',
     margin: 0,
-    padding: '0.5rem',
+    padding: '0.75rem',
     width: 560,
   },
   publicationConfirmation: {
     marginTop: 'auto',
     display: 'grid',
-    columnGap: '0.25rem',
-    gridTemplateColumns: 'auto 1rem 1fr',
+    columnGap: '0.375rem',
+    gridTemplateColumns: 'auto 1.5rem 1fr',
     alignItems: 'center',
   },
   complianceTrainingExpiring: {
     borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.8)}`,
-    marginTop: '0.5rem',
-    paddingTop: '0.5rem',
+    marginTop: '0.75rem',
+    paddingTop: '0.75rem',
   },
   moduleContainer: {
     display: 'grid',
@@ -156,7 +156,7 @@ const CompletedOrBypassedButton = ({
     data-test-id='completed-button'
     style={{ ...renewalStyle.completedButton, ...style }}
   >
-    <ClrIcon shape='check' style={{ marginRight: '0.3rem' }} />
+    <ClrIcon shape='check' style={{ marginRight: '0.45rem' }} />
     {wasBypassed ? 'Bypassed' : completedText}
   </Button>
 );
@@ -191,7 +191,7 @@ const ActionButton = ({
       disabled={disabled}
       style={{
         marginTop: 'auto',
-        height: '1.6rem',
+        height: '2.4rem',
         width: 'max-content',
         ...style,
       }}
@@ -256,7 +256,7 @@ export const RenewalCardBody = (props: {
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
             <Dates />
             <div
-              style={{ marginBottom: '0.5rem', ...textStyle, fontWeight: 500 }}
+              style={{ marginBottom: '0.75rem', ...textStyle, fontWeight: 500 }}
             >
               Please update your profile information if any of it has changed
               recently.
@@ -355,7 +355,7 @@ export const RenewalCardBody = (props: {
                   setLoading(false);
                 }}
                 disabled={publications === null}
-                style={{ gridRow: '1 / span 2', marginRight: '0.25rem' }}
+                style={{ gridRow: '1 / span 2', marginRight: '0.375rem' }}
               />
             </FlexColumn>
           </React.Fragment>
@@ -411,7 +411,7 @@ export const RenewalCardBody = (props: {
                   setLoading(false);
                 }}
                 style={{
-                  height: '1.6rem',
+                  height: '2.4rem',
                   width: 'max-content',
                   marginTop: '0.7em',
                 }}
@@ -472,7 +472,7 @@ export const RenewalCardBody = (props: {
                   setLoading(false);
                 }}
                 style={{
-                  height: '1.6rem',
+                  height: '2.4rem',
                   width: 'max-content',
                   marginTop: '0.7em',
                 }}
@@ -571,7 +571,7 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
                 moduleName
               )}
               setLoading={() => {}}
-              textStyle={{ fontSize: '0.6rem' }}
+              textStyle={{ fontSize: '0.9rem' }}
               radioButtonStyle={{ marginRight: '0.5em' }}
               hide={!showModule}
               showTimeEstimate={true}

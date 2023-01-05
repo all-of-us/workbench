@@ -34,14 +34,14 @@ const styles = reactStyles({
   searchBar: {
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     borderRadius: '5px',
-    height: '1.67rem',
-    padding: '0.3rem 0.58rem',
+    height: '2.505rem',
+    padding: '0.45rem 0.87rem',
   },
   searchInput: {
     background: 'transparent',
     border: 0,
-    height: '1rem',
-    marginLeft: '0.25rem',
+    height: '1.5rem',
+    marginLeft: '0.375rem',
     outline: 'none',
     padding: '0',
     width: '94%',
@@ -50,28 +50,28 @@ const styles = reactStyles({
     position: 'absolute',
     top: '100%',
     left: 0,
-    marginTop: '.083333rem',
+    marginTop: '.125rem',
     display: 'flex',
     flexDirection: 'column',
     background: colors.white,
-    padding: '.25rem 0',
+    padding: '.375rem 0',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    boxShadow: '0 1px 0.125rem hsla(0,0%,45%,.25)',
-    maxHeight: '15rem',
-    minHeight: '1.25rem',
+    boxShadow: '0 1px 0.1875rem hsla(0,0%,45%,.25)',
+    maxHeight: '22.5rem',
+    minHeight: '1.875rem',
     overflowY: 'auto',
     width: '100%',
-    borderRadius: '.125rem',
+    borderRadius: '.1875rem',
     zIndex: 105,
   },
   dropdownItem: {
-    height: '1rem',
+    height: '1.5rem',
     background: 'transparent',
     border: 0,
     cursor: 'pointer',
     margin: 0,
     overflow: 'hidden',
-    padding: '0 1rem',
+    padding: '0 1.5rem',
     textAlign: 'left',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -79,18 +79,18 @@ const styles = reactStyles({
   },
   inputAlert: {
     justifyContent: 'space-between',
-    padding: '0.2rem',
+    padding: '0.3rem',
     width: '64.3%',
   },
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
     height: '100%',
   },
 });
 
 const searchTooltip = (
-  <div style={{ marginLeft: '0.5rem' }}>
+  <div style={{ marginLeft: '0.75rem' }}>
     The following special operators can be used to augment search terms:
     <ul style={{ listStylePosition: 'outside' }}>
       <li>
@@ -455,7 +455,7 @@ export class SearchBar extends React.Component<Props, State> {
         {options !== null && (
           <div ref={(el) => (this.dropdown = el)} style={styles.dropdownMenu}>
             {options.length === 0 ? (
-              <em style={{ padding: '0.15rem 1.25rem' }}>
+              <em style={{ padding: '0.225rem 1.875rem' }}>
                 No results based on your search
               </em>
             ) : (
