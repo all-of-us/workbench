@@ -38,6 +38,7 @@ public class WorkbenchConfig {
   public EgressAlertRemediationPolicy egressAlertRemediationPolicy;
   public App app;
   public E2ETestUserConfig e2eTestUsers;
+  public TermsOfServiceConfig termsOfService;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -69,6 +70,7 @@ public class WorkbenchConfig {
     config.bucketAudit = new BucketAuditConfig();
     config.app = new App();
     config.e2eTestUsers = new E2ETestUserConfig();
+    config.termsOfService = new TermsOfServiceConfig();
     return config;
   }
 
@@ -442,5 +444,15 @@ public class WorkbenchConfig {
 
   public static class E2ETestUserConfig {
     public List<String> testUserEmails;
+  }
+
+  // Configs for AoU and Terra Terms of Service
+  public static class TermsOfServiceConfig {
+    // which All of Us Terms of Service is considered current
+    public int latestAouVersion;
+
+    // When the current version of the Terra Terms of Service was released,
+    // in ISO 8601 string format
+    public String latestTerraTosTimestamp;
   }
 }

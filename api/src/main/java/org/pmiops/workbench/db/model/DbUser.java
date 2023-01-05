@@ -77,6 +77,7 @@ public class DbUser {
   private List<Short> degrees;
   private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
+  private DbDemographicSurveyV2 demographicSurveyV2;
   private DbAddress address;
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
@@ -85,7 +86,6 @@ public class DbUser {
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
-  private DbDemographicSurveyV2 demographicSurveyV2;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -168,5 +168,9 @@
   },
   "app": {
     "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+  },
+  "termsOfService": {
+    "latestAouVersion": 1,
+    "latestTerraTosTimestamp": "2030-12-31T12:34:56Z"
   }
 }

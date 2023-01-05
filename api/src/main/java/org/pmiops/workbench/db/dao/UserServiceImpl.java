@@ -75,7 +75,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class UserServiceImpl implements UserService, GaugeDataCollector {
-
   private static final int MAX_RETRIES = 3;
 
   private final Provider<WorkbenchConfig> configProvider;
@@ -374,7 +373,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (tosVersion == null) {
       throw new BadRequestException("All of Us Terms of Service version is NULL");
     }
-    if (tosVersion != LATEST_AOU_TOS_VERSION) {
+    if (tosVersion != configProvider.get().termsOfService.latestAouVersion) {
       throw new BadRequestException("All of Us Terms of Service version is not up to date");
     }
   }
@@ -384,7 +383,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public boolean validateAllOfUsTermsOfServiceVersion(@Nonnull DbUser dbUser) {
     return userTermsOfServiceDao
         .findFirstByUserIdOrderByTosVersionDesc(dbUser.getUserId())
-        .map(u -> u.getTosVersion() == LATEST_AOU_TOS_VERSION)
+        .map(u -> u.getTosVersion() == configProvider.get().termsOfService.latestAouVersion)
         .orElse(false);
   }
 
@@ -817,6 +816,37 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public void signOut(DbUser user) {
     directoryService.signOut(user.getUsername());
+  }
+
+  @Override
+  public List<DbUser> sendTerraTosReminderEmails() {
+    List<DbUser> usersToRemind =
+        accessTierService.getAllRegisteredTierUsers().stream()
+            .filter(u -> shouldSendTerraTosReminderEmail(u.getUserId()))
+            .collect(Collectors.toList());
+
+    // TODO
+    // usersToRemind.forEach(this::sendTerraTosReminderEmail);
+
+    return usersToRemind;
+  }
+
+  @Override
+  public boolean shouldSendTerraTosReminderEmail(long userId) {
+    Timestamp latestTerraTosTime =
+        Timestamp.from(Instant.parse(configProvider.get().termsOfService.latestTerraTosTimestamp));
+
+    // the user is compliant if they have a TOS entry with a Terra agreement time after
+    // the latest Terra ToS was released
+    boolean userIsCompliant =
+        userTermsOfServiceDao
+            .findFirstByUserIdOrderByTosVersionDesc(userId)
+            .flatMap(dbTos -> Optional.ofNullable(dbTos.getTerraAgreementTime()))
+            .map(userAgreementTime -> userAgreementTime.after(latestTerraTosTime))
+            .orElse(false);
+
+    // send emails to noncompliant users
+    return !userIsCompliant;
   }
 
   /**
