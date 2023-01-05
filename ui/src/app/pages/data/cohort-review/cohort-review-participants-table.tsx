@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
-import {DataTable, DataTableSortOrderType} from 'primereact/datatable';
+import { DataTable, DataTableSortOrderType } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {

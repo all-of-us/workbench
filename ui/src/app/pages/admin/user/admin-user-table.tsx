@@ -80,7 +80,7 @@ const buildColumn = (props: ColumnProps) => {
       sortable={!!sortField}
       excludeGlobalFilter={!filterable}
       filterField={filterable && sortField}
-      filterMatchMode={filterable && 'contains'}
+      filterMatchMode={filterable ? 'contains' : null}
     />
   );
 };
