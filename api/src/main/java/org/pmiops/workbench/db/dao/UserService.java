@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfo;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,8 +19,6 @@ import org.pmiops.workbench.model.Degree;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
-  int LATEST_AOU_TOS_VERSION = 1;
-
   /**
    * Updates a user record with a modifier function.
    *
@@ -27,11 +26,6 @@ public interface UserService {
    * user; handles conflicts with concurrent updates by retrying.
    */
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
-
-  /**
-   * Ensures that the data access tiers for the user reflect the state of other fields on the user
-   */
-  DbUser updateUserAccessTiers(DbUser dbUser, Agent agent);
 
   DbUser createServiceAccountUser(String email);
 
@@ -163,4 +157,10 @@ public interface UserService {
 
   /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
+
+  /** Send reminder emails to all registered users who have not signed the latest Terra ToS */
+  List<DbUser> sendTerraTosReminderEmails();
+
+  @VisibleForTesting
+  boolean shouldSendTerraTosReminderEmail(long userId);
 }

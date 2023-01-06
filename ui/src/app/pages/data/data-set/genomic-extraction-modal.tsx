@@ -90,7 +90,7 @@ export const GenomicExtractionModal = ({
         {title || 'Launch VCF extraction'}
       </ModalTitle>
       <ModalBody>
-        <TextColumn style={{ gap: '0.5rem' }}>
+        <TextColumn style={{ gap: '0.75rem' }}>
           <span>
             Extraction will generate VCF files for the participants in this
             dataset which you can use in your analysis environment.
@@ -169,7 +169,7 @@ export const GenomicExtractionModal = ({
         <Button
           data-test-id='extract-button'
           disabled={loading || isClientError}
-          style={{ marginLeft: '0.5rem' }}
+          style={{ marginLeft: '0.75rem' }}
           onClick={async () => {
             setLaunching(true);
             try {

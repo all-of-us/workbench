@@ -1,5 +1,6 @@
 package org.pmiops.workbench.profile;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,8 @@ public interface ProfileMapper {
       List<String> accessTierShortNames,
       List<UserTierEligibility> tierEligibilities,
       ProfileAccessModules accessModules,
-      boolean newUserSatisfactionSurveyEligibility);
+      boolean newUserSatisfactionSurveyEligibility,
+      Instant newUserSatisfactionSurveyEligibilityEndTime);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

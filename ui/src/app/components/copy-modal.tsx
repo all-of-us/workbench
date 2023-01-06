@@ -80,8 +80,8 @@ const styles = reactStyles({
   },
   mismatchError: {
     color: colors.danger,
-    marginLeft: '0.5rem',
-    marginTop: '0.25rem',
+    marginLeft: '0.75rem',
+    marginTop: '0.375rem',
     fontFamily: 'Montserrat',
     fontSize: '12px',
     letterSpacing: 0,
@@ -99,7 +99,7 @@ const styles = reactStyles({
     borderStyle: 'solid',
     borderRadius: '5px',
     lineHeight: '24px',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   restriction: {
     color: colors.primary,
@@ -135,7 +135,7 @@ const NotebookCdrMismatch = (props: { text: string }) => (
     style={styles.mismatchWarning}
   >
     <FlexRow>
-      <div style={{ paddingRight: '0.5rem' }}>
+      <div style={{ paddingRight: '0.75rem' }}>
         <ClrIcon
           shape='warning-standard'
           class='is-solid'
@@ -286,7 +286,7 @@ const CopyModal = withCdrVersions()(
 
       return (
         <Modal onRequestClose={this.props.onClose}>
-          <ModalTitle style={{ marginBottom: '0.5rem' }}>
+          <ModalTitle style={{ marginBottom: '0.75rem' }}>
             Copy to Workspace
           </ModalTitle>
           {resourceType === ResourceType.CONCEPTSET && (
@@ -337,7 +337,7 @@ const CopyModal = withCdrVersions()(
       ) {
         return (
           <Button
-            style={{ marginLeft: '0.5rem' }}
+            style={{ marginLeft: '0.75rem' }}
             disabled={this.state.destination === null || this.state.loading}
             onClick={() => this.save()}
             data-test-id='copy-button'
@@ -352,7 +352,7 @@ const CopyModal = withCdrVersions()(
             path={`/workspaces/${namespace}/${id}/${ResourceTypeHomeTabs.get(
               this.props.resourceType
             )}`}
-            style={{ marginLeft: '0.5rem' }}
+            style={{ marginLeft: '0.75rem' }}
           >
             Go to Copied {resourceType}
           </Button>

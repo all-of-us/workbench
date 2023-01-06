@@ -40,8 +40,8 @@ const styles = reactStyles({
   newCtNotification: {
     padding: 16,
     marginTop: 16,
-    marginLeft: '2rem',
-    width: 'calc(100% - 5rem)',
+    marginLeft: '3rem',
+    width: 'calc(100% - 7.5rem)',
     boxSizing: 'border-box',
     borderWidth: '1px',
     borderStyle: 'solid',
@@ -128,7 +128,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
       const updateStores = async (namespace) => {
         diskStore.set({
           workspaceNamespace: namespace,
-          persistentDisk: undefined,
+          gcePersistentDisk: undefined,
         });
         runtimeStore.set({
           workspaceNamespace: namespace,

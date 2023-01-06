@@ -52,8 +52,8 @@ const styles = reactStyles({
   institutionalDuaTextBox: {
     ...commonStyles.text,
     fontSize: 14,
-    marginTop: '0.7rem',
-    padding: '0.5rem',
+    marginTop: '1.05rem',
+    padding: '0.75rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.75),
     borderRadius: '5px',
   },
@@ -357,17 +357,17 @@ export class AccountCreationInstitution extends React.Component<
       <div
         id='account-creation-institution'
         style={{
-          paddingTop: '1.5rem',
-          paddingRight: '3rem',
-          paddingLeft: '1rem',
+          paddingTop: '2.25rem',
+          paddingRight: '4.5rem',
+          paddingLeft: '1.5rem',
         }}
       >
         <div style={{ fontSize: 28, fontWeight: 400, color: colors.primary }}>
           Create your account
         </div>
         <FlexRow>
-          <FlexColumn style={{ marginTop: '0.5rem', marginRight: '2rem' }}>
-            <div style={{ ...styles.text, fontSize: 16, marginTop: '1rem' }}>
+          <FlexColumn style={{ marginTop: '0.75rem', marginRight: '3rem' }}>
+            <div style={{ ...styles.text, fontSize: 16, marginTop: '1.5rem' }}>
               Please complete Step 1 of 3
             </div>
             <div style={styles.institutionalDuaTextBox}>
@@ -377,15 +377,15 @@ export class AccountCreationInstitution extends React.Component<
               with the program that enables us to provide their researchers with
               access to the Researcher Workbench.
             </div>
-            <div style={{ ...styles.text, fontSize: 12, marginTop: '0.5rem' }}>
+            <div style={{ ...styles.text, fontSize: 12, marginTop: '0.75rem' }}>
               All fields are required unless indicated as optional
             </div>
             {loadingInstitutions && <SpinnerOverlay />}
             {!loadingInstitutions && (
-              <div style={{ marginTop: '.5rem' }}>
-                <FlexRow style={{ alignItems: 'center', margin: '.5rem 0' }}>
+              <div style={{ marginTop: '.75rem' }}>
+                <FlexRow style={{ alignItems: 'center', margin: '.75rem 0' }}>
                   <label style={styles.boldText}>Select your institution</label>
-                  <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                  <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                 </FlexRow>
                 <div style={{ ...styles.text, fontSize: 14 }}>
                   Your institution will be notified that you have registered
@@ -409,7 +409,7 @@ export class AccountCreationInstitution extends React.Component<
                     <SupportMailto />.
                   </ErrorDiv>
                 )}
-                <div style={{ marginTop: '.5rem' }}>
+                <div style={{ marginTop: '.75rem' }}>
                   <label style={styles.text}>
                     Don't see your institution listed? Help us add it to our
                     growing list by{' '}
@@ -428,11 +428,11 @@ export class AccountCreationInstitution extends React.Component<
                   </a>
                 </div>
                 <TextInputWithLabel
-                  containerStyle={{ marginTop: '1rem', width: null }}
+                  containerStyle={{ marginTop: '1.5rem', width: null }}
                   value={contactEmail}
                   inputId='contact-email'
                   inputName='contactEmail'
-                  inputStyle={{ width: '14rem' }}
+                  inputStyle={{ width: '21rem' }}
                   labelContent={
                     <div>
                       <label style={styles.boldText}>
@@ -456,12 +456,12 @@ export class AccountCreationInstitution extends React.Component<
                   </div>
                 </TextInputWithLabel>
                 {this.displayEmailErrorMessageIfNeeded()}
-                <div style={{ marginTop: '.5rem' }}>
-                  <FlexRow style={{ alignItems: 'center', margin: '.5rem 0' }}>
+                <div style={{ marginTop: '.75rem' }}>
+                  <FlexRow style={{ alignItems: 'center', margin: '.75rem 0' }}>
                     <label style={styles.boldText}>
                       Which of the following best describes your role?
                     </label>
-                    <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                    <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
                   <div>
                     <Dropdown
@@ -488,12 +488,12 @@ export class AccountCreationInstitution extends React.Component<
                   </div>
                 </div>
                 {institutionalRoleEnum === InstitutionalRole.OTHER && (
-                  <div style={{ marginTop: '.5rem' }}>
+                  <div style={{ marginTop: '.75rem' }}>
                     <FlexRow style={{ alignItems: 'center' }}>
-                      <label style={{ ...styles.boldText, margin: '.5rem 0' }}>
+                      <label style={{ ...styles.boldText, margin: '.75rem 0' }}>
                         Please describe your role
                       </label>
-                      <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                      <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                     </FlexRow>
                     <TextInputWithLabel
                       value={institutionalRoleOtherText}
@@ -511,11 +511,11 @@ export class AccountCreationInstitution extends React.Component<
                 )}
               </div>
             )}
-            <FormSection style={{ paddingBottom: '1rem' }}>
+            <FormSection style={{ paddingBottom: '1.5rem' }}>
               <Button
                 aria-label='Previous'
                 type='secondary'
-                style={{ marginRight: '1rem' }}
+                style={{ marginRight: '1.5rem' }}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}
               >
                 Previous

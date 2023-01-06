@@ -10,7 +10,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.12",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.15",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "workspaceLogsProject": "fc-aou-logs-perf",
@@ -19,7 +19,10 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-c"
+    "gceVmZone": "us-central1-c",
+    "userApps": {
+      "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+    }
   },
   "billing": {
     "accountId": "013713-75CFF6-1751E5",
@@ -157,7 +160,8 @@
       }
     }]
   },
-  "app": {
-    "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+  "termsOfService": {
+    "latestAouVersion": 1,
+    "latestTerraTosTimestamp": "1985-10-26T01:22:33Z"
   }
 }

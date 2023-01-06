@@ -129,7 +129,7 @@ export const DiskSelector = ({
               <FlexRow style={{ ...styles.formGrid2, marginTop: '11px' }}>
                 <FlexRow style={styles.labelAndInput}>
                   <label
-                    style={{ ...styles.label, minWidth: '3.0rem' }}
+                    style={{ ...styles.label, minWidth: '4.5rem' }}
                     htmlFor='disk-type'
                   >
                     Disk type

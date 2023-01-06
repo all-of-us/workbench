@@ -8,9 +8,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
@@ -95,14 +95,14 @@ public interface LeonardoApiClient {
    * @param googleProjectId the GCP project the app belongs to
    * @param appName the name of the app
    */
-  App getAppByNameByProjectId(String googleProjectId, String appName);
+  UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName);
 
   /**
-   * Lists all apps the user have permission on in the given workspace GCP project
+   * Lists all apps the user has permission on in the given workspace GCP project
    *
    * @param googleProjectId the GCP project the app belongs to
    */
-  List<App> listAppsInProject(String googleProjectId);
+  List<UserAppEnvironment> listAppsInProject(String googleProjectId);
 
   /**
    * Deletes a Leonardo app

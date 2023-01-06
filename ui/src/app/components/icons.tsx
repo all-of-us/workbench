@@ -59,8 +59,8 @@ export const styles = {
   },
 
   defaultCircle: {
-    height: '1.5rem',
-    width: '1.5rem',
+    height: '2.25rem',
+    width: '2.25rem',
   },
 };
 
@@ -127,6 +127,15 @@ export const InfoIcon = ({ style = {}, ...props }) => (
     {...props}
     class='is-solid'
     style={{ ...styles.infoIcon, ...style }}
+  />
+);
+
+export const WarningIcon = ({ style = {}, ...props }) => (
+  <ClrIcon
+    shape='warning-standard'
+    {...props}
+    class='is-solid'
+    style={{ ...styles.dangerIcon, ...style }}
   />
 );
 

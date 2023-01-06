@@ -809,8 +809,8 @@ paths:
 
   "/v1/workspaces/{workspaceNamespace}/apps":
     get:
-      summary: List apps in workspace
-      description: List apps the caller has access to, in given workspaces
+      summary: List user apps in workspace
+      description: List user apps the caller has access to, in given workspaces
       operationId: listAppsInWorkspace
       tags:
         - apps
@@ -818,11 +818,11 @@ paths:
         - "$ref": "#/parameters/workspaceNamespace"
       responses:
         "200":
-          description: List of apps
+          description: List of user apps
           schema:
             "$ref": "#/definitions/ListAppsResponse"
         404:
-          description: No app exists for this user and workspace.
+          description: No user app exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         412:
@@ -830,9 +830,11 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
     post:
-      summary: Create a workspace APP.
+      summary: Create a user app in this workspace.
       description: |
-        Creates a new app request is received the current user in the given workspace. If a app already exists for the user in this billing project, a 409 conflict error is returned (even if the app is still initializing or is not in a ready state).
+        Creates a new user app for the current user in the given workspace. If a user app already 
+        exists for the user in this billing project, a 409 conflict error is returned (even if the 
+        app is still initializing or is not in a ready state).
       operationId: createApp
       tags:
         - apps
@@ -840,13 +842,13 @@ paths:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: body
           name: app
-          description: APP definition
+          description: User App definition
           required: true
           schema:
             "$ref": "#/definitions/CreateAppRequest"
       responses:
         200:
-          description: App was created successfully
+          description: User App was created successfully
           schema:
             "$ref": "#/definitions/EmptyResponse"
         404:
@@ -854,7 +856,7 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
         409:
-          description: A app for this user and workspace already exists.
+          description: A user app for this user and workspace already exists.
           schema:
             "$ref": "#/definitions/EmptyResponse"
         412:
@@ -873,16 +875,16 @@ paths:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
           name: appName
-          description: The name of app.
+          description: The name of the user app.
           required: true
           type: string
       responses:
         200:
-          description: The app for this user and workspace.
+          description: The user app for this user and workspace.
           schema:
-            "$ref": "#/definitions/App"
+            "$ref": "#/definitions/UserAppEnvironment"
         404:
-          description: No app exists for this user and workspace.
+          description: No user app exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         412:
@@ -890,8 +892,8 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
     patch:
-      summary: Updates the configuration of a app
-      description: In order to update the configuration of a app, it must first be running or paused
+      summary: Updates the configuration of a user app
+      description: In order to update the configuration of a user app, it must first be running or paused
       operationId: updateApp
       tags:
         - apps
@@ -899,16 +901,16 @@ paths:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
           name: appName
-          description: The name of app.
+          description: The name of the user app.
           required: true
           type: string
         - in: body
           name: app
           schema:
-            "$ref": "#/definitions/App"
+            "$ref": "#/definitions/UserAppEnvironment"
       responses:
         202:
-          description: App update request accepted
+          description: User App update request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
         400:
@@ -924,7 +926,7 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
     delete:
-      summary: Delete a workspace app.
+      summary: Delete a workspace user app.
       operationId: deleteApp
       tags:
         - apps
@@ -932,12 +934,12 @@ paths:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
           name: appName
-          description: The name of app.
+          description: The name of the user app.
           required: true
           type: string
         - in: query
           name: deleteDisk
-          description: Whether or not disk should be deleted if the app is using persistent disk. Default to false if not specified
+          description: Whether or not the disk should be deleted if the user app is using a persistent disk. Default to false if not specified
           required: false
           type: boolean
           default: false
@@ -947,7 +949,7 @@ paths:
           schema:
             "$ref": "#/definitions/EmptyResponse"
         404:
-          description: No app exists for this user and workspace.
+          description: No user app exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
         412:
@@ -1673,6 +1675,25 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/users/sendTerraTosReminderEmails":
+    post:
+      tags:
+        - userAdmin
+      consumes:
+        - application/json
+      description: >
+        Send emails to currently-registered users who have not yet agreed to the most recent
+        version of Terra's Terms of Service. Requires COMMUNICATIONS_ADMIN Authority.
+      operationId: sendTerraTosReminderEmails
+      responses:
+        200:
+          description: 'A response containing the emails of the users who were notified'
+          schema:
+            "$ref": "#/definitions/TerraTosReminderEmailsResponse"
+        403:
+          description: User doesn't have the COMMUNICATIONS_ADMIN authority
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2053,6 +2074,39 @@ paths:
       - cron
       description: ''
       operationId: checkObjectNameSize
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/ensureTestUserTosCompliance":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Keep test users' TOS compliance statuses in the appropriate states"
+      operationId: ensureTestUserTosCompliance
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/emailNewUserSatisfactionSurveyLinks":
+    get:
+      security: []
+      tags:
+      - offlineNewUserSatisfactionSurvey
+      - cron
+      description: Email newly eligible users a link to take the new user satisfaction survey.
+      operationId: emailNewUserSatisfactionSurveyLinks
+      responses:
+        204:
+          description: No content.
+  "/v1/cron/deleteTestUserWorkspaces":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Delete all test users' workspaces"
+      operationId: deleteAllTestUserWorkspaces
       responses:
         204:
           description: No content.
@@ -4154,6 +4208,41 @@ paths:
       responses:
         200:
           description: 'The survey responses were successfully stored.'
+  "/v1/surveys/newUserSatisfactionSurvey/validateOneTimeCode/{oneTimeCode}":
+    get:
+      security: []
+      tags:
+      - surveys
+      description: Checks if a given one-time can be used to create a new user satisfaction survey response.
+      operationId: validateOneTimeCodeForNewUserSatisfactionSurvey
+      parameters:
+        - in: path
+          name: oneTimeCode
+          type: string
+          required: true
+          description: the one-time code being validated
+      responses:
+        200:
+          description: 'The server successfully determined if the one-time code is valid.'
+          schema:
+            type: boolean
+  "/v1/surveys/newUserSatisfactionSurvey/withOneTimeCode":
+    post:
+      security: []
+      tags:
+      - surveys
+      description: Stores user responses for the new user satisfaction survey if they have a valid one-time code.
+      operationId: createNewUserSatisfactionSurveyWithOneTimeCode
+      parameters:
+      - in: body
+        name: NewUserSatisfactionSurveyWithOneTimeCode
+        description: Survey response data and the one-time code
+        required: true
+        schema:
+          "$ref": "#/definitions/CreateNewUserSatisfactionSurveyWithOneTimeCode"
+      responses:
+        200:
+          description: 'The survey responses were successfully stored.'
 definitions:
   ArchivalStatus:
     type: string
@@ -4213,6 +4302,7 @@ definitions:
     - PHYSICAL_MEASUREMENT_CSS
     - WHOLE_GENOME_VARIANT
     - LR_WHOLE_GENOME_VARIANT
+    - STRUCTURAL_VARIANT_DATA
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
   Surveys:
@@ -4500,6 +4590,8 @@ definitions:
     - PARSE_ERROR
     - USER_DISABLED
     - COMPUTE_SECURITY_SUSPENDED
+    - TERRA_TOS_NON_COMPLIANT
+    - TERRA_TOS_COMPLIANCE_UNKNOWN
   StatusResponse:
     type: object
     required:
@@ -4525,7 +4617,7 @@ definitions:
         description: G-Suite domain containing user accounts.
       projectId:
         type: string
-        description: The cloud project in which this app is running.
+        description: The GCP project environment in which this All of Us app is running.
       firecloudURL:
         type: string
         description: The Firecloud URL to use for REST requests.
@@ -6101,6 +6193,9 @@ definitions:
         $ref: '#/definitions/DemographicSurveyV2'
       newUserSatisfactionSurveyEligibility:
         type: boolean
+      newUserSatisfactionSurveyEligibilityEndTime:
+        type: string
+        description: Timestamp indicating when the user is ineligible to take the new user survey in ISO 8601 format
 
   AccessModuleStatus:
     type: object
@@ -6294,7 +6389,7 @@ definitions:
         description: timestamp for error in ISO 8601 format
 
   CreateAppRequest:
-    description: Create APP request body
+    description: Create User App request body
     properties:
       appType:
         "$ref": "#/definitions/AppType"
@@ -6310,22 +6405,22 @@ definitions:
         description: Persistent disk configuration
         "$ref": "#/definitions/PersistentDiskRequest"
 
-  App:
+  UserAppEnvironment:
     properties:
       googleProject:
         type: string
-        description: The Google Project used to create the app. Read only.
+        description: The Google Project used to create the user app. Read only.
       appName:
         type: string
-        description: The user-supplied name for the app. Read only.
+        description: The user-supplied name for the user app. Read only.
       appType:
         "$ref": "#/definitions/AppType"
       createdDate:
         type: string
-        description: The date and time the app was created, in ISO-8601 format. Read only.
+        description: The date and time the user app was created, in ISO-8601 format. Read only.
       status:
         "$ref": "#/definitions/AppStatus"
-        description: App status. Read only.
+        description: User App status. Read only.
       autopauseThreshold:
         type: integer
         description: The number of minutes of idle time to elapse before the cluster is
@@ -6339,20 +6434,20 @@ definitions:
         description: Read only. Map of service name to proxyUrl
       diskName:
         type: string
-        description: Read only. The name of the disk associated with this app
+        description: Read only. The name of the disk associated with this user app
       dateAccessed:
         type: string
         description: |
-          The date and time the runtime was last accessed, in ISO-8601 format.
+          The date and time the environment was last accessed, in ISO-8601 format.
           Date accessed is defined as the last time the runtime was created, modified, or accessed via the proxy.
       errors:
         type: array
-        description: The list of errors that were encountered on APP create, if any.
+        description: The list of errors that were encountered on user app creation, if any.
         items:
           $ref: "#/definitions/KubernetesError"
       labels:
         type: object
-        description: The labels of each app in the response whose key is in includeLabels in the request. Of type Map[String,String]
+        description: The labels of each user app in the response whose key is in includeLabels in the request. Of type Map[String,String]
 
   KubernetesError:
       description: a kubernetes app error
@@ -6645,7 +6740,7 @@ definitions:
   ListAppsResponse:
     type: array
     items:
-      "$ref": "#/definitions/App"
+      "$ref": "#/definitions/UserAppEnvironment"
 
   ListDisksResponse:
     type: array
@@ -9804,7 +9899,7 @@ definitions:
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
       registeredTierRequirement:
-        description: Institution tegisted tier requirement.
+        description: Institution registered tier requirement.
         "$ref": "#/definitions/InstitutionMembershipRequirement"
   ReportingNewUserSatisfactionSurvey:
     type: object
@@ -10248,6 +10343,15 @@ definitions:
       - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER
 
+  CreateNewUserSatisfactionSurveyWithOneTimeCode:
+    type: object
+    properties:
+      createNewUserSatisfactionSurvey:
+        "$ref": "#/definitions/CreateNewUserSatisfactionSurvey"
+      oneTimeCode:
+        type: string
+        description: One-time code for creating this survey response.
+
   CreateNewUserSatisfactionSurvey:
     type: object
     properties:
@@ -10266,3 +10370,16 @@ definitions:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
+
+  TerraTosReminderEmailsResponse:
+    type: object
+    properties:
+      users:
+        type: array
+        items:
+          type: object
+          properties:
+            username:
+              type: string
+            contactEmail:
+              type: string

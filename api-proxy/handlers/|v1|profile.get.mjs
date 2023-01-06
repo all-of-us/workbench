@@ -147,7 +147,9 @@ const body = JSON.stringify(
     education: 'PREFER_NOT_TO_ANSWER',
     disadvantaged: 'PREFER_NOT_TO_ANSWER',
     surveyComments: 'asdfg'
-  }
+  },
+  newUserSatisfactionSurveyEligibility: true,
+  newUserSatisfactionSurveyEligibilityEndTime: "2023-01-10T14:38:10Z"
 }
 )
 

@@ -44,16 +44,16 @@ const styles = reactStyles({
     marginTop: '0',
     fontWeight: 600,
     color: colors.primary,
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
   },
   selectionContainer: {
     background: colors.white,
     border: `2px solid ${colors.primary}`,
     borderRadius: '5px',
-    height: 'calc(100% - 17rem)',
-    lineHeight: '0.75rem',
-    minHeight: 'calc(100vh - 15rem)',
-    padding: '0.5rem',
+    height: 'calc(100% - 25.5rem)',
+    lineHeight: '1.125rem',
+    minHeight: 'calc(100vh - 22.5rem)',
+    padding: '0.75rem',
     position: 'relative',
     overflowX: 'hidden',
     overflowY: 'auto',
@@ -64,21 +64,21 @@ const styles = reactStyles({
     display: 'inline-block',
     fontSize: '13px',
     fontWeight: 600,
-    paddingRight: '0.25rem',
+    paddingRight: '0.375rem',
   },
   removeSelection: {
     background: 'none',
     border: 0,
     color: colors.danger,
     cursor: 'pointer',
-    marginRight: '0.25rem',
+    marginRight: '0.375rem',
     padding: 0,
   },
   saveButton: {
-    height: '2rem',
+    height: '3rem',
     borderRadius: '5px',
     fontWeight: 600,
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
 });
 
@@ -240,14 +240,14 @@ export const ConceptListPage = fp.flow(
 
     renderSelection(selection: any, index: number) {
       return (
-        <FlexRow key={index} style={{ lineHeight: '1.25rem' }}>
+        <FlexRow key={index} style={{ lineHeight: '1.875rem' }}>
           <button
             style={styles.removeSelection}
             onClick={() => this.removeSelection(selection)}
           >
             <ClrIcon shape='times-circle' />
           </button>
-          <b style={{ paddingRight: '0.25rem' }}>{selection.conceptCode}</b>
+          <b style={{ paddingRight: '0.375rem' }}>{selection.conceptCode}</b>
           {selection.name ? selection.name : selection.question}
         </FlexRow>
       );
@@ -262,7 +262,7 @@ export const ConceptListPage = fp.flow(
         return (
           <React.Fragment>
             {standardConcepts.length > 0 && (
-              <div style={{ marginBottom: '0.5rem' }}>
+              <div style={{ marginBottom: '0.75rem' }}>
                 <div style={styles.selectionHeader}>Standard Concepts</div>
                 {standardConcepts.map((con, index) =>
                   this.renderSelection(con, index)
@@ -294,7 +294,7 @@ export const ConceptListPage = fp.flow(
             {!!concept && concept.length > 0 && this.renderSelections()}
           </div>
           <FlexRowWrap
-            style={{ flexDirection: 'row-reverse', marginTop: '1rem' }}
+            style={{ flexDirection: 'row-reverse', marginTop: '1.5rem' }}
           >
             <TooltipTrigger
               content={

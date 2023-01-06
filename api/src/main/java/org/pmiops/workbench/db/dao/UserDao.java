@@ -57,6 +57,17 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   Set<DbUser> findUserByUsernameInAndDisabledFalse(List<String> usernames);
 
+  @Query(
+      "SELECT u FROM DbUser u "
+          + "LEFT JOIN FETCH u.newUserSatisfactionSurveyOneTimeCode otc "
+          + "LEFT JOIN FETCH u.newUserSatisfactionSurvey nuss "
+          + "WHERE u.creationTime BETWEEN :minCreationTime AND :maxCreationTime "
+          + "  AND otc.id IS NULL "
+          + "  AND nuss.id IS NULL")
+  List<DbUser> findUsersBetweenCreationTimeWithoutNewUserSurveyOrCode(
+      @Param("minCreationTime") Timestamp minCreationTime,
+      @Param("maxCreationTime") Timestamp maxCreationTime);
+
   interface UserCountByDisabledAndAccessTiers {
     Long getUserCount();
 

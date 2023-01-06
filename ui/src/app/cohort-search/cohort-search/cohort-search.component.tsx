@@ -48,24 +48,24 @@ import { Subscription } from 'rxjs/Subscription';
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
-    marginTop: '-0.2rem',
+    marginTop: '-0.3rem',
     width: '18px',
   },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
     display: 'inline-block',
-    height: '1.5rem',
-    lineHeight: '1.6rem',
+    height: '2.25rem',
+    lineHeight: '2.4rem',
     textAlign: 'center',
-    width: '1.5rem',
+    width: '2.25rem',
   },
   finishButton: {
-    marginTop: '1.5rem',
+    marginTop: '2.25rem',
     borderRadius: '5px',
-    bottom: '1rem',
+    bottom: '1.5rem',
     position: 'absolute',
-    right: '3rem',
+    right: '4.5rem',
   },
   growl: {
     position: 'absolute',
@@ -81,21 +81,21 @@ const styles = reactStyles({
   },
   searchContent: {
     height: '100%',
-    padding: '0 0.5rem',
+    padding: '0 0.75rem',
     position: 'relative',
     width: '100%',
   },
   titleBar: {
     color: colors.primary,
     display: 'table',
-    margin: '1rem 0 0.25rem',
+    margin: '1.5rem 0 0.375rem',
     width: '65%',
-    height: '1.5rem',
+    height: '2.25rem',
   },
   titleHeader: {
     display: 'inline-block',
-    lineHeight: '1.5rem',
-    margin: '0 0 0 0.75rem',
+    lineHeight: '2.25rem',
+    margin: '0 0 0 1.125rem',
   },
 });
 
@@ -203,6 +203,8 @@ export const CohortSearch = fp.flow(
         this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
+      } else if (domain === Domain.STRUCTURALVARIANTDATA) {
+        this.selectStructuralVariantData();
       }
 
       currentCohortCriteriaStore.next(selections);
@@ -375,16 +377,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Whole Genome Sequence',
+        name: 'Short Read WGS',
         group: false,
         domainId: Domain.WHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Short Read WGS');
       saveCriteria([param]);
     }
 
@@ -394,16 +394,14 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Long Read Whole Genome Sequence',
+        name: 'Long Read WGS',
         group: false,
         domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
       } as Selection;
-      AnalyticsTracker.CohortBuilder.SelectCriteria(
-        'Select Long Read Whole Genome Sequence'
-      );
+      AnalyticsTracker.CohortBuilder.SelectCriteria('Select Long Read WGS');
       saveCriteria([param]);
     }
 
@@ -422,6 +420,25 @@ export const CohortSearch = fp.flow(
       } as Selection;
       AnalyticsTracker.CohortBuilder.SelectCriteria(
         'Select Global Diversity Array'
+      );
+      saveCriteria([param]);
+    }
+
+    selectStructuralVariantData() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.PPI.toString(),
+        name: 'Structural Variant Data',
+        group: false,
+        domainId: Domain.STRUCTURALVARIANTDATA.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        'Select Structural Variant Data'
       );
       saveCriteria([param]);
     }
@@ -465,8 +482,8 @@ export const CohortSearch = fp.flow(
               <div
                 style={
                   domain === Domain.PERSON && type !== CriteriaType.AGE
-                    ? { marginBottom: '3.5rem' }
-                    : { height: 'calc(100% - 3.5rem)' }
+                    ? { marginBottom: '5.25rem' }
+                    : { height: 'calc(100% - 5.25rem)' }
                 }
               >
                 {domain === Domain.PERSON ? (

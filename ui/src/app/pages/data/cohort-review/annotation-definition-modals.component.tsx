@@ -25,7 +25,7 @@ const styles = reactStyles({
   editRow: {
     display: 'flex',
     alignItems: 'center',
-    height: '2rem',
+    height: '3rem',
     borderBottom: '1px solid #c3c3c3',
   },
   defName: {
@@ -40,7 +40,7 @@ const styles = reactStyles({
   },
   button: {
     flex: 'none',
-    margin: '0 0.5rem',
+    margin: '0 0.75rem',
   },
 });
 
@@ -132,7 +132,7 @@ export const AddAnnotationDefinitionModal = withRouter(
         <Modal loading={saving}>
           <ModalTitle>Create a Review-Wide Annotation Field</ModalTitle>
           <ModalBody>
-            <div style={{ ...headerStyles.formLabel, marginTop: '1rem' }}>
+            <div style={{ ...headerStyles.formLabel, marginTop: '1.5rem' }}>
               Type:
             </div>
             <Select
@@ -148,7 +148,7 @@ export const AddAnnotationDefinitionModal = withRouter(
             />
             {annotationType === AnnotationType.ENUM && (
               <React.Fragment>
-                <div style={{ ...headerStyles.formLabel, marginTop: '1rem' }}>
+                <div style={{ ...headerStyles.formLabel, marginTop: '1.5rem' }}>
                   Values:
                 </div>
                 {enumValues.map((enumValue, i) => {
@@ -158,7 +158,7 @@ export const AddAnnotationDefinitionModal = withRouter(
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        height: '2rem',
+                        height: '3rem',
                       }}
                     >
                       <TextInput
@@ -171,7 +171,7 @@ export const AddAnnotationDefinitionModal = withRouter(
                         onClick={() =>
                           this.setState(fp.update('enumValues', fp.pullAt(i)))
                         }
-                        style={{ marginLeft: '0.5rem' }}
+                        style={{ marginLeft: '0.75rem' }}
                       >
                         <ClrIcon shape='minus-circle' size={18} />
                       </Clickable>
@@ -180,7 +180,7 @@ export const AddAnnotationDefinitionModal = withRouter(
                 })}
                 <Button
                   type='link'
-                  style={{ padding: '0.25rem 0' }}
+                  style={{ padding: '0.375rem 0' }}
                   onClick={() =>
                     this.setState(
                       fp.update('enumValues', (ev) => ev.concat(['']))
@@ -204,7 +204,7 @@ export const AddAnnotationDefinitionModal = withRouter(
             </Button>
             <TooltipTrigger content={summarizeErrors(errors)}>
               <Button
-                style={{ marginLeft: '0.5rem' }}
+                style={{ marginLeft: '0.75rem' }}
                 disabled={!!errors || saving}
                 onClick={() => this.create()}
               >
@@ -326,7 +326,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
         <Modal loading={busy}>
           <ModalTitle>Edit or Delete Review-Wide Annotation Fields</ModalTitle>
           <ModalBody>
-            <div style={{ maxHeight: '10rem', overflow: 'auto' }}>
+            <div style={{ maxHeight: '15rem', overflow: 'auto' }}>
               {(deleteError || renameError) && (
                 <div>
                   <ClrIcon
@@ -412,7 +412,7 @@ export const EditAnnotationDefinitionsModal = withRouter(
               <React.Fragment>
                 <Button
                   type='secondary'
-                  style={{ marginRight: '0.5rem' }}
+                  style={{ marginRight: '0.75rem' }}
                   onClick={() => this.setState({ deleteId: undefined })}
                 >
                   No

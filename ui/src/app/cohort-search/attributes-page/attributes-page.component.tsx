@@ -49,8 +49,8 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 const styles = reactStyles({
   countPreview: {
     borderTop: `1px solid ${colorWithWhiteness(colors.black, 0.59)}`,
-    marginTop: '1rem',
-    paddingTop: '1rem',
+    marginTop: '1.5rem',
+    paddingTop: '1.5rem',
   },
   row: {
     display: 'flex',
@@ -60,16 +60,16 @@ const styles = reactStyles({
     color: colors.primary,
     fontWeight: 600,
     display: 'flex',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
   },
   orCircle: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.75),
     borderRadius: '50%',
     color: colors.primary,
-    width: '2.25rem',
-    height: '2.25rem',
-    margin: '0.5rem 0',
-    lineHeight: '2.25rem',
+    width: '3.375rem',
+    height: '3.375rem',
+    margin: '0.75rem 0',
+    lineHeight: '3.375rem',
     textAlign: 'center',
     fontSize: '12px',
     fontWeight: 600,
@@ -78,9 +78,9 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.primary, 0.75),
     borderRadius: '50%',
     color: colors.primary,
-    width: '2.25rem',
-    height: '2.25rem',
-    lineHeight: '2.25rem',
+    width: '3.375rem',
+    height: '3.375rem',
+    lineHeight: '3.375rem',
     textAlign: 'center',
     fontSize: '12px',
     fontWeight: 600,
@@ -88,8 +88,8 @@ const styles = reactStyles({
     left: '42%',
   },
   andDivider: {
-    height: '1.15rem',
-    marginBottom: '1.15rem',
+    height: '1.725rem',
+    marginBottom: '1.725rem',
     width: '100%',
     borderBottom: `2px solid ${colorWithWhiteness(colors.primary, 0.75)}`,
   },
@@ -99,46 +99,46 @@ const styles = reactStyles({
     marginRight: 'auto',
   },
   dropdown: {
-    width: '12rem',
-    marginRight: '1rem',
+    width: '18rem',
+    marginRight: '1.5rem',
   },
   categorical: {
     width: '100%',
-    marginBottom: '0.25rem',
+    marginBottom: '0.375rem',
   },
   badge: {
     background: colors.primary,
     color: colors.white,
     fontSize: '10px',
-    height: '0.625rem',
+    height: '0.9375rem',
     padding: '0 4px',
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
     borderRadius: '10px',
     display: 'inline-flex',
     verticalAlign: 'middle',
     alignItems: 'center',
   },
   addButtonContainer: {
-    bottom: '1rem',
+    bottom: '1.5rem',
     position: 'absolute',
-    right: '1rem',
+    right: '1.5rem',
   },
   addButton: {
-    height: '2rem',
+    height: '3rem',
     borderRadius: '5px',
     fontWeight: 600,
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
   calculateButton: {
-    height: '1.75rem',
+    height: '2.625rem',
     border: '1px solid',
     borderColor: colors.accent,
     borderRadius: '2px',
     fontWeight: 100,
   },
   spinner: {
-    marginRight: '0.25rem',
-    marginLeft: '-0.25rem',
+    marginRight: '0.375rem',
+    marginLeft: '-0.375rem',
   },
   resultsContainer: {
     flex: '0 0 50%',
@@ -153,7 +153,7 @@ const styles = reactStyles({
     textAlign: 'left',
     border: '1px solid #ebafa6',
     borderRadius: '5px',
-    margin: '0.25rem 0',
+    margin: '0.375rem 0',
   },
   errors: {
     background: colorWithWhiteness(colors.danger, 0.7),
@@ -161,7 +161,7 @@ const styles = reactStyles({
     fontSize: '11px',
     border: '1px solid #ebafa6',
     borderRadius: '3px',
-    margin: '0.25rem 0',
+    margin: '0.375rem 0',
     padding: '3px 5px',
   },
   errorItem: {
@@ -171,7 +171,7 @@ const styles = reactStyles({
     color: colors.accent,
     cursor: 'pointer',
     fontWeight: 300,
-    margin: '0.75rem 0',
+    margin: '1.125rem 0',
     textDecoration: 'underline',
   },
 });
@@ -235,7 +235,7 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
         </div>
       </FlexRowWrap>
       <FlexRowWrap
-        style={{ flexDirection: 'row-reverse', marginTop: '0.5rem' }}
+        style={{ flexDirection: 'row-reverse', marginTop: '0.75rem' }}
       >
         <Button
           type='primary'
@@ -248,7 +248,7 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
         </Button>
         <Button
           type='link'
-          style={{ color: colors.primary, marginRight: '0.75rem' }}
+          style={{ color: colors.primary, marginRight: '1.125rem' }}
           onClick={() => backFn()}
         >
           BACK
@@ -976,7 +976,7 @@ export const AttributesPage = fp.flow(
                   )}
                   <Dropdown
                     data-test-id={`numerical-dropdown-${a}`}
-                    style={{ marginBottom: '0.5rem', width: '100%' }}
+                    style={{ marginBottom: '0.75rem', width: '100%' }}
                     value={attr.operator}
                     options={options}
                     placeholder='Select Operator'
@@ -988,7 +988,7 @@ export const AttributesPage = fp.flow(
                         <NumberInput
                           data-test-id={`numerical-input-${a}-0`}
                           style={{
-                            padding: '0 0.25rem',
+                            padding: '0 0.375rem',
                             ...(this.hasUnits ? { width: '70%' } : {}),
                           }}
                           value={attr.operands[0]}
@@ -1001,14 +1001,14 @@ export const AttributesPage = fp.flow(
                     )}
                     {attr.operator === Operator.BETWEEN && (
                       <React.Fragment>
-                        <div style={{ padding: '0.2rem 1.5rem 0 1rem' }}>
+                        <div style={{ padding: '0.3rem 2.25rem 0 1.5rem' }}>
                           and
                         </div>
                         <div style={{ width: '33%' }}>
                           <NumberInput
                             data-test-id={`numerical-input-${a}-1`}
                             style={{
-                              padding: '0 0.25rem',
+                              padding: '0 0.375rem',
                               ...(this.hasUnits ? { width: '70%' } : {}),
                             }}
                             value={attr.operands[1]}
@@ -1022,7 +1022,7 @@ export const AttributesPage = fp.flow(
                     )}
                   </FlexRowWrap>
                   {this.hasRange && ![null, 'ANY'].includes(attr.operator) && (
-                    <div style={{ paddingTop: '0.2rem' }}>
+                    <div style={{ paddingTop: '0.3rem' }}>
                       Range: {attr.MIN.toLocaleString()} -{' '}
                       {attr.MAX.toLocaleString()}
                     </div>
@@ -1096,19 +1096,19 @@ export const AttributesPage = fp.flow(
       return loading ? (
         <SpinnerOverlay />
       ) : (
-        <div id='attributes-form' style={{ marginTop: '0.5rem' }}>
+        <div id='attributes-form' style={{ marginTop: '0.75rem' }}>
           {isCOPEOrMinuteSurvey ? (
             <div>
               <h3
                 style={{
                   fontWeight: 600,
-                  margin: '0 0 0.5rem',
+                  margin: '0 0 0.75rem',
                   textTransform: 'capitalize',
                 }}
               >
                 COPE Survey (COVID-19) attribute
               </h3>
-              <div style={{ lineHeight: '0.75rem', paddingRight: '1.5rem' }}>
+              <div style={{ lineHeight: '1.125rem', paddingRight: '2.25rem' }}>
                 The COPE survey is longitudinal and will change over time. Use
                 the following attributes to select data from one or more
                 versions.
@@ -1127,7 +1127,7 @@ export const AttributesPage = fp.flow(
             <h3
               style={{
                 fontWeight: 600,
-                margin: '0 0 0.5rem',
+                margin: '0 0 0.75rem',
                 textTransform: 'capitalize',
               }}
             >
@@ -1138,7 +1138,7 @@ export const AttributesPage = fp.flow(
             </h3>
           )}
           {this.isSurvey && (
-            <div style={{ ...styles.label, marginBottom: '0.5rem' }}>
+            <div style={{ ...styles.label, marginBottom: '0.75rem' }}>
               {subtype === CriteriaSubType.ANSWER
                 ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
                 : name}
@@ -1147,7 +1147,7 @@ export const AttributesPage = fp.flow(
           {countError && (
             <div style={styles.error}>
               <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem' }}
+                style={{ margin: '0 0.75rem 0 0.375rem' }}
                 className='is-solid'
                 shape='exclamation-triangle'
                 size='22'
@@ -1190,7 +1190,7 @@ export const AttributesPage = fp.flow(
                 </div>
               )}
               {!form.anyValue && (
-                <div style={{ minHeight: '10rem' }}>
+                <div style={{ minHeight: '15rem' }}>
                   {this.renderNumericalAttributes()}
                   {this.renderCategoricalAttributes()}
                 </div>

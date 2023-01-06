@@ -10,7 +10,7 @@
     "xAppIdValue": "staging-AoU-RW",
     "timeoutInSeconds": 40,
     "lenientTimeoutInSeconds": 180,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.12",
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-aou:2.1.15",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "workspaceLogsProject": "fc-aou-logs-staging",
@@ -19,7 +19,10 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-a"
+    "gceVmZone": "us-central1-a",
+    "userApps": {
+      "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+    }
   },
   "billing": {
     "accountId": "01DDC8-7ED304-6E46FE",
@@ -157,7 +160,19 @@
       }
     }]
   },
-  "app": {
-    "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+  "e2eTestUsers": {
+    "testUserEmails": [
+      "puppeteer-tester-1@staging.fake-research-aou.org",
+      "puppeteer-writer-1@staging.fake-research-aou.org",
+      "puppeteer-reader-1@staging.fake-research-aou.org",
+      "puppet-access-tester-1@staging.fake-research-aou.org",
+      "puppeteer-admin-1@staging.fake-research-aou.org",
+      "puppeteer-egress-1@staging.fake-research-aou.org",
+      "puppetcitester4@staging.fake-research-aou.org"
+    ]
+  },
+  "termsOfService": {
+    "latestAouVersion": 1,
+    "latestTerraTosTimestamp": "2030-12-31T12:34:56Z"
   }
 }

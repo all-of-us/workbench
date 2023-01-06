@@ -9,8 +9,8 @@ input[type=time]:not([readonly]),
 input[type=url]:not([readonly]) {
   border-radius: 5px;
   background-color: white;
-  line-height: 1.5rem;
-  height: 1.5rem;
+  line-height: 2.25rem;
+  height: 2.25rem;
 }
 
 label {

@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import * as React from 'react';
+import { useState } from 'react';
 import { faBan, faEllipsisV, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { faLocationCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,8 +25,8 @@ const styles = {
   },
   menuItem: {
     height: null,
-    paddingTop: '0.25rem',
-    paddingBottom: '0.25rem',
+    paddingTop: '0.375rem',
+    paddingBottom: '0.375rem',
   },
 };
 
@@ -102,7 +102,7 @@ export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
           icon={faEllipsisV}
           style={{
             color: colors.accent,
-            fontSize: '.7rem',
+            fontSize: '1.05rem',
             marginLeft: 0,
             paddingRight: 0,
             display: 'block',

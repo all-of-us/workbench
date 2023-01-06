@@ -21,9 +21,9 @@ import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
   fadeBox: {
-    margin: '1rem auto 0 auto',
+    margin: '1.5rem auto 0 auto',
     width: '97.5%',
-    padding: '0 1rem',
+    padding: '0 1.5rem',
   },
   cardArea: {
     display: 'flex',
@@ -106,7 +106,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
       return (
         <React.Fragment>
           <FadeBox style={styles.fadeBox}>
-            <div id='workspaces-list' style={{ padding: '0 1rem' }}>
+            <div id='workspaces-list' style={{ padding: '0 1.5rem' }}>
               <ListPageHeader>Workspaces</ListPageHeader>
               <FlexRow style={{ marginTop: '0.5em' }}>
                 <div style={{ margin: '0', padding: '0.5em 0.75em 0 0' }}>
@@ -129,12 +129,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
               )}
               <div style={styles.cardArea}>
                 {workspacesLoading ? (
-                  <Spinner style={{ margin: '1.5rem auto' }} />
+                  <Spinner style={{ margin: '2.25rem auto' }} />
                 ) : (
                   <div
                     style={{
                       display: 'flex',
-                      marginTop: '1.5rem',
+                      marginTop: '2.25rem',
                       flexWrap: 'wrap',
                     }}
                   >

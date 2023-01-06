@@ -273,7 +273,7 @@ const styles = reactStyles({
     textAlign: 'left',
   },
   panelRight: {
-    marginRight: '2rem',
+    marginRight: '3rem',
     marginBottom: '5%',
     maxHeight: '90%',
     height: 'min-content',
@@ -448,9 +448,9 @@ export class QuickTourReact extends React.Component<
               ...styles.panelGrid,
               gridTemplateAreas: `'content image'
                                 'controls controls'`,
-              columnGap: '1rem',
+              columnGap: '1.5rem',
               gridTemplateColumns: '0.75fr 0.25fr',
-              gridTemplateRows: 'minmax(0, 1fr) 4rem',
+              gridTemplateRows: 'minmax(0, 1fr) 6rem',
             }}
           >
             <div
@@ -475,8 +475,8 @@ export class QuickTourReact extends React.Component<
                     position: 'absolute',
                     right: '5%',
                     bottom: '5%',
-                    height: '1rem',
-                    width: '1rem',
+                    height: '1.5rem',
+                    width: '1.5rem',
                   }}
                 >
                   <div
@@ -525,7 +525,7 @@ export class QuickTourReact extends React.Component<
                     type='primaryOnDarkBackground'
                     data-test-id='close'
                     onClick={() => this.close()}
-                    style={{ marginLeft: '10%', marginRight: '0.25rem' }}
+                    style={{ marginLeft: '10%', marginRight: '0.375rem' }}
                   >
                     Close
                   </Button>

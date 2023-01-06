@@ -12,16 +12,16 @@ interface Props {
 }
 export const InitialCreditsPanel = (props: Props) => (
   <FlexRow style={styles.initialCreditsBox}>
-    <FlexColumn style={{ marginLeft: '0.8rem' }}>
-      <div style={{ marginTop: '0.4rem' }}>
+    <FlexColumn style={{ marginLeft: '1.2rem' }}>
+      <div style={{ marginTop: '0.6rem' }}>
         <AoU /> initial credits used:
       </div>
       <div>
         Remaining <AoU /> initial credits:
       </div>
     </FlexColumn>
-    <FlexColumn style={{ alignItems: 'flex-end', marginLeft: '1.0rem' }}>
-      <div style={{ marginTop: '0.4rem', fontWeight: 600 }}>
+    <FlexColumn style={{ alignItems: 'flex-end', marginLeft: '1.5rem' }}>
+      <div style={{ marginTop: '0.6rem', fontWeight: 600 }}>
         {formatInitialCreditsUSD(props.freeTierUsage)}
       </div>
       <div style={{ fontWeight: 600 }}>

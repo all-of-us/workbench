@@ -97,7 +97,7 @@ export class RenameModal extends React.Component<Props, States> {
             {summarizeErrors(nameTouched && errors && errors.newName)}
           </ValidationError>
           {!hideDescription && (
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{ marginTop: '1.5rem' }}>
               <label data-test-id='descriptionLabel' style={styles.fieldHeader}>
                 Description:{' '}
               </label>
@@ -118,7 +118,7 @@ export class RenameModal extends React.Component<Props, States> {
             <Button
               data-test-id='rename-button'
               disabled={!!errors || saving}
-              style={{ marginLeft: '0.5rem' }}
+              style={{ marginLeft: '0.75rem' }}
               onClick={() => this.onRename()}
             >
               Rename {toDisplay(resourceType)}

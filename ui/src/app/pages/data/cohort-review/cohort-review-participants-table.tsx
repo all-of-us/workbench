@@ -52,7 +52,7 @@ const styles = reactStyles({
     overflow: 'auto',
   },
   description: {
-    margin: '0 0 0.25rem',
+    margin: '0 0 0.375rem',
     color: '#000000',
   },
   columnHeader: {
@@ -62,24 +62,24 @@ const styles = reactStyles({
   },
   columnBody: {
     background: '#ffffff',
-    padding: '0.5rem 0.5rem 0.3rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.45rem 1.125rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
     borderBottom: 'none',
-    lineHeight: '0.6rem',
+    lineHeight: '0.9rem',
     cursor: 'pointer',
   },
   sortIcon: {
     marginTop: '4px',
     color: '#2691D0',
-    fontSize: '0.5rem',
+    fontSize: '0.75rem',
     float: 'right',
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
   },
   error: {
     width: '50%',
@@ -90,11 +90,11 @@ const styles = reactStyles({
     textAlign: 'left',
     border: '1px solid #ebafa6',
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
   filterIcon: {
-    marginLeft: '0.3rem',
+    marginLeft: '0.45rem',
     padding: '2px 2px 1px 1px',
     borderRadius: '50%',
     fontWeight: 600,
@@ -520,12 +520,12 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
                       : 0,
                   padding:
                     opt.name === 'Select All'
-                      ? '0.5rem 0.5rem'
-                      : '0.3rem 0.4rem',
+                      ? '0.75rem 0.75rem'
+                      : '0.45rem 0.6rem',
                 }}
               >
                 <input
-                  style={{ width: '0.7rem', height: '0.7rem' }}
+                  style={{ width: '1.05rem', height: '1.05rem' }}
                   type='checkbox'
                   name={opt.name}
                   checked={filters[colType].includes(opt.value)}
@@ -533,7 +533,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
                   onChange={(e) => onCheckboxChange(e, colType)}
                   disabled={loading}
                 />
-                <label style={{ paddingLeft: '0.4rem' }}> {opt.name} </label>
+                <label style={{ paddingLeft: '0.6rem' }}> {opt.name} </label>
               </div>
             ))}
         </OverlayPanel>
@@ -574,7 +574,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     return (
       <div style={styles.error}>
         <ClrIcon
-          style={{ margin: '0 0.5rem 0 0.25rem' }}
+          style={{ margin: '0 0.75rem 0 0.375rem' }}
           className='is-solid'
           shape='exclamation-triangle'
           size='22'
@@ -659,7 +659,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         {getColumns()}
       </DataTable>
       {loading && (
-        <div style={{ marginTop: '5rem', position: 'relative' }}>
+        <div style={{ marginTop: '7.5rem', position: 'relative' }}>
           <SpinnerOverlay />
         </div>
       )}

@@ -22,7 +22,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -45,7 +45,7 @@ public class LeonardoMapperTest {
   private static final String DISK_NAME = "disk name";
   private static final String GOOGLE_PROJECT = "google project";
 
-  private App app;
+  private UserAppEnvironment app;
   private KubernetesRuntimeConfig kubernetesRuntimeConfig;
   private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
   private PersistentDiskRequest persistentDiskRequest;
@@ -84,7 +84,7 @@ public class LeonardoMapperTest {
     labels.put("label key 2", "label value 2");
 
     app =
-        new App()
+        new UserAppEnvironment()
             .createdDate("2022-10-10")
             .dateAccessed("2022-10-10")
             .kubernetesRuntimeConfig(kubernetesRuntimeConfig)

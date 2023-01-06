@@ -98,9 +98,9 @@ export class AdminBanner extends React.Component<
       }
     );
     return (
-      <div style={{ width: '24rem' }}>
+      <div style={{ width: '36rem' }}>
         <BoldHeader style={{ fontSize: 18 }}>Service Banners</BoldHeader>
-        <Header style={{ ...styles.smallHeaderStyles, marginTop: '0.5rem' }}>
+        <Header style={{ ...styles.smallHeaderStyles, marginTop: '0.75rem' }}>
           Banner Headline
         </Header>
         <TextInput
@@ -136,10 +136,10 @@ export class AdminBanner extends React.Component<
         >
           <div
             style={{
-              marginTop: '1.5rem',
+              marginTop: '2.25rem',
               display: 'flex',
               alignItems: 'center',
-              width: '3rem',
+              width: '4.5rem',
             }}
           >
             <ReactSwitch

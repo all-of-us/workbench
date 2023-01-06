@@ -51,12 +51,12 @@ public class ConceptBigQueryService {
       // only use answer ids when looking up participants.
       List<Long> pfhhSurveyQuestionIds =
           cohortBuilderService.findPFHHSurveyQuestionIds(questionConceptIds);
+      // need to filter out PFHH survey questions for other survey questions
+      dbNonPFHHSurveyQuestions =
+          dbConceptSetConceptIds.stream()
+              .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
+              .collect(Collectors.toSet());
       if (!pfhhSurveyQuestionIds.isEmpty()) {
-        // need to filter out PFHH survey questions for other survey questions
-        dbNonPFHHSurveyQuestions =
-            dbConceptSetConceptIds.stream()
-                .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
-                .collect(Collectors.toSet());
         // find all answers for the questions
         dbCriteriaAnswerIds = cohortBuilderService.findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }

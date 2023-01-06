@@ -42,8 +42,8 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
   private static final String PD_NAME_PREFIX = "all-of-us-pd-";
-  private static final String APP_NAME_PREFIX = "all-of-us-";
-  // The UUID for user managed resources. Currently, it is used by PD and APP.
+  private static final String USER_APP_NAME_PREFIX = "all-of-us-";
+  // The UUID for user managed resources. Currently, it is used by PD and User Apps.
   @VisibleForTesting static final int UUID_SUFFIX_SIZE = 4;
 
   // user "system account" fields besides those related to access modules
@@ -67,6 +67,7 @@ public class DbUser {
   private Timestamp lastModifiedTime;
   private Timestamp computeSecuritySuspendedUntil;
   private DbNewUserSatisfactionSurvey newUserSatisfactionSurvey;
+  private DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode;
 
   // user-editable Profile fields
 
@@ -76,6 +77,7 @@ public class DbUser {
   private List<Short> degrees;
   private String areaOfResearch;
   private DbDemographicSurvey demographicSurvey;
+  private DbDemographicSurveyV2 demographicSurveyV2;
   private DbAddress address;
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
@@ -84,7 +86,6 @@ public class DbUser {
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
-  private DbDemographicSurveyV2 demographicSurveyV2;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -427,6 +428,21 @@ public class DbUser {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
+  public DbNewUserSatisfactionSurveyOneTimeCode getNewUserSatisfactionSurveyOneTimeCode() {
+    return newUserSatisfactionSurveyOneTimeCode;
+  }
+
+  public DbUser setNewUserSatisfactionSurveyOneTimeCode(
+      DbNewUserSatisfactionSurveyOneTimeCode newUserSatisfactionSurveyOneTimeCode) {
+    this.newUserSatisfactionSurveyOneTimeCode = newUserSatisfactionSurveyOneTimeCode;
+    return this;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
   public DbDemographicSurveyV2 getDemographicSurveyV2() {
     return demographicSurveyV2;
   }
@@ -466,9 +482,9 @@ public class DbUser {
     return getUserPDNamePrefix() + "-" + randomStringForUserResource();
   }
 
-  /** Returns a name for the persistent disk used in APP to be created for this user. */
+  /** Returns a name for the persistent disk to be created for this user for a given AppType. */
   @Transient
-  public String generatePDNameForApp(AppType appType) {
+  public String generatePDNameForUserApps(AppType appType) {
     return getUserPDNamePrefix()
         + '-'
         + appType.toString().toLowerCase()
@@ -477,8 +493,8 @@ public class DbUser {
   }
 
   @Transient
-  public String generateAppName(AppType appType) {
-    return APP_NAME_PREFIX
+  public String generateUserAppName(AppType appType) {
+    return USER_APP_NAME_PREFIX
         + getUserId()
         + '-'
         + appType.toString().toLowerCase()

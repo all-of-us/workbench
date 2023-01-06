@@ -38,10 +38,10 @@ const styles = reactStyles({
     width: '100%',
   },
   card: {
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     justifyContent: 'space-between',
-    marginRight: '1rem',
-    padding: '0.75rem 0.75rem 0rem 0.75rem',
+    marginRight: '1.5rem',
+    padding: '1.125rem 1.125rem 0rem 1.125rem',
     boxShadow: '0 0 0 0',
   },
   cardName: {
@@ -57,7 +57,7 @@ const styles = reactStyles({
     WebkitBoxOrient: 'vertical',
   },
   cardDescription: {
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     display: '-webkit-box',
@@ -65,8 +65,8 @@ const styles = reactStyles({
     WebkitBoxOrient: 'vertical',
   },
   cardButton: {
-    margin: '1rem 0',
-    height: '2rem',
+    margin: '1.5rem 0',
+    height: '3rem',
   },
 });
 
@@ -178,12 +178,14 @@ export const CohortActions = fp.flow(
     render() {
       const { cohort, cohortLoading } = this.state;
       return (
-        <FadeBox style={{ margin: 'auto', marginTop: '1rem', width: '95.7%' }}>
+        <FadeBox
+          style={{ margin: 'auto', marginTop: '1.5rem', width: '95.7%' }}
+        >
           {cohortLoading && <SpinnerOverlay />}
           {cohort && (
             <React.Fragment>
               <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
-              <div style={{ marginTop: '0.25rem' }}>
+              <div style={{ marginTop: '0.375rem' }}>
                 The cohort
                 <RouteLink
                   style={{ color: colors.accent, margin: '0 4px' }}
@@ -193,7 +195,7 @@ export const CohortActions = fp.flow(
                 </RouteLink>
                 has been saved.
               </div>
-              <h3 style={{ ...styles.cohortsHeader, marginTop: '1.5rem' }}>
+              <h3 style={{ ...styles.cohortsHeader, marginTop: '2.25rem' }}>
                 What Next?
               </h3>
               <div style={styles.cardArea}>

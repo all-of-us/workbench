@@ -49,22 +49,22 @@ const styles = reactStyles({
     position: 'relative',
   },
   workspaceMenuWrapper: {
-    paddingTop: '.5rem',
+    paddingTop: '.75rem',
     borderRight: '1px solid',
     borderColor: colorWithWhiteness(colors.dark, 0.6),
-    flex: '0 0 1rem',
+    flex: '0 0 1.5rem',
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
   workspaceName: {
     color: colors.accent,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     fontSize: 18,
     wordBreak: 'break-all',
   },
   workspaceNameDisabled: {
     color: colors.disabled,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     fontSize: 18,
     wordBreak: 'break-all',
     pointerEvents: 'none',
@@ -72,16 +72,16 @@ const styles = reactStyles({
   },
   permissionBox: {
     color: colors.white,
-    height: '1rem',
-    width: '3rem',
+    height: '1.5rem',
+    width: '4.5rem',
     fontSize: 10,
     textAlign: 'center',
-    borderRadius: '0.2rem',
+    borderRadius: '0.3rem',
     padding: 0,
   },
   lockWorkspace: {
     color: colors.warning,
-    marginBottom: '0.1rem',
+    marginBottom: '0.15rem',
     width: '21px',
     height: '21px',
     viewBox: '0 0 25 27',
@@ -254,7 +254,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               <FlexColumn
                 style={{
                   ...styles.workspaceCard,
-                  padding: '.5rem',
+                  padding: '.75rem',
                 }}
                 data-test-id='workspace-card'
               >
@@ -340,7 +340,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                     </div>
                   </FlexColumn>
                   <FlexColumn
-                    style={{ justifyContent: 'flex-end', marginLeft: '0.8rem' }}
+                    style={{ justifyContent: 'flex-end', marginLeft: '1.2rem' }}
                   >
                     <FlexRow style={{ alignContent: 'space-between' }}>
                       {adminLocked && (
@@ -412,7 +412,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               <ModalFooter>
                 <Button
                   type='primary'
-                  style={{ marginLeft: '1rem', marginRight: '1rem' }}
+                  style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}
                   onClick={() => this.handleReviewResearchPurpose()}
                 >
                   REVIEW NOW

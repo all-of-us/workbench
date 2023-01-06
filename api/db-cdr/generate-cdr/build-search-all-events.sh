@@ -388,7 +388,9 @@ WHERE o.observation_concept_id is not null
               where domain_id = 'Observation'
               and vocabulary_id in ('CPT4')
               and standard_concept = 'S'
-            )"
+            )
+    and c.vocabulary_id != 'PPI'
+    and c.concept_class_id != 'Survey'"
 
 ############################################################
 # insert standard device data into cb_search_all_events

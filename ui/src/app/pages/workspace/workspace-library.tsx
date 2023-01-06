@@ -33,24 +33,24 @@ const styles = reactStyles({
   navPanel: {
     display: 'flex',
     flexDirection: 'column',
-    padding: '1rem',
+    padding: '1.5rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.85),
     minWidth: '300px',
     maxWidth: '300px',
-    marginLeft: '-0.6rem',
+    marginLeft: '-0.9rem',
   },
   searchBar: {
-    height: '2rem',
+    height: '3rem',
     fontSize: '16px',
     lineHeight: '19px',
-    paddingLeft: '2rem',
-    marginTop: '0.5rem',
+    paddingLeft: '3rem',
+    marginTop: '0.75rem',
     borderStyle: 'none',
   },
   iconStyling: {
     color: colors.primary,
-    marginRight: '0.5rem',
-    marginLeft: '0.5rem',
+    marginRight: '0.75rem',
+    marginLeft: '0.75rem',
     height: 24,
     width: 24,
   },
@@ -61,7 +61,7 @@ const styles = reactStyles({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: '0.35rem 0',
+    padding: '0.525rem 0',
     borderRadius: '3px',
   },
   divider: {
@@ -69,14 +69,14 @@ const styles = reactStyles({
     backgroundColor: colors.primary,
     borderWidth: '0px',
     height: '1px',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
   },
   menuLinkSelected: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
   },
   libraryTabDivider: {
     width: '100%',
-    margin: '0.5rem 0',
+    margin: '0.75rem 0',
     backgroundColor: colorWithWhiteness(colors.dark, 0.5),
     border: '0 none',
     height: 1,
@@ -358,11 +358,11 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
               })}
             </FlexColumn>
           </div>
-          <div style={{ padding: '1rem', width: '100%' }}>
+          <div style={{ padding: '1.5rem', width: '100%' }}>
             <Header style={{ textTransform: 'uppercase' }}>
               Researcher Workbench Workspace Library
             </Header>
-            <FlexColumn style={{ marginTop: '2rem' }}>
+            <FlexColumn style={{ marginTop: '3rem' }}>
               <FlexRow>
                 <img src={currentTab.icon} style={styles.iconStyling} />
                 <div
@@ -379,7 +379,7 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
                         color: colors.primary,
                         fontWeight: 400,
                         fontSize: 14,
-                        paddingTop: '0.25rem',
+                        paddingTop: '0.375rem',
                       }}
                     >
                       {currentTab.description}
@@ -399,12 +399,12 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
                 }}
               >
                 {this.areWorkspacesLoading() ? (
-                  <Spinner style={{ width: '100%', marginTop: '0.5rem' }} />
+                  <Spinner style={{ width: '100%', marginTop: '0.75rem' }} />
                 ) : (
                   <div
                     style={{
                       display: 'flex',
-                      marginTop: '0.5rem',
+                      marginTop: '0.75rem',
                       flexWrap: 'wrap',
                     }}
                   >

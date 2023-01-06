@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.db.dao.UserService.LATEST_AOU_TOS_VERSION;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
@@ -27,6 +26,7 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -120,6 +120,8 @@ public class ProfileServiceTest {
   // enables access to the logged in user
   private static DbUser loggedInUser;
 
+  private static WorkbenchConfig providedWorkbenchConfig;
+
   @TestConfiguration
   @Import({
     FakeClockConfiguration.class,
@@ -141,6 +143,11 @@ public class ProfileServiceTest {
     NewUserSatisfactionSurveyService.class,
   })
   static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
+    }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -159,6 +166,8 @@ public class ProfileServiceTest {
     loggedInUser = new DbUser();
     loggedInUser.setUserId(1000);
     loggedInUser = userDao.save(loggedInUser);
+
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
   }
 
   @Test
@@ -177,8 +186,11 @@ public class ProfileServiceTest {
 
   @Test
   public void testReturnsLastAcknowledgedTermsOfService() {
+    int latestVersion = 5; // arbitrary;
+    providedWorkbenchConfig.termsOfService.latestAouVersion = latestVersion;
+
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
-    userTermsOfService.setTosVersion(LATEST_AOU_TOS_VERSION);
+    userTermsOfService.setTosVersion(latestVersion);
     userTermsOfService.setAouAgreementTime(new Timestamp(100));
     when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(1))
         .thenReturn(Optional.of(userTermsOfService));
@@ -186,7 +198,7 @@ public class ProfileServiceTest {
     DbUser user = new DbUser();
     user.setUserId(1);
     Profile profile = profileService.getProfile(user);
-    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(LATEST_AOU_TOS_VERSION);
+    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(latestVersion);
     assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(100);
   }
 

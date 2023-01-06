@@ -130,6 +130,12 @@ public class AppsControllerTest {
   }
 
   @Test
+  public void testCanPerformAppActions() {
+    // does not throw
+    controller.validateCanPerformApiAction(testWorkspace);
+  }
+
+  @Test
   public void testCanPerformAppActions_featureNotEnabled() throws Exception {
     config.featureFlags.enableGkeApp = false;
     assertThrows(

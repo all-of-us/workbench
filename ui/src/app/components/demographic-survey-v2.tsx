@@ -85,9 +85,9 @@ const styles = reactStyles({
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.primary,
-    lineHeight: '1.25rem',
+    lineHeight: '1.875rem',
   },
-  answer: { margin: '0.0rem 0.25rem', color: colors.primary },
+  answer: { margin: '0.0rem 0.375rem', color: colors.primary },
 });
 
 const OTHER_DISABILITY_MAX_LENGTH = 200;
@@ -319,11 +319,11 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
           id='demographics-survey'
           style={{
             backgroundColor: colorWithWhiteness(colors.accent, 0.75),
-            padding: '1rem',
+            padding: '1.5rem',
             borderRadius: '5px',
             color: colors.primary,
-            marginBottom: '1rem',
-            marginTop: '1rem',
+            marginBottom: '1.5rem',
+            marginTop: '1.5rem',
           }}
         >
           <div>
@@ -332,7 +332,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             to these questions will help us learn more about who is using the
             research platform.
           </div>
-          <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginTop: '1.5rem' }}>
             Your privacy is important to us. Your individual responses will not
             be displayed on your researcher profile and will only be accessible
             to a limited number of authorized <AoU /> personnel. <AoU /> may
@@ -982,9 +982,9 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             selected={survey.disabilityErrands}
             onChange={(value) => onUpdate(DISABILITY_ERRANDS, value)}
           />
-          <FlexColumn style={{ marginBottom: '1rem' }}>
+          <FlexColumn style={{ marginBottom: '1.5rem' }}>
             <div
-              style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
+              style={{ ...styles.question, flex: 1, marginBottom: '0.375rem' }}
             >
               {getQuestionLabel(
                 DISABILITY_OTHER,
@@ -999,21 +999,21 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               onChange={(value) => onUpdate('disabilityOtherText', value)}
               initialText={survey.disabilityOtherText || ''}
               textBoxStyleOverrides={{ width: '100%' }}
-              heightOverride={{ height: '5rem' }}
+              heightOverride={{ height: '7.5rem' }}
               maxCharacters={OTHER_DISABILITY_MAX_LENGTH}
             />
           </FlexColumn>
           <div style={styles.question}>
             {getQuestionLabel(YEAR_OF_BIRTH, 'Year of birth')}
           </div>
-          <FlexRow style={{ alignItems: 'center', marginBottom: '1rem' }}>
+          <FlexRow style={{ alignItems: 'center', marginBottom: '1.5rem' }}>
             <NumberInput
               onChange={(value) => onUpdate(YEAR_OF_BIRTH, value)}
               disabled={survey.yearOfBirthPreferNot}
               min={minYear}
               max={maxYear}
               value={survey.yearOfBirth || ''}
-              style={{ width: '4rem' }}
+              style={{ width: '6rem' }}
             />
             <CheckBox
               checked={survey.yearOfBirthPreferNot}
@@ -1021,7 +1021,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 onUpdate(YEAR_OF_BIRTH, null);
                 onUpdate('yearOfBirthPreferNot', value);
               }}
-              style={{ marginLeft: '1rem' }}
+              style={{ marginLeft: '1.5rem' }}
             />
             <label
               htmlFor='show-again-checkbox'
@@ -1075,9 +1075,9 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) => onUpdate(DISADVANTAGED, value)}
           />
 
-          <FlexColumn style={{ marginTop: '1rem' }}>
+          <FlexColumn style={{ marginTop: '1.5rem' }}>
             <div
-              style={{ ...styles.question, flex: 1, marginBottom: '0.25rem' }}
+              style={{ ...styles.question, flex: 1, marginBottom: '0.375rem' }}
             >
               {getQuestionLabel(
                 DEMOGRAPHIC_SURVEY_COMMENTS,

@@ -60,21 +60,21 @@ export const commonStyles = reactStyles({
     paddingLeft: '1em',
   },
   textInput: {
-    width: '14rem',
+    width: '21rem',
     opacity: '100%',
     marginLeft: '1em',
   },
   textInputContainer: {
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
   dropdown: {
     minWidth: '70px',
-    width: '14rem',
+    width: '21rem',
     marginLeft: '1em',
   },
   fadeBox: {
     margin: 'auto',
-    paddingTop: '1rem',
+    paddingTop: '1.5rem',
     width: '96.25%',
     minWidth: '1232px',
     color: colors.primary,
@@ -387,7 +387,7 @@ export const DropdownWithLabel = ({
 }) => {
   const dropdownHighlightStyling = `body .${className} .p-inputtext { background-color: ${colors.highlight}; }`;
   return (
-    <FlexColumn data-test-id={dataTestId} style={{ marginTop: '1rem' }}>
+    <FlexColumn data-test-id={dataTestId} style={{ marginTop: '1.5rem' }}>
       {highlightOnChange && currentValue !== previousValue && (
         <style>{dropdownHighlightStyling}</style>
       )}

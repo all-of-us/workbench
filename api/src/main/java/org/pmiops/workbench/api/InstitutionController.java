@@ -3,9 +3,9 @@ package org.pmiops.workbench.api;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -26,16 +26,16 @@ public class InstitutionController implements InstitutionApiDelegate {
 
   private final InstitutionService institutionService;
   private final Provider<DbUser> userProvider;
-  private final UserService userService;
+  private final AccessSyncService accessSyncService;
 
   @Autowired
   InstitutionController(
       final InstitutionService institutionService,
       final Provider<DbUser> userProvider,
-      final UserService userService) {
+      final AccessSyncService accessSyncService) {
     this.institutionService = institutionService;
     this.userProvider = userProvider;
-    this.userService = userService;
+    this.accessSyncService = accessSyncService;
   }
 
   private Institution getInstitutionImpl(final String shortName) {
@@ -116,7 +116,8 @@ public class InstitutionController implements InstitutionApiDelegate {
                         String.format("Could not update Institution '%s'", shortName)));
     institutionService
         .getAffiliatedUsers(shortName)
-        .forEach(u -> userService.updateUserAccessTiers(u, Agent.asAdmin(userProvider.get())));
+        .forEach(
+            u -> accessSyncService.updateUserAccessTiers(u, Agent.asAdmin(userProvider.get())));
     return ResponseEntity.ok(institution);
   }
 

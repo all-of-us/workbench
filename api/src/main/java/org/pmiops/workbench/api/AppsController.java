@@ -7,10 +7,10 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.model.App;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -64,7 +64,7 @@ public class AppsController implements AppsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<App> getApp(String workspaceNamespace, String appName) {
+  public ResponseEntity<UserAppEnvironment> getApp(String workspaceNamespace, String appName) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
 
@@ -74,7 +74,7 @@ public class AppsController implements AppsApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> updateApp(
-      String workspaceNamespace, String appName, App app) {
+      String workspaceNamespace, String appName, UserAppEnvironment app) {
     throw new UnsupportedOperationException("API not supported.");
   }
 
@@ -89,13 +89,13 @@ public class AppsController implements AppsApiDelegate {
   }
 
   /**
-   * Validates user is allowed to perform APP action.
+   * Validates user is allowed to perform User App actions.
    *
-   * <p>App ACTION requires:
+   * <p>User App actions require:
    *
    * <ul>
-   *   <li>Feature is enabled
-   *   <li>User compute is not suspend due to security reason (e.g. egress alert)
+   *   <li>The User Apps feature is enabled (FF enableGkeApp)
+   *   <li>User compute is not suspended due to security reasons (e.g. egress alert)
    *   <li>User is OWNER or WRITER of the workspace
    * </ul>
    */

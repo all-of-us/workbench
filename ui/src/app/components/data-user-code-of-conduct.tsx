@@ -39,34 +39,34 @@ const styles = reactStyles({
     height: '100%',
     // The chrome is minimized on this page to increase scroll space. This has
     // the unwanted side-effect of removing the app padding. Add this same padding back.
-    paddingLeft: '.6rem',
-    paddingRight: '.6rem',
+    paddingLeft: '.9rem',
+    paddingRight: '.9rem',
   },
   dataUserCodeOfConductFooter: {
     backgroundColor: colors.white,
     marginTop: 'auto',
-    paddingTop: '1rem',
-    paddingBottom: '1rem',
+    paddingTop: '1.5rem',
+    paddingBottom: '1.5rem',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   smallTopMargin: {
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
   },
   largeTopMargin: {
-    marginTop: '1.5rem',
+    marginTop: '2.25rem',
   },
   bold: {
     fontWeight: 600,
   },
   textInput: {
     padding: '0 1ex',
-    width: '12rem',
+    width: '18rem',
     fontSize: 10,
     borderRadius: 6,
   },
   signature: {
-    margin: '0 3.5rem',
+    margin: '0 5.25rem',
   },
   signedText: {
     margin: '0 1ex',
@@ -149,7 +149,7 @@ interface InitialsProps {
 }
 
 const InitialsAgreement = (props: InitialsProps) => (
-  <div style={{ display: 'flex', marginTop: '0.5rem' }}>
+  <div style={{ display: 'flex', marginTop: '0.75rem' }}>
     {props.signatureState === DuccSignatureState.SIGNED ? (
       <SignedText text={props.signedInitials?.toLocaleUpperCase()} />
     ) : (
@@ -160,7 +160,7 @@ const InitialsAgreement = (props: InitialsProps) => (
         style={{ width: '4ex', textAlign: 'center', padding: 0 }}
       />
     )}
-    <div style={{ marginLeft: '0.5rem' }}>{props.children}</div>
+    <div style={{ marginLeft: '0.75rem' }}>{props.children}</div>
   </div>
 );
 
@@ -181,7 +181,7 @@ const DuccContentPage = (props: ContentProps) => {
   } = props;
   const versionInfo = getDuccRenderingInfo(versionToRender);
   const htmlViewerStyle: CSSProperties = {
-    margin: '1rem 0 1rem',
+    margin: '1.5rem 0 1.5rem',
     height: versionInfo.height,
   };
 

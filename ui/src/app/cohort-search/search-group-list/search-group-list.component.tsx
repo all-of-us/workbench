@@ -1,13 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import {
-  CdrVersionTiersResponse,
-  CohortDefinition,
-  CriteriaMenu,
-  Domain,
-  Workspace,
-} from 'generated/fetch';
+import { CohortDefinition, CriteriaMenu, Domain } from 'generated/fetch';
 
 import { CohortCriteriaMenu } from 'app/cohort-search/cohort-criteria-menu';
 import { SearchGroup } from 'app/cohort-search/search-group/search-group.component';
@@ -22,11 +16,9 @@ import {
 } from 'app/cohort-search/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { cdrVersionStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -46,16 +38,16 @@ const styles = reactStyles({
   card: {
     background: colors.white,
     borderColor: 'rgba(215, 215, 215, 0.5)',
-    borderRadius: '0.2rem',
-    boxShadow: `0 0.125rem 0.125rem 0 ${colorWithWhiteness(
+    borderRadius: '0.3rem',
+    boxShadow: `0 0.1875rem 0.1875rem 0 ${colorWithWhiteness(
       colors.black,
       0.85
     )}`,
-    margin: '0 0 0.6rem',
+    margin: '0 0 0.9rem',
   },
   cardBlock: {
     borderBottom: `1px solid ${colors.light}`,
-    padding: '0.5rem 0.5rem 0.5rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.75rem 1.125rem',
   },
   cardHeader: {
     backgroundColor: colorWithWhiteness(colors.light, -0.3),
@@ -63,15 +55,15 @@ const styles = reactStyles({
     fontSize: '14px',
     fontWeight: 600,
     minWidth: '100%',
-    padding: '0.5rem 0.75rem',
+    padding: '0.75rem 1.125rem',
   },
   circle: {
     backgroundColor: 'rgb(226, 226, 233)',
     borderRadius: '50%',
-    width: '2.5rem',
-    height: '2.5rem',
-    marginBottom: '0.5rem',
-    lineHeight: '2.5rem',
+    width: '3.75rem',
+    height: '3.75rem',
+    marginBottom: '0.75rem',
+    lineHeight: '3.75rem',
     textAlign: 'center',
   },
   circleWrapper: {
@@ -105,14 +97,6 @@ function mapMenuItem(item: CriteriaMenu) {
   };
 }
 
-export const notSynthAndHasSurveyConductData = (workspace: Workspace) => {
-  const { hasSurveyConductData, name } = getCdrVersion(
-    workspace,
-    cdrVersionStore.get() as CdrVersionTiersResponse
-  );
-  return !name.includes('Synthetic') && hasSurveyConductData;
-};
-
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
@@ -120,17 +104,13 @@ interface Props {
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;
-  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
   criteriaMenuOptions: Array<any>;
   index: number;
 }
-const SearchGroupList = fp.flow(
-  withCurrentWorkspace(),
-  withCdrVersions()
-)(
+const SearchGroupList = fp.flow(withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private subscription: Subscription;
     constructor(props: Props) {
@@ -166,7 +146,6 @@ const SearchGroupList = fp.flow(
 
     getMenuOptions() {
       const {
-        workspace,
         workspace: { cdrVersionId, id, namespace },
       } = this.props;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
@@ -182,23 +161,7 @@ const SearchGroupList = fp.flow(
                   id,
                   option.id
                 );
-                const filterSurveyConductData =
-                  option.domain === Domain.SURVEY.toString() &&
-                  notSynthAndHasSurveyConductData(workspace);
-                // Survey items to hide if hasSurveyConductData cdr flag is enabled
-                const surveyConductMenuItems = [
-                  'Personal Medical History',
-                  'Family History',
-                  'Personal and Family Health History',
-                ];
-                // TODO Remove filter after fix for survey conduct data in new dataset is complete
-                option.children = children.items
-                  .filter(
-                    ({ name }) =>
-                      !filterSurveyConductData ||
-                      !surveyConductMenuItems.includes(name)
-                  )
-                  .map(mapMenuItem);
+                option.children = children.items.map(mapMenuItem);
               }
               return option;
             })
@@ -251,9 +214,10 @@ const SearchGroupList = fp.flow(
             <div key={g} data-test-id={`${role}-search-group`}>
               <SearchGroup
                 group={group}
-                index={g + index}
-                setSearchContext={setSearchContext}
+                groupIndex={g + index}
                 role={role}
+                roleIndex={g}
+                setSearchContext={setSearchContext}
                 updated={updated}
                 updateRequest={updateRequest}
               />
@@ -265,7 +229,7 @@ const SearchGroupList = fp.flow(
           <div style={styles.card}>
             {/* Group Header */}
             <div style={styles.cardHeader}>
-              <div style={{ marginLeft: '1.15rem' }}>
+              <div style={{ marginLeft: '1.725rem' }}>
                 Group {groups.length + index + 1}
               </div>
             </div>

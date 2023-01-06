@@ -34,27 +34,27 @@ export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS =
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
-    marginTop: '-0.2rem',
+    marginTop: '-0.3rem',
     width: '18px',
   },
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
-    height: '1.5rem',
-    lineHeight: '1.6rem',
+    height: '2.25rem',
+    lineHeight: '2.4rem',
     textAlign: 'center',
-    width: '1.5rem',
+    width: '2.25rem',
   },
   detailExternalLinks: {
     width: '100%',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
     textAlign: 'right',
     verticalAlign: 'middle',
   },
   externalLinks: {
-    flex: '0 0 calc(55% - 1.25rem)',
-    maxWidth: 'calc(55% - 1.25rem)',
-    lineHeight: '0.75rem',
+    flex: '0 0 calc(55% - 1.875rem)',
+    maxWidth: 'calc(55% - 1.875rem)',
+    lineHeight: '1.125rem',
     textAlign: 'right',
     verticalAlign: 'middle',
   },
@@ -65,22 +65,22 @@ const styles = reactStyles({
   },
   loadingSubTree: {
     height: '100%',
-    minHeight: '15rem',
+    minHeight: '22.5rem',
     pointerEvents: 'none',
     opacity: 0.3,
   },
   titleBar: {
     alignItems: 'center',
     color: colors.primary,
-    margin: '0 0.25rem',
+    margin: '0 0.375rem',
     width: '80%',
-    height: '2rem',
+    height: '3rem',
   },
   titleHeader: {
-    flex: '0 0 calc(45% - 1rem)',
-    maxWidth: 'calc(45% - 1rem)',
-    lineHeight: '1rem',
-    margin: '0 0 0 0.75rem',
+    flex: '0 0 calc(45% - 1.5rem)',
+    maxWidth: 'calc(45% - 1.5rem)',
+    lineHeight: '1.5rem',
+    margin: '0 0 0 1.125rem',
   },
 });
 export const growlCSS =
@@ -89,26 +89,26 @@ export const growlCSS =
     position: sticky;
   }
   .p-growl.p-growl-topright {
-    height: 1rem;
-    width: 6.4rem;
-    line-height: 0.7rem;
+    height: 1.5rem;
+    width: 9.6rem;
+    line-height: 1.05rem;
   }
   .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
-    font-size: 1rem !important;
-    margin-top: 0.19rem
+    font-size: 1.5rem !important;
+    margin-top: 0.285rem
   }
   .p-growl-item-container:after {
     content:"";
     position: absolute;
     left: 97.5%;
-    top: 0.1rem;
+    top: 0.15rem;
     width: 0px;
     height: 0px;
-    border-top: 0.5rem solid transparent;
-    border-left: 0.5rem solid ` +
+    border-top: 0.75rem solid transparent;
+    border-left: 0.75rem solid ` +
   colorWithWhiteness(colors.success, 0.6) +
   `;
-    border-bottom: 0.5rem solid transparent;
+    border-bottom: 0.75rem solid transparent;
   }
   .p-growl-item-container {
     background-color: ` +
@@ -120,13 +120,13 @@ export const growlCSS =
     background-color: ` +
   colorWithWhiteness(colors.success, 0.6) +
   `!important;
-    margin-left: 0.3rem;
+    margin-left: 0.45rem;
   }
   .p-growl-message {
     margin-left: 0.5em
   }
   .p-growl-details {
-    margin-top: 0.1rem;
+    margin-top: 0.15rem;
   }
  `;
 
@@ -237,14 +237,14 @@ export const CriteriaSearch = fp.flow(
     getGrowlStyle() {
       return !this.isConcept
         ? styles.growl
-        : { ...styles.growl, marginRight: '2.5rem', paddingTop: '2.75rem' };
+        : { ...styles.growl, marginRight: '3.75rem', paddingTop: '4.125rem' };
     }
 
     searchContentStyle(mode: string) {
       let style = {
         display: 'none',
         flex: 1,
-        minWidth: '14rem',
+        minWidth: '21rem',
         overflowY: 'auto',
         overflowX: 'hidden',
         width: '100%',
@@ -428,7 +428,7 @@ export const CriteriaSearch = fp.flow(
           <FlexRowWrap
             style={{
               ...styles.titleBar,
-              marginTop: source === 'cohort' ? '1rem' : 0,
+              marginTop: source === 'cohort' ? '1.5rem' : 0,
             }}
           >
             {source !== 'conceptSetDetails' && (
@@ -488,7 +488,7 @@ export const CriteriaSearch = fp.flow(
             style={
               loadingSubtree
                 ? styles.loadingSubTree
-                : { height: '100%', minHeight: '15rem' }
+                : { height: '100%', minHeight: '22.5rem' }
             }
           >
             <style>{growlCSS}</style>

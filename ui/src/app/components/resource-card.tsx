@@ -29,10 +29,10 @@ import { Action, ResourceActionsMenu } from './resource-actions-menu';
 
 const styles = reactStyles({
   card: {
-    marginTop: '1rem',
+    marginTop: '1.5rem',
     justifyContent: 'space-between',
-    marginRight: '1rem',
-    padding: '0.75rem 0.75rem 0rem 0.75rem',
+    marginRight: '1.5rem',
+    padding: '1.125rem 1.125rem 0rem 1.125rem',
     boxShadow: '0 0 0 0',
   },
   resourceName: {
@@ -63,11 +63,11 @@ const styles = reactStyles({
     display: 'inline-block',
     lineHeight: '14px',
     fontWeight: 300,
-    marginBottom: '0.2rem',
+    marginBottom: '0.3rem',
   },
   resourceType: {
     height: '22px',
-    width: '6rem',
+    width: '9rem',
     paddingLeft: '10px',
     paddingRight: '10px',
     borderRadius: '2px',

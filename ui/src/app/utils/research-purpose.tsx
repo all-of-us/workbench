@@ -27,7 +27,7 @@ const styles = {
     padding: '10px',
     backgroundColor: colors.white,
     color: colors.primary,
-    marginLeft: '0.5rem',
+    marginLeft: '0.75rem',
     borderRadius: '3px',
   },
 };
@@ -132,7 +132,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
         <div
           style={{
             ...styles.researchPurposeItemHeader,
-            marginTop: index === 0 ? 0 : '0.5rem',
+            marginTop: index === 0 ? 0 : '0.75rem',
           }}
         >
           {selectedPopulationOfInterest.label}
@@ -143,7 +143,7 @@ export function getSelectedPopulations(researchPurpose: ResearchPurpose) {
             <div
               style={{
                 ...styles.sectionItemWithBackground,
-                marginTop: '0.5rem',
+                marginTop: '0.75rem',
               }}
               key={subCategoryIndex}
             >
