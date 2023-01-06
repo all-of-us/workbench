@@ -58,6 +58,10 @@ SELECT
         WHEN f.person_id is null THEN 0
         ELSE 1
       END has_fitbit
+    , CASE
+        WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
+        ELSE null
+      END state_of_residence
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
