@@ -39,7 +39,7 @@ const styles = reactStyles({
   },
   typeColumn: {
     textAlign: 'left',
-    width: '130px',
+    width: '140px',
   },
   modifiedDateColumn: {
     textAlign: 'left',
@@ -226,9 +226,9 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
           <DataTable
             data-test-id='resource-list'
             value={tableData}
-            scrollable={true}
             sortMode='multiple'
             paginator
+            breakpoint='0px'
             rows={ROWS_PER_PAGE_RESOURCE_TABLE}
           >
             <Column field='menu' style={styles.menu} />
