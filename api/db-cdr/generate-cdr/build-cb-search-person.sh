@@ -30,6 +30,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , dob
         , is_deceased
         , has_fitbit
+        , state_of_residence
     )
 SELECT
       p.person_id
