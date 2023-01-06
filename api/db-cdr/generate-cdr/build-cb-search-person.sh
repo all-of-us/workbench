@@ -104,6 +104,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_array_data
         , has_lr_whole_genome_variant
         , has_structural_variant_data
+        , state_of_residence
     )
 SELECT
       p.person_id
@@ -148,6 +149,10 @@ SELECT
         WHEN svt.sample_name is null THEN 0
         ELSE 1
       END has_structural_variant_data
+    , CASE
+        WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
+        ELSE null
+      END state_of_residence
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
