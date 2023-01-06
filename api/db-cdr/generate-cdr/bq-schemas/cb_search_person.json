@@ -83,5 +83,10 @@
     "mode": "NULLABLE",
     "name": "has_structural_variant_data",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "state_of_residence",
+    "type": "STRING"
   }
 ]
