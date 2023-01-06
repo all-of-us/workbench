@@ -30,4 +30,6 @@ public interface ChartService {
   List<ParticipantChartData> findParticipantChartData(Long participantId, Domain domain, int limit);
 
   List<ChartData> getChartData(CohortDefinition cohortDefinition, Domain domain);
+
+  List<ChartData> getChartDataMap(CohortDefinition cohortDefinition);
 }

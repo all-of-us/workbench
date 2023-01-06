@@ -202,6 +202,14 @@ export const Chart = withCurrentWorkspace()(
         return result.items;
       });
 
+      const cdrChartDataMap = await this.fetchChartDataMap(true).then(
+        (result) => {
+          return result.items;
+        }
+      );
+
+      console.log('cdrChartDataMap: ', cdrChartDataMap);
+
       // get available categories and their valueMap => used for getting color-index
       const { categoryNames, categoryValues } =
         getAvailableCategories(cdrChartData);
@@ -307,6 +315,16 @@ export const Chart = withCurrentWorkspace()(
       await this.getChartDataOld();
     }
 
+    async fetchChartDataMap(forCdr: boolean) {
+      const {
+        cohortId,
+        workspace: { id, namespace },
+      } = this.props;
+      return forCdr
+        ? chartBuilderApi().getChartData(namespace, id, 0, null, true)
+        : chartBuilderApi().getChartData(namespace, id, +cohortId, null, true);
+    }
+
     async fetchChartData(forCdr: boolean) {
       const {
         domain,
@@ -314,8 +332,14 @@ export const Chart = withCurrentWorkspace()(
         workspace: { id, namespace },
       } = this.props;
       return forCdr
-        ? chartBuilderApi().getChartData(namespace, id, 0, domain)
-        : chartBuilderApi().getChartData(namespace, id, +cohortId, domain);
+        ? chartBuilderApi().getChartData(namespace, id, 0, domain, false)
+        : chartBuilderApi().getChartData(
+            namespace,
+            id,
+            +cohortId,
+            domain,
+            false
+          );
     }
 
     async getChartDataOld() {

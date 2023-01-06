@@ -1,6 +1,9 @@
 package org.pmiops.workbench.cohortbuilder.mapper;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import java.util.stream.StreamSupport;
@@ -92,27 +95,45 @@ public interface CohortBuilderMapper {
         .collect(ImmutableList.toImmutableList());
   }
 
-  default ChartData fieldValueListToChartData(FieldValueList row) {
+  default ChartData fieldValueListToChartData(FieldValueList row, FieldList fields) {
     ChartData data = new ChartData();
     FieldValues.getString(row, "gender").ifPresent(data::setGender);
     FieldValues.getString(row, "sexAtBirth").ifPresent(data::setSexAtBirth);
     FieldValues.getString(row, "race").ifPresent(data::setRace);
     FieldValues.getString(row, "ethnicity").ifPresent(data::setEthnicity);
-    FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
     FieldValues.getLong(row, "count").ifPresent(data::setCount);
-    if (row.stream().count() > 6) {
+    // optional values
+    if (fields.contains(Field.of("ageBin", LegacySQLTypeName.STRING))) {
+      FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
+    }
+    if (fields.contains(Field.of("stateCode", LegacySQLTypeName.STRING))) {
+      FieldValues.getString(row, "stateCode").ifPresent(data::setStateCode);
+    }
+    if (fields.contains(Field.of("domain", LegacySQLTypeName.STRING))) {
       FieldValues.getString(row, "domain").ifPresent(data::setDomain);
+    }
+    if (fields.contains(Field.of("conceptName", LegacySQLTypeName.STRING))) {
       FieldValues.getString(row, "conceptName").ifPresent(data::setConceptName);
+    }
+    if (fields.contains(Field.of("conceptId", LegacySQLTypeName.NUMERIC))) {
       FieldValues.getLong(row, "conceptId").ifPresent(data::setConceptId);
+    }
+    if (fields.contains(Field.of("conceptRank", LegacySQLTypeName.NUMERIC))) {
       FieldValues.getLong(row, "conceptRank").ifPresent(data::setConceptRank);
+    }
+    if (fields.contains(Field.of("numConceptsCoOccur", LegacySQLTypeName.NUMERIC))) {
       FieldValues.getLong(row, "numConceptsCoOccur").ifPresent(data::setNumConceptsCoOccur);
     }
+
     return data;
   }
 
   default ImmutableList<ChartData> tableResultToChartData(TableResult tableResult) {
+
     return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
-        .map(this::fieldValueListToChartData)
+        .map(
+            fieldValueList ->
+                this.fieldValueListToChartData(fieldValueList, tableResult.getSchema().getFields()))
         .collect(ImmutableList.toImmutableList());
   }
 }

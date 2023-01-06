@@ -184,7 +184,7 @@ public class ChartQueryBuilder extends QueryBuilder {
           + TBL_TMP_DEMO
           + " \n"
           + "group by 1,2,3,4,5\n"
-          + "order by gender, race, ageBin";
+          + "order by 1,2,3,4,5";
 
   private static final String NEW_CHART_DOMAIN_SQL =
       "\n"
@@ -211,8 +211,37 @@ public class ChartQueryBuilder extends QueryBuilder {
           + TBL_TMP_TOP_N_CO_OCCUR
           + " using(person_id)\n"
           + "group by 1,2,3,4,5,6,7,8,9,10\n"
-          + "order by gender, race, ageBin, conceptRank";
+          + "order by 1,2,3,4,5,6,7,8,9,10";
 
+  private static final String TBL_TMP_DEMO_MAP = "tmp_demo_map";
+  private static final String WITH_TMP_DEMO_MAP_SQL =
+      TBL_TMP_DEMO_MAP
+          + " AS \n"
+          + "(\n"
+          + "select person_id,\n"
+          + "       gender,\n"
+          + "       sex_at_birth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       state_of_residence\n"
+          + " from `${projectId}.${dataSetId}.cb_search_person`\n"
+          + " JOIN "
+          + TBL_TMP_COHORT_IDS
+          + " using (person_id) \n"
+          + ")";
+
+  private static final String NEW_CHART_DEMO_MAP_SQL =
+      "SELECT gender,\n"
+          + "       sex_at_birth as sexAtBirth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       state_of_residence as stateCode,\n"
+          + "       count(distinct person_id) as count\n"
+          + " FROM "
+          + TBL_TMP_DEMO_MAP
+          + " \n"
+          + "group by 1,2,3,4,5\n"
+          + "order by 1,2,3,4,5";
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -387,6 +416,42 @@ public class ChartQueryBuilder extends QueryBuilder {
     System.out.println("*******Chart SQL - params******: " + temp);
     System.out.println(params);
     System.out.println("*******Chart SQL and params******\n\n" + temp);
+
+    return QueryJobConfiguration.newBuilder(chartSql.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public QueryJobConfiguration buildNewChartDataMapQuery(ParticipantCriteria participantCriteria) {
+
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    // 1. build cohort pids SQL
+    StringBuilder personIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
+    if (participantCriteria.getCohortDefinition() == null) {
+      // for whole CDR remove the 'WHERE' clause alternately add ' 1 = 1 \n'
+      personIdsSqlBuilder.append(" 1 = 1 \n");
+    } else {
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, personIdsSqlBuilder, params);
+      addDataFilters(
+          participantCriteria.getCohortDefinition().getDataFilters(), personIdsSqlBuilder, params);
+    }
+    // 2.build temp demographics table from cohort_pids sql - no grouping is done
+    String withPersonIdsDemographicsSql =
+        new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, personIdsSqlBuilder))
+            .append(",\n")
+            .append(WITH_TMP_DEMO_MAP_SQL)
+            .toString();
+    // create final SQL query
+    StringBuilder chartSql = new StringBuilder();
+    // 3. For demographics chart: append sql for grouping using tables in WITH
+    chartSql.append(withPersonIdsDemographicsSql).append("\n").append(NEW_CHART_DEMO_MAP_SQL);
+
+    System.out.println("*******MAP Chart SQL and params******: ");
+    System.out.println(chartSql);
+    System.out.println("*******MAP Chart SQL - params******: ");
+    System.out.println(params);
+    System.out.println("*******MAP Chart SQL and params******\n\n");
 
     return QueryJobConfiguration.newBuilder(chartSql.toString())
         .setNamedParameters(params)

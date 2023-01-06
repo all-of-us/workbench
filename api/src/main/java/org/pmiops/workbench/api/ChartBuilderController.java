@@ -39,7 +39,7 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
 
   @Override
   public ResponseEntity<ChartDataListResponse> getChartData(
-      String workspaceNamespace, String workspaceId, Long cohortId, String domain) {
+      String workspaceNamespace, String workspaceId, Long cohortId, String domain, Boolean isMap) {
 
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -47,6 +47,7 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
     System.out.println("cohortId:" + cohortId);
     System.out.println("domain:" + domain);
     System.out.println("domain is null?:" + (domain == null));
+    System.out.println("isMap:" + isMap);
 
     Domain domainEnum = null;
     if (domain.length() > 0) {
@@ -59,9 +60,13 @@ public class ChartBuilderController implements ChartBuilderApiDelegate {
       System.out.println("cohortDefinition:" + cohortDefinition);
     }
     ChartDataListResponse response = new ChartDataListResponse();
+    if (isMap) {
+      return ResponseEntity.ok(response.items(chartService.getChartDataMap(cohortDefinition)));
 
-    return ResponseEntity.ok(
-        response.items(chartService.getChartData(cohortDefinition, domainEnum)));
+    } else {
+      return ResponseEntity.ok(
+          response.items(chartService.getChartData(cohortDefinition, domainEnum)));
+    }
   }
 
   private Domain getValidDomain(String domain) {

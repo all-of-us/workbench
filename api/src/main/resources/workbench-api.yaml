@@ -4213,6 +4213,12 @@ paths:
           type: string
           required: false
           description: domain name
+        - in: query
+          name: isMap
+          type: boolean
+          default: false
+          required: false
+          description: gets chart data with state information
       responses:
         200:
           description: A collection of ChartData
@@ -8995,7 +9001,6 @@ definitions:
       - gender
       - sexAtBirth
       - race
-      - ageBin
       - count
     properties:
       gender:
@@ -9035,6 +9040,9 @@ definitions:
         description: top rank of concept if present
         type: integer
         format: int64
+      stateCode:
+        description: 2 letter state code, if present
+        type: string
   ParticipantDemographics:
     type: object
     required:
