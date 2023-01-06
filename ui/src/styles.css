@@ -416,6 +416,10 @@ iframe#launcher {
   border-top: 1px solid #c8c8c8;
 }
 
+body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
 .p-paginator {
   height: 3rem;
   display: flex;
