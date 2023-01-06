@@ -2,7 +2,7 @@
 set -e
 
 GCLOUD_CREDENTIALS_KEY=$(openssl rand -base64 32)
-GCLOUD_CREDENTIALS=$(openssl enc -md sha256 -aes-256-cbc -in $1 -base64 -A  -k $GCLOUD_CREDENTIALS_KEY)
+GCLOUD_CREDENTIALS=$(openssl enc -md sha256 -aes-256-cbc -in "$1" -base64 -A  -k $GCLOUD_CREDENTIALS_KEY)
 
 echo "GCLOUD_CREDENTIALS=$GCLOUD_CREDENTIALS"
 echo "GCLOUD_CREDENTIALS_KEY=$GCLOUD_CREDENTIALS_KEY"
