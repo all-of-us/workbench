@@ -67,7 +67,7 @@ const styles = reactStyles({
   },
   resourceType: {
     height: '22px',
-    width: '9rem',
+    width: '100%',
     paddingLeft: '10px',
     paddingRight: '10px',
     borderRadius: '2px',
