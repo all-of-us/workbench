@@ -18,8 +18,31 @@ export function getCannedCategoryCounts() {
       type: 'category',
     },
     plotOptions: {
-      bar: {
+      series: {
         grouping: false,
+        events: {
+          legendItemClick: function () {
+            const seriesIndex = this.index;
+            const series = this.chart.series;
+            if (this.visible && this.chart.restIsHidden) {
+              for (var i = 0; i < series.length; i++) {
+                if (series[i].index != seriesIndex) {
+                  series[i].show();
+                }
+              }
+              this.chart.restIsHidden = false;
+            } else {
+              for (var i = 0; i < series.length; i++) {
+                if (series[i].index != seriesIndex) {
+                  series[i].hide();
+                }
+              }
+              this.show();
+              this.chart.restIsHidden = true;
+            }
+            return false;
+          },
+        },
       },
     },
     series: [
@@ -51,6 +74,7 @@ export function getCannedCategoryCounts() {
     ],
   };
 }
+
 
 export function getCannedCategoryCountsByAgeBin() {
   return {
@@ -99,6 +123,29 @@ export function getCannedCategoryCountsByAgeBin() {
     plotOptions: {
       series: {
         stacking: 'normal',
+        events: {
+          legendItemClick: function () {
+            const seriesIndex = this.index;
+            const series = this.chart.series;
+            if (this.visible && this.chart.restIsHidden) {
+              for (var i = 0; i < series.length; i++) {
+                if (series[i].index != seriesIndex) {
+                  series[i].show();
+                }
+              }
+              this.chart.restIsHidden = false;
+            } else {
+              for (var i = 0; i < series.length; i++) {
+                if (series[i].index != seriesIndex) {
+                  series[i].hide();
+                }
+              }
+              this.show();
+              this.chart.restIsHidden = true;
+            }
+            return false;
+          },
+        },
       },
     },
     tooltip: {
