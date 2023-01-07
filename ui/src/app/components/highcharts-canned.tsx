@@ -22,19 +22,20 @@ export function getCannedCategoryCounts() {
         grouping: false,
         events: {
           legendItemClick: function () {
+            console.log('this object name: ' + this.constructor.name);
+            console.log(this);
             const seriesIndex = this.index;
-            const series = this.chart.series;
             if (this.visible && this.chart.restIsHidden) {
-              for (var i = 0; i < series.length; i++) {
-                if (series[i].index != seriesIndex) {
-                  series[i].show();
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].show();
                 }
               }
               this.chart.restIsHidden = false;
             } else {
-              for (var i = 0; i < series.length; i++) {
-                if (series[i].index != seriesIndex) {
-                  series[i].hide();
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].hide();
                 }
               }
               this.show();
@@ -74,7 +75,6 @@ export function getCannedCategoryCounts() {
     ],
   };
 }
-
 
 export function getCannedCategoryCountsByAgeBin() {
   return {
@@ -125,19 +125,20 @@ export function getCannedCategoryCountsByAgeBin() {
         stacking: 'normal',
         events: {
           legendItemClick: function () {
+            console.log('this object name: ' + this.constructor.name);
+            console.log(this);
             const seriesIndex = this.index;
-            const series = this.chart.series;
             if (this.visible && this.chart.restIsHidden) {
-              for (var i = 0; i < series.length; i++) {
-                if (series[i].index != seriesIndex) {
-                  series[i].show();
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].show();
                 }
               }
               this.chart.restIsHidden = false;
             } else {
-              for (var i = 0; i < series.length; i++) {
-                if (series[i].index != seriesIndex) {
-                  series[i].hide();
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].hide();
                 }
               }
               this.show();

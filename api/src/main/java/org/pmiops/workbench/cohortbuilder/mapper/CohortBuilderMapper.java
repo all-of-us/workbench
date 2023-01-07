@@ -1,9 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.mapper;
 
-import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import java.util.stream.StreamSupport;
@@ -103,25 +101,25 @@ public interface CohortBuilderMapper {
     FieldValues.getString(row, "ethnicity").ifPresent(data::setEthnicity);
     FieldValues.getLong(row, "count").ifPresent(data::setCount);
     // optional values
-    if (fields.contains(Field.of("ageBin", LegacySQLTypeName.STRING))) {
+    if (fields.stream().anyMatch(f -> "ageBin".equals(f.getName()))) {
       FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
     }
-    if (fields.contains(Field.of("stateCode", LegacySQLTypeName.STRING))) {
+    if (fields.stream().anyMatch(f -> "stateCode".equals(f.getName()))) {
       FieldValues.getString(row, "stateCode").ifPresent(data::setStateCode);
     }
-    if (fields.contains(Field.of("domain", LegacySQLTypeName.STRING))) {
+    if (fields.stream().anyMatch(f -> "domain".equals(f.getName()))) {
       FieldValues.getString(row, "domain").ifPresent(data::setDomain);
     }
-    if (fields.contains(Field.of("conceptName", LegacySQLTypeName.STRING))) {
+    if (fields.stream().anyMatch(f -> "conceptName".equals(f.getName()))) {
       FieldValues.getString(row, "conceptName").ifPresent(data::setConceptName);
     }
-    if (fields.contains(Field.of("conceptId", LegacySQLTypeName.NUMERIC))) {
+    if (fields.stream().anyMatch(f -> "conceptId".equals(f.getName()))) {
       FieldValues.getLong(row, "conceptId").ifPresent(data::setConceptId);
     }
-    if (fields.contains(Field.of("conceptRank", LegacySQLTypeName.NUMERIC))) {
+    if (fields.stream().anyMatch(f -> "conceptRank".equals(f.getName()))) {
       FieldValues.getLong(row, "conceptRank").ifPresent(data::setConceptRank);
     }
-    if (fields.contains(Field.of("numConceptsCoOccur", LegacySQLTypeName.NUMERIC))) {
+    if (fields.stream().anyMatch(f -> "numConceptsCoOccur".equals(f.getName()))) {
       FieldValues.getLong(row, "numConceptsCoOccur").ifPresent(data::setNumConceptsCoOccur);
     }
 

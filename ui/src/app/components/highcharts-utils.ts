@@ -158,6 +158,28 @@ export function getChartCategoryCounts(
     plotOptions: {
       series: {
         stacking: 'normal', // 'normal',
+        events: {
+          legendItemClick: function () {
+            const seriesIndex = this.index;
+            if (this.visible && this.chart.restIsHidden) {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].show();
+                }
+              }
+              this.chart.restIsHidden = false;
+            } else {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].hide();
+                }
+              }
+              this.show();
+              this.chart.restIsHidden = true;
+            }
+            return false;
+          },
+        },
       },
     },
     tooltip: {
@@ -292,6 +314,28 @@ export function getChartCategoryCountsByAgeBin(
     plotOptions: {
       series: {
         stacking: 'normal', // 'normal',
+        events: {
+          legendItemClick: function () {
+            const seriesIndex = this.index;
+            if (this.visible && this.chart.restIsHidden) {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].show();
+                }
+              }
+              this.chart.restIsHidden = false;
+            } else {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].hide();
+                }
+              }
+              this.show();
+              this.chart.restIsHidden = true;
+            }
+            return false;
+          },
+        },
       },
     },
     tooltip: {
@@ -429,6 +473,28 @@ export function getChartCategoryCountsByConceptRank(
     plotOptions: {
       series: {
         stacking: 'normal', // 'normal',
+        events: {
+          legendItemClick: function () {
+            const seriesIndex = this.index;
+            if (this.visible && this.chart.restIsHidden) {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].show();
+                }
+              }
+              this.chart.restIsHidden = false;
+            } else {
+              for (let i = 0; i < this.chart.series.length; i++) {
+                if (this.chart.series[i].index !== seriesIndex) {
+                  this.chart.series[i].hide();
+                }
+              }
+              this.show();
+              this.chart.restIsHidden = true;
+            }
+            return false;
+          },
+        },
       },
     },
     tooltip: {
