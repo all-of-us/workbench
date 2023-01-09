@@ -649,6 +649,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         alwaysShowPaginator={false}
         paginatorTemplate={paginatorTemplate()}
         currentPageReportTemplate={pageReportTemplate()}
+        breakpoint='0px'
         rows={numberOfRows}
         totalRecords={totalCount}
         onRowClick={onRowClick}

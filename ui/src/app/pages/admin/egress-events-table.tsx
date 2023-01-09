@@ -124,6 +124,7 @@ export const EgressEventsTable = ({
         await maybeFetchMoreEvents(e.first + e.rows - 1);
         setFirst(e.first);
       }}
+      breakpoint='0px'
       first={first}
       rows={displayPageSize}
       totalRecords={totalRecords}

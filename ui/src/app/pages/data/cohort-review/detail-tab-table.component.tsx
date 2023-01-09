@@ -1256,6 +1256,7 @@ export const DetailTabTable = fp.flow(
             rowExpansionTemplate={this.rowExpansionTemplate}
             rowClassName={this.hideGraphIcon}
             style={styles.table}
+            breakpoint='0px'
             value={value}
             sortField={sortField}
             sortOrder={sortOrder}

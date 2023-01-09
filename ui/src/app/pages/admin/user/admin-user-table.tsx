@@ -279,6 +279,7 @@ export const AdminUserTable = withUserProfile()(
                 frozenWidth='200px'
                 globalFilter={filter}
                 paginator={true}
+                breakpoint='0px'
                 rows={10}
                 rowsPerPageOptions={[5, 10, 50, 100]}
                 scrollable

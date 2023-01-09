@@ -221,7 +221,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
 
   return (
     <React.Fragment>
-      <div data-test-id='resources-table'>
+      <div data-test-id='resources-table' style={{flex: 1}}>
         {tableData?.length > 0 && (
           <DataTable
             data-test-id='resource-list'
