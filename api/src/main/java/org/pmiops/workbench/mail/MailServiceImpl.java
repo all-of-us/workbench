@@ -570,9 +570,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(
-            EmailSubstitutionField.TOS_HREF,
-            href(null, "All Of Us Researcher Workbench General Terms of Use"))
+        .put(EmailSubstitutionField.TOS_HREF, getTosUrlAsHref())
         .build();
   }
 
@@ -771,6 +769,12 @@ public class MailServiceImpl implements MailService {
   private String getUiUrlAsHref() {
     final String url = workbenchConfigProvider.get().server.uiBaseUrl;
     return href(url, url);
+  }
+
+  private String getTosUrlAsHref() {
+    final String url =
+        String.format("%s/aou-tos.html", workbenchConfigProvider.get().server.uiBaseUrl);
+    return href(url, "All Of Us Researcher Workbench General Terms of Use");
   }
 
   private String getSupportHubUrlAsHref() {
