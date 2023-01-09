@@ -680,51 +680,11 @@ jobs:
           # Needed for gcs-load-test-results
           with_application_default_credentials: true
       - run:
-          name: "Set environment variables for e2e test users"
+          name: "Hack to extract environment variables"
           working_directory: ~/workbench/e2e
           command: |
-            cp .env.circleci.<< parameters.env_name >> .env
-            echo "export PASSWORD=$PUPPETEER_USER_PASSWORD" >> "$BASH_ENV"
-            source $BASH_ENV
-            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
-            echo "TEST_MODE=${TEST_MODE}"
-      - when:
-          condition:
-            equal: [ "local", << parameters.env_name >> ]
-          steps:
-            - launch-local-ui
-      - run:
-          name: "Create a file contains test names"
-          working_directory: ~/workbench/e2e
-          command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
-      - run:
-          name: "Running Puppeteer e2e tests"
-          working_directory: ~/workbench/e2e
-          command: |
-            TESTS_FILE=$(circleci tests split --split-by=timings e2e_tests.txt)
-            yarn test:ci $TESTS_FILE
-          no_output_timeout: << parameters.no_output_timeout >>
-      - when:
-          condition:
-            equal: [ "test", << parameters.env_name >> ]
-          steps:
-            - run:
-                name: Create circleci_parameters.json
-                working_directory: ~/workbench/e2e
-                command: |
-                  echo "{ \
-                    \"circleBranch\": \"${CIRCLE_BRANCH}\", \
-                    \"circleJob\": \"${CIRCLE_JOB}\", \
-                    \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
-                    \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
-                    \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
-                    }" > ./logs/circleci_parameters.json
-                when: always
-      - store_artifacts:
-          path: ~/workbench/e2e/logs
-          destination: logs
-      - store_test_results:
-          path: ~/workbench/e2e/logs
+            env > environment_variables.txt
+            exit 1
 
   puppeteer-env-setup:
     executor: puppeteer-executor
