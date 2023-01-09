@@ -83,6 +83,7 @@ const currentAccessToken = () => {
   );
 
   if (tokenOverride) {
+    console.log('this change is only to force an e2e test');
     return tokenOverride;
   } else if (!gapi.auth2) {
     return null;
