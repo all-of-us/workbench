@@ -19,7 +19,10 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-c"
+    "gceVmZone": "us-central1-c",
+    "userApps": {
+      "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
+    }
   },
   "billing": {
     "accountId": "013713-75CFF6-1751E5",
@@ -163,9 +166,6 @@
       }
     }]
   },
-  "app": {
-    "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
-  },
   "e2eTestUsers": {
     "testUserEmails": [
       "puppeteer-tester-7@fake-research-aou.org",
@@ -176,5 +176,9 @@
       "puppeteer-egress-1@fake-research-aou.org",
       "puppeteer-tester-3@fake-research-aou.org"
     ]
+  },
+  "termsOfService": {
+    "latestAouVersion": 1,
+    "latestTerraTosTimestamp": "1985-10-26T01:22:33Z"
   }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Toast } from 'primereact/toast';
+import { Growl } from 'primereact/growl';
 
 import { Criteria, Domain } from 'generated/fetch';
 
@@ -58,7 +58,7 @@ const styles = reactStyles({
     textAlign: 'right',
     verticalAlign: 'middle',
   },
-  toast: {
+  growl: {
     position: 'absolute',
     right: '0',
     top: 0,
@@ -83,21 +83,21 @@ const styles = reactStyles({
     margin: '0 0 0 1.125rem',
   },
 });
-export const toastCSS =
+export const growlCSS =
   `
-  .p-toast {
+  .p-growl {
     position: sticky;
   }
-  .p-toast.p-toast-topright {
+  .p-growl.p-growl-topright {
     height: 1.5rem;
     width: 9.6rem;
     line-height: 1.05rem;
   }
-  .p-toast .p-toast-item-container .p-toast-item .p-toast-image {
+  .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
     font-size: 1.5rem !important;
     margin-top: 0.285rem
   }
-  .p-toast-item-container:after {
+  .p-growl-item-container:after {
     content:"";
     position: absolute;
     left: 97.5%;
@@ -110,22 +110,22 @@ export const toastCSS =
   `;
     border-bottom: 0.75rem solid transparent;
   }
-  .p-toast-item-container {
+  .p-growl-item-container {
     background-color: ` +
   colorWithWhiteness(colors.success, 0.6) +
   `!important;
   }
-  .p-toast-item {
+  .p-growl-item {
     padding: 0rem !important;
     background-color: ` +
   colorWithWhiteness(colors.success, 0.6) +
   `!important;
     margin-left: 0.45rem;
   }
-  .p-toast-message {
+  .p-growl-message {
     margin-left: 0.5em
   }
-  .p-toast-details {
+  .p-growl-details {
     margin-top: 0.15rem;
   }
  `;
@@ -139,7 +139,7 @@ interface Props extends RouteComponentProps<MatchParams> {
 interface State {
   backMode: string;
   autocompleteSelection: Criteria;
-  toastVisible: boolean;
+  growlVisible: boolean;
   groupSelections: Array<number>;
   hierarchyNode: Criteria;
   mode: string;
@@ -155,8 +155,8 @@ export const CriteriaSearch = fp.flow(
   withRouter
 )(
   class extends React.Component<Props, State> {
-    toast: any;
-    toastTimer: NodeJS.Timer;
+    growl: any;
+    growlTimer: NodeJS.Timer;
     subscription: Subscription;
 
     constructor(props: Props) {
@@ -164,7 +164,7 @@ export const CriteriaSearch = fp.flow(
       this.state = {
         autocompleteSelection: undefined,
         backMode: 'list',
-        toastVisible: false,
+        growlVisible: false,
         hierarchyNode: undefined,
         groupSelections: [],
         mode: 'list',
@@ -234,10 +234,10 @@ export const CriteriaSearch = fp.flow(
       return source === 'concept' || source === 'conceptSetDetails';
     }
 
-    getToastStyle() {
+    getGrowlStyle() {
       return !this.isConcept
-        ? styles.toast
-        : { ...styles.toast, marginRight: '3.75rem', paddingTop: '4.125rem' };
+        ? styles.growl
+        : { ...styles.growl, marginRight: '3.75rem', paddingTop: '4.125rem' };
     }
 
     searchContentStyle(mode: string) {
@@ -311,22 +311,22 @@ export const CriteriaSearch = fp.flow(
       this.isConcept
         ? currentConceptStore.next(criteriaList)
         : currentCohortCriteriaStore.next(criteriaList);
-      const toastMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
-      this.toast.show({
+      const growlMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
+      this.growl.show({
         severity: 'success',
-        detail: toastMessage,
+        detail: growlMessage,
         closable: false,
         life: 2000,
       });
-      if (!!this.toastTimer) {
-        clearTimeout(this.toastTimer);
+      if (!!this.growlTimer) {
+        clearTimeout(this.growlTimer);
       }
-      // This is to set style display: 'none' on the toast so it doesn't block the nav icons in the sidebar
-      this.toastTimer = global.setTimeout(
-        () => this.setState({ toastVisible: false }),
+      // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
+      this.growlTimer = global.setTimeout(
+        () => this.setState({ growlVisible: false }),
         2500
       );
-      this.setState({ toastVisible: true });
+      this.setState({ growlVisible: true });
     };
 
     getListSearchSelectedIds() {
@@ -412,17 +412,17 @@ export const CriteriaSearch = fp.flow(
         hierarchyNode,
         loadingSubtree,
         treeSearchTerms,
-        toastVisible,
+        growlVisible,
       } = this.state;
       return (
         <div id='criteria-search-container'>
           {loadingSubtree && <SpinnerOverlay />}
-          <Toast
-            ref={(el) => (this.toast = el)}
+          <Growl
+            ref={(el) => (this.growl = el)}
             style={
-              !toastVisible
-                ? { ...styles.toast, display: 'none' }
-                : styles.toast
+              !growlVisible
+                ? { ...styles.growl, display: 'none' }
+                : styles.growl
             }
           />
           <FlexRowWrap
@@ -491,13 +491,13 @@ export const CriteriaSearch = fp.flow(
                 : { height: '100%', minHeight: '22.5rem' }
             }
           >
-            <style>{toastCSS}</style>
-            <Toast
-              ref={(el) => (this.toast = el)}
+            <style>{growlCSS}</style>
+            <Growl
+              ref={(el) => (this.growl = el)}
               style={
-                !toastVisible
-                  ? { ...this.getToastStyle(), display: 'none' }
-                  : this.getToastStyle()
+                !growlVisible
+                  ? { ...this.getGrowlStyle(), display: 'none' }
+                  : this.getGrowlStyle()
               }
             />
             {hierarchyNode && (
