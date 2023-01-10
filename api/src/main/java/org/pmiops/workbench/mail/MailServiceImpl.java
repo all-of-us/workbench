@@ -571,6 +571,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.TOS_HREF, getTosUrlAsHref())
+        .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().server.uiBaseUrl)
         .build();
   }
 
