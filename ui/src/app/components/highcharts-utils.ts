@@ -590,3 +590,106 @@ export function getChartMapParticipantCounts(
     series: series,
   };
 }
+
+export function getChartMapBubbleParticipantCounts(
+  dataForCharts: Array<ChartData>,
+  domain: Domain,
+  category: Category
+) {
+  const categoryProp = category.toString();
+  let total = 0;
+  const categoryCounts = dataForCharts
+    .reduce((accum, record) => {
+      const key =
+        record[categoryProp] !== null ? record[categoryProp] : 'UNKNOWN';
+      const rec = accum.find((item) => item.categoryName === key);
+      if (!rec) {
+        accum.push({
+          category: categoryProp,
+          categoryName: key,
+          categoryCount: record.count,
+          categorySortKey: key,
+        });
+      } else {
+        rec.categoryCount += record.count;
+      }
+      total += record.count;
+      return accum;
+    }, [])
+    .sort(
+      (a, b) => a.x - b.x || a.categorySortKey.localeCompare(b.categorySortKey)
+    );
+
+  // find min-max of counts:
+  const minCount = categoryCounts.reduce(
+    (min, item) => (item.categoryCount < min ? item.categoryCount : min),
+    20
+  );
+  const maxCount = categoryCounts.reduce(
+    (max, item) => (item.categoryCount > max ? item.categoryCount : max),
+    20
+  );
+
+  console.log(minCount,maxCount)
+  const seriesName = 'Participant count';
+  const series = categoryCounts.reduce((accum, rec, i) => {
+    rec.code = rec.categoryName;
+    rec.value = rec.categoryCount;
+    rec.valueFraction = (100 * rec.categoryCount) / total;
+    rec.total = total;
+    // for bubble?
+    rec.z = rec.categoryCount;
+
+    const seriesObj = accum.find((item) => item.name === seriesName);
+    if (!seriesObj) {
+      accum.push(
+        {
+          name: 'States',
+          color: '#FFB0E0',
+          enableMouseTracking: false,
+        },
+        {
+          type: 'mapbubble',
+          sizeByAbsoluteValue: true,
+          negativeColor: '#FF0000',
+          minSize: 1,
+          maxSize: '20%',
+          name: seriesName,
+          data: [rec],
+          joinBy: ['hc-a2', 'code'],
+          states: {
+            hover: {
+              color: '#BADA55',
+            },
+          },
+          dataLabels: {
+            enabled: true,
+            format: '{point.properties.hc-a2}',
+          },
+        }
+      );
+    } else {
+      seriesObj.data.push(rec);
+    }
+    return accum;
+  }, []);
+
+  return {
+    chart: {
+      map: ustopo,
+    },
+    title: {
+      text: seriesName,
+    },
+    mapNavigation: {
+      enabled: true,
+      buttonOptions: {
+        verticalAlign: 'bottom',
+      },
+    },
+    colorAxis: {
+      min: 0,
+    },
+    series: series,
+  };
+}

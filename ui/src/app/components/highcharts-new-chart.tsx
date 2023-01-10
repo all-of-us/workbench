@@ -29,6 +29,7 @@ import {
   getChartCategoryCounts,
   getChartCategoryCountsByAgeBin,
   getChartCategoryCountsByConceptRank,
+  getChartMapBubbleParticipantCounts,
   getChartMapParticipantCounts,
 } from './highcharts-utils';
 
@@ -182,7 +183,7 @@ export const Chart = withCurrentWorkspace()(
 
     async componentDidMount() {
       await this.doCharts();
-      // await this.doChartMap();
+      await this.doChartMap();
     }
 
     async componentDidUpdate(prevProps: Readonly<ChartProps>) {
@@ -191,7 +192,7 @@ export const Chart = withCurrentWorkspace()(
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
         await this.doCharts();
-        // await this.doChartMap();
+        await this.doChartMap();
       }
     }
 
@@ -208,10 +209,19 @@ export const Chart = withCurrentWorkspace()(
         Category.StateCode
       );
 
+      const cdrChartDataMapRowItem2 = getChartMapBubbleParticipantCounts(
+        cdrChartDataMap,
+        null,
+        Category.StateCode
+      );
+
       this.setState({
-        cdrChartDataMapRow: [cdrChartDataMapRowItem],
+        cdrChartDataMapRow: [cdrChartDataMapRowItem, cdrChartDataMapRowItem2],
       });
-      console.log('cdrChartDataMapRow:', [cdrChartDataMapRowItem]);
+      console.log('cdrChartDataMapRow:', [
+        cdrChartDataMapRowItem,
+        cdrChartDataMapRowItem2,
+      ]);
     }
 
     async doCharts() {
@@ -671,8 +681,8 @@ export const Chart = withCurrentWorkspace()(
                     key={index}
                     style={{
                       ...styles.col,
-                      flex: '0 0 ' + 100 + '%',
-                      maxWidth: 100 + '%',
+                      flex: '0 0 ' + 50 + '%',
+                      maxWidth: 50 + '%',
                     }}
                   >
                     <HighchartsReact
