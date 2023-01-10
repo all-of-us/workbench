@@ -825,8 +825,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .filter(u -> shouldSendTerraTosReminderEmail(u.getUserId()))
             .collect(Collectors.toList());
 
-    // TODO
-    // usersToRemind.forEach(this::sendTerraTosReminderEmail);
+    try {
+      for (DbUser user : usersToRemind) {
+        mailService.sendTerraTosReminderEmail(user);
+      }
+    } catch (MessagingException e) {
+      throw new ServerErrorException(e);
+    }
 
     return usersToRemind;
   }
