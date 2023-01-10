@@ -575,6 +575,15 @@ export function getChartMapParticipantCounts(
     chart: {
       map: ustopo,
     },
+    colors: [
+      'rgba(19,64,117,0.05)',
+      'rgba(19,64,117,0.2)',
+      'rgba(19,64,117,0.4)',
+      'rgba(19,64,117,0.5)',
+      'rgba(19,64,117,0.6)',
+      'rgba(19,64,117,0.8)',
+      'rgba(19,64,117,1)',
+    ],
     title: {
       text: seriesName,
     },
@@ -584,8 +593,64 @@ export function getChartMapParticipantCounts(
         verticalAlign: 'bottom',
       },
     },
+    legend: {
+      title: {
+        text: 'Number of Participants',
+        style: {
+          color:
+            // theme
+            (highCharts.defaultOptions &&
+              highCharts.defaultOptions.legend &&
+              highCharts.defaultOptions.legend.title &&
+              highCharts.defaultOptions.legend.title.style &&
+              highCharts.defaultOptions.legend.title.style.color) ||
+            'black',
+        },
+      },
+      align: 'left',
+      verticalAlign: 'bottom',
+      floating: true,
+      layout: 'vertical',
+      valueDecimals: 0,
+      backgroundColor:
+        // theme
+        (highCharts.defaultOptions &&
+          highCharts.defaultOptions.legend &&
+          highCharts.defaultOptions.legend.backgroundColor) ||
+        'rgba(255, 255, 255, 0.85)',
+      symbolRadius: 0,
+      symbolHeight: 14,
+    },
+
     colorAxis: {
-      min: 0,
+      dataClasses: [
+        {
+          to: 200,
+        },
+        {
+          from: 200,
+          to: 500,
+        },
+        {
+          from: 500,
+          to: 1000,
+        },
+        {
+          from: 1000,
+          to: 5000,
+        },
+        {
+          from: 5000,
+          to: 10000,
+        },
+        {
+          from: 10000,
+          to: 20000,
+        },
+        {
+          from: 20000,
+        },
+      ],
     },
     series: series,
   };
@@ -630,7 +695,7 @@ export function getChartMapBubbleParticipantCounts(
     20
   );
 
-  console.log(minCount,maxCount)
+  console.log(minCount, maxCount);
   const seriesName = 'Participant count';
   const series = categoryCounts.reduce((accum, rec, i) => {
     rec.code = rec.categoryName;
@@ -678,6 +743,15 @@ export function getChartMapBubbleParticipantCounts(
     chart: {
       map: ustopo,
     },
+    colors: [
+      'rgba(19,64,117,0.05)',
+      'rgba(19,64,117,0.2)',
+      'rgba(19,64,117,0.4)',
+      'rgba(19,64,117,0.5)',
+      'rgba(19,64,117,0.6)',
+      'rgba(19,64,117,0.8)',
+      'rgba(19,64,117,1)',
+    ],
     title: {
       text: seriesName,
     },
@@ -687,8 +761,64 @@ export function getChartMapBubbleParticipantCounts(
         verticalAlign: 'bottom',
       },
     },
+    legend: {
+      title: {
+        text: 'Number of Participants',
+        style: {
+          color:
+            // theme
+            (highCharts.defaultOptions &&
+              highCharts.defaultOptions.legend &&
+              highCharts.defaultOptions.legend.title &&
+              highCharts.defaultOptions.legend.title.style &&
+              highCharts.defaultOptions.legend.title.style.color) ||
+            'black',
+        },
+      },
+      align: 'left',
+      verticalAlign: 'bottom',
+      floating: true,
+      layout: 'vertical',
+      valueDecimals: 0,
+      backgroundColor:
+        // theme
+        (highCharts.defaultOptions &&
+          highCharts.defaultOptions.legend &&
+          highCharts.defaultOptions.legend.backgroundColor) ||
+        'rgba(255, 255, 255, 0.85)',
+      symbolRadius: 0,
+      symbolHeight: 14,
+    },
+
     colorAxis: {
-      min: 0,
+      dataClasses: [
+        {
+          to: 200,
+        },
+        {
+          from: 200,
+          to: 500,
+        },
+        {
+          from: 500,
+          to: 1000,
+        },
+        {
+          from: 1000,
+          to: 5000,
+        },
+        {
+          from: 5000,
+          to: 10000,
+        },
+        {
+          from: 10000,
+          to: 20000,
+        },
+        {
+          from: 20000,
+        },
+      ],
     },
     series: series,
   };
