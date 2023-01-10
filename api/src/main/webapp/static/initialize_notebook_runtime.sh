@@ -84,6 +84,11 @@ if [ ! -f "${cromwell_config}" ]; then
   cat <<EOF | sudo -E -u jupyter tee "${cromwell_config}"
 include required(classpath("application"))
 
+webservice {
+  port = 8082
+  interface = 0.0.0.0
+}
+
 google {
   application-name = "cromwell"
   auths = [{
@@ -92,10 +97,33 @@ google {
   }]
 }
 
+# Cromwell "system" settings
 system {
+  # Allows re-use of existing results for jobs you've already run
   call-caching {
      enabled = true
      invalidate-bad-cache-results = true
+  }
+}
+
+# This saves the workflow metadata in the file system, so that it's not lost when the cromwell server is restarted.
+# data will be saved at /home/jupyter/cromwell-executions/cromwell-db/
+database {
+  profile = "slick.jdbc.HsqldbProfile$"
+  db {
+    driver = "org.hsqldb.jdbcDriver"
+    url = \"""
+    jdbc:hsqldb:file:cromwell-executions/cromwell-db/cromwell-db;
+    shutdown=false;
+    hsqldb.default_table_type=cached;hsqldb.tx=mvcc;
+    hsqldb.result_max_memory_rows=10000;
+    hsqldb.large_data=true;
+    hsqldb.applog=1;
+    hsqldb.lob_compressed=true;
+    hsqldb.script_format=3
+    \"""
+    connectionTimeout = 120000
+    numThreads = 1
   }
 }
 
