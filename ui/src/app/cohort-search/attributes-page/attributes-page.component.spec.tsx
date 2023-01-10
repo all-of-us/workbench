@@ -86,26 +86,26 @@ describe('AttributesPageV2', () => {
   });
 
   it('should not call api and render a single dropdown for Height in Physical Measurements', async () => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(mockCountParticipants).toHaveBeenCalledTimes(0);
-    expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
-    expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
-    expect(
-      mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
-    ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('[data-test-id="numerical-dropdown-0"]').length).toBe(
-      1
-    );
-    expect(wrapper.find('[data-test-id="numerical-dropdown-1"]').length).toBe(
-      0
-    );
-    expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(0);
-    expect(
-      wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
-        .disabled
-    ).toBeFalsy();
-  });
+      const wrapper = component();
+      await waitOneTickAndUpdate(wrapper);
+      expect(mockCountParticipants).toHaveBeenCalledTimes(0);
+      expect(mockFindCriteriaAttributeByConceptId).toHaveBeenCalledTimes(0);
+      expect(mockFindSurveyVersionByQuestionConceptId).toHaveBeenCalledTimes(0);
+      expect(
+        mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
+      ).toHaveBeenCalledTimes(0);
+      expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(
+        1
+      );
+      expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(
+        0
+      );
+      expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
+      expect(
+        wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
+          .disabled
+      ).toBeFalsy();
+    });
 
   it('should not call api and render two dropdowns for BP in Physical Measurements', async () => {
     props.node = CriteriaWithAttributesStubVariables[1];
@@ -117,16 +117,13 @@ describe('AttributesPageV2', () => {
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('[data-test-id="numerical-dropdown-0"]').length).toBe(
+    expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(
       1
     );
-    expect(wrapper.find('[data-test-id="numerical-dropdown-1"]').length).toBe(
-      1
-    );
+    expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(1);
     expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(0);
     expect(
-      wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
-        .disabled
+      wrapper.find('div[id="attributes-add-btn"]').first().props().disabled
     ).toBeFalsy();
   });
 
@@ -214,7 +211,7 @@ describe('AttributesPageV2', () => {
       value: Operator.EQUAL,
       target: { id: '', name: '', value: Operator.EQUAL },
       stopPropagation: () => {},
-      preventDefault: () => {}
+      preventDefault: () => {},
     });
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(2);

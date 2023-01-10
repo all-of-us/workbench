@@ -156,6 +156,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
         </DetailRow>
         <DetailRow label='Status'>
           <Dropdown
+            id='egress-event-status-dropdown'
             value={pendingUpdateEvent?.status ?? status}
             options={mutableEgressEventStatuses}
             onChange={(e) => {

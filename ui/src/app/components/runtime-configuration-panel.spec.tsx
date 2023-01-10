@@ -814,9 +814,12 @@ describe('RuntimeConfigurationPanel', () => {
       .first()
       .simulate('click');
 
+    wrapper
+      .find('div[id="runtime-ram"]').simulate('click')
+
     const memoryOptions = wrapper
-      .find('#runtime-ram')
-      .first()
+      .find('div[id="runtime-ram"]')
+      .find('.p-dropdown-items')
       .find('.p-dropdown-item');
     expect(memoryOptions.exists()).toBeTruthy();
 
