@@ -195,7 +195,6 @@ export const PresetSelector = ({
       disabled={disabled}
       style={{
         marginTop: '21px',
-        display: 'inline-block',
         color: colors.primary,
       }}
       placeholder='Recommended environments'
