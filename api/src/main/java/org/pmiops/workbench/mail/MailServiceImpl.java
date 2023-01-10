@@ -392,7 +392,7 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(
         ImmutableList.of(user.getContactEmail()),
         Collections.emptyList(),
-        "AoU Researcher Workbench - Terms of Use have been updated",
+        "The All of Us Researcher Workbench Terms of Use have been updated",
         String.format("Terra ToS Reminder sent to user %s", user.getUsername()),
         buildHtml(TERRA_TOS_REMINDER_RESOURCE, terraTosReminderSubstitutionMap(user)));
   }
