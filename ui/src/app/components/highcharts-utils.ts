@@ -56,7 +56,7 @@ function getCategorySortKey(
     if (categoryProp === 'gender') {
       return key.startsWith('Not') ? 'O' : key[0];
     } else {
-      return key!==null? key:'UNKNOWN';
+      return key;
     }
   } else {
     return formattedRank(record.conceptRank) + ':' + record.conceptName;
@@ -516,20 +516,21 @@ export function getChartCategoryCountsByConceptRank(
 export function getChartMapParticipantCounts(
   dataForCharts: Array<ChartData>,
   domain: Domain,
-  category: Category,
+  category: Category
 ) {
   const categoryProp = category.toString();
   let total = 0;
   const categoryCounts = dataForCharts
     .reduce((accum, record) => {
-      const key = record[categoryProp]!==null? record[categoryProp]: 'UNKNOWN' ;
-      const rec = accum.find((item) => item.stateCode === key);
+      const key =
+        record[categoryProp] !== null ? record[categoryProp] : 'UNKNOWN';
+      const rec = accum.find((item) => item.categoryName === key);
       if (!rec) {
         accum.push({
           category: categoryProp,
           categoryName: key,
           categoryCount: record.count,
-          categorySortKey: getCategorySortKey(domain, categoryProp, record),
+          categorySortKey: key,
         });
       } else {
         rec.categoryCount += record.count;
@@ -541,63 +542,50 @@ export function getChartMapParticipantCounts(
       (a, b) => a.x - b.x || a.categorySortKey.localeCompare(b.categorySortKey)
     );
 
-  console.log('getChartMapParticipantCounts:categoryCounts:', categoryCounts);
-  const categories = [];
-
+  const seriesName = 'Participant count';
   const series = categoryCounts.reduce((accum, rec, i) => {
-    categories.push(rec.categoryName);
-    rec.name = rec.categoryName;
+    rec.code = rec.categoryName;
     rec.value = rec.categoryCount;
     rec.valueFraction = (100 * rec.categoryCount) / total;
-    // rec.x = i;
-    // rec.y = (100 * rec.categoryCount) / total;
     rec.total = total;
-    const key = 'Participant count';
-    const seriesObj = accum.find((item) => item.name === key);
+
+    const seriesObj = accum.find((item) => item.name === seriesName);
     if (!seriesObj) {
-      const serObj = {
+      accum.push({
+        name: seriesName,
         data: [rec],
-        joinBy: ['hc-a2', 'stateCode'],
-        name: key,
+        joinBy: ['hc-a2', 'code'],
         states: {
           hover: {
-            color: '#a4edba',
-            borderColor: '#A0A0A0',
-            borderWidth: 2,
-          },
-          tooltip: {
-            valuePrefix: 'counts: ',
-            valueSuffix: JSON.stringify(this),
-            // valueSuffix:
-            //   highCharts.numberFormat(Math.abs(this.valueFraction), 2) +
-            //   '%',
+            color: '#BADA55',
           },
         },
         dataLabels: {
           enabled: true,
           format: '{point.properties.hc-a2}',
         },
-      };
-      accum[key] = serObj;
+      });
     } else {
       seriesObj.data.push(rec);
     }
     return accum;
   }, []);
-  console.log('getChartMapParticipantCounts:series:', series);
 
   return {
     chart: {
       map: ustopo,
     },
     title: {
-      text: CHART_CATEGORY_KEY_NAME[categoryProp],
+      text: seriesName,
     },
     mapNavigation: {
       enabled: true,
       buttonOptions: {
         verticalAlign: 'bottom',
       },
+    },
+    colorAxis: {
+      min: 0,
     },
     series: series,
   };

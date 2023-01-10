@@ -181,7 +181,8 @@ export const Chart = withCurrentWorkspace()(
     }
 
     async componentDidMount() {
-      await this.doCharts();
+      //await this.doCharts();
+      await this.doChartMap();
     }
 
     async componentDidUpdate(prevProps: Readonly<ChartProps>) {
@@ -189,8 +190,29 @@ export const Chart = withCurrentWorkspace()(
 
       if (domain && domain !== prevProps.domain) {
         this.setState({ loading: true });
-        await this.doCharts();
+        //await this.doCharts();
+        await this.doChartMap();
       }
+    }
+
+    async doChartMap(){
+      const cdrChartDataMap = await this.fetchChartDataMap(true).then(
+          (result) => {
+            return result.items;
+          }
+      );
+
+      const cdrChartDataMapRowItem = getChartMapParticipantCounts(
+          cdrChartDataMap,
+          null,
+          Category.StateCode
+      );
+
+      this.setState({
+        cdrChartDataMapRow: [cdrChartDataMapRowItem],
+      });
+      console.log('cdrChartDataMapRow:', [cdrChartDataMapRowItem]);
+
     }
 
     async doCharts() {
@@ -218,8 +240,7 @@ export const Chart = withCurrentWorkspace()(
       const cdrChartDataMapRowItem = getChartMapParticipantCounts(
         cdrChartDataMap,
         null,
-        Category.StateCode,
-        categoryValues[Category.StateCode.toString()]
+        Category.StateCode
       );
 
       this.setState({
@@ -647,6 +668,7 @@ export const Chart = withCurrentWorkspace()(
             <div style={styles.row}>
               {cdrChartDataMapRow &&
                 Object.values(cdrChartDataMapRow).map((value, index) => (
+
                   <div
                     key={index}
                     style={{
@@ -657,12 +679,13 @@ export const Chart = withCurrentWorkspace()(
                   >
                     <HighchartsReact
                       highcharts={highCharts}
+                      constructorType={'mapChart'}
                       options={value}
                       callback={getChartObj}
                     />
                   </div>
                 ))}
-            </div>{' '}
+            </div>{''}
             {getSeparatorDiv(
               'CDR ',
               domainStrForChart,
