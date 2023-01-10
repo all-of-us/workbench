@@ -814,8 +814,7 @@ describe('RuntimeConfigurationPanel', () => {
       .first()
       .simulate('click');
 
-    wrapper
-      .find('div[id="runtime-ram"]').simulate('click')
+    wrapper.find('div[id="runtime-ram"]').simulate('click');
 
     const memoryOptions = wrapper
       .find('div[id="runtime-ram"]')

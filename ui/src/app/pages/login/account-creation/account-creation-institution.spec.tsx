@@ -134,7 +134,7 @@ it('should reset role value & options when institution is selected', async () =>
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   await waitOneTickAndUpdate(wrapper);
 
@@ -148,7 +148,7 @@ it('should reset role value & options when institution is selected', async () =>
     value: academicSpecificRoleOption.value,
     target: { name: '', id: '', value: academicSpecificRoleOption.value },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
 
@@ -158,7 +158,7 @@ it('should reset role value & options when institution is selected', async () =>
     value: 'Verily',
     target: { name: '', id: '', value: 'Verily' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
 
   // Role value should be cleared when institution changes.
@@ -193,7 +193,7 @@ it('should validate email affiliation when inst and email address are specified'
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@asdf.com' },
@@ -230,7 +230,7 @@ it('should validate email affiliation when inst and email domain are specified',
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@asdf.com' },
@@ -266,7 +266,7 @@ it('should display validation icon only after email verification', async () => {
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@wrongDomain.com' },
@@ -301,7 +301,7 @@ it('should clear email validation when institution is changed', async () => {
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@vumc.org' },
@@ -314,7 +314,7 @@ it('should clear email validation when institution is changed', async () => {
     value: InstitutionalRole.EARLYCAREER,
     target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
 
   // At this point, the form should be ready to submit.
@@ -326,14 +326,14 @@ it('should clear email validation when institution is changed', async () => {
     value: 'Verily',
     target: { name: '', id: '', value: 'Verily' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getRoleDropdown(wrapper).props.onChange({
     originalEvent: undefined,
     value: InstitutionalRole.PREDOCTORAL,
     target: { name: '', id: '', value: InstitutionalRole.PREDOCTORAL },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
 
   // The form should be blocked now due to lack of email verification.
@@ -360,14 +360,14 @@ it('should trigger email check when email is filled in before choosing instituti
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getRoleDropdown(wrapper).props.onChange({
     originalEvent: undefined,
     value: InstitutionalRole.EARLYCAREER,
     target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   await waitOneTickAndUpdate(wrapper);
 
@@ -389,7 +389,7 @@ it('should call callback with correct form data', async () => {
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@vumc.org' },
@@ -400,7 +400,7 @@ it('should call callback with correct form data', async () => {
     value: InstitutionalRole.UNDERGRADUATE,
     target: { name: '', id: '', value: InstitutionalRole.UNDERGRADUATE },
     stopPropagation: () => {},
-    preventDefault: () => {}
+    preventDefault: () => {},
   });
   // Await one tick for the APi response to update state and allow form submission.
   await waitOneTickAndUpdate(wrapper);
