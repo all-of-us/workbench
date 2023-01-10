@@ -9,8 +9,6 @@ import * as highCharts from 'highcharts';
 import HighchartsMap from 'highcharts/modules/map';
 import HighchartsReact from 'highcharts-react-official';
 
-HighchartsMap(highCharts);
-
 import { ChartData, Domain } from 'generated/fetch';
 
 import { getChartObj } from 'app/cohort-search/utils';
@@ -31,7 +29,10 @@ import {
   getChartCategoryCounts,
   getChartCategoryCountsByAgeBin,
   getChartCategoryCountsByConceptRank,
+  getChartMapParticipantCounts,
 } from './highcharts-utils';
+
+HighchartsMap(highCharts);
 
 const css = `
   .stats-left-padding {
@@ -115,6 +116,7 @@ export interface ChartState {
   categoryCountsWidths: any;
   categoryCountsAgeBinRow: any;
   categoryCountsAgeBinWidths: any;
+  cdrChartDataMapRow: any;
 }
 
 function getSeparatorDiv(
@@ -174,6 +176,7 @@ export const Chart = withCurrentWorkspace()(
         categoryCountsWidths: null,
         categoryCountsAgeBinRow: null,
         categoryCountsAgeBinWidths: null,
+        cdrChartDataMapRow: null,
       };
     }
 
@@ -208,11 +211,21 @@ export const Chart = withCurrentWorkspace()(
         }
       );
 
-      console.log('cdrChartDataMap: ', cdrChartDataMap);
-
       // get available categories and their valueMap => used for getting color-index
       const { categoryNames, categoryValues } =
         getAvailableCategories(cdrChartData);
+
+      const cdrChartDataMapRowItem = getChartMapParticipantCounts(
+        cdrChartDataMap,
+        null,
+        Category.StateCode,
+        categoryValues[Category.StateCode.toString()]
+      );
+
+      this.setState({
+        cdrChartDataMapRow: [cdrChartDataMap],
+      });
+      console.log('cdrChartDataMapRow:', [cdrChartDataMap]);
 
       const cats = [
         Category.AgeBin,
@@ -575,8 +588,7 @@ export const Chart = withCurrentWorkspace()(
         this.state;
       const { categoryCountsAgeBinRow, categoryCountsAgeBinWidths } =
         this.state;
-
-      console.log('categoryCountsAgeBinRow:', categoryCountsAgeBinRow);
+      const { cdrChartDataMapRow } = this.state;
 
       const cannedTopology = getCannedTopology();
 
@@ -627,6 +639,30 @@ export const Chart = withCurrentWorkspace()(
                 />
               </div>
             </div>
+            {getSeparatorDiv(
+              'CDR ',
+              domainStrForChart,
+              'Topographic Distribution'
+            )}
+            <div style={styles.row}>
+              {cdrChartDataMapRow &&
+                Object.values(cdrChartDataMapRow).map((value, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.col,
+                      flex: '0 0 ' + 100 + '%',
+                      maxWidth: 100 + '%',
+                    }}
+                  >
+                    <HighchartsReact
+                      highcharts={highCharts}
+                      options={value}
+                      callback={getChartObj}
+                    />
+                  </div>
+                ))}
+            </div>{' '}
             {getSeparatorDiv(
               'CDR ',
               domainStrForChart,

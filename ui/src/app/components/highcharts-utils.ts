@@ -2,6 +2,8 @@ import * as highCharts from 'highcharts';
 
 import { ChartData, Domain } from 'generated/fetch';
 
+import ustopo from '@highcharts/map-collection/countries/us/us-all.topo.json';
+
 import hcColors from './highcharts-colors';
 
 export enum Category {
@@ -10,6 +12,7 @@ export enum Category {
   Race = 'race',
   Ethnicity = 'ethnicity',
   AgeBin = 'ageBin',
+  StateCode = 'stateCode',
   ConceptName = 'conceptName',
   NumConceptsCoOccur = 'numConceptsCoOccur',
 }
@@ -20,6 +23,7 @@ const CHART_CATEGORY_KEY_NAME = {
   race: 'Race',
   ethnicity: 'Ethnicity',
   ageBin: 'Age Range',
+  stateCode: 'State Code',
   conceptName: 'Concept Name',
   numConceptsCoOccur: 'Number of Co-occurring Concepts',
 };
@@ -52,7 +56,7 @@ function getCategorySortKey(
     if (categoryProp === 'gender') {
       return key.startsWith('Not') ? 'O' : key[0];
     } else {
-      return key;
+      return key!==null? key:'UNKNOWN';
     }
   } else {
     return formattedRank(record.conceptRank) + ':' + record.conceptName;
@@ -236,7 +240,7 @@ export function getChartCategoryCountsByAgeBin(
       );
       if (!rec) {
         // 1st data record
-        const seriesObj = {
+        accum[key] = {
           name: key,
           color: hcColors.hcColors[categoryProp][categoryColorIndex],
           sortKey: getCategorySortKey(domain, categoryProp, record),
@@ -249,7 +253,6 @@ export function getChartCategoryCountsByAgeBin(
             },
           ],
         };
-        accum[key] = seriesObj;
         categoryTotal[key] = record.count;
       } else {
         const dataRec = accum[key].data.find((item) => item.ageBin === ageBin);
@@ -504,6 +507,96 @@ export function getChartCategoryCountsByConceptRank(
         tip += 'counts: (' + this.point.categoryCount;
         tip += '/' + this.point.sumCategoryTotal + ')<br/>';
         return tip + 'percent:' + parseFloat(this.point.y).toFixed(2) + '%';
+      },
+    },
+    series: series,
+  };
+}
+
+export function getChartMapParticipantCounts(
+  dataForCharts: Array<ChartData>,
+  domain: Domain,
+  category: Category,
+) {
+  const categoryProp = category.toString();
+  let total = 0;
+  const categoryCounts = dataForCharts
+    .reduce((accum, record) => {
+      const key = record[categoryProp]!==null? record[categoryProp]: 'UNKNOWN' ;
+      const rec = accum.find((item) => item.stateCode === key);
+      if (!rec) {
+        accum.push({
+          category: categoryProp,
+          categoryName: key,
+          categoryCount: record.count,
+          categorySortKey: getCategorySortKey(domain, categoryProp, record),
+        });
+      } else {
+        rec.categoryCount += record.count;
+      }
+      total += record.count;
+      return accum;
+    }, [])
+    .sort(
+      (a, b) => a.x - b.x || a.categorySortKey.localeCompare(b.categorySortKey)
+    );
+
+  console.log('getChartMapParticipantCounts:categoryCounts:', categoryCounts);
+  const categories = [];
+
+  const series = categoryCounts.reduce((accum, rec, i) => {
+    categories.push(rec.categoryName);
+    rec.name = rec.categoryName;
+    rec.value = rec.categoryCount;
+    rec.valueFraction = (100 * rec.categoryCount) / total;
+    // rec.x = i;
+    // rec.y = (100 * rec.categoryCount) / total;
+    rec.total = total;
+    const key = 'Participant count';
+    const seriesObj = accum.find((item) => item.name === key);
+    if (!seriesObj) {
+      const serObj = {
+        data: [rec],
+        joinBy: ['hc-a2', 'stateCode'],
+        name: key,
+        states: {
+          hover: {
+            color: '#a4edba',
+            borderColor: '#A0A0A0',
+            borderWidth: 2,
+          },
+          tooltip: {
+            valuePrefix: 'counts: ',
+            valueSuffix: JSON.stringify(this),
+            // valueSuffix:
+            //   highCharts.numberFormat(Math.abs(this.valueFraction), 2) +
+            //   '%',
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          format: '{point.properties.hc-a2}',
+        },
+      };
+      accum[key] = serObj;
+    } else {
+      seriesObj.data.push(rec);
+    }
+    return accum;
+  }, []);
+  console.log('getChartMapParticipantCounts:series:', series);
+
+  return {
+    chart: {
+      map: ustopo,
+    },
+    title: {
+      text: CHART_CATEGORY_KEY_NAME[categoryProp],
+    },
+    mapNavigation: {
+      enabled: true,
+      buttonOptions: {
+        verticalAlign: 'bottom',
       },
     },
     series: series,
