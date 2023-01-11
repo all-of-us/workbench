@@ -592,7 +592,7 @@ export function getChartMapParticipantCounts(
     mapNavigation: {
       enabled: true,
       buttonOptions: {
-        verticalAlign: 'bottom',
+        verticalAlign: 'top',
       },
     },
     legend: {
@@ -761,7 +761,7 @@ export function getChartMapBubbleParticipantCounts(
     mapNavigation: {
       enabled: true,
       buttonOptions: {
-        verticalAlign: 'bottom',
+        verticalAlign: 'top',
       },
     },
     legend: {
