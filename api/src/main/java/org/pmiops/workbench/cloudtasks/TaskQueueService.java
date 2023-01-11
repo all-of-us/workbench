@@ -8,11 +8,11 @@ import com.google.cloud.tasks.v2.Task;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -67,79 +67,60 @@ public class TaskQueueService {
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds) {
-    groupAndPushRdrWorkspaceTasks(workspaceIds, false);
-  }
-
-  public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
-    groupAndPushRdrResearcherTasks(userIds, false);
+    groupAndPushRdrTasks(workspaceIds, EXPORT_WORKSPACE_PATH, false);
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds, boolean backfill) {
-    RdrExportConfig rdrConfig = workbenchConfigProvider.get().rdrExport;
-    if (rdrConfig == null) {
-      LOGGER.info("RDR export is not configured for this environment.  Exiting.");
-      return;
-    }
+    groupAndPushRdrTasks(workspaceIds, EXPORT_WORKSPACE_PATH, backfill);
+  }
 
-    List<List<Long>> groups =
-        CloudTasksUtils.partitionList(workspaceIds, rdrConfig.exportObjectsPerTask);
-    String path = EXPORT_WORKSPACE_PATH;
-    if (backfill) {
-      path += "?backfill=true";
-    }
-    for (List<Long> group : groups) {
-      createAndPushTask(rdrConfig.queueName, path, group);
-    }
+  public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
+    groupAndPushRdrTasks(userIds, EXPORT_RESEARCHER_PATH, false);
   }
 
   public void groupAndPushRdrResearcherTasks(List<Long> userIds, boolean backfill) {
+    groupAndPushRdrTasks(userIds, EXPORT_RESEARCHER_PATH, backfill);
+  }
+
+  public void groupAndPushRdrTasks(List<Long> ids, String pathBase, boolean backfill) {
     RdrExportConfig rdrConfig = workbenchConfigProvider.get().rdrExport;
     if (rdrConfig == null) {
       LOGGER.info("RDR export is not configured for this environment.  Exiting.");
       return;
     }
 
-    List<List<Long>> groups =
-        CloudTasksUtils.partitionList(userIds, rdrConfig.exportObjectsPerTask);
-    String path = EXPORT_RESEARCHER_PATH;
-    if (backfill) {
-      path += "?backfill=true";
-    }
-    for (List<Long> group : groups) {
-      createAndPushTask(rdrConfig.queueName, path, group);
-    }
+    String path = backfill ? pathBase + "?backfill=true" : pathBase;
+
+    CloudTasksUtils.partitionList(ids, rdrConfig.exportObjectsPerTask)
+        .forEach(group -> createAndPushTask(rdrConfig.queueName, path, group));
   }
 
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    List<List<Long>> groups =
-        CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask);
-    for (List<Long> group : groups) {
-      createAndPushTask(
-          AUDIT_PROJECTS_QUEUE_NAME,
-          AUDIT_PROJECTS_PATH,
-          new AuditProjectAccessRequest().userIds(group));
-    }
+    CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
+        .forEach(
+            group ->
+                createAndPushTask(
+                    AUDIT_PROJECTS_QUEUE_NAME,
+                    AUDIT_PROJECTS_PATH,
+                    new AuditProjectAccessRequest().userIds(group)));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    List<List<Long>> groups =
-        CloudTasksUtils.partitionList(
-            userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask);
-    List<String> tasknames = new ArrayList<>();
-    for (List<Long> group : groups) {
-      tasknames.add(
-          createAndPushTask(
-              SYNCHRONIZE_ACCESS_QUEUE_NAME,
-              SYNCHRONIZE_ACCESS_PATH,
-              new SynchronizeUserAccessRequest().userIds(group)));
-    }
-    return tasknames;
+    return CloudTasksUtils.partitionList(
+            userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask)
+        .stream()
+        .map(
+            group ->
+                createAndPushTask(
+                    SYNCHRONIZE_ACCESS_QUEUE_NAME,
+                    SYNCHRONIZE_ACCESS_PATH,
+                    new SynchronizeUserAccessRequest().userIds(group)))
+        .collect(Collectors.toList());
   }
 
-  public List<String> groupAndPushDeleteTestWorkspaceTasks(
-      List<TestUserWorkspace> workspacesToDelete) {
+  public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
     int batchSize =
         Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
             .map(conf -> conf.workspaceDeletionBatchSize)
@@ -147,17 +128,13 @@ public class TaskQueueService {
                 () ->
                     new BadRequestException(
                         "Deletion of e2e test user workspaces is not enabled in this environment"));
-    List<List<TestUserWorkspace>> groups =
-        CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
-    List<String> tasknames = new ArrayList<>();
-    for (List<TestUserWorkspace> group : groups) {
-      tasknames.add(
-          createAndPushTask(
-              DELETE_TEST_WORKSPACES_QUEUE_NAME,
-              DELETE_TEST_WORKSPACES_PATH,
-              new DeleteTestUserWorkspacesRequest().addAll(group)));
-    }
-    return tasknames;
+    CloudTasksUtils.partitionList(workspacesToDelete, batchSize)
+        .forEach(
+            group ->
+                createAndPushTask(
+                    DELETE_TEST_WORKSPACES_QUEUE_NAME,
+                    DELETE_TEST_WORKSPACES_PATH,
+                    new DeleteTestUserWorkspacesRequest().addAll(group)));
   }
 
   public void pushEgressEventTask(Long eventId) {
