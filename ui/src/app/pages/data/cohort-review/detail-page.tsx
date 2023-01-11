@@ -114,8 +114,8 @@ export const DetailPage = fp.flow(
       return (
         <div
           style={{
-            minHeight: 'calc(100vh - calc(4rem + 60px))',
-            padding: '1rem',
+            minHeight: 'calc(100vh - calc(6rem + 60px))',
+            padding: '1.5rem',
             position: 'relative',
             marginRight: '45px',
           }}

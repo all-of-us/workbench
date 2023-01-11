@@ -75,12 +75,16 @@ public class MailServiceImpl implements MailService {
   private static final String INITIAL_CREDITS_EXPIRATION_RESOURCE =
       "emails/initial_credits_expiration/content.html";
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
+  private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
+      "emails/new_user_satisfaction_survey/content.html";
   private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
       "emails/rt_access_expired/content.html";
   private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
       "emails/rt_access_threshold/content.html";
   private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
       "emails/setup_gcp_billing_account/content.html";
+  private static final String TERRA_TOS_REMINDER_RESOURCE =
+      "emails/terra_tos_reminder/content.html";
   private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
   private static final String WELCOME_RESOURCE = "emails/welcome/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
@@ -337,6 +341,26 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
+  public void sendNewUserSatisfactionSurveyEmail(DbUser dbUser, String surveyLink)
+      throws MessagingException {
+    String htmlMessage =
+        buildHtml(
+            NEW_USER_SATISFACTION_SURVEY_RESOURCE,
+            ImmutableMap.<EmailSubstitutionField, String>builder()
+                .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+                .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
+                .put(EmailSubstitutionField.SURVEY_LINK, surveyLink)
+                .build());
+
+    sendWithRetries(
+        ImmutableList.of(dbUser.getContactEmail()),
+        ImmutableList.of(),
+        "Researcher satisfaction survey for the All of Us Researcher Workbench",
+        String.format("New user satisfaction survey email for %s", dbUser.getUsername()),
+        htmlMessage);
+  }
+
+  @Override
   public void sendWorkspaceAdminLockingEmail(
       DbWorkspace workspace, String lockingReason, List<DbUser> owners) throws MessagingException {
 
@@ -361,6 +385,16 @@ public class MailServiceImpl implements MailService {
         buildHtml(
             WORKSPACE_ADMIN_LOCKING_RESOURCE,
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
+  }
+
+  @Override
+  public void sendTerraTosReminderEmail(DbUser user) throws MessagingException {
+    sendWithRetries(
+        ImmutableList.of(user.getContactEmail()),
+        Collections.emptyList(),
+        "The All of Us Researcher Workbench Terms of Use have been updated",
+        String.format("Terra ToS Reminder sent to user %s", user.getUsername()),
+        buildHtml(TERRA_TOS_REMINDER_RESOURCE, terraTosReminderSubstitutionMap(user)));
   }
 
   private void sendEgressRemediationEmailWithContent(
@@ -527,6 +561,17 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
         .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
+        .build();
+  }
+
+  private Map<EmailSubstitutionField, String> terraTosReminderSubstitutionMap(DbUser user) {
+    return ImmutableMap.<EmailSubstitutionField, String>builder()
+        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
+        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
+        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
+        .put(EmailSubstitutionField.TOS_HREF, getTosUrlAsHref())
+        .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().server.uiBaseUrl)
         .build();
   }
 
@@ -725,6 +770,12 @@ public class MailServiceImpl implements MailService {
   private String getUiUrlAsHref() {
     final String url = workbenchConfigProvider.get().server.uiBaseUrl;
     return href(url, url);
+  }
+
+  private String getTosUrlAsHref() {
+    final String url =
+        String.format("%s/aou-tos.html", workbenchConfigProvider.get().server.uiBaseUrl);
+    return href(url, "All Of Us Researcher Workbench General Terms of Use");
   }
 
   private String getSupportHubUrlAsHref() {

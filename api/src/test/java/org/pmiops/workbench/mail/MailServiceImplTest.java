@@ -305,6 +305,25 @@ public class MailServiceImplTest {
     assertThat(gotHtml).doesNotContain("${");
   }
 
+  @Test
+  public void testSendNewUserSatisfactionSurveyEmail() throws Exception {
+    DbUser user = createDbUser();
+    String surveyLink = "example.com?survey_code=123";
+    mailService.sendNewUserSatisfactionSurveyEmail(user, surveyLink);
+
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+
+    MandrillMessage gotMessage = (MandrillMessage) mandrillCaptor.getValue().getMessage();
+
+    assertThat(gotMessage.getTo())
+        .containsExactly(
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.TO));
+
+    String gotHtml = gotMessage.getHtml();
+    assertThat(gotHtml).contains(surveyLink);
+    assertThat(gotHtml).contains("Please take two minutes to rate your satisfaction");
+  }
+
   private DbUser createDbUser() {
     DbUser user = new DbUser();
     user.setFamilyName("family name");

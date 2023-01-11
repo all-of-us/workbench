@@ -59,7 +59,7 @@ const styles = {
     fontWeight: 400,
   },
   button: {
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
     height: 'auto',
   },
   inlineBlock: {
@@ -69,8 +69,8 @@ const styles = {
     background: colors.white,
     border: `1px solid ${inputBorderColor}`,
     borderRadius: 3,
-    height: '1.5rem',
-    padding: '0 0.5rem',
+    height: '2.25rem',
+    padding: '0 0.75rem',
     width: '100%',
   },
 };
@@ -343,7 +343,7 @@ const AnnotationItem = fp.flow(
                 <span style={styles.message}> Annotation Saved</span>
               </div>
             )}
-            {saving && <Spinner style={{ marginLeft: '0.25rem' }} size={16} />}
+            {saving && <Spinner style={{ marginLeft: '0.375rem' }} size={16} />}
           </div>
           {this.renderInput()}
         </React.Fragment>
@@ -522,7 +522,7 @@ export const SidebarContent = fp.flow(
             {deceased ? 'Yes' : 'No'}
           </div>
 
-          <div style={{ display: 'flex', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', marginTop: '1.5rem' }}>
             <div style={styles.header}>Participant Status</div>
             {savingStatus && (
               <Spinner width={16} height={16} style={{ marginLeft: 'auto' }} />
@@ -532,7 +532,7 @@ export const SidebarContent = fp.flow(
           <div
             style={{
               ...(disabled ? { cursor: 'not-allowed' } : {}),
-              marginBottom: '1rem',
+              marginBottom: '1.5rem',
             }}
           >
             <Select

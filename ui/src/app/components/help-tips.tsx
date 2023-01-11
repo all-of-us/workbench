@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { ClrIcon } from 'app/components/icons';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { highlightSearchTerm, reactStyles } from 'app/utils';
+
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
@@ -12,7 +13,7 @@ const styles = reactStyles({
     color: colors.primary,
   },
   contentTitle: {
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     fontSize: '14px',
     fontWeight: 600,
     color: colors.primary,
@@ -26,12 +27,12 @@ const styles = reactStyles({
     borderRadius: '4px',
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
     marginTop: '5px',
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     color: colors.primary,
   },
   textInput: {
     width: '85%',
-    height: '1.5rem',
+    height: '2.25rem',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -134,7 +135,7 @@ export class HelpTips extends React.Component<Props, State> {
         {this.props.allowSearch && (
           <div style={styles.textSearch}>
             <ClrIcon
-              style={{ color: colors.primary, margin: '0 0.25rem' }}
+              style={{ color: colors.primary, margin: '0 0.375rem' }}
               shape='search'
               size={16}
             />
@@ -153,7 +154,7 @@ export class HelpTips extends React.Component<Props, State> {
               <h3
                 style={{
                   ...styles.sectionTitle,
-                  marginTop: s === 0 ? 0 : '0.5rem',
+                  marginTop: s === 0 ? 0 : '0.75rem',
                 }}
                 data-test-id={`section-title-${s}`}
               >
@@ -180,7 +181,7 @@ export class HelpTips extends React.Component<Props, State> {
             </div>
           ))
         ) : (
-          <div style={{ marginTop: '0.5rem' }}>
+          <div style={{ marginTop: '0.75rem' }}>
             <em>No results found</em>
           </div>
         )}

@@ -65,8 +65,8 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '20px',
     color: colors.primary,
-    marginTop: '1.5rem',
-    marginBottom: '0.3rem',
+    marginTop: '2.25rem',
+    marginBottom: '0.45rem',
   },
   tierLabel: {
     fontSize: '16px',
@@ -74,20 +74,20 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '17px',
     color: '#333F52',
-    marginTop: '0.8rem',
-    marginBottom: '1rem',
+    marginTop: '1.2rem',
+    marginBottom: '1.5rem',
   },
   tierConfigContainer: {
-    width: '31rem',
-    height: '20rem',
-    borderRadius: '0.31rem',
+    width: '46.5rem',
+    height: '30rem',
+    borderRadius: '0.465rem',
     backgroundColor: 'rgba(33,111,180,0.1)',
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
   },
   switch: {
-    width: '2rem',
-    height: '1.125rem',
-    borderRadius: '0.31rem',
+    width: '3rem',
+    height: '1.6875rem',
+    borderRadius: '0.465rem',
     onColor: '#080',
   },
   saveButton: {
@@ -177,7 +177,7 @@ const RequirementDropdown = (props: {
   const { tierConfig, onChange } = props;
   return (
     <Dropdown
-      style={{ width: '16rem' }}
+      style={{ width: '24rem' }}
       data-test-id={`${tierConfig.accessTierShortName}-agreement-dropdown`}
       placeholder='Select type'
       options={MembershipRequirements}
@@ -246,8 +246,8 @@ const TierConfig = (props: TierConfigProps) => {
   } = props;
 
   const tierBadgeStyle: CSSProperties = {
-    marginTop: '0.6rem',
-    marginLeft: '0.6rem',
+    marginTop: '0.9rem',
+    marginLeft: '0.9rem',
   };
 
   const tierConfig = getTierConfig(institution, accessTierShortName);
@@ -258,11 +258,11 @@ const TierConfig = (props: TierConfigProps) => {
       <div>
         <TierBadge {...{ accessTierShortName }} style={tierBadgeStyle} />
       </div>
-      <FlexColumn style={{ marginLeft: '0.4rem' }}>
+      <FlexColumn style={{ marginLeft: '0.6rem' }}>
         <label style={styles.tierLabel}>
           {displayNameForTier(accessTierShortName)} access
         </label>
-        <FlexRow style={{ gap: '0.3rem' }}>
+        <FlexRow style={{ gap: '0.45rem' }}>
           <EraRequiredSwitch
             tierConfig={tierConfig}
             onChange={setEraRequired}
@@ -281,7 +281,7 @@ const TierConfig = (props: TierConfigProps) => {
         {tierConfig.membershipRequirement !==
           InstitutionMembershipRequirement.NOACCESS && (
           <div
-            style={{ marginTop: '1rem' }}
+            style={{ marginTop: '1.5rem' }}
             data-test-id={`${accessTierShortName}-card-details`}
           >
             <label style={styles.label}>
@@ -296,7 +296,7 @@ const TierConfig = (props: TierConfigProps) => {
               InstitutionMembershipRequirement.ADDRESSES && (
               <FlexColumn
                 data-test-id={`${accessTierShortName}-email-address`}
-                style={{ width: '16rem' }}
+                style={{ width: '24rem' }}
               >
                 <label style={styles.label}>Accepted Email Addresses</label>
                 <AddressTextArea
@@ -320,7 +320,7 @@ const TierConfig = (props: TierConfigProps) => {
               InstitutionMembershipRequirement.DOMAINS && (
               <FlexColumn
                 data-test-id={`${accessTierShortName}-email-domain`}
-                style={{ width: '16rem' }}
+                style={{ width: '24rem' }}
               >
                 <label style={styles.label}>Accepted Email Domains</label>
                 <DomainTextArea
@@ -363,7 +363,7 @@ const PendingChangesModal = (props: {
         <Button
           onClick={onFinish}
           type='secondary'
-          style={{ marginRight: '2rem' }}
+          style={{ marginRight: '3rem' }}
         >
           Keep Editing
         </Button>
@@ -811,19 +811,23 @@ export const AdminInstitutionEdit = fp.flow(
         <div>
           <style>{css}</style>
           <FadeBox
-            style={{ marginTop: '1rem', marginLeft: '1rem', width: '1239px' }}
+            style={{
+              marginTop: '1.5rem',
+              marginLeft: '1.5rem',
+              width: '1239px',
+            }}
           >
             <FlexRow>
               <Scroll
                 dir='left'
                 onClick={() => this.backButton()}
-                style={{ width: '1.2rem', margin: '0.4rem 0.4rem 0rem 0rem' }}
+                style={{ width: '1.8rem', margin: '0.6rem 0.6rem 0rem 0rem' }}
               />{' '}
               <SemiBoldHeader
                 style={{
                   fontSize: '18px',
                   lineHeight: '22px',
-                  marginBottom: '1rem',
+                  marginBottom: '1.5rem',
                 }}
               >
                 {title}
@@ -837,7 +841,7 @@ export const AdminInstitutionEdit = fp.flow(
                   inputName='displayName'
                   placeholder='Display Name'
                   labelStyle={styles.label}
-                  inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
+                  inputStyle={{ width: '24rem', marginTop: '0.45rem' }}
                   labelText='Institution Name'
                   onChange={(v) =>
                     this.setState(fp.set(['institution', 'displayName'], v))
@@ -856,7 +860,7 @@ export const AdminInstitutionEdit = fp.flow(
                 </div>
                 <label style={styles.label}>Institution Type</label>
                 <Dropdown
-                  style={{ width: '16rem' }}
+                  style={{ width: '24rem' }}
                   data-test-id='organization-dropdown'
                   placeholder='Organization Type'
                   options={OrganizationTypeOptions}
@@ -879,7 +883,7 @@ export const AdminInstitutionEdit = fp.flow(
                         )
                       )
                     }
-                    inputStyle={{ width: '16rem', marginTop: '0.8rem' }}
+                    inputStyle={{ width: '24rem', marginTop: '1.2rem' }}
                   />
                 )}
                 <TextInputWithLabel
@@ -887,9 +891,9 @@ export const AdminInstitutionEdit = fp.flow(
                   inputId='requestAccessUrl'
                   inputName='requestAccessUrl'
                   placeholder='Request Access URL'
-                  containerStyle={{ marginTop: '1.5rem' }}
+                  containerStyle={{ marginTop: '2.25rem' }}
                   labelStyle={styles.label}
-                  inputStyle={{ width: '16rem', marginTop: '0.3rem' }}
+                  inputStyle={{ width: '24rem', marginTop: '0.45rem' }}
                   labelText='Custom URL for “Request Access” Links'
                   onChange={(v) =>
                     this.setState(
@@ -907,7 +911,7 @@ export const AdminInstitutionEdit = fp.flow(
                   style={{
                     color: colors.primary,
                     fontSize: 12,
-                    width: '16rem',
+                    width: '24rem',
                   }}
                 >
                   If provided, users who select this institution but are not
@@ -916,7 +920,7 @@ export const AdminInstitutionEdit = fp.flow(
                   (initial registration, request for Controlled Tier access).
                 </p>
               </FlexColumn>
-              <FlexColumn style={{ width: '50%', marginRight: '1rem' }}>
+              <FlexColumn style={{ width: '50%', marginRight: '1.5rem' }}>
                 <label style={{ ...styles.label, marginTop: '0rem' }}>
                   User Email Instructions Text (Optional)
                 </label>
@@ -939,13 +943,13 @@ export const AdminInstitutionEdit = fp.flow(
               style={{
                 fontSize: '18px',
                 lineHeight: '22px',
-                marginTop: '2rem',
+                marginTop: '3rem',
               }}
             >
               Data access tiers
             </SemiBoldHeader>
             <hr style={{ border: '1px solid #A9B6CB' }} />
-            <FlexRow style={{ gap: '2rem' }}>
+            <FlexRow style={{ gap: '3rem' }}>
               {orderedAccessTierShortNames.map((accessTierShortName) => (
                 <TierConfig
                   key={accessTierShortName}
@@ -979,13 +983,13 @@ export const AdminInstitutionEdit = fp.flow(
               ))}
             </FlexRow>
             <FlexRow
-              style={{ justifyContent: 'flex-start', marginRight: '1rem' }}
+              style={{ justifyContent: 'flex-start', marginRight: '1.5rem' }}
             >
               <div>
                 <Button
                   type='secondary'
                   path='/admin/institution'
-                  style={{ marginRight: '1.5rem' }}
+                  style={{ marginRight: '2.225rem' }}
                 >
                   Cancel
                 </Button>

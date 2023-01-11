@@ -4,13 +4,13 @@ import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from './cookies';
 
 declare const gapi: any;
 
-interface GoogleBillingAccountInfo {
+export interface GoogleBillingAccountInfo {
   billingAccountName: string;
   billingEnabled: boolean;
 }
 
 export async function getBillingAccountInfo(googleProject: string) {
-  return new Promise<GoogleBillingAccountInfo>((resolve) => {
+  return new Promise<GoogleBillingAccountInfo>((resolve, reject) => {
     gapi.load('client', () => {
       if (isTestAccessTokenActive()) {
         gapi.client.load('cloudbilling', 'v1', () => {
@@ -23,7 +23,8 @@ export async function getBillingAccountInfo(googleProject: string) {
             .getBillingInfo({
               name: 'projects/' + googleProject,
             })
-            .then((response) => resolve(JSON.parse(response.body)));
+            .then((response) => resolve(JSON.parse(response.body)))
+            .catch((error) => reject(error));
         });
       } else {
         gapi.client.load('cloudbilling', 'v1', () => {
@@ -31,7 +32,8 @@ export async function getBillingAccountInfo(googleProject: string) {
             .getBillingInfo({
               name: 'projects/' + googleProject,
             })
-            .then((response) => resolve(JSON.parse(response.body)));
+            .then((response) => resolve(JSON.parse(response.body)))
+            .catch((error) => reject(error));
         });
       }
     });

@@ -3,8 +3,6 @@ import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { RadioButton } from 'primereact/radiobutton';
 
-const { useState } = React;
-
 import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
@@ -22,6 +20,8 @@ import { useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import latest from 'assets/icons/latest.svg';
 import outdated from 'assets/icons/outdated.svg';
+
+const { useState } = React;
 
 export const CohortReviewListItem = fp.flow(
   withConfirmDeleteModal(),
@@ -94,8 +94,8 @@ export const CohortReviewListItem = fp.flow(
             boxShadow:
               '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
             display: 'flex',
-            height: '3.5rem',
-            marginTop: '0.25rem',
+            height: '5.25rem',
+            marginTop: '0.375rem',
           }}
         >
           <div
@@ -104,7 +104,7 @@ export const CohortReviewListItem = fp.flow(
             }}
           >
             <RadioButton
-              style={{ marginLeft: '0.25rem' }}
+              style={{ marginLeft: '0.375rem' }}
               name='reviewItem'
               onChange={() => onSelect(cohortReview.cohortReviewId)}
               checked={selected}
@@ -114,8 +114,8 @@ export const CohortReviewListItem = fp.flow(
             style={{
               color: colors.primary,
               flex: '0 0 50%',
-              lineHeight: '0.75rem',
-              padding: '0.5rem 0.25rem',
+              lineHeight: '1.125rem',
+              padding: '0.75rem 0.375rem',
             }}
           >
             <div style={{ fontSize: '14px', fontWeight: 600 }}>
@@ -161,11 +161,11 @@ export const CohortReviewListItem = fp.flow(
               <ResourceActionsMenu actions={actions()} disabled={readOnly} />
             </div>
             {cohortModifiedTime > cohortReview.creationTime ? (
-              <div style={{ color: colors.warning, padding: '0.25rem 0' }}>
+              <div style={{ color: colors.warning, padding: '0.375rem 0' }}>
                 <img src={outdated} /> Outdated
               </div>
             ) : (
-              <div style={{ color: colors.select, padding: '0.25rem 0' }}>
+              <div style={{ color: colors.select, padding: '0.375rem 0' }}>
                 <img src={latest} /> Latest
               </div>
             )}

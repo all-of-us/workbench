@@ -9,12 +9,12 @@ import { reactStyles } from 'app/utils';
 const styles = reactStyles({
   dropdownMenu: {
     display: 'block',
-    maxHeight: '12rem',
+    maxHeight: '18rem',
     minHeight: '30px',
     visibility: 'visible',
     overflowY: 'scroll',
     width: '35%',
-    marginTop: '.25rem',
+    marginTop: '.375rem',
     zIndex: 100,
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     borderRadius: '5px',
@@ -27,15 +27,15 @@ const styles = reactStyles({
   },
   box: {
     borderRadius: '5px',
-    paddingTop: '0.2rem',
-    paddingLeft: '0.2rem',
+    paddingTop: '0.3rem',
+    paddingLeft: '0.3rem',
     color: colors.primary,
   },
   boxHover: {
     background: 'rgb(234, 243, 250)',
     color: colors.primary,
-    paddingTop: '0.2rem',
-    paddingLeft: '0.2rem',
+    paddingTop: '0.3rem',
+    paddingLeft: '0.3rem',
   },
   boxHoverElement: {
     color: colors.primary,

@@ -1,11 +1,13 @@
 package org.pmiops.workbench.api;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -21,6 +23,8 @@ import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.TerraTosReminderEmailsResponse;
+import org.pmiops.workbench.model.TerraTosReminderEmailsResponseUsers;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAdminController implements UserAdminApiDelegate {
 
   private final AccessModuleService accessModuleService;
+  private final AccessSyncService accessSyncService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final ProfileService profileService;
   private final Provider<DbUser> userProvider;
@@ -39,6 +44,7 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   public UserAdminController(
       AccessModuleService accessModuleService,
+      AccessSyncService accessSyncService,
       ActionAuditQueryService actionAuditQueryService,
       ProfileService profileService,
       Provider<DbUser> userProvider,
@@ -46,6 +52,7 @@ public class UserAdminController implements UserAdminApiDelegate {
       TaskQueueService taskQueueService,
       UserService userService) {
     this.accessModuleService = accessModuleService;
+    this.accessSyncService = accessSyncService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.profileService = profileService;
     this.taskQueueService = taskQueueService;
@@ -95,7 +102,7 @@ public class UserAdminController implements UserAdminApiDelegate {
     }
     final DbUser user = userProvider.get();
     accessModuleService.updateAllBypassTimes(user.getUserId());
-    userService.updateUserAccessTiers(user, Agent.asUser(user));
+    accessSyncService.updateUserAccessTiers(user, Agent.asUser(user));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -115,5 +122,21 @@ public class UserAdminController implements UserAdminApiDelegate {
                     userService.findUsersByUsernames(request.getUsernames()).stream()
                         .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.COMMUNICATIONS_ADMIN})
+  public ResponseEntity<TerraTosReminderEmailsResponse> sendTerraTosReminderEmails() {
+    List<DbUser> emailsSent = userService.sendTerraTosReminderEmails();
+
+    return ResponseEntity.ok(
+        new TerraTosReminderEmailsResponse()
+            .users(emailsSent.stream().map(this::toResponse).collect(Collectors.toList())));
+  }
+
+  private TerraTosReminderEmailsResponseUsers toResponse(DbUser user) {
+    return new TerraTosReminderEmailsResponseUsers()
+        .contactEmail(user.getContactEmail())
+        .username(user.getUsername());
   }
 }

@@ -8,10 +8,7 @@ import {
 } from 'generated/fetch';
 
 import { ErrorMessage } from 'app/components/inputs';
-import {
-  registerApiClient,
-  surveysApi,
-} from 'app/services/swagger-fetch-clients';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { createNewUserSatisfactionSurveyStore } from 'app/utils/stores';
 
 import { SurveysApiStub } from 'testing/stubs/surveys-api-stub';
@@ -53,11 +50,13 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
   const createShallowWrapper = ({
     onCancel = () => {},
     onSubmitSuccess = () => {},
+    createSurveyApiCall = () => Promise.resolve(),
   } = {}) => {
     return shallow(
       <NewUserSatisfactionSurveyModal
         onCancel={onCancel}
         onSubmitSuccess={onSubmitSuccess}
+        createSurveyApiCall={createSurveyApiCall}
       />
     );
   };
@@ -111,18 +110,17 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
   });
 
   it('should display an error on API failure and remove it on API success', async () => {
-    const wrapper = createShallowWrapper();
+    const createSurveyApiCall = jest.fn();
+    const wrapper = createShallowWrapper({
+      createSurveyApiCall,
+    });
     expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
 
-    jest
-      .spyOn(surveysApi(), 'createNewUserSatisfactionSurvey')
-      .mockImplementationOnce(() => Promise.reject());
+    createSurveyApiCall.mockImplementationOnce(() => Promise.reject());
     await findSubmitButton(wrapper).prop('onClick')();
     expect(wrapper.find(ErrorMessage).exists()).toBeTruthy();
 
-    jest
-      .spyOn(surveysApi(), 'createNewUserSatisfactionSurvey')
-      .mockImplementationOnce(() => Promise.resolve(new Response()));
+    createSurveyApiCall.mockImplementationOnce(() => Promise.resolve());
     await findSubmitButton(wrapper).prop('onClick')();
     expect(wrapper.find(ErrorMessage).exists()).toBeFalsy();
   });

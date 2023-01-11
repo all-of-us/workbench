@@ -2,8 +2,6 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import { validate } from 'validate.js';
 
-const { useState } = React;
-
 import { AlertWarning } from 'app/components/alert';
 import { Button } from 'app/components/buttons';
 import { NumberInput, TextInput, ValidationError } from 'app/components/inputs';
@@ -19,35 +17,37 @@ import { reactStyles, summarizeErrors } from 'app/utils';
 import { currentCohortReviewStore } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
+const { useState } = React;
+
 const styles = reactStyles({
   title: {
     color: '#302973',
-    fontSize: '0.9rem',
+    fontSize: '1.35rem',
     fontWeight: 200,
   },
   body: {
-    lineHeight: '1rem',
+    lineHeight: '1.5rem',
   },
   input: {
-    height: '1.25rem',
-    width: '10rem',
+    height: '1.875rem',
+    width: '15rem',
   },
   cancel: {
     color: '#000000',
     fontWeight: 'bold',
-    marginRight: '1rem',
-    padding: '0.25rem 0.5rem',
+    marginRight: '1.5rem',
+    padding: '0.375rem 0.75rem',
     letterSpacing: '1.25px',
   },
   create: {
     background: '#302C71',
-    marginLeft: '0.5rem',
+    marginLeft: '0.75rem',
   },
   disabled: {
     background: '#9b9b9b',
     color: '#c9c8c8',
     border: '1px soilid #9b9b9b',
-    marginLeft: '0.5rem',
+    marginLeft: '0.75rem',
   },
 });
 
@@ -140,7 +140,7 @@ export const CreateCohortReviewModal = ({
         <ValidationError>
           {summarizeErrors(reviewNameTouched && errors?.reviewName)}
         </ValidationError>
-        <div style={{ margin: '0.5rem 0' }}>
+        <div style={{ margin: '0.75rem 0' }}>
           Cohort {cohortName} has {participantCount.toLocaleString() + ' '}
           participants for possible review. How many would you like to review?
           {participantCount > 10000 && <span> (max 10,000)</span>}
@@ -175,7 +175,7 @@ export const CreateCohortReviewModal = ({
           {creating && (
             <Spinner
               size={16}
-              style={{ marginRight: '0.25rem', marginLeft: '-0.25rem' }}
+              style={{ marginRight: '0.375rem', marginLeft: '-0.375rem' }}
             />
           )}
           CREATE SET

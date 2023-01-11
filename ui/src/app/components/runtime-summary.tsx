@@ -17,7 +17,7 @@ export const RuntimeSummary = ({
     <>
       <label
         htmlFor='compute-resources'
-        style={{ ...styles.bold, marginTop: '1rem' }}
+        style={{ ...styles.bold, marginTop: '1.5rem' }}
       >
         Compute Resources
       </label>
@@ -31,7 +31,7 @@ export const RuntimeSummary = ({
         <>
           <label
             htmlFor='worker-configuration'
-            style={{ ...styles.bold, marginTop: '1rem' }}
+            style={{ ...styles.bold, marginTop: '1.5rem' }}
           >
             Worker Configuration
           </label>

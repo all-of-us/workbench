@@ -61,7 +61,7 @@ export const RecentWorkspaces = class extends React.Component<{}, State> {
           <div>
             <FlexRow
               style={{
-                marginTop: '1rem',
+                marginTop: '1.5rem',
                 minHeight: 247,
                 position: 'relative',
                 overflow: 'auto',

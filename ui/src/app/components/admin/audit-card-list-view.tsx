@@ -118,7 +118,10 @@ const PropertyChangeListEntry = (props: {
   );
 };
 
-const infoMessageStyle = { margin: '0.25rem 0 0rem 1rem', fontStyle: 'italic' };
+const infoMessageStyle = {
+  margin: '0.375rem 0 0rem 1.5rem',
+  fontStyle: 'italic',
+};
 const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
   const { header, propertyChanges } = props.eventBundle;
 
@@ -128,8 +131,8 @@ const PropertyChangeListView = (props: { eventBundle: AuditEventBundle }) => {
     )(propertyChanges) ? (
     <div
       style={{
-        marginTop: '0.25rem',
-        marginLeft: '1rem',
+        marginTop: '0.375rem',
+        marginLeft: '1.5rem',
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
       }}
@@ -221,10 +224,10 @@ const AuditEventBundleHeaderView = (props: {
       </div>
       <div
         style={{
-          marginLeft: '1rem',
+          marginLeft: '1.5rem',
           display: 'grid',
           justifyItems: 'start',
-          columnGap: '0.5rem',
+          columnGap: '0.75rem',
           gridTemplateColumns: 'auto 1fr',
           gridTemplateRows: '1fr 1fr 1fr',
           gridAutoFlow: 'column',
@@ -241,7 +244,7 @@ const AuditEventBundleHeaderView = (props: {
 const EventBundleView = (props: { eventBundle: AuditEventBundle }) => {
   const { eventBundle } = props;
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <div style={{ marginBottom: '1.5rem' }}>
       <AuditEventBundleHeaderView header={eventBundle.header} />
       <PropertyChangeListView eventBundle={eventBundle} />
     </div>
@@ -268,7 +271,7 @@ const AuditActionCard = (props: { action: AuditAction }) => {
         style={{
           fontWeight: 200,
           textAlign: 'left',
-          fontSize: '0.825rem',
+          fontSize: '1.2375rem',
           padding: '5px',
           animation: 'fadeEffect 0.5s',
         }}
@@ -331,7 +334,7 @@ const ActionTypeFilter = (props: {
               onChange={() => toggleSelectedAction(id)}
               label={entry.displayName}
               checked={entry.isActive}
-              style={{ margin: '0.25rem' }}
+              style={{ margin: '0.375rem' }}
             />
           ))
         )(activeActionTypes)}
@@ -402,7 +405,7 @@ export const AuditActionCardListView = (props: { actions: AuditAction[] }) => {
         activeActionTypes={activeActionTypes}
         updateFilter={updateFilterCallback}
       />
-      <div style={{ margin: '1rem', width: '30rem' }}>
+      <div style={{ margin: '1.5rem', width: '45rem' }}>
         {filteredActions.length ? (
           filteredActions
         ) : (

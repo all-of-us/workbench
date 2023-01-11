@@ -3,8 +3,6 @@ import { useParams } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-const { useEffect, useState } = React;
-
 import {
   CohortReview,
   CriteriaType,
@@ -37,6 +35,8 @@ import { displayDate } from 'app/utils/dates';
 import { currentCohortReviewStore, useNavigation } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
+const { useEffect, useState } = React;
+
 const styles = reactStyles({
   backBtn: {
     padding: 0,
@@ -47,14 +47,14 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   title: {
-    margin: '0 0.5rem 0 0',
+    margin: '0 0.75rem 0 0',
     fontSize: '20px',
     fontWeight: 600,
     color: colors.primary,
     overflow: 'auto',
   },
   description: {
-    margin: '0 0 0.25rem',
+    margin: '0 0 0.375rem',
     color: '#000000',
   },
   columnHeader: {
@@ -64,37 +64,37 @@ const styles = reactStyles({
   },
   columnBody: {
     background: '#ffffff',
-    padding: '0.5rem 0.5rem 0.3rem 0.75rem',
+    padding: '0.75rem 0.75rem 0.45rem 1.125rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
     borderBottom: 'none',
-    lineHeight: '0.6rem',
+    lineHeight: '0.9rem',
     cursor: 'pointer',
   },
   reviewList: {
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     borderRadius: '3px',
     flex: '0 0 20%',
-    marginBottom: '0.25rem',
+    marginBottom: '0.375rem',
   },
   reviewListHeader: {
     borderBottom: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 600,
-    padding: '0.5rem',
+    padding: '0.75rem',
   },
   sortIcon: {
     marginTop: '4px',
     color: '#2691D0',
-    fontSize: '0.5rem',
+    fontSize: '0.75rem',
     float: 'right',
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
   },
 });
 const reverseColumnEnum = {
@@ -254,7 +254,7 @@ export const CohortReviewPage = fp.flow(
   };
 
   return (
-    <FadeBox style={{ margin: 'auto', paddingTop: '1rem', width: '95.7%' }}>
+    <FadeBox style={{ margin: 'auto', paddingTop: '1.5rem', width: '95.7%' }}>
       {loading ? (
         <SpinnerOverlay />
       ) : (
@@ -294,7 +294,7 @@ export const CohortReviewPage = fp.flow(
                     color: colors.accent,
                     fontSize: '12px',
                     fontWeight: 500,
-                    marginRight: '0.5rem',
+                    marginRight: '0.75rem',
                   }}
                 >
                   Cohort details
@@ -304,7 +304,7 @@ export const CohortReviewPage = fp.flow(
                 style={{
                   color: colors.disabled,
                   fontSize: '11px',
-                  marginRight: '0.5rem',
+                  marginRight: '0.75rem',
                 }}
               >
                 Last modified date: {displayDate(cohort.lastModifiedTime)}
@@ -320,14 +320,14 @@ export const CohortReviewPage = fp.flow(
               <div style={styles.reviewListHeader}>
                 Review Sets
                 <Clickable
-                  style={{ display: 'inline-block', marginLeft: '0.5rem' }}
+                  style={{ display: 'inline-block', marginLeft: '0.75rem' }}
                   disabled={readOnly}
                   onClick={() => setShowCreateModal(true)}
                 >
                   <ClrIcon shape='plus-circle' class='is-solid' size={18} />
                 </Clickable>
               </div>
-              <div style={{ minHeight: '10rem', padding: '0.25rem' }}>
+              <div style={{ minHeight: '10rem', padding: '0.375rem' }}>
                 {cohortReviews.map((cohortReview, cr) => (
                   <CohortReviewListItem
                     key={cr}
@@ -353,14 +353,14 @@ export const CohortReviewPage = fp.flow(
                 ))}
               </div>
             </div>
-            <div style={{ flex: '0 0 80%', marginLeft: '0.25rem' }}>
+            <div style={{ flex: '0 0 80%', marginLeft: '0.375rem' }}>
               {!cohortReviews.length ? (
                 <div
                   style={{
                     color: colorWithWhiteness(colors.dark, 0.6),
                     fontSize: '20px',
                     fontWeight: 400,
-                    padding: '1rem',
+                    padding: '1.5rem',
                   }}
                 >
                   There are no review sets for this cohort. Click the plus icon

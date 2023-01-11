@@ -22,16 +22,16 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
       style={{
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginTop: '1rem',
+        marginTop: '1.5rem',
       }}
     >
-      <label style={{ color: colors.primary, marginRight: '1rem' }}>
+      <label style={{ color: colors.primary, marginRight: '1.5rem' }}>
         Workspace namespace
       </label>
       <TextInput
         style={{
-          width: '10rem',
-          marginRight: '1rem',
+          width: '15rem',
+          marginRight: '1.5rem',
         }}
         onChange={(value) => setWorkspaceNamespace(value)}
         onKeyDown={(event: KeyboardEvent) => {
@@ -41,7 +41,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
         }}
       />
       <Button
-        style={{ height: '1.5rem' }}
+        style={{ height: '2.25rem' }}
         onClick={() => navigateToWorkspace()}
       >
         Load Workspace

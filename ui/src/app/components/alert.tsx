@@ -7,16 +7,16 @@ import { reactStyles, withStyle } from 'app/utils';
 
 export const styles = reactStyles({
   alert: {
-    fontSize: '.54167rem',
+    fontSize: '.812505rem',
     letterSpacing: 'normal',
-    lineHeight: '.75rem',
+    lineHeight: '1.125rem',
     position: 'relative',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'row',
     width: 'auto',
-    borderRadius: '.125rem',
-    marginTop: '.25rem',
+    borderRadius: '.1875rem',
+    marginTop: '.375rem',
     background: colors.light,
     color: colors.dark,
     border: `1px solid ${colors.secondary}`,
@@ -32,13 +32,13 @@ export const styles = reactStyles({
     color: colors.primary,
     border: `1px solid ${colorWithWhiteness(colors.primary, 0.65)}`,
     fontSize: '11px',
-    padding: '.2rem',
+    padding: '.3rem',
   },
   warning: {
     background: colors.warning,
     color: colors.white,
     border: 'none',
-    padding: '.2rem',
+    padding: '.3rem',
   },
 });
 

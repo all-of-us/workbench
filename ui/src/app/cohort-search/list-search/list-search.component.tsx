@@ -52,11 +52,11 @@ const styles = reactStyles({
   searchContainer: {
     float: 'left',
     width: '80%',
-    padding: '0.4rem 0',
+    padding: '0.6rem 0',
     zIndex: 10,
   },
   searchBar: {
-    height: '2.1rem',
+    height: '3.15rem',
     width: '100%',
     padding: '7px 14px',
     borderRadius: '5px',
@@ -64,20 +64,20 @@ const styles = reactStyles({
   },
   searchInput: {
     width: '94%',
-    height: '1.5rem',
-    marginLeft: '0.25rem',
+    height: '2.25rem',
+    marginLeft: '0.375rem',
     padding: '0',
     background: 'transparent',
     border: 0,
     outline: 'none',
   },
   attrIcon: {
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
     color: colors.accent,
     cursor: 'pointer',
   },
   selectIcon: {
-    margin: '2px 0.5rem 2px 2px',
+    margin: '2px 0.75rem 2px 2px',
     color: colorWithWhiteness(colors.success, -0.5),
     cursor: 'pointer',
   },
@@ -86,30 +86,30 @@ const styles = reactStyles({
     cursor: 'not-allowed',
   },
   selectedIcon: {
-    marginRight: '0.4rem',
+    marginRight: '0.6rem',
     color: colorWithWhiteness(colors.success, -0.5),
     opacity: 0.4,
     cursor: 'not-allowed',
   },
   disabledIcon: {
-    marginRight: '0.4rem',
+    marginRight: '0.6rem',
     color: colorWithWhiteness(colors.dark, 0.5),
     opacity: 0.4,
     cursor: 'not-allowed',
     pointerEvents: 'none',
   },
   brandIcon: {
-    marginRight: '0.4rem',
+    marginRight: '0.6rem',
     color: colorWithWhiteness(colors.dark, 0.5),
     cursor: 'pointer',
   },
   treeIcon: {
     color: colors.accent,
     cursor: 'pointer',
-    fontSize: '1.15rem',
+    fontSize: '1.725rem',
   },
   listContainer: {
-    margin: '0.5rem 0 1rem',
+    margin: '0.75rem 0 1.5rem',
     fontSize: '12px',
     color: colors.primary,
   },
@@ -129,7 +129,7 @@ const styles = reactStyles({
     borderTop: 0,
   },
   columnNameHeader: {
-    padding: '0 0 0 0.25rem',
+    padding: '0 0 0 0.375rem',
     background: colorWithWhiteness(colors.dark, 0.93),
     color: colors.primary,
     border: 0,
@@ -137,7 +137,7 @@ const styles = reactStyles({
     fontWeight: 600,
     textAlign: 'left',
     verticalAlign: 'middle',
-    lineHeight: '0.75rem',
+    lineHeight: '1.125rem',
   },
   columnBodyName: {
     background: colors.white,
@@ -146,12 +146,12 @@ const styles = reactStyles({
     border: 0,
     borderBottom: borderStyle,
     color: colors.primary,
-    lineHeight: '0.8rem',
+    lineHeight: '1.2rem',
   },
   selectDiv: {
     minWidth: '6%',
     float: 'left',
-    lineHeight: '0.6rem',
+    lineHeight: '0.9rem',
   },
   nameDiv: {
     width: '80%',
@@ -162,8 +162,8 @@ const styles = reactStyles({
   },
   error: {
     width: '99%',
-    marginTop: '2.75rem',
-    padding: '0.25rem',
+    marginTop: '4.125rem',
+    padding: '0.375rem',
     background: colors.warning,
     color: colors.white,
     fontSize: '12px',
@@ -177,18 +177,18 @@ const styles = reactStyles({
   },
   infoIcon: {
     color: colorWithWhiteness(colors.accent, 0.1),
-    marginLeft: '0.25rem',
+    marginLeft: '0.375rem',
     height: '100%',
   },
   clearSearchIcon: {
     color: colors.accent,
     display: 'inline-block',
     float: 'right',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
   },
   inputAlert: {
     justifyContent: 'space-between',
-    padding: '0.2rem',
+    padding: '0.3rem',
     width: '64.3%',
   },
 });
@@ -216,7 +216,7 @@ const columns = [
       ...styles.columnNameHeader,
       width: '10%',
       paddingLeft: '0',
-      paddingRight: '0.5rem',
+      paddingRight: '0.75rem',
     },
   },
   {
@@ -227,7 +227,7 @@ const columns = [
       ...styles.columnNameHeader,
       width: '10%',
       paddingLeft: '0',
-      paddingRight: '0.5rem',
+      paddingRight: '0.75rem',
     },
   },
   {
@@ -273,7 +273,7 @@ const sourceStandardTooltip = (
   </span>
 );
 const searchTooltip = (
-  <div style={{ marginLeft: '0.5rem' }}>
+  <div style={{ marginLeft: '0.75rem' }}>
     The following special operators can be used to augment search terms:
     <ul style={{ listStylePosition: 'outside' }}>
       <li>
@@ -759,26 +759,26 @@ export const ListSearch = fp.flow(
       const open = childNodes[row.id]?.open;
       const loadingChildren = childNodes[row.id]?.loading;
       const columnStyle = child
-        ? { ...styles.columnBodyName, paddingLeft: '1.25rem' }
+        ? { ...styles.columnBodyName, paddingLeft: '1.875rem' }
         : styles.columnBodyName;
       const selectIconStyle = this.selectIconDisabled()
         ? { ...styles.selectIcon, ...styles.disableSelectIcon }
         : styles.selectIcon;
       return (
-        <tr style={{ height: '1.75rem' }}>
+        <tr style={{ height: '2.625rem' }}>
           <td
             style={{
               ...columnStyle,
               width: '31%',
               textAlign: 'left',
               borderLeft: 0,
-              padding: '0 0.25rem',
+              padding: '0 0.375rem',
             }}
           >
             {row.selectable && (
               <div style={styles.selectDiv}>
                 {loadingChildren && (
-                  <Spinner style={{ marginRight: '0.4rem' }} size={16} />
+                  <Spinner style={{ marginRight: '0.6rem' }} size={16} />
                 )}
                 {parent && !loadingChildren && (
                   <ClrIcon
@@ -831,7 +831,11 @@ export const ListSearch = fp.flow(
             </TooltipTrigger>
           </td>
           <td
-            style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
+            style={{
+              ...columnBodyStyle,
+              width: '10%',
+              paddingRight: '0.75rem',
+            }}
           >
             {row.domainId === Domain.DEVICE ? (
               row.conceptId
@@ -845,7 +849,11 @@ export const ListSearch = fp.flow(
             )}
           </td>
           <td
-            style={{ ...columnBodyStyle, width: '10%', paddingRight: '0.5rem' }}
+            style={{
+              ...columnBodyStyle,
+              width: '10%',
+              paddingRight: '0.75rem',
+            }}
           >
             {row.isStandard ? 'Standard' : 'Source'}
           </td>
@@ -853,8 +861,8 @@ export const ListSearch = fp.flow(
           <td
             style={{
               ...columnBodyStyle,
-              paddingLeft: '0.2rem',
-              paddingRight: '0.5rem',
+              paddingLeft: '0.3rem',
+              paddingRight: '0.75rem',
             }}
           >
             <TooltipTrigger
@@ -873,10 +881,10 @@ export const ListSearch = fp.flow(
               </div>
             </TooltipTrigger>
           </td>
-          <td style={{ ...columnBodyStyle, paddingLeft: '0.2rem' }}>
+          <td style={{ ...columnBodyStyle, paddingLeft: '0.3rem' }}>
             {row.parentCount > -1 && row.parentCount.toLocaleString()}
           </td>
-          <td style={{ ...columnBodyStyle, paddingLeft: '0.2rem' }}>
+          <td style={{ ...columnBodyStyle, paddingLeft: '0.3rem' }}>
             {row.childCount > -1 && row.childCount.toLocaleString()}
           </td>
           <td style={{ ...columnBodyStyle, textAlign: 'center', width: '12%' }}>
@@ -1060,7 +1068,10 @@ export const ListSearch = fp.flow(
                 {this.checkSource && (
                   <span style={{ float: 'right' }}>
                     <span
-                      style={{ display: 'table-cell', paddingRight: '0.35rem' }}
+                      style={{
+                        display: 'table-cell',
+                        paddingRight: '0.525rem',
+                      }}
                     >
                       Show results as source concepts (ICD9, ICD10
                       {domain === Domain.PROCEDURE && <span>, CPT</span>})
@@ -1088,7 +1099,7 @@ export const ListSearch = fp.flow(
                     <span
                       style={{
                         display: 'table-cell',
-                        paddingRight: '0.35rem',
+                        paddingRight: '0.525rem',
                       }}
                     >
                       Remove Brand Names
@@ -1110,7 +1121,7 @@ export const ListSearch = fp.flow(
                 <React.Fragment>
                   <table className='p-datatable' style={styles.table}>
                     <thead className='p-datatable-thead'>
-                      <tr style={{ height: '2rem' }}>
+                      <tr style={{ height: '3rem' }}>
                         {columns.map((column, index) => (
                           <th key={index} style={column.style as CSSProperties}>
                             {column.tooltip !== null
@@ -1125,7 +1136,7 @@ export const ListSearch = fp.flow(
                     </thead>
                   </table>
                   <style>{tableBodyOverlayStyle}</style>
-                  <div style={{ height: '15rem' }} className='tablebody'>
+                  <div style={{ height: '22.5rem' }} className='tablebody'>
                     <table
                       data-test-id='list-search-results-table'
                       className='p-datatable'
@@ -1158,7 +1169,9 @@ export const ListSearch = fp.flow(
                                       style={{ ...styles.error, marginTop: 0 }}
                                     >
                                       <ClrIcon
-                                        style={{ margin: '0 0.5rem 0 0.25rem' }}
+                                        style={{
+                                          margin: '0 0.75rem 0 0.375rem',
+                                        }}
                                         className='is-solid'
                                         shape='exclamation-triangle'
                                         size='22'
@@ -1188,11 +1201,11 @@ export const ListSearch = fp.flow(
             <div
               style={{
                 ...styles.error,
-                ...(domain === Domain.DRUG ? { marginTop: '3.75rem' } : {}),
+                ...(domain === Domain.DRUG ? { marginTop: '5.625rem' } : {}),
               }}
             >
               <ClrIcon
-                style={{ margin: '0 0.5rem 0 0.25rem' }}
+                style={{ margin: '0 0.75rem 0 0.375rem' }}
                 className='is-solid'
                 shape='exclamation-triangle'
                 size='22'

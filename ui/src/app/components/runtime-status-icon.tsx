@@ -23,13 +23,13 @@ import { FlexRow } from './flex';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
-    width: '.5rem',
-    height: '.5rem',
+    width: '.75rem',
+    height: '.75rem',
     zIndex: 2,
   },
   runtimeStatusIconOutline: {
     border: `1px solid ${colors.white}`,
-    borderRadius: '.25rem',
+    borderRadius: '.375rem',
   },
   rotate: {
     animation: 'rotation 2s infinite linear',

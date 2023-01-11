@@ -9,7 +9,7 @@ const styles = {
     fontSize: 13,
     lineHeight: '24px',
     background: colors.white,
-    padding: '0.2rem 0.5rem',
+    padding: '0.3rem 0.75rem',
     display: 'flex',
   },
 };
@@ -23,7 +23,7 @@ export const PaddedTableCell = ({
   return (
     <div
       style={{
-        padding: '.2rem',
+        padding: '.3rem',
         width: left ? leftWidth : rightWidth,
         display: 'flex',
       }}

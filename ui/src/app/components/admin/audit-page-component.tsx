@@ -78,7 +78,7 @@ const UserInput = ({
     }
   }, [queryText, downloadSqlFile]);
 
-  const buttonStyle = { height: '1.5rem', margin: '0.25rem 0.5rem' };
+  const buttonStyle = { height: '2.25rem', margin: '0.375rem 0.75rem' };
 
   const onAuditClick = () => {
     setAuditSubject(auditSubject.toLowerCase().trim());
@@ -109,7 +109,7 @@ const UserInput = ({
       {subjectRequested && <Navigate to={getNextAuditPath(auditSubject)} />}
       <TextInputWithLabel
         containerStyle={{ display: 'inline-block' }}
-        style={{ width: '15rem', margin: '1rem' }}
+        style={{ width: '22.5rem', margin: '1.5rem' }}
         labelText={buttonLabel || auditSubjectType}
         value={auditSubject}
         onChange={setAuditSubject}
@@ -193,14 +193,14 @@ const NumActions = ({ onChange, totalActions }) => {
           color: colors.primary,
           lineHeight: '22px',
           fontWeight: 600,
-          marginRight: '0.25rem',
+          marginRight: '0.375rem',
         }}
       >{`Number of Actions to Display (${totalActions} available)`}</label>
       <NumberInput
         value={Math.min(displayNum, totalActions)}
         min={1}
         max={totalActions}
-        style={{ width: '4rem' }}
+        style={{ width: '6rem' }}
         onChange={setDisplayNum}
       />
     </div>
@@ -251,7 +251,7 @@ export const AuditPageComponent = (props: AuditPageProps) => {
 
   return !loading ? (
     <React.Fragment>
-      <div style={{ marginLeft: '1rem' }}>
+      <div style={{ marginLeft: '1.5rem' }}>
         <UserInput
           initialAuditSubject={initialAuditSubject}
           auditSubjectType={auditSubjectType}

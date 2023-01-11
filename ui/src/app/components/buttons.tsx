@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
 import * as fp from 'lodash/fp';
@@ -11,6 +12,7 @@ import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import times from 'assets/icons/times-light.svg';
 
 export interface LinkLocationState {
   pathname: string;
@@ -21,8 +23,8 @@ export const styles = reactStyles({
     display: 'inline-flex',
     justifyContent: 'space-around',
     alignItems: 'center',
-    minWidth: '3rem',
-    maxWidth: '15rem',
+    minWidth: '4.5rem',
+    maxWidth: '22.5rem',
     height: 50,
     fontWeight: 500,
     fontSize: 14,
@@ -46,7 +48,7 @@ export const styles = reactStyles({
     // use a padding-bottom since when the FAB ignores margins in "fixed"
     // positioning mode but respects them in "absolute" mode.
     bottom: 0,
-    paddingBottom: '1rem',
+    paddingBottom: '1.5rem',
     position: 'sticky',
 
     // We use a flex container with flex-end to pin the FAB to the right.
@@ -56,10 +58,10 @@ export const styles = reactStyles({
   },
   slidingButton: {
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
-    borderRadius: '3rem',
+    borderRadius: '4.5rem',
     backgroundColor: colors.accent,
-    height: '1.8rem',
-    minWidth: '1.8rem',
+    height: '2.7rem',
+    minWidth: '2.7rem',
     cursor: 'pointer',
   },
 
@@ -87,7 +89,7 @@ export const styles = reactStyles({
   },
 
   slidingButtonHovering: {
-    padding: '0 0.5rem',
+    padding: '0 0.75rem',
     /* Note: Ideally this would not be hardcoded since the expanded text value is
      * dynamic. Unfortunately using unset or a higher max-width results in a
      * choppy transition. This constant will need to be increased or made dynamic
@@ -103,7 +105,7 @@ const buttonVariants = {
   primary: {
     style: {
       ...styles.baseNew,
-      borderRadius: '0.3rem',
+      borderRadius: '0.45rem',
       backgroundColor: colors.primary,
       color: colors.white,
     },
@@ -147,7 +149,7 @@ const buttonVariants = {
       color: colors.accent,
       fontSize: '10.5px',
       height: '30px',
-      padding: '0 0.5rem',
+      padding: '0 0.75rem',
     },
     disabledStyle: {
       borderColor: colorWithWhiteness(colors.dark, disabledAlpha),
@@ -161,7 +163,7 @@ const buttonVariants = {
   primaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
-      borderRadius: '0.2rem',
+      borderRadius: '0.3rem',
       backgroundColor: colors.primary,
       color: colors.white,
     },
@@ -173,7 +175,7 @@ const buttonVariants = {
   secondaryOnDarkBackground: {
     style: {
       ...styles.baseNew,
-      borderRadius: '0.2rem',
+      borderRadius: '0.3rem',
       backgroundColor: colors.secondary,
       color: colors.white,
     },
@@ -419,7 +421,7 @@ const cardButtonBase = {
     alignContent: 'left',
     fontWeight: 500,
     justifyContent: 'center',
-    padding: '0 1rem',
+    padding: '0 1.5rem',
     color: colors.accent,
   },
   disabledStyle: {
@@ -451,8 +453,8 @@ const cardButtonStyle = {
       maxWidth: '200px',
       minHeight: '105px',
       maxHeight: '105px',
-      marginTop: '1rem',
-      marginRight: '1rem',
+      marginTop: '1.5rem',
+      marginRight: '1.5rem',
     },
     disabledStyle: { ...cardButtonBase.disabledStyle },
   },
@@ -480,7 +482,7 @@ export const CardButton = ({
 
 const tabButtonStyle = {
   style: {
-    margin: '0 1rem',
+    margin: '0 1.5rem',
     textAlign: 'center',
     color: colors.accent,
     fontSize: '16px',
@@ -666,9 +668,9 @@ export class SlidingFabReact extends React.Component<
               <ClrIcon
                 shape={iconShape}
                 style={{
-                  height: '1.5rem',
-                  width: '1.5rem',
-                  marginRight: '.145rem',
+                  height: '2.25rem',
+                  width: '2.25rem',
+                  marginRight: '0.2175rem',
                 }}
               />
             </div>
@@ -678,3 +680,16 @@ export class SlidingFabReact extends React.Component<
     );
   }
 }
+
+interface CloseButtonProps {
+  onClose: Function;
+  style?: CSSProperties;
+}
+export const CloseButton = (props: CloseButtonProps) => {
+  const { onClose, style } = props;
+  return (
+    <Clickable {...{ style }} onClick={onClose}>
+      <img src={times} style={{ height: '27px', width: '17px' }} alt='Close' />
+    </Clickable>
+  );
+};

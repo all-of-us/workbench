@@ -1,5 +1,4 @@
 import * as React from 'react';
-const { useState, Fragment } = React;
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -10,6 +9,8 @@ import colors from 'app/styles/colors';
 import { BackupFilesHelpSection } from './backup-files-help-section';
 import { styles } from './styles';
 
+const { useState, Fragment } = React;
+
 export const ConfirmDeleteUnattachedPD = ({
   onConfirm,
   onCancel,
@@ -19,9 +20,9 @@ export const ConfirmDeleteUnattachedPD = ({
 
   return (
     <Fragment>
-      <div style={{ display: 'flex', marginRight: '0.5rem' }}>
+      <div style={{ display: 'flex', marginRight: '0.75rem' }}>
         <ClrIcon
-          style={{ color: colors.warning, marginRight: '0.25rem' }}
+          style={{ color: colors.warning, marginRight: '0.375rem' }}
           className='is-solid'
           shape='exclamation-triangle'
           size='20'
@@ -44,11 +45,11 @@ export const ConfirmDeleteUnattachedPD = ({
         >
           <div
             data-test-id='delete-unattached-pd'
-            style={{ display: 'inline-block', marginRight: '0.5rem' }}
+            style={{ display: 'inline-block', marginRight: '0.75rem' }}
           >
             <RadioButton
               data-test-id='delete-unattached-pd-radio'
-              style={{ marginRight: '0.25rem' }}
+              style={{ marginRight: '0.375rem' }}
               onChange={() => setDeleting(true)}
               checked={deleting === true}
             />
@@ -70,7 +71,7 @@ export const ConfirmDeleteUnattachedPD = ({
         <Button
           type='secondaryLight'
           aria-label={'Cancel'}
-          style={{ marginRight: '.6rem' }}
+          style={{ marginRight: '.9rem' }}
           onClick={() => onCancel()}
         >
           Cancel

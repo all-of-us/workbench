@@ -19,8 +19,7 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { switchCase } from 'app/utils';
-import { reactStyles } from 'app/utils';
+import { reactStyles, switchCase } from 'app/utils';
 import { profileStore, useStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 
@@ -68,7 +67,7 @@ export const styles = reactStyles({
   },
   infoIcon: {
     height: '15px',
-    marginLeft: '0.2rem',
+    marginLeft: '0.3rem',
     width: '15px',
   },
 });
@@ -183,20 +182,24 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
             style={{
               alignItems: 'center',
               width: '620px',
-              marginBottom: '0.8rem',
+              marginBottom: '1.2rem',
             }}
           >
             <GoogleCloudLogoSvg
               style={{
                 height: '33px',
                 width: '207px',
-                marginLeft: '-0.5rem',
-                marginRight: '0.5rem',
+                marginLeft: '-0.75rem',
+                marginRight: '0.75rem',
               }}
             />
             <div style={styles.line}></div>
             <div
-              style={{ paddingTop: 5, marginLeft: '1rem', marginRight: '2rem' }}
+              style={{
+                paddingTop: 5,
+                marginLeft: '1.5rem',
+                marginRight: '3rem',
+              }}
             >
               <div style={styles.textHeader}>Create billing account</div>
             </div>
@@ -232,8 +235,8 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
           backgroundColor: '#979797',
           borderWidth: '0px',
           height: '1px',
-          marginTop: '0.5rem',
-          marginBottom: '0.5rem',
+          marginTop: '0.75rem',
+          marginBottom: '0.75rem',
         }}
       />
       <ModalFooter
@@ -259,7 +262,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
                   <Button
                     type='primary'
                     style={{
-                      marginTop: '0.5rem',
+                      marginTop: '0.75rem',
                       fontWeight: 500,
                       fontSize: '14px',
                       height: '39px',
@@ -287,7 +290,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
                     data-test-id='use-billing-partner-button'
                     type='primary'
                     style={{
-                      marginTop: '0.5rem',
+                      marginTop: '0.75rem',
                       fontWeight: 500,
                       fontSize: '14px',
                       height: '39px',
@@ -307,7 +310,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
             1,
             () => (
               <FlexColumn
-                style={{ justifyContent: 'space-evenly', width: '37rem' }}
+                style={{ justifyContent: 'space-evenly', width: '55.5rem' }}
               >
                 <div style={styles.textHeader}>Your Information</div>
                 <FlexRow style={{ marginTop: '20px' }}>
@@ -576,8 +579,8 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
           style={{
             color: colors.accent,
             position: 'absolute',
-            top: '1rem',
-            right: '1rem',
+            top: '1.5rem',
+            right: '1.5rem',
             cursor: 'pointer',
           }}
           onClick={() => onClose()}

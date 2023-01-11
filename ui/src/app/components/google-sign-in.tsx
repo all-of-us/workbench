@@ -7,7 +7,7 @@ import googleIcon from 'assets/icons/google-icon.png';
 
 export const styles = reactStyles({
   button: {
-    marginTop: '0.5rem',
+    marginTop: '0.75rem',
     display: 'flex',
     alignItems: 'center',
     height: 'auto',
@@ -17,7 +17,7 @@ export const styles = reactStyles({
     textTransform: 'none',
     borderRadius: '2px',
     justifyContent: 'baseline',
-    width: '6.5rem',
+    width: '9.75rem',
   },
 });
 

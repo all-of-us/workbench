@@ -40,11 +40,11 @@ export const RuntimeInitializerModal = ({
   defaultRuntime,
 }: Props) => {
   const [showDetails, setShowDetails] = useState(false);
-  const { persistentDisk } = useStore(diskStore);
+  const { gcePersistentDisk } = useStore(diskStore);
 
   const defaultAnalysisConfig = toAnalysisConfig(
     defaultRuntime,
-    persistentDisk
+    gcePersistentDisk
   );
   return (
     <Modal width={600}>

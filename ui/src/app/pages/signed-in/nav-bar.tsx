@@ -5,6 +5,7 @@ import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
+import { NewUserSatisfactionSurveyBannerMaybe } from 'app/components/new-user-satisfaction-survey-banner-maybe';
 import { SideNav } from 'app/components/side-nav';
 import { StatusAlertBannerMaybe } from 'app/components/status-alert-banner-maybe';
 import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demographic-survey-v2';
@@ -19,8 +20,8 @@ const styles = reactStyles({
     justifyContent: 'flex-start',
     alignItems: 'center',
     boxShadow: '3px 0px 10px',
-    paddingTop: '1rem',
-    paddingBottom: '0.5rem',
+    paddingTop: '1.5rem',
+    paddingBottom: '0.75rem',
     paddingRight: '30px',
     backgroundColor: colors.white,
     /*
@@ -29,17 +30,17 @@ const styles = reactStyles({
      * wind up with a container that is either too short or so tall it creates a
      * scrollbar
      */
-    height: '4rem',
+    height: '6rem',
   },
   sidenavToggle: {
     transform: 'rotate(0deg)',
     display: 'inline-block',
-    marginLeft: '1rem',
+    marginLeft: '1.5rem',
     transition: 'transform 0.5s',
   },
   sidenavIcon: {
-    width: '1.5rem',
-    height: '1.5rem',
+    width: '2.25rem',
+    height: '2.25rem',
     fill: colors.accent,
   },
   sidenavIconHovering: {
@@ -90,7 +91,7 @@ export const NavBar = () => {
         style={{
           transform: barsTransform,
           display: 'inline-block',
-          marginLeft: '1rem',
+          marginLeft: '1.5rem',
           transition: 'transform 0.5s',
         }}
       >
@@ -111,6 +112,7 @@ export const NavBar = () => {
       <AccessRenewalNotificationMaybe />
       <StatusAlertBannerMaybe />
       <TakeDemographicSurveyV2BannerMaybe />
+      <NewUserSatisfactionSurveyBannerMaybe />
       <CTAvailableBannerMaybe />
       {showSideNav && (
         <SideNav

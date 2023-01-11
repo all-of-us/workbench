@@ -159,7 +159,7 @@ export const StartStopRuntimeButton = ({
         backgroundColor: addOpacity(colors.primary, 0.1),
         justifyContent: 'space-around',
         alignItems: 'center',
-        padding: '0 1rem',
+        padding: '0 1.5rem',
         borderRadius: '5px 0 0 5px',
       }}
     >

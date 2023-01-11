@@ -195,12 +195,12 @@ export const runtimeStore = atom<RuntimeStore>({
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
 export interface DiskStore {
   workspaceNamespace: string | null | undefined;
-  persistentDisk: Disk | null | undefined;
+  gcePersistentDisk: Disk | null | undefined;
 }
 
 export const diskStore = atom<DiskStore>({
   workspaceNamespace: undefined,
-  persistentDisk: undefined,
+  gcePersistentDisk: undefined,
 });
 
 export interface StackdriverErrorReporterStore {

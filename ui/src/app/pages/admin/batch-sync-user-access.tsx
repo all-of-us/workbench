@@ -11,21 +11,22 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
+
 export const BatchSyncUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
   const styles = reactStyles({
     accessContainer: {
-      width: '25rem',
-      height: '15rem',
-      borderRadius: '0.31rem',
+      width: '37.5rem',
+      height: '22.5rem',
+      borderRadius: '0.465rem',
       backgroundColor: 'rgba(33,111,180,0.1)',
-      marginLeft: '0.2rem',
-      marginTop: '1rem',
-      marginBottom: '1rem',
+      marginLeft: '0.3rem',
+      marginTop: '1.5rem',
+      marginBottom: '1.5rem',
     },
     textArea: {
-      width: '12rem',
-      height: '8rem',
-      borderRadius: '0.31rem',
+      width: '18rem',
+      height: '12rem',
+      borderRadius: '0.465rem',
     },
   });
 
@@ -57,7 +58,7 @@ export const BatchSyncUserAccess = (spinnerProps: WithSpinnerOverlayProps) => {
   return (
     <FlexColumn style={styles.accessContainer}>
       <h2>Bulk Synchronization of User Access Modules</h2>
-      <FlexRow style={{ gap: '0.5rem' }}>
+      <FlexRow style={{ gap: '0.75rem' }}>
         <FlexColumn>
           <h3>User emails</h3>
           <TooltipTrigger

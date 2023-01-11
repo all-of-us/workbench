@@ -24,7 +24,7 @@ const styles = reactStyles({
   modal: {
     borderRadius: 8,
     position: 'relative',
-    padding: '1rem',
+    padding: '1.5rem',
     margin: 'auto',
     outline: 'none',
     backgroundColor: 'white',
@@ -33,7 +33,7 @@ const styles = reactStyles({
 
   overlay: {
     backgroundColor: Color(colors.dark).alpha(0.85).toString(),
-    padding: '1rem',
+    padding: '1.5rem',
     display: 'flex',
     position: 'fixed',
     left: 0,
@@ -49,12 +49,12 @@ const styles = reactStyles({
     fontSize: '20px',
     color: colors.primary,
     fontWeight: 600,
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
   },
 
   modalBody: {
     fontSize: '14px',
-    lineHeight: '.8rem',
+    lineHeight: '1.2rem',
     marginTop: '3%',
     fontWeight: 400,
   },
@@ -62,7 +62,7 @@ const styles = reactStyles({
   modalFooter: {
     display: 'flex' as 'flex',
     justifyContent: 'flex-end' as 'flex-end',
-    marginTop: '1rem',
+    marginTop: '1.5rem',
   },
 });
 
@@ -122,7 +122,7 @@ export const NotificationModal = () => {
           <TextColumn>
             <div>{message}</div>
             {showBugReportLink && (
-              <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ marginTop: '0.75rem' }}>
                 Please{' '}
                 <a
                   onClick={() => {

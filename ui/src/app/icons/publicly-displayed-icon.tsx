@@ -8,7 +8,7 @@ import { reactStyles } from 'app/utils';
 
 const styles = reactStyles({
   label: {
-    marginLeft: '0.3rem',
+    marginLeft: '0.45rem',
     color: colors.accent,
     fontSize: '12px',
     fontWeight: 400,
@@ -20,11 +20,11 @@ const css =
   .pointer {
      position: relative;
      height: 29px;
-     width: 7rem;
+     width: 10.5rem;
      background-color: ` +
   colorWithWhiteness(colors.accent, 0.75) +
   `;
-     line-height:1.2rem;
+     line-height:1.8rem;
    }
 
   .pointer::after {
@@ -33,8 +33,8 @@ const css =
      top:0rem;
      width:0rem;
      height:0rem;
-     border-top:0.6rem solid transparent;
-     border-bottom:0.6rem solid transparent;
+     border-top:0.9rem solid transparent;
+     border-bottom:0.9rem solid transparent;
   }
   .pointer:before {
      content:"";
@@ -43,11 +43,11 @@ const css =
      top:0rem;
      width:0rem;
      height:0rem;
-     border-top:0.6rem solid transparent;
-     border-right:0.7rem solid ` +
+     border-top:0.9rem solid transparent;
+     border-right:1.05rem solid ` +
   colorWithWhiteness(colors.accent, 0.75) +
   `;
-     border-bottom:0.6rem solid transparent;
+     border-bottom:0.9rem solid transparent;
    }
  `;
 
@@ -67,7 +67,7 @@ export const PubliclyDisplayed = (props) => {
         <label style={styles.label}>
           Publicly displayed
           <TooltipTrigger content={toolTipContent} side='right'>
-            <InfoIcon style={{ marginLeft: '0.5rem', width: '0.7rem' }} />
+            <InfoIcon style={{ marginLeft: '0.75rem', width: '1.05rem' }} />
           </TooltipTrigger>
         </label>
       </div>

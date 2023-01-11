@@ -29,8 +29,8 @@ export const ConfirmUpdatePanel = ({
           style={{
             ...styles.baseHeader,
             ...styles.sectionHeader,
-            marginTop: '.1rem',
-            marginBottom: '.2rem',
+            marginTop: '.15rem',
+            marginBottom: '.3rem',
           }}
         >
           Editing your environment
@@ -45,7 +45,7 @@ export const ConfirmUpdatePanel = ({
             </li>
           ))}
         </ul>
-        <FlexColumn style={{ gap: '8px', marginTop: '.5rem' }}>
+        <FlexColumn style={{ gap: '8px', marginTop: '.75rem' }}>
           <div>
             <b style={{ fontSize: 10 }}>New estimated cost</b>
             <div
@@ -80,18 +80,18 @@ export const ConfirmUpdatePanel = ({
           <TextColumn>
             <React.Fragment>
               <div>{updateMessaging.warn}</div>
-              <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ marginTop: '0.75rem' }}>
                 {updateMessaging.warnMore}
               </div>
             </React.Fragment>
           </TextColumn>
         </WarningMessage>
       )}
-      <FlexRow style={{ justifyContent: 'flex-end', marginTop: '.75rem' }}>
+      <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1.125rem' }}>
         <Button
           type='secondary'
           aria-label='Cancel'
-          style={{ marginRight: '.25rem' }}
+          style={{ marginRight: '.375rem' }}
           onClick={onCancel}
         >
           Cancel

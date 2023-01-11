@@ -208,7 +208,7 @@ export const getAccessModuleConfig = (
                     'For additional security, we require you to verify your identity by uploading a photo of your ID.'
                   }
                 >
-                  <InfoIcon style={{ margin: '0 0.3rem' }} />
+                  <InfoIcon style={{ margin: '0 0.45rem' }} />
                 </TooltipTrigger>
               </div>
               <LoginGovHelpText {...props} />
@@ -453,7 +453,7 @@ export const getAccessModuleStatusByName = (
   );
 };
 
-export const GetStartedButton = ({ style = { marginLeft: '0.5rem' } }) => (
+export const GetStartedButton = ({ style = { marginLeft: '0.75rem' } }) => (
   <Button
     style={style}
     onClick={() => {

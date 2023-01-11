@@ -38,7 +38,7 @@ const styles = reactStyles({
   code: {
     color: colors.dark,
     fontWeight: 'bold',
-    marginRight: '0.25rem',
+    marginRight: '0.375rem',
     whiteSpace: 'nowrap',
   },
   count: {
@@ -48,11 +48,11 @@ const styles = reactStyles({
     color: colors.white,
     display: 'inline-flex',
     fontSize: '10px',
-    height: '0.625rem',
+    height: '0.9375rem',
     justifyContent: 'center',
     lineHeight: 'normal',
-    margin: '0 0.25rem',
-    minWidth: '0.675rem',
+    margin: '0 0.375rem',
+    minWidth: '1.0125rem',
     padding: '0 4px',
     verticalAlign: 'middle',
   },
@@ -64,18 +64,18 @@ const styles = reactStyles({
     textAlign: 'left',
     border: `1px solid ${colorWithWhiteness(colors.danger, 0.5)}`,
     borderRadius: '5px',
-    marginTop: '0.25rem',
+    marginTop: '0.375rem',
     padding: '8px',
   },
   iconButton: {
     background: 'transparent',
     border: 0,
     cursor: 'pointer',
-    flex: '0 0 1.25rem',
-    height: '1.25rem',
-    lineHeight: '1rem',
+    flex: '0 0 1.875rem',
+    height: '1.875rem',
+    lineHeight: '1.5rem',
     padding: 0,
-    width: '1.25rem',
+    width: '1.875rem',
   },
   name: {
     overflow: 'hidden',
@@ -105,9 +105,9 @@ const styles = reactStyles({
     cursor: 'pointer',
     display: 'flex',
     flexFlow: 'row nowrap',
-    lineHeight: '1.25rem',
+    lineHeight: '1.875rem',
     margin: 0,
-    paddingLeft: '0.25rem',
+    paddingLeft: '0.375rem',
     width: '90%',
   },
 });
@@ -541,7 +541,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
                 >
                   {displayName}
                   {versionedSurveyIds?.includes(id) && (
-                    <span style={{ paddingRight: '0.1rem' }}>
+                    <span style={{ paddingRight: '0.15rem' }}>
                       {' '}
                       - <i> Versioned</i>{' '}
                     </span>
@@ -560,7 +560,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           <div
             style={{
               display: expanded ? 'block' : 'none',
-              marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem',
+              marginLeft: nodeChildren[0].group ? '1.3125rem' : '3rem',
             }}
           >
             {nodeChildren.map((child, c) => (

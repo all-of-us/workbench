@@ -40,7 +40,7 @@ import { canonicalizeUrl } from 'app/utils/urls';
 const styles = reactStyles({
   ...commonStyles,
   multiInputSpacing: {
-    marginLeft: '2rem',
+    marginLeft: '3rem',
   },
   publiclyDisplayedText: {
     fontSize: 12,
@@ -48,7 +48,7 @@ const styles = reactStyles({
   },
   textAreaStyleOverride: {
     width: '100%',
-    minWidth: '30rem',
+    minWidth: '45rem',
   },
   optionalText: {
     fontSize: 12,
@@ -86,11 +86,11 @@ export const stateCodeErrorMessage =
 
 export const MultiSelectWithLabel = (props) => {
   return (
-    <FlexColumn style={{ width: '12rem', ...props.containerStyle }}>
+    <FlexColumn style={{ width: '18rem', ...props.containerStyle }}>
       <label style={{ ...styles.text, fontWeight: 600 }}>
         {props.labelText}
       </label>
-      <FlexRow style={{ alignItems: 'center', marginTop: '0.1rem' }}>
+      <FlexRow style={{ alignItems: 'center', marginTop: '0.15rem' }}>
         <MultiSelect
           className='create-account__degree-select'
           placeholder={props.placeholder}
@@ -434,7 +434,7 @@ export class AccountCreation extends React.Component<
           content={
             <div>
               Usernames can contain only:{' '}
-              <ul style={{ marginLeft: '0.1rem' }}>
+              <ul style={{ marginLeft: '0.15rem' }}>
                 <li>letters (a-z)</li>
                 <li>numbers (0-9)</li>
                 <li>dashes (-)</li>
@@ -449,7 +449,7 @@ export class AccountCreation extends React.Component<
               contain more than one period (.) in a row.
             </div>
           }
-          style={{ marginLeft: '0.5rem' }}
+          style={{ marginLeft: '0.75rem' }}
         >
           <InfoIcon style={{ height: '16px', paddingLeft: '2px' }} />
         </TooltipTrigger>
@@ -462,20 +462,20 @@ export class AccountCreation extends React.Component<
       <div
         id='account-creation'
         style={{
-          paddingTop: '1.5rem',
-          paddingRight: '3rem',
-          paddingLeft: '1rem',
+          paddingTop: '2.25rem',
+          paddingRight: '4.5rem',
+          paddingLeft: '1.5rem',
         }}
       >
         <div style={{ fontSize: 28, fontWeight: 400, color: colors.primary }}>
           Create your account
         </div>
         <FlexRow>
-          <FlexColumn style={{ marginRight: '2rem' }}>
-            <div style={{ ...styles.text, fontSize: 16, marginTop: '1rem' }}>
+          <FlexColumn style={{ marginRight: '3rem' }}>
+            <div style={{ ...styles.text, fontSize: 16, marginTop: '1.5rem' }}>
               Please complete Step 2 of 3
             </div>
-            <div style={{ ...styles.text, fontSize: 12, marginTop: '0.3rem' }}>
+            <div style={{ ...styles.text, fontSize: 12, marginTop: '0.45rem' }}>
               All fields required unless indicated as optional
             </div>
             <Section
@@ -484,7 +484,7 @@ export class AccountCreation extends React.Component<
                   Create an <AoU /> username
                 </div>
               }
-              style={{ marginTop: '1.25rem' }}
+              style={{ marginTop: '1.875rem' }}
             >
               <div>
                 <FlexRow>
@@ -504,7 +504,7 @@ export class AccountCreation extends React.Component<
                         this.state.usernameConflictError ||
                         this.usernameInvalidError()
                       }
-                      containerStyle={{ width: '26rem', marginTop: '1.25rem' }}
+                      containerStyle={{ width: '39rem', marginTop: '1.875rem' }}
                       labelText={usernameLabelText}
                       onChange={(v) => this.usernameChanged(v)}
                     >
@@ -518,14 +518,14 @@ export class AccountCreation extends React.Component<
                   </FlexColumn>
                 </FlexRow>
                 {this.state.usernameConflictError && (
-                  <div style={{ height: '1.5rem' }}>
+                  <div style={{ height: '2.25rem' }}>
                     <FormValidationErrorMessage id='usernameConflictError'>
                       Username is already taken.
                     </FormValidationErrorMessage>
                   </div>
                 )}
                 {this.usernameInvalidError() && (
-                  <div style={{ height: '1.5rem' }}>
+                  <div style={{ height: '2.25rem' }}>
                     <FormValidationErrorMessage id='usernameError'>
                       {username} is not a valid username.
                     </FormValidationErrorMessage>
@@ -537,13 +537,13 @@ export class AccountCreation extends React.Component<
               header={
                 <FlexRow style={{ alignItems: 'center' }}>
                   <div>About you</div>
-                  <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                  <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                 </FlexRow>
               }
-              style={{ marginTop: '2rem' }}
+              style={{ marginTop: '3rem' }}
             >
               <FlexColumn>
-                <FlexRow style={{ marginTop: '.25rem' }}>
+                <FlexRow style={{ marginTop: '.375rem' }}>
                   <TextInputWithLabel
                     value={givenName}
                     inputId='givenName'
@@ -576,7 +576,7 @@ export class AccountCreation extends React.Component<
                     </ErrorMessage>
                   )}
                 </FlexRow>
-                <div style={{ marginTop: '1rem' }}>
+                <div style={{ marginTop: '1.5rem' }}>
                   <MultiSelectWithLabel
                     placeholder={'Select one or more'}
                     options={AccountCreationOptions.degree}
@@ -604,10 +604,10 @@ export class AccountCreation extends React.Component<
                   </div>
                 </React.Fragment>
               }
-              style={{ marginTop: '2rem' }}
+              style={{ marginTop: '3rem' }}
             >
-              <FlexColumn style={{ lineHeight: '1rem' }}>
-                <FlexRow style={{ marginTop: '1rem' }}>
+              <FlexColumn style={{ lineHeight: '1.5rem' }}>
+                <FlexRow style={{ marginTop: '1.5rem' }}>
                   <TextInputWithLabel
                     dataTestId='streetAddress'
                     inputName='streetAddress'
@@ -630,7 +630,7 @@ export class AccountCreation extends React.Component<
                     }
                   />
                 </FlexRow>
-                <FlexRow style={{ marginTop: '1rem' }}>
+                <FlexRow style={{ marginTop: '1.5rem' }}>
                   <TextInputWithLabel
                     dataTestId='city'
                     inputName='city'
@@ -652,7 +652,7 @@ export class AccountCreation extends React.Component<
                     {this.stateInvalidError() && (
                       <div
                         style={{
-                          height: '1.5rem',
+                          height: '2.25rem',
                           ...styles.multiInputSpacing,
                         }}
                       >
@@ -663,7 +663,7 @@ export class AccountCreation extends React.Component<
                     )}
                   </FlexColumn>
                 </FlexRow>
-                <FlexRow style={{ marginTop: '1rem' }}>
+                <FlexRow style={{ marginTop: '1.5rem' }}>
                   <TextInputWithLabel
                     dataTestId='zip'
                     inputName='zip'
@@ -673,7 +673,7 @@ export class AccountCreation extends React.Component<
                     onChange={(value) => this.updateAddress('zipCode', value)}
                   />
                   <FlexColumn
-                    style={{ width: '12rem', ...styles.multiInputSpacing }}
+                    style={{ width: '18rem', ...styles.multiInputSpacing }}
                   >
                     <label style={{ fontWeight: 600, color: colors.primary }}>
                       Country
@@ -697,7 +697,7 @@ export class AccountCreation extends React.Component<
                     />
                     {this.state.countryDropdownSelection ===
                       countryDropdownOption.other && (
-                      <div style={{ marginTop: '0.2rem' }}>
+                      <div style={{ marginTop: '0.3rem' }}>
                         <TextInput
                           data-test-id='non-usa-country-input'
                           id='country'
@@ -723,7 +723,7 @@ export class AccountCreation extends React.Component<
                       Your research background, experience, and research
                       interests
                     </div>
-                    <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                    <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
                   <div style={{ ...styles.asideText, marginTop: '.125px' }}>
                     This information will be posted publicly on the <AoU />{' '}
@@ -732,7 +732,7 @@ export class AccountCreation extends React.Component<
                       (2000 character limit)
                     </span>
                   </div>
-                  <div style={{ marginTop: '.5rem' }}>
+                  <div style={{ marginTop: '1.125rem' }}>
                     <FlexRow
                       style={{ color: colors.accent, alignItems: 'center' }}
                     >
@@ -758,7 +758,7 @@ export class AccountCreation extends React.Component<
                     </FlexRow>
                     {this.state.showMostInterestedInKnowingBlurb && (
                       <ul
-                        style={{ ...styles.asideList, marginLeft: '0.75rem' }}
+                        style={{ ...styles.asideList, marginLeft: '1.125rem' }}
                       >
                         {researchPurposeList.map((value, index) => (
                           <li key={index} style={styles.asideText}>
@@ -770,7 +770,7 @@ export class AccountCreation extends React.Component<
                   </div>
                 </React.Fragment>
               }
-              style={{ marginTop: '2rem' }}
+              style={{ marginTop: '3rem' }}
               sectionHeaderStyles={{ borderBottom: null }}
             >
               <TextAreaWithLengthValidationMessage
@@ -792,13 +792,13 @@ export class AccountCreation extends React.Component<
                     <div style={{ maxWidth: '60%' }}>
                       Your professional profile or bio page below, if available
                     </div>
-                    <PubliclyDisplayed style={{ marginLeft: '1rem' }} />
+                    <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
                   <div
                     style={{
                       ...styles.asideText,
                       ...styles.optionalText,
-                      marginTop: '.125rem',
+                      marginTop: '.1875rem',
                     }}
                   >
                     (Optional)
@@ -806,8 +806,8 @@ export class AccountCreation extends React.Component<
                   <div
                     style={{
                       ...styles.asideText,
-                      marginTop: '.5rem',
-                      marginBottom: '.5rem',
+                      marginTop: '.75rem',
+                      marginBottom: '.75rem',
                     }}
                   >
                     You could provide a link to your faculty bio page from your
@@ -818,7 +818,7 @@ export class AccountCreation extends React.Component<
                   </div>
                 </React.Fragment>
               }
-              style={{ marginTop: '2rem' }}
+              style={{ marginTop: '3rem' }}
             >
               <TextInputWithLabel
                 dataTestId='professionalUrl'
@@ -826,17 +826,17 @@ export class AccountCreation extends React.Component<
                 placeholder='Professional Url'
                 value={professionalUrl}
                 labelText={<div>Paste Professional URL here</div>}
-                containerStyle={{ width: '26rem', marginTop: '.25rem' }}
+                containerStyle={{ width: '39rem', marginTop: '.375rem' }}
                 onChange={(value) =>
                   this.updateProfileObject('professionalUrl', value)
                 }
               />
             </Section>
-            <FormSection style={{ marginTop: '4rem', paddingBottom: '1rem' }}>
+            <FormSection style={{ marginTop: '6rem', paddingBottom: '1.5rem' }}>
               <Button
                 aria-label='Previous'
                 type='secondary'
-                style={{ marginRight: '1rem' }}
+                style={{ marginRight: '1.5rem' }}
                 onClick={() => this.props.onPreviousClick(this.state.profile)}
               >
                 Previous
@@ -863,7 +863,7 @@ export class AccountCreation extends React.Component<
                     this.isUsernameValidationError() ||
                     Boolean(errors)
                   }
-                  style={{ height: '2rem', width: '10rem' }}
+                  style={{ height: '3rem', width: '15rem' }}
                   onClick={() => {
                     AnalyticsTracker.Registration.CreateAccountPage();
                     this.props.onComplete(this.state.profile);

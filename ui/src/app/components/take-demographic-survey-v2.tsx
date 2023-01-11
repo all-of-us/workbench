@@ -11,12 +11,6 @@ import {
 import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
-  bannerText: {
-    width: '26rem',
-  },
-  bannerBox: {
-    width: '36rem',
-  },
   bannerButton: {
     width: '120px',
     alignSelf: 'center',
@@ -53,13 +47,12 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
         text={
           deadlineReached ? notificationTextAfterDeadline : notificationText
         }
-        boxStyle={styles.bannerBox}
-        textStyle={styles.bannerText}
         useLocationLink={true}
         buttonStyle={styles.bannerButton}
         buttonText='Take Survey'
         buttonPath={DEMOGRAPHIC_SURVEY_V2_PATH}
         buttonDisabled={location.pathname === DEMOGRAPHIC_SURVEY_V2_PATH}
+        bannerTextWidth='39rem'
       />
     )
   );

@@ -38,16 +38,16 @@ export const styles = {
   },
 
   error: {
-    padding: '0 0.5rem',
+    padding: '0 0.75rem',
     fontWeight: 600,
     color: colors.primary,
-    marginTop: '0.2rem',
+    marginTop: '0.3rem',
     width: '90%',
   },
 
   errorMessage: {
-    width: '12.5rem',
-    padding: '.25rem',
+    width: '18.75rem',
+    padding: '.375rem',
     float: 'right' as 'right',
     marginTop: 0,
     background: colorWithWhiteness(colors.danger, 0.9),
@@ -75,28 +75,28 @@ export const styles = {
     borderRadius: 3,
     borderStyle: 'solid',
     borderWidth: 1,
-    height: '1.5rem',
-    padding: '0 0.5rem',
+    height: '2.25rem',
+    padding: '0 0.75rem',
     width: '100%',
   },
 
   textBoxWithLengthValidationTextBoxStyle: {
-    height: '15rem',
+    height: '22.5rem',
     resize: 'none',
-    width: '48rem',
+    width: '72rem',
     borderRadius: '3px 3px 0 0',
     borderColor: colorWithWhiteness(colors.dark, 0.5),
   },
 
   textBoxWithLengthValidationValidationStyle: {
     justifyContent: 'space-between',
-    width: '48rem',
+    width: '72rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.95),
     fontSize: 12,
     colors: colors.primary,
-    padding: '0.25rem',
+    padding: '0.375rem',
     borderRadius: '0 0 3px 3px',
-    marginTop: '-0.5rem',
+    marginTop: '-0.75rem',
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`,
   },
 };
@@ -115,8 +115,8 @@ export const ValidationError = ({ children }) => {
         fontSize: 10,
         fontWeight: 500,
         textTransform: 'uppercase',
-        marginLeft: '0.5rem',
-        marginTop: '0.25rem',
+        marginLeft: '0.75rem',
+        marginTop: '0.375rem',
       }}
     >
       {children}
@@ -135,7 +135,7 @@ export const TextArea = ({ style = {}, onChange, ...props }) => {
         borderWidth: 1,
         borderStyle: 'solid',
         borderRadius: 3,
-        padding: '0.25rem 0.5rem',
+        padding: '0.375rem 0.75rem',
         backgroundColor: colors.white,
         ...style,
       }}
@@ -232,7 +232,7 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
               style={{
                 color: colors.danger,
                 justifyContent: 'flex-start',
-                marginRight: '.25rem',
+                marginRight: '.375rem',
               }}
             >
               {tooShortWarning}
@@ -497,7 +497,7 @@ export class DatePicker extends React.Component<{
         style={{
           display: 'flex',
           width: '100%',
-          height: '1.5rem',
+          height: '2.25rem',
           border: 0,
           padding: '0',
           color: colors.dark,
@@ -576,7 +576,7 @@ export class Toggle extends React.Component<ToggleProps> {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          paddingBottom: '.5rem',
+          paddingBottom: '.75rem',
           ...style,
         }}
       >
@@ -589,7 +589,7 @@ export class Toggle extends React.Component<ToggleProps> {
           width={width}
           handleDiameter={handleDiameter}
         />
-        <span style={{ marginLeft: '.5rem' }}>{name}</span>
+        <span style={{ marginLeft: '.75rem' }}>{name}</span>
       </label>
     );
   }
@@ -621,7 +621,7 @@ export function TextInputWithLabel(props) {
           {props.labelText}
         </label>
       )}
-      <div style={{ marginTop: '0.1rem' }}>
+      <div style={{ marginTop: '0.15rem' }}>
         <TextInput
           data-test-id={props.inputId}
           id={props.inputId}

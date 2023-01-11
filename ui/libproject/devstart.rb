@@ -27,6 +27,7 @@ def build(cmd_name, args)
 
   common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
+  common.run_inline %W{yarn run deps}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
@@ -159,7 +160,7 @@ class DeployUI
     }
     environment_name = project_names_to_environment_names[@opts.project]
 
-    common.run_inline(%W{yarn codegen})
+    common.run_inline(%W{yarn deps})
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []

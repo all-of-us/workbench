@@ -14,11 +14,11 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 const css = `
   .graph-border {
-    padding: 0.3rem;
+    padding: 0.45rem;
   }
   @media print{
     .graph-border {
-      padding: 2rem;
+      padding: 3rem;
       page-break-inside:avoid;
     }
     .page-break {
@@ -34,7 +34,7 @@ const styles = reactStyles({
     height: '24px',
     fontSize: '10px',
     textAlign: 'end',
-    paddingRight: '0.2rem',
+    paddingRight: '0.3rem',
     fontWeight: 'bold',
   },
   lightGrey: {
@@ -47,7 +47,7 @@ const styles = reactStyles({
     width: '100%',
     minHeight: '1px',
     maxWidth: '55%',
-    padding: '0.5rem 0 0 1rem',
+    padding: '0.75rem 0 0 1.5rem',
     borderLeft: '1px solid black',
   },
   dataHeading: {
@@ -55,8 +55,8 @@ const styles = reactStyles({
     position: 'relative',
     minHeight: '1px',
     maxWidth: '30%',
-    padding: '0.5rem 0.5rem 0',
-    width: '16rem',
+    padding: '0.75rem 0.75rem 0',
+    width: '24rem',
     fontSize: '10px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -65,15 +65,15 @@ const styles = reactStyles({
   },
   dataPercent: {
     height: '24px',
-    marginLeft: '0.5rem',
-    paddingTop: '0.5rem',
+    marginLeft: '0.75rem',
+    paddingTop: '0.75rem',
     whiteSpace: 'nowrap',
     fontSize: '10px',
     fontWeight: 'bold',
     color: colors.primary,
   },
   count: {
-    paddingLeft: '0.2rem',
+    paddingLeft: '0.3rem',
     fontSize: '10px',
     fontWeight: 'bold',
     color: colors.primary,
@@ -85,7 +85,7 @@ const styles = reactStyles({
   chartWidth: {
     maxWidth: '100%',
     margin: 0,
-    padding: '1rem 0.5rem',
+    padding: '1.5rem 0.75rem',
   },
   chartHeading: {
     textAlign: 'center',
@@ -95,7 +95,7 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
   },
   domainTitle: {
-    paddingBottom: '0.5rem',
+    paddingBottom: '0.75rem',
     fontSize: '16px',
     fontWeight: 600,
     color: colors.primary,

@@ -114,15 +114,15 @@ export const styles = reactStyles({
     fontWeight: 600,
   },
   pageWrapper: {
-    marginLeft: '-1rem',
-    marginRight: '-0.6rem',
+    marginLeft: '-1.5rem',
+    marginRight: '-0.9rem',
     justifyContent: 'space-between',
     fontSize: '1.2em',
   },
   fadeBox: {
-    margin: '0.5rem 0 0 3%',
+    margin: '0.75rem 0 0 3%',
     width: '95%',
-    padding: '0 0.1rem',
+    padding: '0 0.15rem',
   },
   pleaseComplete: {
     color: colors.primary,
@@ -132,9 +132,9 @@ export const styles = reactStyles({
   },
   card: {
     width: '1195px',
-    borderRadius: '0.4rem',
-    marginTop: '0.7rem',
-    marginBottom: '1.7rem',
+    borderRadius: '0.6rem',
+    marginTop: '1.05rem',
+    marginBottom: '2.55rem',
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.accent, 0.9),
     padding: '1em',
@@ -171,8 +171,8 @@ export const styles = reactStyles({
     marginBottom: '0.5em',
   },
   requestAccess: {
-    marginTop: '0.5rem',
-    marginBottom: '0.5rem',
+    marginTop: '0.75rem',
+    marginBottom: '0.75rem',
   },
   modulesContainer: {
     marginLeft: 'auto',
@@ -187,7 +187,7 @@ export const styles = reactStyles({
     padding: '1.4em',
     margin: '0.0em 0.2em',
     width: '593px',
-    borderRadius: '0.2rem',
+    borderRadius: '0.3rem',
     backgroundColor: colors.white,
     border: '1px solid',
     borderColor: colors.accent,
@@ -196,7 +196,7 @@ export const styles = reactStyles({
     padding: '1.4em',
     margin: '0.0em 0.2em',
     width: '593px',
-    borderRadius: '0.2rem',
+    borderRadius: '0.3rem',
     backgroundColor: colorWithWhiteness(colors.accent, 0.95),
   },
   moduleIcon: {
@@ -264,7 +264,7 @@ export const styles = reactStyles({
   },
   renewalInnerHeaderIcon: {
     gridArea: 'icon',
-    marginRight: '0.5rem',
+    marginRight: '0.75rem',
   },
 });
 
@@ -487,7 +487,7 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
       </div>
       <div style={styles.renewalHeaderRequirements}>
         <RenewalRequirementsText />
-        <div style={{ marginTop: '0.5rem' }}>
+        <div style={{ marginTop: '0.75rem' }}>
           For any questions, please contact <SupportMailto />.
         </div>
       </div>
@@ -510,7 +510,7 @@ const SelfBypass = (props: { onClick: () => void }) => (
     <div style={styles.selfBypassText}>
       [Test environment] Self-service bypass is enabled
     </div>
-    <Button style={{ marginLeft: '0.5rem' }} onClick={() => props.onClick()}>
+    <Button style={{ marginLeft: '0.75rem' }} onClick={() => props.onClick()}>
       Bypass all
     </Button>
   </FlexRow>

@@ -1,7 +1,7 @@
 import 'rxjs/Rx';
 
-import { useEffect, useState } from 'react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Switch, useHistory } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -305,13 +305,13 @@ export const AppRoutingComponent: React.FunctionComponent<
             <TermsOfService
               showReAcceptNotification={true}
               onComplete={(tosVersion) => acceptTermsOfService(tosVersion)}
-              filePath={'/aou-tos.html'}
+              filePath='/aou-tos.html'
               afterPrev={false}
-              style={{ height: '36rem' }}
+              style={{ height: '54rem' }}
             />
           )}
           {overriddenUrl && (
-            <div style={{ position: 'absolute', top: 0, left: '1rem' }}>
+            <div style={{ position: 'absolute', top: 0, left: '1.5rem' }}>
               <span style={{ fontSize: '80%', color: 'darkred' }}>
                 API URL: {overriddenUrl}
               </span>
@@ -325,7 +325,7 @@ export const AppRoutingComponent: React.FunctionComponent<
             <div
               style={{
                 maxWidth: '500px',
-                margin: '1rem',
+                margin: '1.5rem',
                 fontFamily: 'Montserrat',
               }}
             >
@@ -334,7 +334,7 @@ export const AppRoutingComponent: React.FunctionComponent<
                 style={{
                   fontSize: '20pt',
                   color: '#2F2E7E',
-                  padding: '1rem 0 1rem 0',
+                  padding: '1.5rem 0 1.5rem 0',
                 }}
               >
                 Cookies are Disabled
