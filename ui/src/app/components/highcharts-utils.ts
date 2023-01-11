@@ -571,18 +571,20 @@ export function getChartMapParticipantCounts(
     return accum;
   }, []);
 
+
   return {
     chart: {
       map: ustopo,
     },
     colors: [
-      'rgba(19,64,117,0.05)',
-      'rgba(19,64,117,0.2)',
-      'rgba(19,64,117,0.4)',
+      'rgba(19,64,117,0.125)',
+      'rgba(19,64,117,0.25)',
+      'rgba(19,64,117,0.375)',
       'rgba(19,64,117,0.5)',
-      'rgba(19,64,117,0.6)',
-      'rgba(19,64,117,0.8)',
-      'rgba(19,64,117,1)',
+      'rgba(19,64,117,0.625)',
+      'rgba(19,64,117,0.75)',
+      'rgba(19,64,117,0.875)',
+      'rgba(19,64,117,1.0)',
     ],
     title: {
       text: seriesName,
@@ -621,10 +623,13 @@ export function getChartMapParticipantCounts(
       symbolRadius: 0,
       symbolHeight: 14,
     },
-
     colorAxis: {
       dataClasses: [
         {
+          to: 100,
+        },
+        {
+          from: 100,
           to: 200,
         },
         {
@@ -637,7 +642,7 @@ export function getChartMapParticipantCounts(
         },
         {
           from: 1000,
-          to: 5000,
+          to: 50000,
         },
         {
           from: 5000,
@@ -715,10 +720,7 @@ export function getChartMapBubbleParticipantCounts(
         },
         {
           type: 'mapbubble',
-          sizeByAbsoluteValue: true,
-          negativeColor: '#FF0000',
-          minSize: 1,
-          maxSize: '20%',
+          maxSize: '12%',
           name: seriesName,
           data: [rec],
           joinBy: ['hc-a2', 'code'],
@@ -744,13 +746,14 @@ export function getChartMapBubbleParticipantCounts(
       map: ustopo,
     },
     colors: [
-      'rgba(19,64,117,0.05)',
-      'rgba(19,64,117,0.2)',
-      'rgba(19,64,117,0.4)',
+      'rgba(19,64,117,0.125)',
+      'rgba(19,64,117,0.25)',
+      'rgba(19,64,117,0.375)',
       'rgba(19,64,117,0.5)',
-      'rgba(19,64,117,0.6)',
-      'rgba(19,64,117,0.8)',
-      'rgba(19,64,117,1)',
+      'rgba(19,64,117,0.625)',
+      'rgba(19,64,117,0.75)',
+      'rgba(19,64,117,0.875)',
+      'rgba(19,64,117,1.0)',
     ],
     title: {
       text: seriesName,
@@ -789,10 +792,13 @@ export function getChartMapBubbleParticipantCounts(
       symbolRadius: 0,
       symbolHeight: 14,
     },
-
     colorAxis: {
       dataClasses: [
         {
+          to: 100,
+        },
+        {
+          from: 100,
           to: 200,
         },
         {
@@ -805,7 +811,7 @@ export function getChartMapBubbleParticipantCounts(
         },
         {
           from: 1000,
-          to: 5000,
+          to: 50000,
         },
         {
           from: 5000,
