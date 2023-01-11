@@ -224,6 +224,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
       <div data-test-id='resources-table' style={{ flex: 1 }}>
         {tableData?.length > 0 && (
           <DataTable
+            filterDisplay='row'
             data-test-id='resource-list'
             value={tableData}
             sortMode='multiple'

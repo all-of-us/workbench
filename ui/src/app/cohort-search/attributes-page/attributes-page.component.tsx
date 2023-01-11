@@ -983,6 +983,7 @@ export const AttributesPage = fp.flow(
                     options={options}
                     placeholder='Select Operator'
                     onChange={(e) => this.selectChange(a, e.value)}
+                    appendTo='self'
                   />
                   <FlexRowWrap>
                     {![null, 'ANY'].includes(attr.operator) && (
