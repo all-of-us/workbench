@@ -1982,7 +1982,9 @@ paths:
       tags:
       - offlineUser
       - cron
-      description: Check each user to ensure they still meet compliance guidelines. If they do not, remove them from access tiers.
+      description: >
+        Check each user to ensure they still meet compliance guidelines. 
+        If they do not, remove them from access tiers.
       operationId: synchronizeUserAccess
       responses:
         204:
@@ -3069,7 +3071,9 @@ paths:
       - cloudTaskUser
       - cloudTask
       security: []
-      description: "Audits the provided user's access to GCP resources"
+      description: >
+        Check each user to ensure they still meet compliance guidelines. 
+        If they do not, remove them from access tiers.
       operationId: synchronizeUserAccess
       consumes:
       - application/json
