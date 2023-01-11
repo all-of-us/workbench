@@ -3151,6 +3151,7 @@ paths:
           description: 'Workspace created'
   "/v1/cloudTask/deleteTestUserWorkspaces":
     post:
+      security: []
       tags:
         - cloudTaskWorkspaces
         - cloudTask
