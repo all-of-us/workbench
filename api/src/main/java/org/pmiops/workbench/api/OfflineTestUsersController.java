@@ -5,6 +5,7 @@ import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;
@@ -22,15 +23,17 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ImpersonatedUserService impersonatedUserService;
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
+  private final TaskQueueService taskQueueService;
 
   @Autowired
   public OfflineTestUsersController(
       Provider<WorkbenchConfig> workbenchConfigProvider,
       ImpersonatedUserService impersonatedUserService,
-      ImpersonatedWorkspaceService impersonatedWorkspaceService) {
+      ImpersonatedWorkspaceService impersonatedWorkspaceService,TaskQueueService taskQueueService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.impersonatedUserService = impersonatedUserService;
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
+    this.taskQueueService = taskQueueService;
   }
 
   @Override
@@ -75,6 +78,9 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     if (testUserConf == null) {
       LOGGER.info("This environment does not have a test user config block.  Exiting.");
     } else {
+
+      taskQueueService.groupAndPushDeleteTestWorkspaceTasks();
+
       testUserConf.testUserEmails.forEach(this::deleteAllOwnedWorkspaces);
     }
 

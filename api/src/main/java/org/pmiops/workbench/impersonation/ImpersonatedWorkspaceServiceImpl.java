@@ -68,10 +68,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public void deleteWorkspace(String username, Workspace workspace) {
+  public void deleteWorkspace(String username, String wsNamespace, String wsId) {
     final DbUser dbUser = userDao.findUserByUsername(username);
-    final String wsNamespace = workspace.getNamespace();
-    final String wsId = workspace.getId();
 
     // also confirms that the workspace exists in the DB
     DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, wsId);
