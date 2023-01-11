@@ -134,7 +134,7 @@ public class TaskQueueService {
                 createAndPushTask(
                     DELETE_TEST_WORKSPACES_QUEUE_NAME,
                     DELETE_TEST_WORKSPACES_PATH,
-                    new DeleteTestUserWorkspacesRequest().addAll(group)));
+                    group));
   }
 
   public void pushEgressEventTask(Long eventId) {
