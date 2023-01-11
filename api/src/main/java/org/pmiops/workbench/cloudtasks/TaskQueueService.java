@@ -21,6 +21,7 @@ import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
+import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
 
@@ -126,7 +127,7 @@ public class TaskQueueService {
           createAndPushTask(
               SYNCHRONIZE_ACCESS_QUEUE_NAME,
               SYNCHRONIZE_ACCESS_PATH,
-              new AuditProjectAccessRequest().userIds(group)));
+              new SynchronizeUserAccessRequest().userIds(group)));
     }
     return tasknames;
   }
