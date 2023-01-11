@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.E2ETestUserConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.RdrExportConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -139,11 +138,17 @@ public class TaskQueueService {
     return tasknames;
   }
 
-  public List<String> groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
-    int batchSize = Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers).map(conf -> conf.workspaceDeletionBatchSize).orElseThrow(
-        () -> new BadRequestException("Deletion of e2e test user workspaces is not enabled in this environment")
-    );
-    List<List<TestUserWorkspace>> groups = CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
+  public List<String> groupAndPushDeleteTestWorkspaceTasks(
+      List<TestUserWorkspace> workspacesToDelete) {
+    int batchSize =
+        Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
+            .map(conf -> conf.workspaceDeletionBatchSize)
+            .orElseThrow(
+                () ->
+                    new BadRequestException(
+                        "Deletion of e2e test user workspaces is not enabled in this environment"));
+    List<List<TestUserWorkspace>> groups =
+        CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
     List<String> tasknames = new ArrayList<>();
     for (List<TestUserWorkspace> group : groups) {
       tasknames.add(

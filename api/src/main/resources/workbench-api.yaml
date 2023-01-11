@@ -3164,7 +3164,7 @@ paths:
           required: true
           description: Workspace duplication task to process.
           schema:
-            "$ref": "#/definitions/DeleteTestUserWorkspaceRequest"
+            "$ref": "#/definitions/DeleteTestUserWorkspacesRequest"
       responses:
         200:
           description: 'Workspaces deleted'

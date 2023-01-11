@@ -1,7 +1,6 @@
 package org.pmiops.workbench.impersonation;
 
 import java.util.List;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
 /**
