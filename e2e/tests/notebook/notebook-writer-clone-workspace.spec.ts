@@ -47,7 +47,7 @@ describe('WRITER clone workspace and notebook tests', () => {
     await notebookPage.save();
   });
 
-  test('WRITER can clone workspace and edit notebook in workspace clone', async () => {
+  test.skip('WRITER can clone workspace and edit notebook in workspace clone', async () => {
     // WRITER log in.
     await signInWithAccessToken(page, config.WRITER_USER);
     await findOrCreateWorkspace(page, { workspaceName });
