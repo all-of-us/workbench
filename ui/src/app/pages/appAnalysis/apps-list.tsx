@@ -125,6 +125,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               data-test-id='application-list-dropdown'
               ariaLabel='Application List Dropdown'
               value={selectedApp}
+              appendTo='self'
               options={APP_LIST}
               placeholder='Choose One'
               onChange={(e) => setSelectedApp(e.value)}
