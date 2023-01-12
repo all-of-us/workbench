@@ -540,3 +540,164 @@ export function getCannedTopology() {
     ],
   };
 }
+
+export function getCannedHeatmap() {
+  // https://codepen.io/pen
+  const color = ['#75E492', '#e987cf', '#75C6E4', '#9375E4', '#e49375'];
+  return {
+    accessibility: {
+      screenReaderSection: {
+        beforeChartFormat:
+          '<{headingTagName}>{chartTitle}</{headingTagName}><div>{typeDescription}</div><div>{chartSubtitle}</div><div>{chartLongdesc}</div>',
+      },
+      description: 'The demo below visualizes...',
+    },
+    series: [
+      {
+        name: 'Condition and Drugs',
+        type: 'treemap',
+        allowDrillToNode: true,
+        dataLabels: {
+          enabled: false,
+        },
+        levelIsConstant: false,
+        levels: [
+          {
+            level: 1,
+            dataLabels: {
+              enabled: true,
+              style: {
+                textOutline: false,
+              },
+            },
+            borderWidth: 3,
+          },
+        ],
+        drilldown: {
+          series: [
+            {
+              id: 'Condition and Drugs',
+            },
+          ],
+        },
+        data: [
+          {
+            id: 'Essential hypertension',
+            name: 'Essential hypertension',
+            value: 378148,
+            color: color[0],
+          },
+          {
+            id: '1-1',
+            name: '2 ML ondansetron 2 MG/ML Injection',
+            value: 177678,
+            parent: 'Essential hypertension',
+          },
+          {
+            id: '1-2',
+            name: 'calcium chloride 0.0014 MEQ/ML / potassium chloride 0.004 MEQ/ML / sodium chloride 0.103 MEQ/ML / sodium lactate 0.028 MEQ/ML Injectable Solution"',
+            value: 7871,
+            parent: 'Essential hypertension',
+          },
+          {
+            id: '1-3',
+            name: '1000 ML sodium chloride 9 MG/ML Injection',
+            value: 108016,
+            parent: 'Essential hypertension',
+          },
+          {
+            id: '1-4',
+            name: '2 ML fentanyl 0.05 MG/ML Injection',
+            value: 20031,
+            parent: 'Essential hypertension',
+          },
+          {
+            id: '1-5',
+            name: 'tetanus toxoid, reduced diphtheria toxoid, and acellular pertussis vaccine, adsorbed',
+            value: 64552,
+            parent: 'Essential hypertension',
+          },
+          {
+            id: 'Cough',
+            name: 'Cough',
+            value: 131918,
+            color: color[1],
+          },
+          {
+            id: '2-1',
+            name: 'sodium chloride 9 MG/ML Injectable Solution',
+            value: 15466,
+            parent: 'Cough',
+          },
+          {
+            id: '2-2',
+            name: '2 ML ondansetron 2 MG/ML Injection',
+            value: 50469,
+            parent: 'Cough',
+          },
+          {
+            id: '2-3',
+            name: 'calcium chloride 0.0014 MEQ/ML / potassium chloride 0.004 MEQ/ML / sodium chloride 0.103 MEQ/ML / sodium lactate 0.028 MEQ/ML Injectable Solution',
+            value: 65983,
+            parent: 'Cough',
+          },
+          {
+            id: 'Headache',
+            name: 'Headache',
+            value: 36156,
+            color: color[2],
+          },
+          {
+            id: '3-1',
+            name: 'acetaminophen 325 MG Oral Tablet',
+            value: 10897,
+            parent: 'Headache',
+          },
+          {
+            id: '3-2',
+            name: '2 ML fentanyl 0.05 MG/ML Injection',
+            value: 9602,
+            parent: 'Headache',
+          },
+          {
+            id: '3-4',
+            name: 'ondansetron 2 MG/ML Injectable Solution',
+            value: 15657,
+            parent: 'Headache',
+          },
+          {
+            id: 'Chest pain',
+            name: 'Chest pain',
+            value: 337071,
+            color: color[3],
+          },
+          {
+            id: '4-1',
+            name: 'acetaminophen',
+            value: 247708,
+            parent: 'Chest pain',
+          },
+          {
+            id: '4-2',
+            name: 'sodium chloride 9 MG/ML Injectable Solution',
+            value: 58931,
+            parent: 'Chest pain',
+          },
+          {
+            id: '4-3',
+            name: '2 ML ondansetron 2 MG/ML Injection',
+            value: 30432,
+            parent: 'Chest pain',
+          },
+        ],
+      },
+    ],
+    title: {
+      text: 'Participants taking one of overall-top 10 drugs for each of overall-top 10 conditions',
+    },
+    tooltip: {
+      useHTML: true,
+      pointFormat: '<b>{point.name}</b>: Counts <b>{point.value}</b>',
+    },
+  };
+}
