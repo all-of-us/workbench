@@ -139,7 +139,7 @@ describe('Cohort review set tests', () => {
     expect(columnNames.sort()).toEqual(columns.sort());
 
     // Get Date of Birth in row 2.
-    const dobCell = await participantsTable.getCell(2, 2);
+    const dobCell = await participantsTable.getCell(2, 1);
     const cellValue = await getPropValue<string>(dobCell, 'textContent');
     // Check birth date is valid format.
     expect(isValidDate(cellValue)).toBeTruthy();
@@ -248,12 +248,12 @@ describe('Cohort review set tests', () => {
     participantsTable = cohortReviewPage.getDataTable();
 
     // Get the status of participant1
-    const statusCell1 = await participantsTable.getCell(2, 8);
+    const statusCell1 = await participantsTable.getCell(2, 7);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
     expect(statusValue1).toEqual(participantStatus1);
 
     // Get the status of participant2
-    const statusCell2 = await participantsTable.getCell(3, 8);
+    const statusCell2 = await participantsTable.getCell(3, 7);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
 
