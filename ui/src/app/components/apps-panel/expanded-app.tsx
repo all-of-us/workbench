@@ -41,12 +41,37 @@ const styles = reactStyles({
   },
 });
 
-const RuntimeSettingsButton = (props: { onClickRuntimeConf: Function }) => (
-  <AppsPanelButton
-    onClick={props.onClickRuntimeConf}
-    icon={faGear}
-    buttonText='Settings'
-  />
+const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
+  const { onClick, disabled } = props;
+  return (
+    <AppsPanelButton
+      {...{ onClick, disabled }}
+      icon={faGear}
+      buttonText='Settings'
+    />
+  );
+};
+
+const JupyterAppButtonRow = (props: {
+  workspace: Workspace;
+  onClickRuntimeConf: Function;
+}) => {
+  const { workspace, onClickRuntimeConf } = props;
+  return (
+    <FlexRow>
+      <SettingsButton onClick={onClickRuntimeConf} />
+      <RuntimeStateButton {...{ workspace }} />
+      <NewNotebookButton {...{ workspace }} />
+    </FlexRow>
+  );
+};
+
+const UserAppButtonRow = () => (
+  <FlexRow>
+    <SettingsButton disabled={true} onClick={() => {}} />
+    <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
+    <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
+  </FlexRow>
 );
 
 export const ExpandedApp = (props: {
@@ -54,40 +79,58 @@ export const ExpandedApp = (props: {
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
+  onClickDeleteAppEnvironment?: Function; // TODO
 }) => {
   const { runtime } = useStore(runtimeStore);
-  const { appType, workspace, onClickRuntimeConf, onClickDeleteRuntime } =
-    props;
+  const {
+    appType,
+    workspace,
+    onClickRuntimeConf,
+    onClickDeleteRuntime,
+    onClickDeleteAppEnvironment,
+  } = props;
+  const trashEnabled =
+    appType === UIAppType.JUPYTER ? isActionable(runtime?.status) : true; // TODO
+  const onClickDelete =
+    appType === UIAppType.JUPYTER
+      ? onClickDeleteRuntime
+      : onClickDeleteAppEnvironment;
   return (
-    // first iteration: hard-code Jupyter only
-    appType === UIAppType.JUPYTER && (
-      <FlexColumn style={styles.expandedAppContainer}>
-        <FlexRow>
-          <div>
-            <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
-          </div>
-          <RuntimeStatusIcon
-            style={{ alignSelf: 'center', marginRight: '0.5em' }}
-            workspaceNamespace={workspace.namespace}
-          />
-          <RuntimeCost />
-          <Clickable
-            style={
-              isActionable(runtime?.status)
-                ? styles.enabledTrashButton
-                : styles.disabledTrashButton
-            }
-            onClick={onClickDeleteRuntime}
-          >
-            <FontAwesomeIcon icon={faTrashCan} />
-          </Clickable>
-        </FlexRow>
-        <FlexRow>
-          <RuntimeSettingsButton {...{ onClickRuntimeConf }} />
-          <RuntimeStateButton {...{ workspace }} />
-          <NewNotebookButton {...{ workspace }} />
-        </FlexRow>
-      </FlexColumn>
-    )
+    <FlexColumn style={styles.expandedAppContainer}>
+      <FlexRow>
+        <div>
+          <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
+        </div>
+        {
+          // TODO: support Cromwell + other User Apps
+          appType === UIAppType.JUPYTER && (
+            <RuntimeStatusIcon
+              style={{ alignSelf: 'center', marginRight: '0.5em' }}
+              workspaceNamespace={workspace.namespace}
+            />
+          )
+        }
+        {
+          // TODO: support Cromwell + other User Apps
+          appType === UIAppType.JUPYTER && <RuntimeCost />
+        }
+        <Clickable
+          disabled={!trashEnabled}
+          style={
+            trashEnabled
+              ? styles.enabledTrashButton
+              : styles.disabledTrashButton
+          }
+          onClick={onClickDelete}
+        >
+          <FontAwesomeIcon icon={faTrashCan} />
+        </Clickable>
+      </FlexRow>
+      {appType === UIAppType.JUPYTER ? (
+        <JupyterAppButtonRow {...{ workspace, onClickRuntimeConf }} />
+      ) : (
+        <UserAppButtonRow />
+      )}
+    </FlexColumn>
   );
 };
