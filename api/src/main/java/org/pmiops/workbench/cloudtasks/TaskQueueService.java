@@ -91,18 +91,18 @@ public class TaskQueueService {
     String path = backfill ? pathBase + "?backfill=true" : pathBase;
 
     CloudTasksUtils.partitionList(ids, rdrConfig.exportObjectsPerTask)
-        .forEach(group -> createAndPushTask(rdrConfig.queueName, path, group));
+        .forEach(batch -> createAndPushTask(rdrConfig.queueName, path, batch));
   }
 
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     CloudTasksUtils.partitionList(userIds, workbenchConfig.offlineBatch.usersPerAuditTask)
         .forEach(
-            group ->
+            batch ->
                 createAndPushTask(
                     AUDIT_PROJECTS_QUEUE_NAME,
                     AUDIT_PROJECTS_PATH,
-                    new AuditProjectAccessRequest().userIds(group)));
+                    new AuditProjectAccessRequest().userIds(batch)));
   }
 
   public List<String> groupAndPushSynchronizeAccessTasks(List<Long> userIds) {
@@ -111,11 +111,11 @@ public class TaskQueueService {
             userIds, workbenchConfig.offlineBatch.usersPerSynchronizeAccessTask)
         .stream()
         .map(
-            group ->
+            batch ->
                 createAndPushTask(
                     SYNCHRONIZE_ACCESS_QUEUE_NAME,
                     SYNCHRONIZE_ACCESS_PATH,
-                    new SynchronizeUserAccessRequest().userIds(group)))
+                    new SynchronizeUserAccessRequest().userIds(batch)))
         .collect(Collectors.toList());
   }
 
@@ -129,9 +129,9 @@ public class TaskQueueService {
                         "Deletion of e2e test user workspaces is not enabled in this environment"));
     CloudTasksUtils.partitionList(workspacesToDelete, batchSize)
         .forEach(
-            group ->
+            batch ->
                 createAndPushTask(
-                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, group));
+                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, batch));
   }
 
   public void pushEgressEventTask(Long eventId) {
