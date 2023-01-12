@@ -27,15 +27,6 @@ export default class DataTable extends Table {
     return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`);
   }
 
-  /**
-   * Finds table column names. Returns in array of string.
-   * @returns {Array<string>}
-   */
-  async getColumnNames(): Promise<string[]> {
-    const headerTable = this.getHeaderTable();
-    return headerTable.getColumnNames();
-  }
-
   async getNumRecords(): Promise<number[]> {
     const selector = `${this.getPaginatorXpath()}/*[@class="p-paginator-current"]`;
     let textContent: string;
