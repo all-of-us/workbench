@@ -88,7 +88,7 @@
     "enzyme": "^3.11.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "eslint": "^8.17.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-jest": "^27.1.6",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prefer-arrow": "^1.2.3",
@@ -98,7 +98,7 @@
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "lolex": "^3.0.0",
-    "prettier": "^2.0.4",
+    "prettier": "^2.8.2",
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
     "url": "^0.11.0"
