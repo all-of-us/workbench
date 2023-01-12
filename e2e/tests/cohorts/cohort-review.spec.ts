@@ -140,7 +140,7 @@ describe('Cohort review set tests', () => {
 
     // Get Date of Birth in row 2.
     const dobCell = await participantsTable.getCell(2, 1);
-    const cellValue = await getPropValue<string>(dobCell, 'textContent');
+    const cellValue = await getPropValue<string>(dobCell, 'outerText');
     // Check birth date is valid format.
     expect(isValidDate(cellValue)).toBeTruthy();
 
