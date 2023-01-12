@@ -21,7 +21,6 @@ import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AuditProjectAccessRequest;
 import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
-import org.pmiops.workbench.model.DeleteTestUserWorkspacesRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
@@ -132,9 +131,7 @@ public class TaskQueueService {
         .forEach(
             group ->
                 createAndPushTask(
-                    DELETE_TEST_WORKSPACES_QUEUE_NAME,
-                    DELETE_TEST_WORKSPACES_PATH,
-                    group));
+                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, group));
   }
 
   public void pushEgressEventTask(Long eventId) {
