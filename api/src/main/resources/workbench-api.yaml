@@ -3155,7 +3155,7 @@ paths:
       tags:
         - cloudTaskWorkspaces
         - cloudTask
-      description: Deletes the requestd test user workspaces.
+      description: Deletes the requested test user workspaces.
       operationId: deleteTestUserWorkspaces
       consumes:
         - application/json
@@ -3163,7 +3163,7 @@ paths:
         - in: body
           name: request
           required: true
-          description: Workspace duplication task to process.
+          description: Batch of workspace deletions to process.
           schema:
             "$ref": "#/definitions/DeleteTestUserWorkspacesRequest"
       responses:
