@@ -56,7 +56,7 @@ export const AppsPanel = (props: {
   const { runtime } = useStore(runtimeStore);
 
   // in display order
-  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
 
   const appStates = [
     {
@@ -64,10 +64,9 @@ export const AppsPanel = (props: {
       expandable: true,
       shouldExpandByDefault: isVisible(runtime?.status),
     },
-    // RStudio is not implemented yet, so we don't expand it
     {
-      appType: UIAppType.RSTUDIO,
-      expandable: false,
+      appType: UIAppType.CROMWELL,
+      expandable: true,
       shouldExpandByDefault: false,
     },
   ];
