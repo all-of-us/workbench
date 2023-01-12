@@ -640,6 +640,7 @@ export const ModifierPage = fp.flow(
                   <div style={styles.modifier}>
                     <Dropdown
                       value={operator}
+                      appendTo='self'
                       style={styles.select}
                       onChange={(e) => selectChange(e.value, i)}
                       options={options}
