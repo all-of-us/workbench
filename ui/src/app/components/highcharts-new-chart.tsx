@@ -24,6 +24,7 @@ import {
   getCannedCategoryCountsByAgeBin,
   getCannedHeatmap,
   getCannedTopology,
+  getCannedTreemap,
 } from './highcharts-canned';
 import {
   Category,
@@ -624,10 +625,8 @@ export const Chart = withCurrentWorkspace()(
       const { cdrChartDataMapRow } = this.state;
 
       const cannedTopology = getCannedTopology();
+      const cannedTreemap = getCannedTreemap();
       const cannedHeatmap = getCannedHeatmap();
-      console.log('cannedHeatmap',cannedHeatmap);
-
-      highCharts.Chart
 
       return (
         <React.Fragment>
@@ -638,8 +637,8 @@ export const Chart = withCurrentWorkspace()(
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 25%',
-                  maxWidth: '25%',
+                  flex: '0 0 33%',
+                  maxWidth: '33%',
                 }}
               >
                 <HighchartsReact
@@ -651,8 +650,8 @@ export const Chart = withCurrentWorkspace()(
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 25%',
-                  maxWidth: '25%',
+                  flex: '0 0 33%',
+                  maxWidth: '33%',
                 }}
               >
                 <HighchartsReact
@@ -664,8 +663,8 @@ export const Chart = withCurrentWorkspace()(
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 25%',
-                  maxWidth: '25%',
+                  flex: '0 0 33%',
+                  maxWidth: '33%',
                 }}
               >
                 <HighchartsReact
@@ -675,11 +674,27 @@ export const Chart = withCurrentWorkspace()(
                   callback={getChartObj}
                 />
               </div>
+            </div>
+            <div></div>
+            <div style={styles.row}>
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 25%',
-                  maxWidth: '25%',
+                  flex: '0 0 50%',
+                  maxWidth: '50%',
+                }}
+              >
+                <HighchartsReact
+                  highcharts={highCharts}
+                  options={cannedTreemap}
+                  callback={getChartObj}
+                />
+              </div>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 50%',
+                  maxWidth: '50%',
                 }}
               >
                 <HighchartsReact
