@@ -7,6 +7,7 @@ import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
 // Import Highcharts
 import HighchartsMap from 'highcharts/modules/map';
+import HighchartsSankey from 'highcharts/modules/sankey';
 import HighchartsTreeMap from 'highcharts/modules/treemap';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -23,6 +24,7 @@ import {
   getCannedCategoryCounts,
   getCannedCategoryCountsByAgeBin,
   getCannedHeatmap,
+  getCannedSankey,
   getCannedTopology,
   getCannedTreemap,
 } from './highcharts-canned';
@@ -38,6 +40,7 @@ import {
 
 HighchartsMap(highCharts);
 HighchartsTreeMap(highCharts);
+HighchartsSankey(highCharts);
 require('highcharts/modules/exporting')(highCharts);
 
 const css = `
@@ -628,6 +631,7 @@ export const Chart = withCurrentWorkspace()(
       const cannedTopology = getCannedTopology();
       const cannedTreemap = getCannedTreemap();
       const cannedHeatmap = getCannedHeatmap();
+      const cannedSankey = getCannedSankey();
 
       return (
         <React.Fragment>
@@ -701,6 +705,21 @@ export const Chart = withCurrentWorkspace()(
                 <HighchartsReact
                   highcharts={highCharts}
                   options={cannedHeatmap}
+                  callback={getChartObj}
+                />
+              </div>
+            </div>
+            <div style={styles.row}>
+              <div
+                style={{
+                  ...styles.col,
+                  flex: '0 0 70%',
+                  maxWidth: '70%',
+                }}
+              >
+                <HighchartsReact
+                  highcharts={highCharts}
+                  options={cannedSankey}
                   callback={getChartObj}
                 />
               </div>
