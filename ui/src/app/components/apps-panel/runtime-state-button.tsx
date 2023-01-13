@@ -2,19 +2,16 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { RuntimeStatus, Workspace } from 'generated/fetch';
 
-import { Clickable } from 'app/components/buttons';
-import { FlexColumn } from 'app/components/flex';
 import { cond, switchCase } from 'app/utils';
 import {
   RuntimeStatusRequest,
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
 
-import { buttonStyles } from './utils';
+import { AppsPanelButton } from './apps-panel-button';
 
 export const RuntimeStateButton = (props: { workspace: Workspace }) => {
   const {
@@ -73,23 +70,10 @@ export const RuntimeStateButton = (props: { workspace: Workspace }) => {
   );
 
   return (
-    <Clickable
+    <AppsPanelButton
+      {...{ icon, buttonText }}
       disabled={!enabled}
-      style={{ padding: '0.5em' }}
       onClick={toggleRuntimeStatus}
-    >
-      <FlexColumn
-        style={enabled ? buttonStyles.button : buttonStyles.disabledButton}
-      >
-        <FontAwesomeIcon {...{ icon }} style={buttonStyles.buttonIcon} />
-        <div
-          style={
-            enabled ? buttonStyles.buttonText : buttonStyles.disabledButtonText
-          }
-        >
-          {buttonText}
-        </div>
-      </FlexColumn>
-    </Clickable>
+    />
   );
 };
