@@ -6,6 +6,8 @@ import ustopo from '@highcharts/map-collection/countries/us/us-all.topo.json';
 
 import hcColors from './highcharts-colors';
 
+require('highcharts/modules/exporting')(highCharts);
+
 export enum Category {
   Gender = 'gender',
   SexAtBirth = 'sexAtBirth',
@@ -570,7 +572,6 @@ export function getChartMapParticipantCounts(
     }
     return accum;
   }, []);
-
 
   return {
     chart: {

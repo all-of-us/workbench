@@ -38,6 +38,7 @@ import {
 
 HighchartsMap(highCharts);
 HighchartsTreeMap(highCharts);
+require('highcharts/modules/exporting')(highCharts);
 
 const css = `
   .stats-left-padding {
