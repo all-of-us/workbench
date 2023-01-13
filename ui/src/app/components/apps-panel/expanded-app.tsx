@@ -7,12 +7,18 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Workspace } from 'generated/fetch';
+import {
+  AppType,
+  CreateAppRequest,
+  DiskType,
+  Workspace,
+} from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { isActionable } from 'app/utils/runtime-utils';
@@ -23,7 +29,7 @@ import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { RuntimeCost } from './runtime-cost';
 import { RuntimeStateButton } from './runtime-state-button';
-import { UIAppType } from './utils';
+import { defaultCromwellConfig, UIAppType } from './utils';
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -73,34 +79,42 @@ const JupyterButtonRow = (props: {
 };
 
 // TODO generalize as UserAppButtonRow?
-const CromwellButtonRow = () => (
-  <FlexRow>
-    <TooltipTrigger
-      disabled={false}
-      content='Support for configuring Cromwell is not yet available'
-    >
-      {/* tooltip trigger needs a div for some reason */}
-      <div>
-        <SettingsButton disabled={true} onClick={() => {}} />
-      </div>
-    </TooltipTrigger>
-    <TooltipTrigger
-      disabled={false}
-      content='Support for pausing Cromwell is not yet available'
-    >
-      {/* tooltip trigger needs a div for some reason */}
-      <div>
-        <AppsPanelButton
-          disabled={true}
-          onClick={() => {}}
-          icon={faPause}
-          buttonText='Pause'
-        />
-      </div>
-    </TooltipTrigger>
-    <AppsPanelButton onClick={() => {}} icon={faPlay} buttonText='Launch' />
-  </FlexRow>
-);
+const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
+  return (
+    <FlexRow>
+      <TooltipTrigger
+        disabled={false}
+        content='Support for configuring Cromwell is not yet available'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <SettingsButton disabled={true} onClick={() => {}} />
+        </div>
+      </TooltipTrigger>
+      <TooltipTrigger
+        disabled={false}
+        content='Support for pausing Cromwell is not yet available'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            disabled={true}
+            onClick={() => {}}
+            icon={faPause}
+            buttonText='Pause'
+          />
+        </div>
+      </TooltipTrigger>
+      <AppsPanelButton
+        onClick={() => {
+          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig);
+        }}
+        icon={faPlay}
+        buttonText='Launch'
+      />
+    </FlexRow>
+  );
+};
 
 export const ExpandedApp = (props: {
   appType: UIAppType;
@@ -158,7 +172,7 @@ export const ExpandedApp = (props: {
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
         // TODO: generalize to other User Apps
-        <CromwellButtonRow />
+        <CromwellButtonRow workspaceNamespace={workspace.namespace} />
       )}
     </FlexColumn>
   );
