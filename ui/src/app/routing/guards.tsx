@@ -1,5 +1,6 @@
 import { AccessModule, Profile } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Guard } from 'app/components/app-router';
 import { cond } from 'app/utils';
 import {
@@ -18,7 +19,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { authStore, profileStore, serverConfigStore } from 'app/utils/stores';
+import { authStore, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
 
@@ -93,7 +94,7 @@ export const adminLockedGuard = (ns: string, wsid: string): Guard => {
 // new analysis page, if the flag is off
 export const tempAppsAnalysisGuard = (ns: string, wsid: string): Guard => {
   return {
-    allowed: (): boolean => serverConfigStore.get().config.enableGkeApp,
+    allowed: (): boolean => environment.showNewAnalysisTab,
     redirectPath: `/workspaces/${ns}/${wsid}/data`,
   };
 };
