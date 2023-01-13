@@ -1,4 +1,5 @@
-import { AppType, CreateAppRequest } from '../../../generated/fetch';
+import { AppType, CreateAppRequest } from 'generated/fetch';
+
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
