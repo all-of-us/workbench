@@ -14,7 +14,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
@@ -33,6 +32,7 @@ import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
 import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
+import { SelectionList } from 'app/pages/data/cohort/selection-list';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';

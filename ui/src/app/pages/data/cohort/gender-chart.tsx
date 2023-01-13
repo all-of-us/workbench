@@ -5,8 +5,14 @@ import HighchartsReact from 'highcharts-react-official';
 import { getChartObj } from 'app/pages/data/cohort/utils';
 import colors from 'app/styles/colors';
 
+highCharts.setOptions({
+  lang: {
+    decimalPoint: '.',
+    thousandsSep: ',',
+  },
+});
+
 interface Props {
-  mode: string;
   data: any;
 }
 
@@ -14,7 +20,7 @@ interface State {
   options: any;
 }
 
-export class ComboChart extends React.Component<Props, State> {
+export class GenderChart extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { options: null };
@@ -24,19 +30,8 @@ export class ComboChart extends React.Component<Props, State> {
     this.getChartOptions();
   }
 
-  componentDidUpdate(prevProps: any): void {
-    if (
-      prevProps.mode !== this.props.mode ||
-      prevProps.data !== this.props.data
-    ) {
-      this.getChartOptions();
-    }
-  }
-
   getChartOptions() {
-    const { mode } = this.props;
-    const normalized = mode === 'normalized';
-    const { categories, series } = this.getCategoriesAndSeries();
+    const { categories, data } = this.getCategoriesAndData();
     const height = Math.max(categories.length * 30, 200);
     const options = {
       chart: {
@@ -55,15 +50,11 @@ export class ComboChart extends React.Component<Props, State> {
         tickPixelInterval: 50,
       },
       yAxis: {
-        labels: {
-          format: '{value}' + (normalized ? '%' : ''),
-        },
         min: 0,
         title: {
-          text: '',
+          text: '# Participants',
         },
       },
-      colors: colors.chartColors,
       legend: {
         enabled: false,
       },
@@ -72,49 +63,53 @@ export class ComboChart extends React.Component<Props, State> {
           groupPadding: 0,
           pointPadding: 0.1,
         },
-        series: {
-          stacking: normalized ? 'percent' : 'normal',
-        },
       },
-      series,
+      series: [
+        {
+          data,
+          tooltip: {
+            pointFormat:
+              '<span style="color:{point.color}">\u25CF </span><b> {point.y}</b>',
+          },
+        },
+      ],
     };
     this.setState({ options });
   }
 
-  getCategoriesAndSeries() {
+  getCategoriesAndData() {
     const { data } = this.props;
-    const codeMap = {
+    const genderCodes = {
       M: 'Male',
       F: 'Female',
       'No matching concept': 'Unknown',
     };
-    const getKey = (dat) => {
-      const gender = !!codeMap[dat.name] ? codeMap[dat.name] : dat.name;
-      return `${gender} ${dat.ageRange || 'Unknown'}`;
-    };
-    const categories = data
-      .reduce((acc, datum) => {
-        const key = getKey(datum);
-        if (!acc.includes(key)) {
-          acc.push(key);
+    const chartData = data.reduce(
+      (acc, datum) => {
+        const gender = !!genderCodes[datum.name]
+          ? genderCodes[datum.name]
+          : datum.name;
+        if (!acc.categories.includes(gender)) {
+          acc.categories.push(gender);
         }
-        return acc;
-      }, [])
-      .sort((a, b) => (a > b ? 1 : -1));
-    const series = data
-      .reduce((acc, datum) => {
-        const key = getKey(datum);
-        const obj = { x: categories.indexOf(key), y: datum.count };
-        const index = acc.findIndex((d) => d.name === datum.race);
-        if (index === -1) {
-          acc.push({ name: datum.race, data: [obj] });
+        const index = acc.data.findIndex((d) => d.name === gender);
+        if (index > -1) {
+          acc.data[index].y += datum.count;
         } else {
-          acc[index].data.push(obj);
+          acc.data.push({
+            y: datum.count,
+            name: gender,
+            color: colors.chartColors[acc.data.length],
+          });
         }
         return acc;
-      }, [])
-      .sort((a, b) => (a.name < b.name ? 1 : -1));
-    return { categories, series };
+      },
+      { categories: [], data: [] }
+    );
+    return {
+      categories: chartData.categories.sort((a, b) => (a > b ? 1 : -1)),
+      data: chartData.data.sort((a, b) => (a.name > b.name ? 1 : -1)),
+    };
   }
 
   render() {

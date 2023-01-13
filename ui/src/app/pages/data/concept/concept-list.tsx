@@ -9,12 +9,12 @@ import {
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
-import { domainToTitle } from 'app/cohort-search/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow, FlexRowWrap } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import {
   CONCEPT_SET_CONCEPT_LIMIT,
   ConceptAddModal,

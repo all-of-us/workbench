@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-import { getChartObj } from 'app/cohort-search/utils';
+import { getChartObj } from 'app/pages/data/cohort/utils';
 
 export class ReviewDomainChartsComponent extends React.Component<{
   unitData: any;
