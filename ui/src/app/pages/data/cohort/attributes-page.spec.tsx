@@ -23,10 +23,7 @@ import {
 } from 'testing/stubs/cohort-builder-service-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import {
-  AttributesPage,
-  AttributesPageProps,
-} from './attributes-page';
+import { AttributesPage, AttributesPageProps } from './attributes-page';
 
 import SpyInstance = jest.SpyInstance;
 
