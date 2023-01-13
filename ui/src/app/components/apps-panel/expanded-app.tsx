@@ -6,6 +6,7 @@ import { Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -68,7 +69,15 @@ const JupyterAppButtonRow = (props: {
 
 const UserAppButtonRow = () => (
   <FlexRow>
-    <SettingsButton disabled={true} onClick={() => {}} />
+    <TooltipTrigger
+      disabled={false}
+      content='Support for configuring Cromwell is not yet available'
+    >
+      {/* tooltip trigger needs a div for some reason */}
+      <div>
+        <SettingsButton disabled={true} onClick={() => {}} />
+      </div>
+    </TooltipTrigger>
     <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
     <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
   </FlexRow>
