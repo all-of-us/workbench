@@ -122,6 +122,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
           <ModalBody>
             <div style={styles.appsLabel}>Select an application</div>
             <Dropdown
+              id='application-list-dropdown'
               data-test-id='application-list-dropdown'
               ariaLabel='Application List Dropdown'
               value={selectedApp}
