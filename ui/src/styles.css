@@ -434,3 +434,15 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
 body .p-paginator .p-paginator-pages {
   height: auto;
 }
+
+.p-button.p-button-secondary {
+  background-color: #f4f4f4;
+  border-color: #f4f4f4;
+  color: #333333;
+}
+
+.p-button.p-button-secondary:enabled:hover {
+  background-color: #c8c8c8;
+  border-color: #c8c8c8;
+  color: #333333;
+}
