@@ -74,23 +74,31 @@ export const DiskSelector = ({
             A standard disk is created and deleted with your cloud environment.
           </span>
           {diskConfig.detachable || (
-            <DiskSizeSelector
-              idPrefix='standard'
-              diskSize={diskConfig.size}
-              disabled={disabled}
-              style={{ marginTop: '11px' }}
-              onChange={(size: number) =>
-                onChange(
-                  maybeWithExistingDiskName(
-                    {
-                      ...diskConfig,
-                      size,
-                    },
-                    existingDisk
-                  )
-                )
+            <TooltipTrigger
+              content={
+                'We are removing the ability of using standard disk type '
               }
-            />
+            >
+              <div>
+                <DiskSizeSelector
+                  idPrefix='standard'
+                  diskSize={diskConfig.size}
+                  disabled={true}
+                  style={{ marginTop: '11px' }}
+                  onChange={(size: number) =>
+                    onChange(
+                      maybeWithExistingDiskName(
+                        {
+                          ...diskConfig,
+                          size,
+                        },
+                        existingDisk
+                      )
+                    )
+                  }
+                />
+              </div>
+            </TooltipTrigger>
           )}
         </FlexColumn>
       </FlexRow>
