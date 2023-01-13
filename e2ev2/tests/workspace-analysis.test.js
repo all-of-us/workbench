@@ -24,7 +24,7 @@ browserTest('create an application', async browser => {
   const nextButton = await page.waitForSelector('div[role="button"][aria-label="next"]')
   await expect(nextButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
 
-  const applicationListDropdown = await page.waitForSelector('input[aria-label="Application List Dropdown"]')
+  const applicationListDropdown = await page.waitForSelector('.p-dropdown:has(input[aria-label="Application List Dropdown"])')
   /*
   * Since Prime React uses attaches the aria-label of its Dropdown element to an
   * invisible element, Puppeteer's click method does not work as intended.
