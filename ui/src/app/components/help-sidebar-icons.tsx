@@ -22,6 +22,7 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
@@ -115,13 +116,13 @@ const displayRuntimeStatusIcon = (
   icon: IconConfig,
   workspaceNamespace: string
 ) => {
-  const { enableGkeApp } = serverConfigStore.get().config;
+  const { showAppsPanel } = environment;
 
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
-  const containerStyle: CSSProperties = enableGkeApp
+  const containerStyle: CSSProperties = showAppsPanel
     ? {
         height: '100%',
         alignItems: 'center',
@@ -133,11 +134,11 @@ const displayRuntimeStatusIcon = (
         alignItems: 'center',
         justifyContent: 'space-around',
       };
-  const iconStyle: CSSProperties = enableGkeApp
+  const iconStyle: CSSProperties = showAppsPanel
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
 
-  const iconSrc = enableGkeApp ? jupyterAssets.icon : thunderstorm;
+  const iconSrc = showAppsPanel ? jupyterAssets.icon : thunderstorm;
 
   // We always want to show the thunderstorm or Jupyter icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
@@ -546,8 +547,8 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     criteria,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-  const { enableGkeApp, enableGenomicExtraction } =
-    serverConfigStore.get().config;
+  const { enableGenomicExtraction } = serverConfigStore.get().config;
+  const { showAppsPanel } = environment;
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
@@ -561,7 +562,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (
-    enableGkeApp &&
+    showAppsPanel &&
     WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
   ) {
     keys.push('apps');

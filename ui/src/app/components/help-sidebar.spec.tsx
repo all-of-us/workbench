@@ -15,6 +15,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -310,34 +311,26 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display apps icon for writable workspaces when enableGkeApp is true', async () => {
+  it('should display apps icon for writable workspaces when showAppsPanel is true', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableGkeApp: true,
-      },
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
+    environment.showAppsPanel = true;
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
   });
 
-  it('should not display apps icon for writable workspaces when enableGkeApp is false', async () => {
+  it('should not display apps icon for writable workspaces when showAppsPanel is false', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableGkeApp: false,
-      },
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
+    environment.showAppsPanel = false;
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
