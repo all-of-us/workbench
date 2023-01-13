@@ -175,35 +175,33 @@ const dateTooltip = `Dates are consistently shifted within a participant’s rec
       The date shift differs across participants.`;
 
 const getDefaultFormState = () => {
-  const defaultFormState = [
-    {
-      name: ModifierType.AGEATEVENT,
-      label: 'Age At Event',
-      type: 'number',
-      operator: undefined,
-      values: [undefined, undefined],
-      options: [
-        {
-          label: 'Any',
-          value: undefined,
-        },
-        {
-          label: 'Greater Than or Equal To',
-          value: Operator.GREATERTHANOREQUALTO,
-        },
-        {
-          label: 'Less Than or Equal To',
-          value: Operator.LESSTHANOREQUALTO,
-        },
-        {
-          label: 'Between',
-          value: Operator.BETWEEN,
-        },
-      ],
-    },
-  ];
-  // JSON stringify and parse prevents changes from being passed back to default state
-  return JSON.parse(JSON.stringify(defaultFormState));
+  const defaultFormState = {
+    name: ModifierType.AGEATEVENT,
+    label: 'Age At Event',
+    type: 'number',
+    operator: undefined,
+    values: [undefined, undefined],
+    options: [
+      {
+        label: 'Any',
+        value: undefined,
+      },
+      {
+        label: 'Greater Than or Equal To',
+        value: Operator.GREATERTHANOREQUALTO,
+      },
+      {
+        label: 'Less Than or Equal To',
+        value: Operator.LESSTHANOREQUALTO,
+      },
+      {
+        label: 'Between',
+        value: Operator.BETWEEN,
+      },
+    ],
+  };
+  // Object.assign prevents changes from being passed back to default state
+  return [Object.assign({}, defaultFormState)];
 };
 
 interface Selection extends Criteria {
