@@ -20,7 +20,10 @@ export default class DataTable extends Table {
   }
 
   getBodyTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-body-table"]`);
+    return new Table(
+      this.page,
+      `${this.getXpath()}//table[contains(concat(" ", normalize-space(@class), " "), " p-datatable-table ")]`
+    );
   }
 
   getFooterTable(): Table {
