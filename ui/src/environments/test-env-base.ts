@@ -26,4 +26,6 @@ export const testEnvironmentBase: EnvironmentBase = {
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDemographicSurveyV2Redirect: false,
+  showAppsPanel: true,
+  showNewAnalysisTab: true,
 };

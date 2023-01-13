@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 
 import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -171,7 +172,7 @@ export const WorkspaceNavBar = fp.flow(
   const { ns, wsid } = useParams<MatchParams>();
 
   useEffect(() => {
-    if (serverConfigStore.get().config.enableGkeApp && tabs.length === 3) {
+    if (environment.showNewAnalysisTab && tabs.length === 3) {
       tabs.push({ name: 'Analysis (New)', link: 'apps' });
     }
   }, []);
