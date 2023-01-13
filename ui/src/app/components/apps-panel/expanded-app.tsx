@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { faGear, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import {
+  faGear,
+  faPause,
+  faPlay,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace } from 'generated/fetch';
@@ -53,7 +58,7 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
   );
 };
 
-const JupyterAppButtonRow = (props: {
+const JupyterButtonRow = (props: {
   workspace: Workspace;
   onClickRuntimeConf: Function;
 }) => {
@@ -67,7 +72,8 @@ const JupyterAppButtonRow = (props: {
   );
 };
 
-const UserAppButtonRow = () => (
+// TODO generalize as UserAppButtonRow?
+const CromwellButtonRow = () => (
   <FlexRow>
     <TooltipTrigger
       disabled={false}
@@ -78,8 +84,21 @@ const UserAppButtonRow = () => (
         <SettingsButton disabled={true} onClick={() => {}} />
       </div>
     </TooltipTrigger>
-    <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
-    <AppsPanelButton onClick={() => {}} icon={faGear} buttonText='TODO' />
+    <TooltipTrigger
+      disabled={false}
+      content='Support for pausing Cromwell is not yet available'
+    >
+      {/* tooltip trigger needs a div for some reason */}
+      <div>
+        <AppsPanelButton
+          disabled={true}
+          onClick={() => {}}
+          icon={faPause}
+          buttonText='Pause'
+        />
+      </div>
+    </TooltipTrigger>
+    <AppsPanelButton onClick={() => {}} icon={faPlay} buttonText='Launch' />
   </FlexRow>
 );
 
@@ -99,7 +118,7 @@ export const ExpandedApp = (props: {
     onClickDeleteAppEnvironment,
   } = props;
   const trashEnabled =
-    appType === UIAppType.JUPYTER ? isActionable(runtime?.status) : true; // TODO
+    appType === UIAppType.JUPYTER ? isActionable(runtime?.status) : false; // TODO
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
@@ -136,9 +155,10 @@ export const ExpandedApp = (props: {
         </Clickable>
       </FlexRow>
       {appType === UIAppType.JUPYTER ? (
-        <JupyterAppButtonRow {...{ workspace, onClickRuntimeConf }} />
+        <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
-        <UserAppButtonRow />
+        // TODO: generalize to other User Apps
+        <CromwellButtonRow />
       )}
     </FlexColumn>
   );
