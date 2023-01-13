@@ -120,7 +120,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                     this.setState({ filterLevels: value })
                   }
                   styles={{
-                    control: (baseStyles, state) => ({
+                    control: (baseStyles) => ({
                       ...baseStyles,
                       width: '100px',
                     }),
