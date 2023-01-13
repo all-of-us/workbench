@@ -8,9 +8,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
-  AppType,
-  CreateAppRequest,
-  DiskType,
   Workspace,
 } from 'generated/fetch';
 
@@ -107,7 +104,7 @@ const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
       </TooltipTrigger>
       <AppsPanelButton
         onClick={() => {
-          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig);
+          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig).then((result) => );
         }}
         icon={faPlay}
         buttonText='Launch'
@@ -121,7 +118,6 @@ export const ExpandedApp = (props: {
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
-  onClickDeleteAppEnvironment?: Function; // TODO
 }) => {
   const { runtime } = useStore(runtimeStore);
   const {
@@ -129,14 +125,18 @@ export const ExpandedApp = (props: {
     workspace,
     onClickRuntimeConf,
     onClickDeleteRuntime,
-    onClickDeleteAppEnvironment,
   } = props;
+
+  appsApi().listAppsInWorkspace(workspace.namespace).then((result) => console.log(result.entries()));
+
+
   const trashEnabled =
     appType === UIAppType.JUPYTER ? isActionable(runtime?.status) : false; // TODO
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : onClickDeleteAppEnvironment;
+      : () => appsApi().deleteApp(workspace.namespace, appName,true);
+
   return (
     <FlexColumn style={styles.expandedAppContainer}>
       <FlexRow>
