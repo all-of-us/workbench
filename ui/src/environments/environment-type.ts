@@ -56,17 +56,24 @@ export interface EnvironmentBase {
   enableCaptcha: boolean;
   // Captcha site key registered with the domain
   captchaSiteKey: string;
-  // Enable workbench footer on the signed in pages
-  enableFooter: boolean;
-  // Enable redirect to v2 demographic survey if not submitted by user
-  enableDemographicSurveyV2Redirect: boolean;
 
+  // Environment flags: UI-specific feature flags
+  //
   // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
   // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
   // to the UI via ConfigController and serverConfigStore.
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
+
+  // Enable workbench footer on the signed in pages
+  enableFooter: boolean;
+  // Enable redirect to v2 demographic survey if not submitted by user
+  enableDemographicSurveyV2Redirect: boolean;
+  // Show the AppsPanel component to enable the use of User Apps in the UI
+  showAppsPanel: boolean;
+  // Show the new Analysis Tab in the UI
+  showNewAnalysisTab: boolean;
 }
 
 export interface Environment extends EnvironmentBase {
