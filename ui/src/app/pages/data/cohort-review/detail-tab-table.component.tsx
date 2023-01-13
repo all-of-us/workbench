@@ -14,10 +14,10 @@ import {
   SortOrder,
 } from 'generated/fetch';
 
-import { domainToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { ReviewDomainChartsComponent } from 'app/pages/data/cohort-review/review-domain-charts';
 import { vocabOptions } from 'app/services/review-state.service';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';

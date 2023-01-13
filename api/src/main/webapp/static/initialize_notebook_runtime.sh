@@ -92,6 +92,13 @@ google {
   }]
 }
 
+system {
+  call-caching {
+     enabled = true
+     invalidate-bad-cache-results = true
+  }
+}
+
 backend {
   default = "PAPIv2-beta"
   providers {

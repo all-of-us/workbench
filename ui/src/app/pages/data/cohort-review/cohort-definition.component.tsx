@@ -13,7 +13,7 @@ import {
   SearchParameter,
 } from 'generated/fetch';
 
-import { domainToTitle } from 'app/cohort-search/utils';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';

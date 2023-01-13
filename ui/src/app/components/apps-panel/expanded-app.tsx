@@ -13,10 +13,11 @@ import { isActionable } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './app-logo';
+import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { RuntimeCost } from './runtime-cost';
 import { RuntimeStateButton } from './runtime-state-button';
-import { buttonStyles, UIAppType } from './utils';
+import { UIAppType } from './utils';
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -26,15 +27,26 @@ const styles = reactStyles({
     padding: '1em',
     width: 'fit-content',
   },
+  enabledTrashButton: {
+    alignSelf: 'center',
+    marginLeft: 'auto',
+    marginRight: '1em',
+  },
+  disabledTrashButton: {
+    alignSelf: 'center',
+    marginLeft: 'auto',
+    marginRight: '1em',
+    color: colors.disabled,
+    cursor: 'not-allowed',
+  },
 });
 
 const RuntimeSettingsButton = (props: { onClickRuntimeConf: Function }) => (
-  <Clickable style={{ padding: '0.5em' }} onClick={props.onClickRuntimeConf}>
-    <FlexColumn style={buttonStyles.button}>
-      <FontAwesomeIcon icon={faGear} style={buttonStyles.buttonIcon} />
-      <div style={buttonStyles.buttonText}>Settings</div>
-    </FlexColumn>
-  </Clickable>
+  <AppsPanelButton
+    onClick={props.onClickRuntimeConf}
+    icon={faGear}
+    buttonText='Settings'
+  />
 );
 
 export const ExpandedApp = (props: {
@@ -60,11 +72,10 @@ export const ExpandedApp = (props: {
           />
           <RuntimeCost />
           <Clickable
-            disabled={!isActionable(runtime?.status)}
             style={
               isActionable(runtime?.status)
-                ? buttonStyles.enabledTrashButton
-                : buttonStyles.disabledTrashButton
+                ? styles.enabledTrashButton
+                : styles.disabledTrashButton
             }
             onClick={onClickDeleteRuntime}
           >

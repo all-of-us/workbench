@@ -6,14 +6,14 @@ import { Toast } from 'primereact/toast';
 import { Criteria, Domain } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { ListSearch } from 'app/cohort-search/list-search/list-search.component';
-import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
-import { CriteriaTree } from 'app/cohort-search/tree/tree.component';
-import { domainToTitle, typeToTitle } from 'app/cohort-search/utils';
 import { Clickable, StyledExternalLink } from 'app/components/buttons';
 import { FlexRowWrap } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
+import { ListSearch } from 'app/pages/data/cohort/list-search';
+import { Selection } from 'app/pages/data/cohort/selection-list';
+import { CriteriaTree } from 'app/pages/data/cohort/tree';
+import { domainToTitle, typeToTitle } from 'app/pages/data/cohort/utils';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import {
