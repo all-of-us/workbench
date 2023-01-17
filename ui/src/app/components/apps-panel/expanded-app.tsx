@@ -97,6 +97,7 @@ const CromwellButtonRow = (props: {
       </TooltipTrigger>
       <TooltipTrigger
         disabled={false}
+        // RW-9304
         content='Support for pausing Cromwell is not yet available'
       >
         {/* tooltip trigger needs a div for some reason */}
@@ -118,6 +119,7 @@ const CromwellButtonRow = (props: {
           <AppsPanelButton
             disabled={!canCreateApp(userApp)}
             onClick={() => {
+              // TODO also indicate action to user
               appsApi().createApp(workspaceNamespace, defaultCromwellConfig);
             }}
             icon={faPlay}
@@ -160,6 +162,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
       : () =>
+          // TODO also indicate action to user
           appsApi().deleteApp(
             workspace.namespace,
             initialUserAppInfo.appName,
