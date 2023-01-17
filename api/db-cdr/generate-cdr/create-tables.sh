@@ -22,7 +22,7 @@ for filename in generate-cdr/bq-schemas/*.json;
 do
     json_name=${filename##*/}
     table_name=${json_name%.json}
-    if [[ "$table_name" != 'ds_procedure_occurrence_52' || "$table_name" != 'prep_survey' ]]
+    if [[ "$table_name" != 'ds_procedure_occurrence_52' || "$table_name" != 'prep_survey']]
     then
       echo "Deleting $table_name"
       bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
