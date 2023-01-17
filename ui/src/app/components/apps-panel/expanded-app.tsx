@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { AppType, Workspace } from 'generated/fetch';
+import { AppType, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -25,7 +25,7 @@ import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { RuntimeCost } from './runtime-cost';
 import { RuntimeStateButton } from './runtime-state-button';
-import { defaultCromwellConfig, UIAppType } from './utils';
+import { canDeleteApp, defaultCromwellConfig, UIAppType } from './utils';
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -112,6 +112,15 @@ const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
   );
 };
 
+const TempCromwellDebugInfo = (props: { userApp: UserAppEnvironment }) => {
+  const { appName, status } = props.userApp;
+  return (
+    <div>
+      {appName} | {status}
+    </div>
+  );
+};
+
 interface ExpandedAppProps {
   appType: UIAppType;
   workspace: Workspace;
@@ -124,7 +133,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     props;
 
   // not used for Jupyter
-  const [userAppName, setUserAppName] = useState<string>();
+  const [userApp, setUserApp] = useState<UserAppEnvironment>();
   useEffect(() => {
     if (appType !== UIAppType.JUPYTER) {
       appsApi()
@@ -133,7 +142,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           console.log(result);
           result
             .filter((env) => env.appType === AppType.CROMWELL) // TODO choose the right app instead of hardcode
-            .map((env) => setUserAppName(env.appName));
+            .map(setUserApp);
         });
     }
   }, []);
@@ -141,11 +150,11 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const trashEnabled =
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
-      : !!userAppName;
+      : canDeleteApp(userApp);
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () => appsApi().deleteApp(workspace.namespace, userAppName, true);
+      : () => appsApi().deleteApp(workspace.namespace, userApp.appName, true);
 
   return (
     <FlexColumn style={styles.expandedAppContainer}>
@@ -181,8 +190,11 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       {appType === UIAppType.JUPYTER ? (
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
-        // TODO: generalize to other User Apps
-        <CromwellButtonRow workspaceNamespace={workspace.namespace} />
+        <>
+          {/* TODO: generalize to other User Apps */}
+          <CromwellButtonRow workspaceNamespace={workspace.namespace} />
+          {userApp && <TempCromwellDebugInfo {...{ userApp }} />}
+        </>
       )}
     </FlexColumn>
   );

@@ -1,4 +1,10 @@
-import { AppType, CreateAppRequest, DiskType } from 'generated/fetch';
+import {
+  AppStatus,
+  AppType,
+  CreateAppRequest,
+  DiskType,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import cromwellLogo from 'assets/images/Cromwell.png';
@@ -52,3 +58,9 @@ export const defaultCromwellConfig: CreateAppRequest = {
     labels: {},
   },
 };
+
+export const canDelete = (status: AppStatus): boolean =>
+  [AppStatus.RUNNING, AppStatus.STOPPED].includes(status);
+
+export const canDeleteApp = (app: UserAppEnvironment): boolean =>
+  app && canDelete(app.status);
