@@ -10,7 +10,7 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { ChartData, CohortDefinition } from 'generated/fetch';
 
-import { getChartObj } from 'app/cohort-search/utils';
+import { getChartObj } from 'app/pages/data/cohort/utils';
 import {
   chartBuilderApi,
   cohortsApi,
