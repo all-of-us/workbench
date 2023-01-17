@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -201,7 +202,6 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "app.auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "app.auditInfo.dateAccessed")
-  @Mapping(target = "appType", ignore = true)
   @Mapping(target = "appName", source = "appName")
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   @Mapping(target = "autopauseThreshold", ignore = true)
@@ -209,29 +209,9 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appType", ignore = true)
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   UserAppEnvironment toApiApp(LeonardoListAppResponse app);
-
-  @AfterMapping
-  default void getAppAfterMapper(
-      @MappingTarget UserAppEnvironment app, LeonardoGetAppResponse leonardoGetAppResponse) {
-    app.appName(leonardoGetAppResponse.getAppName())
-        .googleProject(leonardoGetAppResponse.getCloudContext().getCloudResource());
-    mapAppType(app, leonardoGetAppResponse.getAppName());
-  }
-
-  @AfterMapping
-  default void listAppAfterMapper(
-      @MappingTarget UserAppEnvironment app, LeonardoListAppResponse leonardoListAppResponse) {
-    mapAppType(app, leonardoListAppResponse.getAppName());
-  }
-
-  default void mapAppType(UserAppEnvironment app, String appName) {
-    // App name format is all-of-us-{user-id}-{appType}.
-    app.appType(AppType.fromValue(appName.substring(appName.lastIndexOf('-') + 1).toUpperCase()));
-  }
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
       LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
@@ -239,9 +219,12 @@ public interface LeonardoMapper {
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  @ValueMapping(source = "CROMWELL", target = "CROMWELL")
   @ValueMapping(source = "RSTUDIO", target = "CUSTOM")
   LeonardoAppType toLeonardoAppType(AppType appType);
+
+  @ValueMapping(source = "CUSTOM", target = "RSTUDIO")
+  @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
+  AppType toApiAppType(LeonardoAppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
