@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import {
   faGear,
   faPause,
@@ -7,9 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import {
-  Workspace,
-} from 'generated/fetch';
+import { AppType, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -104,7 +103,7 @@ const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
       </TooltipTrigger>
       <AppsPanelButton
         onClick={() => {
-          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig).then((result) => );
+          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig);
         }}
         icon={faPlay}
         buttonText='Launch'
@@ -113,29 +112,40 @@ const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
   );
 };
 
-export const ExpandedApp = (props: {
+interface ExpandedAppProps {
   appType: UIAppType;
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
-}) => {
+}
+export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
-  const {
-    appType,
-    workspace,
-    onClickRuntimeConf,
-    onClickDeleteRuntime,
-  } = props;
+  const { appType, workspace, onClickRuntimeConf, onClickDeleteRuntime } =
+    props;
 
-  appsApi().listAppsInWorkspace(workspace.namespace).then((result) => console.log(result.entries()));
-
+  // not used for Jupyter
+  const [userAppName, setUserAppName] = useState<string>();
+  useEffect(() => {
+    if (appType !== UIAppType.JUPYTER) {
+      appsApi()
+        .listAppsInWorkspace(workspace.namespace)
+        .then((result) => {
+          console.log(result);
+          result
+            .filter((env) => env.appType === AppType.CROMWELL) // TODO choose the right app instead of hardcode
+            .map((env) => setUserAppName(env.appName));
+        });
+    }
+  }, []);
 
   const trashEnabled =
-    appType === UIAppType.JUPYTER ? isActionable(runtime?.status) : false; // TODO
+    appType === UIAppType.JUPYTER
+      ? isActionable(runtime?.status)
+      : !!userAppName;
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () => appsApi().deleteApp(workspace.namespace, appName,true);
+      : () => appsApi().deleteApp(workspace.namespace, userAppName, true);
 
   return (
     <FlexColumn style={styles.expandedAppContainer}>

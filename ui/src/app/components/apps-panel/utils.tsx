@@ -1,5 +1,6 @@
-import { AppType, CreateAppRequest } from 'generated/fetch';
+import { AppType, CreateAppRequest, DiskType } from 'generated/fetch';
 
+import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
@@ -39,16 +40,15 @@ export const appAssets: AppAssets[] = [
 
 export const defaultCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
-  autopauseThreshold: 0, // number
   kubernetesRuntimeConfig: {
-    numNodes: 0, // number
-    machineType: null, // string
+    numNodes: 1, // number
+    machineType: DEFAULT_MACHINE_NAME, // string
     autoscalingEnabled: false, // boolean
   },
   persistentDiskRequest: {
-    name: null, // string
-    size: 0, // number
-    diskType: null, // Standard or Ssd
-    labels: 0, // Map[String,String]
+    name: 'my-disk', // string
+    size: 100, // number
+    diskType: DiskType.Standard, // Standard or Ssd
+    labels: {},
   },
 };
