@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { BillingStatus, Workspace } from 'generated/fetch';
+import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -13,7 +14,7 @@ import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import { UIAppType } from './apps-panel/utils';
+import { findApp, shouldShowApp, UIAppType } from './apps-panel/utils';
 
 const styles = reactStyles({
   header: {
@@ -52,11 +53,17 @@ export const AppsPanel = (props: {
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
-  const { onClose } = props;
+  const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
 
   // in display order
   const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
+
+  // all apps besides Jupyter
+  const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
+  useEffect(() => {
+    appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
+  }, []);
 
   const appStates = [
     {
@@ -67,7 +74,8 @@ export const AppsPanel = (props: {
     {
       appType: UIAppType.CROMWELL,
       expandable: true,
-      shouldExpandByDefault: false,
+      shouldExpandByDefault:
+        userApps && shouldShowApp(findApp(userApps, UIAppType.CROMWELL)),
     },
   ];
 
@@ -104,7 +112,11 @@ export const AppsPanel = (props: {
           {appsToDisplay.map(
             (appType) =>
               showInActiveSection(appType) && (
-                <ExpandedApp {...{ ...props, appType }} key={appType} />
+                <ExpandedApp
+                  {...{ ...props, appType }}
+                  key={appType}
+                  initialUserAppInfo={findApp(userApps, appType)}
+                />
               )
           )}
         </FlexColumn>
@@ -124,7 +136,11 @@ export const AppsPanel = (props: {
             (appType) =>
               showInAvailableSection(appType) &&
               (userExpandedApps.includes(appType) ? (
-                <ExpandedApp {...{ ...props, appType }} key={appType} />
+                <ExpandedApp
+                  {...{ ...props, appType }}
+                  key={appType}
+                  initialUserAppInfo={findApp(userApps, appType)}
+                />
               ) : (
                 <UnexpandedApp
                   {...{ appType }}

@@ -6,6 +6,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { switchCase } from 'app/utils';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
@@ -44,23 +45,48 @@ export const appAssets: AppAssets[] = [
   },
 ];
 
+// TODO replace with better defaults
 export const defaultCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
-    numNodes: 1, // number
-    machineType: DEFAULT_MACHINE_NAME, // string
-    autoscalingEnabled: false, // boolean
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    name: 'my-disk', // string
-    size: 100, // number
-    diskType: DiskType.Standard, // Standard or Ssd
-    labels: {},
+    size: 10,
+    diskType: DiskType.Standard,
   },
 };
 
-export const canDelete = (status: AppStatus): boolean =>
+// visible/actionable logic is copied from runtime-utils
+
+export const isVisible = (status: AppStatus): boolean =>
+  status && ![AppStatus.DELETED, AppStatus.ERROR].includes(status);
+
+export const shouldShowApp = (app: UserAppEnvironment): boolean =>
+  isVisible(app?.status);
+
+export const canCreateApp = (app: UserAppEnvironment): boolean =>
+  !isVisible(app?.status);
+
+export const isActionable = (status: AppStatus): boolean =>
   [AppStatus.RUNNING, AppStatus.STOPPED].includes(status);
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
-  app && canDelete(app.status);
+  app && isActionable(app.status);
+
+// TODO reconcile with API AppType and LeonardoMapper
+
+export const toAppType = (type: UIAppType): AppType =>
+  switchCase(
+    type,
+    [UIAppType.CROMWELL, () => AppType.CROMWELL],
+    [UIAppType.RSTUDIO, () => AppType.RSTUDIO]
+  );
+
+export const findApp = (
+  apps: UserAppEnvironment[],
+  appType: UIAppType
+): UserAppEnvironment =>
+  apps?.find((app) => app.appType === toAppType(appType));

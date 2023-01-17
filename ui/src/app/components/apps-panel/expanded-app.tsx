@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import {
   faGear,
   faPause,
@@ -8,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { AppType, UserAppEnvironment, Workspace } from 'generated/fetch';
+import { UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -25,7 +24,12 @@ import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { RuntimeCost } from './runtime-cost';
 import { RuntimeStateButton } from './runtime-state-button';
-import { canDeleteApp, defaultCromwellConfig, UIAppType } from './utils';
+import {
+  canCreateApp,
+  canDeleteApp,
+  defaultCromwellConfig,
+  UIAppType,
+} from './utils';
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -75,7 +79,11 @@ const JupyterButtonRow = (props: {
 };
 
 // TODO generalize as UserAppButtonRow?
-const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
+const CromwellButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  const { userApp, workspaceNamespace } = props;
   return (
     <FlexRow>
       <TooltipTrigger
@@ -101,60 +109,61 @@ const CromwellButtonRow = (props: { workspaceNamespace: string }) => {
           />
         </div>
       </TooltipTrigger>
-      <AppsPanelButton
-        onClick={() => {
-          appsApi().createApp(props.workspaceNamespace, defaultCromwellConfig);
-        }}
-        icon={faPlay}
-        buttonText='Launch'
-      />
+      <TooltipTrigger
+        disabled={canCreateApp(userApp)}
+        content='A Cromwell app already exists in this environment'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            disabled={!canCreateApp(userApp)}
+            onClick={() => {
+              appsApi().createApp(workspaceNamespace, defaultCromwellConfig);
+            }}
+            icon={faPlay}
+            buttonText='Launch'
+          />
+        </div>
+      </TooltipTrigger>
     </FlexRow>
   );
 };
 
-const TempCromwellDebugInfo = (props: { userApp: UserAppEnvironment }) => {
-  const { appName, status } = props.userApp;
-  return (
-    <div>
-      {appName} | {status}
-    </div>
-  );
+const AppStatus = (props: { userApp: UserAppEnvironment }) => {
+  const { status } = props.userApp;
+  return <span>{status}</span>;
 };
 
 interface ExpandedAppProps {
   appType: UIAppType;
+  initialUserAppInfo: UserAppEnvironment;
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }
 export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
-  const { appType, workspace, onClickRuntimeConf, onClickDeleteRuntime } =
-    props;
-
-  // not used for Jupyter
-  const [userApp, setUserApp] = useState<UserAppEnvironment>();
-  useEffect(() => {
-    if (appType !== UIAppType.JUPYTER) {
-      appsApi()
-        .listAppsInWorkspace(workspace.namespace)
-        .then((result) => {
-          console.log(result);
-          result
-            .filter((env) => env.appType === AppType.CROMWELL) // TODO choose the right app instead of hardcode
-            .map(setUserApp);
-        });
-    }
-  }, []);
+  const {
+    appType,
+    initialUserAppInfo,
+    workspace,
+    onClickRuntimeConf,
+    onClickDeleteRuntime,
+  } = props;
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
-      : canDeleteApp(userApp);
+      : canDeleteApp(initialUserAppInfo);
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () => appsApi().deleteApp(workspace.namespace, userApp.appName, true);
+      : () =>
+          appsApi().deleteApp(
+            workspace.namespace,
+            initialUserAppInfo.appName,
+            true
+          );
 
   return (
     <FlexColumn style={styles.expandedAppContainer}>
@@ -164,11 +173,13 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         </div>
         {
           // TODO: support Cromwell + other User Apps
-          appType === UIAppType.JUPYTER && (
+          appType === UIAppType.JUPYTER ? (
             <RuntimeStatusIcon
               style={{ alignSelf: 'center', marginRight: '0.5em' }}
               workspaceNamespace={workspace.namespace}
             />
+          ) : (
+            initialUserAppInfo && <AppStatus userApp={initialUserAppInfo} />
           )
         }
         {
@@ -190,11 +201,11 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       {appType === UIAppType.JUPYTER ? (
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
-        <>
-          {/* TODO: generalize to other User Apps */}
-          <CromwellButtonRow workspaceNamespace={workspace.namespace} />
-          {userApp && <TempCromwellDebugInfo {...{ userApp }} />}
-        </>
+        // TODO: generalize to other User Apps
+        <CromwellButtonRow
+          userApp={initialUserAppInfo}
+          workspaceNamespace={workspace.namespace}
+        />
       )}
     </FlexColumn>
   );
