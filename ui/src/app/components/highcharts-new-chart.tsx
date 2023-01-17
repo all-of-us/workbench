@@ -8,6 +8,8 @@ import * as highCharts from 'highcharts';
 // Import Highcharts
 import HighchartsMap from 'highcharts/modules/map';
 import HighchartsSankey from 'highcharts/modules/sankey';
+import HighchartsDependencyWheel from 'highcharts/modules/dependency-wheel';
+
 import HighchartsTreeMap from 'highcharts/modules/treemap';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -22,7 +24,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import {
   getCannedCategoryCounts,
-  getCannedCategoryCountsByAgeBin,
+  getCannedCategoryCountsByAgeBin, getCannedDependencyWheel,
   getCannedHeatmap,
   getCannedSankey,
   getCannedTopology,
@@ -41,6 +43,7 @@ import {
 HighchartsMap(highCharts);
 HighchartsTreeMap(highCharts);
 HighchartsSankey(highCharts);
+HighchartsDependencyWheel(highCharts);
 require('highcharts/modules/exporting')(highCharts);
 
 const css = `
@@ -632,6 +635,7 @@ export const Chart = withCurrentWorkspace()(
       const cannedTreemap = getCannedTreemap();
       const cannedHeatmap = getCannedHeatmap();
       const cannedSankey = getCannedSankey();
+      const cannedDependencyWheel = getCannedDependencyWheel();
 
       return (
         <React.Fragment>
@@ -713,14 +717,27 @@ export const Chart = withCurrentWorkspace()(
               <div
                 style={{
                   ...styles.col,
-                  flex: '0 0 70%',
-                  maxWidth: '70%',
+                  flex: '0 0 50%',
+                  maxWidth: '50%',
                 }}
               >
                 <HighchartsReact
                   highcharts={highCharts}
                   options={cannedSankey}
                   callback={getChartObj}
+                />
+              </div>
+              <div
+                  style={{
+                    ...styles.col,
+                    flex: '0 0 50%',
+                    maxWidth: '50%',
+                  }}
+              >
+                <HighchartsReact
+                    highcharts={highCharts}
+                    options={cannedDependencyWheel}
+                    callback={getChartObj}
                 />
               </div>
             </div>
