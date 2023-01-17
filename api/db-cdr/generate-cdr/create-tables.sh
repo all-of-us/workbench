@@ -22,7 +22,7 @@ for filename in generate-cdr/bq-schemas/*.json;
 do
     json_name=${filename##*/}
     table_name=${json_name%.json}
-    if [[ ! $table_name =~ ds_procedure_occurrence_52|prep_survey|prep_survey_ancestor ]]
+    if [[ ! $table_name =~ ds_procedure_occurrence_52|prep_survey|prep_survey_concept_ancestor ]]
     then
       echo "Deleting $table_name"
       bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
@@ -32,7 +32,7 @@ do
     then
       echo "Skipping $table_name"
       continue
-    elif [[ $table_name =~ prep_survey|prep_survey_ancestor && "$TABLE_LIST" != *"prep_survey"* ]]
+    elif [[ $table_name =~ prep_survey|prep_survey_concept_ancestor && "$TABLE_LIST" != *"prep_survey"* ]]
       then
         echo "Creating $table_name"
         bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
