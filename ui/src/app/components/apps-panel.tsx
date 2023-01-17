@@ -74,8 +74,9 @@ export const AppsPanel = (props: {
     {
       appType: UIAppType.CROMWELL,
       expandable: true,
-      shouldExpandByDefault:
-        userApps && shouldShowApp(findApp(userApps, UIAppType.CROMWELL)),
+      shouldExpandByDefault: shouldShowApp(
+        findApp(userApps, UIAppType.CROMWELL)
+      ),
     },
   ];
 

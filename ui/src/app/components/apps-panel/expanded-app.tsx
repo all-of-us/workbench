@@ -111,7 +111,7 @@ const CromwellButtonRow = (props: {
       </TooltipTrigger>
       <TooltipTrigger
         disabled={canCreateApp(userApp)}
-        content='A Cromwell app already exists in this environment'
+        content='A Cromwell app already exists in this workspace'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
@@ -129,6 +129,7 @@ const CromwellButtonRow = (props: {
   );
 };
 
+// TODO: refine and style more like RuntimeStatusIcon
 const AppStatus = (props: { userApp: UserAppEnvironment }) => {
   const { status } = props.userApp;
   return <span>{status}</span>;
@@ -171,17 +172,14 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <div>
           <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
         </div>
-        {
-          // TODO: support Cromwell + other User Apps
-          appType === UIAppType.JUPYTER ? (
-            <RuntimeStatusIcon
-              style={{ alignSelf: 'center', marginRight: '0.5em' }}
-              workspaceNamespace={workspace.namespace}
-            />
-          ) : (
-            initialUserAppInfo && <AppStatus userApp={initialUserAppInfo} />
-          )
-        }
+        {appType === UIAppType.JUPYTER ? (
+          <RuntimeStatusIcon
+            style={{ alignSelf: 'center', marginRight: '0.5em' }}
+            workspaceNamespace={workspace.namespace}
+          />
+        ) : (
+          initialUserAppInfo && <AppStatus userApp={initialUserAppInfo} />
+        )}
         {
           // TODO: support Cromwell + other User Apps
           appType === UIAppType.JUPYTER && <RuntimeCost />
