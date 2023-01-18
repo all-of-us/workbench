@@ -92,59 +92,52 @@ export const AppsPanel = (props: {
     !appStates.find((s) => s.appType === appType)?.shouldExpandByDefault;
   const showAvailableSection = appsToDisplay.some(showInAvailableSection);
 
-  const ActiveApps = (sectionProps: { showCloseButtonHere: boolean }) => (
-    <FlexColumn>
-      <FlexRow>
-        <h3 style={styles.header}>Active applications</h3>
-        {sectionProps.showCloseButtonHere && (
-          <CloseButton {...{ onClose }} style={styles.closeButton} />
-        )}
-      </FlexRow>
-      {appsToDisplay.map(
-        (appType) =>
-          showInActiveSection(appType) && (
-            <ExpandedApp {...{ ...props, appType }} key={appType} />
-          )
-      )}
-    </FlexColumn>
-  );
-
-  const AvailableApps = (sectionProps: { showCloseButtonHere: boolean }) => (
-    <FlexColumn>
-      <FlexRow>
-        <h3 style={styles.header}>Launch other applications</h3>
-        {sectionProps.showCloseButtonHere && (
-          <CloseButton {...{ onClose }} style={styles.closeButton} />
-        )}
-      </FlexRow>
-      {appsToDisplay.map(
-        (appType) =>
-          showInAvailableSection(appType) &&
-          (userExpandedApps.includes(appType) ? (
-            <ExpandedApp {...{ ...props, appType }} key={appType} />
-          ) : (
-            <UnexpandedApp
-              {...{ appType }}
-              key={appType}
-              onClick={() =>
-                appStates.find((s) => s.appType === appType)?.expandable &&
-                addToExpandedApps(appType)
-              }
-            />
-          ))
-      )}
-    </FlexColumn>
-  );
-
   return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
     <div>
       {showActiveSection && (
-        <ActiveApps showCloseButtonHere={showActiveSection} />
+        <FlexColumn>
+          <FlexRow>
+            <h3 style={styles.header}>Active applications</h3>
+            <CloseButton {...{ onClose }} style={styles.closeButton} />
+          </FlexRow>
+          {appsToDisplay.map(
+            (appType) =>
+              showInActiveSection(appType) && (
+                <ExpandedApp {...{ ...props, appType }} key={appType} />
+              )
+          )}
+        </FlexColumn>
       )}
       {showAvailableSection && (
-        <AvailableApps showCloseButtonHere={!showActiveSection} />
+        <FlexColumn>
+          <FlexRow>
+            <h3 style={styles.header}>Launch other applications</h3>
+            {
+              // only show the close button in the Available section if there is no Active section
+              !showActiveSection && (
+                <CloseButton {...{ onClose }} style={styles.closeButton} />
+              )
+            }
+          </FlexRow>
+          {appsToDisplay.map(
+            (appType) =>
+              showInAvailableSection(appType) &&
+              (userExpandedApps.includes(appType) ? (
+                <ExpandedApp {...{ ...props, appType }} key={appType} />
+              ) : (
+                <UnexpandedApp
+                  {...{ appType }}
+                  key={appType}
+                  onClick={() =>
+                    appStates.find((s) => s.appType === appType)?.expandable &&
+                    addToExpandedApps(appType)
+                  }
+                />
+              ))
+          )}
+        </FlexColumn>
       )}
     </div>
   );
