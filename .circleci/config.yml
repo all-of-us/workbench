@@ -124,10 +124,6 @@ commands:
 
   deploy-to-staging-command:
     description: "Deploy API and UI to staging App Engine"
-    parameters:
-      project_name:
-        type: string
-        default: ""
     steps:
       - checkout-code
       - attach_workspace:
@@ -589,7 +585,7 @@ jobs:
   deploy-to-staging:
     executor: workbench-executor
     steps:
-      - deploy-to-staging-command:
+      - deploy-to-staging-command
 
   puppeteer-generate-access-tokens:
     executor: puppeteer-executor
