@@ -18,6 +18,20 @@ QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
 OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
 
+function check_prep_survey() {
+  echo "Getting prep_survey count"
+  query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`"
+  prepSurveyCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+  if [[ $prepSurveyCount > 0 ]];
+  then
+    echo "Skipping prep_survey table exists with row count [$prepSurveyCount]"
+    exit 0
+  else
+    echo "Creating prep_survey table"
+  fi
+}
+
 function simple_select() {
   # run this query to initializing our .bigqueryrc configuration file
   # otherwise this will corrupt the output of the first call to find_info()
@@ -149,6 +163,10 @@ function increment_question_parent_id() {
 function increment_answer_parent_id() {
   ANSWER_PARENT_ID=$(($1))
 }
+
+# check and exit if prep_survey table exists
+# else continue
+check_prep_survey
 
 # run this query to initializing our .bigqueryrc configuration file
 # otherwise this will corrupt the output of the first call to find_info()

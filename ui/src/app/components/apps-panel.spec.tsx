@@ -3,6 +3,7 @@ import { mount } from 'enzyme';
 
 import { NotebooksApi, RuntimeApi, RuntimeStatus } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -33,9 +34,8 @@ describe('AppsPanel', () => {
   let runtimeStub: RuntimeApiStub;
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableGkeApp: true },
-    });
+    serverConfigStore.set({ config: defaultServerConfig });
+    environment.showAppsPanel = true;
     runtimeStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());

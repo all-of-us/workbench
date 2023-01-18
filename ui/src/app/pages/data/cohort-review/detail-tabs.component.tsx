@@ -5,8 +5,8 @@ import { TabPanel, TabView } from 'primereact/tabview';
 
 import { CohortReview, Domain, FilterColumns } from 'generated/fetch';
 
-import { domainToTitle } from 'app/cohort-search/utils';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { DetailTabTable } from 'app/pages/data/cohort-review/detail-tab-table.component';
 import { IndividualParticipantsCharts } from 'app/pages/data/cohort-review/individual-participants-charts';
 import { filterStateStore } from 'app/services/review-state.service';
