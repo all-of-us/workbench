@@ -22,7 +22,7 @@ export const testEnvironmentBase: EnvironmentBase = {
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
-  enableCaptcha: true,
+  enableCaptcha: false,
   enablePublishedWorkspaces: false,
   enableFooter: true,
   enableDemographicSurveyV2Redirect: false,
