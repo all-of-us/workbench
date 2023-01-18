@@ -592,12 +592,6 @@ jobs:
       - deploy-to-staging-perf:
           project_name: "all-of-us-rw-staging"
 
-  deploy-to-perf:
-    executor: workbench-executor
-    steps:
-      - deploy-to-staging-perf:
-          project_name: "all-of-us-rw-perf"
-
   puppeteer-generate-access-tokens:
     executor: puppeteer-executor
     parameters:
@@ -825,15 +819,6 @@ workflows:
       - api-integration-test:
           <<: *filter-release-tags
       - deploy-to-staging:
-          <<: *filter-release-tags
-          requires:
-            - api-local-test
-            - api-unit-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-unit-test
-      - deploy-to-perf:
           <<: *filter-release-tags
           requires:
             - api-local-test
