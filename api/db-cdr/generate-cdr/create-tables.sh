@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo `bash -version`
 # This script removes/creates all CDR indices specific tables.
 
 set -e
