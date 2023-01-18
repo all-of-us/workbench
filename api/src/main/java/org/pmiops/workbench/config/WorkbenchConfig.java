@@ -443,6 +443,7 @@ public class WorkbenchConfig {
   }
 
   public static class E2ETestUserConfig {
+    public int workspaceDeletionBatchSize;
     public List<String> testUserEmails;
   }
 

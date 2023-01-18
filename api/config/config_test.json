@@ -167,6 +167,7 @@
     }]
   },
   "e2eTestUsers": {
+    "workspaceDeletionBatchSize": 15,
     "testUserEmails": [
       "puppeteer-tester-7@fake-research-aou.org",
       "puppeteer-writer-1@fake-research-aou.org",
