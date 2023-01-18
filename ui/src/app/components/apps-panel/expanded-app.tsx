@@ -156,22 +156,23 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     onClickRuntimeConf,
     onClickDeleteRuntime,
   } = props;
+  const [deletingApp, setDeletingApp] = useState(false);
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
-      : canDeleteApp(initialUserAppInfo);
+      : !deletingApp && canDeleteApp(initialUserAppInfo);
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () =>
-          // TODO also indicate action to user
+      : () => {
+          setDeletingApp(true);
           appsApi().deleteApp(
             workspace.namespace,
             initialUserAppInfo.appName,
             true
           );
-
+        };
   return (
     <FlexColumn style={styles.expandedAppContainer}>
       <FlexRow>
