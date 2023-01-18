@@ -1,7 +1,6 @@
 package org.pmiops.workbench.impersonation;
 
 import java.util.List;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
 /**
@@ -13,5 +12,5 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 public interface ImpersonatedWorkspaceService {
   List<WorkspaceResponse> getOwnedWorkspaces(String username);
 
-  void deleteWorkspace(String username, Workspace workspace);
+  void deleteWorkspace(String username, String wsNamespace, String wsId);
 }

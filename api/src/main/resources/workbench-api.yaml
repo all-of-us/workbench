@@ -3149,6 +3149,26 @@ paths:
       responses:
         200:
           description: 'Workspace created'
+  "/v1/cloudTask/deleteTestUserWorkspaces":
+    post:
+      security: []
+      tags:
+        - cloudTaskWorkspaces
+        - cloudTask
+      description: Deletes the requested test user workspaces.
+      operationId: deleteTestUserWorkspaces
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: Batch of workspace deletions to process.
+          schema:
+            "$ref": "#/definitions/DeleteTestUserWorkspacesRequest"
+      responses:
+        200:
+          description: 'Workspaces deleted'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -9023,6 +9043,28 @@ definitions:
         description: 'Egress event ID to be processed'
         type: integer
         format: int64
+
+  DeleteTestUserWorkspacesRequest:
+    type: array
+    items:
+      "$ref": "#/definitions/TestUserWorkspace"
+
+  TestUserWorkspace:
+    type: object
+    required:
+      - username
+      - wsNamespace
+      - wsFirecloudId
+    properties:
+      username:
+        description: 'Test username (email address including GSuite)'
+        type: string
+      wsNamespace:
+        description: 'Workspace Namespace'
+        type: string
+      wsFirecloudId:
+        description: 'Firecloud ID for the Workspace'
+        type: string
 
   CreateWorkspaceTaskRequest:
     type: object
