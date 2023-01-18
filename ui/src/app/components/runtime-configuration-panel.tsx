@@ -6,6 +6,7 @@ import { validate } from 'validate.js';
 import {
   BillingStatus,
   DataprocConfig,
+  DiskType,
   GpuConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -517,7 +518,9 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
-    const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
+    const runtimeCanBeCreated =
+      !(getErrorMessageContent().length > 0) &&
+      analysisConfig.diskConfig.detachableType === DiskType.Standard;
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
