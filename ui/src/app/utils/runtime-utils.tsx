@@ -687,8 +687,7 @@ export const withAnalysisConfigDefaults = (
     } else if (detachable === true || existingDisk) {
       detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
-      detachableType =
-        detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
+      detachableType = detachableType ?? existingDisk?.diskType ?? DiskType.Ssd;
       if (canUseExistingDisk(r.diskConfig, existingDisk)) {
         existingDiskName = existingDisk.name;
       }
