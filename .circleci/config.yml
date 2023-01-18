@@ -122,8 +122,8 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  deploy-to-staging-perf:
-    description: "Deploy API and UI to staging or perf App Engine"
+  deploy-to-staging-command:
+    description: "Deploy API and UI to staging App Engine"
     parameters:
       project_name:
         type: string
@@ -137,7 +137,7 @@ commands:
           working_directory: ~/workbench/deploy
           command: |
             ./project.rb deploy \
-              --project << parameters.project_name >> \
+              --project all-of-us-rw-staging \
               --account << pipeline.parameters.circle-service-account >> \
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
@@ -582,15 +582,14 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
-  # In staging and perf, we deploy all at once in order to track and control
-  # the release for a tagged version only. In "test", we maintain individual
+  # In staging, we deploy all at once in order to track and control the 
+  # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
   deploy-to-staging:
     executor: workbench-executor
     steps:
-      - deploy-to-staging-perf:
-          project_name: "all-of-us-rw-staging"
+      - deploy-to-staging-command:
 
   puppeteer-generate-access-tokens:
     executor: puppeteer-executor
