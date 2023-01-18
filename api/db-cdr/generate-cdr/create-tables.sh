@@ -43,17 +43,17 @@ do
     # create with partitioning and clustering
     elif [[ "$table_name" =~ cb_search_all_events ]]
     then
-      echo "Creating "$table_name" with time_partitioning on DAY and clustering on concept_id"
+      echo "Creating $table_name with time_partitioning on DAY and clustering on concept_id"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields concept_id "$BQ_DATASET.$table_name"
     # create with partitioning and clustering
     elif [[ "$table_name" =~ cb_review_survey|cb_search_person ]]
     then
-      echo "Creating "$table_name" with time_partitioning on DAY and clustering on person_id"
+      echo "Creating $table_name with time_partitioning on DAY and clustering on person_id"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id "$BQ_DATASET.$table_name"
     # create with partitioning and clustering
     elif [[ "$table_name" =~ cb_review_all_events ]]
     then
-     echo "Creating "$table_name" with time_partitioning on DAY and clustering on person_id, domain"
+     echo "Creating $table_name with time_partitioning on DAY and clustering on person_id, domain"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields person_id,domain "$BQ_DATASET.$table_name"
     # create ds_zip_code_socioeconomic only if TABLE_LIST contains zip3_ses_map (CT)
     elif [[ "$table_name" =~ ds_zip_code_socioeconomic ]]
@@ -66,11 +66,11 @@ do
     # create OMOP v5.3.1 ds_procedure_occurrence only if TABLE_LIST contains visit_detail
     elif [[ "$TABLE_LIST" == *'visit_detail'* && "$table_name" =~ ds_procedure_occurrence && "$done_ds_proc_occur" == 0 ]]
     then
-      echo "Creating "$table_name" (OMOP v5.3.1)"
+      echo "Creating $table_name (OMOP v5.3.1)"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
       done_ds_proc_occur=1
     # create ds_procedure_occurrence from ds_procedure_occurrence_52.json only if TABLE_LIST does not contain visit_detail (OMOP 5.2)
-    elif [[ "$TABLE_LIST" != *'visit_detail'* && "$table_name" =~ ds_procedure_occurrence_52 && "$done_ds_proc_occur" == 0 ]]
+    elif [[ "$TABLE_LIST" != *'visit_detail'* && $table_name =~ ds_procedure_occurrence_52 && "$done_ds_proc_occur" == 0 ]]
     then
       echo "Creating ds_procedure_occurrence (OMOP v5.2) schema:$json_name -> table: ds_procedure_occurrence"
       bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.ds_procedure_occurrence"
