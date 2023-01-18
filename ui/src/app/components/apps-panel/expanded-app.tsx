@@ -164,6 +164,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
       : !deletingApp && canDeleteApp(initialUserAppInfo);
+
+  // TODO allow configuration
+  const deleteDiskWithUserApp = true;
+
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
@@ -172,7 +176,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           appsApi().deleteApp(
             workspace.namespace,
             initialUserAppInfo.appName,
-            true
+            deleteDiskWithUserApp
           );
         };
   return (
