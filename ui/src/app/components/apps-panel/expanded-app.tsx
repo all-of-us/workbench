@@ -137,7 +137,9 @@ const CromwellButtonRow = (props: {
 // TODO: refine and style more like RuntimeStatusIcon
 const AppStatus = (props: { userApp: UserAppEnvironment }) => {
   const { status } = props.userApp;
-  return <span>{status}</span>;
+  return (
+    <div style={{ alignSelf: 'center', marginRight: '1em' }}>{status}</div>
+  );
 };
 
 interface ExpandedAppProps {
@@ -206,11 +208,15 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       {appType === UIAppType.JUPYTER ? (
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
-        // TODO: generalize to other User Apps
-        <CromwellButtonRow
-          userApp={initialUserAppInfo}
-          workspaceNamespace={workspace.namespace}
-        />
+        <FlexColumn style={{ alignItems: 'center' }}>
+          {/* TODO: keep status updated internally */}
+          <div>(refresh to update status)</div>
+          {/* TODO: generalize to other User Apps*/}
+          <CromwellButtonRow
+            userApp={initialUserAppInfo}
+            workspaceNamespace={workspace.namespace}
+          />
+        </FlexColumn>
       )}
     </FlexColumn>
   );
