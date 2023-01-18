@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import {
   faGear,
   faPause,
@@ -84,6 +85,8 @@ const CromwellButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
+  const [launching, setLaunching] = useState(false);
+
   return (
     <FlexRow>
       <TooltipTrigger
@@ -111,19 +114,19 @@ const CromwellButtonRow = (props: {
         </div>
       </TooltipTrigger>
       <TooltipTrigger
-        disabled={canCreateApp(userApp)}
-        content='A Cromwell app already exists in this workspace'
+        disabled={!launching && canCreateApp(userApp)}
+        content='A Cromwell app exists or is being created'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
           <AppsPanelButton
-            disabled={!canCreateApp(userApp)}
+            disabled={launching || !canCreateApp(userApp)}
             onClick={() => {
-              // TODO also indicate action to user
+              setLaunching(true);
               appsApi().createApp(workspaceNamespace, defaultCromwellConfig);
             }}
             icon={faPlay}
-            buttonText='Launch'
+            buttonText={launching ? 'Launching' : 'Launch'}
           />
         </div>
       </TooltipTrigger>
