@@ -41,19 +41,19 @@ do
     table_name=${json_name%.json}
     if [[ ${CLUSTERED_TABLES[@]} =~ "$table_name" ]]; then
       if [[ "$table_name" =~ cb_search_all_events ]]; then
-        createClusteredTable $table_name "concept_id"
+        createClusteredTable "$table_name" "concept_id"
       elif [[ "$table_name" =~ cb_review_survey|cb_search_person ]]; then
-        createClusteredTable $table_name "person_id"
+        createClusteredTable "$table_name" "person_id"
       elif [[ "$table_name" =~ cb_review_all_events ]]; then
-        createClusteredTable $table_name "person_id,domain"
+        createClusteredTable "$table_name" "person_id,domain"
       fi
     elif [[ ${SKIP_TABLES[@]} =~ "$table_name"  ]]; then
       echo "Skipping table $table_name"
     elif [[ "$table_name" == 'ds_zip_code_socioeconomic' ]]; then
       if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
-        createBasicTable $table_name
+        createBasicTable "$table_name"
       fi
     else
-      createBasicTable $table_name
+      createBasicTable "$table_name"
     fi
 done
