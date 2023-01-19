@@ -121,6 +121,12 @@
       "category": "DEMO_PROJECTS"
     },
     {
+      "name": "Genomics Undergrad Lesson Plan Exemplar (v6)",
+      "namespace": "aou-rw-e88a6e91",
+      "id": "duplicateofcontroltierusersupportcontentv6",
+      "category": "DEMO_PROJECTS"
+    },
+    {
       "name": "Work with All of Us Physical Measurements Data (v6)",
       "namespace": "aou-rw-0e8e7aca",
       "id": "workwithallofusphysicalmeasurementsdatav6",
@@ -172,12 +178,6 @@
       "name": "How to Work with All of Us Genomic Data (Hail - Plink)(v6)",
       "namespace": "aou-rw-61aae708",
       "id": "duplicateofhowtoworkwithallofusgenomicdatahailplinkjunerefresh",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "Genomics Undergrad Lesson Plan Exemplar (v6)",
-      "namespace": "aou-rw-e88a6e91",
-      "id": "duplicateofcontroltierusersupportcontentv6",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
