@@ -49,7 +49,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   exit 1
 fi
 
-TABLE_LIST=$(bq ls -n 1000 "all-of-us-ehr-dev:ChenchalDummyCdr" | tail -n +3 | cut -d " " -f 3 )
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 )
 
 SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
 CLUSTERED_TABLES=("cb_search_all_events" "cb_review_survey" "cb_search_person" "cb_review_all_events")
