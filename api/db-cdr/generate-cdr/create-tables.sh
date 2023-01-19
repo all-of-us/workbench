@@ -10,23 +10,6 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
-function testCiBashAssociativeEnabled(){
-  echo `bash --version`
-
-  declare -A C_TABLES
-  C_TABLES["cb_search_all_events"]="concept_id"
-  C_TABLES["cb_review_survey"]="person_id"
-  C_TABLES["cb_search_person"]="person_id"
-  C_TABLES["cb_review_all_events"]="person_id,domain"
-
-  echo "Associative Array Keys: ${!C_TABLES[@]}"
-  echo "Associative Array Values: ${C_TABLES[@]}"
-  key="cb_review_survey"
-  echo "Value for key: $key = ${C_TABLES[$key]} "
-}
-# remove this after running once on Circle CI
-testCiBashAssociativeEnabled
-
 function deleteAndCreateTable(){
   local table_name=$1
   # delete table - no error thrown if table does not exist
