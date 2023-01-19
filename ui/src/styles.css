@@ -446,3 +446,7 @@ body .p-paginator .p-paginator-pages {
   border-color: #c8c8c8;
   color: #333;
 }
+
+body .p-menu .p-menuitem-link {
+  display: block;
+}
