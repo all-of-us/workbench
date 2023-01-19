@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# #!/bin/bash
+# using #!/usr/bin/env bash else need to change for local development
 # #!/usr/bin/env bash -> we can use associative arrays
-# This script removes/creates all CDR indices specific tables.
+# #!/bin/bash -> we can use associative arrays
 
+# This script removes/creates all CDR indices specific tables.
 set -e
 
 export BQ_PROJECT=$1         # CDR project
@@ -56,7 +57,12 @@ fi
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 )
 
 SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
-CLUSTERED_TABLES=("cb_search_all_events" "cb_review_survey" "cb_search_person" "cb_review_all_events")
+
+declare -A CLUSTERED_TABLES
+CLUSTERED_TABLES["cb_search_all_events"]="concept_id"
+CLUSTERED_TABLES["cb_review_survey"]="person_id"
+CLUSTERED_TABLES["cb_search_person"]="person_id"
+CLUSTERED_TABLES["cb_review_all_events"]="person_id,domain"
 
 schema_path=generate-cdr/bq-schemas
 for filename in generate-cdr/bq-schemas/*.json;
@@ -64,14 +70,8 @@ do
     json_name=${filename##*/}
     table_name=${json_name%.json}
 
-    if [[ ${CLUSTERED_TABLES[@]} =~ "$table_name" ]]; then
-      if [[ "$table_name" =~ cb_search_all_events ]]; then
-        deleteAndCreateTable "$table_name" "concept_id"
-      elif [[ "$table_name" =~ cb_review_survey|cb_search_person ]]; then
-        deleteAndCreateTable "$table_name" "person_id"
-      elif [[ "$table_name" =~ cb_review_all_events ]]; then
-        deleteAndCreateTable "$table_name" "person_id,domain"
-      fi
+    if [[ -n "${CLUSTERED_TABLES[$table_name]}" ]]; then
+      deleteAndCreateTable "$table_name" "${CLUSTERED_TABLES[$table_name]}"
     elif [[ ${SKIP_TABLES[@]} =~ "$table_name"  ]]; then
       echo "Skipping table $table_name"
     elif [[ "$table_name" == 'ds_zip_code_socioeconomic' ]]; then
@@ -88,3 +88,5 @@ do
       deleteAndCreateTable "$table_name"
     fi
 done
+wait
+echo "Done creating tables"
