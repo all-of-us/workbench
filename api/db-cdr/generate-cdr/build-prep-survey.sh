@@ -21,7 +21,7 @@ OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'ech
 function check_prep_survey() {
   echo "Checking prep_survey count"
   query="select row_count from \`$BQ_PROJECT.$BQ_DATASET.prep_create_tables_list\` where table_name = 'prep_survey'"
-  prepSurveyCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+  prepSurveyCount=$(bq --quiet --project_id="all-of-us-ehr-dev" query --nouse_legacy_sql "$query"| tr -dc '0-9')
   echo "prep_survey row count: $prepSurveyCount"
   if [[ $prepSurveyCount > 0 ]];
   then
@@ -164,13 +164,13 @@ function increment_answer_parent_id() {
   ANSWER_PARENT_ID=$(($1))
 }
 
-# check and exit if prep_survey table exists
-# else continue
-check_prep_survey
-
 # run this query to initializing our .bigqueryrc configuration file
 # otherwise this will corrupt the output of the first call to find_info()
 simple_select
+
+# check and exit if prep_survey table exists
+# else continue
+check_prep_survey
 
 if [[ "$FILE_NAME" = "socialdeterminantsofhea_staged.csv" ]]; then
   #  Getting count for SDOH Survey
