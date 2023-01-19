@@ -2,13 +2,12 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
+import { environment } from 'environments/environment';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
-import { environment } from 'environments/environment';
-
-import { Environments, ajaxContext } from 'terraui/out/Environments';
+import { ajaxContext, Environments } from 'terraui/out/Environments';
 
 const leoUrlRoot = environment.leoApiUrl;
 
