@@ -10,6 +10,8 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 
+export table_names_table="prep_create_tables_list"
+
 function deleteAndCreateTable(){
   local table_name=$1
   # delete table - no error thrown if table does not exist
@@ -26,6 +28,25 @@ function deleteAndCreateTable(){
     echo "Creating $table_name"
     bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
   fi
+  wait
+  updateRowCounts $table_name
+}
+
+function createTableForRowCounts(){
+  echo "Creating $table_names_table"
+  ddl="CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$table_names_table\` AS SELECT '' table_name, null row_count"
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$ddl"
+  wait
+}
+
+function updateRowCounts(){
+  local table_name=$1
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$table_names_table\`
+      (table_name, row_count)
+      (SELECT '$table_name' as table_name, count(*) as row_count
+      FROM \`$BQ_PROJECT.$BQ_DATASET.$table_name\`)
+    "
   wait
 }
 
@@ -73,3 +94,4 @@ do
 done
 wait
 echo "Done creating tables"
+

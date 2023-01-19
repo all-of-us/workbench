@@ -20,15 +20,12 @@ OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'ech
 
 function check_prep_survey() {
   echo "Checking prep_survey count"
-  query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_survey\`"
-  results=$(bq --quiet --project_id="all-of-us-ehr-dev" query --nouse_legacy_sql "$query")
-  prepSurveyCount=0
-  if [[ "$results" == *"count"* ]]; then
-    prepSurveyCount=$(echo "$prepSurveyCount" | tr -dc '0-9')
-  fi
+  query="select row_count from \`$BQ_PROJECT.$BQ_DATASET.prep_create_tables_list\` where table_name = 'prep_survey'"
+  prepSurveyCount=$(bq --quiet --project_id="all-of-us-ehr-dev" query --nouse_legacy_sql "$query"| tr -dc '0-9')
+
   if [[ $prepSurveyCount > 0 ]];
   then
-    echo "Table prep_survey exists with row count [$prepSurveyCount]. Skipping creating prep_survey table"
+    echo "Table prep_survey has row count [$prepSurveyCount]. Skipping creating prep_survey table"
     exit 0
   else
     echo "Creating prep_survey table"
