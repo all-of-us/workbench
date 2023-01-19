@@ -450,3 +450,29 @@ body .p-paginator .p-paginator-pages {
 body .p-menu .p-menuitem-link {
   display: block;
 }
+
+.p-tabview .p-tabview-nav li {
+  padding: 0.571em 0.7em;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link,
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link{
+  background-color: transparent;
+  color: #2691D0;
+  border: none;
+  display: inline-block;
+  padding: 0;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: transparent;
+  color: #2691D0;
+  border-bottom: 3px solid #2691D0;
+}
+
+.p-datatable .p-sortable-column .p-column-title,
+.p-datatable .p-sortable-column .p-sortable-column-icon,
+.p-datatable .p-sortable-column .p-sortable-column-badge {
+  display: flex;
+  align-items: center;
+}
