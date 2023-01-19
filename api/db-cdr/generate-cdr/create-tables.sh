@@ -50,7 +50,6 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
 fi
 
 TABLE_LIST=$(bq ls -n 1000 "all-of-us-ehr-dev:ChenchalDummyCdr" | tail -n +3 | cut -d " " -f 3 )
-echo "Table list: $TABLE_LIST"
 
 SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
 CLUSTERED_TABLES=("cb_search_all_events" "cb_review_survey" "cb_search_person" "cb_review_all_events")
@@ -82,7 +81,6 @@ do
         echo "Keeping existing prep_survey table"
       fi
     else
-      echo "TABLE_LIST = $TABLE_LIST"
       deleteAndCreateTable "$table_name"
     fi
 done
