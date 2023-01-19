@@ -89,7 +89,8 @@ do
       if [[ "$TABLE_LIST" != *"prep_survey"* ]]; then
         deleteAndCreateTable "$table_name"
       else
-        echo "Keeping existing prep_survey table"
+        echo "Keeping existing prep_survey table and updating row count"
+        updateRowCounts "$table_name"
       fi
     else
       deleteAndCreateTable "$table_name"
