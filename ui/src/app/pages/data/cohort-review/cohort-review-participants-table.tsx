@@ -207,6 +207,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
   const [filters, setFilters] = useState(
     JSON.parse(JSON.stringify(initialFilterState.participants))
   );
+  const [focusedColumn, setFocusedColumn] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pageState, setPageState] = useState({
     page: 0,
@@ -476,13 +477,16 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
             className='pi pi-filter'
             style={filtered ? filterIcons.active : filterIcons.default}
             onClick={(e) => {
+              if (e.target instanceof Element) {
+                setFocusedColumn(e.target as HTMLElement);
+                fl.toggle(e);
+              }
               const { name } = fields.find((it) => it.field === column);
               triggerEvent(
                 EVENT_CATEGORY,
                 'Click',
                 `Filter - ${name} - Review Participant List`
               );
-              fl.toggle(e);
               if (column === 'participantId') {
                 ip.focus();
               }
@@ -497,6 +501,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
           }}
           showCloseIcon={true}
           dismissable={true}
+          appendTo={focusedColumn}
         >
           {column === 'participantId' && (
             <div style={styles.textSearch}>
@@ -597,7 +602,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
       const asc = sortField === col.field && sortOrder === 1;
       const desc = sortField === col.field && sortOrder === -1;
       const header = (
-        <React.Fragment>
+        <>
           <span
             onClick={() => columnSort(col.field)}
             style={styles.columnHeader}
@@ -619,7 +624,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
               onClick={() => columnSort(col.field)}
             />
           )}
-        </React.Fragment>
+        </>
       );
       return (
         <Column
