@@ -29,7 +29,7 @@ function deleteAndCreateTable(){
     bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
   fi
   wait
-  updateRowCounts $table_name
+  updateRowCounts "$table_name"
 }
 
 function createTableForRowCounts(){
