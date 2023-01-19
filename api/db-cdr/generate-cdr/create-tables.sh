@@ -58,6 +58,9 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   exit 1
 fi
 
+# now that we can run cdr-indexing build - create a temp table to keep track of newly created/retained tables
+createTableForRowCounts
+
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 )
 
 SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
