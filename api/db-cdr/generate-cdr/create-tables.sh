@@ -1,6 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # #!/bin/bash
+# #!/usr/bin/env bash -> we can use associative arrays
 # This script removes/creates all CDR indices specific tables.
 
 set -e
@@ -84,6 +85,6 @@ do
         echo "Keeping existing prep_survey table"
       fi
     else
-      createBasicTable "$table_name"
+      deleteAndCreateTable "$table_name"
     fi
 done
