@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+# #!/bin/bash
 # This script removes/creates all CDR indices specific tables.
 set -e
 
@@ -29,13 +30,13 @@ function deleteAndCreateTable(){
   wait
   # if number of arguments = 2, create a clustered table
   if [[ $# -eq 2 ]]; then
-      local cluster_fields=$2
-      echo "Creating $table_name clustering_fields $cluster_fields"
-      bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields "$cluster_fields" "$BQ_DATASET.$table_name"
+    local cluster_fields=$2
+    echo "Creating $table_name clustering_fields: $cluster_fields"
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" --time_partitioning_type=DAY --clustering_fields "$cluster_fields" "$BQ_DATASET.$table_name"
   else
-  # create a basic table
-  echo "Creating $table_name"
-  bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
+    # create a basic table
+    echo "Creating $table_name"
+    bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
   fi
   wait
 }
@@ -48,7 +49,8 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   exit 1
 fi
 
-TABLE_LIST=($(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 ))
+TABLE_LIST=$(bq ls -n 1000 "all-of-us-ehr-dev:ChenchalDummyCdr" | tail -n +3 | cut -d " " -f 3 )
+echo "Table list: $TABLE_LIST"
 
 SKIP_TABLES=("cb_data_filter" "cb_person" "survey_module" "domain_card")
 CLUSTERED_TABLES=("cb_search_all_events" "cb_review_survey" "cb_search_person" "cb_review_all_events")
@@ -73,11 +75,14 @@ do
       if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
         deleteAndCreateTable "$table_name"
       fi
-    elif [[ "$table_name" == 'prep_survey' && && "$TABLE_LIST" != *"prep_survey"* ]]; then
-      if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
+    elif [[ "$table_name" == 'prep_survey' ]]; then
+      if [[ "$TABLE_LIST" != *"prep_survey"* ]]; then
         deleteAndCreateTable "$table_name"
+      else
+        echo "Keeping existing prep_survey table"
       fi
     else
+      echo "TABLE_LIST = $TABLE_LIST"
       deleteAndCreateTable "$table_name"
     fi
 done
