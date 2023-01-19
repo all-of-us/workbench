@@ -25,7 +25,6 @@ import {
   setupCustomValidators,
 } from 'app/services/setup';
 
-
 import { AppRoutingComponent } from './app/routing/app-routing';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so

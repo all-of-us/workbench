@@ -64,7 +64,10 @@ const DemographicSurveyPage = fp.flow(
   withRoutingSpinner
 )(DemographicSurvey);
 
-export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
+export const SignedInImpl = (
+  spinnerProps: WithSpinnerOverlayProps,
+  getAccessToken
+) => {
   useEffect(() => spinnerProps.hideSpinner(), []);
 
   const [hideFooter, setHideFooter] = useState(false);
@@ -167,7 +170,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   routeData={{ title: 'Demographic Page' }}
                 />
               ) : (
-                <SignedInRoutes />
+                <SignedInRoutes {...{ getAccessToken }} />
               )}
             </div>
           )}

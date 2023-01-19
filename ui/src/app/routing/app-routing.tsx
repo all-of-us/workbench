@@ -295,7 +295,11 @@ export const AppRoutingComponent: React.FunctionComponent<
                   guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
                 >
                   {!redirectToTOSPage && (
-                    <SignedInPage intermediaryRoute={true} routeData={{}} />
+                    <SignedInPage
+                      intermediaryRoute={true}
+                      routeData={{}}
+                      getAccessToken={currentAccessToken}
+                    />
                   )}
                 </AppRoute>
               </Switch>
