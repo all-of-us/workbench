@@ -22,7 +22,7 @@ function check_prep_survey() {
   echo "Checking prep_survey count"
   query="select row_count from \`$BQ_PROJECT.$BQ_DATASET.prep_create_tables_list\` where table_name = 'prep_survey'"
   prepSurveyCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
-
+  echo "prep_survey row count: $prepSurveyCount"
   if [[ $prepSurveyCount > 0 ]];
   then
     echo "Table prep_survey has row count [$prepSurveyCount]. Skipping creating prep_survey table"
