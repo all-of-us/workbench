@@ -6413,15 +6413,15 @@ definitions:
         description: timestamp for error in ISO 8601 format
 
   CreateAppRequest:
+    type: object
+    required:
+      - appType
+      - kubernetesRuntimeConfig
+      - persistentDiskRequest
     description: Create User App request body
     properties:
       appType:
         "$ref": "#/definitions/AppType"
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is
-          autopaused. If autopause is set to false, this value is disregarded.
-          A value of 0 is equivalent to autopause being turned off.
       kubernetesRuntimeConfig:
         description: kubernetesRuntimeConfig will be returned
         "$ref": "#/definitions/KubernetesRuntimeConfig"

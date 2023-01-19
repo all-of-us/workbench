@@ -52,6 +52,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
+import org.pmiops.workbench.model.KubernetesRuntimeConfig;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -511,7 +513,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
+
     AppType appType = createAppRequest.getAppType();
+    KubernetesRuntimeConfig kubernetesRuntimeConfig = createAppRequest.getKubernetesRuntimeConfig();
+    PersistentDiskRequest persistentDiskRequest = createAppRequest.getPersistentDiskRequest();
 
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
@@ -523,12 +528,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     LeonardoPersistentDiskRequest diskRequest =
         leonardoMapper
-            .toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest())
+            .toLeonardoPersistentDiskRequest(persistentDiskRequest)
             .labels(
                 upsertLeonardoLabel(
-                    createAppRequest.getPersistentDiskRequest().getLabels(),
+                    persistentDiskRequest.getLabels(),
                     LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
-                    appTypeToLabelValue(createAppRequest.getAppType())));
+                    appTypeToLabelValue(appType)));
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
@@ -537,8 +542,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))
         .kubernetesRuntimeConfig(
-            leonardoMapper.toLeonardoKubernetesRuntimeConfig(
-                createAppRequest.getKubernetesRuntimeConfig()))
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);

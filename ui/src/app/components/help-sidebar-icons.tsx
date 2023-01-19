@@ -122,18 +122,11 @@ const displayRuntimeStatusIcon = (
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
-  const containerStyle: CSSProperties = showAppsPanel
-    ? {
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        background: colors.white,
-      }
-    : {
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-      };
+  const containerStyle: CSSProperties = {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  };
   const iconStyle: CSSProperties = showAppsPanel
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
