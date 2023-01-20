@@ -9,38 +9,26 @@ import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
-const leoUrlRoot = environment.leoApiUrl;
-
 const ajax = (getAccessToken) => (signal) => {
-  const fetchOpts = () => ({
-    signal,
-    headers: { authorization: 'bearer ' + getAccessToken() },
-  });
+  const jsonLeoFetch = (path) =>
+    fetch(environment.leoApiUrl + path, {
+      signal,
+      headers: { authorization: 'bearer ' + getAccessToken() },
+    }).then((r) => r.json());
   return {
     Workspaces: {
       list: () => workspacesApi().getWorkspaces(),
     },
     Runtimes: {
-      listV2: () =>
-        fetch(
-          leoUrlRoot + '/api/v2/runtimes?includeDeleted=false',
-          fetchOpts()
-        ).then((r) => r.json()),
+      listV2: () => jsonLeoFetch('/api/v2/runtimes?includeDeleted=false'),
     },
     Apps: {
       listWithoutProject: () =>
-        fetch(
-          leoUrlRoot + '/api/google/v1/apps?includeDeleted=false',
-          fetchOpts()
-        ).then((r) => r.json()),
+        jsonLeoFetch('/api/google/v1/apps?includeDeleted=false'),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
-      list: () =>
-        fetch(
-          leoUrlRoot + '/api/google/v1/disks?includeDeleted=false',
-          fetchOpts()
-        ).then((r) => r.json()),
+      list: () => jsonLeoFetch('/api/google/v1/disks?includeDeleted=false'),
     },
   };
 };
