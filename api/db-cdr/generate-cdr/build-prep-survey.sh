@@ -168,8 +168,7 @@ function increment_answer_parent_id() {
 # otherwise this will corrupt the output of the first call to find_info()
 simple_select
 
-# check and exit if prep_survey table exists
-# else continue
+# check and exit if prep_survey table exists else continue
 check_prep_survey
 
 if [[ "$FILE_NAME" = "socialdeterminantsofhea_staged.csv" ]]; then
