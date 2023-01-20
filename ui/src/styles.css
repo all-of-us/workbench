@@ -455,6 +455,12 @@ body .p-menu .p-menuitem-link {
   padding: 0.571em 0.7em;
 }
 
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: transparent;
+  color: #2691d0;
+  border-bottom: 3px solid #2691d0;
+}
+
 .p-tabview .p-tabview-nav li .p-tabview-nav-link,
 .p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
   background-color: transparent;
@@ -462,12 +468,6 @@ body .p-menu .p-menuitem-link {
   border: none;
   display: inline-block;
   padding: 0;
-}
-
-.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  background-color: transparent;
-  color: #2691d0;
-  border-bottom: 3px solid #2691d0;
 }
 
 .p-datatable .p-sortable-column .p-column-title,
