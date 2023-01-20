@@ -21,7 +21,7 @@ OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'ech
 function check_prep_survey() {
   echo "Checking prep_survey count"
   query="select row_count from \`$BQ_PROJECT.$BQ_DATASET.prep_create_tables_list\` where table_name = 'prep_survey'"
-  prepSurveyCount=$(bq --quiet --project_id="all-of-us-ehr-dev" query --nouse_legacy_sql "$query"| tr -dc '0-9')
+  prepSurveyCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
   if [[ $prepSurveyCount > 0 ]];
   then
