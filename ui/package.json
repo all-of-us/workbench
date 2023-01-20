@@ -98,7 +98,7 @@
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "lolex": "^3.0.0",
-    "prettier": "^2.8.2",
+    "prettier": "^2.8.3",
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
     "url": "^0.11.0"
