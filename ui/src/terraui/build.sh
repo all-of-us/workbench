@@ -4,7 +4,7 @@
 set -euo pipefail
 set -v
 
-TERRA_UI_GIT_HASH=7ef0dbd38877b5a63c68a3f63c6b52ac8af5121e
+TERRA_UI_GIT_HASH=0cfd092effbc6427ee15c8c1f05e48b03d168532
 
 WD="$(dirname "$0")"
 cd "$WD"
