@@ -73,6 +73,11 @@ const industrySpecificRoleOption =
     (x) => x.value === InstitutionalRole.SENIORRESEARCHER
   );
 
+const eventDefaults = {
+  stopPropagation: () => undefined,
+  preventDefault: () => undefined,
+};
+
 beforeEach(() => {
   serverConfigStore.set({ config: defaultServerConfig });
   registerApiClient(ConfigApi, new ConfigApiStub());
@@ -130,11 +135,10 @@ it('should reset role value & options when institution is selected', async () =>
   // Simulate choosing an institution from the dropdown.
   const institutionDropdown = getInstitutionDropdown(wrapper);
   institutionDropdown.props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   await waitOneTickAndUpdate(wrapper);
 
@@ -144,21 +148,19 @@ it('should reset role value & options when institution is selected', async () =>
 
   // Simulate selecting a role value for Broad.
   roleDropdown.props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: academicSpecificRoleOption.value,
     target: { name: '', id: '', value: academicSpecificRoleOption.value },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
 
   // Simulate switching to Verily.
   institutionDropdown.props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'Verily',
     target: { name: '', id: '', value: 'Verily' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
 
   // Role value should be cleared when institution changes.
@@ -189,11 +191,10 @@ it('should validate email affiliation when inst and email address are specified'
 
   // Choose 'Broad' and enter an email address.
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@asdf.com' },
@@ -226,11 +227,10 @@ it('should validate email affiliation when inst and email domain are specified',
 
   // Choose 'VUMC' and enter an email address.
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@asdf.com' },
@@ -262,11 +262,10 @@ it('should display validation icon only after email verification', async () => {
 
   // Choose 'VUMC' and enter an email address.
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@wrongDomain.com' },
@@ -297,11 +296,10 @@ it('should clear email validation when institution is changed', async () => {
   await waitOneTickAndUpdate(wrapper);
 
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@vumc.org' },
@@ -310,11 +308,10 @@ it('should clear email validation when institution is changed', async () => {
   getEmailInput(wrapper).simulate('blur');
   await waitOneTickAndUpdate(wrapper);
   getRoleDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: InstitutionalRole.EARLYCAREER,
     target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
 
   // At this point, the form should be ready to submit.
@@ -322,18 +319,16 @@ it('should clear email validation when institution is changed', async () => {
 
   // ... Mimic changing the institution & role, but leaving email as-is.
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'Verily',
     target: { name: '', id: '', value: 'Verily' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getRoleDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: InstitutionalRole.PREDOCTORAL,
     target: { name: '', id: '', value: InstitutionalRole.PREDOCTORAL },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
 
   // The form should be blocked now due to lack of email verification.
@@ -356,18 +351,16 @@ it('should trigger email check when email is filled in before choosing instituti
   await waitOneTickAndUpdate(wrapper);
 
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'Broad',
     target: { name: '', id: '', value: 'Broad' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getRoleDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: InstitutionalRole.EARLYCAREER,
     target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   await waitOneTickAndUpdate(wrapper);
 
@@ -385,22 +378,20 @@ it('should call callback with correct form data', async () => {
 
   // Fill in all fields with reasonable data.
   getInstitutionDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: 'VUMC',
     target: { name: '', id: '', value: 'VUMC' },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   getEmailInput(wrapper).simulate('change', {
     target: { value: 'asdf@vumc.org' },
   });
   getEmailInput(wrapper).simulate('blur');
   getRoleDropdown(wrapper).props.onChange({
+    ...eventDefaults,
     originalEvent: undefined,
     value: InstitutionalRole.UNDERGRADUATE,
     target: { name: '', id: '', value: InstitutionalRole.UNDERGRADUATE },
-    stopPropagation: () => {},
-    preventDefault: () => {},
   });
   // Await one tick for the APi response to update state and allow form submission.
   await waitOneTickAndUpdate(wrapper);
