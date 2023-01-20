@@ -29,7 +29,6 @@ function deleteAndCreateTable(){
     bq --quiet --project_id="$BQ_PROJECT" mk --schema="$schema_path/$json_name" "$BQ_DATASET.$table_name"
   fi
   wait
-  updateRowCounts "$table_name"
 }
 
 function createTableForRowCounts(){
@@ -90,8 +89,8 @@ do
         deleteAndCreateTable "$table_name"
       else
         echo "Keeping existing prep_survey table and updating row count"
-        updateRowCounts "$table_name"
       fi
+      updateRowCounts "$table_name"
     else
       deleteAndCreateTable "$table_name"
     fi
