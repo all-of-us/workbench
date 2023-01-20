@@ -83,8 +83,6 @@ public class MailServiceImpl implements MailService {
       "emails/rt_access_threshold/content.html";
   private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
       "emails/setup_gcp_billing_account/content.html";
-  private static final String TERRA_TOS_REMINDER_RESOURCE =
-      "emails/terra_tos_reminder/content.html";
   private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
   private static final String WELCOME_RESOURCE = "emails/welcome/content.html";
   private static final String WORKSPACE_ADMIN_LOCKING_RESOURCE =
@@ -387,16 +385,6 @@ public class MailServiceImpl implements MailService {
             workspaceAdminLockedSubstitutionMap(workspace, lockingReason)));
   }
 
-  @Override
-  public void sendTerraTosReminderEmail(DbUser user) throws MessagingException {
-    sendWithRetries(
-        ImmutableList.of(user.getContactEmail()),
-        Collections.emptyList(),
-        "The All of Us Researcher Workbench Terms of Use have been updated",
-        String.format("Terra ToS Reminder sent to user %s", user.getUsername()),
-        buildHtml(TERRA_TOS_REMINDER_RESOURCE, terraTosReminderSubstitutionMap(user)));
-  }
-
   private void sendEgressRemediationEmailWithContent(
       DbUser dbUser, EgressRemediationAction action, String remediationEmail)
       throws MessagingException {
@@ -561,17 +549,6 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.WORKSPACE_NAMESPACE, workspace.getWorkspaceNamespace())
         .put(EmailSubstitutionField.LOCKING_REASON, lockingReason)
         .put(EmailSubstitutionField.RAB_SUPPORT_EMAIL, RAB_SUPPORT_EMAIL)
-        .build();
-  }
-
-  private Map<EmailSubstitutionField, String> terraTosReminderSubstitutionMap(DbUser user) {
-    return ImmutableMap.<EmailSubstitutionField, String>builder()
-        .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
-        .put(EmailSubstitutionField.FIRST_NAME, user.getGivenName())
-        .put(EmailSubstitutionField.LAST_NAME, user.getFamilyName())
-        .put(EmailSubstitutionField.USERNAME, user.getUsername())
-        .put(EmailSubstitutionField.TOS_HREF, getTosUrlAsHref())
-        .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().server.uiBaseUrl)
         .build();
   }
 
@@ -770,12 +747,6 @@ public class MailServiceImpl implements MailService {
   private String getUiUrlAsHref() {
     final String url = workbenchConfigProvider.get().server.uiBaseUrl;
     return href(url, url);
-  }
-
-  private String getTosUrlAsHref() {
-    final String url =
-        String.format("%s/aou-tos.html", workbenchConfigProvider.get().server.uiBaseUrl);
-    return href(url, "All Of Us Researcher Workbench General Terms of Use");
   }
 
   private String getSupportHubUrlAsHref() {
