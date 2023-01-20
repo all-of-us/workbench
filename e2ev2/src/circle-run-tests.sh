@@ -31,7 +31,8 @@ set +e
 export FAILED_TESTS_LOG=failed-tests.txt
 # This should do the right thing. If $FAILED_TESTS is empty, nothing is specified, so Jest runs
 # all tests.
-yarn test $FAILED_TESTS
+yarn test $FAILED_TESTS \
+  --reporters=jest-silent-reporter --reporters=./src/failure-reporter.js
 TESTS_EXIT_CODE=$?
 set -e
 
