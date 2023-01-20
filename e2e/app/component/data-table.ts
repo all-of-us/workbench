@@ -20,20 +20,14 @@ export default class DataTable extends Table {
   }
 
   getBodyTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-body-table"]`);
+    return new Table(
+      this.page,
+      `${this.getXpath()}//table[contains(concat(" ", normalize-space(@class), " "), " p-datatable-table ")]`
+    );
   }
 
   getFooterTable(): Table {
     return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`);
-  }
-
-  /**
-   * Finds table column names. Returns in array of string.
-   * @returns {Array<string>}
-   */
-  async getColumnNames(): Promise<string[]> {
-    const headerTable = this.getHeaderTable();
-    return headerTable.getColumnNames();
   }
 
   async getNumRecords(): Promise<number[]> {

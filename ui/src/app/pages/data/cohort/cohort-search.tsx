@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 
 import {
   CriteriaType,
@@ -28,8 +28,8 @@ import {
 } from 'app/pages/data/cohort/utils';
 import {
   CriteriaSearch,
-  growlCSS,
   LOCAL_STORAGE_KEY_COHORT_CONTEXT,
+  toastCSS,
 } from 'app/pages/data/criteria-search';
 import colors, { addOpacity } from 'app/styles/colors';
 import { reactStyles, withCurrentCohortSearchContext } from 'app/utils';
@@ -67,7 +67,7 @@ const styles = reactStyles({
     position: 'absolute',
     right: '4.5rem',
   },
-  growl: {
+  toast: {
     position: 'absolute',
     right: '0',
     top: 0,
@@ -161,7 +161,7 @@ interface Props extends RouteComponentProps<MatchParams> {
 }
 
 interface State {
-  growlVisible: boolean;
+  toastVisible: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
   showUnsavedModal: boolean;
@@ -173,13 +173,13 @@ export const CohortSearch = fp.flow(
   withRouter
 )(
   class extends React.Component<Props, State> {
-    growl: any;
-    growlTimer: NodeJS.Timer;
+    toast: any;
+    toastTimer: NodeJS.Timer;
     subscription: Subscription;
     constructor(props: Props) {
       super(props);
       this.state = {
-        growlVisible: false,
+        toastVisible: false,
         selectedIds: [],
         selections: [],
         showUnsavedModal: false,
@@ -318,21 +318,21 @@ export const CohortSearch = fp.flow(
         JSON.stringify(localStorageContext)
       );
       this.setState({ selections, selectedIds });
-      this.growl.show({
+      this.toast.show({
         severity: 'success',
         detail: 'Criteria Added',
         closable: false,
         life: 2000,
       });
-      if (!!this.growlTimer) {
-        clearTimeout(this.growlTimer);
+      if (!!this.toastTimer) {
+        clearTimeout(this.toastTimer);
       }
-      // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
-      this.growlTimer = global.setTimeout(
-        () => this.setState({ growlVisible: false }),
+      // This is to set style display: 'none' on the toast so it doesn't block the nav icons in the sidebar
+      this.toastTimer = global.setTimeout(
+        () => this.setState({ toastVisible: false }),
         2500
       );
-      this.setState({ growlVisible: true });
+      this.setState({ toastVisible: true });
     };
 
     selectDeceased() {
@@ -448,18 +448,18 @@ export const CohortSearch = fp.flow(
         cohortContext,
         cohortContext: { domain, type },
       } = this.props;
-      const { growlVisible, selectedIds, selections, showUnsavedModal } =
+      const { toastVisible, selectedIds, selections, showUnsavedModal } =
         this.state;
       return (
         !!cohortContext && (
           <FlexRowWrap style={styles.searchContainer}>
-            <style>{growlCSS}</style>
-            <Growl
-              ref={(el) => (this.growl = el)}
+            <style>{toastCSS}</style>
+            <Toast
+              ref={(el) => (this.toast = el)}
               style={
-                !growlVisible
-                  ? { ...styles.growl, display: 'none' }
-                  : styles.growl
+                !toastVisible
+                  ? { ...styles.toast, display: 'none' }
+                  : styles.toast
               }
             />
             <div id='cohort-search-container' style={styles.searchContent}>

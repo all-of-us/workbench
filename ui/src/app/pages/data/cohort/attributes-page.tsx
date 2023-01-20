@@ -242,6 +242,7 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
       >
         <Button
           type='primary'
+          id='attributes-add-btn'
           data-test-id='attributes-add-btn'
           disabled={disableAdd}
           style={styles.addButton}
@@ -978,17 +979,20 @@ export const AttributesPage = fp.flow(
                     <div style={styles.orCircle}>OR</div>
                   )}
                   <Dropdown
+                    id={`numerical-dropdown-${a}`}
                     data-test-id={`numerical-dropdown-${a}`}
                     style={{ marginBottom: '0.75rem', width: '100%' }}
                     value={attr.operator}
                     options={options}
                     placeholder='Select Operator'
                     onChange={(e) => this.selectChange(a, e.value)}
+                    appendTo='self'
                   />
                   <FlexRowWrap>
                     {![null, 'ANY'].includes(attr.operator) && (
                       <div style={{ width: '33%' }}>
                         <NumberInput
+                          id={`numerical-input-${a}-0`}
                           data-test-id={`numerical-input-${a}-0`}
                           style={{
                             padding: '0 0.375rem',
@@ -1009,6 +1013,7 @@ export const AttributesPage = fp.flow(
                         </div>
                         <div style={{ width: '33%' }}>
                           <NumberInput
+                            id={`numerical-input-${a}-1`}
                             data-test-id={`numerical-input-${a}-1`}
                             style={{
                               padding: '0 0.375rem',

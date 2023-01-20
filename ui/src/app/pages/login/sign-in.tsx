@@ -486,7 +486,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             >
               <Button
                 aria-label='Submit'
-                disabled={!!errors || !this.state.captcha || loading}
+                disabled={
+                  !!errors ||
+                  (environment.enableCaptcha && !this.state.captcha) ||
+                  loading
+                }
                 type='primary'
                 data-test-id='submit-button'
                 onClick={this.onSubmit}

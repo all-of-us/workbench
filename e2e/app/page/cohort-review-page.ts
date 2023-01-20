@@ -42,10 +42,10 @@ export default class CohortReviewPage extends AuthenticatedPage {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    const textContent = await getPropValue<string>(cell, 'textContent');
+    const innerText = await getPropValue<string>(cell, 'innerText');
     await cell.click();
     await waitWhileLoading(this.page);
-    return textContent;
+    return innerText;
   }
   /**
    * Get the participant ID in specified row

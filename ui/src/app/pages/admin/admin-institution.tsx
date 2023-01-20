@@ -164,6 +164,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
               data-test-id='institution-datatable'
               value={institutions}
               paginator={true}
+              breakpoint='0px'
               rows={500}
               scrollable={true}
               frozenWidth='10.5rem'

@@ -91,13 +91,9 @@ describe('AttributesPageV2', () => {
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('[data-test-id="numerical-dropdown-0"]').length).toBe(
-      1
-    );
-    expect(wrapper.find('[data-test-id="numerical-dropdown-1"]').length).toBe(
-      0
-    );
-    expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(0);
+    expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
+    expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(0);
+    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
     expect(
       wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
         .disabled
@@ -114,16 +110,11 @@ describe('AttributesPageV2', () => {
     expect(
       mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId
     ).toHaveBeenCalledTimes(0);
-    expect(wrapper.find('[data-test-id="numerical-dropdown-0"]').length).toBe(
-      1
-    );
-    expect(wrapper.find('[data-test-id="numerical-dropdown-1"]').length).toBe(
-      1
-    );
+    expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
+    expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(1);
     expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(0);
     expect(
-      wrapper.find('[data-test-id="attributes-add-btn"]').first().props()
-        .disabled
+      wrapper.find('div[id="attributes-add-btn"]').first().props().disabled
     ).toBeFalsy();
   });
 
@@ -210,6 +201,8 @@ describe('AttributesPageV2', () => {
       originalEvent: undefined,
       value: Operator.EQUAL,
       target: { id: '', name: '', value: Operator.EQUAL },
+      stopPropagation: () => {},
+      preventDefault: () => {},
     });
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(2);

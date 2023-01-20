@@ -1500,6 +1500,7 @@ export const DatasetPage = fp.flow(
         <DataTable
           key={selectedPreviewDomain}
           scrollable={true}
+          breakpoint='0px'
           style={{ width: '100%' }}
           value={getDataTableValue(filteredPreviewData.values)}
         >

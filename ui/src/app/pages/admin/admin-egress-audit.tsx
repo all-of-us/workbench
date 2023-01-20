@@ -156,6 +156,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
         </DetailRow>
         <DetailRow label='Status'>
           <Dropdown
+            id='egress-event-status-dropdown'
             value={pendingUpdateEvent?.status ?? status}
             options={mutableEgressEventStatuses}
             onChange={(e) => {
@@ -205,6 +206,7 @@ export const AdminEgressAudit = (props: WithSpinnerOverlayProps) => {
             <TabPanel key={group.name} header={`${group.name} (${logCount})`}>
               <DataTable
                 paginator
+                breakpoint='0px'
                 rows={50}
                 rowsPerPageOptions={[50, 100, 500]}
                 value={group.entries}
