@@ -7,6 +7,7 @@
  */
 
 import {
+  AppsApi,
   BaseAPI,
   Configuration as FetchConfiguration,
   JupyterApi,
@@ -49,9 +50,10 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: leoRuntimesApi().listRuntimes();
+export const jupyterApi = bindCtor(JupyterApi);
+export const leoAppsApi = bindCtor(AppsApi);
 export const leoRuntimesApi = bindCtor(RuntimesApi);
 export const proxyApi = bindCtor(ProxyApi);
-export const jupyterApi = bindCtor(JupyterApi);
 
 export function registerApiClient<T extends BaseAPI>(
   ctor: new () => T,
