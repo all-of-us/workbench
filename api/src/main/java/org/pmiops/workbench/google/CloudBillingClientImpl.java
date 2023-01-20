@@ -2,6 +2,7 @@ package org.pmiops.workbench.google;
 
 import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.io.IOException;
@@ -32,9 +33,18 @@ public class CloudBillingClientImpl implements CloudBillingClient {
     for (Instant deadline = Instant.now().plusSeconds(300);
         Instant.now().isBefore(deadline);
         Thread.sleep(pollInterval.toMillis())) {
-      ProjectBillingInfo projectBillingInfo = getProjectBillingInfo(projectId);
-      if (projectBillingInfo.getBillingAccountName().equals(billingAccountName)) {
-        return projectBillingInfo;
+      ProjectBillingInfo projectBillingInfo = null;
+      try {
+        projectBillingInfo = getProjectBillingInfo(projectId);
+        if (projectBillingInfo.getBillingAccountName().equals(billingAccountName)) {
+          return projectBillingInfo;
+        }
+      } catch (GoogleJsonResponseException e) {
+        if (e.getStatusCode() != 403) {
+          // Google may return 403 due to IAM delay, keep retrying on 403, and throw all other
+          // exceptions.
+          throw e;
+        }
       }
     }
     throw new InterruptedException(

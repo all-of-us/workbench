@@ -20,11 +20,6 @@ public abstract class ResponseCodeRetryPolicy extends SimpleRetryPolicy {
     this.serviceName = serviceName;
   }
 
-  public ResponseCodeRetryPolicy(String serviceName, int maxAttempt) {
-    super(maxAttempt);
-    this.serviceName = serviceName;
-  }
-
   @Override
   public boolean canRetry(RetryContext context) {
     // canRetry is (counter-intuitively) invoked before the first attempt;
