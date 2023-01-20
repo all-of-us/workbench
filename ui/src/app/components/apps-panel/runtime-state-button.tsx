@@ -13,18 +13,37 @@ import {
 
 import { AppsPanelButton } from './apps-panel-button';
 
-export const RuntimeStateButton = (props: { workspace: Workspace }) => {
-  const {
-    workspace: { namespace, googleProject },
-  } = props;
+type EnvironmentState =
+  | 'UNINITIALIZED'
+  | 'running'
+  | 'pausing'
+  | 'paused'
+  | 'resuming';
 
-  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+const toEnvState = (status: RuntimeStatus): EnvironmentState =>
+  cond(
+    [status === RuntimeStatus.Running, () => 'running'],
+    [status === RuntimeStatus.Stopping, () => 'pausing'],
+    [status === RuntimeStatus.Stopped, () => 'paused'],
+    [status === RuntimeStatus.Starting, () => 'resuming'],
+    () => 'UNINITIALIZED'
+  );
 
-  // transition states, so we don't have to wait for polling
+interface Props {
+  externalStatus: RuntimeStatus;
+  onPause: Function;
+  onResume: Function;
+}
+const StateTransitionButton = (props: Props) => {
+  const { externalStatus, onPause, onResume } = props;
+
+  const [envState, setEnvState] = useState<EnvironmentState>('UNINITIALIZED');
+
+  // immediate transition states, instead of waiting for external updates
   const [pausing, setPausing] = useState(false);
   const [resuming, setResuming] = useState(false);
 
-  // when polling updates the status value, clear our transition states
+  // when the external state is updated, also clear our transition states
   useEffect(() => {
     if (pausing) {
       setPausing(false);
@@ -32,48 +51,54 @@ export const RuntimeStateButton = (props: { workspace: Workspace }) => {
     if (resuming) {
       setResuming(false);
     }
-  }, [status]);
+
+    setEnvState(toEnvState(externalStatus));
+  }, [externalStatus]);
 
   // transition from RUNNING to STOPPED, or STOPPED to RUNNING
-  const toggleRuntimeStatus = () =>
+  const onClick = () =>
     switchCase(
-      status,
+      envState,
       [
-        RuntimeStatus.Running,
+        'running',
         () => {
           setPausing(true);
-          setRuntimeStatus(RuntimeStatusRequest.Stop);
+          onPause();
         },
       ],
       [
-        RuntimeStatus.Stopped,
+        'paused',
         () => {
           setResuming(true);
-          setRuntimeStatus(RuntimeStatusRequest.Start);
+          onResume();
         },
       ]
     );
 
-  const [icon, buttonText, enabled] = cond(
-    [
-      pausing || status === RuntimeStatus.Stopping,
-      () => [faSyncAlt, 'Pausing', false],
-    ],
-    [
-      resuming || status === RuntimeStatus.Starting,
-      () => [faSyncAlt, 'Resuming', false],
-    ],
-    [status === RuntimeStatus.Stopped, () => [faPlay, 'Resume', true]],
-    [status === RuntimeStatus.Running, () => [faPause, 'Pause', true]],
+  const [icon, buttonText, disabled] = cond(
+    [pausing || envState === 'pausing', () => [faSyncAlt, 'Pausing', true]],
+    [resuming || envState === 'resuming', () => [faSyncAlt, 'Resuming', true]],
+    [envState === 'paused', () => [faPlay, 'Resume', false]],
+    [envState === 'running', () => [faPause, 'Pause', false]],
     // choose a (disabled) default to show for other states
-    () => [faPause, 'Pause', false]
+    () => [faPause, 'Pause', true]
   );
 
+  return <AppsPanelButton {...{ icon, buttonText, disabled, onClick }} />;
+};
+
+export const RuntimeStateButton = (props: { workspace: Workspace }) => {
+  const {
+    workspace: { namespace, googleProject },
+  } = props;
+
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+
   return (
-    <AppsPanelButton
-      {...{ icon, buttonText }}
-      disabled={!enabled}
-      onClick={toggleRuntimeStatus}
+    <StateTransitionButton
+      externalStatus={status}
+      onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+      onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
     />
   );
 };
