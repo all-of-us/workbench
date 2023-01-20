@@ -164,13 +164,13 @@ function increment_answer_parent_id() {
   ANSWER_PARENT_ID=$(($1))
 }
 
-# run this query to initializing our .bigqueryrc configuration file
-# otherwise this will corrupt the output of the first call to find_info()
-simple_select
-
 # check and exit if prep_survey table exists
 # else continue
 check_prep_survey
+
+# run this query to initializing our .bigqueryrc configuration file
+# otherwise this will corrupt the output of the first call to find_info()
+simple_select
 
 if [[ "$FILE_NAME" = "socialdeterminantsofhea_staged.csv" ]]; then
   #  Getting count for SDOH Survey
