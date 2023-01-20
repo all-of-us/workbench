@@ -18,11 +18,12 @@ import org.springframework.stereotype.Service;
 public class GoogleRetryHandler extends RetryHandler<IOException> {
 
   private static final Logger logger = Logger.getLogger(GoogleRetryHandler.class.getName());
+  private static final Integer MAX_ATTEMPTS = 20;
 
   private static class GoogleRetryPolicy extends ResponseCodeRetryPolicy {
 
     public GoogleRetryPolicy() {
-      super("Google API");
+      super("Google API", MAX_ATTEMPTS);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class CloudBillingClientImpl implements CloudBillingClient {
   public ProjectBillingInfo pollUntilBillingAccountLinked(
       String projectId, String billingAccountName) throws IOException, InterruptedException {
     Duration pollInterval = Duration.ofSeconds(2);
-    for (Instant deadline = Instant.now().plusSeconds(40);
+    for (Instant deadline = Instant.now().plusSeconds(120);
         Instant.now().isBefore(deadline);
         Thread.sleep(pollInterval.toMillis())) {
       ProjectBillingInfo projectBillingInfo = getProjectBillingInfo(projectId);
