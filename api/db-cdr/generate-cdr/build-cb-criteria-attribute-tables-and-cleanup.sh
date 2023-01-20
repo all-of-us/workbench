@@ -417,3 +417,34 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
    WHERE name LIKE '%…%') cr2
  WHERE cr1.id = cr2.id"
+
+################################################
+# FIX PFHH ANSWERS
+################################################
+echo "Getting id of PFHH survey"
+query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+where concept_id = 1740639"
+pfhhId=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+echo "Updating PFHH survey answer names"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, SUBSTR(name, STRPOS(name, '- ') + 2) as name
+     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    WHERE name LIKE '%-%'
+      AND subtype = 'ANSWER'
+      AND path LIKE '$pfhhId%') cr2
+ WHERE cr1.id = cr2.id"
+
+echo "Updating PFHH deprecated Kidney Condition question 836838"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, LEFT(code, STRPOS(code, 'KidneyCondition_KidneyDisease') - 1) AS name
+     FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    WHERE concept_id = 836838
+      AND subtype = 'ANSWER') cr2
+ WHERE cr1.id = cr2.id"
