@@ -11,9 +11,12 @@ public abstract class ResponseCodeRetryPolicy extends SimpleRetryPolicy {
 
   private static final Logger logger = Logger.getLogger(ResponseCodeRetryPolicy.class.getName());
 
+  private static final Integer DEFAULT_MAX_ATTEMPTS = 6;
+
   private final String serviceName;
 
   public ResponseCodeRetryPolicy(String serviceName) {
+    super(DEFAULT_MAX_ATTEMPTS);
     this.serviceName = serviceName;
   }
 
