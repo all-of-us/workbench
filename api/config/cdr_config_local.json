@@ -139,6 +139,14 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "wgsVdsPath": "wgs/vds",
+      "wgsExomeNonSplitHailPath": "wgs/exome/non-split-hail.mt",
+      "wgsExomeSplitHailPath": "wgs/exome/split-hail.mt",
+      "wgsExomeVcfPath": "wgs/exome/vcf",
+      "wgsCommonVariantsNonSplitHailPath": "wgs/exome/non-split-hail.mt",
+      "wgsCommonVariantsSplitHailPath": "wgs/exome/split-hail.mt",
+      "wgsCommonVariantsVcfPath": "wgs/exome/vcf",
+      "longReadsStoragePath": "longreads",
       "accessTier": "controlled"
     },
     {

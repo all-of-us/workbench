@@ -41,6 +41,15 @@ public class DbCdrVersion {
   private String microarrayVcfSingleSampleStoragePath;
   private String microarrayVcfManifestPath;
   private String microarrayIdatManifestPath;
+  // 2023Q1 CDR Release
+  private String wgsVdsPath;
+  private String wgsExomeNonSplitHailPath;
+  private String wgsExomeSplitHailPath;
+  private String wgsExomeVcfPath;
+  private String wgsCommonVariantsNonSplitHailPath;
+  private String wgsCommonVariantsSplitHailPath;
+  private String wgsCommonVariantsVcfPath;
+  private String longReadsStoragePath;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -314,6 +323,87 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "wgs_vds_path")
+  public String getWgsVdsPath() {
+    return wgsVdsPath;
+  }
+
+  public DbCdrVersion setWgsVdsPath(String wgsVdsPath) {
+    this.wgsVdsPath = wgsVdsPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_non_split_hail_path")
+  public String getWgsExomeNonSplitHailPath() {
+    return wgsExomeNonSplitHailPath;
+  }
+
+  public DbCdrVersion setWgsExomeNonSplitHailPath(String wgsExomeNonSplitHailPath) {
+    this.wgsExomeNonSplitHailPath = wgsExomeNonSplitHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_split_hail_path")
+  public String getWgsExomeSplitHailPath() {
+    return wgsExomeSplitHailPath;
+  }
+
+  public DbCdrVersion setWgsExomeSplitHailPath(String wgsExomeSplitHailPath) {
+    this.wgsExomeSplitHailPath = wgsExomeSplitHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_vcf_path")
+  public String getWgsExomeVcfPath() {
+    return wgsExomeVcfPath;
+  }
+
+  public DbCdrVersion setWgsExomeVcfPath(String wgsExomeVcfPath) {
+    this.wgsExomeVcfPath = wgsExomeVcfPath;
+    return this;
+  }
+
+  @Column(name = "wgs_cv_non_split_hail_path")
+  public String getWgsCommonVariantsNonSplitHailPath() {
+    return wgsCommonVariantsNonSplitHailPath;
+  }
+
+  public DbCdrVersion setWgsCommonVariantsNonSplitHailPath(
+      String wgsCommonVariantsNonSplitHailPath) {
+    this.wgsCommonVariantsNonSplitHailPath = wgsCommonVariantsNonSplitHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_cv_split_hail_path")
+  public String getWgsCommonVariantsSplitHailPath() {
+    return wgsCommonVariantsSplitHailPath;
+  }
+
+  public DbCdrVersion setWgsCommonVariantsSplitHailPath(String wgsCommonVariantsSplitHailPath) {
+    this.wgsCommonVariantsSplitHailPath = wgsCommonVariantsSplitHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_cv_vcf_path")
+  public String getWgsCommonVariantsVcfPath() {
+    return wgsCommonVariantsVcfPath;
+  }
+
+  public DbCdrVersion setWgsCommonVariantsVcfPath(String wgsCommonVariantsVcfPath) {
+    this.wgsCommonVariantsVcfPath = wgsCommonVariantsVcfPath;
+    return this;
+  }
+
+  @Column(name = "long_reads_storage_path")
+  public String getLongReadsStoragePath() {
+    return longReadsStoragePath;
+  }
+
+  public DbCdrVersion setLongReadsStoragePath(String longReadsStoragePath) {
+    this.longReadsStoragePath = longReadsStoragePath;
+    return this;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -341,7 +431,8 @@ public class DbCdrVersion {
         microarrayHailStoragePath,
         microarrayVcfSingleSampleStoragePath,
         microarrayVcfManifestPath,
-        microarrayIdatManifestPath);
+        microarrayIdatManifestPath,
+        wgsVdsPath);
   }
 
   @Override
@@ -378,6 +469,7 @@ public class DbCdrVersion {
         && Objects.equals(
             microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath)
         && Objects.equals(microarrayVcfManifestPath, that.microarrayVcfManifestPath)
-        && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath);
+        && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath)
+        && Objects.equals(wgsVdsPath, that.wgsVdsPath);
   }
 }

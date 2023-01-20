@@ -33,4 +33,12 @@ public class CdrVersionVO {
   public String microarrayVcfSingleSampleStoragePath;
   public String microarrayVcfManifestPath;
   public String microarrayIdatManifestPath;
+  public String wgsVdsPath;
+  public String wgsExomeNonSplitHailPath;
+  public String wgsExomeSplitHailPath;
+  public String wgsExomeVcfPath;
+  public String wgsCommonVariantsNonSplitHailPath;
+  public String wgsCommonVariantsSplitHailPath;
+  public String wgsCommonVariantsVcfPath;
+  public String longReadsStoragePath;
 }
