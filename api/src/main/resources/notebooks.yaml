@@ -208,14 +208,12 @@ paths:
           name: googleProject
           description: googleProject
           required: true
-          schema:
-            type: string
+          type: string
         - in: path
           name: appName
           description: appName
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "202":
           description: App stop request accepted
@@ -251,14 +249,12 @@ paths:
           name: googleProject
           description: googleProject
           required: true
-          schema:
-            type: string
+          type: string
         - in: path
           name: appName
           description: appName
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "202":
           description: App start request accepted
