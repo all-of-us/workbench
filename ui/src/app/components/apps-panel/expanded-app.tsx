@@ -17,14 +17,18 @@ import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { isActionable } from 'app/utils/runtime-utils';
+import {
+  isActionable,
+  RuntimeStatusRequest,
+  useRuntimeStatus,
+} from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './app-logo';
 import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
+import { PauseResumeButton } from './pause-resume-button';
 import { RuntimeCost } from './runtime-cost';
-import { RuntimeStateButton } from './runtime-state-button';
 import {
   canCreateApp,
   canDeleteApp,
@@ -65,6 +69,22 @@ const SettingsButton = (props: { onClick: Function; disabled?: boolean }) => {
   );
 };
 
+const PauseRuntimeButton = (props: { workspace: Workspace }) => {
+  const {
+    workspace: { namespace, googleProject },
+  } = props;
+
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+
+  return (
+    <PauseResumeButton
+      externalStatus={status}
+      onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+      onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+    />
+  );
+};
+
 const JupyterButtonRow = (props: {
   workspace: Workspace;
   onClickRuntimeConf: Function;
@@ -73,9 +93,28 @@ const JupyterButtonRow = (props: {
   return (
     <FlexRow>
       <SettingsButton onClick={onClickRuntimeConf} />
-      <RuntimeStateButton {...{ workspace }} />
+      <PauseRuntimeButton {...{ workspace }} />
       <NewNotebookButton {...{ workspace }} />
     </FlexRow>
+  );
+};
+
+const PauseUserAppButton = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  // const {
+  //   workspace: { namespace, googleProject },
+  // } = props;
+  //
+  // const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+
+  return (
+    <PauseResumeButton
+    // externalStatus={status}
+    // onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+    // onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+    />
   );
 };
 
@@ -98,21 +137,23 @@ const CromwellButtonRow = (props: {
           <SettingsButton disabled={true} onClick={() => {}} />
         </div>
       </TooltipTrigger>
-      <TooltipTrigger
-        disabled={false}
-        // RW-9304
-        content='Support for pausing Cromwell is not yet available'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={true}
-            onClick={() => {}}
-            icon={faPause}
-            buttonText='Pause'
-          />
-        </div>
-      </TooltipTrigger>
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+
+      {/* <TooltipTrigger */}
+      {/*   disabled={false} */}
+      {/*   // RW-9304 */}
+      {/*   content='Support for pausing Cromwell is not yet available' */}
+      {/* > */}
+      {/*   /!* tooltip trigger needs a div for some reason *!/ */}
+      {/*   <div> */}
+      {/*     <AppsPanelButton */}
+      {/*       disabled={true} */}
+      {/*       onClick={() => {}} */}
+      {/*       icon={faPause} */}
+      {/*       buttonText='Pause' */}
+      {/*     /> */}
+      {/*   </div> */}
+      {/* </TooltipTrigger> */}
       <TooltipTrigger
         disabled={!launching && canCreateApp(userApp)}
         content='A Cromwell app exists or is being created'
