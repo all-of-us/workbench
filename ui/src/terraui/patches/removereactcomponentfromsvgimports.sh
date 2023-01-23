@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 # The SVG plugin in Terra UI exports the SVG as ReactComponent, whereas the plugin we're using
 # makes them the default export.
 

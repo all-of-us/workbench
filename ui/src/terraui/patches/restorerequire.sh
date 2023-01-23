@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 # Webpack cannot analyze require statements if they are indirect and we don't need the protection
 # since we know `require` is present.
 

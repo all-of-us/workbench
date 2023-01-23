@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 # The react-virtualized library contains a garbage import. Esbuild is strict about these things,
 # Webpack is not.
 
