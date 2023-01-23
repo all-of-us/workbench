@@ -123,7 +123,11 @@ export const AppsPanel = (props: {
       {showAvailableSection && (
         <FlexColumn>
           <FlexRow>
-            <h3 style={styles.header}>Launch other applications</h3>
+            <h3 style={styles.header}>
+              {showActiveSection
+                ? 'Launch other applications'
+                : 'Launch applications'}
+            </h3>
             {
               // only show the close button in the Available section if there is no Active section
               !showActiveSection && (
