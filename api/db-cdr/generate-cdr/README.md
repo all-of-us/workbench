@@ -43,4 +43,4 @@ for a step-by-step guide.
   - `prep_microarray_metadata`
   - `prep_structural_variants_metadata`
   
-  `./project.rb circle-build-cdr-indices --project all-of-us-rw-preprod --bq-dataset C2021Q2R1 --cdr-version c_2021q2_4`
+  `./project.rb create-cdr-indices --project all-of-us-rw-preprod --bq-dataset C2021Q2R1 --cdr-version c_2021q2_4`
