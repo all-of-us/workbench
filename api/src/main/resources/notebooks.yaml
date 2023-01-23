@@ -221,22 +221,10 @@ paths:
           description: User does not have permission to perform action on app
         "404":
           description: App not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "409":
           description: App cannot be stopped
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
   "/api/google/v1/apps/{googleProject}/{appName}/start":
     post:
       summary: Starts an app with the given project and name
@@ -262,22 +250,10 @@ paths:
           description: User does not have permission to perform action on app
         "404":
           description: App not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "409":
           description: App cannot be started
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
         "500":
           description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorReport"
 
 ##########################################################################################
 ## Subset of the Welder API
