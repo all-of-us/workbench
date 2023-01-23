@@ -3,37 +3,20 @@ import * as React from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 
-import { RuntimeStatus } from 'generated/fetch';
-
 import { cond, switchCase } from 'app/utils';
 
 import { AppsPanelButton } from './apps-panel-button';
-
-type EnvironmentState =
-  | 'UNINITIALIZED'
-  | 'running'
-  | 'pausing'
-  | 'paused'
-  | 'resuming';
-
-const toEnvState = (status: RuntimeStatus): EnvironmentState =>
-  cond(
-    [status === RuntimeStatus.Running, () => 'running'],
-    [status === RuntimeStatus.Stopping, () => 'pausing'],
-    [status === RuntimeStatus.Stopped, () => 'paused'],
-    [status === RuntimeStatus.Starting, () => 'resuming'],
-    () => 'UNINITIALIZED'
-  );
+import { EnvironmentState } from './utils';
 
 interface Props {
-  externalStatus: RuntimeStatus;
+  initialState: EnvironmentState;
   onPause: Function;
   onResume: Function;
 }
 export const PauseResumeButton = (props: Props) => {
-  const { externalStatus, onPause, onResume } = props;
+  const { initialState, onPause, onResume } = props;
 
-  const [envState, setEnvState] = useState<EnvironmentState>('UNINITIALIZED');
+  const [envState, setEnvState] = useState<EnvironmentState>(initialState);
 
   // immediate transition states, instead of waiting for external updates
   const [pausing, setPausing] = useState(false);
@@ -48,22 +31,22 @@ export const PauseResumeButton = (props: Props) => {
       setResuming(false);
     }
 
-    setEnvState(toEnvState(externalStatus));
-  }, [externalStatus]);
+    setEnvState(initialState);
+  }, [initialState]);
 
-  // transition from RUNNING to STOPPED, or STOPPED to RUNNING
+  // transition from Running to Paused, or Paused to Running
   const onClick = () =>
     switchCase(
       envState,
       [
-        'running',
+        'Running',
         () => {
           setPausing(true);
           onPause();
         },
       ],
       [
-        'paused',
+        'Paused',
         () => {
           setResuming(true);
           onResume();
@@ -72,10 +55,10 @@ export const PauseResumeButton = (props: Props) => {
     );
 
   const [icon, buttonText, disabled] = cond(
-    [pausing || envState === 'pausing', () => [faSyncAlt, 'Pausing', true]],
-    [resuming || envState === 'resuming', () => [faSyncAlt, 'Resuming', true]],
-    [envState === 'paused', () => [faPlay, 'Resume', false]],
-    [envState === 'running', () => [faPause, 'Pause', false]],
+    [pausing || envState === 'Pausing', () => [faSyncAlt, 'Pausing', true]],
+    [resuming || envState === 'Resuming', () => [faSyncAlt, 'Resuming', true]],
+    [envState === 'Paused', () => [faPlay, 'Resume', false]],
+    [envState === 'Running', () => [faPause, 'Pause', false]],
     // choose a (disabled) default to show for other states
     () => [faPause, 'Pause', true]
   );

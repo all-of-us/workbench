@@ -3,10 +3,11 @@ import {
   AppType,
   CreateAppRequest,
   DiskType,
+  RuntimeStatus,
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { switchCase } from 'app/utils';
+import { cond, switchCase } from 'app/utils';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
@@ -90,3 +91,29 @@ export const findApp = (
   appType: UIAppType
 ): UserAppEnvironment =>
   apps?.find((app) => app.appType === toAppType(appType));
+
+// used as a generic equivalence for certain states of RuntimeStatus and AppStatus
+export type EnvironmentState =
+  | 'UNINITIALIZED'
+  | 'Running'
+  | 'Pausing'
+  | 'Paused'
+  | 'Resuming';
+
+export const fromRuntimeStatus = (status: RuntimeStatus): EnvironmentState =>
+  cond(
+    [status === RuntimeStatus.Running, () => 'Running'],
+    [status === RuntimeStatus.Stopping, () => 'Pausing'],
+    [status === RuntimeStatus.Stopped, () => 'Paused'],
+    [status === RuntimeStatus.Starting, () => 'resuming'],
+    () => 'UNINITIALIZED'
+  );
+
+export const fromUserAppStatus = (status: AppStatus): EnvironmentState =>
+  cond(
+    [status === AppStatus.RUNNING, () => 'Running'],
+    [status === AppStatus.STOPPING, () => 'Pausing'],
+    [status === AppStatus.STOPPED, () => 'Paused'],
+    // apparently there is no STARTING state for User Apps
+    () => 'UNINITIALIZED'
+  );

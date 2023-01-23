@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import {
-  faGear,
-  faPause,
-  faPlay,
-  faTrashCan,
-} from '@fortawesome/free-solid-svg-icons';
+import { faGear, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { UserAppEnvironment, Workspace } from 'generated/fetch';
@@ -14,6 +9,7 @@ import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
+import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -33,6 +29,8 @@ import {
   canCreateApp,
   canDeleteApp,
   defaultCromwellConfig,
+  fromRuntimeStatus,
+  fromUserAppStatus,
   UIAppType,
 } from './utils';
 
@@ -78,7 +76,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
-      externalStatus={status}
+      initialState={fromRuntimeStatus(status)}
       onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
     />
@@ -99,21 +97,14 @@ const JupyterButtonRow = (props: {
   );
 };
 
-const PauseUserAppButton = (props: {
-  userApp: UserAppEnvironment;
-  workspaceNamespace: string;
-}) => {
-  // const {
-  //   workspace: { namespace, googleProject },
-  // } = props;
-  //
-  // const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
+const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
+  const { googleProject, appName } = props.userApp || {};
 
   return (
     <PauseResumeButton
-    // externalStatus={status}
-    // onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
-    // onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+      initialState={fromUserAppStatus(props.userApp.status)}
+      onPause={() => leoAppsApi().stopApp(googleProject, appName)}
+      onResume={() => leoAppsApi().startApp(googleProject, appName)}
     />
   );
 };
@@ -137,23 +128,7 @@ const CromwellButtonRow = (props: {
           <SettingsButton disabled={true} onClick={() => {}} />
         </div>
       </TooltipTrigger>
-      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
-
-      {/* <TooltipTrigger */}
-      {/*   disabled={false} */}
-      {/*   // RW-9304 */}
-      {/*   content='Support for pausing Cromwell is not yet available' */}
-      {/* > */}
-      {/*   /!* tooltip trigger needs a div for some reason *!/ */}
-      {/*   <div> */}
-      {/*     <AppsPanelButton */}
-      {/*       disabled={true} */}
-      {/*       onClick={() => {}} */}
-      {/*       icon={faPause} */}
-      {/*       buttonText='Pause' */}
-      {/*     /> */}
-      {/*   </div> */}
-      {/* </TooltipTrigger> */}
+      <PauseUserAppButton {...{ userApp }} />
       <TooltipTrigger
         disabled={!launching && canCreateApp(userApp)}
         content='A Cromwell app exists or is being created'
@@ -178,8 +153,10 @@ const CromwellButtonRow = (props: {
 // TODO: refine and style more like RuntimeStatusIcon
 const AppStatus = (props: { userApp: UserAppEnvironment }) => {
   const { status } = props.userApp;
+  // replace with common text representation, if available; fall back on original
+  const statusText = fromUserAppStatus(status) || status;
   return (
-    <div style={{ alignSelf: 'center', marginRight: '1em' }}>{status}</div>
+    <div style={{ alignSelf: 'center', marginRight: '1em' }}>{statusText}</div>
   );
 };
 
