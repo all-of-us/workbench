@@ -98,11 +98,11 @@ const JupyterButtonRow = (props: {
 };
 
 const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
-  const { googleProject, appName } = props.userApp || {};
+  const { googleProject, appName, status } = props.userApp || {};
 
   return (
     <PauseResumeButton
-      externalStatus={fromUserAppStatus(props.userApp.status)}
+      externalStatus={fromUserAppStatus(status)}
       onPause={() => leoAppsApi().stopApp(googleProject, appName)}
       onResume={() => leoAppsApi().startApp(googleProject, appName)}
     />
@@ -150,16 +150,6 @@ const CromwellButtonRow = (props: {
   );
 };
 
-// TODO: refine and style more like RuntimeStatusIcon
-const AppStatus = (props: { userApp: UserAppEnvironment }) => {
-  const { status } = props.userApp;
-  // replace with common text representation, if available; fall back on original
-  const statusText = fromUserAppStatus(status) || status;
-  return (
-    <div style={{ alignSelf: 'center', marginRight: '1em' }}>{statusText}</div>
-  );
-};
-
 interface ExpandedAppProps {
   appType: UIAppType;
   initialUserAppInfo: UserAppEnvironment;
@@ -203,13 +193,11 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <div>
           <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
         </div>
-        {appType === UIAppType.JUPYTER ? (
+        {appType === UIAppType.JUPYTER && (
           <RuntimeStatusIcon
             style={{ alignSelf: 'center', marginRight: '0.5em' }}
             workspaceNamespace={workspace.namespace}
           />
-        ) : (
-          initialUserAppInfo && <AppStatus userApp={initialUserAppInfo} />
         )}
         {
           // TODO: support Cromwell + other User Apps
@@ -232,7 +220,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ) : (
         <FlexColumn style={{ alignItems: 'center' }}>
           {/* TODO: keep status updated internally */}
-          <div>(refresh to update status)</div>
+          <div>status: {initialUserAppInfo?.status} (refresh to update)</div>
           {/* TODO: generalize to other User Apps*/}
           <CromwellButtonRow
             userApp={initialUserAppInfo}
