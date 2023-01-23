@@ -9,30 +9,30 @@ import { AppsPanelButton } from './apps-panel-button';
 import { EnvironmentState } from './utils';
 
 interface Props {
-  initialState: EnvironmentState;
+  externalStatus: EnvironmentState;
   onPause: Function;
   onResume: Function;
 }
 export const PauseResumeButton = (props: Props) => {
-  const { initialState, onPause, onResume } = props;
+  const { externalStatus, onPause, onResume } = props;
 
-  const [envState, setEnvState] = useState<EnvironmentState>(initialState);
+  const [envState, setEnvState] = useState<EnvironmentState>(externalStatus);
 
-  // immediate transition states, instead of waiting for external updates
+  // immediate transition states, instead of waiting for externalStatus updates
   const [pausing, setPausing] = useState(false);
   const [resuming, setResuming] = useState(false);
 
-  // when the external state is updated, also clear our transition states
+  // when the externalStatus is updated, also clear our transition states
   useEffect(() => {
-    if (pausing) {
-      setPausing(false);
-    }
-    if (resuming) {
-      setResuming(false);
-    }
+    // if (pausing) {
+    //   setPausing(false);
+    // }
+    // if (resuming) {
+    //   setResuming(false);
+    // }
 
-    setEnvState(initialState);
-  }, [initialState]);
+    setEnvState(externalStatus);
+  }, [externalStatus]);
 
   // transition from Running to Paused, or Paused to Running
   const onClick = () =>
@@ -41,14 +41,14 @@ export const PauseResumeButton = (props: Props) => {
       [
         'Running',
         () => {
-          setPausing(true);
+          setEnvState('Pausing');
           onPause();
         },
       ],
       [
         'Paused',
         () => {
-          setResuming(true);
+          setEnvState('Resuming');
           onResume();
         },
       ]

@@ -76,7 +76,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
-      initialState={fromRuntimeStatus(status)}
+      externalStatus={fromRuntimeStatus(status)}
       onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
     />
@@ -102,7 +102,7 @@ const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
 
   return (
     <PauseResumeButton
-      initialState={fromUserAppStatus(props.userApp.status)}
+      externalStatus={fromUserAppStatus(props.userApp.status)}
       onPause={() => leoAppsApi().stopApp(googleProject, appName)}
       onResume={() => leoAppsApi().startApp(googleProject, appName)}
     />
