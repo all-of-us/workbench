@@ -6319,11 +6319,16 @@ definitions:
   AppStatus:
     type: string
     enum:
-      - DELETING
       - DELETED
+      - DELETING
       - ERROR
+      - PRECREATTING
+      - PREDELETING
+      - PRESTARTING
+      - PRESTOPPING
       - PROVISIONING
       - RUNNING
+      - STARTING
       - STATUS_UNSPECIFIED
       - STOPPED
       - STOPPING
