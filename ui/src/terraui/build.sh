@@ -9,17 +9,23 @@ TERRA_UI_GIT_HASH=0cfd092effbc6427ee15c8c1f05e48b03d168532
 WD="$(dirname "$0")"
 cd "$WD"
 
-yarn install
-
 # Making this a hidden directory avoids having to exclude it from the parent build.
 REPODIR=.repo
 
-set +e # ignore if repo already exists
+if [[ -e $REPODIR ]]; then
+  set +e; (cd $REPODIR; git log $TERRA_UI_GIT_HASH..$TERRA_UI_GIT_HASH); set -e
+  if [ $? -eq 0 ]; then
+    echo Repo exists and is current. Delete "$WD"/$REPODIR to rebuild.
+    exit 0
+  fi
+fi
+
+yarn install
+
 # The date specified here must be early-enough to contain the specified hash.
 git clone -n --shallow-since='2023-01-01T00:00' \
   https://github.com/DataBiosphere/terra-ui.git \
   $REPODIR
-set -e
 
 (cd $REPODIR; git checkout --detach $TERRA_UI_GIT_HASH)
 

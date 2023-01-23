@@ -4,7 +4,7 @@ require('esbuild').build({
   loader: { '.jpg': 'file', },
   bundle: true,
   format: 'esm',
-  outdir: 'out',
+  outdir: '../out', // relative to repo directory
   // Without a sourcemap, browser debugging information is garbage.
   sourcemap: true,
   plugins: [
