@@ -8,6 +8,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { withNewUserSatisfactionSurveyModal } from 'app/components/with-new-user-satisfaction-survey-modal-wrapper';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { ZendeskWidget } from 'app/components/zendesk-widget';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { InactivityMonitor } from 'app/pages/signed-in/inactivity-monitor';
@@ -63,8 +64,8 @@ const DemographicSurveyPage = fp.flow(
   withRoutingSpinner
 )(DemographicSurvey);
 
-export const SignedInImpl = ({ getAccessToken, hideSpinner }) => {
-  useEffect(() => hideSpinner(), []);
+export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
+  useEffect(() => spinnerProps.hideSpinner(), []);
 
   const [hideFooter, setHideFooter] = useState(false);
 
@@ -166,7 +167,7 @@ export const SignedInImpl = ({ getAccessToken, hideSpinner }) => {
                   routeData={{ title: 'Demographic Page' }}
                 />
               ) : (
-                <SignedInRoutes {...{ getAccessToken }} />
+                <SignedInRoutes />
               )}
             </div>
           )}

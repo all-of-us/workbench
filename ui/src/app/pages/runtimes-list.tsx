@@ -5,11 +5,12 @@ import * as fp from 'lodash/fp';
 import { environment } from 'environments/environment';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { getAccessToken } from 'app/utils/authentication';
 import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
-const ajax = (getAccessToken) => (signal) => {
+const ajax = (signal) => {
   const jsonLeoFetch = (path) =>
     fetch(environment.leoApiUrl + path, {
       signal,
@@ -36,9 +37,7 @@ const ajax = (getAccessToken) => (signal) => {
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
-    RouteComponentProps {
-  getAccessToken: () => String;
-}
+    RouteComponentProps {}
 export const RuntimesList = fp.flow(
   withNavigation,
   withRouter
@@ -54,7 +53,7 @@ export const RuntimesList = fp.flow(
       return (
         <>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
-          <ajaxContext.Provider value={ajax(this.props.getAccessToken)}>
+          <ajaxContext.Provider value={ajax}>
             <Environments
               {...{
                 nav: {

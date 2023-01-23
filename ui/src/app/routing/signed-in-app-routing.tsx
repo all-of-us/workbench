@@ -134,7 +134,7 @@ const WorkspaceSearchAdminPage = fp.flow(
   withRoutingSpinner
 )(AdminWorkspaceSearch);
 
-export const SignedInRoutes = ({ getAccessToken }) => {
+export const SignedInRoutes = () => {
   const { search } = useLocation();
   const query = new URLSearchParams(search);
 
@@ -334,10 +334,7 @@ export const SignedInRoutes = ({ getAccessToken }) => {
         />
       </AppRoute>
       <AppRoute exact path='/runtimes'>
-        <RuntimesListPage
-          routeData={{ title: 'Runtimes' }}
-          {...{ getAccessToken }}
-        />
+        <RuntimesListPage routeData={{ title: 'Runtimes' }} />
       </AppRoute>
       <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
         <WorkspaceLibraryPage

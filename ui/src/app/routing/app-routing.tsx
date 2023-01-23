@@ -37,7 +37,7 @@ import {
   useShowTOS,
 } from 'app/utils/access-utils';
 import { initializeAnalytics } from 'app/utils/analytics';
-import { useAuthentication } from 'app/utils/authentication';
+import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
   cookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
@@ -50,8 +50,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
-
-declare const gapi: any;
 
 const CookiePolicyPage = fp.flow(
   withRouteData,
@@ -77,39 +75,17 @@ interface RoutingProps {
   signOut: () => void;
 }
 
-const currentAccessToken = () => {
-  const tokenOverride = window.localStorage.getItem(
-    LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-  );
-
-  if (tokenOverride) {
-    return tokenOverride;
-  } else if (!gapi.auth2) {
-    return null;
-  } else {
-    const authResponse = gapi.auth2
-      .getAuthInstance()
-      .currentUser.get()
-      .getAuthResponse(true);
-    if (authResponse !== null) {
-      return authResponse.access_token;
-    } else {
-      return null;
-    }
-  }
-};
-
 const bindClients = () => {
   bindApiClients(
     new Configuration({
       basePath: getApiBaseUrl(),
-      accessToken: () => currentAccessToken(),
+      accessToken: () => getAccessToken(),
     })
   );
   notebooksBindApiClients(
     new Configuration({
       basePath: environment.leoApiUrl,
-      accessToken: () => currentAccessToken(),
+      accessToken: () => getAccessToken(),
     })
   );
 };
@@ -295,11 +271,7 @@ export const AppRoutingComponent: React.FunctionComponent<
                   guards={[signInGuard, disabledGuard(isUserDisabledInDb)]}
                 >
                   {!redirectToTOSPage && (
-                    <SignedInPage
-                      intermediaryRoute={true}
-                      routeData={{}}
-                      getAccessToken={currentAccessToken}
-                    />
+                    <SignedInPage intermediaryRoute={true} routeData={{}} />
                   )}
                 </AppRoute>
               </Switch>
