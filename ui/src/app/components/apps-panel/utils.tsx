@@ -116,6 +116,6 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
     [status === AppStatus.RUNNING, () => 'Running'],
     [status === AppStatus.STOPPING, () => 'Pausing'],
     [status === AppStatus.STOPPED, () => 'Paused'],
-    // apparently there is no STARTING state for User Apps
+    [status === AppStatus.STARTING, () => 'Resuming'],
     () => 'UNINITIALIZED'
   );
