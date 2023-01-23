@@ -93,14 +93,16 @@ export const findApp = (
   apps?.find((app) => app.appType === toAppType(appType));
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
-export type EnvironmentState =
+export type UserEnvironmentStatus =
   | 'UNINITIALIZED'
   | 'Running'
   | 'Pausing'
   | 'Paused'
   | 'Resuming';
 
-export const fromRuntimeStatus = (status: RuntimeStatus): EnvironmentState =>
+export const fromRuntimeStatus = (
+  status: RuntimeStatus
+): UserEnvironmentStatus =>
   cond(
     [status === RuntimeStatus.Running, () => 'Running'],
     [status === RuntimeStatus.Stopping, () => 'Pausing'],
@@ -109,7 +111,7 @@ export const fromRuntimeStatus = (status: RuntimeStatus): EnvironmentState =>
     () => 'UNINITIALIZED'
   );
 
-export const fromUserAppStatus = (status: AppStatus): EnvironmentState =>
+export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
   cond(
     [status === AppStatus.RUNNING, () => 'Running'],
     [status === AppStatus.STOPPING, () => 'Pausing'],

@@ -6,60 +6,51 @@ import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import { cond, switchCase } from 'app/utils';
 
 import { AppsPanelButton } from './apps-panel-button';
-import { EnvironmentState } from './utils';
+import { UserEnvironmentStatus } from './utils';
 
 interface Props {
-  externalStatus: EnvironmentState;
+  externalStatus: UserEnvironmentStatus;
   onPause: Function;
   onResume: Function;
 }
 export const PauseResumeButton = (props: Props) => {
   const { externalStatus, onPause, onResume } = props;
 
-  const [envState, setEnvState] = useState<EnvironmentState>(externalStatus);
+  const [envStatus, setEnvStatus] =
+    useState<UserEnvironmentStatus>(externalStatus);
 
-  // immediate transition states, instead of waiting for externalStatus updates
-  const [pausing, setPausing] = useState(false);
-  const [resuming, setResuming] = useState(false);
-
-  // when the externalStatus is updated, also clear our transition states
   useEffect(() => {
-    // if (pausing) {
-    //   setPausing(false);
-    // }
-    // if (resuming) {
-    //   setResuming(false);
-    // }
-
-    setEnvState(externalStatus);
+    setEnvStatus(externalStatus);
   }, [externalStatus]);
 
   // transition from Running to Paused, or Paused to Running
   const onClick = () =>
     switchCase(
-      envState,
+      envStatus,
       [
         'Running',
         () => {
-          setEnvState('Pausing');
+          // transition this button immediately, instead of waiting for externalStatus updates
+          setEnvStatus('Pausing');
           onPause();
         },
       ],
       [
         'Paused',
         () => {
-          setEnvState('Resuming');
+          // transition this button immediately, instead of waiting for externalStatus updates
+          setEnvStatus('Resuming');
           onResume();
         },
       ]
     );
 
   const [icon, buttonText, disabled] = cond(
-    [pausing || envState === 'Pausing', () => [faSyncAlt, 'Pausing', true]],
-    [resuming || envState === 'Resuming', () => [faSyncAlt, 'Resuming', true]],
-    [envState === 'Paused', () => [faPlay, 'Resume', false]],
-    [envState === 'Running', () => [faPause, 'Pause', false]],
-    // choose a (disabled) default to show for other states
+    [envStatus === 'Pausing', () => [faSyncAlt, 'Pausing', true]],
+    [envStatus === 'Resuming', () => [faSyncAlt, 'Resuming', true]],
+    [envStatus === 'Paused', () => [faPlay, 'Resume', false]],
+    [envStatus === 'Running', () => [faPause, 'Pause', false]],
+    // choose a (disabled) default to show for other statuses
     () => [faPause, 'Pause', true]
   );
 
