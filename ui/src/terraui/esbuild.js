@@ -4,7 +4,7 @@ require('esbuild').build({
   loader: { '.jpg': 'file', },
   bundle: true,
   format: 'esm',
-  outdir: '/Users/dmohs/b/r/aou/vmlistpage/ui/src/terraui/out',
+  outdir: 'out',
   // Without a sourcemap, browser debugging information is garbage.
   sourcemap: true,
   plugins: [
