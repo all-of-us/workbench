@@ -33,9 +33,8 @@ public class CloudBillingClientImpl implements CloudBillingClient {
     for (Instant deadline = Instant.now().plusSeconds(300);
         Instant.now().isBefore(deadline);
         Thread.sleep(pollInterval.toMillis())) {
-      ProjectBillingInfo projectBillingInfo = null;
       try {
-        projectBillingInfo = getProjectBillingInfo(projectId);
+        ProjectBillingInfo projectBillingInfo = getProjectBillingInfo(projectId);
         if (projectBillingInfo.getBillingAccountName().equals(billingAccountName)) {
           return projectBillingInfo;
         }
