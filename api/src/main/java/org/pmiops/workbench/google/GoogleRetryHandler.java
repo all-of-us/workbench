@@ -45,11 +45,7 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
       // to retry. So we will retry in these cases, too.
       // Due to Google IAM delay, GCP calls may return 401, 403, or 404 temporary. We try until
       // succeed.
-      return super.canRetry(code)
-          || code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-          || code == HttpServletResponse.SC_FORBIDDEN
-          || code == HttpServletResponse.SC_UNAUTHORIZED
-          || code == HttpServletResponse.SC_NOT_FOUND;
+      return super.canRetry(code) || code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
     @Override
