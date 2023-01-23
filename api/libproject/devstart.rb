@@ -533,21 +533,6 @@ def create_cdr_indices(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--wgv-project [wgv-project]",
-    ->(opts, v) { opts.wgv_project = v},
-    "Whole genome variant project."
-  )
-  op.add_option(
-    "--wgv-dataset [wgv-dataset]",
-    ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset."
-  )
-  op.add_option(
-    "--wgv-table [wgv-table]",
-    ->(opts, v) { opts.wgv_table = v},
-    "Whole genome variant table."
-  )
-  op.add_option(
     "--cdr-version [cdr-version]",
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
@@ -556,21 +541,6 @@ def create_cdr_indices(cmd_name, *args)
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
-  )
-  op.add_option(
-      "--array-table [array-table]",
-      ->(opts, v) { opts.array_table = v},
-      "Array table."
-    )
-  op.add_option(
-    "--long-read-wgv-table [long-read-wgv-table]",
-    ->(opts, v) { opts.long_read_wgv_table = v},
-    "Long read whole genome variant table."
-  )
-  op.add_option(
-    "--structural-variant-data-table [structural-variant-data-table]",
-    ->(opts, v) { opts.structural_variant_data_table = v},
-    "Structural Variant data table."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
@@ -873,36 +843,6 @@ def build_cb_search_person(cmd_name, *args)
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
-  )
-  op.add_option(
-      "--wgv-project [wgv-project]",
-      ->(opts, v) { opts.wgv_project = v},
-      "Whole genome variant project."
-  )
-  op.add_option(
-      "--wgv-dataset [wgv-dataset]",
-      ->(opts, v) { opts.wgv_dataset = v},
-      "Whole genome variant dataset."
-  )
-  op.add_option(
-      "--wgv-table [wgv-table]",
-      ->(opts, v) { opts.wgv_table = v},
-      "Whole genome variant table."
-  )
-  op.add_option(
-        "--array-table [array-table]",
-        ->(opts, v) { opts.array_table = v},
-        "Array table."
-    )
-  op.add_option(
-    "--long-read-wgv-table [long-read-wgv-table]",
-    ->(opts, v) { opts.long_read_wgv_table = v},
-    "Long read whole genome variant table."
-  )
-  op.add_option(
-    "--structural-variant-data-table [structural-variant-data-table]",
-    ->(opts, v) { opts.structural_variant_data_table = v},
-    "Structural Variant data table."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
