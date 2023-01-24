@@ -222,7 +222,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <FlexColumn style={{ alignItems: 'center' }}>
           {/* TODO: keep status updated internally */}
           <div>
-            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}
+            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
             (refresh to update)
           </div>
           {/* TODO: generalize to other User Apps*/}

@@ -107,7 +107,7 @@ export const fromRuntimeStatus = (
     [status === RuntimeStatus.Running, () => 'Running'],
     [status === RuntimeStatus.Stopping, () => 'Pausing'],
     [status === RuntimeStatus.Stopped, () => 'Paused'],
-    [status === RuntimeStatus.Starting, () => 'resuming'],
+    [status === RuntimeStatus.Starting, () => 'Resuming'],
     () => 'UNKNOWN'
   );
 
