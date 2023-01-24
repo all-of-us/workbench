@@ -240,11 +240,11 @@ if [[ "$DS_DOMAIN_TABLE" eq "ds_observation" ]]; then
   do_ds_observation
 elif [[ "$DS_DOMAIN_TABLE" eq "ds_condition_occurrence" ]]; then
   do_ds_condition_occurrence
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_condition_occurrence" ]]; then
-  do_ds_drug_exposure
 elif [[ "$DS_DOMAIN_TABLE" eq "ds_drug_exposure" ]]; then
+  do_ds_drug_exposure
+elif [[ "$DS_DOMAIN_TABLE" eq "ds_visit_occurrence" ]]; then
   do_ds_visit_occurrence
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_ds_measurement" ]]; then
+elif [[ "$DS_DOMAIN_TABLE" eq "ds_measurement" ]]; then
   do_ds_measurement
 elif [[ "$DS_DOMAIN_TABLE" eq "ds_procedure_occurrence" ]]; then
   do_ds_procedure_occurrence
