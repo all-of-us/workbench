@@ -29,12 +29,11 @@ git clone -n --shallow-since='2023-01-01T00:00' \
 
 (cd $REPODIR; git checkout --detach $TERRA_UI_GIT_HASH)
 
-(cd $REPODIR; yarn install)
-
 # Apply patches. See comments in individual files.
 
+sh patches/removenodeversioncheck.sh $REPODIR/.yarnrc.yml
+(cd $REPODIR; yarn install)
 bash patches/commentoutbadimportline.sh
-
 sh patches/removereactcomponentfromsvgimports.sh $REPODIR/src/components/CloudProviderIcon.ts
 sh patches/removereactcomponentfromsvgimports.sh $REPODIR/src/libs/icon-dict.js
 
