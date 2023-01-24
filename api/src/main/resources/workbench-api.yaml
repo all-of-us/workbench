@@ -35,20 +35,35 @@ host: api.pmi-ops.org
 securityDefinitions:
   aou_oauth:
     x-aou-note: |
-      Establish the fact that *some endpoints* are OAuth protected
-      by defining an `aou_oauth` security mode, which we'll assigning
-      to any protected endpoints below.
+      Users authenticate with our API using a Google-issued OIDC access token.
 
-      TODO: Vet/fix this token and/or authorization URL to work in practice.
-      These are currently included simply to satisfy the Swagger specification,
-      as this is not directly used to dictate oauth details (just used to
-      annotate which methods require oauth).
+      This is a non-standard use of Swagger 2.0's oauth2 type. The aou_auth
+      entry under security (below) serves to establish the fact
+      that all endpoints are protected. This annotation ensures that client
+      libraries know to send bearer tokens when calling, but otherwise only
+      provides a minimal OAuth2 implementation. Future Swagger versions may
+      provide a better mapping to our authorization and authentication flows.
 
-      The aou_auth entry under security (below) serves to establish the fact
-      that all endpoints are protected: this annotation ensures that client
-      libraries know to send bearer tokens when calling
+      We use the OAuth2 authorization code grant with the the PKCE extension on
+      public clients. However, Google only supports the authorization code grant
+      for confidential clients. To enable public client access, we provide an
+      endpoint that forwards token-related requests to Google with the client
+      secret added.
+
+      Because we do not provide a full OAuth implementation, adding the scope
+      property is at best documentation and at worst may lead to unexpected
+      behavior. Instead, we document them here.
+
+      Required Google scopes:
+      - https://www.googleapis.com/auth/userinfo.email
+      - openid
+      - https://www.googleapis.com/auth/userinfo.profile
+
+      In addition to the above, the following scope is required for endpoints
+      that leverage billing information:
+      - https://www.googleapis.com/auth/cloud-billing
     authorizationUrl: ''
-    tokenUrl: ''
+    tokenUrl: /oauth2/token
     type: oauth2
     flow: accessCode
 schemes:

@@ -172,4 +172,9 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
     return fileDetail;
   }
+
+  @Override
+  public String getGoogleOAuthClientSecret() {
+    return getCredentialsBucketString("google-oauth-client-secret.txt");
+  }
 }
