@@ -4,8 +4,15 @@
 
 set -e
 
-export BQ_PROJECT=$1  # project
-export BQ_DATASET=$2  # dataset
+export BQ_PROJECT=$1   # project
+export BQ_DATASET=$2   # dataset
+export DATA_BROWSER=$3 # data browser build
+
+if [[ "$DATA_BROWSER" == true ]]
+then
+  echo "Building index for data browser. Skipping creation of the ds_linking table."
+  exit 0
+fi
 
 # check if OMOP 5.3.1
 echo "ds-linking - checking $BQ_PROJECT:$BQ_DATASET.visit_detail table exists"

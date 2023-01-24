@@ -540,7 +540,7 @@ def create_cdr_indices(cmd_name, *args)
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Default is false"
+    "Generate for data browser. Optional - Default is false"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
@@ -731,7 +731,7 @@ def build_search_all_events(cmd_name, *args)
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Default is false"
+    "Generate for data browser. Optional - Default is false"
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
@@ -750,6 +750,7 @@ Common.register_command({
 
 def build_ds_linking(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -760,13 +761,18 @@ def build_ds_linking(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -778,6 +784,7 @@ Common.register_command({
 
 def build_ds_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -788,13 +795,18 @@ def build_ds_tables(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -806,6 +818,7 @@ Common.register_command({
 
 def build_review_all_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -816,13 +829,18 @@ def build_review_all_events(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -834,6 +852,7 @@ Common.register_command({
 
 def build_cb_search_person(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -844,13 +863,18 @@ def build_cb_search_person(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -890,6 +914,7 @@ Common.register_command({
 
 def build_cb_criteria_menu(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -900,13 +925,18 @@ def build_cb_criteria_menu(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-menu.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-menu.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -918,6 +948,7 @@ Common.register_command({
 
 def build_cloudsql_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -938,13 +969,18 @@ def build_cloudsql_tables(cmd_name, *args)
       ->(opts, v) { opts.output_dataset = v},
       "Output dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
+    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -956,6 +992,7 @@ Common.register_command({
 
 def build_backup_cb_ds_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -976,13 +1013,18 @@ def build_backup_cb_ds_tables(cmd_name, *args)
       ->(opts, v) { opts.output_dataset = v},
       "Output dataset. Required."
   )
+  op.add_option(
+      "--data-browser [data-browser]",
+      ->(opts, v) { opts.data_browser = v},
+      "Generate for data browser. Optional - Default is false"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
+    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset} #{op.opts.data_browser}}
   end
 end
 
