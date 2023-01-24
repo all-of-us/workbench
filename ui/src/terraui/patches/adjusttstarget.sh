@@ -4,4 +4,4 @@
 
 set -v
 
-vim -e -s -c '%s/"target": "es5"/"target": "es2022"' -c wq $@
+vi -e -s -c '%s/"target": "es5"/"target": "es2022"' -c wq $@

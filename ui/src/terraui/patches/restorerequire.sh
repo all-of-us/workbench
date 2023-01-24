@@ -5,4 +5,4 @@
 
 set -v
 
-vim -e -s -c '%s/__require("react")/require("react")' -c wq $@
+vi -e -s -c '%s/__require("react")/require("react")' -c wq $@

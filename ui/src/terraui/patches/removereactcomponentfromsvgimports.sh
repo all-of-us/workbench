@@ -5,4 +5,4 @@
 
 set -v
 
-vim -e -c '%s/[{]\s*ReactComponent\s\+as\s\+\(\S\+\)\s*[}]/\1' -c wq $@
+vi -e -c '%s/[{]\s*ReactComponent\s\+as\s\+\(\S\+\)\s*[}]/\1' -c wq $@

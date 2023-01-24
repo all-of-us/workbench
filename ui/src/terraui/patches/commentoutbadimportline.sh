@@ -18,7 +18,7 @@ BADFILE=node_modules/react-virtualized/dist/es/WindowScroller/utils/onScroll.js
 
 unzip "$ZF" $BADFILE
 
-vim -e -c '%s/\(import { bpfrpt_proptype_WindowScroller\)/\/\/ \1' -c wq $BADFILE
+vi -e -c '%s/\(import { bpfrpt_proptype_WindowScroller\)/\/\/ \1' -c wq $BADFILE
 
 zip -f "$ZF" $BADFILE
 

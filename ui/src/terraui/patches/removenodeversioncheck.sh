@@ -4,4 +4,4 @@
 
 set -v
 
-vim -e -s -c '%s/- .\/.hooks\/plugin-warning-logger.js/' -c wq $@
+vi -e -s -c '%s/- .\/.hooks\/plugin-warning-logger.js/' -c wq $@
