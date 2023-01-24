@@ -40,7 +40,7 @@ def build(cmd_name, args)
   end
 
   react_opts = "REACT_APP_ENVIRONMENT=#{options.env}"
-  common.run_inline "#{react_opts} NODE_OPTIONS='--max_old_space_size=4096 --report-on-fatalerror' yarn run build #{optimize} --no-watch --no-progress"
+  common.run_inline "#{react_opts} yarn run build #{optimize} --no-watch --no-progress"
 end
 
 class DevStart
