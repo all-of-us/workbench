@@ -17,7 +17,7 @@ export DS_DOMAIN_TABLE=$3 # ds_[domain] table to build
 ################################################
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_condition_occurrence\`
       (PERSON_ID, CONDITION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       CONDITION_START_DATETIME, CONDITION_END_DATETIME, CONDITION_TYPE_CONCEPT_ID, CONDITION_TYPE_CONCEPT_NAME,
@@ -41,7 +41,7 @@ function do_ds_condition_occurrence(){
 
 function do_ds_device(){
   echo "ds_device - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_device\`
        (PERSON_ID, DEVICE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
        DEVICE_EXPOSURE_START_DATETIME, DEVICE_EXPOSURE_END_DATETIME, DEVICE_TYPE_CONCEPT_ID, DEVICE_TYPE_CONCEPT_NAME,
@@ -62,7 +62,7 @@ function do_ds_device(){
 
 function do_ds_drug_exposure(){
   echo "ds_drug_exposure - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`
       (PERSON_ID, DRUG_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, DRUG_EXPOSURE_START_DATETIME,
       DRUG_EXPOSURE_END_DATETIME, VERBATIM_END_DATE, DRUG_TYPE_CONCEPT_ID, DRUG_TYPE_CONCEPT_NAME, STOP_REASON, REFILLS, QUANTITY,
@@ -87,7 +87,7 @@ function do_ds_drug_exposure(){
 
 function do_ds_measurement(){
   echo "ds_measurement - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_measurement\`
       (PERSON_ID, MEASUREMENT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       MEASUREMENT_DATETIME, MEASUREMENT_TYPE_CONCEPT_ID, MEASUREMENT_TYPE_CONCEPT_NAME, OPERATOR_CONCEPT_ID,
@@ -117,7 +117,7 @@ function do_ds_measurement(){
 
 function do_ds_observation(){
   echo "ds_observation - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_observation\`
       (PERSON_ID, OBSERVATION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       OBSERVATION_DATETIME, OBSERVATION_TYPE_CONCEPT_ID, OBSERVATION_TYPE_CONCEPT_NAME, VALUE_AS_NUMBER, VALUE_AS_STRING,
@@ -147,7 +147,7 @@ function do_ds_observation(){
 
 function do_ds_person(){
   echo "ds_person - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
       (PERSON_ID, GENDER_CONCEPT_ID, GENDER, DATE_OF_BIRTH, RACE_CONCEPT_ID, RACE, ETHNICITY_CONCEPT_ID, ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, SEX_AT_BIRTH)
   SELECT
@@ -162,7 +162,7 @@ function do_ds_person(){
 
 function do_ds_procedure_occurrence(){
   echo "ds_procedure_occurrence (OMOP 5.3.1) - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_procedure_occurrence\`
       (PERSON_ID, PROCEDURE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       PROCEDURE_DATETIME, PROCEDURE_TYPE_CONCEPT_ID, PROCEDURE_TYPE_CONCEPT_NAME, MODIFIER_CONCEPT_ID, MODIFIER_CONCEPT_NAME,
@@ -186,7 +186,7 @@ function do_ds_procedure_occurrence(){
 
 function do_ds_visit_occurrence(){
   echo "ds_visit_occurrence - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_visit_occurrence\`
       (PERSON_ID, VISIT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, VISIT_START_DATETIME,
       VISIT_END_DATETIME, VISIT_TYPE_CONCEPT_ID, VISIT_TYPE_CONCEPT_NAME, VISIT_SOURCE_VALUE, VISIT_SOURCE_CONCEPT_ID,
@@ -210,7 +210,7 @@ function do_ds_visit_occurrence(){
 function do_ds_zip_code_socioeconomic(){
   if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
     echo "ds_zip_code_socioeconomic - inserting data - Controlled Tier"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
     (PERSON_ID, OBSERVATION_DATETIME, ZIP3_AS_STRING, FRACTION_ASSISTED_INCOME, FRACTION_HIGH_SCHOOL_EDU, MEDIAN_INCOME, FRACTION_NO_HEALTH_INS, FRACTION_POVERTY, FRACTION_VACANT_HOUSING, DEPRIVATION_INDEX, ACS)
     select o.person_id,
