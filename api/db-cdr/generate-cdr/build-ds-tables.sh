@@ -461,7 +461,7 @@ elif [[ "$TABLE_TOKEN" eq "ds_person" ]]; then
   do_ds_person
 elif [[ "$TABLE_TOKEN" eq "ds_zip_code_socioeconomic" ]]; then
   do_ds_zip_code_socioeconomic
-elif [[ "$TABLE_TOKEN" eq "all_except_code_and_pfhh" ]]; then
+elif [[ "$TABLE_TOKEN" eq "all_except_cope_and_pfhh" ]]; then
   do_COPE_and_PFHH
 elif [[ "$TABLE_TOKEN" eq "pfhh" ]]; then
   do_PFHH
