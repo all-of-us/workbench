@@ -516,6 +516,7 @@ Common.register_command({
 def create_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
+  op.opts.create_surveys = true
   op.opts.branch = "main"
   op.add_option(
     "--branch [branch]",
@@ -542,6 +543,11 @@ def create_cdr_indices(cmd_name, *args)
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
+  op.add_option(
+    "--create-surveys [create-surveys]",
+    ->(opts, v) { opts.create_surveys = v},
+    "Create all surveys. Optional - Default is true"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
   op.parse.validate
@@ -555,7 +561,7 @@ def create_cdr_indices(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\",  \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}, \"create_surveys\": #{op.opts.create_surveys} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -567,6 +573,7 @@ Common.register_command({
 
 def build_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.create_surveys = true
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -587,13 +594,18 @@ def build_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.id_start_block = v},
       "ID start block"
   )
+  op.add_option(
+    "--create-surveys [create-surveys]",
+    ->(opts, v) { opts.create_surveys = v},
+    "Create all surveys. Optional - Default is true"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.filename and opts.id_start_block}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename} #{op.opts.id_start_block}}
+    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename} #{op.opts.id_start_block} #{op.opts.create_surveys}}
   end
 end
 
@@ -605,6 +617,7 @@ Common.register_command({
 
 def create_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.create_surveys = true
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -615,13 +628,18 @@ def create_tables(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ Dataset name"
   )
+  op.add_option(
+    "--create-surveys [create-surveys]",
+    ->(opts, v) { opts.create_surveys = v},
+    "Create all surveys. Optional - Default is true"
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/create-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/create-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.create_surveys}}
   end
 end
 

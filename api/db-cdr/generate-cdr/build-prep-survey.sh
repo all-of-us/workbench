@@ -8,6 +8,13 @@ export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 export FILE_NAME=$3          # Filename to process
 export ID=$4                 # Starting id position
+export CREATE_SURVEYS=$5     # Create surveys flag
+
+if [[ "$CREATE_SURVEYS" == false ]]
+then
+  echo "Skipping creation of the prep_survey table for $FILE_NAME."
+  exit 0
+fi
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 SCHEMA_PATH="generate-cdr/bq-schemas"
@@ -17,20 +24,6 @@ TOPIC_PARENT_ID=0
 QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
 OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
-
-function check_prep_survey() {
-  echo "Checking prep_survey count"
-  query="select row_count from \`$BQ_PROJECT.$BQ_DATASET.prep_create_tables_list\` where table_name = 'prep_survey'"
-  prepSurveyCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
-  echo "prep_survey row count: $prepSurveyCount"
-  if [[ $prepSurveyCount > 0 ]];
-  then
-    echo "Table prep_survey has row count [$prepSurveyCount]. Skipping creating prep_survey table"
-    exit 0
-  else
-    echo "Creating prep_survey table"
-  fi
-}
 
 function simple_select() {
   # run this query to initializing our .bigqueryrc configuration file
@@ -167,9 +160,6 @@ function increment_answer_parent_id() {
 # run this query to initializing our .bigqueryrc configuration file
 # otherwise this will corrupt the output of the first call to find_info()
 simple_select
-
-# check and exit if prep_survey table exists else continue
-check_prep_survey
 
 if [[ "$FILE_NAME" = "socialdeterminantsofhea_staged.csv" ]]; then
   #  Getting count for SDOH Survey
