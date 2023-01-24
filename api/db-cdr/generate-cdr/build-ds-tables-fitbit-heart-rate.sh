@@ -23,7 +23,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
 where rank = 1"
 
 echo "ds_heart_rate_minute_level - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
     (datetime, person_id, heart_rate_value)
 SELECT datetime, person_id, heart_rate_value
