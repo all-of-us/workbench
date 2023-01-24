@@ -443,35 +443,35 @@ GROUP BY a.person_id,
         survey_version_name"
 }
 
-if [[ "$DS_DOMAIN_TABLE" eq "ds_observation" ]]; then
+if [[ "$TABLE_TOKEN" eq "ds_observation" ]]; then
   do_ds_observation
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_condition_occurrence" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_condition_occurrence" ]]; then
   do_ds_condition_occurrence
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_drug_exposure" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_drug_exposure" ]]; then
   do_ds_drug_exposure
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_visit_occurrence" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_visit_occurrence" ]]; then
   do_ds_visit_occurrence
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_measurement" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_measurement" ]]; then
   do_ds_measurement
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_procedure_occurrence" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_procedure_occurrence" ]]; then
   do_ds_procedure_occurrence
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_device" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_device" ]]; then
   do_ds_device
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_person" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_person" ]]; then
   do_ds_person
-elif [[ "$DS_DOMAIN_TABLE" eq "ds_zip_code_socioeconomic" ]]; then
+elif [[ "$TABLE_TOKEN" eq "ds_zip_code_socioeconomic" ]]; then
   do_ds_zip_code_socioeconomic
-elif [[ "$DS_SURVEY_TOKEN" eq "all_except_code_and_pfhh" ]]; then
+elif [[ "$TABLE_TOKEN" eq "all_except_code_and_pfhh" ]]; then
   do_COPE_and_PFHH
-elif [[ "$DS_SURVEY_TOKEN" eq "pfhh" ]]; then
+elif [[ "$TABLE_TOKEN" eq "pfhh" ]]; then
   do_PFHH
-elif [[ "$DS_SURVEY_TOKEN" eq "cope" ]]; then
+elif [[ "$TABLE_TOKEN" eq "cope" ]]; then
   do_COPE
-elif [[ "$DS_SURVEY_TOKEN" eq "cope_minute" ]]; then
+elif [[ "$TABLE_TOKEN" eq "cope_minute" ]]; then
   do_COPE_vaccine
-elif [[ "$DS_SURVEY_TOKEN" eq "fitbit" ]]; then
+elif [[ "$TABLE_TOKEN" eq "fitbit" ]]; then
   do_fitbit
 else
-  echo "Unknown table $DS_SURVEY_TOKEN"
+  echo "Unknown table $TABLE_TOKEN"
   exit 0
 fi
