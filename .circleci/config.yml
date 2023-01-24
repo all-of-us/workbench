@@ -439,6 +439,7 @@ jobs:
 
   ui-unit-test:
     executor: workbench-executor
+    resource_class: large
     steps:
       - checkout-code
       - halt-test-check:
