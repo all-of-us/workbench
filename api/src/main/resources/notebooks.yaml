@@ -1,7 +1,7 @@
 # This file is a hand-crafted combination of Leo and its proxy APIs.
 #  - A subset of Welder (modified for runtime/path prefix): https://github.com/DataBiosphere/welder/blob/master/server/src/main/resources/api-docs.yaml
 #  - A subset of Jupyter (modified for runtime/path prefix): https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
-#  - Subset of Leo API used client-side (downgraded to Swagger2): https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
+#  - Subset of Leo API used client-side (downgraded to Swagger2): https://github.com/broadinstitute/leonardo/blob/develop/http/src/main/resources/swagger/api-docs.yaml
 
 swagger: '2.0'
 info:
@@ -24,6 +24,8 @@ tags:
     description: Notebook proxy API
   - name: jupyter
     description: Jupyter API
+  - name: apps
+    description: Experimental App API
 
 security:
   - googleoauth:
@@ -190,6 +192,66 @@ paths:
       responses:
         "200":
           description: Successfully invalidated a token
+        "500":
+          description: Internal Error
+
+  "/api/google/v1/apps/{googleProject}/{appName}/stop":
+    post:
+      summary: Stops an app with the given project and name
+      description: >
+        Stops the running compute, but retains any data persisted on disk. The app may be restarted with the /start endpoint.
+      operationId: stopApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          type: string
+      responses:
+        "202":
+          description: App stop request accepted
+        "403":
+          description: User does not have permission to perform action on app
+        "404":
+          description: App not found
+        "409":
+          description: App cannot be stopped
+        "500":
+          description: Internal Error
+  "/api/google/v1/apps/{googleProject}/{appName}/start":
+    post:
+      summary: Starts an app with the given project and name
+      description: Starts the stopped app
+      operationId: startApp
+      tags:
+        - apps
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: appName
+          description: appName
+          required: true
+          type: string
+      responses:
+        "202":
+          description: App start request accepted
+        "403":
+          description: User does not have permission to perform action on app
+        "404":
+          description: App not found
+        "409":
+          description: App cannot be started
         "500":
           description: Internal Error
 

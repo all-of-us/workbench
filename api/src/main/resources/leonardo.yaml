@@ -1896,11 +1896,12 @@ components:
     AppStatus:
       type: string
       enum:
-        - DELETING
         - DELETED
+        - DELETING
         - ERROR
         - PROVISIONING
         - RUNNING
+        - STARTING
         - STATUS_UNSPECIFIED
         - STOPPED
         - STOPPING
