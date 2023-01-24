@@ -800,13 +800,18 @@ def build_ds_tables(cmd_name, *args)
       ->(opts, v) { opts.data_browser = v},
       "Generate for data browser. Optional - Default is false"
   )
+  op.add_option(
+      "--table-token [table-token]",
+      ->(opts, v) { opts.table_token = v},
+      "Generate specified table. Required"
+  )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.table_token}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.data_browser}}
   end
 end
 
