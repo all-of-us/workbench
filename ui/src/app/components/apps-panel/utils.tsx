@@ -94,7 +94,7 @@ export const findApp = (
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
 export type UserEnvironmentStatus =
-  | 'UNINITIALIZED'
+  | 'UNKNOWN'
   | 'Running'
   | 'Pausing'
   | 'Paused'
@@ -108,7 +108,7 @@ export const fromRuntimeStatus = (
     [status === RuntimeStatus.Stopping, () => 'Pausing'],
     [status === RuntimeStatus.Stopped, () => 'Paused'],
     [status === RuntimeStatus.Starting, () => 'resuming'],
-    () => 'UNINITIALIZED'
+    () => 'UNKNOWN'
   );
 
 export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
@@ -117,5 +117,12 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
     [status === AppStatus.STOPPING, () => 'Pausing'],
     [status === AppStatus.STOPPED, () => 'Paused'],
     [status === AppStatus.STARTING, () => 'Resuming'],
-    () => 'UNINITIALIZED'
+    () => 'UNKNOWN'
   );
+
+// if the status is mappable to a UserEnvironmentStatus, return that
+// else return the original status
+export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
+  const mappedStatus = fromUserAppStatus(status);
+  return mappedStatus === 'UNKNOWN' ? status.toString() : mappedStatus;
+};

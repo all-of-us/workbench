@@ -31,6 +31,7 @@ import {
   defaultCromwellConfig,
   fromRuntimeStatus,
   fromUserAppStatus,
+  fromUserAppStatusWithFallback,
   UIAppType,
 } from './utils';
 
@@ -220,7 +221,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ) : (
         <FlexColumn style={{ alignItems: 'center' }}>
           {/* TODO: keep status updated internally */}
-          <div>status: {initialUserAppInfo?.status} (refresh to update)</div>
+          <div>
+            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}
+            (refresh to update)
+          </div>
           {/* TODO: generalize to other User Apps*/}
           <CromwellButtonRow
             userApp={initialUserAppInfo}
