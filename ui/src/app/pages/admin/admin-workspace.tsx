@@ -156,7 +156,7 @@ const NameCell = (props: NameCellProps) => {
       >
         <Button
           style={styles.previewButton}
-          disabled={!accessReason || !accessReason.trim()}
+          disabled={!accessReason?.trim()}
           onClick={navigateToPreview}
         >
           Preview

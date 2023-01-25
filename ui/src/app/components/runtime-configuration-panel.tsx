@@ -726,23 +726,24 @@ const PanelMain = fp.flow(
                       }}
                     />
                   </FlexRow>
-                  {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
-                    <ErrorMessage iconPosition={'top'} iconSize={16}>
-                      <div>
-                        An error was encountered with your cloud environment.
-                        Please re-attempt creation of the environment and
-                        contact support if the error persists.
-                      </div>
-                      <div>Error details:</div>
-                      {currentRuntime.errors.map((err, idx) => {
-                        return (
-                          <div style={{ fontFamily: 'monospace' }} key={idx}>
-                            {err.errorMessage}
-                          </div>
-                        );
-                      })}
-                    </ErrorMessage>
-                  )}
+                  {currentRuntime?.errors &&
+                    currentRuntime.errors.length > 0 && (
+                      <ErrorMessage iconPosition={'top'} iconSize={16}>
+                        <div>
+                          An error was encountered with your cloud environment.
+                          Please re-attempt creation of the environment and
+                          contact support if the error persists.
+                        </div>
+                        <div>Error details:</div>
+                        {currentRuntime.errors.map((err, idx) => {
+                          return (
+                            <div style={{ fontFamily: 'monospace' }} key={idx}>
+                              {err.errorMessage}
+                            </div>
+                          );
+                        })}
+                      </ErrorMessage>
+                    )}
                   <PresetSelector
                     {...{
                       allowDataproc,
