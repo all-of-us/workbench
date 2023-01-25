@@ -61,9 +61,6 @@ export interface EnvironmentBase {
   shouldShowDisplayTag: boolean;
   // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
   allowTestAccessTokenOverride: boolean;
-  // Whether users should be able to see the Published Workspaces
-  // tab in the Workspace Library.
-  enablePublishedWorkspaces: boolean;
   // Enable Captcha during registration
   enableCaptcha: boolean;
   // Show the AppsPanel component to enable the use of User Apps in the UI
