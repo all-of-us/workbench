@@ -54,7 +54,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 10,
+    size: 50,
     diskType: DiskType.Standard,
   },
 };
