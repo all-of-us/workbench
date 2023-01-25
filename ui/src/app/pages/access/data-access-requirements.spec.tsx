@@ -280,30 +280,11 @@ describe('DataAccessRequirements', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enforceRasLoginGovLinking: false,
       },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
-
-  it(
-    'should return the RAS module from getEligibleModules when ' +
-      'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not',
-    () => {
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableRasLoginGovLinking: false,
-          enforceRasLoginGovLinking: true,
-        },
-      });
-      const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-      expect(
-        enabledModules.includes(AccessModule.RASLINKLOGINGOV)
-      ).toBeTruthy();
-    }
-  );
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
     serverConfigStore.set({
@@ -403,7 +384,6 @@ describe('DataAccessRequirements', () => {
         config: {
           ...defaultServerConfig,
           enableRasLoginGovLinking: false,
-          enforceRasLoginGovLinking: false,
         },
       });
 
@@ -584,7 +564,6 @@ describe('DataAccessRequirements', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enforceRasLoginGovLinking: false,
       },
     });
     const wrapper = component();
