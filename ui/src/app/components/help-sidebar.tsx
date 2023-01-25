@@ -15,7 +15,12 @@ import {
 } from 'generated/fetch';
 
 import { AppsPanel } from 'app/components/apps-panel';
-import { CloseButton, StyledExternalLink } from 'app/components/buttons';
+import {
+  Button,
+  CloseButton,
+  StyledExternalLink,
+} from 'app/components/buttons';
+import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
@@ -29,7 +34,6 @@ import {
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
 import { SelectionList } from 'app/pages/data/cohort/selection-list';
@@ -373,6 +377,7 @@ export const HelpSidebar = fp.flow(
       bodyPadding?: string;
       renderBody: () => JSX.Element;
       showFooter: boolean;
+      showNavigation?: boolean;
     } {
       const { pageKey, workspace, cohortContext } = this.props;
 
@@ -417,9 +422,9 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '45',
             bodyPadding: '0 1.875rem',
             renderBody: () => (
-              <RuntimeConfigurationPanel
+              <ConfigurationPanel
+                {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
-                initialPanelContent={runtimeConfPanelInitialState}
               />
             ),
             showFooter: false,
@@ -440,6 +445,33 @@ export const HelpSidebar = fp.flow(
               />
             ),
             showFooter: false,
+          };
+        case 'cromwellConfig':
+          return {
+            headerPadding: '1.125rem',
+            renderHeader: () => (
+              <div>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  Cromwell Cloud environment
+                </h3>
+              </div>
+            ),
+            bodyWidthRem: '45',
+            bodyPadding: '0 1.875rem',
+            renderBody: () => (
+              <ConfigurationPanel
+                type='cromwell'
+                onClose={() => this.setActiveIcon(null)}
+                runtimeConfPanelInitialState={null}
+              />
+            ),
+            showFooter: false,
+            showNavigation: true,
           };
         case 'notebooksHelp':
           return {
@@ -523,6 +555,13 @@ export const HelpSidebar = fp.flow(
       );
       const shouldRenderWorkspaceMenu =
         !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
+
+      const closeButton = (
+        <CloseButton
+          style={{ marginLeft: 'auto' }}
+          onClose={() => this.setActiveIcon(null)}
+        />
+      );
 
       return (
         <div id='help-sidebar'>
@@ -628,6 +667,25 @@ export const HelpSidebar = fp.flow(
                       }}
                     >
                       <FlexColumn style={{ height: '100%' }}>
+                        {sidebarContent.showNavigation && (
+                          <FlexRow
+                            style={{
+                              padding: '1rem 0.625rem 1rem 0.625rem',
+                              borderBottom: '1px solid #979797',
+                              margin: '0rem 0.5rem',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Button
+                              type='secondary'
+                              onClick={() => console.log('Back')}
+                            >
+                              <i className='pi pi-angle-left' />
+                              BACK
+                            </Button>
+                            {closeButton}
+                          </FlexRow>
+                        )}
                         {sidebarContent.renderHeader && (
                           <FlexRow
                             style={{
@@ -636,10 +694,7 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <CloseButton
-                              style={{ marginLeft: 'auto' }}
-                              onClose={() => this.setActiveIcon(null)}
-                            />
+                            {!sidebarContent.showNavigation && closeButton}
                           </FlexRow>
                         )}
 
