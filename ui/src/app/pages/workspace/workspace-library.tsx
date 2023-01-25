@@ -83,25 +83,6 @@ const styles = reactStyles({
 });
 
 const libraryTabs = {
-  // TODO delete? this is an old feature which was abandoned before launching
-  PUBLISHED_WORKSPACES: {
-    title: 'Published Workspaces',
-    // TODO: Find the right icon when we intend to release this.
-    icon: phenotypeLibrary,
-    filter: (
-      workspaceList: WorkspacePermissions[],
-      featuredWorkspaces: FeaturedWorkspace[]
-    ) => {
-      return workspaceList.filter(
-        (workspace) =>
-          !featuredWorkspaces.find(
-            (featuredWorkspace) =>
-              workspace.workspace.id === featuredWorkspace.id &&
-              workspace.workspace.namespace === featuredWorkspace.namespace
-          )
-      );
-    },
-  },
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
     description: (
