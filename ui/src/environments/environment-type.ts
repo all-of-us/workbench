@@ -66,8 +66,6 @@ export interface EnvironmentBase {
   enablePublishedWorkspaces: boolean;
   // Enable Captcha during registration
   enableCaptcha: boolean;
-  // Enable redirect to v2 demographic survey if not submitted by user
-  enableDemographicSurveyV2Redirect: boolean;
   // Show the AppsPanel component to enable the use of User Apps in the UI
   showAppsPanel: boolean;
   // Show the new Analysis Tab in the UI
