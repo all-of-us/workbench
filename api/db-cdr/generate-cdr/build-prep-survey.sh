@@ -22,7 +22,7 @@ ID_START_MAP["newyearminutesurveyonco_staged.csv"]=42000
 ID_START_MAP["personalandfamilyhealth_staged.csv"]=50000
 
 if [[ -n "${ID_START_MAP[$FILE_NAME]}" ]]; then
-  ID=${ID_START_MAP[$FILE_NAME]}
+  ID="${ID_START_MAP[$FILE_NAME]}"
   echo "$FILE_NAME start ID $ID"
 else
   echo "Failed - Filename $FILE_NAME is not mapped to start ID"
