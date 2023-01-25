@@ -86,8 +86,13 @@ describe('AppsPanel', () => {
         findNodesContainingText(wrapper, 'Active applications').exists()
       ).toBe(activeExpected);
 
+      // this changes based on whether there are active applications above this section
+      const availableExpectedHeader = activeExpected
+        ? 'Launch other applications'
+        : 'Launch applications';
+
       expect(
-        findNodesContainingText(wrapper, 'Launch other applications').exists()
+        findNodesContainingText(wrapper, availableExpectedHeader).exists()
       ).toBe(availableExpected);
     }
   );

@@ -9,8 +9,7 @@ set -e
 
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
-
-export table_names_table="prep_create_tables_list"
+export CREATE_SURVEYS=$3     # Create surveys flag
 
 function deleteAndCreateTable(){
   local table_name=$1
@@ -31,24 +30,6 @@ function deleteAndCreateTable(){
   wait
 }
 
-function createTableForRowCounts(){
-  echo "Creating $table_names_table"
-  ddl="CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.$table_names_table\` AS SELECT '' table_name, null row_count"
-  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$ddl"
-  wait
-}
-
-function updateRowCounts(){
-  local table_name=$1
-  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-    "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$table_names_table\`
-      (table_name, row_count)
-      (SELECT '$table_name' as table_name, count(*) as row_count
-      FROM \`$BQ_PROJECT.$BQ_DATASET.$table_name\`)
-    "
-  wait
-}
-
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3", "R2021Q3R5", "C2021Q2R1", "C2021Q3R6", "R2022Q2R2", "C2022Q2R2", "R2022Q2R6", "SR2022Q2R6", "SC2022Q2R6", "SC2021Q2R1")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
@@ -56,9 +37,6 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   echo "Can't run CDR build indices against $BQ_DATASET!"
   exit 1
 fi
-
-# now that we can run cdr-indexing build - create a temp table to keep track of newly created/retained tables
-createTableForRowCounts
 
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET" | tail -n +3 | cut -d " " -f 3 )
 
@@ -85,12 +63,11 @@ do
         deleteAndCreateTable "$table_name"
       fi
     elif [[ "$table_name" == 'prep_survey' ]]; then
-      if [[ "$TABLE_LIST" != *"prep_survey"* ]]; then
+      if [[ "$CREATE_SURVEYS" == true ]]; then
         deleteAndCreateTable "$table_name"
       else
-        echo "Keeping existing prep_survey table and updating row count"
+        echo "Keeping existing prep_survey table"
       fi
-      updateRowCounts "$table_name"
     else
       deleteAndCreateTable "$table_name"
     fi

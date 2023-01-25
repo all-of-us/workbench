@@ -24,14 +24,8 @@ import {
   exposeAccessTokenSetter,
   setupCustomValidators,
 } from 'app/services/setup';
-import * as u from 'terraui/out/utils';
 
 import { AppRoutingComponent } from './app/routing/app-routing';
-
-// Trivial use in code to avoid pruning.
-if (u.atom('foo').get() !== 'foo') {
-  throw new Error('bad atom implementation');
-}
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:

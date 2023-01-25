@@ -3,10 +3,11 @@ import {
   AppType,
   CreateAppRequest,
   DiskType,
+  RuntimeStatus,
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { switchCase } from 'app/utils';
+import { cond, switchCase } from 'app/utils';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
@@ -90,3 +91,38 @@ export const findApp = (
   appType: UIAppType
 ): UserAppEnvironment =>
   apps?.find((app) => app.appType === toAppType(appType));
+
+// used as a generic equivalence for certain states of RuntimeStatus and AppStatus
+export type UserEnvironmentStatus =
+  | 'UNKNOWN'
+  | 'Running'
+  | 'Pausing'
+  | 'Paused'
+  | 'Resuming';
+
+export const fromRuntimeStatus = (
+  status: RuntimeStatus
+): UserEnvironmentStatus =>
+  cond(
+    [status === RuntimeStatus.Running, () => 'Running'],
+    [status === RuntimeStatus.Stopping, () => 'Pausing'],
+    [status === RuntimeStatus.Stopped, () => 'Paused'],
+    [status === RuntimeStatus.Starting, () => 'Resuming'],
+    () => 'UNKNOWN'
+  );
+
+export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
+  cond(
+    [status === AppStatus.RUNNING, () => 'Running'],
+    [status === AppStatus.STOPPING, () => 'Pausing'],
+    [status === AppStatus.STOPPED, () => 'Paused'],
+    [status === AppStatus.STARTING, () => 'Resuming'],
+    () => 'UNKNOWN'
+  );
+
+// if the status is mappable to a UserEnvironmentStatus, return that
+// else return the original status
+export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
+  const mappedStatus = fromUserAppStatus(status);
+  return mappedStatus === 'UNKNOWN' ? status.toString() : mappedStatus;
+};
