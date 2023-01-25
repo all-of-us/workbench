@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { Runtime, RuntimeStatus } from 'generated/fetch';
+import { AppType, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -134,6 +134,10 @@ const PanelMain = fp.flow(
               workspace,
               analysisConfig,
             }}
+            status={null}
+            onPause={Promise.resolve()}
+            onResume={Promise.resolve()}
+            appType={AppType.CROMWELL}
           />
           <WarningMessage>
             This cost is only for running the Cromwell Engine, there will be

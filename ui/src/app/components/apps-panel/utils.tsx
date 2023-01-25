@@ -94,20 +94,30 @@ export const findApp = (
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
 export type UserEnvironmentStatus =
+  | 'Creating'
+  | 'Deleted'
+  | 'Deleting'
+  | 'Error'
   | 'UNKNOWN'
   | 'Running'
   | 'Pausing'
   | 'Paused'
-  | 'Resuming';
+  | 'Resuming'
+  | 'Updating';
 
 export const fromRuntimeStatus = (
   status: RuntimeStatus
 ): UserEnvironmentStatus =>
   cond(
+    [status === RuntimeStatus.Creating, () => 'Creating'],
+    [status === RuntimeStatus.Deleted, () => 'Deleted'],
+    [status === RuntimeStatus.Deleting, () => 'Deleting'],
+    [status === RuntimeStatus.Error, () => 'Error'],
     [status === RuntimeStatus.Running, () => 'Running'],
     [status === RuntimeStatus.Stopping, () => 'Pausing'],
     [status === RuntimeStatus.Stopped, () => 'Paused'],
     [status === RuntimeStatus.Starting, () => 'Resuming'],
+    [status === RuntimeStatus.Updating, () => 'Updating'],
     () => 'UNKNOWN'
   );
 

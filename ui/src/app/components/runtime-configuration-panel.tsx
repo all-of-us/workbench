@@ -79,6 +79,7 @@ import {
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
+import { UIAppType } from './apps-panel/utils';
 import { CostPredictor } from './cost-predictor';
 
 const { useState, useEffect, Fragment } = React;
@@ -89,6 +90,8 @@ const CreatePanel = ({
   workspace,
   analysisConfig,
   creatorFreeCreditsRemaining,
+  status,
+  setRuntimeStatus,
 }) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
@@ -103,7 +106,11 @@ const CreatePanel = ({
           profile,
           workspace,
           analysisConfig,
+          status,
         }}
+        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+        appType={UIAppType.JUPYTER}
       />
       <FlexRow
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
@@ -552,7 +559,12 @@ const PanelMain = fp.flow(
             () => (
               <Fragment>
                 <CreatePanel
-                  {...{ creatorFreeCreditsRemaining, profile }}
+                  {...{
+                    creatorFreeCreditsRemaining,
+                    profile,
+                    setRuntimeStatus,
+                    status,
+                  }}
                   setPanelContent={(value) => setPanelContent(value)}
                   workspace={workspace}
                   analysisConfig={analysisConfig}
@@ -638,25 +650,32 @@ const PanelMain = fp.flow(
                       profile,
                       workspace,
                       analysisConfig,
+                      status,
                     }}
+                    onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+                    onResume={() =>
+                      setRuntimeStatus(RuntimeStatusRequest.Start)
+                    }
+                    appType={UIAppType.JUPYTER}
                   />
-                  {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
-                    <ErrorMessage iconPosition={'top'} iconSize={16}>
-                      <div>
-                        An error was encountered with your cloud environment.
-                        Please re-attempt creation of the environment and
-                        contact support if the error persists.
-                      </div>
-                      <div>Error details:</div>
-                      {currentRuntime.errors.map((err, idx) => {
-                        return (
-                          <div style={{ fontFamily: 'monospace' }} key={idx}>
-                            {err.errorMessage}
-                          </div>
-                        );
-                      })}
-                    </ErrorMessage>
-                  )}
+                  {currentRuntime?.errors &&
+                    currentRuntime.errors.length > 0 && (
+                      <ErrorMessage iconPosition={'top'} iconSize={16}>
+                        <div>
+                          An error was encountered with your cloud environment.
+                          Please re-attempt creation of the environment and
+                          contact support if the error persists.
+                        </div>
+                        <div>Error details:</div>
+                        {currentRuntime.errors.map((err, idx) => {
+                          return (
+                            <div style={{ fontFamily: 'monospace' }} key={idx}>
+                              {err.errorMessage}
+                            </div>
+                          );
+                        })}
+                      </ErrorMessage>
+                    )}
                   <PresetSelector
                     {...{
                       allowDataproc,

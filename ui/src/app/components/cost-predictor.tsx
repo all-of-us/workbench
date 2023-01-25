@@ -67,12 +67,13 @@ export const CostPredictor = ({
   profile,
   workspace,
   analysisConfig,
+  status,
+  onPause,
+  onResume,
+  appType,
 }) => (
   <FlexRow style={styles.costPredictorWrapper}>
-    <StartStopRuntimeButton
-      workspaceNamespace={workspace.namespace}
-      googleProject={workspace.googleProject}
-    />
+    <StartStopRuntimeButton {...{ status, onPause, onResume, appType }} />
     <CostInfo
       runtimeChanged={false}
       analysisConfig={analysisConfig}
