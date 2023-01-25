@@ -164,7 +164,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
               !profileState.profile.demographicSurveyV2 &&
               !hasDismissedDemographicSurvey ? (
                 <DemographicSurveyPage
-                  routeData={{ title: 'Demographic Page' }}
+                  routeData={{ title: 'Demographic Survey' }}
                 />
               ) : (
                 <SignedInRoutes />
