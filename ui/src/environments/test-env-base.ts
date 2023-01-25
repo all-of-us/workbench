@@ -23,7 +23,7 @@ export const testEnvironmentBase: EnvironmentBase = {
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
   enablePublishedWorkspaces: false,
-  enableDemographicSurveyV2Redirect: false,
+  enableDemographicSurveyV2Redirect: true,
   showAppsPanel: true,
   showNewAnalysisTab: true,
 };
