@@ -208,7 +208,7 @@ function do_ds_visit_occurrence(){
 }
 
 function do_ds_zip_code_socioeconomic(){
-  if [[ "$(bq ls -n 1000 $BQ_PROJECT:$BQ_DATASET)" == *"zip3_ses_map"* ]]; then
+  if [[ "$(bq ls -n 1000 "$BQ_PROJECT":"$BQ_DATASET")" == *"zip3_ses_map"* ]]; then
     echo "ds_zip_code_socioeconomic - inserting data - Controlled Tier"
     bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
