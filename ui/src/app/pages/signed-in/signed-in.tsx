@@ -172,9 +172,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
             </div>
           )}
       </FlexRow>
-      {!hideFooter && environment.enableFooter && (
-        <Footer type={FooterTypeEnum.Workbench} />
-      )}
+      {!hideFooter && <Footer type={FooterTypeEnum.Workbench} />}
       <InactivityMonitor />
       <ZendeskWidget />
     </FlexColumn>

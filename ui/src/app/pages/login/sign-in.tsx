@@ -288,9 +288,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   // TODO: Move Previous, Next, and Submit buttons out of each of the
   // steps and into this component
   render() {
-    const showFooter =
-      environment.enableFooter &&
-      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
+    const showFooter = this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
     return (
       <FlexColumn

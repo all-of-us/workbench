@@ -56,8 +56,6 @@ export interface EnvironmentBase {
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
 
-  // Enable workbench footer on the signed in pages
-  enableFooter: boolean;
   // Indicates if the displayTag should be shown in the web app. If it is true,
   // a small label will be added under the "All of Us" logo in the header.
   shouldShowDisplayTag: boolean;
