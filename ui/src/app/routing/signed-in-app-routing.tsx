@@ -30,6 +30,7 @@ import { UserAudit } from 'app/pages/admin/user-audit';
 import { DemographicSurvey } from 'app/pages/demographic-survey';
 import { Homepage } from 'app/pages/homepage/homepage';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
+import { RuntimesList } from 'app/pages/runtimes-list';
 import {
   WorkspaceEdit,
   WorkspaceEditMode,
@@ -91,6 +92,10 @@ const ProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(ProfileComponent);
+const RuntimesListPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(RuntimesList);
 const UserAdminProfilePage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -327,6 +332,9 @@ export const SignedInRoutes = () => {
         <DataAccessRequirementsPage
           routeData={{ title: 'Data Access Requirements' }}
         />
+      </AppRoute>
+      <AppRoute exact path='/runtimes'>
+        <RuntimesListPage routeData={{ title: 'Runtimes' }} />
       </AppRoute>
       <AppRoute exact path='/library' guards={[getAccessModuleGuard()]}>
         <WorkspaceLibraryPage
