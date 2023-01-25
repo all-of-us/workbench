@@ -51,7 +51,6 @@
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "ngx-popper": "^5.1.7",
     "nouislider": "^14.1.1",
     "nouislider-react": "^3.3.7",
     "outdated-browser-rework": "^2.8.0",

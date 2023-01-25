@@ -6542,13 +6542,6 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-ngx-popper@^5.1.7:
-  version "5.1.7"
-  resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-5.1.7.tgz#36c7924875a28a65f2a7cdb0504145af97cf3a05"
-  integrity sha512-0I3EuLrRmgdPjuE29C5RQY+MEqS1CKUTCm4Mtm4vxrCnAQJW/yfO0R0mz2HSFfR8M0eyU3tp3tOMvmRzZ+sgLQ==
-  dependencies:
-    tslib "^1.7.1"
-
 no-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-3.0.4.tgz#d361fd5c9800f558551a8369fc0dcd4662b6124d"
@@ -9106,7 +9099,7 @@ tsconfig-paths@^3.12.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tslib@^1.7.1, tslib@^1.8.1:
+tslib@^1.8.1:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
