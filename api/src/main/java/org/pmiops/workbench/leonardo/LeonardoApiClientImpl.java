@@ -1,30 +1,16 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserWorkspaceAppDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserWorkspaceApp;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -68,11 +54,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
+
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
+  private static final String CROMWELL_ENABLED = "CROMWELL_ENABLED";
+  private static final String CROMWELL_SERVER = "CROMWELL_SERVER";
+
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
 
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
@@ -112,6 +118,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
   private final WorkspaceDao workspaceDao;
+  private final UserWorkspaceAppDao userWorkspaceAppDao;
 
   @Autowired
   public LeonardoApiClientImpl(
@@ -129,7 +136,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      UserWorkspaceAppDao userWorkspaceAppDao) {
     this.leonardoApiClientFactory = leonardoApiClientFactory;
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
@@ -144,13 +152,16 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
     this.workspaceDao = workspaceDao;
+    this.userWorkspaceAppDao = userWorkspaceAppDao;
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
     WorkbenchConfig config = workbenchConfigProvider.get();
-    String assetsBaseUrl = config.server.apiBaseUrl + "/static";
-
+    //    String assetsBaseUrl =
+    // "https://nsaxena-dot-api-dot-all-of-us-workbench-test.appspot.com/static";
+    String assetsBaseUrl =
+        "https://nsaxena-dot-api-dot-all-of-us-workbench-test.appspot.com/static";
     Map<String, String> nbExtensions =
         new ImmutableMap.Builder<String, String>()
             .put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js")
@@ -551,13 +562,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       leonardoCreateAppRequest.descriptorPath(
           workbenchConfigProvider.get().firecloud.userApps.rStudioDescriptorPath);
     }
-
+    String userAppName =
+        appType.equals(AppType.CROMWELL)
+            ? getCromwellAppName(dbWorkspace)
+            : userProvider.get().generateUserAppName(appType);
     leonardoRetryHandler.run(
         (context) -> {
-          appsApi.createApp(
-              dbWorkspace.getGoogleProject(),
-              userProvider.get().generateUserAppName(appType),
-              leonardoCreateAppRequest);
+          appsApi.createApp(dbWorkspace.getGoogleProject(), userAppName, leonardoCreateAppRequest);
           return null;
         });
   }
@@ -591,6 +602,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
 
+    userWorkspaceAppDao.deleteDbUserWorkspaceAppByAppName(appName);
     leonardoRetryHandler.run(
         (context) -> {
           appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
@@ -634,6 +646,38 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
+    boolean flagEnabled = workbenchConfigProvider.get().featureFlags.enableGkeApp;
+    customEnvironmentVariables.put(
+        CROMWELL_ENABLED, String.valueOf(!flagEnabled));
+    if (flagEnabled) {
+      customEnvironmentVariables.put(CROMWELL_SERVER, getCromwellServer(workspace));
+    }
+
     return customEnvironmentVariables;
+  }
+
+  private String getCromwellServer(DbWorkspace dbWorkspace) {
+    return leonardoApiClientFactory.newApiClient().getBasePath()
+        + "v1/apps/"
+        + dbWorkspace.getGoogleProject()
+        + "/"
+        + getCromwellAppName(dbWorkspace);
+  }
+
+  private String getCromwellAppName(DbWorkspace dbWorkspace) {
+    DbUser dbUser = userProvider.get();
+    Optional<DbUserWorkspaceApp> dbUserWorkspaceApp =
+        userWorkspaceAppDao.findDbUserWorkspaceAppByUserIdAndWorkspaceId(
+            dbUser.getUserId(), dbWorkspace.getWorkspaceId());
+    return dbUserWorkspaceApp.isPresent()
+        ? dbUserWorkspaceApp.get().getAppName()
+        : saveUserAppName(dbWorkspace.getWorkspaceId()).getAppName();
+  }
+
+  private DbUserWorkspaceApp saveUserAppName(long workspaceId) {
+    DbUser dbUser = userProvider.get();
+    return userWorkspaceAppDao.save(
+        new DbUserWorkspaceApp(
+            dbUser.getUserId(), workspaceId, dbUser.generateUserAppName(AppType.CROMWELL)));
   }
 }

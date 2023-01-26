@@ -138,3 +138,8 @@ backend {
 }
 EOF
 fi
+
+if [ "${CROMWELL_ENABLED}" = "true" ] ; then
+    cromshell-alpha
+    cromshell-alpha update-server "${CROMWELL_SERVER}"
+fi
