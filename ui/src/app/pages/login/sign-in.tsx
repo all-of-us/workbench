@@ -446,6 +446,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     const { enableCaptcha } = serverConfigStore.get().config;
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
       const { captcha, errors, loading } = this.state;
+      const invalid = !!errors || (enableCaptcha && !captcha);
       return (
         <div
           style={{
@@ -479,7 +480,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             </Button>
             <TooltipTrigger
               content={
-                (errors || (enableCaptcha && !captcha)) && (
+                invalid && (
                   <DemographicSurveyValidationMessage
                     {...{ captcha, errors }}
                     isAccountCreation
@@ -489,9 +490,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             >
               <Button
                 aria-label='Submit'
-                disabled={
-                  !!errors || (enableCaptcha && !this.state.captcha) || loading
-                }
+                disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
                 onClick={this.onSubmit}
