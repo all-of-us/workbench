@@ -40,7 +40,12 @@ function renderResourceCard(props: RenderResourceCardProps) {
     ],
     [
       isNotebook,
-      () => <NotebookResourceCard {...{ ...props, inactiveBilling }} />,
+      () => (
+        <NotebookResourceCard
+          {...{ ...props }}
+          disableDuplicate={inactiveBilling}
+        />
+      ),
     ],
   ])(resource);
 }

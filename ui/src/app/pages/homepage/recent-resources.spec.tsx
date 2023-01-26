@@ -2,11 +2,7 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 
-import {
-  UserMetricsApi,
-  WorkspaceAccessLevel,
-  WorkspaceResponse,
-} from 'generated/fetch';
+import { UserMetricsApi, WorkspaceAccessLevel } from 'generated/fetch';
 
 import {
   MODIFIED_DATE_COLUMN_NUMBER,
