@@ -4739,6 +4739,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable demographic survey v2 in the UI.
+      enableCaptcha:
+        type: boolean
+        default: true
+        description: Whether a captcha check is part of the new user registration process
 
   RuntimeImage:
     type: object

@@ -52,8 +52,6 @@ export interface EnvironmentBase {
   // Whether users should be able to see the Published Workspaces
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;
-  // Enable Captcha during registration
-  enableCaptcha: boolean;
   // Captcha site key registered with the domain
   captchaSiteKey: string;
 
