@@ -646,8 +646,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
-    // Add scripts to execute cromshell and update-server to point to user CROMWELL server
     // if enableGkeApp is true
+    // Add variable with CROMWELL SERVER information to enable user to use cromwell as APP in
+    // jupyter
     boolean flagEnabled = workbenchConfigProvider.get().featureFlags.enableGkeApp;
     customEnvironmentVariables.put(CROMWELL_ENABLED, String.valueOf(flagEnabled));
     if (flagEnabled) {
