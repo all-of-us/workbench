@@ -443,8 +443,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private renderNavigation(currentStep: SignInStep) {
-    const { enableCaptcha } = serverConfigStore.get().config;
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
+      const { enableCaptcha } = serverConfigStore.get().config;
       const { captcha, errors, loading } = this.state;
       const invalid = !!errors || (enableCaptcha && !captcha);
       return (
