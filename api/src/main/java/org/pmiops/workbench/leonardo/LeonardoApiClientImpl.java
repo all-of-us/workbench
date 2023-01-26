@@ -647,8 +647,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     boolean flagEnabled = workbenchConfigProvider.get().featureFlags.enableGkeApp;
-    customEnvironmentVariables.put(
-        CROMWELL_ENABLED, String.valueOf(!flagEnabled));
+    customEnvironmentVariables.put(CROMWELL_ENABLED, String.valueOf(flagEnabled));
     if (flagEnabled) {
       customEnvironmentVariables.put(CROMWELL_SERVER, getCromwellServer(workspace));
     }
@@ -666,18 +665,20 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private String getCromwellAppName(DbWorkspace dbWorkspace) {
     DbUser dbUser = userProvider.get();
-    Optional<DbUserWorkspaceApp> dbUserWorkspaceApp =
-        userWorkspaceAppDao.findDbUserWorkspaceAppByUserIdAndWorkspaceId(
-            dbUser.getUserId(), dbWorkspace.getWorkspaceId());
-    return dbUserWorkspaceApp.isPresent()
-        ? dbUserWorkspaceApp.get().getAppName()
-        : saveUserAppName(dbWorkspace.getWorkspaceId()).getAppName();
+    long workspaceId = dbWorkspace.getWorkspaceId();
+    return userWorkspaceAppDao
+        .findDbUserWorkspaceAppByUserIdAndWorkspaceId(dbUser.getUserId(), workspaceId)
+        .orElseGet(() -> saveUserAppName(workspaceId))
+        .getAppName();
   }
 
   private DbUserWorkspaceApp saveUserAppName(long workspaceId) {
     DbUser dbUser = userProvider.get();
     return userWorkspaceAppDao.save(
         new DbUserWorkspaceApp(
-            dbUser.getUserId(), workspaceId, dbUser.generateUserAppName(AppType.CROMWELL)));
+            dbUser.getUserId(),
+            workspaceId,
+            dbUser.generateUserAppName(AppType.CROMWELL),
+            AppType.CROMWELL.toString()));
   }
 }

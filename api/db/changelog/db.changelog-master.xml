@@ -218,7 +218,7 @@
   <include file="changelog/db.changelog-208-add-new-user-satisfaction-survey.xml"/>
   <include file="changelog/db.changelog-209-drop-admin-action-history-table.xml"/>
   <include file="changelog/db.changelog-210-add-new-user-satisfaction-survey-one-time-code.xml"/>
-  <include file="changelog/db.changelog-211-store-cromwell-server.xml"/>
+  <include file="changelog/db.changelog-211-app-info.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

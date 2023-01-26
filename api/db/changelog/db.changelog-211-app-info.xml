@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="nsaxena" id="changelog-211-store-cromwell-server">
+  <changeSet author="nsaxena" id="changelog-211-app-info">
     <createTable tableName="user_workspace_app">
       <column name="id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
@@ -26,6 +26,11 @@
         />
       </column>
       <column name="app_name" type="varchar(100)">
+        <constraints
+            nullable="false"
+        />
+      </column>
+      <column name="app_type" type="ENUM('CROMWELL')">
         <constraints
             nullable="false"
         />

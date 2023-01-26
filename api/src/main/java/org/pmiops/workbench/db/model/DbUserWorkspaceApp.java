@@ -14,13 +14,15 @@ public class DbUserWorkspaceApp {
   private long userId;
   private long workspaceId;
   private String appName;
+  private String appType;
 
   public DbUserWorkspaceApp() {}
 
-  public DbUserWorkspaceApp(long userId, long workspaceId, String appName) {
+  public DbUserWorkspaceApp(long userId, long workspaceId, String appName, String appType) {
     this.userId = userId;
     this.workspaceId = workspaceId;
     this.appName = appName;
+    this.appType = appType;
   }
 
   @Id
@@ -59,5 +61,14 @@ public class DbUserWorkspaceApp {
 
   public void setAppName(String cromwellAppName) {
     this.appName = cromwellAppName;
+  }
+
+  @Column(name = "app_type")
+  public String getAppType() {
+    return appType;
+  }
+
+  public void setAppType(String appType) {
+    this.appType = appType;
   }
 }
