@@ -1,7 +1,8 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AppType, Runtime, RuntimeStatus } from 'generated/fetch';
+import { AppType } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -13,30 +14,13 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { findCdrVersion } from 'app/utils/cdr-versions';
-import {
-  ComputeType,
-  validLeoDataprocMasterMachineTypes,
-  validLeoGceMachineTypes,
-} from 'app/utils/machines';
-import { applyPresetOverride } from 'app/utils/runtime-presets';
-import {
-  AnalysisDiff,
-  diffsToUpdateMessaging,
-  getAnalysisConfigDiffs,
-  isVisible,
-  maybeWithExistingDisk,
-  toAnalysisConfig,
-  UpdateMessaging,
-  useCustomRuntime,
-  useRuntimeStatus,
-  withAnalysisConfigDefaults,
-} from 'app/utils/runtime-utils';
-import { diskStore, runtimeStore, useStore } from 'app/utils/stores';
+import { findMachineByName } from 'app/utils/machines';
+import { runtimeStore, useStore } from 'app/utils/stores';
 
+import { defaultCromwellConfig } from './apps-panel/utils';
 import { CostPredictor } from './cost-predictor';
 
-const { useState, useEffect } = React;
+const { useState } = React;
 
 const PanelMain = fp.flow(
   withCdrVersions(),
@@ -44,82 +28,12 @@ const PanelMain = fp.flow(
   withUserProfile()
 )(
   ({
-    cdrVersionTiersResponse,
+    analysisConfig,
     workspace,
     profileState,
     creatorFreeCreditsRemaining,
   }) => {
     const { profile } = profileState;
-    const { namespace, cdrVersionId, googleProject } = workspace;
-
-    const { hasWgsData: allowDataproc } = findCdrVersion(
-      cdrVersionId,
-      cdrVersionTiersResponse
-    ) || { hasWgsData: false };
-
-    const { gcePersistentDisk } = useStore(diskStore);
-    let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
-      useCustomRuntime(namespace, gcePersistentDisk);
-
-    // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
-      currentRuntime = applyPresetOverride(
-        // The attached disk information is lost for deleted runtimes. In any case,
-        // by default we want to offer that the user reattach their existing disk,
-        // if any and if the configuration allows it.
-        maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
-      );
-    }
-
-    const [status, setRuntimeStatus] = useRuntimeStatus(
-      namespace,
-      googleProject
-    );
-
-    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
-    const existingRuntime =
-      pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
-    const existingAnalysisConfig = toAnalysisConfig(
-      existingRuntime,
-      gcePersistentDisk
-    );
-
-    const [analysisConfig, setAnalysisConfig] = useState(
-      withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
-    );
-
-    const validMainMachineTypes =
-      analysisConfig.computeType === ComputeType.Standard
-        ? validLeoGceMachineTypes
-        : validLeoDataprocMasterMachineTypes;
-    // The compute type affects the set of valid machine types, so revert to the
-    // default machine type if switching compute types would invalidate the main
-    // machine type choice.
-    useEffect(() => {
-      if (
-        !validMainMachineTypes.find(
-          ({ name }) => name === analysisConfig.machine.name
-        )
-      ) {
-        setAnalysisConfig({
-          ...analysisConfig,
-          machine: existingAnalysisConfig.machine,
-        });
-      }
-    }, [analysisConfig.computeType]);
-
-    const runtimeExists = (status && isVisible(status)) || !!pendingRuntime;
-
-    let configDiffs: AnalysisDiff[] = [];
-    let updateMessaging: UpdateMessaging;
-    if (runtimeExists) {
-      configDiffs = getAnalysisConfigDiffs(
-        existingAnalysisConfig,
-        analysisConfig
-      );
-      updateMessaging = diffsToUpdateMessaging(configDiffs);
-    }
 
     return (
       <FlexColumn style={{ height: '100%' }}>
@@ -225,9 +139,27 @@ export const CromwellConfigurationPanel = ({
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
 }) => {
+  const [analysisConfig, setAnalysisConfig] = useState({});
   const { runtimeLoaded } = useStore(runtimeStore);
 
-  if (!runtimeLoaded) {
+  useEffect(
+    () =>
+      setAnalysisConfig({
+        machine: findMachineByName(
+          defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+        ),
+        diskConfig: {
+          size: defaultCromwellConfig.persistentDiskRequest.size,
+          detachable: true,
+          detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
+        },
+        numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
+      }),
+    []
+  );
+
+  const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
+  if (!runtimeLoaded && !analysisConfigLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
   }
 
@@ -240,7 +172,12 @@ export const CromwellConfigurationPanel = ({
         with the workflow.
       </div>
       <PanelMain
-        {...{ onClose, initialPanelContent, creatorFreeCreditsRemaining }}
+        {...{
+          analysisConfig,
+          onClose,
+          initialPanelContent,
+          creatorFreeCreditsRemaining,
+        }}
       />
     </FlexColumn>
   );

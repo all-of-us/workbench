@@ -75,8 +75,8 @@ export const CostPredictor = ({
   <FlexRow style={styles.costPredictorWrapper}>
     <StartStopRuntimeButton {...{ status, onPause, onResume, appType }} />
     <CostInfo
+      {...{ analysisConfig }}
       runtimeChanged={false}
-      analysisConfig={analysisConfig}
       currentUser={profile.username}
       workspace={workspace}
       creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}

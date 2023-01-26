@@ -111,13 +111,14 @@ export interface AnalysisConfig {
   computeType: ComputeType;
   machine: Machine;
   diskConfig: DiskConfig;
-  // This should only be populated if !diskconfig.detachable.
+  // This should only be populated if !diskconfig.detachable. (What does this mean?)
   detachedDisk: Disk;
   // TODO: Refactor this type to an intermediate representation.
   dataprocConfig: DataprocConfig;
   // TODO: Refactor this type to an intermediate representation.
   gpuConfig: GpuConfig;
   autopauseThreshold: number;
+  numNodes?: number;
 }
 
 export interface UpdateMessaging {
