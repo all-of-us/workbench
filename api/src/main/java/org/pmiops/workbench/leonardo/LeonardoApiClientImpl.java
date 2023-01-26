@@ -158,10 +158,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
     WorkbenchConfig config = workbenchConfigProvider.get();
-    //    String assetsBaseUrl =
-    // "https://nsaxena-dot-api-dot-all-of-us-workbench-test.appspot.com/static";
-    String assetsBaseUrl =
-        "https://nsaxena-dot-api-dot-all-of-us-workbench-test.appspot.com/static";
+    String assetsBaseUrl = config.server.apiBaseUrl + "/static";
+
     Map<String, String> nbExtensions =
         new ImmutableMap.Builder<String, String>()
             .put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js")
@@ -562,6 +560,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       leonardoCreateAppRequest.descriptorPath(
           workbenchConfigProvider.get().firecloud.userApps.rStudioDescriptorPath);
     }
+
+    // For CROMWELL save the generatedUserAppName in DB
     String userAppName =
         appType.equals(AppType.CROMWELL)
             ? getCromwellAppName(dbWorkspace)
@@ -602,12 +602,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
 
-    userWorkspaceAppDao.deleteDbUserWorkspaceAppByAppName(appName);
     leonardoRetryHandler.run(
         (context) -> {
           appsApi.deleteApp(dbWorkspace.getGoogleProject(), appName, deleteDisk);
           return null;
         });
+
+    userWorkspaceAppDao.deleteDbUserWorkspaceAppByAppName(appName);
   }
 
   @Override
@@ -646,6 +647,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
+    // Add scripts to execute cromshell and update-server to point to user CROMWELL server
+    // if enableGkeApp is true
     boolean flagEnabled = workbenchConfigProvider.get().featureFlags.enableGkeApp;
     customEnvironmentVariables.put(CROMWELL_ENABLED, String.valueOf(flagEnabled));
     if (flagEnabled) {
@@ -656,6 +659,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private String getCromwellServer(DbWorkspace dbWorkspace) {
+    // Store the appName in DATABASE so that jupyter and cromwell server can use the same server information
     return leonardoApiClientFactory.newApiClient().getBasePath()
         + "v1/apps/"
         + dbWorkspace.getGoogleProject()
