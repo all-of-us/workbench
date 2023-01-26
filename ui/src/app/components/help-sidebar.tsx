@@ -450,18 +450,28 @@ export const HelpSidebar = fp.flow(
           return {
             headerPadding: '1.125rem',
             renderHeader: () => (
-              <div>
+              <div style={{ display: 'flex' }}>
                 <h3
                   style={{
                     ...styles.sectionTitle,
                     lineHeight: 1.75,
                   }}
                 >
-                  Cromwell Cloud environment
+                  Cromwell Cloud Environment
                 </h3>
+                <div
+                  style={{
+                    border: `2px ${colors.primary} solid`,
+                    borderRadius: '8px',
+                    padding: '0 0.5rem',
+                    marginLeft: '0.5rem',
+                  }}
+                >
+                  Beta
+                </div>
               </div>
             ),
-            bodyWidthRem: '45',
+            bodyWidthRem: '55',
             bodyPadding: '0 1.875rem',
             renderBody: () => (
               <ConfigurationPanel

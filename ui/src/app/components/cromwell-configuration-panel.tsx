@@ -22,6 +22,14 @@ import { CostPredictor } from './cost-predictor';
 
 const { useState } = React;
 
+const cromwellSupportArticles = [
+  { text: 'How to run Cromwell in All of Us workbench?', link: '#' },
+  { text: 'Cromwell documentation', link: '#' },
+  { text: 'Workflow and WDL', link: '#' },
+  { text: 'Running and Autopause', link: '#' },
+  { text: 'Storage options', link: '#' },
+];
+
 const PanelMain = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
@@ -71,9 +79,10 @@ const PanelMain = fp.flow(
           </WarningMessage>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+          <div style={{ fontWeight: 'bold' }}>Cromwell version: 76</div>
           <FlexRow style={{ alignItems: 'center' }}>
             <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-              Cromwell version: 76
+              Cloud compute profile
             </div>
             <div
               style={{
@@ -101,34 +110,28 @@ const PanelMain = fp.flow(
           </FlexRow>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
-          <ol>
-            <li>
-              <a href='#'>How to run Cromwell in All of Us workbench?</a>
-            </li>
-            <li>
-              <a href='#'>Cromwell documentation</a>
-            </li>
-            <li>
-              <a href='#'>Workflow and WDL</a>
-            </li>
-            <li>
-              <a href='#'>Running and Autopause</a>
-            </li>
-            <li>
-              <a href='#'>Storage options</a>
-            </li>
-          </ol>
+          <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
+          {cromwellSupportArticles.map((article, index) => (
+            <a href={article.link} style={{ display: 'block' }}>
+              {index + 1}. {article.text}
+            </a>
+          ))}
         </div>
-        <FlexRow style={{ justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <FlexRow
+          style={{
+            marginTop: '1rem',
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ margin: '0rem 1rem 1rem 0rem ' }}>
+            <div style={{ fontWeight: 'bold' }}>Next Steps:</div>
+            <div>
+              You can interact with the workflow by using the Cromshell in
+              Jupyter Terminal or Jupyter notebook
+            </div>
+          </div>
           <Button>Start</Button>
         </FlexRow>
-        <div style={{ margin: 'auto 0 2rem 0' }}>
-          <div style={{ fontWeight: 'bold' }}>Next Steps:</div>
-          <div>
-            You can interact with the workflow by using the Cromshell in Jupyter
-            Terminal or Jupyter notebook
-          </div>
-        </div>
       </FlexColumn>
     );
   }
