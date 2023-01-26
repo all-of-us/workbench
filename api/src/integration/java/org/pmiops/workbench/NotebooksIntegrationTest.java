@@ -3,6 +3,7 @@ package org.pmiops.workbench;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.db.dao.UserWorkspaceAppDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
@@ -33,6 +34,7 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @MockBean LeonardoMapper leonardoMapper;
   @MockBean WorkspaceDao workspaceDao;
   @MockBean WorkspaceAuthService workspaceAuthService;
+  @MockBean UserWorkspaceAppDao userWorkspaceAppDao;
 
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
