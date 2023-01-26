@@ -590,22 +590,17 @@ def build_prep_survey(cmd_name, *args)
       "Filename"
   )
   op.add_option(
-      "--id-start-block [id-start-block]",
-      ->(opts, v) { opts.id_start_block = v},
-      "ID start block"
-  )
-  op.add_option(
     "--create-surveys [create-surveys]",
     ->(opts, v) { opts.create_surveys = v},
     "Create all surveys. Optional - Default is true"
   )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.filename and opts.id_start_block}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.filename}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename} #{op.opts.id_start_block} #{op.opts.create_surveys}}
+    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename} #{op.opts.create_surveys}}
   end
 end
 
