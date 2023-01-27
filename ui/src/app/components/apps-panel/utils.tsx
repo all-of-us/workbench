@@ -124,5 +124,5 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
 // else return the original status
 export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
   const mappedStatus = fromUserAppStatus(status);
-  return mappedStatus === 'UNKNOWN' ? status.toString() : mappedStatus;
+  return mappedStatus === 'UNKNOWN' ? status?.toString() : mappedStatus;
 };
