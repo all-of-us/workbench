@@ -235,19 +235,6 @@ input[type=text]:focus, input[type=password]:focus {
   background-color: #FFEEEE;
 }
 
-/*
- * ngx-popper => default background is transparent.
- * That is usually unusable.  Also we'd rather it wrap
- * at some point than just grow infinitely wide
- */
-.ngxp__container {
-  background: #fff;
-  max-width: 18rem;
-  /* I dunno why THEY don't set these /whatever */
-  position: relative;
-  z-index: 999;
-}
-
 /**
  * Style overrides for noUiSlider
  */

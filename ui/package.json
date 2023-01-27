@@ -24,7 +24,6 @@
   "private": true,
   "dependencies": {
     "@clr/icons": "^0.11.12",
-    "@clr/ui": "^0.11.12",
     "@fortawesome/fontawesome-free": "^6.1.2",
     "@fortawesome/fontawesome-pro": "^6.1.2",
     "@fortawesome/fontawesome-svg-core": "^6.1.2",
@@ -52,7 +51,6 @@
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "ngx-popper": "^5.1.7",
     "nouislider": "^14.1.1",
     "nouislider-react": "^3.3.7",
     "outdated-browser-rework": "^2.8.0",
@@ -96,7 +94,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
-    "lolex": "^3.0.0",
     "prettier": "^2.8.3",
     "react-app-rewired": "^2.1.9",
     "react-scripts": "^5.0.0",
