@@ -560,7 +560,7 @@ jobs:
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
               --key-file circle-sa-key.json \
-              --promote
+              --promote --quiet
 
   api-deploy-to-test:
     executor: workbench-executor
