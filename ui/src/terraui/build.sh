@@ -13,8 +13,8 @@ cd "$WD"
 REPODIR=.repo
 
 if [[ -e $REPODIR ]]; then
-  set +e; (cd $REPODIR; git log $TERRA_UI_GIT_HASH..$TERRA_UI_GIT_HASH); set -e
-  if [ $? -eq 0 ]; then
+  gitlogexitcode=$(cd $REPODIR; git log $TERRA_UI_GIT_HASH..$TERRA_UI_GIT_HASH>/dev/null; echo $?)
+  if [[ $gitlogexitcode == 0 ]]; then
     echo Repo exists and is current. Delete "$WD"/$REPODIR to rebuild.
     exit 0
   else
