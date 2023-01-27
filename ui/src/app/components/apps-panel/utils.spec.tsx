@@ -13,15 +13,12 @@ describe('AppsPanel utils', () => {
     [RuntimeStatus.Stopping, 'Pausing'],
     [RuntimeStatus.Stopped, 'Paused'],
     [RuntimeStatus.Starting, 'Resuming'],
-
-    // no other RuntimeStatuses are mapped currently
-
-    [RuntimeStatus.Creating, 'UNKNOWN'],
-    [RuntimeStatus.Deleted, 'UNKNOWN'],
-    [RuntimeStatus.Deleting, 'UNKNOWN'],
-    [RuntimeStatus.Error, 'UNKNOWN'],
+    [RuntimeStatus.Creating, 'Creating'],
+    [RuntimeStatus.Deleted, 'Deleted'],
+    [RuntimeStatus.Deleting, 'Deleting'],
+    [RuntimeStatus.Error, 'Error'],
+    [RuntimeStatus.Updating, 'Updating'],
     [RuntimeStatus.Unknown, 'UNKNOWN'],
-    [RuntimeStatus.Updating, 'UNKNOWN'],
 
     [undefined, 'UNKNOWN'],
     [null, 'UNKNOWN'],
