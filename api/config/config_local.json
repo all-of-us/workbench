@@ -139,7 +139,7 @@
     "exportDemoSurveyV2": true
   },
   "captcha": {
-    "enableCaptcha": true,
+    "enableCaptcha": false,
     "useTestCaptcha": true
   },
   "reporting": {

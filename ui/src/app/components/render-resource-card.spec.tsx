@@ -9,6 +9,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubDataSet } from 'testing/stubs/data-set-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { renderResourceCard } from './render-resource-card';
 
@@ -31,6 +32,7 @@ describe('renderResourceCard', () => {
 
     const card = renderResourceCard({
       resource: testCohort,
+      workspace: workspaceDataStub,
       existingNameList: [],
       onUpdate: async () => {},
       menuOnly: false,
@@ -46,6 +48,7 @@ describe('renderResourceCard', () => {
   it('does not render a card for an invalid resource', () => {
     const card = renderResourceCard({
       resource: stubResource,
+      workspace: workspaceDataStub,
       existingNameList: [],
       onUpdate: async () => {},
       menuOnly: false,
@@ -61,6 +64,7 @@ describe('renderResourceCard', () => {
 
     const menu = renderResourceCard({
       resource: testCohort,
+      workspace: workspaceDataStub,
       existingNameList: [],
       onUpdate: async () => {},
       menuOnly: true,
@@ -81,6 +85,7 @@ describe('renderResourceCard', () => {
 
     const menu = renderResourceCard({
       resource: testDataSet,
+      workspace: workspaceDataStub,
       existingNameList: [],
       onUpdate: async () => {},
       menuOnly: true,
@@ -108,6 +113,7 @@ describe('renderResourceCard', () => {
 
     const menu = renderResourceCard({
       resource: testDataSet,
+      workspace: workspaceDataStub,
       existingNameList: [],
       onUpdate: async () => {},
       menuOnly: true,

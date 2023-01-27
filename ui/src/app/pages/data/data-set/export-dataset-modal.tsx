@@ -33,7 +33,7 @@ import {
 } from 'app/pages/analysis/util';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, summarizeErrors, withCurrentWorkspace } from 'app/utils';
+import { reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
@@ -44,10 +44,6 @@ import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 interface Props {
   closeFunction: Function;
   dataset: DataSet;
-}
-
-// HocProps includes all props that are inherited through HOC
-interface HocProps extends Props {
   workspace: WorkspaceData;
 }
 
@@ -61,9 +57,11 @@ const styles = reactStyles({
   },
 });
 
-export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
-  withCurrentWorkspace()
-)(({ workspace, dataset, closeFunction }: HocProps) => {
+export const ExportDatasetModal = ({
+  workspace,
+  dataset,
+  closeFunction,
+}: Props) => {
   const [existingNotebooks, setExistingNotebooks] = useState(undefined);
   const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
   const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
@@ -395,4 +393,4 @@ export const ExportDatasetModal: (props: Props) => JSX.Element = fp.flow(
       </FlexRow>
     </AnimatedModal>
   );
-});
+};

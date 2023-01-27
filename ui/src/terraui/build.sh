@@ -17,6 +17,9 @@ if [[ -e $REPODIR ]]; then
   if [ $? -eq 0 ]; then
     echo Repo exists and is current. Delete "$WD"/$REPODIR to rebuild.
     exit 0
+  else
+    echo Repo is out of date. Delete "$WD"/$REPODIR to rebuild.
+    exit 1
   fi
 fi
 

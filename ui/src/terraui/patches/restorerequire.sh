@@ -5,4 +5,10 @@
 
 set -v
 
-vi -e -s -c '%s/__require("react")/require("react")' -c wq $@
+node patches/patch.mjs '__require[(]"react"[)]' "() => 'require(\"react\")'" "$@"
+
+# Webpack warns if any indirect requires are present even if they are not used.
+# There are two offending usages.
+
+node patches/patch.mjs '[?] require ' "() => '? () => null '" "$@"
+node patches/patch.mjs 'return require.apply' "() => 'return (() => null)'" "$@"

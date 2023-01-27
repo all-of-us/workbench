@@ -2067,6 +2067,7 @@ export const DatasetPage = fp.flow(
             ModalState.Export,
             () => (
               <ExportDatasetModal
+                {...{ workspace }}
                 dataset={dataSet}
                 closeFunction={() => setModalState(ModalState.None)}
               />
