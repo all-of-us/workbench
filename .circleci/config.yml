@@ -545,6 +545,7 @@ jobs:
 
   ui-deploy-to-test:
     executor: workbench-executor
+    resource_class: large
     steps:
       - checkout-code
       - attach_workspace:
