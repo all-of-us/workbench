@@ -17,7 +17,7 @@ fi
 ################################################
 # insert person data into cb_search_person
 ################################################
-if [[ ! "$BQ_DATASET" =~ /^C|^SC/ ]]
+if [[ ! "$BQ_DATASET" =~ (^C|^SC).* ]]
 then
 echo "Inserting person data into cb_search_person for Registered Tier (RT)"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
