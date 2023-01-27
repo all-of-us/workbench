@@ -5,4 +5,4 @@
 
 set -v
 
-vi -e -c '%s/[{]\s*ReactComponent\s\+as\s\+\(\S\+\)\s*[}]/\1' -c wq $@
+node patches/patch.mjs '[{]\s*ReactComponent\s+as\s+(\S+)\s*[}]' "(m, s) => s" "$@"

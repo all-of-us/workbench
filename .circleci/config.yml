@@ -460,7 +460,7 @@ jobs:
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
-          command: CI=false ./project.rb build --environment test
+          command: ./project.rb build --environment test
       - run:
           # Lint last; it's more important to surface test failures early.
           name: Lint typescript

@@ -4,4 +4,4 @@
 
 set -v
 
-vi -e -s -c '%s/"target": "es5"/"target": "es2022"' -c wq $@
+node patches/patch.mjs '"target": "es5"' "() => '\"target\": \"es2022\"'" "$@"

@@ -4,4 +4,4 @@
 
 set -v
 
-vi -e -s -c '%s/- .\/.hooks\/plugin-warning-logger.js/' -c wq $@
+node patches/patch.mjs '- [.][/][.]hooks[/]plugin-warning-logger[.]js' "() => ''" "$@"
