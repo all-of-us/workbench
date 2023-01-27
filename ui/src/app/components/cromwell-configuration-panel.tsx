@@ -9,6 +9,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { Spinner } from 'app/components/spinners';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 import {
   withCdrVersions,
   withCurrentWorkspace,
@@ -40,6 +41,7 @@ const PanelMain = fp.flow(
     workspace,
     profileState,
     creatorFreeCreditsRemaining,
+    onClose,
   }) => {
     const { profile } = profileState;
 
@@ -130,7 +132,14 @@ const PanelMain = fp.flow(
               Jupyter Terminal or Jupyter notebook
             </div>
           </div>
-          <Button>Start</Button>
+          <Button
+            onClick={() => {
+              appsApi().createApp(workspace.namespace, defaultCromwellConfig);
+              onClose();
+            }}
+          >
+            Start
+          </Button>
         </FlexRow>
       </FlexColumn>
     );
@@ -162,7 +171,7 @@ export const CromwellConfigurationPanel = ({
   );
 
   const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
-  if (!runtimeLoaded && !analysisConfigLoaded) {
+  if (!runtimeLoaded || !analysisConfigLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
   }
 

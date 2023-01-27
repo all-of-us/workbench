@@ -46,7 +46,7 @@ const PanelMain = fp.flow(
         </div>
       ) : (
         <CromwellConfigurationPanel
-          {...{ onClose, creatorFreeCreditsRemaining }}
+          {...{ onClose, creatorFreeCreditsRemaining, workspace }}
         />
       )}
     </div>

@@ -13,6 +13,7 @@ import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,
   RuntimeStatusRequest,
@@ -28,7 +29,6 @@ import { RuntimeCost } from './runtime-cost';
 import {
   canCreateApp,
   canDeleteApp,
-  defaultCromwellConfig,
   fromRuntimeStatus,
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
@@ -115,8 +115,7 @@ const CromwellButtonRow = (props: {
   userApp: UserAppEnvironment;
   workspaceNamespace: string;
 }) => {
-  const { userApp, workspaceNamespace } = props;
-  const [launching, setLaunching] = useState(false);
+  const { userApp } = props;
 
   return (
     <FlexRow>
@@ -131,19 +130,16 @@ const CromwellButtonRow = (props: {
       </TooltipTrigger>
       <PauseUserAppButton {...{ userApp }} />
       <TooltipTrigger
-        disabled={!launching && canCreateApp(userApp)}
+        disabled={canCreateApp(userApp)}
         content='A Cromwell app exists or is being created'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
           <AppsPanelButton
-            disabled={launching || !canCreateApp(userApp)}
-            onClick={() => {
-              setLaunching(true);
-              appsApi().createApp(workspaceNamespace, defaultCromwellConfig);
-            }}
+            disabled={!canCreateApp(userApp)}
+            onClick={() => setSidebarActiveIconStore.next('cromwellConfig')}
             icon={faPlay}
-            buttonText={launching ? 'Launching' : 'Launch'}
+            buttonText='Launch'
           />
         </div>
       </TooltipTrigger>
