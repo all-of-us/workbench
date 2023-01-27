@@ -133,6 +133,8 @@ const PanelMain = fp.flow(
             </div>
           </div>
           <Button
+            id='cromwell-cloud-environment-create-button'
+            aria-label='cromwell cloud environment create button'
             onClick={() => {
               appsApi().createApp(workspace.namespace, defaultCromwellConfig);
               onClose();
@@ -172,11 +174,17 @@ export const CromwellConfigurationPanel = ({
 
   const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
   if (!runtimeLoaded || !analysisConfigLoaded) {
-    return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
+    return (
+      <Spinner
+        id='cromwell-configuration-panel-spinner'
+        aria-label='spinner showing that cromwell configuration panel is loading'
+        style={{ width: '100%', marginTop: '7.5rem' }}
+      />
+    );
   }
 
   return (
-    <FlexColumn style={{ height: '100%' }}>
+    <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
       <div>
         A cloud environment consists of application configuration, cloud compute
         and persistent disk(s). This is the server version of Cromwell only. You

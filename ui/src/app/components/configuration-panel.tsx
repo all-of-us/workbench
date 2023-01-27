@@ -36,7 +36,7 @@ const PanelMain = fp.flow(
   }, []);
 
   return (
-    <div>
+    <div id='configuration-panel-container'>
       {type === 'runtime' ? (
         <div>
           <RuntimeConfigurationPanel
