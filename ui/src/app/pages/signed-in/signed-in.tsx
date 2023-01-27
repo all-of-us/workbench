@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
-import { environment } from 'environments/environment';
 import { withRouteData } from 'app/components/app-router';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
@@ -122,8 +121,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     checkStoresLoaded();
   }, [profileState, tiers]);
 
-  const { enableDemographicSurveyV2Redirect } = environment;
-
   // DEMOGRAPHIC_SURVEY_SESSION_KEY is set in session when the user selects Maybe Later Button on
   // Demographic Survey Page and is cleared out on signOut.
   // So, if this key exist, it means user should not be redirected to demographic survey page.
@@ -159,12 +156,11 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {enableDemographicSurveyV2Redirect &&
-              pastSurveyDueDate &&
+              {pastSurveyDueDate &&
               !profileState.profile.demographicSurveyV2 &&
               !hasDismissedDemographicSurvey ? (
                 <DemographicSurveyPage
-                  routeData={{ title: 'Demographic Page' }}
+                  routeData={{ title: 'Demographic Survey' }}
                 />
               ) : (
                 <SignedInRoutes />
@@ -172,9 +168,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
             </div>
           )}
       </FlexRow>
-      {!hideFooter && environment.enableFooter && (
-        <Footer type={FooterTypeEnum.Workbench} />
-      )}
+      {!hideFooter && <Footer type={FooterTypeEnum.Workbench} />}
       <InactivityMonitor />
       <ZendeskWidget />
     </FlexColumn>

@@ -16,9 +16,6 @@ export interface EnvironmentBase {
   // The OAuth2 client ID. Used by the sign-in module to authenticate the user.
   // Example value: '56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com'
   clientId: string;
-  // Indicates if the displayTag should be shown in the web app. If it is true,
-  // a small label will be added under the "All of Us" logo in the header.
-  shouldShowDisplayTag: boolean;
   // The Google Analytics account ID for logging actions and page views.
   // Example value: 'UA-112406425-3'
   gaId: string;
@@ -47,11 +44,6 @@ export interface EnvironmentBase {
   zendeskEnv: ZendeskEnv;
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
-  // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
-  allowTestAccessTokenOverride: boolean;
-  // Whether users should be able to see the Published Workspaces
-  // tab in the Workspace Library.
-  enablePublishedWorkspaces: boolean;
   // Captcha site key registered with the domain
   captchaSiteKey: string;
 
@@ -64,10 +56,11 @@ export interface EnvironmentBase {
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
 
-  // Enable workbench footer on the signed in pages
-  enableFooter: boolean;
-  // Enable redirect to v2 demographic survey if not submitted by user
-  enableDemographicSurveyV2Redirect: boolean;
+  // Indicates if the displayTag should be shown in the web app. If it is true,
+  // a small label will be added under the "All of Us" logo in the header.
+  shouldShowDisplayTag: boolean;
+  // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
+  allowTestAccessTokenOverride: boolean;
   // Show the AppsPanel component to enable the use of User Apps in the UI
   showAppsPanel: boolean;
   // Show the new Analysis Tab in the UI

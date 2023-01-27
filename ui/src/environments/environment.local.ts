@@ -20,9 +20,6 @@ export const environment: Environment = {
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
-  enablePublishedWorkspaces: false,
-  enableFooter: true,
-  enableDemographicSurveyV2Redirect: false,
   showAppsPanel: true,
   showNewAnalysisTab: true,
 };
