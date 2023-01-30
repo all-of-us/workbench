@@ -1,0 +1,14 @@
+[
+  {
+    "name": "ancestor_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "descendant_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "is_standard",
+    "type": "INTEGER"
+  }
+]

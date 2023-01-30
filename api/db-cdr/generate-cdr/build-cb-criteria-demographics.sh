@@ -6,7 +6,6 @@ TBL_CBC='cb_criteria'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 ID_PREFIX=$3
-export DATA_BROWSER=$4      # data browser flag
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
@@ -150,8 +149,8 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
   AND domain_id = 'PERSON'
   AND type = 'GENDER'"
 
-if [[ "$DATA_BROWSER" == false ]]
-then
+#if [[ "$DATA_BROWSER" == false ]]
+#then
   echo "DEMOGRAPHICS - Sex at Birth"
   bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
@@ -197,7 +196,7 @@ then
           GROUP BY 1
       ) a
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
-fi
+#fi
 
 echo "DEMOGRAPHICS - Race"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
