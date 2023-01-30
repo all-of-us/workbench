@@ -442,9 +442,12 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
-    const runtimeCanBeCreated =
-      !(getErrorMessageContent().length > 0) &&
-      analysisConfig.diskConfig.detachableType === DiskType.Standard;
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-9167
+    // We are disabling disabling standard disk option to encourage all users to sart using persistant disk
+    const disableCreate =
+      !disableDetachableReason &&
+      analysisConfig.diskConfig.detachableType !== DiskType.Standard;
+    const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =

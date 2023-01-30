@@ -141,6 +141,54 @@ export const DiskSelector = ({
         </FlexColumn>
       </FlexRow>
       <TooltipTrigger
+        content={'We are removing the ability of using standard disk type '}
+        disabled={disableDetachableReason}
+      >
+        <FlexRow style={styles.diskRow}>
+          <RadioButton
+            name='standardDisk'
+            data-test-id='standard-disk-radio'
+            style={styles.diskRadio}
+            disabled={disabled || !disableDetachableReason}
+            onChange={() =>
+              onChange({
+                ...diskConfig,
+                detachable: false,
+                detachableType: null,
+                existingDiskName: null,
+              })
+            }
+            checked={!diskConfig.detachable}
+          />
+          <FlexColumn>
+            <label style={styles.diskLabel}>Standard disk</label>
+            <span>
+              A standard disk is created and deleted with your cloud
+              environment.
+            </span>
+            {diskConfig.detachable || (
+              <DiskSizeSelector
+                idPrefix='standard'
+                diskSize={diskConfig.size}
+                disabled={!disableDetachableReason}
+                style={{ marginTop: '11px' }}
+                onChange={(size: number) =>
+                  onChange(
+                    maybeWithExistingDiskName(
+                      {
+                        ...diskConfig,
+                        size,
+                      },
+                      existingDisk
+                    )
+                  )
+                }
+              />
+            )}
+          </FlexColumn>
+        </FlexRow>
+      </TooltipTrigger>
+      <TooltipTrigger
         content={disableDetachableReason}
         disabled={!disableDetachableReason}
       >

@@ -733,6 +733,13 @@ export const withAnalysisConfigDefaults = (
   };
 };
 
+// https://precisionmedicineinitiative.atlassian.net/browse/RW-9167
+const defaultToPersistentDisk = (runtime): boolean =>
+  runtime === null ||
+  runtime === undefined ||
+  runtime.status === RuntimeStatus.Unknown ||
+  runtime.status === RuntimeStatus.Deleted;
+
 export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
@@ -744,7 +751,7 @@ export const toAnalysisConfig = (
       machine: findMachineByName(machineType),
       diskConfig: {
         size: diskSize,
-        detachable: false,
+        detachable: defaultToPersistentDisk(runtime),
         detachableType: null,
         existingDiskName: null,
       },
