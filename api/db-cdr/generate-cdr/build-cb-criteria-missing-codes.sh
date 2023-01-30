@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='ADD IN OTHER CODES NOT ALREADY CAPTURED'
+
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 
