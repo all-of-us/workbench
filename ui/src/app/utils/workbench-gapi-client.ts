@@ -1,8 +1,9 @@
-import { isTestAccessTokenActive } from 'app/utils/authentication';
+import {
+  getAccessToken,
+  isTestAccessTokenActive,
+} from 'app/utils/authentication';
 
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from './cookies';
-
-declare const gapi: any;
 
 export interface GoogleBillingAccountInfo {
   billingAccountName: string;
@@ -10,32 +11,16 @@ export interface GoogleBillingAccountInfo {
 }
 
 export async function getBillingAccountInfo(googleProject: string) {
-  return new Promise<GoogleBillingAccountInfo>((resolve, reject) => {
-    gapi.load('client', () => {
-      if (isTestAccessTokenActive()) {
-        gapi.client.load('cloudbilling', 'v1', () => {
-          gapi.client.setToken({
-            access_token: window.localStorage.getItem(
-              LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-            ),
-          });
-          gapi.client.cloudbilling.projects
-            .getBillingInfo({
-              name: 'projects/' + googleProject,
-            })
-            .then((response) => resolve(JSON.parse(response.body)))
-            .catch((error) => reject(error));
-        });
-      } else {
-        gapi.client.load('cloudbilling', 'v1', () => {
-          gapi.client.cloudbilling.projects
-            .getBillingInfo({
-              name: 'projects/' + googleProject,
-            })
-            .then((response) => resolve(JSON.parse(response.body)))
-            .catch((error) => reject(error));
-        });
-      }
-    });
-  });
+  const accessToken = isTestAccessTokenActive()
+    ? window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN)
+    : getAccessToken();
+  const response = await fetch(
+    `https://content-cloudbilling.googleapis.com/v1/projects/${googleProject}/billingInfo`,
+    {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }
+  );
+  return response.json();
 }
