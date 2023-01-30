@@ -97,7 +97,7 @@ import { withNavigation } from 'app/utils/with-navigation-hoc';
 import {
   getBillingAccountInfo,
   GoogleBillingAccountInfo,
-} from 'app/utils/workbench-gapi-client';
+} from 'app/utils/project-billing-info';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 
