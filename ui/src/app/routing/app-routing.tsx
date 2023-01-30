@@ -28,7 +28,6 @@ import {
 import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
 import {
   bindApiClients,
-  configApi,
   getApiBaseUrl,
 } from 'app/services/swagger-fetch-clients';
 import {
@@ -47,7 +46,6 @@ import {
   authStore,
   serverConfigStore,
   stackdriverErrorReporterStore,
-  useStore,
 } from 'app/utils/stores';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 
@@ -67,13 +65,6 @@ const UserDisabledPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(UserDisabled);
-
-interface RoutingProps {
-  onSignIn: () => void;
-  signIn: () => void;
-  subscribeToInactivitySignOut: () => void;
-  signOut: () => void;
-}
 
 const bindClients = () => {
   bindApiClients(
@@ -118,21 +109,6 @@ const ScrollToTop = () => {
   return <React.Fragment />;
 };
 
-const useServerConfig = () => {
-  const { config } = useStore(serverConfigStore);
-
-  useEffect(() => {
-    const load = async () => {
-      const serverConfig = await configApi().getConfig();
-      serverConfigStore.set({ config: serverConfig });
-    };
-
-    load();
-  }, []);
-
-  return config;
-};
-
 const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
@@ -172,10 +148,7 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<
-  RoutingProps
-> = () => {
-  const config = useServerConfig();
+export const AppRoutingComponent: React.FunctionComponent = () => {
   const { authLoaded, authError } = useAuthentication();
   const isUserDisabledInDb = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
@@ -183,11 +156,8 @@ export const AppRoutingComponent: React.FunctionComponent<
   const loadLocalStorageAccessToken = () => {
     // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
     // an infinite loop
-    // Enable test access token override via local storage. Intended to support
-    // Puppeteer testing flows. This is handled in the server config callback
-    // for signin timing consistency. Normally we cannot sign in until we've
-    // loaded the oauth client ID from the config service.
-    if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
+    // Enable test access token override via local storage. Intended to support Puppeteer testing flows.
+    if (environment.allowTestAccessTokenOverride && !authLoaded) {
       const localStorageTestAccessToken = window.localStorage.getItem(
         LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
       );
@@ -204,14 +174,11 @@ export const AppRoutingComponent: React.FunctionComponent<
   const redirectToTOSPage = useShowTOS();
 
   useEffect(() => {
-    if (config) {
-      // Bootstrapping that requires server config
-      bindClients();
-      loadErrorReporter();
-      initializeAnalytics();
-      loadLocalStorageAccessToken();
-    }
-  }, [config]);
+    bindClients();
+    loadErrorReporter();
+    initializeAnalytics();
+    loadLocalStorageAccessToken();
+  }, []);
 
   const firstPartyCookiesEnabled = cookiesEnabled();
   const thirdPartyCookiesEnabled = !(
@@ -222,10 +189,6 @@ export const AppRoutingComponent: React.FunctionComponent<
 
   return (
     <React.Fragment>
-      {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
-      {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
-      {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
-      <div id='outdated' />
       {authLoaded && isUserDisabledInDb !== undefined && (
         <React.Fragment>
           {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
