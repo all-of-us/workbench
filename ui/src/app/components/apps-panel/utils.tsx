@@ -60,22 +60,21 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
 };
 
-// visible/actionable logic is copied from runtime-utils
-
 export const isVisible = (status: AppStatus): boolean =>
-  status && ![AppStatus.DELETED, AppStatus.ERROR].includes(status);
+  status && ![AppStatus.DELETED].includes(status);
 
 export const shouldShowApp = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);
 
+// TODO what about ERROR?
 export const canCreateApp = (app: UserAppEnvironment): boolean =>
   !isVisible(app?.status);
 
-export const isActionable = (status: AppStatus): boolean =>
-  [AppStatus.RUNNING, AppStatus.STOPPED].includes(status);
+export const isDeletable = (status: AppStatus): boolean =>
+  [AppStatus.RUNNING, AppStatus.ERROR].includes(status);
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
-  app && isActionable(app.status);
+  app && isDeletable(app.status);
 
 // TODO reconcile with API AppType and LeonardoMapper
 
