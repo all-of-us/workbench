@@ -196,7 +196,6 @@ export const PresetSelector = ({
       disabled={disabled}
       style={{
         marginTop: '21px',
-        display: 'inline-block',
         color: colors.primary,
       }}
       placeholder='Recommended environments'
@@ -518,9 +517,10 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
-    const runtimeCanBeCreated =
-      !(getErrorMessageContent().length > 0) &&
-      analysisConfig.diskConfig.detachableType === DiskType.Standard;
+    const disableCreate =
+      !disableDetachableReason &&
+      analysisConfig.diskConfig.detachableType !== DiskType.Standard;
+    const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
@@ -549,7 +549,7 @@ const PanelMain = fp.flow(
       return (
         <Button
           aria-label='Create'
-          disabled={!runtimeCanBeCreated}
+          disabled={!runtimeCanBeCreated || disableCreate}
           onClick={() => {
             requestAnalysisConfig(analysisConfig);
             onClose();
@@ -730,23 +730,24 @@ const PanelMain = fp.flow(
                       }}
                     />
                   </FlexRow>
-                  {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
-                    <ErrorMessage iconPosition={'top'} iconSize={16}>
-                      <div>
-                        An error was encountered with your cloud environment.
-                        Please re-attempt creation of the environment and
-                        contact support if the error persists.
-                      </div>
-                      <div>Error details:</div>
-                      {currentRuntime.errors.map((err, idx) => {
-                        return (
-                          <div style={{ fontFamily: 'monospace' }} key={idx}>
-                            {err.errorMessage}
-                          </div>
-                        );
-                      })}
-                    </ErrorMessage>
-                  )}
+                  {currentRuntime?.errors &&
+                    currentRuntime.errors.length > 0 && (
+                      <ErrorMessage iconPosition={'top'} iconSize={16}>
+                        <div>
+                          An error was encountered with your cloud environment.
+                          Please re-attempt creation of the environment and
+                          contact support if the error persists.
+                        </div>
+                        <div>Error details:</div>
+                        {currentRuntime.errors.map((err, idx) => {
+                          return (
+                            <div style={{ fontFamily: 'monospace' }} key={idx}>
+                              {err.errorMessage}
+                            </div>
+                          );
+                        })}
+                      </ErrorMessage>
+                    )}
                   <PresetSelector
                     {...{
                       allowDataproc,

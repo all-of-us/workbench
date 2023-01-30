@@ -7,7 +7,6 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -84,24 +83,6 @@ const styles = reactStyles({
 });
 
 const libraryTabs = {
-  PUBLISHED_WORKSPACES: {
-    title: 'Published Workspaces',
-    // TODO: Find the right icon when we intend to release this.
-    icon: phenotypeLibrary,
-    filter: (
-      workspaceList: WorkspacePermissions[],
-      featuredWorkspaces: FeaturedWorkspace[]
-    ) => {
-      return workspaceList.filter(
-        (workspace) =>
-          !featuredWorkspaces.find(
-            (featuredWorkspace) =>
-              workspace.workspace.id === featuredWorkspace.id &&
-              workspace.workspace.namespace === featuredWorkspace.namespace
-          )
-      );
-    },
-  },
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
     description: (
@@ -221,7 +202,6 @@ interface CurrentTab {
 }
 
 interface Props extends WithSpinnerOverlayProps {
-  enablePublishedWorkspaces: boolean;
   profileState: { profile: Profile; reload: Function; updateCache: Function };
 }
 
@@ -246,25 +226,11 @@ export const WorkspaceLibrary = fp.flow(withUserProfile())(
       };
     }
 
-    // Defaulting to the environment variable value here, but allowing it to be overridden by props.
-    // This is to make our testing easier. We don't use environment variable injection anywhere in
-    // our unit testing framework, so we have to pass it in via props. We also don't create this
-    // component in any way except for legacy Angular magic, so we have to get this information via
-    // environment variable.
-    libraryTabs =
-      this.props.enablePublishedWorkspaces ||
-      environment.enablePublishedWorkspaces
-        ? [
-            libraryTabs.TUTORIAL_WORKSPACES,
-            libraryTabs.DEMO_PROJECTS,
-            libraryTabs.PHENOTYPE_LIBRARY,
-            libraryTabs.PUBLISHED_WORKSPACES,
-          ]
-        : [
-            libraryTabs.TUTORIAL_WORKSPACES,
-            libraryTabs.DEMO_PROJECTS,
-            libraryTabs.PHENOTYPE_LIBRARY,
-          ];
+    libraryTabs = [
+      libraryTabs.TUTORIAL_WORKSPACES,
+      libraryTabs.DEMO_PROJECTS,
+      libraryTabs.PHENOTYPE_LIBRARY,
+    ];
 
     async componentDidMount() {
       this.props.hideSpinner();

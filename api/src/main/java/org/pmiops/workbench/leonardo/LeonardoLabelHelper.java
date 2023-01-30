@@ -30,7 +30,7 @@ public class LeonardoLabelHelper {
     return AppType.fromValue(labelValue.toUpperCase());
   }
 
-  /** Insert of update disk labels. */
+  /** Insert or update disk labels. */
   @SuppressWarnings("unchecked")
   public static Map<String, String> upsertLeonardoLabel(
       Object rawLabelObject, String labelKey, String labelValue) {

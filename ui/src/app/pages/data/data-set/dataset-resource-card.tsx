@@ -34,6 +34,7 @@ import { getDescription, getDisplayName, getType } from 'app/utils/resources';
 import { serverConfigStore } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { ExportDatasetModal } from './export-dataset-modal';
 
@@ -43,6 +44,7 @@ interface Props
     WithSpinnerOverlayProps,
     NavigationProps {
   resource: WorkspaceResource;
+  workspace: WorkspaceData;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
   inactiveBilling: boolean;
@@ -187,11 +189,12 @@ export const DatasetResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const { resource, workspace, menuOnly } = this.props;
       return (
         <React.Fragment>
           {this.state.showExportToNotebookModal && (
             <ExportDatasetModal
+              {...{ workspace }}
               dataset={resource.dataSet}
               closeFunction={() =>
                 this.setState({ showExportToNotebookModal: false })

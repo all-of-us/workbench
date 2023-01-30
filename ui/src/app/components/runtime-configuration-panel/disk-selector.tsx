@@ -67,14 +67,26 @@ export const DiskSelector = ({
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
     >
-      <FlexRow style={warningBoxStyle.box}>
-        <WarningIcon style={warningBoxStyle.icon} />
-        <div>
-          <AoU /> will now only support re-attachable persistent disks as the
-          storage disk option and will discontinue standard disks. Refer to the
-          linked article to learn more.
-        </div>
-      </FlexRow>
+      {!disableDetachableReason && (
+        <FlexRow style={warningBoxStyle.box}>
+          <WarningIcon style={warningBoxStyle.icon} />
+          <div>
+            <AoU /> will now only support re-attachable persistent disks as the
+            storage disk option and will discontinue standard disks. Refer to
+            the
+            <a
+              target='_blank'
+              href={
+                'https://support.researchallofus.org/hc/en-us/articles/360041683891'
+              }
+            >
+              {' '}
+              article{' '}
+            </a>{' '}
+            to learn more.
+          </div>
+        </FlexRow>
+      )}
       <FlexColumn>
         {computeType === ComputeType.Dataproc && (
           <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
@@ -90,38 +102,38 @@ export const DiskSelector = ({
           </StyledExternalLink>
         </FlexRow>
       </FlexColumn>
-      <FlexRow style={styles.diskRow}>
-        <RadioButton
-          name='standardDisk'
-          data-test-id='standard-disk-radio'
-          style={styles.diskRadio}
-          disabled={disabled}
-          onChange={() =>
-            onChange({
-              ...diskConfig,
-              detachable: false,
-              detachableType: null,
-              existingDiskName: null,
-            })
-          }
-          checked={!diskConfig.detachable}
-        />
-        <FlexColumn>
-          <label style={styles.diskLabel}>Standard disk</label>
-          <span>
-            A standard disk is created and deleted with your cloud environment.
-          </span>
-          {diskConfig.detachable || (
-            <TooltipTrigger
-              content={
-                'We are removing the ability of using standard disk type '
-              }
-            >
+      <TooltipTrigger
+        content={'We are removing the ability of using standard disk type '}
+        disabled={disableDetachableReason}
+      >
+        <FlexRow style={styles.diskRow}>
+          <RadioButton
+            name='standardDisk'
+            data-test-id='standard-disk-radio'
+            style={styles.diskRadio}
+            disabled={disabled || !disableDetachableReason}
+            onChange={() =>
+              onChange({
+                ...diskConfig,
+                detachable: false,
+                detachableType: null,
+                existingDiskName: null,
+              })
+            }
+            checked={!diskConfig.detachable}
+          />
+          <FlexColumn>
+            <label style={styles.diskLabel}>Standard disk</label>
+            <span>
+              A standard disk is created and deleted with your cloud
+              environment.
+            </span>
+            {diskConfig.detachable || (
               <div>
                 <DiskSizeSelector
                   idPrefix='standard'
                   diskSize={diskConfig.size}
-                  disabled={true}
+                  disabled={!disableDetachableReason}
                   style={{ marginTop: '11px' }}
                   onChange={(size: number) =>
                     onChange(
@@ -136,10 +148,10 @@ export const DiskSelector = ({
                   }
                 />
               </div>
-            </TooltipTrigger>
-          )}
-        </FlexColumn>
-      </FlexRow>
+            )}
+          </FlexColumn>
+        </FlexRow>
+      </TooltipTrigger>
       <TooltipTrigger
         content={disableDetachableReason}
         disabled={!disableDetachableReason}

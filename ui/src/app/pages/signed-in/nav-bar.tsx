@@ -78,10 +78,12 @@ export const NavBar = () => {
   };
 
   useEffect(() => {
-    document.addEventListener('click', onClickOutside);
+    document.getElementById('root').addEventListener('click', onClickOutside);
 
     return () => {
-      document.removeEventListener('click', onClickOutside);
+      document
+        .getElementById('root')
+        .removeEventListener('click', onClickOutside);
     };
   });
 

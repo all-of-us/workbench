@@ -434,6 +434,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
     <DataTable
       data-test-id='access-module-table'
       rowHover
+      breakpoint='0px'
       style={{ paddingTop: '1em' }}
       value={tableData}
       footer={

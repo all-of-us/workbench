@@ -83,7 +83,6 @@ const defaultServerConfig: ConfigResponse = {
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
-  enableGkeApp: false,
 };
 
 export default defaultServerConfig;

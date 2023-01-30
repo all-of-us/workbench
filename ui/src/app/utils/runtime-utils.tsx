@@ -678,14 +678,17 @@ export const withAnalysisConfigDefaults = (
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
+
   if (computeType === ComputeType.Standard) {
+    detachable = r.diskConfig.detachable;
     dataprocConfig = null;
     if (detachable === false) {
       detachableType = null;
     } else if (detachable === true || existingDisk) {
       detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
-      detachableType = detachableType ?? existingDisk?.diskType ?? DiskType.Ssd;
+      detachableType =
+        detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
       if (canUseExistingDisk(r.diskConfig, existingDisk)) {
         existingDiskName = existingDisk.name;
       }
@@ -731,6 +734,12 @@ export const withAnalysisConfigDefaults = (
   };
 };
 
+const runtimeNotRunning = (runtime): boolean =>
+  runtime === null ||
+  runtime === undefined ||
+  runtime.status === RuntimeStatus.Unknown ||
+  runtime.status === RuntimeStatus.Deleted;
+
 export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
@@ -742,7 +751,7 @@ export const toAnalysisConfig = (
       machine: findMachineByName(machineType),
       diskConfig: {
         size: diskSize,
-        detachable: false,
+        detachable: runtimeNotRunning(runtime),
         detachableType: null,
         existingDiskName: null,
       },

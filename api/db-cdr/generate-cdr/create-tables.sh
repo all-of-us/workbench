@@ -9,7 +9,7 @@ export BQ_DATASET=$2         # CDR dataset
 
 TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
 
-INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3", "R2021Q3R5", "C2021Q2R1", "C2021Q3R6", "R2022Q2R2", "C2022Q2R2", "R2022Q2R6")
+INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
@@ -28,19 +28,7 @@ do
       bq --project_id="$BQ_PROJECT" rm -f "$BQ_DATASET.$table_name"
     fi
 
-    if [[ "$table_name" == 'domain_card' ]]
-    then
-      echo "Skipping domain_card"
-      continue
-    elif [[ "$table_name" == 'survey_module' ]]
-    then
-      echo "Skipping survey_module"
-      continue
-    elif [[ "$table_name" == 'cb_data_filter' ]]
-    then
-      echo "Skipping cb_data_filter"
-      continue
-    elif [[ "$table_name" == 'cb_person' ]]
+    if [[ "$table_name" == 'cb_person' ]]
     then
       echo "Skipping cb_person"
       continue

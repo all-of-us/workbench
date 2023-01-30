@@ -311,13 +311,23 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_invalidCaptchaToken() {
+    config.captcha.enableCaptcha = true;
+    createAccountAndDbUserWithAffiliation();
+    createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
+
     assertThrows(
-        BadRequestException.class,
-        () -> {
-          createAccountAndDbUserWithAffiliation();
-          createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
-          profileController.createAccount(createAccountRequest);
-        });
+        BadRequestException.class, () -> profileController.createAccount(createAccountRequest));
+  }
+
+  @Test
+  public void testCreateAccount_invalidCaptchaToken_okIfEnableCaptchaFalse() {
+    config.captcha.enableCaptcha = false;
+
+    createAccountAndDbUserWithAffiliation();
+    createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
+
+    // no exception
+    profileController.createAccount(createAccountRequest);
   }
 
   @Test

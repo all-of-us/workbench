@@ -119,6 +119,12 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                   onChange={({ value }) =>
                     this.setState({ filterLevels: value })
                   }
+                  styles={{
+                    control: (baseStyles) => ({
+                      ...baseStyles,
+                      width: '100px',
+                    }),
+                  }}
                 />
               </FlexRow>
               {errorText && (

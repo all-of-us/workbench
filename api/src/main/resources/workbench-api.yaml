@@ -3149,6 +3149,26 @@ paths:
       responses:
         200:
           description: 'Workspace created'
+  "/v1/cloudTask/deleteTestUserWorkspaces":
+    post:
+      security: []
+      tags:
+        - cloudTaskWorkspaces
+        - cloudTask
+      description: Deletes the requested test user workspaces.
+      operationId: deleteTestUserWorkspaces
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: Batch of workspace deletions to process.
+          schema:
+            "$ref": "#/definitions/DeleteTestUserWorkspacesRequest"
+      responses:
+        200:
+          description: 'Workspaces deleted'
   "/v1/institutions":
     x-aou-note: Institution endpoints, for Verified Institutional Affiliation
     get:
@@ -4719,6 +4739,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable demographic survey v2 in the UI.
+      enableCaptcha:
+        type: boolean
+        default: true
+        description: Whether a captcha check is part of the new user registration process
 
   RuntimeImage:
     type: object
@@ -6299,11 +6323,12 @@ definitions:
   AppStatus:
     type: string
     enum:
-      - DELETING
       - DELETED
+      - DELETING
       - ERROR
       - PROVISIONING
       - RUNNING
+      - STARTING
       - STATUS_UNSPECIFIED
       - STOPPED
       - STOPPING
@@ -6393,15 +6418,15 @@ definitions:
         description: timestamp for error in ISO 8601 format
 
   CreateAppRequest:
+    type: object
+    required:
+      - appType
+      - kubernetesRuntimeConfig
+      - persistentDiskRequest
     description: Create User App request body
     properties:
       appType:
         "$ref": "#/definitions/AppType"
-      autopauseThreshold:
-        type: integer
-        description: The number of minutes of idle time to elapse before the cluster is
-          autopaused. If autopause is set to false, this value is disregarded.
-          A value of 0 is equivalent to autopause being turned off.
       kubernetesRuntimeConfig:
         description: kubernetesRuntimeConfig will be returned
         "$ref": "#/definitions/KubernetesRuntimeConfig"
@@ -9023,6 +9048,28 @@ definitions:
         description: 'Egress event ID to be processed'
         type: integer
         format: int64
+
+  DeleteTestUserWorkspacesRequest:
+    type: array
+    items:
+      "$ref": "#/definitions/TestUserWorkspace"
+
+  TestUserWorkspace:
+    type: object
+    required:
+      - username
+      - wsNamespace
+      - wsFirecloudId
+    properties:
+      username:
+        description: 'Test username (email address including GSuite)'
+        type: string
+      wsNamespace:
+        description: 'Workspace Namespace'
+        type: string
+      wsFirecloudId:
+        description: 'Firecloud ID for the Workspace'
+        type: string
 
   CreateWorkspaceTaskRequest:
     type: object

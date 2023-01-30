@@ -162,7 +162,6 @@ export const getAccessModuleConfig = (
 ): AccessModuleUIConfig => {
   const {
     enableRasLoginGovLinking,
-    enforceRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
     accessModules,
@@ -188,16 +187,7 @@ export const getAccessModuleConfig = (
       AccessModule.RASLINKLOGINGOV,
       () => ({
         ...apiConfig,
-        isEnabledInEnvironment:
-          enableRasLoginGovLinking || enforceRasLoginGovLinking,
-
-        // override these API config values temporarily
-        // when we complete RW-7862, enforceRasLoginGovLinking will work as normal access enable flag
-        // and we can remove this override
-
-        requiredForRTAccess: enforceRasLoginGovLinking,
-        requiredForCTAccess: enforceRasLoginGovLinking,
-
+        isEnabledInEnvironment: enableRasLoginGovLinking,
         DARTitleComponent: (props: DARTitleComponentConfig) => {
           return (
             <>

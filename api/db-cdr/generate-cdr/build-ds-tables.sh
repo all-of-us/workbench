@@ -16,7 +16,7 @@ fi
 # INSERT DATA
 ################################################
 echo "ds_condition_occurrence - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_condition_occurrence\`
     (PERSON_ID, CONDITION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     CONDITION_START_DATETIME, CONDITION_END_DATETIME, CONDITION_TYPE_CONCEPT_ID, CONDITION_TYPE_CONCEPT_NAME,
@@ -38,7 +38,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.CONDITION_SOURCE_CONCEPT_I
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.CONDITION_STATUS_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_device - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_device\`
      (PERSON_ID, DEVICE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
      DEVICE_EXPOSURE_START_DATETIME, DEVICE_EXPOSURE_END_DATETIME, DEVICE_TYPE_CONCEPT_ID, DEVICE_TYPE_CONCEPT_NAME,
@@ -57,7 +57,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.DEVICE_SOURCE_CONCEPT_ID = c4.CONCEPT_ID"
 
 echo "ds_drug_exposure - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`
     (PERSON_ID, DRUG_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, DRUG_EXPOSURE_START_DATETIME,
     DRUG_EXPOSURE_END_DATETIME, VERBATIM_END_DATE, DRUG_TYPE_CONCEPT_ID, DRUG_TYPE_CONCEPT_NAME, STOP_REASON, REFILLS, QUANTITY,
@@ -80,7 +80,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.VISIT_CONCEPT_ID = c4.CONC
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DRUG_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_measurement - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_measurement\`
     (PERSON_ID, MEASUREMENT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     MEASUREMENT_DATETIME, MEASUREMENT_TYPE_CONCEPT_ID, MEASUREMENT_TYPE_CONCEPT_NAME, OPERATOR_CONCEPT_ID,
@@ -108,7 +108,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.conc
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.measurement_source_concept_id = c7.concept_id"
 
 echo "ds_observation - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_observation\`
     (PERSON_ID, OBSERVATION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     OBSERVATION_DATETIME, OBSERVATION_TYPE_CONCEPT_ID, OBSERVATION_TYPE_CONCEPT_NAME, VALUE_AS_NUMBER, VALUE_AS_STRING,
@@ -136,7 +136,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.OBSERVATION_SOURCE_CONCEPT_ID = c7.CONCEPT_ID"
 
 echo "ds_person - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
     (PERSON_ID, GENDER_CONCEPT_ID, GENDER, DATE_OF_BIRTH, RACE_CONCEPT_ID, RACE, ETHNICITY_CONCEPT_ID, ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, SEX_AT_BIRTH)
 SELECT
@@ -151,7 +151,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.sex_at_birth_concept_id = 
 if [[ "$TABLE_LIST" == *'visit_detail'* ]];
 then
   echo "ds_procedure_occurrence (OMOP 5.3.1) - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_procedure_occurrence\`
       (PERSON_ID, PROCEDURE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       PROCEDURE_DATETIME, PROCEDURE_TYPE_CONCEPT_ID, PROCEDURE_TYPE_CONCEPT_NAME, MODIFIER_CONCEPT_ID, MODIFIER_CONCEPT_NAME,
@@ -173,7 +173,7 @@ then
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 else
   echo "ds_procedure_occurrence - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_procedure_occurrence\`
       (PERSON_ID, PROCEDURE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
       PROCEDURE_DATETIME, PROCEDURE_TYPE_CONCEPT_ID, PROCEDURE_TYPE_CONCEPT_NAME, MODIFIER_CONCEPT_ID, MODIFIER_CONCEPT_NAME,
@@ -195,75 +195,16 @@ else
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 fi
 
-echo "ds_survey - inserting data for all surveys except COPE and PFHH"
+echo "ds_survey - inserting data"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
+   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
 SELECT  a.person_id,
-        a.entry_datetime as survey_datetime,
+        a.observation_datetime as survey_datetime,
         c.name as survey,
         d.concept_id as question_concept_id,
         d.concept_name as question,
         e.concept_id as answer_concept_id,
-        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-JOIN
-    (
-        SELECT *
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-        WHERE ancestor_concept_id in
-            (
-                SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE domain_id = 'SURVEY'
-                AND parent_id = 0
-                AND concept_id NOT IN (1741006, 1333342, 1740639)
-            )
-    ) b on a.concept_id = b.descendant_concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
-
-echo "ds_survey - inserting data for PFHH survey"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
-SELECT  a.person_id,
-        a.entry_datetime as survey_datetime,
-        'Personal and Family Health History' as survey,
-        d.concept_id as question_concept_id,
-        d.concept_name as question,
-        e.concept_id as answer_concept_id,
-        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-JOIN
-    (
-        SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-        JOIN (
-              SELECT CAST(id AS STRING) AS id
-              FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-              WHERE concept_id IN (1740639)
-              AND domain_id = 'SURVEY'
-            ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
-        WHERE domain_id = 'SURVEY'
-        AND type = 'PPI'
-        AND subtype = 'ANSWER'
-    ) b on a.value_source_concept_id = b.answer_concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.answer_concept_id = CAST(c.value AS INT64)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
-
-echo "ds_survey - inserting data for cope vaccine survey"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
-SELECT  a.person_id,
-        a.observation_datetime as survey_datetime,
-        case when g.display_name like '%COPE Survey' then 'COVID-19 Participant Experience (COPE) Survey' when g.display_name like '%Minute Survey' then 'COVID-19 Vaccine Survey' else c.name end as survey,
-        d.concept_id as question_concept_id,
-        d.concept_name as question,
-        e.concept_id as answer_concept_id,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer,
         g.survey_version_concept_id as survey_version_concept_id,
         g.display_name as survey_version_name
@@ -277,70 +218,17 @@ JOIN
                 SELECT concept_id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
-                AND parent_id = 0
-                AND concept_id IN (1741006)
+                    and parent_id = 0
             )
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
-GROUP BY a.person_id,
-        survey_datetime,
-        survey,
-        question_concept_id,
-        question,
-        answer_concept_id,
-        answer,
-        survey_version_concept_id,
-        survey_version_name"
-
-echo "ds_survey - inserting data for COVID-19 Participant Experience (COPE) Survey"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
-SELECT  a.person_id,
-        a.observation_datetime as survey_datetime,
-        case when g.display_name like '%COPE Survey' then 'COVID-19 Participant Experience (COPE) Survey' when g.display_name like '%Minute Survey' then 'COVID-19 Vaccine Survey' else c.name end as survey,
-        d.concept_id as question_concept_id,
-        d.concept_name as question,
-        e.concept_id as answer_concept_id,
-        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer,
-        g.survey_version_concept_id as survey_version_concept_id,
-        g.display_name as survey_version_name
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-JOIN
-    (
-        SELECT *
-        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
-        WHERE ancestor_concept_id in
-            (
-                SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE domain_id = 'SURVEY'
-                AND parent_id = 0
-                AND concept_id IN (1333342)
-            )
-        AND descendant_concept_id NOT IN (1310132, 1310137)
-    ) b on a.observation_source_concept_id = b.descendant_concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` f on a.questionnaire_response_id = f.survey_conduct_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_concept_id = g.survey_version_concept_id
-GROUP BY a.person_id,
-        survey_datetime,
-        survey,
-        question_concept_id,
-        question,
-        answer_concept_id,
-        answer,
-        survey_version_concept_id,
-        survey_version_name"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` f on a.observation_id = f.observation_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_version_concept_id = g.survey_version_concept_id"
 
 echo "ds_visit_occurrence - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_visit_occurrence\`
     (PERSON_ID, VISIT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, VISIT_START_DATETIME,
     VISIT_END_DATETIME, VISIT_TYPE_CONCEPT_ID, VISIT_TYPE_CONCEPT_NAME, VISIT_SOURCE_VALUE, VISIT_SOURCE_CONCEPT_ID,
@@ -361,7 +249,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.ADMITTING_SOURCE_CONCEPT_I
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DISCHARGE_TO_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_activity_summary - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
     (date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
     lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id)
@@ -372,7 +260,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
 where rank = 1"
 
 echo "ds_heart_rate_minute_level - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
     (datetime, person_id, heart_rate_value)
 SELECT datetime, person_id, heart_rate_value
@@ -381,7 +269,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`)
 where rank = 1"
 
 echo "ds_heart_rate_summary - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_summary\`
     (person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count)
 SELECT person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count
@@ -390,7 +278,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`)
 where rank = 1"
 
 echo "ds_steps_intraday - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
     (datetime, steps, person_id)
 SELECT datetime, steps, person_id
@@ -400,7 +288,7 @@ where rank = 1"
 
 if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
   echo "ds_zip_code_socioeconomic - inserting data"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_zip_code_socioeconomic\`
   (PERSON_ID, OBSERVATION_DATETIME, ZIP3_AS_STRING, FRACTION_ASSISTED_INCOME, FRACTION_HIGH_SCHOOL_EDU, MEDIAN_INCOME, FRACTION_NO_HEALTH_INS, FRACTION_POVERTY, FRACTION_VACANT_HOUSING, DEPRIVATION_INDEX, ACS)
   select o.person_id,
@@ -419,21 +307,3 @@ if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
   where observation_source_concept_id = 1585250
   and o.value_as_string not like 'Res%'"
 fi
-
-echo "ds_sleep_daily_summary - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_daily_summary\`
-    (person_id, sleep_date, is_main_sleep, minute_in_bed, minute_asleep, minute_after_wakeup, minute_awake, minute_restless, minute_deep, minute_light, minute_rem, minute_wake)
-SELECT person_id, sleep_date, is_main_sleep, minute_in_bed, minute_asleep, minute_after_wakeup, minute_awake, minute_restless, minute_deep, minute_light, minute_rem, minute_wake
-FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
-FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`)
-where rank = 1"
-
-echo "ds_sleep_level - inserting data"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_sleep_level\`
-    (person_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min)
-SELECT person_id, sleep_date, is_main_sleep, level, start_datetime, duration_in_min
-FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY person_id ) AS rank
-FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`)
-where rank = 1"

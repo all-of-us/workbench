@@ -562,16 +562,6 @@ def create_cdr_indices(cmd_name, *args)
       ->(opts, v) { opts.array_table = v},
       "Array table."
     )
-  op.add_option(
-    "--long-read-wgv-table [long-read-wgv-table]",
-    ->(opts, v) { opts.long_read_wgv_table = v},
-    "Long read whole genome variant table."
-  )
-  op.add_option(
-    "--structural-variant-data-table [structural-variant-data-table]",
-    ->(opts, v) { opts.structural_variant_data_table = v},
-    "Structural Variant data table."
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
   op.parse.validate
@@ -585,7 +575,7 @@ def create_cdr_indices(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"array_source_table\": \"#{op.opts.array_table}\", \"long_read_wgv_source_table\": \"#{op.opts.long_read_wgv_table}\", \"structural_variant_source_table\": \"#{op.opts.structural_variant_data_table}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"array_source_table\": \"#{op.opts.array_table}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -894,23 +884,13 @@ def build_cb_search_person(cmd_name, *args)
         ->(opts, v) { opts.array_table = v},
         "Array table."
     )
-  op.add_option(
-    "--long-read-wgv-table [long-read-wgv-table]",
-    ->(opts, v) { opts.long_read_wgv_table = v},
-    "Long read whole genome variant table."
-  )
-  op.add_option(
-    "--structural-variant-data-table [structural-variant-data-table]",
-    ->(opts, v) { opts.structural_variant_data_table = v},
-    "Structural Variant data table."
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.long_read_wgv_table} #{op.opts.structural_variant_data_table} #{op.opts.array_table}}
+    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.array_table}}
   end
 end
 
@@ -1202,44 +1182,6 @@ Common.register_command({
   :invocation => "build-cb-criteria",
   :description => "Builds cb_criteria",
   :fn => ->(*args) { build_cb_criteria("build-cb-criteria", *args) }
-})
-
-def build_cb_criteria_demographics(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
-  op.add_option(
-    "--bq-project [bq-project]",
-    ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
-  )
-  op.add_option(
-    "--bq-dataset [bq-dataset]",
-    ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
-  )
-  op.add_option(
-    "--id-prefix [id-prefix]",
-    ->(opts, v) { opts.id_prefix = v},
-    "ID Prefix."
-  )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.id_prefix }
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-cb-criteria-demographics",
-  :description => "Builds cb_criteria",
-  :fn => ->(*args) { build_cb_criteria_demographics("build-cb-criteria-demographics", *args) }
 })
 
 def create_local_csv_files(cmd_name, *args)

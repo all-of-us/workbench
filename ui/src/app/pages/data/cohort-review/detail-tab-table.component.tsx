@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { DataTable, DataTableSortOrderType } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { TabPanel, TabView } from 'primereact/tabview';
 
@@ -14,10 +14,10 @@ import {
   SortOrder,
 } from 'generated/fetch';
 
-import { domainToTitle } from 'app/cohort-search/utils';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { ReviewDomainChartsComponent } from 'app/pages/data/cohort-review/review-domain-charts';
 import { vocabOptions } from 'app/services/review-state.service';
 import { cohortReviewApi } from 'app/services/swagger-fetch-clients';
@@ -196,12 +196,12 @@ const domains = [
 
 class NameContainer extends React.Component<
   { data: any; vocab: string },
-  { showMore: boolean }
+  { showMore: boolean; focusedElement: HTMLElement }
 > {
   container: HTMLDivElement;
   constructor(props: any) {
     super(props);
-    this.state = { showMore: false };
+    this.state = { showMore: false, focusedElement: null };
   }
 
   handleResize = fp.debounce(100, () => {
@@ -236,7 +236,17 @@ class NameContainer extends React.Component<
         </div>
         {showMore && (
           <React.Fragment>
-            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>
+            <span
+              style={styles.showMore}
+              onClick={(e) => {
+                if (e.target instanceof Element) {
+                  this.setState({
+                    focusedElement: e.target as HTMLElement,
+                  });
+                }
+                nl.toggle(e);
+              }}
+            >
               Show more
             </span>
             <OverlayPanel
@@ -244,6 +254,7 @@ class NameContainer extends React.Component<
               ref={(el) => (nl = el)}
               showCloseIcon={true}
               dismissable={true}
+              appendTo={this.state.focusedElement}
             >
               <div style={{ paddingBottom: '0.3rem' }}>
                 {data[`${vocab}Name`]}
@@ -276,7 +287,7 @@ interface State {
   page: number;
   start: number;
   sortField: string;
-  sortOrder: number;
+  sortOrder: DataTableSortOrderType;
   expandedRows: Array<any>;
   codeResults: any;
   error: boolean;
@@ -285,6 +296,7 @@ interface State {
   requestPage: number;
   range: Array<number>;
   tabFilterState: any;
+  focusedElement: HTMLElement;
 }
 
 export const DetailTabTable = fp.flow(
@@ -318,6 +330,7 @@ export const DetailTabTable = fp.flow(
         tabFilterState: JSON.parse(
           JSON.stringify(props.filterState.tabs[props.domain])
         ),
+        focusedElement: null,
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -696,6 +709,11 @@ export const DetailTabTable = fp.flow(
                 className='pi pi-caret-down'
                 style={styles.caretIcon}
                 onClick={(e) => {
+                  if (e.target instanceof Element) {
+                    this.setState({
+                      focusedElement: e.target as HTMLElement,
+                    });
+                  }
                   vl.toggle(e);
                   this.scrollToBottom(column.rowIndex, column.value.length);
                 }}
@@ -706,6 +724,7 @@ export const DetailTabTable = fp.flow(
               ref={(el) => (vl = el)}
               showCloseIcon={true}
               dismissable={true}
+              appendTo={this.state.focusedElement}
             >
               {rowData.refRange && column.field === 'value' && (
                 <div style={{ paddingBottom: '0.3rem' }}>
@@ -975,6 +994,11 @@ export const DetailTabTable = fp.flow(
             style={filterStyle}
             onClick={(e) => {
               this.filterEvent(column);
+              if (e.target instanceof Element) {
+                this.setState({
+                  focusedElement: e.target as HTMLElement,
+                });
+              }
               fl.toggle(e);
             }}
           />
@@ -984,6 +1008,7 @@ export const DetailTabTable = fp.flow(
             ref={(el) => (fl = el)}
             showCloseIcon={true}
             dismissable={true}
+            appendTo={this.state.focusedElement}
           >
             {column === `${vocab}Code` && (
               <div style={styles.textSearch}>
@@ -1031,6 +1056,11 @@ export const DetailTabTable = fp.flow(
             style={filtered ? filterIcons.active : filterIcons.default}
             onClick={(e) => {
               this.filterEvent(column);
+              if (e.target instanceof Element) {
+                this.setState({
+                  focusedElement: e.target as HTMLElement,
+                });
+              }
               fl.toggle(e);
               ip.focus();
             }}
@@ -1046,6 +1076,7 @@ export const DetailTabTable = fp.flow(
                 this.setState({ tabFilterState });
               }
             }}
+            appendTo={this.state.focusedElement}
           >
             <div style={styles.textSearch}>
               <i
@@ -1256,6 +1287,7 @@ export const DetailTabTable = fp.flow(
             rowExpansionTemplate={this.rowExpansionTemplate}
             rowClassName={this.hideGraphIcon}
             style={styles.table}
+            breakpoint='0px'
             value={value}
             sortField={sortField}
             sortOrder={sortOrder}

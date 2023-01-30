@@ -26,7 +26,10 @@ browserTest('create user', async browser => {
   await page.evaluate(() => window.forceHasReadEntireAgreement())
   await expect(isAckCheckboxDisabled()).resolves.toBe(false)
   await tu.jsClick(page, ackCheckboxSel)
-  await page.click('[role="button"][aria-label="Next"]')
+  await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
+    page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
+    return sel
+  }).then(sel => page.click(sel))
 
   await page.waitForSelector('#account-creation-institution') // Institution Page
   await page.waitForSelector('[aria-label="Institution"]')
@@ -39,7 +42,10 @@ browserTest('create user', async browser => {
     .then(eh => eh.evaluate(e => e.parentNode.parentNode.click()))
   await page.waitForSelector('[role="option"][aria-label^="Project Personnel"]')
     .then(eh => eh.click())
-  await tu.jsClick(page, '[role="button"][aria-label="Next"]')
+  await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
+    page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
+    return sel
+  }).then(sel => page.click(sel))
 
   await page.waitForSelector('#account-creation') // Personal Information Page
   await page.type('#username', 'test')
@@ -60,7 +66,10 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Testing the system.')
-  await tu.jsClick(page, '[role="button"][aria-label="Next"]')
+  await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
+    page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
+    return sel
+  }).then(sel => page.click(sel))
 
   await page.waitForSelector('#demographics-survey') // Demographics Survey Page
   await pressKey(page, 'Tab', 10)
@@ -79,11 +88,11 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Space')
   await pressKey(page, 'Tab', 2)
   await pressKey(page, 'ArrowRight', 2)
-  await page.waitForSelector('#g-recaptcha-response')
   await pressKey(page, 'Tab', 2)
-  const [captchaSolved] = await tu.promiseWindowEvent(page, 'captcha-solved')
-  await Promise.all([captchaSolved, page.keyboard.press('Space')])
-  await page.click('[role="button"][aria-label="Submit"]')
+  await Promise.resolve('[role="button"][aria-label="Submit"]').then(sel => {
+    page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
+    return sel
+  }).then(sel => page.click(sel))
 
   await page.waitForSelector('#account-creation-success')
   await expect(page.waitForSelector('h2').then(eh => eh.evaluate(e => e.innerText)))

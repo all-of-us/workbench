@@ -24,7 +24,6 @@ describe('AdminUserBypassSpec', () => {
         publicApiKeyForErrorReports: 'aaa',
         enableEraCommons: true,
         enableRasLoginGovLinking: true,
-        enforceRasLoginGovLinking: true,
       },
     });
     props = {

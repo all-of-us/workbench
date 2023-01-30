@@ -34,6 +34,7 @@ describe('EgressEventsTable', () => {
     rowIndex: number
   ) => {
     wrapper.find('.p-row-editor-init').at(rowIndex).simulate('click');
+    wrapper.find('.p-dropdown').simulate('click');
     wrapper
       .find('.p-dropdown-item')
       .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
