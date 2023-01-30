@@ -192,6 +192,7 @@ export const PresetSelector = ({
   return (
     <Dropdown
       id='runtime-presets-menu'
+      appendTo='self'
       disabled={disabled}
       style={{
         marginTop: '21px',
@@ -810,6 +811,7 @@ const PanelMain = fp.flow(
                       <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
                         <Dropdown
                           id='runtime-compute'
+                          appendTo='self'
                           disabled={!allowDataproc || disableControls}
                           style={{ width: '15rem' }}
                           options={[ComputeType.Standard, ComputeType.Dataproc]}
