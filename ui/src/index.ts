@@ -24,8 +24,7 @@ import {
   exposeAccessTokenSetter,
   setupCustomValidators,
 } from 'app/services/setup';
-
-import { AppRoutingComponent } from './app/routing/app-routing';
+import { AppConfigComponent } from 'config/app-config';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -41,4 +40,4 @@ ReactModal.defaultStyles.content = {};
 const domContainer = document.querySelector('#error-handler-root');
 const bodyContainer = document.querySelector('#root');
 ReactDOM.render(React.createElement(SystemErrorHandler), domContainer);
-ReactDOM.render(React.createElement(AppRoutingComponent), bodyContainer);
+ReactDOM.render(React.createElement(AppConfigComponent), bodyContainer);
