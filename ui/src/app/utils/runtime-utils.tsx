@@ -678,7 +678,6 @@ export const withAnalysisConfigDefaults = (
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
-
   if (computeType === ComputeType.Standard) {
     detachable = r.diskConfig.detachable;
     dataprocConfig = null;
@@ -734,7 +733,8 @@ export const withAnalysisConfigDefaults = (
   };
 };
 
-const runtimeNotRunning = (runtime): boolean =>
+// https://precisionmedicineinitiative.atlassian.net/browse/RW-9167
+const defaultToPersistentDisk = (runtime): boolean =>
   runtime === null ||
   runtime === undefined ||
   runtime.status === RuntimeStatus.Unknown ||
@@ -751,7 +751,7 @@ export const toAnalysisConfig = (
       machine: findMachineByName(machineType),
       diskConfig: {
         size: diskSize,
-        detachable: runtimeNotRunning(runtime),
+        detachable: defaultToPersistentDisk(runtime),
         detachableType: null,
         existingDiskName: null,
       },

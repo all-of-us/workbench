@@ -129,25 +129,23 @@ export const DiskSelector = ({
               environment.
             </span>
             {diskConfig.detachable || (
-              <div>
-                <DiskSizeSelector
-                  idPrefix='standard'
-                  diskSize={diskConfig.size}
-                  disabled={!disableDetachableReason}
-                  style={{ marginTop: '11px' }}
-                  onChange={(size: number) =>
-                    onChange(
-                      maybeWithExistingDiskName(
-                        {
-                          ...diskConfig,
-                          size,
-                        },
-                        existingDisk
-                      )
+              <DiskSizeSelector
+                idPrefix='standard'
+                diskSize={diskConfig.size}
+                disabled={!disableDetachableReason}
+                style={{ marginTop: '11px' }}
+                onChange={(size: number) =>
+                  onChange(
+                    maybeWithExistingDiskName(
+                      {
+                        ...diskConfig,
+                        size,
+                      },
+                      existingDisk
                     )
-                  }
-                />
-              </div>
+                  )
+                }
+              />
             )}
           </FlexColumn>
         </FlexRow>

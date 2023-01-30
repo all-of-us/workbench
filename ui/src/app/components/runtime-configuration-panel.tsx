@@ -517,6 +517,8 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-9167
+    // We are disabling disabling standard disk option to encourage all users to sart using persistant disk
     const disableCreate =
       !disableDetachableReason &&
       analysisConfig.diskConfig.detachableType !== DiskType.Standard;
