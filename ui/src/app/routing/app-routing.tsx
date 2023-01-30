@@ -68,13 +68,6 @@ const UserDisabledPage = fp.flow(
   withRoutingSpinner
 )(UserDisabled);
 
-interface RoutingProps {
-  onSignIn: () => void;
-  signIn: () => void;
-  subscribeToInactivitySignOut: () => void;
-  signOut: () => void;
-}
-
 const bindClients = () => {
   bindApiClients(
     new Configuration({
@@ -172,9 +165,7 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<
-  RoutingProps
-> = () => {
+export const AppRoutingComponent: React.FunctionComponent = () => {
   const config = useServerConfig();
   const { authLoaded, authError } = useAuthentication();
   const isUserDisabledInDb = useIsUserDisabled();
