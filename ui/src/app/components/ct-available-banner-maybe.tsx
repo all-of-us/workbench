@@ -12,7 +12,7 @@ import {
   DATA_ACCESS_REQUIREMENTS_PATH,
   eligibleForTier,
 } from 'app/utils/access-utils';
-import { cookiesEnabled } from 'app/utils/cookies';
+import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 import { cdrVersionStore, profileStore, useStore } from 'app/utils/stores';
 
 import { StyledRouterLink } from './buttons';
@@ -43,7 +43,7 @@ const shouldShowBanner = (
     // the user is not currently visiting the DAR page
     pathname !== DATA_ACCESS_REQUIREMENTS_PATH;
 
-  if (cookiesEnabled()) {
+  if (firstPartyCookiesEnabled()) {
     const cookie = localStorage.getItem(CT_COOKIE_KEY);
     return !cookie && shouldShow;
   } else {
@@ -63,7 +63,7 @@ export const CTAvailableBannerMaybe = () => {
   );
 
   const acknowledgeBanner = () => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       localStorage.setItem(CT_COOKIE_KEY, 'acknowledged');
     }
     setShowBanner(false);

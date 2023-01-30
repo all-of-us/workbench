@@ -6,7 +6,7 @@ import { StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { cookiesEnabled } from 'app/utils/cookies';
+import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 import cookies from 'assets/images/cookies.png';
 
 const styles = reactStyles({
@@ -47,14 +47,14 @@ export class CookieBanner extends React.Component<{}, CookieBannerState> {
   }
 
   handleCloseCookies() {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       this.setState({ cookieBannerClosed: true });
       localStorage.setItem(cookieKey, 'cookie-banner-dismissed');
     }
   }
 
   cookieBannerVisible() {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       return !localStorage.getItem(cookieKey) && !this.state.cookieBannerClosed;
     } else {
       return true;

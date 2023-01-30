@@ -39,7 +39,7 @@ import {
 import { initializeAnalytics } from 'app/utils/analytics';
 import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
-  cookiesEnabled,
+  firstPartyCookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
   LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN,
 } from 'app/utils/cookies';
@@ -137,7 +137,7 @@ const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
   useEffect(() => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -213,12 +213,12 @@ export const AppRoutingComponent: React.FunctionComponent<
     }
   }, [config]);
 
-  const firstPartyCookiesEnabled = cookiesEnabled();
   const thirdPartyCookiesEnabled = !(
     authError &&
     authError.length > 0 &&
     authError.includes('Cookies')
   );
+  const cookiesEnabled = firstPartyCookiesEnabled() && thirdPartyCookiesEnabled;
 
   return (
     <React.Fragment>
@@ -230,7 +230,7 @@ export const AppRoutingComponent: React.FunctionComponent<
         <React.Fragment>
           {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
           <NotificationModal />
-          {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
+          {cookiesEnabled && (
             <AppRouter>
               <ScrollToTop />
               {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
@@ -295,42 +295,41 @@ export const AppRoutingComponent: React.FunctionComponent<
           )}
         </React.Fragment>
       )}
-      {!firstPartyCookiesEnabled ||
-        (!thirdPartyCookiesEnabled && (
-          <div>
+      {!cookiesEnabled && (
+        <div>
+          <div
+            style={{
+              maxWidth: '500px',
+              margin: '1.5rem',
+              fontFamily: 'Montserrat',
+            }}
+          >
+            <SignedInAouHeaderWithDisplayTag />
             <div
               style={{
-                maxWidth: '500px',
-                margin: '1.5rem',
-                fontFamily: 'Montserrat',
+                fontSize: '20pt',
+                color: '#2F2E7E',
+                padding: '1.5rem 0 1.5rem 0',
               }}
             >
-              <SignedInAouHeaderWithDisplayTag />
-              <div
-                style={{
-                  fontSize: '20pt',
-                  color: '#2F2E7E',
-                  padding: '1.5rem 0 1.5rem 0',
-                }}
+              Cookies are Disabled
+            </div>
+            <div style={{ fontSize: '14pt', color: '#000000' }}>
+              For full functionality of this site it is necessary to enable
+              cookies. Here are the{' '}
+              <a
+                href='https://support.google.com/accounts/answer/61416'
+                style={{ color: '#2691D0' }}
+                target='_blank'
+                rel='noopener noreferrer'
               >
-                Cookies are Disabled
-              </div>
-              <div style={{ fontSize: '14pt', color: '#000000' }}>
-                For full functionality of this site it is necessary to enable
-                cookies. Here are the{' '}
-                <a
-                  href='https://support.google.com/accounts/answer/61416'
-                  style={{ color: '#2691D0' }}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  instructions how to enable cookies in your web browser
-                </a>
-                .
-              </div>
+                instructions how to enable cookies in your web browser
+              </a>
+              .
             </div>
           </div>
-        ))}
+        </div>
+      )}
     </React.Fragment>
   );
 };

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { StatusAlert } from 'generated/fetch';
 
 import { statusAlertApi } from 'app/services/swagger-fetch-clients';
-import { cookiesEnabled } from 'app/utils/cookies';
+import { firstPartyCookiesEnabled } from 'app/utils/cookies';
 
 import { Button } from './buttons';
 import { ToastBanner, ToastType } from './toast-banner';
@@ -19,7 +19,7 @@ const INITIAL_STATUS_ALERT: StatusAlert = {
 
 const shouldShowStatusAlert = (statusAlert: StatusAlert) => {
   const { statusAlertId, message } = statusAlert;
-  if (cookiesEnabled()) {
+  if (firstPartyCookiesEnabled()) {
     const cookie = localStorage.getItem(STATUS_ALERT_COOKIE_KEY);
     return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!message;
   } else {
@@ -45,7 +45,7 @@ export const StatusAlertBannerMaybe = () => {
   }, []);
 
   const acknowledgeAlert = () => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       localStorage.setItem(
         STATUS_ALERT_COOKIE_KEY,
         `${statusAlertDetails.statusAlertId}`
