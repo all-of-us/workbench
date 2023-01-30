@@ -24,7 +24,7 @@ import {
   exposeAccessTokenSetter,
   setupCustomValidators,
 } from 'app/services/setup';
-import { AppConfigComponent } from 'config/app-config';
+import { AppConfigComponent } from 'app/config/app-config';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
