@@ -33,12 +33,6 @@ export const StartStopRuntimeButton = ({
   onResume,
   appType,
 }: StatusInfo) => {
-  // Get status in shared type
-  //  Update StartStopRunTimeButton to expect status and a way to update it
-  // Update instances of RuntimeStatus to shared type
-  // setup shared way of updating status - did Joel already make this?
-  // Make sure Cromwell always shows not sign for now
-
   const userEnvironmentStatus: UserEnvironmentStatus =
     cond<UserEnvironmentStatus>(
       [
