@@ -470,3 +470,12 @@ body .p-menu .p-menuitem-link {
   display: flex;
   align-items: center;
 }
+
+.css-b8ldur-Input {
+  width: 100%;
+  z-index: 1;
+}
+
+.css-b8ldur-Input :is(div,input){
+  width: 100%;
+}
