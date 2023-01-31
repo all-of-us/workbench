@@ -417,3 +417,120 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
    WHERE name LIKE '%…%') cr2
  WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'Ђ™', '\'') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%Ђ™%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'ö', 'o') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%ö%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, '“drink,”', '\"drink,\"') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%“drink,”%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'é', 'e') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%é%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'è', 'e') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%è%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'ä', 'a') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%ä%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'ü', 'u') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%ü%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, '－', '-') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%－%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'â', 'a') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%â%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'ž', 'z') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%ž%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, '·', '') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%·%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'Â', '') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%Â%') cr2
+ WHERE cr1.id = cr2.id"
+
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` cr1
+ SET cr1.name = cr2.name
+ FROM (
+   SELECT id, REPLACE (name, 'É', 'E') AS name
+   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+   WHERE name LIKE '%É%') cr2
+ WHERE cr1.id = cr2.id"
