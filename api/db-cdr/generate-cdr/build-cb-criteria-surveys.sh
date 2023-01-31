@@ -4,7 +4,7 @@ set -e
 SQL_FOR='PPI SURVEYS'
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
-MAX_ROWS=1000
+
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 ID_PREFIX=$3
