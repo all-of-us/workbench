@@ -19,12 +19,12 @@ import * as ReactModal from 'react-modal';
 import * as StackTrace from 'stacktrace-js';
 
 import { SystemErrorHandler } from 'app/components/system-error-handler';
+import { AppConfigComponent } from 'app/config/app-config';
 import {
   checkBrowserSupport,
   exposeAccessTokenSetter,
   setupCustomValidators,
 } from 'app/services/setup';
-import { AppConfigComponent } from 'config/app-config';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
