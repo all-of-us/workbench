@@ -60,7 +60,7 @@ export const styles = reactStyles({
     padding: '0.75rem',
     borderRadius: '0.5em',
   },
-  costPredictorWrapper: {
+  environmentInformedActionPanelWrapper: {
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     // Not using shorthand here because react doesn't like it when you mix shorthand and non-shorthand,
     // and the border color changes when the runtime does

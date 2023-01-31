@@ -19,7 +19,7 @@ import { findMachineByName } from 'app/utils/machines';
 import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
-import { CostPredictor } from './cost-predictor';
+import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
 const { useState } = React;
 
@@ -51,7 +51,7 @@ const PanelMain = fp.flow(
           data-test-id='runtime-create-panel'
           style={{ ...styles.controlSection, marginTop: '1rem' }}
         >
-          <CostPredictor
+          <EnvironmentInformedActionPanel
             {...{
               creatorFreeCreditsRemaining,
               profile,

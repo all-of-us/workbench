@@ -62,7 +62,7 @@ const CostInfo = ({
   );
 };
 
-export const CostPredictor = ({
+export const EnvironmentInformedActionPanel = ({
   creatorFreeCreditsRemaining,
   profile,
   workspace,
@@ -72,7 +72,7 @@ export const CostPredictor = ({
   onResume,
   appType,
 }) => (
-  <FlexRow style={styles.costPredictorWrapper}>
+  <FlexRow style={styles.environmentInformedActionPanelWrapper}>
     <StartStopRuntimeButton {...{ status, onPause, onResume, appType }} />
     <CostInfo
       {...{ analysisConfig }}

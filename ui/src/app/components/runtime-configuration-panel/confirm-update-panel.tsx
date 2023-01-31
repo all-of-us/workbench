@@ -50,7 +50,7 @@ export const ConfirmUpdatePanel = ({
             <b style={{ fontSize: 10 }}>New estimated cost</b>
             <div
               style={{
-                ...styles.costPredictorWrapper,
+                ...styles.environmentInformedActionPanelWrapper,
                 ...styles.costComparison,
               }}
             >
@@ -61,7 +61,7 @@ export const ConfirmUpdatePanel = ({
             <b style={{ fontSize: 10 }}>Previous estimated cost</b>
             <div
               style={{
-                ...styles.costPredictorWrapper,
+                ...styles.environmentInformedActionPanelWrapper,
                 ...styles.costComparison,
                 color: 'grey',
                 backgroundColor: '',

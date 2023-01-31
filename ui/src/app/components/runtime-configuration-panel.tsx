@@ -80,7 +80,7 @@ import {
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { UIAppType } from './apps-panel/utils';
-import { CostPredictor } from './cost-predictor';
+import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
 const { useState, useEffect, Fragment } = React;
 
@@ -100,7 +100,7 @@ const CreatePanel = ({
 
   return (
     <div data-test-id='runtime-create-panel' style={styles.controlSection}>
-      <CostPredictor
+      <EnvironmentInformedActionPanel
         {...{
           creatorFreeCreditsRemaining,
           profile,
@@ -644,7 +644,7 @@ const PanelMain = fp.flow(
             () => (
               <div style={{ marginBottom: '10px' }}>
                 <div style={styles.controlSection}>
-                  <CostPredictor
+                  <EnvironmentInformedActionPanel
                     {...{
                       creatorFreeCreditsRemaining,
                       profile,
