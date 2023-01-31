@@ -131,10 +131,9 @@ VALUES
 (1585855,'','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
 (1585710,'','Survey provides information about how participants report levels of individual health.',0,0,2),
 (1586134,'','Survey includes participant demographic information.',0,0,1),
-(43529712,'','Survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'','Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6),
-(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,7)"
+(1333342,'','Survey includes information about the impact of COVID-19 on participant mental and physical health.',0,0,6),
+(1740639,'','Survey includes information about medical history of family members, including medical conditions and approximate age of diagnosis.',0,0,4)"
 
 #  Getting count for SDOH Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
@@ -146,12 +145,12 @@ if [[ "$sdohCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (40192389,'','Survey includes information to help better understand the connection between social environmental factors and overall health.',0,0,8)"
+  (40192389,'','Survey includes information to help better understand the connection between social environmental factors and overall health.',0,0,7)"
 fi
 
 #  Getting count for Cope Minute Survey
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.concept\`
-where concept_id = 765936"
+where concept_id = 1741006"
 minuteCount=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 if [[ "$minuteCount" > 0 ]]; then
   # Insert row for Cope Minute Survey
@@ -159,21 +158,20 @@ if [[ "$minuteCount" > 0 ]]; then
   "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
   (concept_id,name,description,question_count,participant_count,order_number)
   VALUES
-  (765936,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,9)"
+  (1741006,'','Survey includes information about participant COVID-19 Vaccinations.',0,0,8)"
 fi
 
-echo "Updating survey names on survey_module"
+echo "Updating survey names on survey_module from cb_criteria table"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\` sm
-SET sm.name = c.concept_name
+SET sm.name = cbc.name
 FROM (
-  SELECT concept_name, concept_id
-  FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
-  WHERE domain_id = 'Observation'
-  AND vocabulary_id = 'PPI'
-  AND concept_class_id = 'Module'
-) c
-WHERE sm.concept_id = c.concept_id"
+  SELECT name, concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+  WHERE domain_id = 'SURVEY'
+  AND parent_id = 0
+) cbc
+WHERE sm.concept_id = cbc.concept_id"
 
 # Populate cb_person table
 echo "Inserting cb_person"
@@ -436,9 +434,78 @@ FROM
                 SELECT concept_id
                 FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
-                    and parent_id = 0
+                  AND parent_id = 0
             )
         GROUP BY 1
     ) y
 WHERE x.concept_id = y.ancestor_concept_id"
 
+# Set the question count on the survey_module row
+# Concept ids (1310132, 1310137) are duplicated in both Cope Surveys and Cope
+# Vaccine Surveys. We only show them in the vaccinations survey, so we need to
+# update count to not include these concepts.
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.question_count = y.num_questions
+FROM
+    (
+        SELECT ancestor_concept_id, count(*) as num_questions
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_concept_ancestor\`
+        join \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` on concept_id = descendant_concept_id
+        WHERE subtype = 'QUESTION'
+        AND ancestor_concept_id in
+            (
+                SELECT concept_id
+                FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                  AND parent_id = 0
+                  AND concept_id = 1333342
+            )
+        AND descendant_concept_id NOT IN (1310132, 1310137)
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.ancestor_concept_id"
+
+# Set the question count for the PFHH survey
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.question_count = y.num_questions
+FROM
+    (
+        SELECT 1740639 as concept_id, COUNT(DISTINCT concept_id) as num_questions
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` c
+        JOIN (
+              SELECT CAST(id AS STRING) AS id
+              FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
+              WHERE concept_id IN (1740639)
+              AND domain_id = 'SURVEY'
+             ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+        WHERE domain_id = 'SURVEY'
+        AND type = 'PPI'
+        AND subtype = 'QUESTION'
+    ) y
+WHERE x.concept_id = y.concept_id"
+
+# Set the participant count for the PFHH survey
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.participant_count = y.est_count
+FROM
+    (
+        SELECT 1740639 as concept_id, count(distinct person_id) as est_count
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_search_all_events\` se
+        WHERE se.value_source_concept_id in (
+          SELECT DISTINCT CAST(c.value AS INT64) as value
+          FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` c
+          JOIN (
+                SELECT CAST(id AS STRING) AS id
+                FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
+                WHERE concept_id IN (1740639)
+                AND domain_id = 'SURVEY'
+              ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+          WHERE domain_id = 'SURVEY'
+          AND type = 'PPI'
+          AND subtype = 'ANSWER'
+          AND code NOT LIKE '%PMI_%')
+    ) y
+WHERE x.concept_id = y.concept_id"

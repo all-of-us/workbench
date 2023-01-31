@@ -73,5 +73,15 @@
     "mode": "NULLABLE",
     "name": "survey_version_concept_id",
     "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "survey_concept_id",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "cati_concept_id",
+    "type": "integer"
   }
 ]

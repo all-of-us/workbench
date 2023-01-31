@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "sleep_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_main_sleep",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "level",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "start_datetime",
+    "type": "DATETIME"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "duration_in_min",
+    "type": "FLOAT"
+  }
+]

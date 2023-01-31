@@ -4,19 +4,22 @@
 
 set -e
 
-export BQ_PROJECT=$1        # CDR project
-export BQ_DATASET=$2        # CDR dataset
-export WGV_PROJECT=$3       # whole genome variant project
-export WGV_DATASET=$4       # whole genome variant dataset
-export WGV_TABLE=$5         # whole genome variant table
-export ARRAY_TABLE=$6       # array data table
+export BQ_PROJECT=$1                # CDR project
+export BQ_DATASET=$2                # CDR dataset
+export DATA_BROWSER=$3              # data browser build
+
+if [[ "$DATA_BROWSER" == true ]]
+then
+  echo "Building index for data browser. Skipping creation of the cb_search_person table."
+  exit 0
+fi
 
 ################################################
 # insert person data into cb_search_person
 ################################################
-echo "Inserting person data into cb_search_person"
-if [[ -z "$WGV_PROJECT" && -z "$ARRAY_TABLE" ]]
+if [[ ! "$BQ_DATASET" =~ (^C|^SC).* ]]
 then
+echo "Inserting person data into cb_search_person for Registered Tier (RT)"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
     (
@@ -28,6 +31,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , dob
         , is_deceased
         , has_fitbit
+        , state_of_residence
     )
 SELECT
       p.person_id
@@ -56,6 +60,10 @@ SELECT
         WHEN f.person_id is null THEN 0
         ELSE 1
       END has_fitbit
+    , CASE
+        WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
+        ELSE null
+      END state_of_residence
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
@@ -76,8 +84,13 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)"
 else
+echo "Inserting person data into cb_search_person for Controlled Tier (CT)"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
     (
@@ -91,7 +104,9 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_fitbit
         , has_whole_genome_variant
         , has_array_data
-
+        , has_lr_whole_genome_variant
+        , has_structural_variant_data
+        , state_of_residence
     )
 SELECT
       p.person_id
@@ -128,6 +143,18 @@ SELECT
         WHEN a.sample_name is null THEN 0
         ELSE 1
       END has_array_data
+    , CASE
+        WHEN lrw.sample_name is null THEN 0
+        ELSE 1
+      END has_lr_whole_genome_variant
+    , CASE
+        WHEN svt.sample_name is null THEN 0
+        ELSE 1
+      END has_structural_variant_data
+    , CASE
+        WHEN p.state_of_residence_source_value like 'PII State%' THEN replace(p.state_of_residence_source_value, 'PII State: ','')
+        ELSE null
+      END state_of_residence
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
@@ -148,9 +175,15 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$ARRAY_TABLE\` a on (CAST(p.person_id as STRING) = a.sample_name)"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_wgs_metadata\` w on (CAST(p.person_id as STRING) = w.sample_name)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_longreads_metadata\` lrw on (CAST(p.person_id as STRING) = lrw.sample_name)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_microarray_metadata\` a on (CAST(p.person_id as STRING) = a.sample_name)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_structural_variants_metadata\` svt on (CAST(p.person_id as STRING) = svt.sample_name)"
 fi
 
 ################################################

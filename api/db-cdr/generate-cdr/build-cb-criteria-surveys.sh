@@ -4,6 +4,7 @@ set -e
 SQL_FOR='PPI SURVEYS'
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
+MAX_ROWS=1000
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 ID_PREFIX=$3
@@ -166,6 +167,201 @@ LEFT JOIN (SELECT id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE
 WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
+##########################################################
+# Delete Lifestyle entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete lifestyle entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH lifestyle_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1585855)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1585855)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+         WHERE concept_id IN (1585855)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     )
+   )
+   SELECT *
+   FROM lifestyle_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
+
+##########################################################
+# Delete Overall Health entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete Overall Health entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH overall_health_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1585710)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1585710)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         )
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+         WHERE concept_id IN (1585710)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     )
+   )
+   SELECT *
+   FROM overall_health_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
+
+##########################################################
+# Delete Basics entries where all questions have null questionnaire_response_id
+##########################################################
+echo "delete Basics entries where all questions have null questionnaire_response_id"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+ WHERE EXISTS (
+   WITH basics_survey_remove_participants AS (
+     SELECT person_id, observation_date, observation_source_concept_id, questionnaire_response_id
+     FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+     WHERE person_id IN (
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE (observation_source_concept_id IN (903581, 1384450)
+            OR observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1586134)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         ))
+         AND questionnaire_response_id IS NULL
+
+           EXCEPT DISTINCT
+
+         SELECT DISTINCT person_id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.observation\`
+         WHERE (observation_source_concept_id IN (903581, 1384450)
+            OR observation_source_concept_id IN (
+           SELECT DISTINCT concept_id
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+             SELECT CAST(id AS STRING) AS id
+             FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+             WHERE concept_id IN (1586134)
+               AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+             AND type = 'PPI'
+             AND subtype = 'QUESTION'
+         ))
+         AND questionnaire_response_id IS NOT NULL
+     )
+     AND (observation_source_concept_id IN (903581, 1384450)
+      OR observation_source_concept_id IN (
+       SELECT DISTINCT concept_id
+       FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+       JOIN (
+         SELECT CAST(id AS STRING) AS id
+         FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+         WHERE concept_id IN (1586134)
+           AND domain_id = 'SURVEY' ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+       WHERE domain_id = 'SURVEY'
+         AND type = 'PPI'
+         AND subtype = 'QUESTION'
+     ))
+   )
+   SELECT *
+   FROM basics_survey_remove_participants lsrp
+   WHERE se.person_id = lsrp.person_id AND se.entry_date = lsrp.observation_date AND se.concept_id = lsrp.observation_source_concept_id
+ )"
+
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
@@ -276,7 +472,156 @@ FROM
         GROUP BY 1
     ) y
 WHERE x.domain_id = 'SURVEY'
-    and x.concept_id = y.ancestor_concept_id"
+and x.concept_id = y.ancestor_concept_id"
+
+# Correct Cope Survey total participant count. Concept ids (1310132, 1310137)
+# are duplicated in both Cope Surveys and Cope Vaccine Surveys. We only show them
+# in the vaccinations survey, so we need to update count to not include these concepts.
+echo "PPI SURVEYS - Correct Survey counts for Cope Survey"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.rollup_count = y.cnt
+    , x.est_count = y.cnt
+FROM
+    (
+        SELECT b.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN
+            (
+                SELECT *
+                FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
+                WHERE ancestor_concept_id in
+                    (
+                        SELECT concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                        WHERE domain_id = 'SURVEY'
+                          AND parent_id = 0
+                          AND concept_id = 1333342
+                    )
+            ) b on a.concept_id = b.descendant_concept_id
+        WHERE a.is_standard = 0
+        AND b.descendant_concept_id NOT IN (1310132, 1310137)
+        GROUP BY 1
+    ) y
+WHERE x.domain_id = 'SURVEY'
+and x.concept_id = y.ancestor_concept_id"
+
+echo "PPI SURVEYS - update Minute Survey Name"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.name = 'COVID-19 Vaccine Survey'
+WHERE code = 'cope_vaccine4'
+AND domain_id = 'SURVEY'"
+
+echo "cb_criteria - delete non health related question for PFHH only"
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
+"DELETE
+ FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+ WHERE id IN (
+  SELECT c.id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+  JOIN (
+      SELECT CAST(id AS STRING) AS id
+      FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+      WHERE concept_id IN (1740639)
+      AND domain_id = 'SURVEY'
+  ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+  WHERE code LIKE '%PMI_%'
+)"
+
+echo "PPI SURVEYS - generate answer counts for PFHH survey only"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+SET x.item_count = y.count
+    , x.est_count = y.count
+FROM
+    (
+      WITH pfhh_answers AS (
+        SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+        JOIN (
+              SELECT CAST(id AS STRING) AS id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+              WHERE concept_id IN (1740639)
+              AND domain_id = 'SURVEY'
+            ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+        WHERE domain_id = 'SURVEY'
+        AND type = 'PPI'
+        AND subtype = 'ANSWER'
+      )
+      SELECT se.value_source_concept_id, COUNT(DISTINCT person_id) as count
+      FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+      JOIN pfhh_answers ON (se.value_source_concept_id = pfhh_answers.answer_concept_id)
+      GROUP BY se.value_source_concept_id
+    ) y
+WHERE x.domain_id = 'SURVEY'
+AND x.type = 'PPI'
+AND x.subtype = 'ANSWER'
+AND CAST(x.value AS INT64) = y.value_source_concept_id"
+
+echo "PPI SURVEYS - generate question counts for PFHH survey only"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` z
+SET z.rollup_count = y.cnt,
+    z.item_count = y.cnt,
+    z.est_count = y.cnt
+FROM (
+      SELECT question_concept_id, COUNT(DISTINCT person_id) AS cnt
+      FROM (
+            WITH question_concept_ids AS (
+              SELECT DISTINCT concept_id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+              JOIN (
+                    SELECT CAST(id AS STRING) AS id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                    WHERE concept_id IN (1740639)
+                    AND domain_id = 'SURVEY'
+                  ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+              WHERE domain_id = 'SURVEY'
+              AND type = 'PPI'
+              AND subtype = 'QUESTION'
+            )
+            SELECT qci.concept_id AS question_concept_id, CAST(value AS INT64) AS answer_concept_id
+            FROM question_concept_ids qci
+            JOIN \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` cc ON qci.concept_id = cc.concept_id
+            WHERE cc.value IS NOT NULL
+            AND cc.code NOT LIKE '%PMI_%'
+            GROUP BY qci.concept_id, CAST(value AS INT64)
+           ) x
+      JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` ON value_source_concept_id = x.answer_concept_id
+      WHERE domain = 'Observation'
+      GROUP BY question_concept_id
+     ) y
+WHERE z.domain_id = 'SURVEY'
+AND z.type = 'PPI'
+AND z.is_group = 1
+AND z.concept_id = y.question_concept_id"
+
+echo "PPI SURVEYS - update survey count for PFHH survey only"
+bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
+ SET x.rollup_count = y.cnt
+     , x.est_count = y.cnt
+ FROM
+     (
+         SELECT 1740639 as concept_id, count(distinct person_id) as cnt
+         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+         WHERE se.value_source_concept_id in (
+           SELECT DISTINCT CAST(c.value AS INT64) as value
+           FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` c
+           JOIN (
+                 SELECT CAST(id AS STRING) AS id
+                 FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
+                 WHERE concept_id IN (1740639)
+                 AND domain_id = 'SURVEY'
+               ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+           WHERE domain_id = 'SURVEY'
+           AND type = 'PPI'
+           AND subtype = 'ANSWER'
+ )
+     ) y
+ WHERE x.domain_id = 'SURVEY'
+ AND x.concept_id = y.concept_id"
 
 ## wait for process to end before copying
 wait

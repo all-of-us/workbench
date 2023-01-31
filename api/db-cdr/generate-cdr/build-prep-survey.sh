@@ -229,7 +229,7 @@ do
 
   result=$(find_info "$concept_code" "$survey_name" "$order_by")
   IFS=$'|' read -a result_array <<< "$result"
-  if [[ ! -z "$topic" && "$topic" != "topic" && "${#result_array[@]}" -ge 2 ]]
+  if [[ ! -z "$topic" && "$topic" != "topic" ]]
   then
     formatted_topic=$(echo "$topic" | sed "s/'/\'/")
     echo "writing topic: $formatted_topic"
