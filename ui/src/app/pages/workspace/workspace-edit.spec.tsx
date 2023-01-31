@@ -53,7 +53,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
-jest.mock('app/utils/workbench-gapi-client', () => ({
+jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
     new Promise((resolve) =>
       resolve({ billingAccountName: 'billing-account' })
