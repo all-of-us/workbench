@@ -5,6 +5,7 @@ import { Profile } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
+import { withErrorModal } from 'app/components/modals';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
@@ -291,9 +292,13 @@ export const SideNav = (props: SideNavProps) => {
         <SideNavItem
           content={'Sign Out'}
           onToggleSideNav={() => onToggleSideNav()}
-          parentOnClick={() => {
-            signOut();
-          }}
+          parentOnClick={withErrorModal(
+            {
+              title: 'Sign Out Error',
+              message: 'There was an error signing out.',
+            },
+            signOut
+          )}
         />
       )}
       <SideNavItem

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { environment } from 'environments/environment';
+import { withErrorModal } from 'app/components/modals';
 import { TextModal } from 'app/components/text-modal';
 import { debouncer } from 'app/utils';
 import { signOut } from 'app/utils/authentication';
@@ -45,7 +46,13 @@ const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     null
   );
-  signOut(continuePath);
+  withErrorModal(
+    {
+      title: 'Sign Out Error',
+      message: 'There was an error signing you out for inactivity.',
+    },
+    () => signOut(continuePath)
+  )();
 };
 
 export const InactivityMonitor = () => {
@@ -154,7 +161,7 @@ export const InactivityMonitor = () => {
       });
     };
 
-    signOutIfLocalStorageInactivityElapsed('/sign-in-again');
+    signOutIfLocalStorageInactivityElapsed('/login');
     startUserActivityTracker();
     startInactivityMonitoring();
 
