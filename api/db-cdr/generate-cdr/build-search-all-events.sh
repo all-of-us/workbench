@@ -100,7 +100,14 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = po.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = po.procedure_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)
 WHERE po.procedure_concept_id is not null
-    and po.procedure_concept_id != 0"
+    and po.procedure_concept_id != 0
+    and c.concept_id not in (
+          select concept_id
+          from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+          where domain_id = 'Procedure'
+          and vocabulary_id in ('CPT4', 'ICD9Proc', 'ICD10PCS')
+          and standard_concept = 'S'
+        )"
 
 ##############################################################
 # insert source measurement data into cb_search_all_events
@@ -198,7 +205,14 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
 WHERE m.measurement_concept_id is not null
-    and m.measurement_concept_id != 0"
+    and m.measurement_concept_id != 0
+    and c.concept_id not in (
+              select concept_id
+              from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+              where domain_id = 'Measurement'
+              and vocabulary_id in ('CPT4')
+              and standard_concept = 'S'
+            )"
 
 #####################################################################
 #   update standard diastolic pressure data into cb_search_all_events
@@ -266,6 +280,8 @@ then
           , value_as_concept_id
           , value_source_concept_id
           , survey_version_concept_id
+          , survey_concept_id
+          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -283,10 +299,13 @@ then
       , a.value_as_concept_id
       , a.value_source_concept_id
       , c.survey_version_concept_id
+      , e.survey_concept_id
+      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` c on a.observation_id = c.observation_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 else
@@ -309,6 +328,8 @@ else
           , value_as_number
           , value_as_concept_id
           , value_source_concept_id
+          , survey_concept_id
+          , cati_concept_id
       )
   SELECT
         b.person_id
@@ -325,9 +346,12 @@ else
       , a.value_as_number
       , a.value_as_concept_id
       , a.value_source_concept_id
+      , e.survey_concept_id
+      , e.collection_method_concept_id
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` d on a.visit_occurrence_id = d.visit_occurrence_id
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.survey_conduct\` e on a.questionnaire_response_id = e.survey_conduct_id
   WHERE a.observation_source_concept_id is not null
       and a.observation_source_concept_id != 0"
 fi
@@ -357,7 +381,16 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = o.observation_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)
 WHERE o.observation_concept_id is not null
-    and o.observation_concept_id != 0"
+    and o.observation_concept_id != 0
+    and c.concept_id not in (
+              select concept_id
+              from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+              where domain_id = 'Observation'
+              and vocabulary_id in ('CPT4')
+              and standard_concept = 'S'
+            )
+    and c.vocabulary_id != 'PPI'
+    and c.concept_class_id != 'Survey'"
 
 ############################################################
 # insert standard device data into cb_search_all_events
@@ -382,29 +415,6 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where c.standard_concept = 'S'
 and c.domain_id = 'Device'
 and de.device_concept_id != 0"
-
-#######################################################
-#   insert source drug data into cb_search_all_events
-#######################################################
-echo "Inserting drug data into cb_search_all_events"
-bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-    (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
-SELECT p.person_id,
-    d.drug_exposure_start_date as entry_date,
-    d.drug_exposure_start_datetime as entry_datetime,
-    0 as is_standard,
-    d.drug_source_concept_id as concept_id,
-    'Drug' as domain,
-    DATE_DIFF(d.drug_exposure_start_date,date(p.BIRTH_DATETIME), YEAR) - IF(EXTRACT(MONTH FROM date(p.BIRTH_DATETIME))*100 + EXTRACT(DAY FROM date(p.BIRTH_DATETIME)) > EXTRACT(MONTH FROM d.drug_exposure_start_date)*100 + EXTRACT(DAY FROM d.drug_exposure_start_date),1,0) as age_at_event,
-    vo.visit_concept_id,
-    vo.visit_occurrence_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d
-JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = d.person_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = d.drug_source_concept_id)
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = d.visit_occurrence_id)
-WHERE d.drug_source_concept_id is not null
-    and d.drug_source_concept_id != 0"
 
 #########################################################
 #   insert standard drug data into cb_search_all_events
