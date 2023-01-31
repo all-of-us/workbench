@@ -8,10 +8,10 @@ import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
 import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
 
-const PanelMain = fp.flow(
+export const ConfigurationPanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
-)(({ onClose, workspace, type, runtimeConfPanelInitialState }) => {
+)(({ onClose, workspace, type = 'runtime', runtimeConfPanelInitialState }) => {
   const { namespace, id } = workspace;
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
     useState(null);
@@ -52,11 +52,3 @@ const PanelMain = fp.flow(
     </div>
   );
 });
-
-export const ConfigurationPanel = ({
-  type = 'runtime',
-  onClose,
-  runtimeConfPanelInitialState,
-}) => {
-  return <PanelMain {...{ type, onClose, runtimeConfPanelInitialState }} />;
-};
