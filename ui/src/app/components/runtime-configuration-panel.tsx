@@ -560,14 +560,14 @@ const PanelMain = fp.flow(
               <Fragment>
                 <CreatePanel
                   {...{
+                    analysisConfig,
                     creatorFreeCreditsRemaining,
                     profile,
+                    setPanelContent,
                     setRuntimeStatus,
                     status,
+                    workspace,
                   }}
-                  setPanelContent={(value) => setPanelContent(value)}
-                  workspace={workspace}
-                  analysisConfig={analysisConfig}
                 />
                 <FlexRow
                   style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
