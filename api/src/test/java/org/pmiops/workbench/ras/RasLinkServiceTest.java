@@ -170,7 +170,7 @@ public class RasLinkServiceTest {
       config.access.renewal.expiryDays = 365L;
       config.access.enableEraCommons = true;
       config.access.enableRasLoginGovLinking = true;
-      config.access.enforceRasLoginGovLinking = true;
+      // config.access.enforceRasLoginGovLinking = true;
       return config;
     }
 

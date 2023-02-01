@@ -163,7 +163,7 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    // providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
@@ -923,7 +923,7 @@ public class UserServiceAccessTest {
   @Test
   public void testRasLinkNotComplete() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    // providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 
@@ -943,7 +943,7 @@ public class UserServiceAccessTest {
   @Test
   public void testRasLinkNotComplete_enforceRasOff_enableRasOn() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
+    // providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
@@ -960,7 +960,7 @@ public class UserServiceAccessTest {
   public void testRasLinkNotComplete_enableRasFFNotAffect(boolean enableRasFFStatus) {
     // TODO: Delete this test when delete enable RAS feature flag.
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
+    // providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = enableRasFFStatus;
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
