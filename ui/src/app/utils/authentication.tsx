@@ -8,11 +8,7 @@ import { userApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
 import { navigateSignOut } from 'app/utils/navigation';
-import {
-  authStore,
-  notificationStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { authStore, serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
 import { User, WebStorageStateStore } from 'oidc-client-ts';
 
