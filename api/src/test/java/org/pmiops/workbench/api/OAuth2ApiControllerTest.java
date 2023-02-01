@@ -77,6 +77,18 @@ class OAuth2ApiControllerTest {
   }
 
   @Test
+  void testProxyOauthToken_proxiesQueryString_null() {
+    when(mockHttpServletRequest.getQueryString()).thenReturn(null);
+    String expectedUri = OAuth2ApiController.GOOGLE_TOKEN_ENDPOINT;
+
+    oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);
+
+    ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+    verify(restTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
+    assertThat(argument.getValue()).isEqualTo(expectedUri);
+  }
+
+  @Test
   void testProxyOauthToken_addsClientSecretToBody() throws IOException {
     String body = "abc=123";
     when(mockHttpServletRequest.getReader()).thenReturn(new BufferedReader(new StringReader(body)));
