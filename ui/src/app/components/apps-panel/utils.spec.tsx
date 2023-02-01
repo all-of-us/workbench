@@ -60,11 +60,11 @@ describe('AppsPanel utils', () => {
 
     // no other AppStatuses are mapped currently
 
-    [AppStatus.DELETED, AppStatus.DELETED],
-    [AppStatus.DELETING, AppStatus.DELETING],
-    [AppStatus.ERROR, AppStatus.ERROR],
-    [AppStatus.PROVISIONING, AppStatus.PROVISIONING],
-    [AppStatus.STATUSUNSPECIFIED, AppStatus.STATUSUNSPECIFIED],
+    [AppStatus.DELETED, AppStatus.DELETED.toString()],
+    [AppStatus.DELETING, AppStatus.DELETING.toString()],
+    [AppStatus.ERROR, AppStatus.ERROR.toString()],
+    [AppStatus.PROVISIONING, AppStatus.PROVISIONING.toString()],
+    [AppStatus.STATUSUNSPECIFIED, AppStatus.STATUSUNSPECIFIED.toString()],
 
     [undefined, undefined],
     [null, undefined],

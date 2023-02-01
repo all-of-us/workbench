@@ -7,7 +7,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { AppsApi, RuntimeApi } from 'generated/fetch/api';
+import { AppsApi } from 'generated/fetch/api';
 
 import { Spinner } from 'app/components/spinners';
 import {
@@ -19,7 +19,6 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import {
   clearCompoundRuntimeOperations,
   profileStore,
-  runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
 
@@ -32,9 +31,7 @@ import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import {
-  workspaceDataStub,
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
@@ -49,7 +46,6 @@ interface Props {
 
 describe('CromwellConfigurationPanel', () => {
   let props: Props;
-  let runtimeApiStub: RuntimeApiStub;
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
@@ -63,14 +59,6 @@ describe('CromwellConfigurationPanel', () => {
   };
 
   beforeEach(async () => {
-    runtimeApiStub = new RuntimeApiStub();
-    registerApiClient(RuntimeApi, runtimeApiStub);
-    runtimeStore.set({
-      workspaceNamespace: workspaceDataStub.namespace,
-      runtime: runtimeApiStub.runtime,
-      runtimeLoaded: true,
-    });
-
     disksApiStub = new DisksApiStub();
     registerApiClient(DisksApi, disksApiStub);
 
@@ -81,7 +69,6 @@ describe('CromwellConfigurationPanel', () => {
       accessLevel: WorkspaceAccessLevel.WRITER,
       billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-      googleProject: runtimeApiStub.runtime.googleProject,
     });
 
     registerApiClient(ProfileApi, new ProfileApiStub());
@@ -114,18 +101,6 @@ describe('CromwellConfigurationPanel', () => {
     act(() => clearCompoundRuntimeOperations());
     jest.clearAllTimers();
     jest.useRealTimers();
-  });
-
-  it('should show loading spinner while loading', async () => {
-    runtimeStore.set({
-      workspaceNamespace: workspaceDataStub.namespace,
-      runtime: runtimeApiStub.runtime,
-      runtimeLoaded: false,
-    });
-    const wrapper = await component();
-
-    expect(wrapper.exists('#cromwell-configuration-panel')).toEqual(false);
-    expect(wrapper.exists(Spinner)).toEqual(true);
   });
 
   it('should show configuration panel while not loading', async () => {

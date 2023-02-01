@@ -16,7 +16,6 @@ import {
   withUserProfile,
 } from 'app/utils';
 import { findMachineByName } from 'app/utils/machines';
-import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
@@ -48,7 +47,7 @@ const PanelMain = fp.flow(
     return (
       <FlexColumn style={{ height: '100%' }}>
         <div
-          data-test-id='runtime-create-panel'
+          data-test-id='cromwell-create-panel'
           style={{ ...styles.controlSection, marginTop: '1rem' }}
         >
           <EnvironmentInformedActionPanel
@@ -154,7 +153,6 @@ export const CromwellConfigurationPanel = ({
   creatorFreeCreditsRemaining = null,
 }) => {
   const [analysisConfig, setAnalysisConfig] = useState({});
-  const { runtimeLoaded } = useStore(runtimeStore);
 
   useEffect(
     () =>
@@ -173,7 +171,7 @@ export const CromwellConfigurationPanel = ({
   );
 
   const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
-  if (!runtimeLoaded || !analysisConfigLoaded) {
+  if (!analysisConfigLoaded) {
     return (
       <Spinner
         id='cromwell-configuration-panel-spinner'
@@ -186,10 +184,10 @@ export const CromwellConfigurationPanel = ({
   return (
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
       <div>
-        A cloud environment consists of application configuration, cloud compute
-        and persistent disk(s). This is the server version of Cromwell only. You
-        will need to create a Jupyter terminal environment in order to interact
-        with the workflow.
+        A cloud environment consists of an application configuration, cloud
+        compute and persistent disk(s). This is the server version of Cromwell
+        only. You will need to create a Jupyter terminal environment in order to
+        interact with the workflow.
       </div>
       <PanelMain
         {...{
