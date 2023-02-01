@@ -279,7 +279,6 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     // If true, all users are required to finish identity verification using RAS/login.gov.
     public boolean enableRasLoginGovLinking;
-    @Deprecated public boolean enforceRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
 
