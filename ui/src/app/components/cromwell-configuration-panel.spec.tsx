@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 
 import {
   DisksApi,
@@ -16,11 +15,7 @@ import {
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import {
-  clearCompoundRuntimeOperations,
-  profileStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -98,7 +93,6 @@ describe('CromwellConfigurationPanel', () => {
   });
 
   afterEach(() => {
-    act(() => clearCompoundRuntimeOperations());
     jest.clearAllTimers();
     jest.useRealTimers();
   });
