@@ -93,46 +93,49 @@ export const findApp = (
   apps?.find((app) => app.appType === toAppType(appType));
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
-export type UserEnvironmentStatus =
-  | 'Creating'
-  | 'Deleted'
-  | 'Deleting'
-  | 'Error'
-  | 'UNKNOWN'
-  | 'Running'
-  | 'Pausing'
-  | 'Paused'
-  | 'Resuming'
-  | 'Updating';
+export enum UserEnvironmentStatus {
+  CREATING = 'Creating',
+  DELETED = 'Deleted',
+  DELETING = 'Deleting',
+  ERROR = 'Error',
+  RUNNING = 'Running',
+  PAUSING = 'Pausing',
+  PAUSED = 'Paused',
+  RESUMING = 'Resuming',
+  UPDATING = 'Updating',
+  UNKNOWN = 'UNKNOWN',
+}
 
 export const fromRuntimeStatus = (
   status: RuntimeStatus
 ): UserEnvironmentStatus =>
   cond(
-    [status === RuntimeStatus.Creating, () => 'Creating'],
-    [status === RuntimeStatus.Deleted, () => 'Deleted'],
-    [status === RuntimeStatus.Deleting, () => 'Deleting'],
-    [status === RuntimeStatus.Error, () => 'Error'],
-    [status === RuntimeStatus.Running, () => 'Running'],
-    [status === RuntimeStatus.Stopping, () => 'Pausing'],
-    [status === RuntimeStatus.Stopped, () => 'Paused'],
-    [status === RuntimeStatus.Starting, () => 'Resuming'],
-    [status === RuntimeStatus.Updating, () => 'Updating'],
-    () => 'UNKNOWN'
+    [status === RuntimeStatus.Creating, () => UserEnvironmentStatus.CREATING],
+    [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
+    [status === RuntimeStatus.Deleting, () => UserEnvironmentStatus.DELETING],
+    [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
+    [status === RuntimeStatus.Running, () => UserEnvironmentStatus.RUNNING],
+    [status === RuntimeStatus.Stopping, () => UserEnvironmentStatus.PAUSING],
+    [status === RuntimeStatus.Stopped, () => UserEnvironmentStatus.PAUSED],
+    [status === RuntimeStatus.Starting, () => UserEnvironmentStatus.RESUMING],
+    [status === RuntimeStatus.Updating, () => UserEnvironmentStatus.UPDATING],
+    () => UserEnvironmentStatus.UNKNOWN
   );
 
 export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
   cond(
-    [status === AppStatus.RUNNING, () => 'Running'],
-    [status === AppStatus.STOPPING, () => 'Pausing'],
-    [status === AppStatus.STOPPED, () => 'Paused'],
-    [status === AppStatus.STARTING, () => 'Resuming'],
-    () => 'UNKNOWN'
+    [status === AppStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
+    [status === AppStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
+    [status === AppStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
+    [status === AppStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
+    () => UserEnvironmentStatus.UNKNOWN
   );
 
 // if the status is mappable to a UserEnvironmentStatus, return that
 // else return the original status
 export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
   const mappedStatus = fromUserAppStatus(status);
-  return mappedStatus === 'UNKNOWN' ? status?.toString() : mappedStatus;
+  return mappedStatus === UserEnvironmentStatus.UNKNOWN
+    ? status?.toString()
+    : mappedStatus;
 };

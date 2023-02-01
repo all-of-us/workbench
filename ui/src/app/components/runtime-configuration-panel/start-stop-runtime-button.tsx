@@ -43,7 +43,7 @@ export const StartStopRuntimeButton = ({
         appType === UIAppType.JUPYTER,
         () => fromRuntimeStatus(status as RuntimeStatus),
       ],
-      () => 'UNKNOWN'
+      () => UserEnvironmentStatus.UNKNOWN
     );
 
   const rotateStyle = { animation: 'rotation 2s infinite linear' };
@@ -56,7 +56,7 @@ export const StartStopRuntimeButton = ({
   } = switchCase(
     userEnvironmentStatus,
     [
-      'Creating',
+      UserEnvironmentStatus.CREATING,
       () => ({
         altText: 'Runtime creation in progress',
         iconSrc: computeStarting,
@@ -65,7 +65,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Running',
+      UserEnvironmentStatus.RUNNING,
       () => ({
         altText: 'Runtime running, click to pause',
         iconSrc: computeRunning,
@@ -74,7 +74,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Updating',
+      UserEnvironmentStatus.UPDATING,
       () => ({
         altText: 'Runtime update in progress',
         iconSrc: computeStarting,
@@ -83,7 +83,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Error',
+      UserEnvironmentStatus.ERROR,
       () => ({
         altText: 'Runtime in error state',
         iconSrc: computeError,
@@ -91,7 +91,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Pausing',
+      UserEnvironmentStatus.PAUSING,
       () => ({
         altText: 'Runtime pause in progress',
         iconSrc: computeStopping,
@@ -100,7 +100,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Paused',
+      UserEnvironmentStatus.PAUSED,
       () => ({
         altText: 'Runtime paused, click to resume',
         iconSrc: computeStopped,
@@ -109,7 +109,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Resuming',
+      UserEnvironmentStatus.RESUMING,
       () => ({
         altText: 'Runtime resume in progress',
         iconSrc: computeStarting,
@@ -118,7 +118,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Deleting',
+      UserEnvironmentStatus.DELETING,
       () => ({
         altText: 'Runtime deletion in progress',
         iconSrc: computeStopping,
@@ -127,7 +127,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'Deleted',
+      UserEnvironmentStatus.DELETED,
       () => ({
         altText: 'Runtime has been deleted',
         iconSrc: computeNone,
@@ -135,7 +135,7 @@ export const StartStopRuntimeButton = ({
       }),
     ],
     [
-      'UNKNOWN',
+      UserEnvironmentStatus.UNKNOWN,
       () => ({
         altText: 'Runtime status unknown',
         iconSrc: computeNone,

@@ -9,19 +9,19 @@ import {
 
 describe('AppsPanel utils', () => {
   test.each([
-    [RuntimeStatus.Running, 'Running'],
-    [RuntimeStatus.Stopping, 'Pausing'],
-    [RuntimeStatus.Stopped, 'Paused'],
-    [RuntimeStatus.Starting, 'Resuming'],
-    [RuntimeStatus.Creating, 'Creating'],
-    [RuntimeStatus.Deleted, 'Deleted'],
-    [RuntimeStatus.Deleting, 'Deleting'],
-    [RuntimeStatus.Error, 'Error'],
-    [RuntimeStatus.Updating, 'Updating'],
-    [RuntimeStatus.Unknown, 'UNKNOWN'],
+    [RuntimeStatus.Running, UserEnvironmentStatus.RUNNING],
+    [RuntimeStatus.Stopping, UserEnvironmentStatus.PAUSING],
+    [RuntimeStatus.Stopped, UserEnvironmentStatus.PAUSED],
+    [RuntimeStatus.Starting, UserEnvironmentStatus.RESUMING],
+    [RuntimeStatus.Creating, UserEnvironmentStatus.CREATING],
+    [RuntimeStatus.Deleted, UserEnvironmentStatus.DELETED],
+    [RuntimeStatus.Deleting, UserEnvironmentStatus.DELETING],
+    [RuntimeStatus.Error, UserEnvironmentStatus.ERROR],
+    [RuntimeStatus.Updating, UserEnvironmentStatus.UPDATING],
+    [RuntimeStatus.Unknown, UserEnvironmentStatus.UNKNOWN],
 
-    [undefined, 'UNKNOWN'],
-    [null, 'UNKNOWN'],
+    [undefined, UserEnvironmentStatus.UNKNOWN],
+    [null, UserEnvironmentStatus.UNKNOWN],
   ])(
     'Should convert RuntimeStatus %s to the correct UserEnvironmentStatus',
     (runtimeStatus: RuntimeStatus, expected: UserEnvironmentStatus) => {
@@ -30,21 +30,21 @@ describe('AppsPanel utils', () => {
   );
 
   test.each([
-    [AppStatus.RUNNING, 'Running'],
-    [AppStatus.STOPPING, 'Pausing'],
-    [AppStatus.STOPPED, 'Paused'],
-    [AppStatus.STARTING, 'Resuming'],
+    [AppStatus.RUNNING, UserEnvironmentStatus.RUNNING],
+    [AppStatus.STOPPING, UserEnvironmentStatus.PAUSING],
+    [AppStatus.STOPPED, UserEnvironmentStatus.PAUSED],
+    [AppStatus.STARTING, UserEnvironmentStatus.RESUMING],
 
     // no other AppStatuses are mapped currently
 
-    [AppStatus.DELETED, 'UNKNOWN'],
-    [AppStatus.DELETING, 'UNKNOWN'],
-    [AppStatus.ERROR, 'UNKNOWN'],
-    [AppStatus.PROVISIONING, 'UNKNOWN'],
-    [AppStatus.STATUSUNSPECIFIED, 'UNKNOWN'],
+    [AppStatus.DELETED, UserEnvironmentStatus.UNKNOWN],
+    [AppStatus.DELETING, UserEnvironmentStatus.UNKNOWN],
+    [AppStatus.ERROR, UserEnvironmentStatus.UNKNOWN],
+    [AppStatus.PROVISIONING, UserEnvironmentStatus.UNKNOWN],
+    [AppStatus.STATUSUNSPECIFIED, UserEnvironmentStatus.UNKNOWN],
 
-    [undefined, 'UNKNOWN'],
-    [null, 'UNKNOWN'],
+    [undefined, UserEnvironmentStatus.UNKNOWN],
+    [null, UserEnvironmentStatus.UNKNOWN],
   ])(
     'Should convert AppStatus %s to the correct UserEnvironmentStatus',
     (userAppStatus: AppStatus, expected: UserEnvironmentStatus) => {
@@ -53,10 +53,10 @@ describe('AppsPanel utils', () => {
   );
 
   test.each([
-    [AppStatus.RUNNING, 'Running'],
-    [AppStatus.STOPPING, 'Pausing'],
-    [AppStatus.STOPPED, 'Paused'],
-    [AppStatus.STARTING, 'Resuming'],
+    [AppStatus.RUNNING, UserEnvironmentStatus.RUNNING],
+    [AppStatus.STOPPING, UserEnvironmentStatus.PAUSING],
+    [AppStatus.STOPPED, UserEnvironmentStatus.PAUSED],
+    [AppStatus.STARTING, UserEnvironmentStatus.RESUMING],
 
     // no other AppStatuses are mapped currently
 
