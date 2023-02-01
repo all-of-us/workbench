@@ -38,7 +38,6 @@ const styles = reactStyles({
     fontWeight: '600',
   },
   costPeriod: {
-    marginLeft: '0.125rem',
     fontWeight: '600',
   },
 });
@@ -80,7 +79,7 @@ export const RuntimeCostEstimator = ({
         >
           <div style={costStyle} data-test-id='running-cost'>
             <div style={styles.costValue}>{formatUsd(runningCost)}</div>
-            <div style={styles.costPeriod}>per hour</div>
+            <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
         </TooltipTrigger>
       </FlexColumn>
@@ -100,7 +99,7 @@ export const RuntimeCostEstimator = ({
         >
           <div style={costStyle} data-test-id='storage-cost'>
             <div style={styles.costValue}>{formatUsd(storageCost)}</div>
-            <div style={styles.costPeriod}>per hour</div>
+            <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
         </TooltipTrigger>
       </FlexColumn>
@@ -111,7 +110,7 @@ export const RuntimeCostEstimator = ({
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
             <div style={styles.costValue}>{formatUsd(pdCost)}</div>
-            <div style={styles.costPeriod}>per month</div>
+            <div style={styles.costPeriod}>{` per month`}</div>
           </div>
         </FlexColumn>
       )}
