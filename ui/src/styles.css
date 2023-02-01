@@ -477,6 +477,6 @@ body .p-menu .p-menuitem-link {
   z-index: 1;
 }
 
-.css-b8ldur-Input :is(div,input) {
+.css-b8ldur-Input :is(div, input) {
   width: 100%;
 }
