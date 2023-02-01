@@ -1,26 +1,10 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -68,12 +52,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
+
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+  private static final String LEONARDO_BASE_URL ="LEONARDO_BASE_URL";
 
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
@@ -282,6 +284,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
+
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -631,7 +634,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         || workspace.isTerraV2Workspace()) {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
-
+    customEnvironmentVariables.put(LEONARDO_BASE_URL, leonardoApiClientFactory.newNotebooksClient().getBasePath());
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     return customEnvironmentVariables;
