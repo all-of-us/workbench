@@ -9,7 +9,7 @@ fi
 # drop trailing slash if exists
 SNIPPETS_REPO_DIR=${1%/}
 
-snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "r_gcs" "r_sql" "r_dataset", "py_cromwell")
+snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "py_cromwell" "r_gcs" "r_sql" "r_dataset")
 
 for prefix in "${snippet_filename_prefixes[@]}"; do
   source="${SNIPPETS_REPO_DIR}/build/${prefix}_snippets_menu_config.json"
