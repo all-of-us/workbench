@@ -136,14 +136,6 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCanPerformAppActions_featureNotEnabled() throws Exception {
-    config.featureFlags.enableGkeApp = false;
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.validateCanPerformApiAction(testWorkspace));
-  }
-
-  @Test
   public void testCanPerformAppActions_securitySuspended() throws ApiException {
     user.setComputeSecuritySuspendedUntil(
         Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));

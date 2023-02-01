@@ -94,16 +94,12 @@ public class AppsController implements AppsApiDelegate {
    * <p>User App actions require:
    *
    * <ul>
-   *   <li>The User Apps feature is enabled (FF enableGkeApp)
    *   <li>User compute is not suspended due to security reasons (e.g. egress alert)
    *   <li>User is OWNER or WRITER of the workspace
    * </ul>
    */
   @VisibleForTesting
   protected void validateCanPerformApiAction(DbWorkspace dbWorkspace) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGkeApp) {
-      throw new UnsupportedOperationException("API not supported.");
-    }
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
     String workspaceNamespace = dbWorkspace.getWorkspaceNamespace();
