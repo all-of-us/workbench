@@ -325,7 +325,7 @@ const PanelMain = fp.flow(
       );
       updateMessaging = diffsToUpdateMessaging(configDiffs);
     }
-    const runtimeChanged = configDiffs.length > 0;
+    const environmentChanged = configDiffs.length > 0;
 
     // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
     // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
@@ -449,7 +449,7 @@ const PanelMain = fp.flow(
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
-      runtimeChanged &&
+      environmentChanged &&
       [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
         status as RuntimeStatus
       ) &&
@@ -651,6 +651,7 @@ const PanelMain = fp.flow(
                       workspace,
                       analysisConfig,
                       status,
+                      environmentChanged,
                     }}
                     onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
                     onResume={() =>

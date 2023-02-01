@@ -12,7 +12,7 @@ import { Spinner } from './spinners';
 
 const CostInfo = ({
   creatorFreeCreditsRemaining,
-  runtimeChanged,
+  environmentChanged,
   analysisConfig,
   currentUser,
   workspace,
@@ -29,7 +29,7 @@ const CostInfo = ({
       <div
         style={{
           padding: '.495rem .75rem',
-          ...(runtimeChanged
+          ...(environmentChanged
             ? {
                 backgroundColor: colorWithWhiteness(colors.warning, 0.9),
               }
@@ -71,12 +71,12 @@ export const EnvironmentInformedActionPanel = ({
   onPause,
   onResume,
   appType,
+  environmentChanged = false,
 }) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
     <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
     <CostInfo
-      {...{ analysisConfig }}
-      runtimeChanged={false}
+      {...{ analysisConfig, environmentChanged }}
       currentUser={profile.username}
       workspace={workspace}
       creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}

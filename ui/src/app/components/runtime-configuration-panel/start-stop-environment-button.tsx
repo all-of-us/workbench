@@ -182,7 +182,7 @@ export const StartStopEnvironmentButton = ({
       {onClick && (
         <TooltipTrigger content={<div>{altText}</div>} side='left'>
           <FlexRow style={iconWrapperStyle}>
-            <Clickable onClick={() => onClick()}>
+            <Clickable {...{ onClick }} style={{ display: 'flex' }}>
               <img
                 alt={altText}
                 src={iconSrc}
