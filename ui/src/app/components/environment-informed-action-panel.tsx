@@ -5,7 +5,7 @@ import { formatUsd } from 'app/utils/numbers';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
 import { FlexRow } from './flex';
-import { StartStopRuntimeButton } from './runtime-configuration-panel/start-stop-runtime-button';
+import { StartStopEnvironmentButton } from './runtime-configuration-panel/start-stop-environment-button';
 import { styles } from './runtime-configuration-panel/styles';
 import { RuntimeCostEstimator } from './runtime-cost-estimator';
 import { Spinner } from './spinners';
@@ -73,7 +73,7 @@ export const EnvironmentInformedActionPanel = ({
   appType,
 }) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
-    <StartStopRuntimeButton {...{ status, onPause, onResume, appType }} />
+    <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
     <CostInfo
       {...{ analysisConfig }}
       runtimeChanged={false}

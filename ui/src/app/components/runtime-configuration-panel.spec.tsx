@@ -1215,7 +1215,7 @@ describe('RuntimeConfigurationPanel', () => {
     const wrapper = await component();
 
     expect(
-      wrapper.find('[data-test-id="runtime-status-icon-running"]').exists()
+      wrapper.find('[data-test-id="environment-status-icon-running"]').exists()
     ).toBeTruthy();
   });
 
@@ -1223,7 +1223,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     expect(
-      wrapper.find('[data-test-id="runtime-status-icon-none"]').exists()
+      wrapper.find('[data-test-id="environment-status-icon-none"]').exists()
     ).toBeTruthy();
   });
 

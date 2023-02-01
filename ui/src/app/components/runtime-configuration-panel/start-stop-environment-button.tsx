@@ -27,7 +27,7 @@ interface StatusInfo {
   appType: UIAppType;
 }
 
-export const StartStopRuntimeButton = ({
+export const StartStopEnvironmentButton = ({
   status,
   onPause,
   onResume,
@@ -58,96 +58,96 @@ export const StartStopRuntimeButton = ({
     [
       UserEnvironmentStatus.CREATING,
       () => ({
-        altText: 'Runtime creation in progress',
+        altText: 'Environment creation in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.RUNNING,
       () => ({
-        altText: 'Runtime running, click to pause',
+        altText: 'Environment running, click to pause',
         iconSrc: computeRunning,
-        dataTestId: 'runtime-status-icon-running',
+        dataTestId: 'environment-status-icon-running',
         onClick: onPause,
       }),
     ],
     [
       UserEnvironmentStatus.UPDATING,
       () => ({
-        altText: 'Runtime update in progress',
+        altText: 'Environment update in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.ERROR,
       () => ({
-        altText: 'Runtime in error state',
+        altText: 'Environment in error state',
         iconSrc: computeError,
-        dataTestId: 'runtime-status-icon-error',
+        dataTestId: 'environment-status-icon-error',
       }),
     ],
     [
       UserEnvironmentStatus.PAUSING,
       () => ({
-        altText: 'Runtime pause in progress',
+        altText: 'Environment pause in progress',
         iconSrc: computeStopping,
-        dataTestId: 'runtime-status-icon-stopping',
+        dataTestId: 'environment-status-icon-stopping',
         styleOverrides: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.PAUSED,
       () => ({
-        altText: 'Runtime paused, click to resume',
+        altText: 'Environment paused, click to resume',
         iconSrc: computeStopped,
-        dataTestId: 'runtime-status-icon-stopped',
+        dataTestId: 'environment-status-icon-stopped',
         onClick: onResume,
       }),
     ],
     [
       UserEnvironmentStatus.RESUMING,
       () => ({
-        altText: 'Runtime resume in progress',
+        altText: 'Environment resume in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.DELETING,
       () => ({
-        altText: 'Runtime deletion in progress',
+        altText: 'Environment deletion in progress',
         iconSrc: computeStopping,
-        dataTestId: 'runtime-status-icon-stopping',
+        dataTestId: 'environment-status-icon-stopping',
         styleOverrides: rotateStyle,
       }),
     ],
     [
       UserEnvironmentStatus.DELETED,
       () => ({
-        altText: 'Runtime has been deleted',
+        altText: 'Environment has been deleted',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ],
     [
       UserEnvironmentStatus.UNKNOWN,
       () => ({
-        altText: 'Runtime status unknown',
+        altText: 'Environment status unknown',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ],
     [
       DEFAULT,
       () => ({
-        altText: 'No runtime found',
+        altText: 'No Environment found',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ]
   );
