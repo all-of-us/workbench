@@ -111,7 +111,8 @@ export interface AnalysisConfig {
   computeType: ComputeType;
   machine: Machine;
   diskConfig: DiskConfig;
-  // This should only be populated if !diskconfig.detachable. (What does this mean?)
+  // TODO: Document types of disks available (RW-9490)
+  // This should only be populated if !diskconfig.detachable.
   detachedDisk: Disk;
   // TODO: Refactor this type to an intermediate representation.
   dataprocConfig: DataprocConfig;
