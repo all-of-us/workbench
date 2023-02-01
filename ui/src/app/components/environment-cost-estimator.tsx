@@ -42,7 +42,7 @@ const styles = reactStyles({
   },
 });
 
-export const RuntimeCostEstimator = ({
+export const EnvironmentCostEstimator = ({
   analysisConfig,
   costTextColor = colors.accent,
   style = {},

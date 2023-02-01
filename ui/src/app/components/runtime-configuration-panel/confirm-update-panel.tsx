@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
+import { EnvironmentCostEstimator } from 'app/components/environment-cost-estimator';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { TextColumn } from 'app/components/text-column';
 import {
   diffsToUpdateMessaging,
@@ -54,7 +54,7 @@ export const ConfirmUpdatePanel = ({
                 ...styles.costComparison,
               }}
             >
-              <RuntimeCostEstimator analysisConfig={newAnalysisConfig} />
+              <EnvironmentCostEstimator analysisConfig={newAnalysisConfig} />
             </div>
           </div>
           <div>
@@ -67,7 +67,7 @@ export const ConfirmUpdatePanel = ({
                 backgroundColor: '',
               }}
             >
-              <RuntimeCostEstimator
+              <EnvironmentCostEstimator
                 analysisConfig={existingAnalysisConfig}
                 costTextColor='grey'
               />

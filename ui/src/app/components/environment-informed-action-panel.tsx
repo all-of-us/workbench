@@ -4,10 +4,10 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatUsd } from 'app/utils/numbers';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
+import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { FlexRow } from './flex';
 import { StartStopEnvironmentButton } from './runtime-configuration-panel/start-stop-environment-button';
 import { styles } from './runtime-configuration-panel/styles';
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
 import { Spinner } from './spinners';
 
 const CostInfo = ({
@@ -36,7 +36,7 @@ const CostInfo = ({
             : {}),
         }}
       >
-        <RuntimeCostEstimator {...{ analysisConfig }} />
+        <EnvironmentCostEstimator {...{ analysisConfig }} />
       </div>
       {isUsingFreeTierBillingAccount(workspace) &&
         currentUser === workspace.creator && (
