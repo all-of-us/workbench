@@ -400,7 +400,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
       () =>
         icon.faIcon === null ? (
           <img
-            alt={icon.id}
+            alt={icon.label}
             data-test-id={'help-sidebar-icon-' + icon.id}
             style={icon.style}
           />
@@ -520,7 +520,7 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
     cromwellConfig: {
       id: 'cromwellConfig',
       disabled: !!loadingError,
-      faIcon: faEdit,
+      faIcon: null,
       label: 'Cromwell Icon',
       showIcon: () => true,
       style: { width: '36px' },
