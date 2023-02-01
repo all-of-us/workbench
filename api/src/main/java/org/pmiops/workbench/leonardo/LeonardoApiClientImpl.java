@@ -634,7 +634,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
     customEnvironmentVariables.put(
-        LEONARDO_BASE_URL, leonardoApiClientFactory.newNotebooksClient().getBasePath());
+        LEONARDO_BASE_URL, workbenchConfigProvider.get().firecloud.leoBaseUrl);
     customEnvironmentVariables.put(AOU_REFER, workbenchConfigProvider.get().server.apiBaseUrl);
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
