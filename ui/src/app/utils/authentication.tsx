@@ -16,6 +16,8 @@ import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from './constants';
 
 const GOOGLE_BILLING_SCOPE = 'https://www.googleapis.com/auth/cloud-billing';
 
+// In e2e tests we circumvent Google sign-in because puppeteer could be
+// flagged as a bot by Google sign-in.
 function getTestAccessTokenOverride() {
   return window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
 }
