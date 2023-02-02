@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,8 +29,10 @@ import org.springframework.web.client.RestTemplate;
 
 @Controller
 public class OAuth2ApiController {
-  static final String AOU_TOKEN_ENDPOINT = "/oauth2/token";
+  @VisibleForTesting
   static final String GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+
+  private static final String AOU_TOKEN_ENDPOINT = "/oauth2/token";
   private static final String CLIENT_SECRET_PARAM = "client_secret";
   private final RestTemplate restTemplate;
   private final CloudStorageClient cloudStorageClient;
