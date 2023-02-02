@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AppStatus, AppType, UserAppEnvironment } from 'generated/fetch';
+import { AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -53,11 +53,30 @@ const PanelMain = fp.flow(
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
     const [creationStarted, setCreationStarted] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [status, setStatus] = useState(null);
+
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
-    const status: AppStatus = findApp(userApps, UIAppType.CROMWELL)?.status;
+    useEffect(() => {
+      setStatus(findApp(userApps, UIAppType.CROMWELL)?.status);
+    }, [userApps]);
+
+    useEffect(() => {
+      if (loading && !!status) {
+        setLoading(false);
+      }
+    }, [loading, status]);
+
+    useEffect(() => {
+      if (creationStarted) {
+        appsApi().createApp(workspace.namespace, defaultCromwellConfig);
+        onClose();
+        setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+      }
+    }, [creationStarted]);
 
     const { profile } = profileState;
 
@@ -153,11 +172,8 @@ const PanelMain = fp.flow(
             aria-label='cromwell cloud environment create button'
             onClick={() => {
               setCreationStarted(true);
-              appsApi().createApp(workspace.namespace, defaultCromwellConfig);
-              onClose();
-              setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
             }}
-            disabled={!!status || creationStarted}
+            disabled={loading || !!status || creationStarted}
           >
             Start
           </Button>

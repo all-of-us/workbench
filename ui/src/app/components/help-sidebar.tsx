@@ -692,7 +692,7 @@ export const HelpSidebar = fp.flow(
                           >
                             <Button
                               id='helpSideBarBackButton'
-                              ariaLabel='A button to navigate back to the last panel displayed in the apps panel.'
+                              aria-label='A button to navigate back to the last panel displayed in the apps panel.'
                               type='secondary'
                               onClick={() => this.handleBack()}
                             >
