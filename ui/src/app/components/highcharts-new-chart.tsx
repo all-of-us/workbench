@@ -5,16 +5,17 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
 import * as highCharts from 'highcharts';
-import HighchartsDependencyWheel from 'highcharts/modules/dependency-wheel';
 // Import Highcharts
 import HighchartsMap from 'highcharts/modules/map';
 import HighchartsSankey from 'highcharts/modules/sankey';
+import HighchartsDependencyWheel from 'highcharts/modules/dependency-wheel';
+
 import HighchartsTreeMap from 'highcharts/modules/treemap';
 import HighchartsReact from 'highcharts-react-official';
 
 import { ChartData, Domain } from 'generated/fetch';
 
-import { getChartObj } from 'app/pages/data/cohort/utils';
+import { getChartObj } from 'app/cohort-search/utils';
 import { chartBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
@@ -23,8 +24,7 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 
 import {
   getCannedCategoryCounts,
-  getCannedCategoryCountsByAgeBin,
-  getCannedDependencyWheel,
+  getCannedCategoryCountsByAgeBin, getCannedDependencyWheel,
   getCannedHeatmap,
   getCannedSankey,
   getCannedTopology,
@@ -728,16 +728,16 @@ export const Chart = withCurrentWorkspace()(
                 />
               </div>
               <div
-                style={{
-                  ...styles.col,
-                  flex: '0 0 50%',
-                  maxWidth: '50%',
-                }}
+                  style={{
+                    ...styles.col,
+                    flex: '0 0 50%',
+                    maxWidth: '50%',
+                  }}
               >
                 <HighchartsReact
-                  highcharts={highCharts}
-                  options={cannedDependencyWheel}
-                  callback={getChartObj}
+                    highcharts={highCharts}
+                    options={cannedDependencyWheel}
+                    callback={getChartObj}
                 />
               </div>
             </div>

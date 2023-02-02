@@ -17,7 +17,7 @@ import {
   GenderOrSexType,
 } from 'generated/fetch';
 
-import { getChartObj } from 'app/pages/data/cohort/utils';
+import { getChartObj } from 'app/cohort-search/utils';
 import {
   chartBuilderApi,
   cohortBuilderApi,
@@ -127,14 +127,21 @@ export interface Props
 
 interface State {
   demoChartData: DemoChartInfo[];
+  newChartData: ChartData[];
   options: any;
+  newOptions: any;
 }
 
 export const DemoChart = fp.flow(withRouter)(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
-      this.state = { demoChartData: null, options: null };
+      this.state = {
+        demoChartData: null,
+        options: null,
+        newChartData: null,
+        newOptions: null,
+      };
     }
 
     async componentDidMount(): Promise<void> {
@@ -161,8 +168,13 @@ export const DemoChart = fp.flow(withRouter)(
         AgeType[AgeType.AGE],
         cohortDefinition
       );
-      this.setState({ demoChartData: demoChartData.items });
+      const newChartData = await chartBuilderApi().getChartData(ns, wsid, 1);
+      this.setState({
+        demoChartData: demoChartData.items,
+        newChartData: newChartData.items,
+      });
       this.getChartOptions();
+      this.getNewChartOptions();
       hideSpinner();
     }
 
@@ -180,6 +192,9 @@ export const DemoChart = fp.flow(withRouter)(
     getChartOptions() {
       const normalized = 'normalized';
       const { categories, series } = this.getCategoriesAndSeries();
+      console.log('categories:', categories);
+      console.log('series:', series);
+
       const height = Math.max(categories.length * 30, 200);
       const options = {
         chart: {
@@ -261,28 +276,33 @@ export const DemoChart = fp.flow(withRouter)(
     }
 
     render() {
-      const { options } = this.state;
+      const { options, newOptions } = this.state;
       return (
-        <div>
-          <div style={{ minHeight: 200 }}>
-            {options && (
-              <HighchartsReact
-                highcharts={highCharts}
-                options={options}
-                callback={getChartObj}
-              />
-            )}
+        <React.Fragment>
+          <style>{css}</style>
+          <div style={{ ...styles.container, margin: 0 }}>
+            <div>
+              <div style={{ minHeight: 200, width: 800 }}>
+                {options && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={options}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
+              <div style={{ minHeight: 200, width: 800 }}>
+                {newOptions && (
+                  <HighchartsReact
+                    highcharts={highCharts}
+                    options={newOptions}
+                    callback={getChartObj}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-          <div style={{ minHeight: 200 }}>
-            {options && (
-              <HighchartsReact
-                highcharts={highCharts}
-                options={options}
-                callback={getChartObj}
-              />
-            )}
-          </div>
-        </div>
+        </React.Fragment>
       );
     }
   }
