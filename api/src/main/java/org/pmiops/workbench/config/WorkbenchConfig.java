@@ -319,8 +319,6 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
-    // If true, allow creating GKE application using Terra Leonardo
-    public boolean enableGkeApp;
   }
 
   public static class ActionAuditConfig {

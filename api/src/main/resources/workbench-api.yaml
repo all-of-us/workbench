@@ -4697,10 +4697,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to persistent disk as the notebook storage
-      enableGkeApp:
-        type: boolean
-        default: false
-        description: Whether to enable creating custom applications using Terra Leonardo
       rasHost:
         type: string
         description: The RAS base host name.

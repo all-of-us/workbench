@@ -81,7 +81,6 @@ public class AppsControllerTest {
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.enableGkeApp = true;
 
     user = new DbUser();
     createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
