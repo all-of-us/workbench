@@ -1,8 +1,6 @@
 // For DT-32 demonstration plots
 // original file from dolbeew/highcharts-demo -- src/app/components/highcharts-new-gallery.tsx
 // 1. create new route - routing - workspace-app-routing.tsx
-// need to make ap-calls modular to just accept person_ids
-// so apis can be called from notebook
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { cloneDeep } from 'lodash';
