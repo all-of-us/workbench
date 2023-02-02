@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AppType } from 'generated/fetch';
+import { AppStatus, AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -16,8 +16,9 @@ import {
   withUserProfile,
 } from 'app/utils';
 import { findMachineByName } from 'app/utils/machines';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
-import { defaultCromwellConfig } from './apps-panel/utils';
+import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
 const { useState } = React;
@@ -42,6 +43,15 @@ const PanelMain = fp.flow(
     creatorFreeCreditsRemaining,
     onClose,
   }) => {
+    // all apps besides Jupyter
+    const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
+    const [creationStarted, setCreationStarted] = useState(false);
+    useEffect(() => {
+      appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
+    }, []);
+
+    const status: AppStatus = findApp(userApps, UIAppType.CROMWELL)?.status;
+
     const { profile } = profileState;
 
     return (
@@ -57,7 +67,7 @@ const PanelMain = fp.flow(
               workspace,
               analysisConfig,
             }}
-            status={null}
+            status={status}
             onPause={Promise.resolve()}
             onResume={Promise.resolve()}
             appType={AppType.CROMWELL}
@@ -135,9 +145,12 @@ const PanelMain = fp.flow(
             id='cromwell-cloud-environment-create-button'
             aria-label='cromwell cloud environment create button'
             onClick={() => {
+              setCreationStarted(true);
               appsApi().createApp(workspace.namespace, defaultCromwellConfig);
               onClose();
+              setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
             }}
+            disabled={!!status || creationStarted}
           >
             Start
           </Button>
