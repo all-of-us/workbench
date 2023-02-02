@@ -20,8 +20,6 @@ import java.util.function.Function;
 import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -163,7 +161,6 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(1, 2); // arbitrary
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
@@ -923,45 +920,7 @@ public class UserServiceAccessTest {
   @Test
   public void testRasLinkNotComplete() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // Incomplete RAS module, expect user removed from Registered tier;
-    accessModuleService.updateBypassTime(
-        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierDisabled(dbUser);
-
-    // Complete RAS Linking, verify user become registered
-    accessModuleService.updateCompletionTime(
-        dbUser, DbAccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierEnabled(dbUser);
-  }
-
-  @Test
-  public void testRasLinkNotComplete_enforceRasOff_enableRasOn() {
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = false;
     providedWorkbenchConfig.access.enableRasLoginGovLinking = true;
-    dbUser = updateUserWithRetries(registerUserNow);
-    assertRegisteredTierEnabled(dbUser);
-
-    // Incomplete RAS module, expect user is still Registered;
-    accessModuleService.updateBypassTime(
-        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
-    dbUser = updateUserAccessTiers();
-    assertRegisteredTierEnabled(dbUser);
-  }
-
-  @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testRasLinkNotComplete_enableRasFFNotAffect(boolean enableRasFFStatus) {
-    // TODO: Delete this test when delete enable RAS feature flag.
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    providedWorkbenchConfig.access.enforceRasLoginGovLinking = true;
-    providedWorkbenchConfig.access.enableRasLoginGovLinking = enableRasFFStatus;
     dbUser = updateUserWithRetries(registerUserNow);
     assertRegisteredTierEnabled(dbUser);
 

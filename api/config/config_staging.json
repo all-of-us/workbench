@@ -100,7 +100,6 @@
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 365,

@@ -350,3 +350,35 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
      ($MAX_ID + 15, 'SOURCE_CONCEPT_NAME', 'd_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device'),
      ($MAX_ID + 16, 'SOURCE_CONCEPT_CODE', 'd_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device'),
      ($MAX_ID + 17, 'SOURCE_VOCABULARY', 'd_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` d_source_concept ON device.device_source_concept_id = d_source_concept.concept_id', 'Device')"
+
+echo "ds_linking - inserting fitbit sleep_daily_summary data"
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($MAX_ID + 1, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 2, 'PERSON_ID', 'sleep_daily_summary.person_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 3, 'SLEEP_DATE', 'sleep_daily_summary.sleep_date', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 4, 'IS_MAIN_SLEEP', 'sleep_daily_summary.is_main_sleep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 5, 'MINUTE_IN_BED', 'sleep_daily_summary.minute_in_bed', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 6, 'MINUTE_ASLEEP', 'sleep_daily_summary.minute_asleep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 7, 'MINUTE_AFTER_WAKEUP', 'sleep_daily_summary.minute_after_wakeup', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 8, 'MINUTE_AWAKE', 'sleep_daily_summary.minute_awake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 9, 'MINUTE_RESTLESS', 'sleep_daily_summary.minute_restless', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 10, 'MINUTE_DEEP', 'sleep_daily_summary.minute_deep', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 11, 'MINUTE_LIGHT', 'sleep_daily_summary.minute_light', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 12, 'MINUTE_REM', 'sleep_daily_summary.minute_rem', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary'),
+  ($MAX_ID + 13, 'MINUTE_WAKE', 'sleep_daily_summary.minute_wake', 'FROM \`\${projectId}.\${dataSetId}.sleep_daily_summary\` sleep_daily_summary', 'Fitbit_sleep_daily_summary')"
+
+echo "ds_linking - inserting fitbit sleep_level data"
+MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
+VALUES
+  ($MAX_ID + 1, 'CORE_TABLE_FOR_DOMAIN', 'CORE_TABLE_FOR_DOMAIN', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 2, 'PERSON_ID', 'sleep_level.person_id', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 3, 'SLEEP_DATE', 'sleep_level.sleep_date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 4, 'IS_MAIN_SLEEP', 'sleep_level.is_main_sleep', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 5, 'LEVEL', 'sleep_level.level', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 6, 'START_DATETIME', 'CAST(sleep_level.start_datetime AS DATE) as date', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level'),
+  ($MAX_ID + 7, 'DURATION_IN_MIN', 'sleep_level.duration_in_min', 'FROM \`\${projectId}.\${dataSetId}.sleep_level\` sleep_level', 'Fitbit_sleep_level')"

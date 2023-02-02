@@ -580,12 +580,13 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
-  # In staging, we deploy all at once in order to track and control the 
+  # In staging, we deploy all at once in order to track and control the
   # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
   deploy-to-staging:
     executor: workbench-executor
+    resource_class: large
     steps:
       - deploy-to-staging-command
 
