@@ -1,5 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.chart;
-
+// TODO need to make ap-calls modular to just accept person_ids so apis can be called from notebook
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChartQueryBuilder extends QueryBuilder {
+
 
   private static final String SEARCH_PERSON_TABLE = "cb_search_person";
 
