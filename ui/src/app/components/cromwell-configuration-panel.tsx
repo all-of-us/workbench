@@ -34,8 +34,9 @@ const cromwellSupportArticles = [
   { text: 'Running and Autopause', link: '#' },
   { text: 'Storage options', link: '#' },
 ];
-export const DEFAULT_MACHINE_TYPE: Machine =
-  findMachineByName(DEFAULT_MACHINE_NAME);
+const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
+
+const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
 const PanelMain = fp.flow(
   withCdrVersions(),
@@ -110,7 +111,7 @@ const PanelMain = fp.flow(
                 borderRadius: '0.5rem',
               }}
             >
-              {`${DEFAULT_MACHINE_TYPE.cpu} CPUS, ${DEFAULT_MACHINE_TYPE.memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
+              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
             </div>
             <a href='#' style={{ marginLeft: '0.25rem' }}>
               Learn more{' '}
