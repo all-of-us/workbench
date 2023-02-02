@@ -833,6 +833,12 @@ public class WorkspacesControllerTest {
   public void testDuplicateWorkspaceAsync_removeUserRoleWhenSourceIsPublish() {
     Workspace workspace = createWorkspace();
     workspace.setPublished(true);
+    workspaceDao.save(
+        new DbWorkspace()
+            .setWorkspaceNamespace(workspace.getNamespace())
+            .setFirecloudName(workspace.getName())
+            .setCdrVersion(cdrVersion)
+            .setPublished(true));
     CloneWorkspaceRequest request =
         new CloneWorkspaceRequest().workspace(workspace).includeUserRoles(true);
 
@@ -850,11 +856,7 @@ public class WorkspacesControllerTest {
 
     verify(mockTaskQueueService)
         .pushDuplicateWorkspaceTask(
-            operation.getId(),
-            workspace.getNamespace(),
-            workspace.getName(),
-            false,
-            operation.getWorkspace());
+            operation.getId(), workspace.getNamespace(), workspace.getId(), false, workspace);
   }
 
   @Test
