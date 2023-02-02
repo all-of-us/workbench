@@ -8,7 +8,6 @@ import {
 } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import { Spinner } from 'app/components/spinners';
 import {
   appsApi,
   profileApi,
@@ -35,19 +34,18 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { defaultCromwellConfig } from './apps-panel/utils';
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
 
-interface Props {
-  onClose: () => void;
-}
-
 describe('CromwellConfigurationPanel', () => {
-  let props: Props;
+  const onClose = jest.fn();
+  const freeTierBillingAccountId = 'freetier';
+  const DEFAULT_PROPS = {
+    onClose,
+  };
+
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
-  let onClose: () => void;
-  let freeTierBillingAccountId: string;
 
   const component = async (propOverrides?: object) => {
-    const allProps = { ...props, ...propOverrides };
+    const allProps = { ...DEFAULT_PROPS, ...propOverrides };
     const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
@@ -77,41 +75,41 @@ describe('CromwellConfigurationPanel', () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        freeTierBillingAccountId: 'freetier',
+        freeTierBillingAccountId: freeTierBillingAccountId,
         defaultFreeCreditsDollarLimit: 100.0,
         gsuiteDomain: '',
       },
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-
-    onClose = jest.fn();
-    props = {
-      onClose,
-    };
     jest.useFakeTimers();
   });
 
   afterEach(() => {
+    // jest.clearAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
   });
 
   it('should show configuration panel while not loading', async () => {
     const wrapper = await component();
-
     expect(wrapper.exists('#cromwell-configuration-panel')).toEqual(true);
-    expect(wrapper.exists(Spinner)).toEqual(false);
+    expect(wrapper.exists('cromwell-configuration-panel-spinner')).toEqual(
+      false
+    );
   });
 
   it('start button should create cromwell and close panel', async () => {
+    jest
+      .spyOn(appsApi(), 'listAppsInWorkspace')
+      .mockImplementationOnce(() => Promise.resolve([]));
     const wrapper = await component();
     const spyCreateApp = jest.spyOn(appsApi(), 'createApp');
-
     const startButton = wrapper
       .find('#cromwell-cloud-environment-create-button')
       .first();
     startButton.simulate('click');
+
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,

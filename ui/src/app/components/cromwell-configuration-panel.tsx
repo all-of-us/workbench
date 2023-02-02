@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AppType, UserAppEnvironment } from 'generated/fetch';
+import { AppStatus, AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -54,18 +54,25 @@ const PanelMain = fp.flow(
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
     const [creationStarted, setCreationStarted] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [status, setStatus] = useState(null);
+    const [status, setStatus] = useState<AppStatus>();
 
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
     useEffect(() => {
-      setStatus(findApp(userApps, UIAppType.CROMWELL)?.status);
+      if (userApps !== undefined) {
+        const app = findApp(userApps, UIAppType.CROMWELL);
+        if (app) {
+          setStatus(app.status ?? null);
+        } else {
+          setLoading(false);
+        }
+      }
     }, [userApps]);
 
     useEffect(() => {
-      if (loading && !!status) {
+      if (loading && status !== undefined) {
         setLoading(false);
       }
     }, [loading, status]);
@@ -149,7 +156,7 @@ const PanelMain = fp.flow(
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
           <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
           {cromwellSupportArticles.map((article, index) => (
-            <a href={article.link} style={{ display: 'block' }}>
+            <a href={article.link} key={index} style={{ display: 'block' }}>
               {index + 1}. {article.text}
             </a>
           ))}
