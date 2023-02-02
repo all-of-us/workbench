@@ -117,8 +117,7 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableUpdatedDemographicSurvey": true,
-    "enableGkeApp": true
+    "enableUpdatedDemographicSurvey": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
