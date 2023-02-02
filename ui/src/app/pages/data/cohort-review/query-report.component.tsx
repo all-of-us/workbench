@@ -266,6 +266,7 @@ export const QueryReport = fp.flow(
         cdrVersionId,
         cdrVersionTiersResponse
       ).name;
+      // calling for demographics data.... Chenchal
       this.setState({ cdrName });
       const [demoChartInfo, ethnicityInfo, participantCount] =
         await Promise.all([

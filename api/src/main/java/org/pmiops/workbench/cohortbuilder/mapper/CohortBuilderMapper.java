@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.mapper;
 
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
@@ -89,6 +90,48 @@ public interface CohortBuilderMapper {
   default ImmutableList<EthnicityInfo> tableResultToEthnicityInfo(TableResult tableResult) {
     return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
         .map(this::fieldValueListToEthnicityInfo)
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  default ChartData fieldValueListToChartData(FieldValueList row, FieldList fields) {
+    ChartData data = new ChartData();
+    FieldValues.getString(row, "gender").ifPresent(data::setGender);
+    FieldValues.getString(row, "sexAtBirth").ifPresent(data::setSexAtBirth);
+    FieldValues.getString(row, "race").ifPresent(data::setRace);
+    FieldValues.getString(row, "ethnicity").ifPresent(data::setEthnicity);
+    FieldValues.getLong(row, "count").ifPresent(data::setCount);
+    // optional values
+    if (fields.stream().anyMatch(f -> "ageBin".equals(f.getName()))) {
+      FieldValues.getString(row, "ageBin").ifPresent(data::setAgeBin);
+    }
+    if (fields.stream().anyMatch(f -> "stateCode".equals(f.getName()))) {
+      FieldValues.getString(row, "stateCode").ifPresent(data::setStateCode);
+    }
+    if (fields.stream().anyMatch(f -> "domain".equals(f.getName()))) {
+      FieldValues.getString(row, "domain").ifPresent(data::setDomain);
+    }
+    if (fields.stream().anyMatch(f -> "conceptName".equals(f.getName()))) {
+      FieldValues.getString(row, "conceptName").ifPresent(data::setConceptName);
+    }
+    if (fields.stream().anyMatch(f -> "conceptId".equals(f.getName()))) {
+      FieldValues.getLong(row, "conceptId").ifPresent(data::setConceptId);
+    }
+    if (fields.stream().anyMatch(f -> "conceptRank".equals(f.getName()))) {
+      FieldValues.getLong(row, "conceptRank").ifPresent(data::setConceptRank);
+    }
+    if (fields.stream().anyMatch(f -> "numConceptsCoOccur".equals(f.getName()))) {
+      FieldValues.getLong(row, "numConceptsCoOccur").ifPresent(data::setNumConceptsCoOccur);
+    }
+
+    return data;
+  }
+
+  default ImmutableList<ChartData> tableResultToChartData(TableResult tableResult) {
+
+    return StreamSupport.stream(tableResult.iterateAll().spliterator(), false)
+        .map(
+            fieldValueList ->
+                this.fieldValueListToChartData(fieldValueList, tableResult.getSchema().getFields()))
         .collect(ImmutableList.toImmutableList());
   }
 }

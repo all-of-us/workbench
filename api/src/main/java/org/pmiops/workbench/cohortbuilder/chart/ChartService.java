@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.chart;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.ChartData;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -27,4 +28,8 @@ public interface ChartService {
   List<EthnicityInfo> findEthnicityInfo(CohortDefinition cohortDefinition);
 
   List<ParticipantChartData> findParticipantChartData(Long participantId, Domain domain, int limit);
+
+  List<ChartData> getChartData(CohortDefinition cohortDefinition, Domain domain);
+
+  List<ChartData> getChartDataMap(CohortDefinition cohortDefinition);
 }

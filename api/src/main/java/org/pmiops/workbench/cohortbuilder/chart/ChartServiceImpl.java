@@ -8,6 +8,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.model.AgeType;
+import org.pmiops.workbench.model.ChartData;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -97,5 +98,26 @@ public class ChartServiceImpl implements ChartService {
             chartQueryBuilder.buildChartDataQuery(participantId, domain, limit));
 
     return cohortReviewMapper.tableResultToParticipantChartData(result);
+  }
+
+  @Override
+  public List<ChartData> getChartData(CohortDefinition cohortDefinition, Domain domain) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildNewChartDataQuery(
+                new ParticipantCriteria(
+                    cohortDefinition, GenderOrSexType.GENDER, AgeType.AGE_AT_CDR),
+                domain));
+    return cohortBuilderMapper.tableResultToChartData(result);
+  }
+
+  @Override
+  public List<ChartData> getChartDataMap(CohortDefinition cohortDefinition) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            chartQueryBuilder.buildNewChartDataMapQuery(
+                new ParticipantCriteria(
+                    cohortDefinition, GenderOrSexType.GENDER, AgeType.AGE_AT_CDR)));
+    return cohortBuilderMapper.tableResultToChartData(result);
   }
 }

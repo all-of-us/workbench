@@ -4216,6 +4216,38 @@ paths:
           description: A collection of data filter options
           schema:
             "$ref": "#/definitions/DataFiltersResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/charts":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - chartBuilder
+      description: Create chart data for participants.
+      operationId: getChartData
+      parameters:
+        - in: query
+          name: cohortId
+          type: integer
+          format: int64
+          required: false
+          description: cohort id optional
+        - in: query
+          name: domain
+          type: string
+          required: false
+          description: domain name
+        - in: query
+          name: isMap
+          type: boolean
+          default: false
+          required: false
+          description: gets chart data with state information
+      responses:
+        200:
+          description: A collection of ChartData
+          schema:
+            "$ref": "#/definitions/ChartDataListResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -8979,6 +9011,63 @@ definitions:
         description: number of subjects
         type: integer
         format: int64
+  ChartDataListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/ChartData"
+  ChartData:
+    type: object
+    required:
+      - gender
+      - sexAtBirth
+      - race
+      - count
+    properties:
+      gender:
+        description: gender of subject
+        type: string
+      sexAtBirth:
+        description: sex at birth of subject
+        type: string
+      race:
+        description: race of subject
+        type: string
+      ethnicity:
+        description: ethnicity of subject
+        type: string
+      ageBin:
+        description: lower and higher (inclusive) age range of subject
+        type: string
+      count:
+        description: number of subjects
+        type: integer
+        format: int64
+      domain:
+        description: domain name, if present
+        type: string
+      conceptName:
+        description: concept name, if present
+        type: string
+      conceptId:
+        description: concept id, if present
+        type: integer
+        format: int64
+      numConceptsCoOccur:
+        description: number of top N ranked concepts that co-occur for a subject, if present
+        type: integer
+        format: int64
+      conceptRank:
+        description: top rank of concept if present
+        type: integer
+        format: int64
+      stateCode:
+        description: 2 letter state code, if present
+        type: string
   ParticipantDemographics:
     type: object
     required:

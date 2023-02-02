@@ -1,5 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.chart;
-
+// TODO need to make ap-calls modular to just accept person_ids so apis can be called from notebook
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ChartQueryBuilder extends QueryBuilder {
+
 
   private static final String SEARCH_PERSON_TABLE = "cb_search_person";
 
@@ -90,6 +91,158 @@ public class ChartQueryBuilder extends QueryBuilder {
           + "and rnk <= @%s\n"
           + "order by rank asc, standardName, startDate\n";
 
+  private static final String COHORT_PIDS_SQL =
+      "SELECT distinct person_id \n"
+          + "FROM `${projectId}.${dataSetId}.cb_search_person` cb_search_person\n"
+          + "WHERE ";
+  private static final String AGE_BIN_SIZE_PARAM = "ageBin";
+  private static final String TBL_TMP_COHORT_IDS = "tmp_cohort_ids";
+
+  private static final String WITH_TMP_COHORT_IDS_SQL =
+      "WITH " + TBL_TMP_COHORT_IDS + " AS\n" + "(%s)";
+  private static final String TBL_TMP_DEMO = "tmp_demo";
+  private static final String WITH_TMP_DEMO_SQL =
+      TBL_TMP_DEMO
+          + " AS \n"
+          + "(\n"
+          + "select person_id,\n"
+          + "       gender,\n"
+          + "       sex_at_birth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       age_at_cdr,\n"
+          + "       concat(cast(floor(age_at_cdr/@"
+          + AGE_BIN_SIZE_PARAM
+          + ") * @"
+          + AGE_BIN_SIZE_PARAM
+          + " as int64),'-',\n"
+          + "       cast(((floor(age_at_cdr/@"
+          + AGE_BIN_SIZE_PARAM
+          + ")+1) * @"
+          + AGE_BIN_SIZE_PARAM
+          + ") - 1 as int64)) as age_bin \n"
+          + " from `${projectId}.${dataSetId}.cb_search_person`\n"
+          + " JOIN "
+          + TBL_TMP_COHORT_IDS
+          + " using (person_id) \n"
+          + ")";
+
+  private static final String TBL_TMP_TOP_N = "top_n";
+
+  private static final String WITH_TEMP_TOP_N_SQL =
+      TBL_TMP_TOP_N
+          + " AS \n"
+          + "(SELECT\n"
+          + "       standard_name ,\n"
+          + "       standard_concept_id ,\n"
+          + "       COUNT(DISTINCT person_id) as count,\n"
+          + "       row_number() over (order by COUNT(DISTINCT person_id) desc) as concept_rank\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events` \n"
+          + "JOIN "
+          + TBL_TMP_COHORT_IDS
+          + " using (person_id)\n"
+          + "WHERE\n"
+          + "lower(domain) = lower(@"
+          + DOMAIN_PARAM
+          + ")\n"
+          + "AND standard_concept_id != 0\n"
+          + "GROUP BY standard_name, standard_concept_id\n"
+          + "ORDER BY count DESC, standard_name ASC\n"
+          + "LIMIT @"
+          + LIMIT
+          + "\n"
+          + ")";
+
+  private static final String TBL_TMP_TOP_N_CO_OCCUR = "top_n_co_occur";
+  // replace %s,$s with domain_table and domain_table-concept_id column name
+  // example condition_occurrence, condition_concept_id
+  private static final String WITH_TEMP_TOP_N_CO_OCCUR =
+      TBL_TMP_TOP_N_CO_OCCUR
+          + " AS\n"
+          + "(SELECT\n"
+          + "       person_id,\n"
+          + "       COUNT(distinct standard_concept_id) as n_concept_co_occur\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events`\n"
+          + "JOIN "
+          + TBL_TMP_COHORT_IDS
+          + " using (person_id)\n"
+          + "join "
+          + TBL_TMP_TOP_N
+          + " using(standard_concept_id)\n"
+          + "GROUP BY 1\n"
+          + "order by 2 desc\n"
+          + ")";
+  private static final String NEW_CHART_DEMO_SQL =
+      "SELECT gender,\n"
+          + "       sex_at_birth as sexAtBirth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       age_bin as ageBin,\n"
+          + "       count(distinct person_id) as count,\n"
+          // + "       safe_divide(count(distinct person_id), sum(count(distinct person_id)) over
+          // ()) as fract\n"
+          + "FROM "
+          + TBL_TMP_DEMO
+          + " \n"
+          + "group by 1,2,3,4,5\n"
+          + "order by 1,2,3,4,5";
+
+  private static final String NEW_CHART_DOMAIN_SQL =
+      "\n"
+          + "SELECT\n"
+          + "      gender,\n"
+          + "      sex_at_birth as sexAtBirth,\n"
+          + "      race,\n"
+          + "      ethnicity,\n"
+          + "      age_bin as ageBin,\n"
+          + "      cb.domain as domain,\n"
+          + "      cb.standard_name as conceptName,\n"
+          + "      cb.standard_concept_id as conceptId,\n"
+          + "      concept_rank as conceptRank,\n"
+          + "      n_concept_co_occur as numConceptsCoOccur,\n"
+          + "      COUNT(DISTINCT cb.person_id) as count\n"
+          + "FROM `${projectId}.${dataSetId}.cb_review_all_events` cb\n"
+          + "join "
+          + TBL_TMP_TOP_N
+          + " using (standard_concept_id)\n"
+          + "JOIN "
+          + TBL_TMP_DEMO
+          + " using (person_id)\n"
+          + "JOIN "
+          + TBL_TMP_TOP_N_CO_OCCUR
+          + " using(person_id)\n"
+          + "group by 1,2,3,4,5,6,7,8,9,10\n"
+          + "order by 1,2,3,4,5,6,7,8,9,10";
+
+  private static final String TBL_TMP_DEMO_MAP = "tmp_demo_map";
+  private static final String WITH_TMP_DEMO_MAP_SQL =
+      TBL_TMP_DEMO_MAP
+          + " AS \n"
+          + "(\n"
+          + "select person_id,\n"
+          + "       gender,\n"
+          + "       sex_at_birth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       state_of_residence\n"
+          + " from `${projectId}.${dataSetId}.cb_search_person`\n"
+          + " JOIN "
+          + TBL_TMP_COHORT_IDS
+          + " using (person_id) \n"
+          + ")";
+
+  private static final String NEW_CHART_DEMO_MAP_SQL =
+      "SELECT gender,\n"
+          + "       sex_at_birth as sexAtBirth,\n"
+          + "       race,\n"
+          + "       ethnicity,\n"
+          + "       state_of_residence as stateCode,\n"
+          + "       count(distinct person_id) as count\n"
+          + " FROM "
+          + TBL_TMP_DEMO_MAP
+          + " \n"
+          + "group by 1,2,3,4,5\n"
+          + "order by 1,2,3,4,5";
   /**
    * Provides counts with demographic info for charts defined by the provided {@link
    * ParticipantCriteria}.
@@ -212,6 +365,96 @@ public class ChartQueryBuilder extends QueryBuilder {
     queryBuilder.append(endSqlTemplate);
 
     return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public QueryJobConfiguration buildNewChartDataQuery(
+      ParticipantCriteria participantCriteria, Domain domain) {
+    final int ageBin = 10; // maybe get it from input?
+    final int limit = 10; // limit to top 10
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    // 1. build cohort pids SQL
+    StringBuilder personIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
+    if (participantCriteria.getCohortDefinition() == null) {
+      // for whole CDR remove the 'WHERE' clause alternately add ' 1 = 1 \n'
+      personIdsSqlBuilder.append(" 1 = 1 \n");
+    } else {
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, personIdsSqlBuilder, params);
+      addDataFilters(
+          participantCriteria.getCohortDefinition().getDataFilters(), personIdsSqlBuilder, params);
+    }
+    // 2.build temp demographics table from cohort_pids sql - no grouping is done
+    String withPersonIdsDemographicsSql =
+        new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, personIdsSqlBuilder))
+            .append(",\n")
+            .append(WITH_TMP_DEMO_SQL)
+            .toString();
+    params.put(AGE_BIN_SIZE_PARAM, QueryParameterValue.int64(ageBin));
+    // create final SQL query
+    StringBuilder chartSql = new StringBuilder();
+    if (domain == null) {
+      // 3. For demographics chart: append sql for grouping using tables in WITH
+      chartSql.append(withPersonIdsDemographicsSql).append("\n").append(NEW_CHART_DEMO_SQL);
+    } else {
+      // if domain then to withPersonIdsDemographicsSql append as temp tables:
+      chartSql.append(withPersonIdsDemographicsSql);
+      // 3. sql for top 10 concepts for domain
+      chartSql.append(",\n").append(WITH_TEMP_TOP_N_SQL);
+      params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.toString()));
+      params.put(LIMIT, QueryParameterValue.int64(limit));
+      // 3a. if domain is condition: sql for count of n-distinct-top10-concepts per person-id
+      chartSql.append(",\n").append(WITH_TEMP_TOP_N_CO_OCCUR);
+      // 4. append grouping sql for chart
+      chartSql.append("\n").append(NEW_CHART_DOMAIN_SQL);
+    }
+
+    String temp = domain != null ? domain.toString() : "Demographics";
+    temp += participantCriteria.getCohortDefinition() == null ? " (for CDR)" : "(for Cohort)";
+    System.out.println("*******Chart SQL and params******: " + temp);
+    System.out.println(chartSql);
+    System.out.println("*******Chart SQL - params******: " + temp);
+    System.out.println(params);
+    System.out.println("*******Chart SQL and params******\n\n" + temp);
+
+    return QueryJobConfiguration.newBuilder(chartSql.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public QueryJobConfiguration buildNewChartDataMapQuery(ParticipantCriteria participantCriteria) {
+
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    // 1. build cohort pids SQL
+    StringBuilder personIdsSqlBuilder = new StringBuilder(COHORT_PIDS_SQL);
+    if (participantCriteria.getCohortDefinition() == null) {
+      // for whole CDR remove the 'WHERE' clause alternately add ' 1 = 1 \n'
+      personIdsSqlBuilder.append(" 1 = 1 \n");
+    } else {
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, personIdsSqlBuilder, params);
+      addDataFilters(
+          participantCriteria.getCohortDefinition().getDataFilters(), personIdsSqlBuilder, params);
+    }
+    // 2.build temp demographics table from cohort_pids sql - no grouping is done
+    String withPersonIdsDemographicsSql =
+        new StringBuilder(String.format(WITH_TMP_COHORT_IDS_SQL, personIdsSqlBuilder))
+            .append(",\n")
+            .append(WITH_TMP_DEMO_MAP_SQL)
+            .toString();
+    // create final SQL query
+    StringBuilder chartSql = new StringBuilder();
+    // 3. For demographics chart: append sql for grouping using tables in WITH
+    chartSql.append(withPersonIdsDemographicsSql).append("\n").append(NEW_CHART_DEMO_MAP_SQL);
+
+    System.out.println("*******MAP Chart SQL and params******: ");
+    System.out.println(chartSql);
+    System.out.println("*******MAP Chart SQL - params******: ");
+    System.out.println(params);
+    System.out.println("*******MAP Chart SQL and params******\n\n");
+
+    return QueryJobConfiguration.newBuilder(chartSql.toString())
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();
