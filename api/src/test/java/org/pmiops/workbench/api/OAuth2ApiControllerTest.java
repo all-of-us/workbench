@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +37,7 @@ class OAuth2ApiControllerTest {
 
   @MockBean CloudStorageClient cloudStorageClient;
   @MockBean private HttpServletRequest mockHttpServletRequest;
-  private RestTemplate restTemplate;
+  @MockBean private RestTemplate mockRestTemplate;
 
   @TestConfiguration
   @Import({OAuth2ApiController.class})
@@ -46,8 +45,6 @@ class OAuth2ApiControllerTest {
 
   @BeforeEach
   public void setup() throws IOException {
-    restTemplate = mock(RestTemplate.class);
-    when(oAuth2ApiController.getRestTemplate()).thenReturn(restTemplate);
     when(mockHttpServletRequest.getMethod()).thenReturn(HttpMethods.POST);
     when(mockHttpServletRequest.getReader()).thenReturn(new BufferedReader(new StringReader("")));
   }
@@ -60,7 +57,7 @@ class OAuth2ApiControllerTest {
     oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-    verify(restTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
+    verify(mockRestTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
     assertThat(argument.getValue()).isEqualTo(expectedUri);
   }
 
@@ -72,7 +69,7 @@ class OAuth2ApiControllerTest {
     oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-    verify(restTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
+    verify(mockRestTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
     assertThat(argument.getValue()).isEqualTo(expectedUri);
   }
 
@@ -84,7 +81,7 @@ class OAuth2ApiControllerTest {
     oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);
 
     ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-    verify(restTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
+    verify(mockRestTemplate).exchange(argument.capture(), any(), any(), eq(JsonNode.class));
     assertThat(argument.getValue()).isEqualTo(expectedUri);
   }
 
@@ -99,7 +96,7 @@ class OAuth2ApiControllerTest {
     oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);
 
     ArgumentCaptor<HttpEntity> argument = ArgumentCaptor.forClass(HttpEntity.class);
-    verify(restTemplate).exchange(anyString(), any(), argument.capture(), eq(JsonNode.class));
+    verify(mockRestTemplate).exchange(anyString(), any(), argument.capture(), eq(JsonNode.class));
     assertThat(argument.getValue().getBody()).isEqualTo(expectedProxiedBody);
   }
 
@@ -115,7 +112,7 @@ class OAuth2ApiControllerTest {
   @Test
   void testProxyOauthToken_forwardsResponse() {
     ObjectNode responseJson = JsonNodeFactory.instance.objectNode();
-    when(restTemplate.exchange(anyString(), any(), any(), eq(JsonNode.class)))
+    when(mockRestTemplate.exchange(anyString(), any(), any(), eq(JsonNode.class)))
         .thenReturn(ResponseEntity.ok(responseJson));
 
     ResponseEntity<JsonNode> response = oAuth2ApiController.proxyOauthToken(mockHttpServletRequest);

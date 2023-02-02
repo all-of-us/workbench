@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.annotations.VisibleForTesting;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +14,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,9 +34,14 @@ public class OAuth2ApiController {
   private final RestTemplate restTemplate;
   private final CloudStorageClient cloudStorageClient;
 
+  @Bean
+  public static RestTemplate restTemplate() {
+    return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+  }
+
   @Autowired
-  public OAuth2ApiController(CloudStorageClient cloudStorageClient) {
-    restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+  public OAuth2ApiController(CloudStorageClient cloudStorageClient, RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
     this.cloudStorageClient = cloudStorageClient;
   }
 
@@ -60,12 +65,8 @@ public class OAuth2ApiController {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-    return getRestTemplate()
-        .exchange(
-            actualEndpoint,
-            HttpMethod.POST,
-            new HttpEntity<>(requestBody, headers),
-            JsonNode.class);
+    return restTemplate.exchange(
+        actualEndpoint, HttpMethod.POST, new HttpEntity<>(requestBody, headers), JsonNode.class);
   }
 
   private String addClientSecret(String requestBody) {
@@ -76,10 +77,5 @@ public class OAuth2ApiController {
             CLIENT_SECRET_PARAM, cloudStorageClient.getGoogleOAuthClientSecret()));
 
     return URLEncodedUtils.format(parameters, StandardCharsets.UTF_8);
-  }
-
-  @VisibleForTesting
-  RestTemplate getRestTemplate() {
-    return restTemplate;
   }
 }
