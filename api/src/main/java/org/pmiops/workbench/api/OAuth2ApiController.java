@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +56,10 @@ public class OAuth2ApiController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<JsonNode> proxyOauthToken(HttpServletRequest request) {
     String queryString =
-        StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
+        Optional.ofNullable(request.getQueryString())
+            .filter(qs -> !StringUtils.isEmpty(qs))
+            .map(qs -> "?" + qs)
+            .orElse("");
     String actualEndpoint = GOOGLE_TOKEN_ENDPOINT + queryString;
 
     String requestBody;
