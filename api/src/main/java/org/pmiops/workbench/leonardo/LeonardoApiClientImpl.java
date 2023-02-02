@@ -74,6 +74,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+  private static final String LEONARDO_BASE_URL = "LEONARDO_BASE_URL";
 
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
@@ -631,7 +632,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         || workspace.isTerraV2Workspace()) {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
-
+    customEnvironmentVariables.put(
+        LEONARDO_BASE_URL, workbenchConfigProvider.get().firecloud.leoBaseUrl);
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     return customEnvironmentVariables;
