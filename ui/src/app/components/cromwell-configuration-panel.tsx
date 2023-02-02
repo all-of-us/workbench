@@ -15,7 +15,11 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { findMachineByName } from 'app/utils/machines';
+import {
+  DEFAULT_MACHINE_NAME,
+  findMachineByName,
+  Machine,
+} from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
 import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
@@ -30,6 +34,8 @@ const cromwellSupportArticles = [
   { text: 'Running and Autopause', link: '#' },
   { text: 'Storage options', link: '#' },
 ];
+export const DEFAULT_MACHINE_TYPE: Machine =
+  findMachineByName(DEFAULT_MACHINE_NAME);
 
 const PanelMain = fp.flow(
   withCdrVersions(),
@@ -104,7 +110,7 @@ const PanelMain = fp.flow(
                 borderRadius: '0.5rem',
               }}
             >
-              4 CPUS, 15GB RAM, 120GB disk
+              {`${DEFAULT_MACHINE_TYPE.cpu} CPUS, ${DEFAULT_MACHINE_TYPE.memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
             </div>
             <a href='#' style={{ marginLeft: '0.25rem' }}>
               Learn more{' '}
