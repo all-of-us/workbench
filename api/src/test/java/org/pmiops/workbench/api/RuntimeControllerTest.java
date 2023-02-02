@@ -151,7 +151,7 @@ public class RuntimeControllerTest {
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
-  private static final String LEONARD_URL = "https://leonardo.dsde-dev.broadinstitute.org";
+  private static final String LEONARDO_URL = "https://leonardo.dsde-dev.broadinstitute.org";
   private static final String BIGQUERY_DATASET = "dataset-name";
   private static final String EXTRA_RUNTIME_NAME = "all-of-us-extra";
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
@@ -261,7 +261,7 @@ public class RuntimeControllerTest {
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.firecloud.leoBaseUrl = LEONARD_URL;
+    config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
     config.firecloud.gceVmZone = "us-central-1";
