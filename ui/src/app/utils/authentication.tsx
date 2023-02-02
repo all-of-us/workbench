@@ -56,7 +56,7 @@ export const makeOIDC = (config: ConfigResponse): AuthProviderProps => {
     scope: scopes.join(' '),
     userStore: new WebStorageStateStore({ store: window.localStorage }),
     extraQueryParams: {
-      access_type: 'offline', // Allows us to mint additional refresh tokens
+      access_type: 'offline', // Provides a refresh token that allows us to mint additional access tokens
       hd: config.gsuiteDomain, // hd = "hosted domain"; Provides a hint for which Google account to use
     },
     // If we revoke one token (access/refresh), the other (refresh/access) is revoked as well.
