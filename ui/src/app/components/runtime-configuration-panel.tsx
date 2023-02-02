@@ -878,6 +878,7 @@ const PanelMain = fp.flow(
                       </label>
                       <Dropdown
                         id='runtime-autopause'
+                        appendTo='self'
                         disabled={disableControls}
                         style={{ width: '15rem' }}
                         options={Array.from(
