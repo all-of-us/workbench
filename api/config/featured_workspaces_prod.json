@@ -227,6 +227,12 @@
       "namespace": "aou-rw-0e2ce67a",
       "id": "phenotypetype2diabetesv6",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Demo-Geographic Variation in Obesity (V4)",
+      "namespace": "aou-rw-808a79c0",
+      "id": "demogeographicvariationinobesityv4",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
