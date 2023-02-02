@@ -298,6 +298,7 @@ public class WorkspacesControllerTest {
   @MockBean FreeTierBillingService mockFreeTierBillingService;
   @MockBean IamService mockIamService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
+  @MockBean TaskQueueService mockTaskQueueService;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
@@ -374,7 +375,6 @@ public class WorkspacesControllerTest {
     MailService.class,
     MonitoringService.class,
     NotebooksService.class,
-    TaskQueueService.class,
     UserRecentResourceService.class,
     UserService.class,
     WorkspaceAuditor.class,
@@ -827,6 +827,34 @@ public class WorkspacesControllerTest {
         () -> {
           workspacesController.duplicateWorkspaceAsync("foo", "bar", request);
         });
+  }
+
+  @Test
+  public void testDuplicateWorkspaceAsync_removeUserRoleWhenSourceIsPublish() {
+    Workspace workspace = createWorkspace();
+    workspace.setPublished(true);
+    CloneWorkspaceRequest request =
+        new CloneWorkspaceRequest().workspace(workspace).includeUserRoles(true);
+
+    // mocks Terra returning workspace info
+    stubGetWorkspace(
+        workspace.getNamespace(),
+        workspace.getId(),
+        currentUser.getUsername(),
+        WorkspaceAccessLevel.READER);
+
+    WorkspaceOperation operation =
+        workspacesController
+            .duplicateWorkspaceAsync(workspace.getNamespace(), workspace.getId(), request)
+            .getBody();
+
+    verify(mockTaskQueueService)
+        .pushDuplicateWorkspaceTask(
+            operation.getId(),
+            workspace.getNamespace(),
+            workspace.getName(),
+            false,
+            operation.getWorkspace());
   }
 
   @Test

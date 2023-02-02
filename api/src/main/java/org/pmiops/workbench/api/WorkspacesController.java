@@ -242,6 +242,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
+    // Don't share with the same user group when duplicating from published workspace.
+    if (workspaceService.lookupWorkspaceByNamespace(fromWorkspaceNamespace).getPublished()) {
+      request.setIncludeUserRoles(false);
+    }
+
     DbWorkspaceOperation operation = initWorkspaceOperation();
 
     log.info(
