@@ -14,13 +14,7 @@ then
   exit 0
 fi
 
-# check if OMOP 5.3.1
-echo "ds-linking - checking $BQ_PROJECT:$BQ_DATASET.visit_detail table exists"
-TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
-if [[ "$TABLE_LIST" == *'visit_detail'* ]]
-then
-  echo "Dataset is OMOP 5.3.1, dataset contains 'visit_detail' table"
-fi
+# Remove references to OMOP versions older than OMOP 5.3.1 - DT-196
 # query to find max of id column after inserting rows for a table
 MAX_ID_QRY="query --quiet --project_id=$BQ_PROJECT --nouse_legacy_sql --format=csv select coalesce(max(id),0) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 ################################################
@@ -196,21 +190,8 @@ VALUES
     ($MAX_ID + 16, 'PROCEDURE_SOURCE_CONCEPT_ID', 'procedure.procedure_source_concept_id', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure'),
     ($MAX_ID + 17, 'SOURCE_CONCEPT_NAME', 'p_source_concept.concept_name as source_concept_name', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
     ($MAX_ID + 18, 'SOURCE_CONCEPT_CODE', 'p_source_concept.concept_code as source_concept_code', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
-    ($MAX_ID + 19, 'SOURCE_VOCABULARY', 'p_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure')"
-if [[ "$TABLE_LIST" == *'visit_detail'* ]]
-then
-  echo "OMOP v5.3.1 using MODIFIER_SOURCE_VALUE for column name"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-  VALUES
+    ($MAX_ID + 19, 'SOURCE_VOCABULARY', 'p_source_concept.vocabulary_id as source_vocabulary', 'LEFT JOIN \`\${projectId}.\${dataSetId}.concept\` p_source_concept ON procedure.procedure_source_concept_id = p_source_concept.concept_id', 'Procedure'),
     ($MAX_ID + 20, 'MODIFIER_SOURCE_VALUE', 'procedure.modifier_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure')"
-else
-  echo "OMOP v5.2 using QUALIFIER_SOURCE_VALUE for column name"
-  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_linking\` (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
-  VALUES
-    ($MAX_ID + 20, 'QUALIFIER_SOURCE_VALUE', 'procedure.qualifier_source_value', 'FROM \`\${projectId}.\${dataSetId}.procedure_occurrence\` procedure', 'Procedure')"
-fi
 
 echo "ds_linking - inserting survey data"
 MAX_ID=$(bq $MAX_ID_QRY | awk '{if(NR>1)print}')
