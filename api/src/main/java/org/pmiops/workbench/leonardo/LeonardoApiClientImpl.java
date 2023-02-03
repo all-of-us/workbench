@@ -89,6 +89,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
   private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
 
+  // The Leonardo user role who creates Leonardo APP or disks.
+  private static final String LEONARDO_CREATOR_ROLE = "creator";
+
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
   private static Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
@@ -501,13 +504,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
-                googleProject, null, includeDeleted, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS));
+                googleProject, null, includeDeleted, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS, LEONARDO_CREATOR_ROLE));
   }
 
   @Override
@@ -573,7 +576,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<UserAppEnvironment> listAppsInProject(String googleProjectId) {
+  public List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
@@ -582,7 +585,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     googleProjectId,
                     /* labels= */ null,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS));
+                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS, LEONARDO_CREATOR_ROLE));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }

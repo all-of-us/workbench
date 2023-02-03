@@ -46,7 +46,7 @@ public class DiskController implements DiskApiDelegate {
     String pdNamePrefix = userProvider.get().getUserPDNamePrefix();
 
     List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false).stream()
+        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false).stream()
             .filter(r -> r.getName().startsWith(pdNamePrefix))
             .collect(Collectors.toList());
 

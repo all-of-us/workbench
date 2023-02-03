@@ -91,7 +91,7 @@ public class DisksController implements DisksApiDelegate {
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
     List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
+        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false);
 
     List<Disk> diskList =
         findTheMostRecentActiveDisks(
@@ -118,8 +118,7 @@ public class DisksController implements DisksApiDelegate {
         disksToValidate.stream()
             .filter(
                 d ->
-                    ACTIVE_DISK_STATUSES.contains(d.getStatus())
-                        && d.getCreator().equals(userProvider.get().getUsername()))
+                    ACTIVE_DISK_STATUSES.contains(d.getStatus()))
             .collect(Collectors.toList());
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =
