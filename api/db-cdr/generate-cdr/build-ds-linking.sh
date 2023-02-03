@@ -15,6 +15,11 @@ then
 fi
 
 # Remove references to OMOP versions older than OMOP 5.3.1 - DT-196
+# run query to initialize our .bigqueryrc configuration file
+# otherwise error in bigquery job?
+query="select count(*) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query"
+
 # query to find max of id column after inserting rows for a table
 MAX_ID_QRY="query --quiet --project_id=$BQ_PROJECT --nouse_legacy_sql --format=csv select coalesce(max(id),0) from \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 ################################################
