@@ -13,7 +13,7 @@ import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EthnicityInfo;
-import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.springframework.stereotype.Service;
 
@@ -61,11 +61,11 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-      GenderOrSexType genderOrSexType, AgeType ageType, CohortDefinition cohortDefinition) {
+          GenderSexRaceOrEthType genderSexRaceOrEthType, AgeType ageType, CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
-                new ParticipantCriteria(cohortDefinition, genderOrSexType, ageType)));
+                new ParticipantCriteria(cohortDefinition, genderSexRaceOrEthType, ageType)));
 
     return cohortBuilderMapper.tableResultToDemoChartInfo(result);
   }
