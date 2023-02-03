@@ -44,11 +44,12 @@ securityDefinitions:
       provides a minimal OAuth2 implementation. Future Swagger versions may
       provide a better mapping to our authorization and authentication flows.
 
-      We use the OAuth2 authorization code grant with the PKCE extension on
-      public clients. However, Google only supports the authorization code grant
-      for confidential clients. To enable public client access, we provide an
-      endpoint that forwards token-related requests to Google with the client
-      secret added.
+      We use the OAuth2 authorization code grant with the PKCE extension
+      (https://oauth.net/2/pkce/) on public clients
+      (https://oauth.net/2/client-types/). However, Google only supports the
+      authorization code grant for confidential clients. To enable public client
+      access, we provide an endpoint that forwards token-related requests to
+      Google with the client secret added.
 
       Because we do not provide a full OAuth implementation, adding the scope
       property is at best documentation and at worst may lead to unexpected
