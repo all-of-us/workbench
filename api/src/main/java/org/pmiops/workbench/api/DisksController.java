@@ -116,9 +116,7 @@ public class DisksController implements DisksApiDelegate {
 
     List<Disk> activeDisks =
         disksToValidate.stream()
-            .filter(
-                d ->
-                    ACTIVE_DISK_STATUSES.contains(d.getStatus()))
+            .filter(d -> ACTIVE_DISK_STATUSES.contains(d.getStatus()))
             .collect(Collectors.toList());
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =

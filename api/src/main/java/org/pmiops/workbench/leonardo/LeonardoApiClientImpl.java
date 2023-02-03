@@ -510,7 +510,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
-                googleProject, null, includeDeleted, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS, LEONARDO_CREATOR_ROLE));
+                googleProject,
+                null,
+                includeDeleted,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_CREATOR_ROLE));
   }
 
   @Override
@@ -585,7 +589,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     googleProjectId,
                     /* labels= */ null,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS, LEONARDO_CREATOR_ROLE));
+                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    LEONARDO_CREATOR_ROLE));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
