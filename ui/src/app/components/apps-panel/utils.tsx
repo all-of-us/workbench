@@ -139,3 +139,19 @@ export const fromUserAppStatusWithFallback = (status: AppStatus): string => {
     ? status?.toString()
     : mappedStatus;
 };
+
+export const toUserEnvironmentStatusByAppType = (
+  status: AppStatus | RuntimeStatus,
+  appType: UIAppType
+): UserEnvironmentStatus =>
+  cond<UserEnvironmentStatus>(
+    [
+      appType === UIAppType.CROMWELL,
+      () => fromUserAppStatus(status as AppStatus),
+    ],
+    [
+      appType === UIAppType.JUPYTER,
+      () => fromRuntimeStatus(status as RuntimeStatus),
+    ],
+    () => UserEnvironmentStatus.UNKNOWN
+  );

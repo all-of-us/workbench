@@ -3,8 +3,7 @@ import * as React from 'react';
 import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
 import {
-  fromRuntimeStatus,
-  fromUserAppStatus,
+  toUserEnvironmentStatusByAppType,
   UIAppType,
   UserEnvironmentStatus,
 } from 'app/components/apps-panel/utils';
@@ -12,7 +11,7 @@ import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { addOpacity } from 'app/styles/colors';
-import { cond, DEFAULT, switchCase } from 'app/utils';
+import { DEFAULT, switchCase } from 'app/utils';
 import computeError from 'assets/icons/compute-error.svg';
 import computeNone from 'assets/icons/compute-none.svg';
 import computeRunning from 'assets/icons/compute-running.svg';
@@ -34,17 +33,7 @@ export const StartStopEnvironmentButton = ({
   appType,
 }: StatusInfo) => {
   const userEnvironmentStatus: UserEnvironmentStatus =
-    cond<UserEnvironmentStatus>(
-      [
-        appType === UIAppType.CROMWELL,
-        () => fromUserAppStatus(status as AppStatus),
-      ],
-      [
-        appType === UIAppType.JUPYTER,
-        () => fromRuntimeStatus(status as RuntimeStatus),
-      ],
-      () => UserEnvironmentStatus.UNKNOWN
-    );
+    toUserEnvironmentStatusByAppType(status, appType);
 
   const rotateStyle = { animation: 'rotation 2s infinite linear' };
   const {
