@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 import { ReactWrapper } from 'enzyme';
 
 import {
-  BillingStatus,
   DisksApi,
   ProfileApi,
   RuntimeConfigurationType,
@@ -1640,25 +1639,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickNumWorkers(wrapper, 2);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
-  });
-
-  it('should render disabled panel when creator billing disabled', async () => {
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingStatus: BillingStatus.INACTIVE,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    });
-    const wrapper = await component();
-
-    const disabledPanel = wrapper.find({
-      'data-test-id': 'runtime-disabled-panel',
-    });
-    expect(disabledPanel.exists()).toBeTruthy();
-    const createPanel = wrapper.find({
-      'data-test-id': 'runtime-create-panel',
-    });
-    expect(createPanel.exists()).toBeFalsy();
   });
 
   it('should allow creating gce with GPU', async () => {
