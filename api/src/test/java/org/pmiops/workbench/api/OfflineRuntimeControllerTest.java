@@ -192,7 +192,7 @@ public class OfflineRuntimeControllerTest {
   }
 
   private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) throws Exception {
-    when(mockDisksApi.listDisks(any(), any(), anyString())).thenReturn(disks);
+    when(mockDisksApi.listDisks(any(), any(), anyString(), anyString())).thenReturn(disks);
   }
 
   private void stubWorkspaceOwners(DbWorkspace w, List<DbUser> users) {
