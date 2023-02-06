@@ -98,7 +98,7 @@ public interface LeonardoApiClient {
   UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName);
 
   /**
-   * Lists all apps the user creates on in the given workspace GCP project
+   * Lists all apps the user creates in the given workspace GCP project
    *
    * @param googleProjectId the GCP project the app belongs to
    */
