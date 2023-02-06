@@ -15,11 +15,7 @@ import {
 } from 'generated/fetch';
 
 import { AppsPanel } from 'app/components/apps-panel';
-import {
-  Button,
-  CloseButton,
-  StyledExternalLink,
-} from 'app/components/buttons';
+import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -381,7 +377,6 @@ export const HelpSidebar = fp.flow(
       bodyPadding?: string;
       renderBody: () => JSX.Element;
       showFooter: boolean;
-      showNavigation?: boolean;
     } {
       const { pageKey, workspace, cohortContext } = this.props;
 
@@ -454,7 +449,7 @@ export const HelpSidebar = fp.flow(
           return {
             headerPadding: '1.125rem',
             renderHeader: () => (
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3
                   style={{
                     ...styles.sectionTitle,
@@ -485,7 +480,6 @@ export const HelpSidebar = fp.flow(
               />
             ),
             showFooter: false,
-            showNavigation: true,
           };
         case 'notebooksHelp':
           return {
@@ -681,27 +675,6 @@ export const HelpSidebar = fp.flow(
                       }}
                     >
                       <FlexColumn style={{ height: '100%' }}>
-                        {sidebarContent.showNavigation && (
-                          <FlexRow
-                            style={{
-                              padding: '1rem 0.625rem 1rem 0.625rem',
-                              borderBottom: '1px solid #979797',
-                              margin: '0rem 0.5rem',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <Button
-                              id='helpSideBarBackButton'
-                              aria-label='A button to navigate back to the last panel displayed in the apps panel.'
-                              type='secondary'
-                              onClick={() => this.handleBack()}
-                            >
-                              <i className='pi pi-angle-left' />
-                              BACK
-                            </Button>
-                            {closeButton}
-                          </FlexRow>
-                        )}
                         {sidebarContent.renderHeader && (
                           <FlexRow
                             style={{
@@ -710,7 +683,7 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            {!sidebarContent.showNavigation && closeButton}
+                            {closeButton}
                           </FlexRow>
                         )}
 
