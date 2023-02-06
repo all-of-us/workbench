@@ -377,7 +377,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 this.deleteWorkspace();
               }}
               workspaceNamespace={workspace.namespace}
-              resourceName={workspace.name}
+              workspaceName={workspace.name}
             />
           )}
           {showShareModal && (

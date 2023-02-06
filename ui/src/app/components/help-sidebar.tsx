@@ -710,7 +710,7 @@ export const HelpSidebar = fp.flow(
                   }
                   receiveDelete={() => this.deleteWorkspace()}
                   workspaceNamespace={this.props.workspace.namespace}
-                  resourceName={this.props.workspace.name}
+                  workspaceName={this.props.workspace.name}
                 />
               ),
             ],

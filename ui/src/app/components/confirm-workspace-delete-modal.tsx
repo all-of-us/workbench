@@ -16,7 +16,7 @@ import {
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import { toDisplay } from 'app/utils/resources';
 
-export interface ConfirmDeleteModalProps {
+export interface ConfirmWorkspaceDeleteModalProps {
   closeFunction: Function;
   receiveDelete: Function;
   workspaceName: string;
@@ -27,7 +27,7 @@ export const ConfirmWorkspaceDeleteModal = ({
   receiveDelete,
   workspaceName,
   workspaceNamespace,
-}: ConfirmDeleteModalProps) => {
+}: ConfirmWorkspaceDeleteModalProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
   const [checkForApp, setCheckForApp] = useState<boolean>(true);
