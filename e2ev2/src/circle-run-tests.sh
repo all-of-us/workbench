@@ -13,6 +13,7 @@ mkdir screenshots
 yarn install
 
 export UI_URL_ROOT=https://pr-$PR_SITE_NUM-dot-all-of-us-workbench-test.appspot.com
+echo $UI_URL_ROOT
 export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 export JEST_SILENT_REPORTER_DOTS=true
 export JEST_SILENT_REPORTER_SHOW_PATHS=true
@@ -43,7 +44,7 @@ if [[ $TESTS_EXIT_CODE -ne 0 ]]; then
 
   # Collect garbage
   gsutil ls $BKT_ROOT | tail -n 10 > latest.txt
-  gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm || true
+  gsutil ls $BKT_ROOT | grep -v -F -f latest.txt | gsutil rm -I || true
 fi
 
 exit $TESTS_EXIT_CODE
