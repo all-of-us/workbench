@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import * as fp from 'lodash/fp';
 
-import { AppStatus, AppType, UserAppEnvironment } from 'generated/fetch';
+import { AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -53,37 +53,22 @@ const PanelMain = fp.flow(
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
     const [creationStarted, setCreationStarted] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [status, setStatus] = useState<AppStatus>();
+
+    const app = findApp(userApps, UIAppType.CROMWELL);
+    const loading = !app?.status;
 
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
-    useEffect(() => {
-      if (userApps !== undefined) {
-        const app = findApp(userApps, UIAppType.CROMWELL);
-        if (app) {
-          setStatus(app.status ?? null);
-        } else {
-          setLoading(false);
-        }
-      }
-    }, [userApps]);
-
-    useEffect(() => {
-      if (loading && status !== undefined) {
-        setLoading(false);
-      }
-    }, [loading, status]);
-
-    useEffect(() => {
-      if (creationStarted) {
+    const onCreate = () => {
+      if (!creationStarted) {
+        setCreationStarted(true);
         appsApi().createApp(workspace.namespace, defaultCromwellConfig);
         onClose();
         setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
       }
-    }, [creationStarted]);
+    };
 
     const { profile } = profileState;
 
@@ -100,7 +85,7 @@ const PanelMain = fp.flow(
               workspace,
               analysisConfig,
             }}
-            status={status}
+            status={app?.status}
             onPause={Promise.resolve()}
             onResume={Promise.resolve()}
             appType={AppType.CROMWELL}
@@ -177,10 +162,8 @@ const PanelMain = fp.flow(
           <Button
             id='cromwell-cloud-environment-create-button'
             aria-label='cromwell cloud environment create button'
-            onClick={() => {
-              setCreationStarted(true);
-            }}
-            disabled={loading || !!status || creationStarted}
+            onClick={onCreate}
+            disabled={loading || !!app?.status || creationStarted}
           >
             Start
           </Button>
