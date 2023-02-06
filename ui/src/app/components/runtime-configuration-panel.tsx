@@ -4,7 +4,6 @@ import { Dropdown } from 'primereact/dropdown';
 import { validate } from 'validate.js';
 
 import {
-  BillingStatus,
   DataprocConfig,
   GpuConfig,
   Runtime,
@@ -235,10 +234,6 @@ const PanelMain = fp.flow(
     const initializePanelContent = (): PanelContent =>
       cond(
         [!!initialPanelContent, () => initialPanelContent],
-        [
-          workspace.billingStatus === BillingStatus.INACTIVE,
-          () => PanelContent.Disabled,
-        ],
         // If there's a pendingRuntime, this means there's already a create/update
         // in progress, even if the runtime store doesn't actively reflect this yet.
         // Show the customize panel in this event.

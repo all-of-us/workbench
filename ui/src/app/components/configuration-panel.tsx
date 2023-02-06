@@ -2,11 +2,14 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 
+import { BillingStatus } from 'generated/fetch';
+
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { withCurrentWorkspace } from 'app/utils';
+import { cond, withCurrentWorkspace } from 'app/utils';
 
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
 import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
+import { DisabledPanel } from './runtime-configuration-panel/disabled-panel';
 
 export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
   ({ onClose, workspace, type = 'runtime', runtimeConfPanelInitialState }) => {
@@ -35,17 +38,27 @@ export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
 
     return (
       <div id='configuration-panel-container'>
-        {type === 'runtime' ? (
-          <div>
-            <RuntimeConfigurationPanel
-              {...{ onClose, creatorFreeCreditsRemaining }}
-              initialPanelContent={runtimeConfPanelInitialState}
+        {cond(
+          [
+            workspace.billingStatus === BillingStatus.INACTIVE,
+            () => <DisabledPanel />,
+          ],
+          [
+            type === 'runtime',
+            () => (
+              <div>
+                <RuntimeConfigurationPanel
+                  {...{ onClose, creatorFreeCreditsRemaining }}
+                  initialPanelContent={runtimeConfPanelInitialState}
+                />
+              </div>
+            ),
+          ],
+          () => (
+            <CromwellConfigurationPanel
+              {...{ onClose, creatorFreeCreditsRemaining, workspace }}
             />
-          </div>
-        ) : (
-          <CromwellConfigurationPanel
-            {...{ onClose, creatorFreeCreditsRemaining, workspace }}
-          />
+          )
         )}
       </div>
     );
