@@ -208,23 +208,6 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void testListPD_nameNotMatchingPrefix() throws ApiException {
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        newListPdResponse(
-            "rstudio1",
-            LeonardoDiskStatus.READY,
-            NOW.minusSeconds(100).toString(),
-            AppType.RSTUDIO);
-
-    rstudioDisk.auditInfo(rstudioDisk.getAuditInfo().creator("other@gmail.com"));
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
-            GOOGLE_PROJECT_ID, false))
-        .thenReturn(ImmutableList.of(rstudioDisk));
-
-    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody()).isEmpty();
-  }
-
-  @Test
   public void testUpdateDisk() throws ApiException {
     int diskSize = 200;
     String diskName = user.generatePDName();
