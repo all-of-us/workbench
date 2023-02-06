@@ -42,66 +42,8 @@ export class ConfirmDeleteModal extends React.Component<
     this.props.receiveDelete();
   }
 
-  validateDeleteText = (event) => {
-    event.toLowerCase().match('delete')
-      ? this.setState({ deleteDisabled: false })
-      : this.setState({ deleteDisabled: true });
-  };
-
   render() {
-    const { resourceType } = this.props;
-
-    if (resourceType === ResourceType.WORKSPACE) {
-      return (
-        <Modal loading={this.state.loading}>
-          <ModalTitle style={{ lineHeight: '28px' }}>
-            Warning — All work in this workspace will be lost.
-          </ModalTitle>
-          <ModalBody style={{ marginTop: '0.3rem', lineHeight: '28.px' }}>
-            <div>
-              <div>
-                Are you sure you want to delete{' '}
-                {toDisplay(this.props.resourceType)} : {this.props.resourceName}
-                ?
-              </div>
-              <br />
-              <div>
-                Deleting this workspace will immediately, permanently delete any
-                items inside the workspace, such as notebooks and cohort
-                definitions. This includes items created or used by other users
-                with access to the workspace. If you still wish to delete this
-                workspace and all items within it, type DELETE below to confirm.
-              </div>
-              <TextInput
-                placeholder='type DELETE to confirm'
-                style={{ marginTop: '0.75rem' }}
-                onChange={this.validateDeleteText}
-                onBlur=''
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter style={{ paddingTop: '1.5rem' }}>
-            <Button
-              aria-label='Cancel'
-              type='secondary'
-              onClick={() => this.props.closeFunction()}
-            >
-              Cancel
-            </Button>
-            <Button
-              aria-label='Confirm Delete'
-              disabled={this.state.loading || this.state.deleteDisabled}
-              style={{ marginLeft: '0.75rem' }}
-              data-test-id='confirm-delete'
-              onClick={() => this.emitDelete()}
-            >
-              Delete {toDisplay(this.props.resourceType)}
-            </Button>
-          </ModalFooter>
-        </Modal>
-      );
-    } else {
-      return (
+    return (
         <Modal loading={this.state.loading}>
           <ModalTitle style={{ lineHeight: '28px' }}>
             Are you sure you want to delete {toDisplay(this.props.resourceType)}
@@ -131,5 +73,4 @@ export class ConfirmDeleteModal extends React.Component<
         </Modal>
       );
     }
-  }
 }
