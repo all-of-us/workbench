@@ -10,7 +10,7 @@ import {
   DemoChartInfo,
   Domain,
   EthnicityInfo,
-  GenderOrSexType,
+  GenderSexRaceOrEthType,
   SortOrder,
 } from 'generated/fetch';
 
@@ -272,8 +272,8 @@ export const QueryReport = fp.flow(
           cohortBuilderApi().findDemoChartInfo(
             ns,
             wsid,
-            GenderOrSexType[GenderOrSexType.GENDER],
-            AgeType[AgeType.AGE],
+            GenderSexRaceOrEthType.GENDER.toString(),
+            AgeType.AGE.toString(),
             cohortDefinition
           ),
           cohortBuilderApi().findEthnicityInfo(ns, wsid, cohortDefinition),
@@ -593,7 +593,7 @@ export const QueryReport = fp.flow(
                           <div style={demoTitle}>Demographics</div>
                           <div style={styles.graphBorder}>
                             {data && (
-                              <ComboChart mode={'stacked'} data={data} />
+                              <ComboChart legendTitle='Age' mode={'stacked'} data={data} />
                             )}
                             {chartsLoading && <SpinnerOverlay />}
                           </div>

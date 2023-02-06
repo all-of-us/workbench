@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { DemoChartInfo } from 'generated/fetch';
+
 import { getChartObj } from 'app/pages/data/cohort/utils';
 import colors from 'app/styles/colors';
 
@@ -13,7 +15,7 @@ highCharts.setOptions({
 });
 
 interface Props {
-  data: any;
+  data: DemoChartInfo[];
 }
 
 interface State {
@@ -79,26 +81,18 @@ export class GenderChart extends React.Component<Props, State> {
 
   getCategoriesAndData() {
     const { data } = this.props;
-    const genderCodes = {
-      M: 'Male',
-      F: 'Female',
-      'No matching concept': 'Unknown',
-    };
     const chartData = data.reduce(
-      (acc, datum) => {
-        const gender = !!genderCodes[datum.name]
-          ? genderCodes[datum.name]
-          : datum.name;
-        if (!acc.categories.includes(gender)) {
-          acc.categories.push(gender);
+      (acc, { count, name }) => {
+        if (!acc.categories.includes(name)) {
+          acc.categories.push(name);
         }
-        const index = acc.data.findIndex((d) => d.name === gender);
+        const index = acc.data.findIndex((d) => d.name === name);
         if (index > -1) {
-          acc.data[index].y += datum.count;
+          acc.data[index].y += count;
         } else {
           acc.data.push({
-            y: datum.count,
-            name: gender,
+            y: count,
+            name,
             color: colors.chartColors[acc.data.length],
           });
         }
