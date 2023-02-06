@@ -42,7 +42,7 @@ export const ConfirmWorkspaceDeleteModal = ({
       appsApi()
         .listAppsInWorkspace(workspaceNamespace)
         .then((userApps) => {
-          setAppsExistForWorkspace(!!userApps?.length > 0);
+          setAppsExistForWorkspace(userApps?.length > 0);
           setCheckingForUserApps(false);
         })
         .finally(() => {
