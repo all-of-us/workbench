@@ -7,7 +7,7 @@ import { AoU } from 'app/components/text-wrappers';
 export const DisabledPanel = () => {
   return (
     <WarningMessage
-      data-test-id='runtime-disabled-panel'
+      data-test-id='environment-disabled-panel'
       iconSize={16}
       iconPosition={'top'}
     >

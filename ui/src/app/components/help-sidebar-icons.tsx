@@ -98,6 +98,7 @@ export type SidebarIconId =
   | 'annotations'
   | 'apps'
   | 'runtimeConfig'
+  | 'cromwellConfig'
   | 'terminal'
   | 'genomicExtractions';
 
@@ -339,6 +340,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
           }}
         >
           <img
+            alt={icon.id}
             data-test-id={'help-sidebar-icon-' + icon.id}
             src={thunderstorm}
             style={{ ...icon.style, position: 'absolute' }}
@@ -349,6 +351,30 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
     [
       'runtimeConfig',
       () => displayRuntimeStatusIcon(icon, workspace.namespace),
+    ],
+    [
+      'cromwellConfig',
+      () => {
+        const cromwellAssets = appAssets.find(
+          (aa) => aa.appType === UIAppType.CROMWELL
+        );
+        return (
+          <FlexRow
+            style={{
+              height: '100%',
+              alignItems: 'center',
+              justifyContent: 'space-around',
+            }}
+          >
+            <img
+              data-test-id={'help-sidebar-icon-' + icon.id}
+              src={cromwellAssets.icon}
+              alt={icon.label}
+              style={{ ...icon.style, position: 'absolute' }}
+            />
+          </FlexRow>
+        );
+      },
     ],
     [
       'terminal',
@@ -374,6 +400,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
       () =>
         icon.faIcon === null ? (
           <img
+            alt={icon.label}
             data-test-id={'help-sidebar-icon-' + icon.id}
             style={icon.style}
           />
@@ -490,6 +517,16 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
       hasContent: true,
     },
+    cromwellConfig: {
+      id: 'cromwellConfig',
+      disabled: !!loadingError,
+      faIcon: null,
+      label: 'Cromwell Icon',
+      showIcon: () => true,
+      style: { width: '36px' },
+      tooltip: runtimeTooltip('Cromwell Cloud Environment', loadingError),
+      hasContent: true,
+    },
     terminal: {
       id: 'terminal',
       disabled: !!loadingError,
@@ -558,7 +595,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     showAppsPanel &&
     WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
   ) {
-    keys.push('apps');
+    keys.push('apps', 'cromwellConfig');
   }
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {

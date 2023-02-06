@@ -111,6 +111,7 @@ export interface AnalysisConfig {
   computeType: ComputeType;
   machine: Machine;
   diskConfig: DiskConfig;
+  // TODO: Document types of disks available (RW-9490)
   // This should only be populated if !diskconfig.detachable.
   detachedDisk: Disk;
   // TODO: Refactor this type to an intermediate representation.
@@ -118,6 +119,7 @@ export interface AnalysisConfig {
   // TODO: Refactor this type to an intermediate representation.
   gpuConfig: GpuConfig;
   autopauseThreshold: number;
+  numNodes?: number;
 }
 
 export interface UpdateMessaging {
