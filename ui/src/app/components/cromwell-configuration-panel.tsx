@@ -24,6 +24,7 @@ import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
 import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
+import { TooltipTrigger } from './popups';
 
 const { useState } = React;
 
@@ -55,7 +56,7 @@ const PanelMain = fp.flow(
     const [creationStarted, setCreationStarted] = useState(false);
 
     const app = findApp(userApps, UIAppType.CROMWELL);
-    const loading = !app?.status;
+    const loading = userApps === undefined;
 
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
@@ -93,9 +94,9 @@ const PanelMain = fp.flow(
           <WarningMessage>
             This cost is only for running the Cromwell Engine, there will be
             additional cost for interactions with the workflow.
-            <a href='#' style={{ marginLeft: '0.25rem' }}>
-              Learn more{' '}
-            </a>
+            <TooltipTrigger content='Coming soon'>
+              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
+            </TooltipTrigger>
             <i
               className='pi pi-external-link'
               style={{
@@ -124,9 +125,9 @@ const PanelMain = fp.flow(
             >
               {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
             </div>
-            <a href='#' style={{ marginLeft: '0.25rem' }}>
-              Learn more{' '}
-            </a>
+            <TooltipTrigger content='Coming soon'>
+              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
+            </TooltipTrigger>
             <i
               className='pi pi-external-link'
               style={{
@@ -141,9 +142,13 @@ const PanelMain = fp.flow(
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
           <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
           {cromwellSupportArticles.map((article, index) => (
-            <a href={article.link} key={index} style={{ display: 'block' }}>
-              {index + 1}. {article.text}
-            </a>
+            <div key={index} style={{ display: 'block' }}>
+              <TooltipTrigger content='Coming soon'>
+                <a>
+                  {index + 1}. {article.text}
+                </a>
+              </TooltipTrigger>
+            </div>
           ))}
         </div>
         <FlexRow
