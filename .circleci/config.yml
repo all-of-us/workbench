@@ -736,6 +736,28 @@ jobs:
             - ~/workbench/e2e/node_modules
           key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
+  build-ui:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    parameters:
+      environment:
+        default: test
+        type: string
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              --recurse-submodules --shallow-submodules \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+      - run:
+          name: Build
+          working_directory: ui
+          command: |
+            set +e
+            set -v
+            ../.circleci/activate-service-account.sh
+            ./src/circle-build.sh '<<parameters.environment>>'
 
 workflows:
   build-test-deploy:
@@ -863,6 +885,13 @@ workflows:
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
+
+  build-all-uis:
+    jobs:
+      - build-ui:
+          matrix:
+            parameters:
+              environment: ['test', 'staging']
 
 experimental:
   notify:

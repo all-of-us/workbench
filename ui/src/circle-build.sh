@@ -4,8 +4,11 @@
 set -euo pipefail
 set -v
 
+REACT_APP_ENVIRONMENT="$1"
+shift
+
 gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
 yarn install
 yarn deps
-REACT_APP_ENVIRONMENT=test yarn run build --aot --no-watch --no-progress
+yarn run build --aot --no-watch --no-progress
 
