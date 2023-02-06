@@ -86,7 +86,6 @@ describe('CromwellConfigurationPanel', () => {
   });
 
   afterEach(() => {
-    // jest.clearAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
   });

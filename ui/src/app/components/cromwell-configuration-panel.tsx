@@ -53,7 +53,7 @@ const PanelMain = fp.flow(
   }) => {
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
-    const [creationStarted, setCreationStarted] = useState(false);
+    const [creatingStarted, setCreatingStarted] = useState(false);
 
     const app = findApp(userApps, UIAppType.CROMWELL);
     const loading = userApps === undefined;
@@ -63,8 +63,8 @@ const PanelMain = fp.flow(
     }, []);
 
     const onCreate = () => {
-      if (!creationStarted) {
-        setCreationStarted(true);
+      if (!creatingStarted) {
+        setCreatingStarted(true);
         appsApi().createApp(workspace.namespace, defaultCromwellConfig);
         onClose();
         setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
@@ -168,7 +168,7 @@ const PanelMain = fp.flow(
             id='cromwell-cloud-environment-create-button'
             aria-label='cromwell cloud environment create button'
             onClick={onCreate}
-            disabled={loading || !!app?.status || creationStarted}
+            disabled={loading || !!app?.status || creatingStarted}
           >
             Start
           </Button>

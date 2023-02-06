@@ -245,10 +245,6 @@ export const HelpSidebar = fp.flow(
       this.setState({ runtimeConfPanelInitialState });
     }
 
-    handleBack() {
-      setSidebarActiveIconStore.next('apps');
-    }
-
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
