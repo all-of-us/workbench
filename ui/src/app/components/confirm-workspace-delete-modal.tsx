@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { ResourceType } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
+import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { TextInput } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
@@ -30,22 +30,26 @@ export const ConfirmWorkspaceDeleteModal = ({
 }: ConfirmWorkspaceDeleteModalProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
-  const [checkForApp, setCheckForApp] = useState<boolean>(true);
+  const [checkingForUserApps, setCheckingForUserApps] = useState<boolean>(
+    environment.showAppsPanel
+  );
   const [appsExistForWorkspace, setAppsExistForWorkspace] =
     useState<boolean>(false);
 
   useEffect(() => {
-    setCheckForApp(true);
-    appsApi()
-      .listAppsInWorkspace(workspaceNamespace)
-      .then((userApps) => {
-        setAppsExistForWorkspace(!!findApp(userApps, UIAppType.CROMWELL));
-        setCheckForApp(false);
-      })
-      .finally(() => {
-        setCheckForApp(false);
-      });
-  }, []);
+    if (environment.showAppsPanel) {
+      setCheckingForUserApps(true);
+      appsApi()
+        .listAppsInWorkspace(workspaceNamespace)
+        .then((userApps) => {
+          setAppsExistForWorkspace(!!userApps?.length > 0);
+          setCheckingForUserApps(false);
+        })
+        .finally(() => {
+          setCheckingForUserApps(false);
+        });
+    }
+  }, [environment]);
 
   const emitDelete = () => {
     setLoading(true);
@@ -56,7 +60,7 @@ export const ConfirmWorkspaceDeleteModal = ({
     setDeleteDisabled(!event.toLowerCase().match('delete'));
   };
 
-  const displayUserInput = !checkForApp && !appsExistForWorkspace;
+  const displayUserInput = !checkingForUserApps && !appsExistForWorkspace;
 
   return (
     <Modal loading={loading}>
@@ -66,8 +70,7 @@ export const ConfirmWorkspaceDeleteModal = ({
       <ModalBody style={{ marginTop: '0.3rem', lineHeight: '28.px' }}>
         <div>
           <div>
-            Are you sure you want to delete {ResourceType.WORKSPACE} :{' '}
-            {workspaceName}?
+            Are you sure you want to delete Workspace : {workspaceName}?
           </div>
           <br />
           <div>
@@ -85,16 +88,16 @@ export const ConfirmWorkspaceDeleteModal = ({
               onBlur=''
             />
           )}
-          {checkForApp && (
+          {checkingForUserApps && (
             <div style={{ paddingTop: '1rem' }}>
               {' '}
-              Checking for any existing Apps....
+              Checking for any existing User Apps....
             </div>
           )}
           {appsExistForWorkspace && (
             <WarningMessage>
-              You cannot delete the workspace as there are Cromwell Apps you
-              must delete first
+              You cannot delete the workspace as there are Apps you must delete
+              first
             </WarningMessage>
           )}
         </div>
@@ -110,7 +113,10 @@ export const ConfirmWorkspaceDeleteModal = ({
         <Button
           aria-label='Confirm Delete'
           disabled={
-            loading || deleteDisabled || checkForApp || appsExistForWorkspace
+            loading ||
+            deleteDisabled ||
+            checkingForUserApps ||
+            appsExistForWorkspace
           }
           style={{ marginLeft: '0.75rem' }}
           data-test-id='confirm-delete'
