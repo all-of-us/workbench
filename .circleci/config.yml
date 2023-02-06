@@ -737,6 +737,10 @@ jobs:
   build-ui:
     machine:
       image: ubuntu-2204:2022.04.1
+    parameters:
+      environment:
+        default: test
+        type: string
     steps:
       - run:
           name: Checkout code
@@ -746,10 +750,6 @@ jobs:
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
       - run:
           name: Build
-          parameters:
-            environment:
-              default: test
-              type: string
           working_directory: ui
           command: |
             set +e
