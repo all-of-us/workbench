@@ -4,24 +4,20 @@
 set -euo pipefail
 set -v
 
-TERRA_UI_GIT_HASH=0cfd092effbc6427ee15c8c1f05e48b03d168532
-
 WD="$(dirname "$0")"
 cd "$WD"
+
+TERRA_UI_GIT_HASH=$(< githash.txt)
 
 # Making this a hidden directory avoids having to exclude it from the parent build.
 REPODIR=.repo
 
-if [[ -e $REPODIR ]]; then
-  set +e; (cd $REPODIR; git log $TERRA_UI_GIT_HASH..$TERRA_UI_GIT_HASH); set -e
-  if [ $? -eq 0 ]; then
-    echo Repo exists and is current. Delete "$WD"/$REPODIR to rebuild.
-    exit 0
-  else
-    echo Repo is out of date. Delete "$WD"/$REPODIR to rebuild.
-    exit 1
-  fi
+if [[ -e out ]]; then
+  echo Build artifacts directory exists. Delete "$WD"/out to rebuild.
+  exit 0
 fi
+
+rm -rf $REPODIR
 
 yarn install
 

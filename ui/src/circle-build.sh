@@ -4,7 +4,7 @@
 set -euo pipefail
 set -v
 
-REACT_APP_ENVIRONMENT="$1"
+export REACT_APP_ENVIRONMENT="$1"
 shift
 
 gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .

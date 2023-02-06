@@ -491,19 +491,8 @@ jobs:
           name: Checkout code
           command: |
             git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              --recurse-submodules --shallow-submodules \
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
-            (cd aou-utils/; git submodule update --init)
-      - run:
-          name: Build
-          working_directory: ui
-          command: |
-            set +e
-            set -v
-            ../.circleci/activate-service-account.sh
-            source ../.circleci/PR_SITE_NUM.sh
-            export PR_SITE_NUM
-
-            ./src/circle-build.sh
       - run:
           name: Deploy
           working_directory: ui
@@ -511,9 +500,10 @@ jobs:
             set +e
             set -v
             ../.circleci/activate-service-account.sh
+            BKT=gs://aou-dontuse-public-build-artifacts
+            gsutil cat $BKT/ui/builds/$CIRCLE_SHA1.test.tgz | tar -xzv
             source ../.circleci/PR_SITE_NUM.sh
             export PR_SITE_NUM
-
             ./src/circle-deploy.sh
   e2etests-run:
     machine:
@@ -525,8 +515,8 @@ jobs:
           name: Checkout code
           command: |
             git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              --recurse-submodules --shallow-submodules \
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
-            (cd aou-utils/; git submodule update --init)
       - run:
           name: Run tests
           working_directory: e2ev2
@@ -734,6 +724,36 @@ jobs:
             - ~/workbench/e2e/node_modules
           key: v5-e2e-yarn-{{ .Branch }}-{{ arch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
+  build-ui-dep-terra-ui:
+    machine:
+      image: ubuntu-2204:2022.04.1
+    steps:
+      - run:
+          name: Checkout code
+          command: |
+            git clone --branch="$CIRCLE_BRANCH" --depth=1 \
+              --recurse-submodules --shallow-submodules \
+              https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
+      - run:
+          name: Skip if already built
+          command: |
+            ./.circleci/activate-service-account.sh
+            BKT=gs://aou-dontuse-public-build-artifacts
+            set +e
+            gsutil ls $BKT/ui/deps/terra-ui-deps.$(< ui/src/terraui/githash.txt).tgz
+            if [[ $? == 0 ]]; then circleci-agent step halt; fi
+      - run:
+          name: Build
+          working_directory: ui
+          command: ./src/terraui/build.sh
+      - run:
+          name: Store
+          working_directory: ui/src/terraui
+          command: |
+            AFILE=terra-ui-deps.$(< githash.txt).tgz
+            (cd out; tar -czf ../$AFILE .)
+            gsutil cp $AFILE gs://aou-dontuse-public-build-artifacts/ui/deps/$AFILE
+
   build-ui:
     machine:
       image: ubuntu-2204:2022.04.1
@@ -749,6 +769,15 @@ jobs:
               --recurse-submodules --shallow-submodules \
               https://github.com/"$CIRCLE_PROJECT_USERNAME"/"$CIRCLE_PROJECT_REPONAME".git .
       - run:
+          name: Download deps
+          working_directory: ui
+          command: |
+            ../.circleci/activate-service-account.sh
+            mkdir src/terraui/out
+            cd src/terraui
+            BKT=gs://aou-dontuse-public-build-artifacts
+            gsutil cat $BKT/ui/deps/terra-ui-deps.$(< githash.txt).tgz | (cd out; tar -xzv)
+      - run:
           name: Build
           working_directory: ui
           command: |
@@ -756,6 +785,16 @@ jobs:
             set -v
             ../.circleci/activate-service-account.sh
             ./src/circle-build.sh '<<parameters.environment>>'
+      - run:
+          name: Store
+          working_directory: ui
+          command : |
+            ../.circleci/activate-service-account.sh
+            githash=$(git rev-parse HEAD)
+            # Saving to a file before transfer helps gsutil figure out the content type.
+            tar -czf $githash.tgz app.yaml build
+            BKT=gs://aou-dontuse-public-build-artifacts
+            gsutil cp $githash.tgz $BKT/ui/builds/$githash.'<<parameters.environment>>'.tgz
 
 workflows:
   build-test-deploy:
@@ -816,8 +855,17 @@ workflows:
           <<: *filter-pr-branch
   e2etests:
     jobs:
+      - build-ui-dep-terra-ui
+      - build-ui:
+          requires:
+            - build-ui-dep-terra-ui
+          matrix:
+            parameters:
+              environment: ['test', 'staging']
       - e2etests-deploy-ui:
           <<: *filter-pr-branch
+          requires:
+            - build-ui
       - e2etests-run:
           requires:
             - e2etests-deploy-ui
@@ -883,13 +931,6 @@ workflows:
           requires:
             - puppeteer-env-setup
             - puppeteer-generate-access-tokens
-
-  build-all-uis:
-    jobs:
-      - build-ui:
-          matrix:
-            parameters:
-              environment: ['test', 'staging']
 
 experimental:
   notify:
