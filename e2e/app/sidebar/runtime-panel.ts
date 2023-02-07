@@ -192,7 +192,7 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   buildStatusIconDataTestId = (startStopIconState: StartStopIconState): string => {
-    return `//*[@data-test-id="runtime-status-icon-${startStopIconState}"]`;
+    return `//*[@data-test-id="environment-status-icon-${startStopIconState}"]`;
   };
 
   /**

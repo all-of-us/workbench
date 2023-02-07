@@ -17,9 +17,9 @@ export const DisabledPanel = () => {
             Cloud services are disabled for this workspace.
           </div>
           <div style={{ marginTop: '0.75rem' }}>
-            You cannot run or edit notebooks in this workspace because billed
-            services are disabled for the workspace creator's <AoU /> Researcher
-            account.
+            You cannot run or edit notebooks or user apps in this workspace
+            because billed services are disabled for the workspace creator's{' '}
+            <AoU /> Researcher account.
           </div>
         </TextColumn>
       }

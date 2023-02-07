@@ -68,9 +68,20 @@ describe('ConfigurationPanel', () => {
       'data-test-id': 'environment-disabled-panel',
     });
     expect(disabledPanel.exists()).toBeTruthy();
-    const createPanel = wrapper.find({
-      'data-test-id': 'runtime-create-panel',
+  });
+
+  it('should not render disabled panel when creator billing is enabled', async () => {
+    currentWorkspaceStore.next({
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingStatus: BillingStatus.ACTIVE,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     });
-    expect(createPanel.exists()).toBeFalsy();
+    const wrapper = await component();
+
+    const disabledPanel = wrapper.find({
+      'data-test-id': 'environment-disabled-panel',
+    });
+    expect(disabledPanel.exists()).toBeFalsy();
   });
 });
