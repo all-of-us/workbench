@@ -9,7 +9,6 @@ import {
   CohortDefinition,
   DemoChartInfo,
   Domain,
-  EthnicityInfo,
   GenderSexRaceOrEthType,
   SortOrder,
 } from 'generated/fetch';
@@ -208,6 +207,13 @@ const domains = [
   Domain[Domain.LAB],
 ];
 
+const chartTypes = [
+  GenderSexRaceOrEthType.ETHNICITY,
+  GenderSexRaceOrEthType.GENDER,
+  GenderSexRaceOrEthType.RACE,
+  GenderSexRaceOrEthType.SEXATBIRTH,
+];
+
 export interface QueryReportProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -267,24 +273,30 @@ export const QueryReport = fp.flow(
         cdrVersionTiersResponse
       ).name;
       this.setState({ cdrName });
-      const [demoChartInfo, ethnicityInfo, participantCount] =
-        await Promise.all([
-          cohortBuilderApi().findDemoChartInfo(
-            ns,
-            wsid,
-            GenderSexRaceOrEthType.GENDER.toString(),
-            AgeType.AGE.toString(),
-            cohortDefinition
-          ),
-          cohortBuilderApi().findEthnicityInfo(ns, wsid, cohortDefinition),
-          cohortBuilderApi().countParticipants(ns, wsid, cohortDefinition),
-        ]);
-      this.groupChartData([...demoChartInfo.items, ...ethnicityInfo.items]);
+      const demoChartData = {};
+      await Promise.all([
+        ...chartTypes.map((chartType) =>
+          cohortBuilderApi()
+            .findDemoChartInfo(
+              ns,
+              wsid,
+              chartType.toString(),
+              AgeType.AGE.toString(),
+              cohortDefinition
+            )
+            .then((demoChartInfo) => {
+              demoChartData[chartType] = demoChartInfo.items;
+            })
+        ),
+        cohortBuilderApi()
+          .countParticipants(ns, wsid, cohortDefinition)
+          .then((participantCount) => this.setState({ participantCount })),
+      ]);
+      this.groupChartData(demoChartData);
       this.setState({
-        data: demoChartInfo.items,
+        data: demoChartData[GenderSexRaceOrEthType.GENDER],
         chartsLoading: false,
         cohortDefinition,
-        participantCount,
       });
     }
 
@@ -346,36 +358,30 @@ export const QueryReport = fp.flow(
       return request;
     }
 
-    groupChartData(data: Array<DemoChartInfo | EthnicityInfo>) {
-      const groups = ['name', 'ageRange', 'race', 'ethnicity'];
-      const init = { name: {}, ageRange: {}, race: {}, ethnicity: {} };
-      const groupedData = data.reduce((acc, i) => {
-        groups.forEach((group) => {
-          const key = i[group];
-          if (key) {
-            if (acc[group][key]) {
-              acc[group][key].count += i.count;
+    groupChartData(data: any) {
+      const groupedData = { AGE: {} };
+      chartTypes.forEach((chartType, index) => {
+        groupedData[chartType] = data[chartType].reduce((acc, typeInfo) => {
+          if (acc[typeInfo.name]) {
+            acc[typeInfo.name].count += typeInfo.count;
+          } else {
+            acc[typeInfo.name] = { name: typeInfo.name, count: typeInfo.count };
+          }
+          // Get the age range totals on the first iteration
+          if (index === 0) {
+            if (groupedData.AGE[typeInfo.ageRange]) {
+              groupedData.AGE[typeInfo.ageRange].count += typeInfo.count;
             } else {
-              acc[group][key] = { name: key, count: i.count };
+              groupedData.AGE[typeInfo.ageRange] = {
+                name: typeInfo.ageRange,
+                count: typeInfo.count,
+              };
             }
           }
-        });
-        return acc;
-      }, init);
+          return acc;
+        }, {});
+      });
       this.setState({ groupedData });
-    }
-
-    getStatisticsHeader(group: string) {
-      switch (group) {
-        case 'ageRange':
-          return 'Age';
-        case 'name':
-          return 'Gender';
-        case 'race':
-          return 'Race';
-        case 'ethnicity':
-          return 'Ethnicity';
-      }
     }
 
     goBack() {
@@ -498,9 +504,13 @@ export const QueryReport = fp.flow(
                               }}
                             >
                               <div
-                                style={{ ...columns.col7, ...styles.groupText }}
+                                style={{
+                                  ...columns.col7,
+                                  ...styles.groupText,
+                                  textTransform: 'capitalize',
+                                }}
                               >
-                                {this.getStatisticsHeader(group)}
+                                {group.replace(/_/g, ' ').toLowerCase()}
                               </div>
                               {g === 0 && (
                                 <div
@@ -524,33 +534,31 @@ export const QueryReport = fp.flow(
                               )}
                             </div>
                           </div>
-                          {Object.keys(groupedData[group]).map((row, r) => (
-                            <div key={r} style={styles.container}>
-                              <div
-                                style={{
-                                  ...styles.row,
-                                  ...styles.groupContent,
-                                }}
-                              >
-                                <div style={columns.col7}>
-                                  {groupedData[group][row].name}
-                                </div>
-                                <div style={columns.col2}>
-                                  {groupedData[group][
-                                    row
-                                  ].count.toLocaleString()}
-                                </div>
-                                <div style={columns.col3}>
-                                  {Math.round(
-                                    (groupedData[group][row].count /
-                                      participantCount) *
-                                      100
-                                  )}
-                                  %
+                          {Object.values(groupedData[group]).map(
+                            ({ count, name }, r) => (
+                              <div key={r} style={styles.container}>
+                                <div
+                                  style={{
+                                    ...styles.row,
+                                    ...styles.groupContent,
+                                  }}
+                                >
+                                  <div style={columns.col7}>{name}</div>
+                                  <div style={columns.col2}>
+                                    {count.toLocaleString()}
+                                  </div>
+                                  <div style={columns.col3}>
+                                    {(count / participantCount) * 100 < 1
+                                      ? '<1'
+                                      : Math.round(
+                                          (count / participantCount) * 100
+                                        )}
+                                    %
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
                       ))}
                     {chartsLoading && <SpinnerOverlay />}
@@ -593,7 +601,11 @@ export const QueryReport = fp.flow(
                           <div style={demoTitle}>Demographics</div>
                           <div style={styles.graphBorder}>
                             {data && (
-                              <ComboChart legendTitle='Age' mode={'stacked'} data={data} />
+                              <ComboChart
+                                legendTitle='Age'
+                                mode={'stacked'}
+                                data={data}
+                              />
                             )}
                             {chartsLoading && <SpinnerOverlay />}
                           </div>
