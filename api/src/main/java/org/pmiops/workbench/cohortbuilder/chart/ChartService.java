@@ -20,7 +20,9 @@ public interface ChartService {
       Set<Long> participantIds, Domain domain, int limit);
 
   List<DemoChartInfo> findDemoChartInfo(
-          GenderSexRaceOrEthType genderSexRaceOrEthType, AgeType ageType, CohortDefinition cohortDefinition);
+      GenderSexRaceOrEthType genderSexRaceOrEthType,
+      AgeType ageType,
+      CohortDefinition cohortDefinition);
 
   List<DemoChartInfo> findCohortReviewDemoChartInfo(Set<Long> participantIds);
 

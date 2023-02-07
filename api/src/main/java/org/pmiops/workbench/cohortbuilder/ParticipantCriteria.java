@@ -35,7 +35,9 @@ public class ParticipantCriteria {
   }
 
   public ParticipantCriteria(
-          CohortDefinition cohortDefinition, GenderSexRaceOrEthType genderSexRaceOrEthType, AgeType ageType) {
+      CohortDefinition cohortDefinition,
+      GenderSexRaceOrEthType genderSexRaceOrEthType,
+      AgeType ageType) {
     this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
     this.participantIdsToInclude = null;
@@ -90,7 +92,7 @@ public class ParticipantCriteria {
         cohortDefinition,
         participantIdsToExclude,
         participantIdsToExclude,
-            genderSexRaceOrEthType,
+        genderSexRaceOrEthType,
         ageType);
   }
 

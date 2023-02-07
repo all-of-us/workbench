@@ -98,7 +98,9 @@ public class ChartQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
-            .replace("${genderSexRaceOrEthType}", participantCriteria.getGenderSexRaceOrEthType().toString())
+            .replace(
+                "${genderSexRaceOrEthType}",
+                participantCriteria.getGenderSexRaceOrEthType().toString())
             .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
             .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);

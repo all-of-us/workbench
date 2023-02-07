@@ -2321,18 +2321,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void findDemoChartInfoRaceAgeAtCdr() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
-            controller
-                    .findDemoChartInfo(
-                            WORKSPACE_NAMESPACE,
-                            WORKSPACE_ID,
-                            GenderSexRaceOrEthType.RACE.toString(),
-                            AgeType.AGE_AT_CDR.toString(),
-                            cohortDefinition)
-                    .getBody();
+        controller
+            .findDemoChartInfo(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                GenderSexRaceOrEthType.RACE.toString(),
+                AgeType.AGE_AT_CDR.toString(),
+                cohortDefinition)
+            .getBody();
     assertRace(Objects.requireNonNull(response));
   }
 
@@ -2340,18 +2340,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void findDemoChartInfoEthnicityAgeAtCdr() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     CohortDefinition cohortDefinition =
-            createCohortDefinition(
-                    Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+        createCohortDefinition(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
-            controller
-                    .findDemoChartInfo(
-                            WORKSPACE_NAMESPACE,
-                            WORKSPACE_ID,
-                            GenderSexRaceOrEthType.ETHNICITY.toString(),
-                            AgeType.AGE_AT_CDR.toString(),
-                            cohortDefinition)
-                    .getBody();
+        controller
+            .findDemoChartInfo(
+                WORKSPACE_NAMESPACE,
+                WORKSPACE_ID,
+                GenderSexRaceOrEthType.ETHNICITY.toString(),
+                AgeType.AGE_AT_CDR.toString(),
+                cohortDefinition)
+            .getBody();
     assertEthnicityDemographics(Objects.requireNonNull(response));
   }
 
@@ -2426,20 +2426,46 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private void assertDemographics(DemoChartInfoListResponse response) {
     assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().contains(new DemoChartInfo().name("MALE").ageRange("45-64").count(1L))).isTrue();
-    assertThat(response.getItems().contains(new DemoChartInfo().name("MALE").ageRange("18-44").count(1L))).isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(new DemoChartInfo().name("MALE").ageRange("45-64").count(1L)))
+        .isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(new DemoChartInfo().name("MALE").ageRange("18-44").count(1L)))
+        .isTrue();
   }
 
   private void assertRace(DemoChartInfoListResponse response) {
     assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().contains(new DemoChartInfo().name("Asian").ageRange("45-64").count(1L))).isTrue();
-    assertThat(response.getItems().contains(new DemoChartInfo().name("Caucasian").ageRange("18-44").count(1L))).isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(new DemoChartInfo().name("Asian").ageRange("45-64").count(1L)))
+        .isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(new DemoChartInfo().name("Caucasian").ageRange("18-44").count(1L)))
+        .isTrue();
   }
 
   private void assertEthnicityDemographics(DemoChartInfoListResponse response) {
     assertThat(response.getItems().size()).isEqualTo(2);
-    assertThat(response.getItems().contains(new DemoChartInfo().name("Not Hispanic or Latino").ageRange("45-64").count(1L))).isTrue();
-    assertThat(response.getItems().contains(new DemoChartInfo().name("Not Hispanic or Latino").ageRange("18-44").count(1L))).isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(
+                    new DemoChartInfo().name("Not Hispanic or Latino").ageRange("45-64").count(1L)))
+        .isTrue();
+    assertThat(
+            response
+                .getItems()
+                .contains(
+                    new DemoChartInfo().name("Not Hispanic or Latino").ageRange("18-44").count(1L)))
+        .isTrue();
   }
 
   private void assertEthnicity(EthnicityInfoListResponse response) {

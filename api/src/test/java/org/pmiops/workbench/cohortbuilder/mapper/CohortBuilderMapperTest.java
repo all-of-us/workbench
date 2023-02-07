@@ -203,8 +203,7 @@ public class CohortBuilderMapperTest {
     TableResult result =
         new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
 
-    DemoChartInfo demoChartInfo =
-        new DemoChartInfo().name("name").ageRange("2-11").count(10L);
+    DemoChartInfo demoChartInfo = new DemoChartInfo().name("name").ageRange("2-11").count(10L);
     assertThat(cohortBuilderMapper.tableResultToDemoChartInfo(result))
         .isEqualTo(ImmutableList.of(demoChartInfo));
   }

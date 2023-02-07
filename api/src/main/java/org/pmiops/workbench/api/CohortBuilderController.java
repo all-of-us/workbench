@@ -184,14 +184,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       CohortDefinition cohortDefinition) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    GenderSexRaceOrEthType genderSexRaceOrEthType = validateGenderSexRaceOrEthType(genderSexRaceOrEth);
+    GenderSexRaceOrEthType genderSexRaceOrEthType =
+        validateGenderSexRaceOrEthType(genderSexRaceOrEth);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (cohortDefinition.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
     return ResponseEntity.ok(
-        response.items(chartService.findDemoChartInfo(genderSexRaceOrEthType, ageType, cohortDefinition)));
+        response.items(
+            chartService.findDemoChartInfo(genderSexRaceOrEthType, ageType, cohortDefinition)));
   }
 
   @Override
@@ -396,6 +398,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             () ->
                 new BadRequestException(
                     String.format(
-                        BAD_REQUEST_MESSAGE, "gender, sex at birth, race or ethnicity parameter", genderSexRaceOrEth)));
+                        BAD_REQUEST_MESSAGE,
+                        "gender, sex at birth, race or ethnicity parameter",
+                        genderSexRaceOrEth)));
   }
 }

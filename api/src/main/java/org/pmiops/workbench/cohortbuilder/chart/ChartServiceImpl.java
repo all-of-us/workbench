@@ -61,7 +61,9 @@ public class ChartServiceImpl implements ChartService {
 
   @Override
   public List<DemoChartInfo> findDemoChartInfo(
-          GenderSexRaceOrEthType genderSexRaceOrEthType, AgeType ageType, CohortDefinition cohortDefinition) {
+      GenderSexRaceOrEthType genderSexRaceOrEthType,
+      AgeType ageType,
+      CohortDefinition cohortDefinition) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             chartQueryBuilder.buildDemoChartInfoCounterQuery(
