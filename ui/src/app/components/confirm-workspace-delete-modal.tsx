@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { ResourceType } from 'generated/fetch';
-
 import { environment } from 'environments/environment';
 import { Button } from 'app/components/buttons';
 import { TextInput } from 'app/components/inputs';
@@ -14,7 +12,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { toDisplay } from 'app/utils/resources';
 
 export interface ConfirmWorkspaceDeleteModalProps {
   closeFunction: Function;
@@ -50,7 +47,7 @@ export const ConfirmWorkspaceDeleteModal = ({
         });
     }
   }, []);
-  
+
   const emitDelete = () => {
     setLoading(true);
     receiveDelete();
