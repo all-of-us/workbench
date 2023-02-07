@@ -738,7 +738,7 @@ export const toAnalysisConfig = (
       diskConfig: {
         size: diskSize,
         detachable: true,
-        detachableType: null,
+        detachableType: DiskType.Standard,
         existingDiskName: null,
       },
       detachedDisk: existingDisk,

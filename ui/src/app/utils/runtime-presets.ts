@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -24,6 +24,7 @@ export const runtimePresets: {
       gceConfig: {
         machineType: DEFAULT_MACHINE_NAME,
         diskSize: MIN_DISK_SIZE_GB,
+        detachableType: DiskType.Standard,
         gpuConfig: null,
       },
     },
