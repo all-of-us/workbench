@@ -122,7 +122,7 @@ export const ConfirmWorkspaceDeleteModal = ({
           data-test-id='confirm-delete'
           onClick={() => emitDelete()}
         >
-          Delete {toDisplay(ResourceType.WORKSPACE)}
+          Delete Workspace
         </Button>
       </ModalFooter>
     </Modal>
