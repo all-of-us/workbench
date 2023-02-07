@@ -486,7 +486,7 @@ export const machineStorageCostBreakdown = ({
 };
 
 export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
-  const { computeType, machine, gpuConfig } = analysisConfig;
+  const { computeType, machine, gpuConfig, numNodes } = analysisConfig;
   const { workerMachineType, numberOfWorkers, numberOfPreemptibleWorkers } =
     analysisConfig.dataprocConfig ?? {};
 
@@ -512,7 +512,7 @@ export const machineRunningCost = (analysisConfig: AnalysisConfig) => {
       : 0;
   return fp.sum([
     dataprocPrice,
-    machine.price,
+    machine.price * (numNodes ?? 1),
     gpu ? gpu.price : 0,
     machineStorageCost(analysisConfig),
   ]);

@@ -10,10 +10,10 @@ import { toAnalysisConfig } from 'app/utils/runtime-utils';
 import { diskStore, useStore } from 'app/utils/stores';
 
 import { Button, Clickable } from './buttons';
+import { EnvironmentCostEstimator } from './environment-cost-estimator';
 import { ClrIcon } from './icons';
 import { WarningMessage } from './messages';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from './modals';
-import { RuntimeCostEstimator } from './runtime-cost-estimator';
 import { RuntimeSummary } from './runtime-summary';
 
 const styles = reactStyles({
@@ -58,7 +58,7 @@ export const RuntimeInitializerModal = ({
             ? 'Would you like to continue with this default environment?'
             : 'Would you like to continue with your most recently used environment settings in this workspace?'}
         </WarningMessage>
-        <RuntimeCostEstimator
+        <EnvironmentCostEstimator
           analysisConfig={defaultAnalysisConfig}
           style={{ ...styles.bodyElement, justifyContent: 'space-evenly' }}
         />

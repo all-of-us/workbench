@@ -23,7 +23,7 @@ interface Props {
 
 const styles = reactStyles({
   costSection: {
-    marginRight: '1.5rem',
+    marginRight: '0.5rem',
     overflow: 'hidden',
   },
   cost: {
@@ -31,10 +31,18 @@ const styles = reactStyles({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    display: 'flex',
+  },
+  costValue: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+  },
+  costPeriod: {
+    fontWeight: '600',
   },
 });
 
-export const RuntimeCostEstimator = ({
+export const EnvironmentCostEstimator = ({
   analysisConfig,
   costTextColor = colors.accent,
   style = {},
@@ -70,7 +78,8 @@ export const RuntimeCostEstimator = ({
           }
         >
           <div style={costStyle} data-test-id='running-cost'>
-            {formatUsd(runningCost)}/hour
+            <div style={styles.costValue}>{formatUsd(runningCost)}</div>
+            <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
         </TooltipTrigger>
       </FlexColumn>
@@ -89,7 +98,8 @@ export const RuntimeCostEstimator = ({
           }
         >
           <div style={costStyle} data-test-id='storage-cost'>
-            {formatUsd(storageCost)}/hour
+            <div style={styles.costValue}>{formatUsd(storageCost)}</div>
+            <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
         </TooltipTrigger>
       </FlexColumn>
@@ -99,7 +109,8 @@ export const RuntimeCostEstimator = ({
             Persistent disk cost
           </div>
           <div style={costStyle} data-test-id='pd-cost'>
-            {formatUsd(pdCost)}/month
+            <div style={styles.costValue}>{formatUsd(pdCost)}</div>
+            <div style={styles.costPeriod}>{` per month`}</div>
           </div>
         </FlexColumn>
       )}

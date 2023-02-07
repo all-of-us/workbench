@@ -1,16 +1,17 @@
 import * as React from 'react';
 
-import { RuntimeStatus } from 'generated/fetch';
+import { AppStatus, RuntimeStatus } from 'generated/fetch';
 
+import {
+  toUserEnvironmentStatusByAppType,
+  UIAppType,
+  UserEnvironmentStatus,
+} from 'app/components/apps-panel/utils';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { addOpacity } from 'app/styles/colors';
 import { DEFAULT, switchCase } from 'app/utils';
-import {
-  RuntimeStatusRequest,
-  useRuntimeStatus,
-} from 'app/utils/runtime-utils';
 import computeError from 'assets/icons/compute-error.svg';
 import computeNone from 'assets/icons/compute-none.svg';
 import computeRunning from 'assets/icons/compute-running.svg';
@@ -18,14 +19,21 @@ import computeStarting from 'assets/icons/compute-starting.svg';
 import computeStopped from 'assets/icons/compute-stopped.svg';
 import computeStopping from 'assets/icons/compute-stopping.svg';
 
-export const StartStopRuntimeButton = ({
-  workspaceNamespace,
-  googleProject,
-}) => {
-  const [status, setRuntimeStatus] = useRuntimeStatus(
-    workspaceNamespace,
-    googleProject
-  );
+interface StatusInfo {
+  status: AppStatus | RuntimeStatus;
+  onPause: () => Promise<any>;
+  onResume: () => Promise<any>;
+  appType: UIAppType;
+}
+
+export const StartStopEnvironmentButton = ({
+  status,
+  onPause,
+  onResume,
+  appType,
+}: StatusInfo) => {
+  const userEnvironmentStatus: UserEnvironmentStatus =
+    toUserEnvironmentStatusByAppType(status, appType);
 
   const rotateStyle = { animation: 'rotation 2s infinite linear' };
   const {
@@ -35,104 +43,100 @@ export const StartStopRuntimeButton = ({
     styleOverrides = {},
     onClick = null,
   } = switchCase(
-    status,
+    userEnvironmentStatus,
     [
-      RuntimeStatus.Creating,
+      UserEnvironmentStatus.CREATING,
       () => ({
-        altText: 'Runtime creation in progress',
+        altText: 'Environment creation in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
-      RuntimeStatus.Running,
+      UserEnvironmentStatus.RUNNING,
       () => ({
-        altText: 'Runtime running, click to pause',
+        altText: 'Environment running, click to pause',
         iconSrc: computeRunning,
-        dataTestId: 'runtime-status-icon-running',
-        onClick: () => {
-          setRuntimeStatus(RuntimeStatusRequest.Stop);
-        },
+        dataTestId: 'environment-status-icon-running',
+        onClick: onPause,
       }),
     ],
     [
-      RuntimeStatus.Updating,
+      UserEnvironmentStatus.UPDATING,
       () => ({
-        altText: 'Runtime update in progress',
+        altText: 'Environment update in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
-      RuntimeStatus.Error,
+      UserEnvironmentStatus.ERROR,
       () => ({
-        altText: 'Runtime in error state',
+        altText: 'Environment in error state',
         iconSrc: computeError,
-        dataTestId: 'runtime-status-icon-error',
+        dataTestId: 'environment-status-icon-error',
       }),
     ],
     [
-      RuntimeStatus.Stopping,
+      UserEnvironmentStatus.PAUSING,
       () => ({
-        altText: 'Runtime pause in progress',
+        altText: 'Environment pause in progress',
         iconSrc: computeStopping,
-        dataTestId: 'runtime-status-icon-stopping',
+        dataTestId: 'environment-status-icon-stopping',
         styleOverrides: rotateStyle,
       }),
     ],
     [
-      RuntimeStatus.Stopped,
+      UserEnvironmentStatus.PAUSED,
       () => ({
-        altText: 'Runtime paused, click to resume',
+        altText: 'Environment paused, click to resume',
         iconSrc: computeStopped,
-        dataTestId: 'runtime-status-icon-stopped',
-        onClick: () => {
-          setRuntimeStatus(RuntimeStatusRequest.Start);
-        },
+        dataTestId: 'environment-status-icon-stopped',
+        onClick: onResume,
       }),
     ],
     [
-      RuntimeStatus.Starting,
+      UserEnvironmentStatus.RESUMING,
       () => ({
-        altText: 'Runtime resume in progress',
+        altText: 'Environment resume in progress',
         iconSrc: computeStarting,
-        dataTestId: 'runtime-status-icon-starting',
+        dataTestId: 'environment-status-icon-starting',
         styleOverrides: rotateStyle,
       }),
     ],
     [
-      RuntimeStatus.Deleting,
+      UserEnvironmentStatus.DELETING,
       () => ({
-        altText: 'Runtime deletion in progress',
+        altText: 'Environment deletion in progress',
         iconSrc: computeStopping,
-        dataTestId: 'runtime-status-icon-stopping',
+        dataTestId: 'environment-status-icon-stopping',
         styleOverrides: rotateStyle,
       }),
     ],
     [
-      RuntimeStatus.Deleted,
+      UserEnvironmentStatus.DELETED,
       () => ({
-        altText: 'Runtime has been deleted',
+        altText: 'Environment has been deleted',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ],
     [
-      RuntimeStatus.Unknown,
+      UserEnvironmentStatus.UNKNOWN,
       () => ({
-        altText: 'Runtime status unknown',
+        altText: 'Environment status unknown',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ],
     [
       DEFAULT,
       () => ({
-        altText: 'No runtime found',
+        altText: 'No Environment found',
         iconSrc: computeNone,
-        dataTestId: 'runtime-status-icon-none',
+        dataTestId: 'environment-status-icon-none',
       }),
     ]
   );
@@ -167,7 +171,7 @@ export const StartStopRuntimeButton = ({
       {onClick && (
         <TooltipTrigger content={<div>{altText}</div>} side='left'>
           <FlexRow style={iconWrapperStyle}>
-            <Clickable onClick={() => onClick()}>
+            <Clickable {...{ onClick }} style={{ display: 'flex' }}>
               <img
                 alt={altText}
                 src={iconSrc}

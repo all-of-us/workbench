@@ -28,28 +28,40 @@ export const PauseResumeButton = (props: Props) => {
     switchCase(
       envStatus,
       [
-        'Running',
+        UserEnvironmentStatus.RUNNING,
         () => {
           // transition this button immediately, instead of waiting for externalStatus updates
-          setEnvStatus('Pausing');
+          setEnvStatus(UserEnvironmentStatus.PAUSING);
           onPause();
         },
       ],
       [
-        'Paused',
+        UserEnvironmentStatus.PAUSED,
         () => {
           // transition this button immediately, instead of waiting for externalStatus updates
-          setEnvStatus('Resuming');
+          setEnvStatus(UserEnvironmentStatus.RESUMING);
           onResume();
         },
       ]
     );
 
   const [icon, buttonText, disabled] = cond(
-    [envStatus === 'Pausing', () => [faSyncAlt, 'Pausing', true]],
-    [envStatus === 'Resuming', () => [faSyncAlt, 'Resuming', true]],
-    [envStatus === 'Paused', () => [faPlay, 'Resume', false]],
-    [envStatus === 'Running', () => [faPause, 'Pause', false]],
+    [
+      envStatus === UserEnvironmentStatus.PAUSING,
+      () => [faSyncAlt, UserEnvironmentStatus.PAUSING, true],
+    ],
+    [
+      envStatus === UserEnvironmentStatus.RESUMING,
+      () => [faSyncAlt, UserEnvironmentStatus.RESUMING, true],
+    ],
+    [
+      envStatus === UserEnvironmentStatus.PAUSED,
+      () => [faPlay, 'Resume', false],
+    ],
+    [
+      envStatus === UserEnvironmentStatus.RUNNING,
+      () => [faPause, 'Pause', false],
+    ],
     // choose a (disabled) default to show for other statuses
     () => [faPause, 'Pause', true]
   );

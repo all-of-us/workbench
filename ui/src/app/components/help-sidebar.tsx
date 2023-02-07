@@ -29,7 +29,6 @@ import {
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
 import { SelectionList } from 'app/pages/data/cohort/selection-list';
@@ -245,6 +244,10 @@ export const HelpSidebar = fp.flow(
       this.setState({ runtimeConfPanelInitialState });
     }
 
+    handleBack() {
+      setSidebarActiveIconStore.next('apps');
+    }
+
     async componentDidMount() {
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
@@ -417,9 +420,9 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '45',
             bodyPadding: '0 1.875rem',
             renderBody: () => (
-              <RuntimeConfigurationPanel
+              <ConfigurationPanel
+                {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
-                initialPanelContent={runtimeConfPanelInitialState}
               />
             ),
             showFooter: false,
@@ -437,6 +440,42 @@ export const HelpSidebar = fp.flow(
                 onClickDeleteRuntime={() =>
                   this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
                 }
+              />
+            ),
+            showFooter: false,
+          };
+        case 'cromwellConfig':
+          return {
+            headerPadding: '1.125rem',
+            renderHeader: () => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  Cromwell Cloud Environment
+                </h3>
+                <div
+                  style={{
+                    border: `2px ${colors.primary} solid`,
+                    borderRadius: '8px',
+                    padding: '0 0.5rem',
+                    marginLeft: '0.5rem',
+                  }}
+                >
+                  Beta
+                </div>
+              </div>
+            ),
+            bodyWidthRem: '55',
+            bodyPadding: '0 1.875rem',
+            renderBody: () => (
+              <ConfigurationPanel
+                type='cromwell'
+                onClose={() => this.setActiveIcon(null)}
+                runtimeConfPanelInitialState={null}
               />
             ),
             showFooter: false,
@@ -523,6 +562,13 @@ export const HelpSidebar = fp.flow(
       );
       const shouldRenderWorkspaceMenu =
         !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
+
+      const closeButton = (
+        <CloseButton
+          style={{ marginLeft: 'auto' }}
+          onClose={() => this.setActiveIcon(null)}
+        />
+      );
 
       return (
         <div id='help-sidebar'>
@@ -636,10 +682,7 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <CloseButton
-                              style={{ marginLeft: 'auto' }}
-                              onClose={() => this.setActiveIcon(null)}
-                            />
+                            {closeButton}
                           </FlexRow>
                         )}
 
