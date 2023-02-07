@@ -9,7 +9,6 @@ import {
   Criteria,
   GenomicExtractionJob,
   ParticipantCohortStatus,
-  ResourceType,
   RuntimeError,
   RuntimeStatus,
 } from 'generated/fetch';
@@ -17,7 +16,7 @@ import {
 import { AppsPanel } from 'app/components/apps-panel';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfigurationPanel } from 'app/components/configuration-panel';
-import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
 import {
@@ -749,13 +748,13 @@ export const HelpSidebar = fp.flow(
             [
               CurrentModal.Delete,
               () => (
-                <ConfirmDeleteModal
+                <ConfirmWorkspaceDeleteModal
                   closeFunction={() =>
                     this.setState({ currentModal: CurrentModal.None })
                   }
-                  resourceType={ResourceType.WORKSPACE}
                   receiveDelete={() => this.deleteWorkspace()}
-                  resourceName={this.props.workspace.name}
+                  workspaceNamespace={this.props.workspace.namespace}
+                  workspaceName={this.props.workspace.name}
                 />
               ),
             ],
