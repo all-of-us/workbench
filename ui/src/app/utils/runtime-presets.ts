@@ -1,12 +1,12 @@
 import * as fp from 'lodash/fp';
 
-import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
-  MIN_DISK_SIZE_GB,
+  DEFAULT_MACHINE_NAME_FOR_GCE,
 } from './machines';
 
 export const runtimePresets: {
@@ -22,9 +22,8 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
-        machineType: DEFAULT_MACHINE_NAME,
-        diskSize: MIN_DISK_SIZE_GB,
-        detachableType: DiskType.Standard,
+        machineType: DEFAULT_MACHINE_NAME_FOR_GCE,
+        diskSize: DATAPROC_MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
     },
