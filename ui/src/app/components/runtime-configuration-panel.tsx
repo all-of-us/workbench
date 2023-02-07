@@ -476,7 +476,7 @@ const PanelMain = fp.flow(
       return (
         <Button
           aria-label='Create'
-          disabled={!runtimeCanBeCreated}
+          disabled={!runtimeCanBeCreated || disableCreate}
           onClick={() => {
             requestAnalysisConfig(analysisConfig);
             onClose();

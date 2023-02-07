@@ -681,6 +681,7 @@ export const withAnalysisConfigDefaults = (
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
+    detachable = r.diskConfig.detachable;
     dataprocConfig = null;
     if (detachable === false) {
       detachableType = null;

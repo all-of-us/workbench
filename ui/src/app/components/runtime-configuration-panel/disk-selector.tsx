@@ -67,14 +67,26 @@ export const DiskSelector = ({
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}
     >
-      <FlexRow style={warningBoxStyle.box}>
-        <WarningIcon style={warningBoxStyle.icon} />
-        <div>
-          <AoU /> will now only support re-attachable persistent disks as the
-          storage disk option and will discontinue standard disks. Refer to the
-          linked article to learn more.
-        </div>
-      </FlexRow>
+      {!disableDetachableReason && (
+        <FlexRow style={warningBoxStyle.box}>
+          <WarningIcon style={warningBoxStyle.icon} />
+          <div>
+            <AoU /> will now only support re-attachable persistent disks as the
+            storage disk option and will discontinue standard disks. Refer to
+            the
+            <a
+              target='_blank'
+              href={
+                'https://support.researchallofus.org/hc/en-us/articles/360041683891'
+              }
+            >
+              {' '}
+              article{' '}
+            </a>{' '}
+            to learn more.
+          </div>
+        </FlexRow>
+      )}
       <FlexColumn>
         {computeType === ComputeType.Dataproc && (
           <span style={{ ...styles.sectionTitle, marginBottom: 0 }}>
