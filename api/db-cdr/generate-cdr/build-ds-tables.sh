@@ -349,9 +349,9 @@ function do_PFHH(){
           AND type = 'PPI'
           AND subtype = 'ANSWER'
       ) b on a.value_source_concept_id = b.answer_concept_id
-  JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.answer_concept_id = CAST(c.value AS INT64)
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
+  WHERE a.is_standard = 0"
 }
 
 function do_COPE_vaccine(){
