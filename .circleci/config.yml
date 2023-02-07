@@ -737,7 +737,6 @@ jobs:
       - run:
           name: Skip if already built
           command: |
-            ./.circleci/activate-service-account.sh
             BKT=gs://aou-dontuse-public-build-artifacts
             set +e
             gsutil ls $BKT/ui/deps/terra-ui-deps.$(< ui/src/terraui/githash.txt).tgz
@@ -752,6 +751,7 @@ jobs:
           command: |
             AFILE=terra-ui-deps.$(< githash.txt).tgz
             (cd out; tar -czf ../$AFILE .)
+            ../../../.circleci/activate-service-account.sh
             gsutil cp $AFILE gs://aou-dontuse-public-build-artifacts/ui/deps/$AFILE
 
   build-ui:
@@ -772,7 +772,6 @@ jobs:
           name: Download deps
           working_directory: ui
           command: |
-            ../.circleci/activate-service-account.sh
             mkdir src/terraui/out
             cd src/terraui
             BKT=gs://aou-dontuse-public-build-artifacts
