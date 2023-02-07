@@ -20,6 +20,10 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { DiskSizeSelector } from './disk-size-selector';
 
+const isComputeTypeStandard = (computeType) => {
+  return computeType === ComputeType.Standard;
+};
+
 export const DiskSelector = ({
   diskConfig,
   onChange,
@@ -54,7 +58,7 @@ export const DiskSelector = ({
           </StyledExternalLink>
         </FlexRow>
       </FlexColumn>
-      {computeType === ComputeType.Standard && (
+      {isComputeTypeStandard(computeType) && (
         <WarningMessage>
           <AoU /> will now only support reattachable persistent disks as the
           storage disk option for Standard VMs and will discontinue standard
@@ -76,14 +80,14 @@ export const DiskSelector = ({
         content={
           'To creating a new  Standard VM environment, you will have to use a reattachable persistent disk'
         }
-        disabled={computeType !== ComputeType.Standard}
+        disabled={!isComputeTypeStandard(computeType)}
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
             name='standardDisk'
             data-test-id='standard-disk-radio'
             style={styles.diskRadio}
-            disabled={disabled || computeType === ComputeType.Standard}
+            disabled={disabled || isComputeTypeStandard(computeType)}
             onChange={() =>
               onChange({
                 ...diskConfig,
@@ -93,7 +97,7 @@ export const DiskSelector = ({
               })
             }
             checked={
-              computeType !== ComputeType.Standard && !diskConfig.detachable
+              !isComputeTypeStandard(computeType) && !diskConfig.detachable
             }
           />
           <FlexColumn>
@@ -147,7 +151,7 @@ export const DiskSelector = ({
               )
             }
             checked={
-              computeType === ComputeType.Standard || diskConfig.detachable
+              isComputeTypeStandard(computeType) || diskConfig.detachable
             }
             disabled={disabled || !!disableDetachableReason}
           />
