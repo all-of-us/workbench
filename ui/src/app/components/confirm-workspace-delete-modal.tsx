@@ -49,8 +49,8 @@ export const ConfirmWorkspaceDeleteModal = ({
           setCheckingForUserApps(false);
         });
     }
-  }, [environment]);
-
+  }, []);
+  
   const emitDelete = () => {
     setLoading(true);
     receiveDelete();

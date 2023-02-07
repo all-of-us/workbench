@@ -15,6 +15,7 @@ import {
 
 import { AppsPanel } from 'app/components/apps-panel';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
+import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
