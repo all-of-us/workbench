@@ -220,7 +220,11 @@ public class DiskControllerTest {
             .createdDate("2021-08-06T17:57:29.827954Z");
 
     when(userDisksApi.listDisksByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
+            GOOGLE_PROJECT_ID,
+            null,
+            false,
+            LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+            "creator"))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(readyPD);
   }
@@ -246,7 +250,11 @@ public class DiskControllerTest {
             .createdDate("2021-08-06T19:57:29.827954Z");
 
     when(userDisksApi.listDisksByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
+            GOOGLE_PROJECT_ID,
+            null,
+            false,
+            LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+            "creator"))
         .thenReturn(ImmutableList.of(deletingPDResponse, readyPDResponse));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody()).isEqualTo(deletingPD);
   }
@@ -254,7 +262,11 @@ public class DiskControllerTest {
   @Test
   public void testGetDisk_noDisks() throws ApiException {
     when(userDisksApi.listDisksByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
+            GOOGLE_PROJECT_ID,
+            null,
+            false,
+            LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+            "creator"))
         .thenReturn(Collections.emptyList());
     assertThrows(NotFoundException.class, () -> diskController.getDisk(WORKSPACE_NS));
   }
@@ -270,7 +282,11 @@ public class DiskControllerTest {
             .auditInfo(new LeonardoAuditInfo().createdDate("2021-08-06T16:57:29.827954Z"))
             .googleProject(GOOGLE_PROJECT_ID);
     when(userDisksApi.listDisksByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS))
+            GOOGLE_PROJECT_ID,
+            null,
+            false,
+            LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+            "creator"))
         .thenReturn(ImmutableList.of(response));
     assertThat(diskController.getDisk(WORKSPACE_NS).getBody().getStatus())
         .isEqualTo(DiskStatus.UNKNOWN);
