@@ -369,15 +369,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
     if (supportsConceptSets(domain)) {
-      List<DbConceptSetConceptId> dbConceptSetConceptIds;
+      List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
       List<Long> dbCriteriaAnswerIds = new ArrayList<>();
       switch (domain) {
         case SURVEY:
         case PHYSICAL_MEASUREMENT_CSS:
-          dbConceptSetConceptIds =
-              isPrepackagedAllSurveys(request)
-                  ? findPrepackagedSurveyQuestionConceptIds()
-                  : findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          if (!isPrepackagedAllSurveys(request)) {
+            dbConceptSetConceptIds = findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          }
           List<Long> questionConceptIds =
               dbConceptSetConceptIds.stream()
                   .map(DbConceptSetConceptId::getConceptId)
@@ -676,8 +675,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           clause -> queryBuilder.append(" WHERE \n").append(clause));
 
       if (!includesAllParticipants) {
+        if (queryBuilder.toString().contains("WHERE")) {
+          queryBuilder.append(" \nAND (");
+        } else {
+          queryBuilder.append(" \nWHERE (");
+        }
         queryBuilder
-            .append(" \nAND (")
             .append(personIdQualified)
             .append(" IN (")
             .append(cohortQueries)
@@ -750,13 +753,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(Collectors.toList());
     final List<Long> dbConceptSetIds =
         conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
-    List<DbConceptSetConceptId> dbConceptSetConceptIds;
+    List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
     List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     if (domain.equals(Domain.SURVEY)) {
-      dbConceptSetConceptIds =
-          prePackagedSurveyConceptSet(dbConceptSets)
-              ? findPrepackagedSurveyQuestionConceptIds()
-              : findDomainConceptIds(domain, dbConceptSetIds);
+      if (!prePackagedSurveyConceptSet(dbConceptSets)) {
+        dbConceptSetConceptIds = findDomainConceptIds(domain, dbConceptSetIds);
+      }
       List<Long> questionConceptIds =
           dbConceptSetConceptIds.stream()
               .map(DbConceptSetConceptId::getConceptId)
@@ -1631,26 +1633,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       domains.add(domain.toString());
     }
     return new ArrayList<>(domains);
-  }
-
-  @NotNull
-  private List<DbConceptSetConceptId> findPrepackagedSurveyQuestionConceptIds() {
-    QueryJobConfiguration qjc =
-        QueryJobConfiguration.newBuilder(SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
-            .setUseLegacySql(false)
-            .build();
-    TableResult result =
-        bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc), 360000L);
-    List<Long> conceptIdList = new ArrayList<>();
-    result
-        .getValues()
-        .forEach(
-            surveyValue -> {
-              conceptIdList.add(Long.parseLong(surveyValue.get(0).getValue().toString()));
-            });
-    return conceptIdList.stream()
-        .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(false).build())
-        .collect(Collectors.toList());
   }
 
   @NotNull
