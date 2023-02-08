@@ -6,7 +6,7 @@ import {
   DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
-  DEFAULT_MACHINE_NAME_FOR_GCE,
+  MIN_DISK_SIZE_GB,
 } from './machines';
 
 export const runtimePresets: {
@@ -22,8 +22,8 @@ export const runtimePresets: {
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
-        machineType: DEFAULT_MACHINE_NAME_FOR_GCE,
-        diskSize: DATAPROC_MIN_DISK_SIZE_GB,
+        machineType: DEFAULT_MACHINE_NAME,
+        diskSize: MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
     },
