@@ -149,10 +149,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
-  private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
-      "SELECT DISTINCT(question_concept_id) as concept_id \n"
-          + "FROM `${projectId}.${dataSetId}.ds_survey`\n";
-
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
@@ -375,7 +371,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         case SURVEY:
         case PHYSICAL_MEASUREMENT_CSS:
           if (!isPrepackagedAllSurveys(request)) {
-            dbConceptSetConceptIds = findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+            dbConceptSetConceptIds =
+                findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
           }
           List<Long> questionConceptIds =
               dbConceptSetConceptIds.stream()
@@ -435,6 +432,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           queryBuilder.append(" OR ");
         }
         queryBuilder.append("answer_concept_id IN unnest(@answerConceptIds)");
+      }
+      if (queryBuilder.toString().endsWith("WHERE (")) {
+        queryBuilder.append(" 1 = 1 ");
       }
       queryBuilder.append(")");
     }
@@ -680,11 +680,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         } else {
           queryBuilder.append(" \nWHERE (");
         }
-        queryBuilder
-            .append(personIdQualified)
-            .append(" IN (")
-            .append(cohortQueries)
-            .append("))");
+        queryBuilder.append(personIdQualified).append(" IN (").append(cohortQueries).append("))");
       }
     } else if (!includesAllParticipants) {
       queryBuilder
