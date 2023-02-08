@@ -377,7 +377,6 @@ export const findMachineByName = (machineToFind: string) =>
   fp.find(({ name }) => name === machineToFind, allMachineTypes);
 
 export const DEFAULT_MACHINE_NAME = 'n1-standard-4';
-export const DEFAULT_MACHINE_NAME_FOR_GCE = 'n1-highmem-64';
 export const DEFAULT_MACHINE_TYPE: Machine =
   findMachineByName(DEFAULT_MACHINE_NAME);
 export const DEFAULT_DISK_SIZE = MIN_DISK_SIZE_GB;
