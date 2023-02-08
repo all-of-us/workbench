@@ -110,7 +110,7 @@ export const DiskSelector = ({
               <DiskSizeSelector
                 idPrefix='standard'
                 diskSize={diskConfig.size}
-                disabled={disabled}
+                disabled={disabled || isComputeTypeStandard(computeType)}
                 style={{ marginTop: '11px' }}
                 onChange={(size: number) =>
                   onChange(
