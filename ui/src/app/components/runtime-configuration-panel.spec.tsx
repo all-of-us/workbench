@@ -402,17 +402,17 @@ describe('RuntimeConfigurationPanel', () => {
         machineType: 'n1-standard-16',
         diskSize: 1000,
       },
-      dataprocConfig: null,
     });
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expectEqualFields(
-      runtimeApiStub.runtime.gceConfig,
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig,
-      ['machineType', 'diskSize']
+    expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
     );
   });
 
@@ -589,8 +589,9 @@ describe('RuntimeConfigurationPanel', () => {
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
     await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
 
@@ -598,9 +599,9 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.GeneralAnalysis
+      RuntimeConfigurationType.UserOverride
     );
-    expect(runtimeApiStub.runtime.gceConfig).toEqual(
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual(
       runtimePresets.generalAnalysis.runtimeTemplate.gceConfig
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
@@ -656,7 +657,7 @@ describe('RuntimeConfigurationPanel', () => {
           runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
         ).memory
       );
-      expect(getMainDiskSize(wrapper)).toEqual(
+      expect(getDetachableDiskSize(wrapper)).toEqual(
         runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
       );
     }
@@ -864,13 +865,15 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainRam(wrapper)).toBe(7.5);
   });
 
-  it('should warn user about reboot if there are updates that require one - increase disk size', async () => {
+  it('should NOT show any warn user about reboot if there are updates that require one - increase disk size', async () => {
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
+    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 10);
     await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+    // After https://precisionmedicineinitiative.atlassian.net/browse/RW-9167 Reattachable persistent disk is default
+    // Increase disk size for RPD does not show any error message
+    expect(wrapper.find(WarningMessage).length).toBe(0);
   });
 
   it('should not warn user for updates where not needed - number of workers', async () => {
@@ -940,7 +943,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 10);
+    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) - 10);
     await mustClickButton(wrapper, 'Next');
 
     expect(
@@ -1057,7 +1060,7 @@ describe('RuntimeConfigurationPanel', () => {
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
-    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
+    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 20);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
@@ -1114,7 +1117,7 @@ describe('RuntimeConfigurationPanel', () => {
     // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
-    await pickMainDiskSize(wrapper, 300);
+    await pickDetachableDiskSize(wrapper, 300);
     expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
     expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
 
@@ -1256,13 +1259,13 @@ describe('RuntimeConfigurationPanel', () => {
     const wrapper = await component();
     const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
 
-    await pickMainDiskSize(wrapper, 49);
+    await pickDetachableDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 4900);
+    await pickDetachableDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -1541,8 +1544,9 @@ describe('RuntimeConfigurationPanel', () => {
     // Default option should be NOT to delete.
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
-
     runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    console.log(wrapper.html());
+
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
