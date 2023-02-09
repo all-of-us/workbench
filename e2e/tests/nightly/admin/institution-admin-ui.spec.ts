@@ -23,7 +23,7 @@ describe('Institution Admin', () => {
     await institutionAdminPage.waitForLoad();
     const adminTable = new AdminTable(page);
     await adminTable.waitUntilVisible();
-    const columns = await adminTable.getAllColumnNames();
+    const columns = await adminTable.getColumnNames();
     expect(columns).toEqual(
       expect.arrayContaining([
         HeaderName.InstitutionName,
