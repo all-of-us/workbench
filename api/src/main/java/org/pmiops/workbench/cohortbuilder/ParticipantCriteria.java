@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.CohortDefinition;
-import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 
 /**
  * A class representing participants to use when querying data from a CDR version.
@@ -27,7 +27,7 @@ public class ParticipantCriteria {
   private final CohortDefinition cohortDefinition;
   private final Set<Long> participantIdsToInclude;
   private final Set<Long> participantIdsToExclude;
-  private final GenderOrSexType genderOrSexType;
+  private final GenderSexRaceOrEthType genderSexRaceOrEthType;
   private final AgeType ageType;
 
   public ParticipantCriteria(CohortDefinition cohortDefinition) {
@@ -35,11 +35,13 @@ public class ParticipantCriteria {
   }
 
   public ParticipantCriteria(
-      CohortDefinition cohortDefinition, GenderOrSexType genderOrSexType, AgeType ageType) {
+      CohortDefinition cohortDefinition,
+      GenderSexRaceOrEthType genderSexRaceOrEthType,
+      AgeType ageType) {
     this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = NO_PARTICIPANTS_TO_EXCLUDE;
     this.participantIdsToInclude = null;
-    this.genderOrSexType = genderOrSexType;
+    this.genderSexRaceOrEthType = genderSexRaceOrEthType;
     this.ageType = ageType;
   }
 
@@ -47,7 +49,7 @@ public class ParticipantCriteria {
     this.cohortDefinition = cohortDefinition;
     this.participantIdsToExclude = participantIdsToExclude;
     this.participantIdsToInclude = null;
-    this.genderOrSexType = null;
+    this.genderSexRaceOrEthType = null;
     this.ageType = null;
   }
 
@@ -55,7 +57,7 @@ public class ParticipantCriteria {
     this.participantIdsToInclude = participantIdsToInclude;
     this.cohortDefinition = null;
     this.participantIdsToExclude = null;
-    this.genderOrSexType = null;
+    this.genderSexRaceOrEthType = null;
     this.ageType = null;
   }
 
@@ -75,8 +77,8 @@ public class ParticipantCriteria {
   }
 
   @Nullable
-  public GenderOrSexType getGenderOrSexType() {
-    return genderOrSexType;
+  public GenderSexRaceOrEthType getGenderSexRaceOrEthType() {
+    return genderSexRaceOrEthType;
   }
 
   @Nullable
@@ -90,7 +92,7 @@ public class ParticipantCriteria {
         cohortDefinition,
         participantIdsToExclude,
         participantIdsToExclude,
-        genderOrSexType,
+        genderSexRaceOrEthType,
         ageType);
   }
 
@@ -103,7 +105,7 @@ public class ParticipantCriteria {
     return Objects.equals(this.cohortDefinition, that.cohortDefinition)
         && Objects.equals(this.participantIdsToExclude, that.participantIdsToExclude)
         && Objects.equals(this.participantIdsToInclude, that.participantIdsToInclude)
-        && Objects.equals(this.genderOrSexType, that.genderOrSexType)
+        && Objects.equals(this.genderSexRaceOrEthType, that.genderSexRaceOrEthType)
         && Objects.equals(this.ageType, that.ageType);
   }
 }

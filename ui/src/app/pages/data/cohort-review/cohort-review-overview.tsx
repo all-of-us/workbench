@@ -135,7 +135,11 @@ export const CohortReviewOverview = ({ cohortReview }) => {
             ) : (
               <div style={styles.graphContainer}>
                 {activeTab === Domain.PERSON ? (
-                  <ComboChart mode={'stacked'} data={demoChartData} />
+                  <ComboChart
+                    data={demoChartData}
+                    legendTitle='Age'
+                    mode={'stacked'}
+                  />
                 ) : (
                   <ParticipantsCharts
                     cohortReviewId={cohortReview.cohortReviewId}

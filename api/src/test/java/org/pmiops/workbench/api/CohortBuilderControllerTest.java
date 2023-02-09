@@ -60,7 +60,7 @@ import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCard;
-import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
@@ -1455,12 +1455,12 @@ public class CohortBuilderControllerTest {
   @Test
   public void validateGenderOrSexTypeCaseSensitive() {
     List<String> values =
-        Stream.of(GenderOrSexType.values())
-            .map(GenderOrSexType::toString)
+        Stream.of(GenderSexRaceOrEthType.values())
+            .map(GenderSexRaceOrEthType::toString)
             .collect(Collectors.toList());
     for (String value : values) {
       assertDoesNotThrow(
-          () -> controller.validateGenderOrSexType(value),
+          () -> controller.validateGenderSexRaceOrEthType(value),
           "BadRequestException is not expected to be thrown for [" + value + "]");
     }
     // expect exception for lowercase
@@ -1469,11 +1469,11 @@ public class CohortBuilderControllerTest {
       Throwable exception =
           assertThrows(
               BadRequestException.class,
-              () -> controller.validateGenderOrSexType(value),
+              () -> controller.validateGenderSexRaceOrEthType(value),
               "Expected BadRequestException is not thrown.");
       assertThat(exception)
           .hasMessageThat()
-          .contains("Please provide a valid gender or sex at birth parameter");
+          .contains("Please provide a valid gender, sex at birth, race or ethnicity parameter");
     }
   }
 

@@ -6,7 +6,7 @@ import {
   CriteriaSubType,
   CriteriaType,
   Domain,
-  GenderOrSexType,
+  GenderSexRaceOrEthType,
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
@@ -196,12 +196,18 @@ export function ageTypeToText(ageType: AgeType) {
   }
 }
 
-export function genderOrSexTypeToText(genderOrSexType: GenderOrSexType) {
-  switch (genderOrSexType) {
-    case GenderOrSexType.GENDER:
+export function genderSexRaceOrEthTypeToText(
+  genderSexRaceOrEthType: GenderSexRaceOrEthType
+) {
+  switch (genderSexRaceOrEthType) {
+    case GenderSexRaceOrEthType.GENDER:
       return 'Gender Identity';
-    case GenderOrSexType.SEXATBIRTH:
+    case GenderSexRaceOrEthType.SEXATBIRTH:
       return 'Sex at Birth';
+    case GenderSexRaceOrEthType.RACE:
+      return 'Race';
+    case GenderSexRaceOrEthType.ETHNICITY:
+      return 'Ethnicity';
   }
 }
 

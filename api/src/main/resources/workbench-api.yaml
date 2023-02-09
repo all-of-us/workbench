@@ -4103,7 +4103,7 @@ paths:
           schema:
             type: integer
             format: int64
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderOrSex}/{age}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderSexRaceOrEth}/{age}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -4116,10 +4116,10 @@ paths:
       operationId: findDemoChartInfo
       parameters:
       - in: path
-        name: genderOrSex
+        name: genderSexRaceOrEth
         type: string
         required: true
-        description: represents gender or sex at birth
+        description: represents gender, sex at birth, race or ethnicity
       - in: path
         name: age
         type: string
@@ -8917,12 +8917,14 @@ definitions:
     - AGE
     - AGE_AT_CONSENT
     - AGE_AT_CDR
-  GenderOrSexType:
+  GenderSexRaceOrEthType:
     type: string
-    description: represents gender or sex at birth
+    description: represents gender, sex at birth, race or ethnicity
     enum:
     - GENDER
     - SEX_AT_BIRTH
+    - RACE
+    - ETHNICITY
   DemoChartInfoListResponse:
     type: object
     required:
@@ -8936,15 +8938,11 @@ definitions:
     type: object
     required:
     - name
-    - race
     - ageRange
     - count
     properties:
       name:
-        description: gender or sex at birth of subject
-        type: string
-      race:
-        description: race of subject
+        description: gender, sex at birth, race or ethnicity of subject
         type: string
       ageRange:
         description: age range of subject
