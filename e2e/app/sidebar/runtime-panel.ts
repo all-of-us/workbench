@@ -228,6 +228,8 @@ export default class RuntimePanel extends BaseSidebar {
     }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
     await this.getDeleteIcon();
+    const timeoutForDeletion = 3 * 60 * 1000;
+    await this.waitUntilVisible(timeoutForDeletion);
     await this.waitUntilVisible();
     // Wait for visible texts
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
