@@ -477,6 +477,7 @@ body .p-menu .p-menuitem-link {
   https://github.com/JedWatson/react-select/issues/4106#issuecomment-743959376
 */
 
+.react-select__input,
 .react-select__input input {
   width: 100% !important;
 }
