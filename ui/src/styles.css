@@ -472,6 +472,7 @@ body .p-menu .p-menuitem-link {
 }
 
 /* React Select styling to increase size of underlying input tag */
-.react-select__input, .react-select__input input {
+.react-select__input,
+.react-select__input input {
   width: 100% !important;
 }
