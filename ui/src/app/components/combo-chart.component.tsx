@@ -83,8 +83,6 @@ export class ComboChart extends React.Component<Props, State> {
           stacking: normalized ? 'percent' : 'normal',
           events: {
             legendItemClick: function () {
-              console.log('this object name: ' + this.constructor.name);
-              console.log(this);
               const seriesIndex = this.index;
               if (this.visible && this.chart.restIsHidden) {
                 for (let i = 0; i < this.chart.series.length; i++) {
