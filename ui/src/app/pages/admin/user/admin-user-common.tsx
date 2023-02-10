@@ -393,6 +393,7 @@ export const DropdownWithLabel = ({
       )}
       <label style={{ ...commonStyles.label, ...labelStyle }}>{label}</label>
       <Dropdown
+        appendTo='self'
         className={className}
         style={{ ...commonStyles.dropdown, ...dropdownStyle }}
         options={options}

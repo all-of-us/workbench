@@ -79,7 +79,7 @@ export default class WorkspaceAdminPage extends AuthenticatedPage {
   }
 
   getCloudStorageTable(): Table {
-    const selector = '//table[@class="p-datatable-scrollable-header-table"]';
+    const selector = '//table[@class="p-datatable-table"]';
     return new Table(this.page, selector);
   }
 

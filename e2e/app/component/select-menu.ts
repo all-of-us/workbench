@@ -51,7 +51,7 @@ export default class SelectMenu extends BaseMenu {
    */
   async getInputElement(): Promise<ElementHandle> {
     const selector = this.xpath + '//*[contains(normalize-space(@class), "p-inputtext")]';
-    return this.page.waitForXPath(selector, { visible: true });
+    return this.page.waitForXPath(selector);
   }
 
   /**
