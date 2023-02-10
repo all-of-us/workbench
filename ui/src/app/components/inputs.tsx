@@ -462,7 +462,7 @@ export const Select = ({ value, options, onChange, ...props }) => {
       options={options}
       onChange={(o) => onChange(o?.value)}
       styles={{
-        input: (baseStyles, state) => ({
+        input: (baseStyles) => ({
           ...baseStyles,
           width: '100%',
           zIndex: 1,
