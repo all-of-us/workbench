@@ -471,7 +471,12 @@ body .p-menu .p-menuitem-link {
   align-items: center;
 }
 
-/* React Select styling to increase size of underlying input tag */
+/* React Select styling to increase size of underlying input tag
+  Would prefer not to use !important, but seems like how input is styled in
+  React-Select is not working as expected. More details can be found here:
+  https://github.com/JedWatson/react-select/issues/4106#issuecomment-743959376
+*/
+
 .react-select__input,
 .react-select__input input {
   width: 100% !important;
