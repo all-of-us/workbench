@@ -12,22 +12,11 @@ export default class DataTable extends Table {
     super(page, xpath, container);
   }
 
-  getHeaderTable(): Table {
-    return new Table(
-      this.page,
-      `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table" or @role="grid"]`
-    );
-  }
-
   getTable(): Table {
     return new Table(
       this.page,
       `${this.getXpath()}//table[contains(concat(" ", normalize-space(@class), " "), " p-datatable-table ")]`
     );
-  }
-
-  getFooterTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`);
   }
 
   async getNumRecords(): Promise<number[]> {
