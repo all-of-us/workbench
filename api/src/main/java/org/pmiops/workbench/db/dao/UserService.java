@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.services.oauth2.model.Userinfo;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -157,10 +156,4 @@ public interface UserService {
 
   /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
-
-  /** Send reminder emails to all registered users who have not signed the latest Terra ToS */
-  List<DbUser> sendTerraTosReminderEmails();
-
-  @VisibleForTesting
-  boolean shouldSendTerraTosReminderEmail(long userId);
 }

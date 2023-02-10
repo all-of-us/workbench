@@ -66,6 +66,4 @@ public interface MailService {
 
   void sendFileLengthsEgressRemediationEmail(DbUser dbUser, EgressRemediationAction action)
       throws MessagingException;
-
-  void sendTerraTosReminderEmail(DbUser user) throws MessagingException;
 }

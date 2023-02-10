@@ -152,8 +152,6 @@ public class UserServiceTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
-    providedWorkbenchConfig.termsOfService.latestTerraTosTimestamp =
-        "2001-01-01T12:34:56Z"; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -655,65 +653,6 @@ public class UserServiceTest {
     String username = "test@@appspot.gserviceaccount.com";
     userService.createServiceAccountUser(username);
     assertThat(userDao.findUserByUsername(username)).isNotNull();
-  }
-
-  @Test
-  public void testShouldSendTerraTosReminderEmail_missingToS() {
-    long userId = userDao.findUserByUsername(USERNAME).getUserId();
-    assertThat(userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(userId)).isEmpty();
-
-    assertThat(userService.shouldSendTerraTosReminderEmail(userId)).isTrue();
-  }
-
-  @Test
-  public void testShouldSendTerraTosReminderEmail_missingTerraToS() {
-    long userId = userDao.findUserByUsername(USERNAME).getUserId();
-    DbUserTermsOfService tos =
-        userTermsOfServiceDao.save(
-            new DbUserTermsOfService()
-                .setUserId(userId)
-                .setAouAgreementTime(Timestamp.from(fakeClock.instant())));
-    assertThat(tos.getTerraAgreementTime()).isNull();
-
-    assertThat(userService.shouldSendTerraTosReminderEmail(userId)).isTrue();
-  }
-
-  @Test
-  public void testShouldSendTerraTosReminderEmail_oldTerraToS() {
-    Timestamp latestTerraTos =
-        Timestamp.from(
-            Instant.parse(providedWorkbenchConfig.termsOfService.latestTerraTosTimestamp));
-    Timestamp tooOldTime = Timestamp.from(Instant.parse("1999-01-01T12:34:56Z"));
-    // sanity-check that the test is valid
-    assertThat(tooOldTime.getTime()).isLessThan(latestTerraTos.getTime());
-
-    long userId = userDao.findUserByUsername(USERNAME).getUserId();
-    userTermsOfServiceDao.save(
-        new DbUserTermsOfService()
-            .setUserId(userId)
-            .setAouAgreementTime(Timestamp.from(fakeClock.instant()))
-            .setTerraAgreementTime(tooOldTime));
-
-    assertThat(userService.shouldSendTerraTosReminderEmail(userId)).isTrue();
-  }
-
-  @Test
-  public void testShouldSendTerraTosReminderEmail_recentTerraToS() {
-    Timestamp latestTerraTos =
-        Timestamp.from(
-            Instant.parse(providedWorkbenchConfig.termsOfService.latestTerraTosTimestamp));
-    Timestamp newerTime = Timestamp.from(Instant.parse("2023-01-01T12:34:56Z"));
-    // sanity-check that the test is valid
-    assertThat(newerTime.getTime()).isGreaterThan(latestTerraTos.getTime());
-
-    long userId = userDao.findUserByUsername(USERNAME).getUserId();
-    userTermsOfServiceDao.save(
-        new DbUserTermsOfService()
-            .setUserId(userId)
-            .setAouAgreementTime(Timestamp.from(fakeClock.instant()))
-            .setTerraAgreementTime(newerTime));
-
-    assertThat(userService.shouldSendTerraTosReminderEmail(userId)).isFalse();
   }
 
   private void assertModuleCompletionEqual(
