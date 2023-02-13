@@ -101,7 +101,7 @@
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 329023,
-      "cdrDbName": "r_2021q3_10",
+      "cdrDbName": "r_2021q3_12",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -116,7 +116,7 @@
       "creationTime": "2021-08-10 00:00:00Z",
       "releaseNumber": 6,
       "numParticipants": 331335,
-      "cdrDbName": "c_2021q3_11",
+      "cdrDbName": "c_2021q3_12",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "storageBasePath": "v5",
