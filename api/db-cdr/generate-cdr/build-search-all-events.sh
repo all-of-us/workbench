@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# #!/bin/bash
 
 # This generates big query denormalized tables for search.
 
@@ -7,7 +8,19 @@ set -e
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
+export DOMAIN_TOKEN=$4
 
+# map domain_token to function call
+declare -A DOMAIN_FUNCTION
+DOMAIN_FUNCTION["condition"]="do_condition"
+DOMAIN_FUNCTION["procedure"]="do_procedure"
+DOMAIN_FUNCTION["measurement"]="do_measurement"
+DOMAIN_FUNCTION["observation"]="do_observation"
+DOMAIN_FUNCTION["device"]="do_device"
+DOMAIN_FUNCTION["drug"]="do_drug"
+DOMAIN_FUNCTION["visit"]="do_visit"
+
+function do_condition(){
 ############################################################
 # insert source condition data into cb_search_all_events
 ############################################################
@@ -54,7 +67,9 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = co.condition_conce
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = co.visit_occurrence_id)
 WHERE co.condition_concept_id is not null
     and co.condition_concept_id != 0"
+}
 
+function do_procedure(){
 ############################################################
 #   insert source procedure data into cb_search_all_events
 ############################################################
@@ -108,7 +123,8 @@ WHERE po.procedure_concept_id is not null
           and vocabulary_id in ('CPT4', 'ICD9Proc', 'ICD10PCS')
           and standard_concept = 'S'
         )"
-
+}
+function do_measurement(){
 ##############################################################
 # insert source measurement data into cb_search_all_events
 ##############################################################
@@ -257,7 +273,9 @@ WHERE meas.person_id = sad.person_id
     and sad.is_standard = 1
     -- this is intentional as we want to update systolic on the diastolic row
     and sad.concept_id = 903115"
+}
 
+function do_observation(){
 if [ "$DATA_BROWSER" == false ]
 then
   ##############################################################
@@ -391,7 +409,9 @@ WHERE o.observation_concept_id is not null
             )
     and c.vocabulary_id != 'PPI'
     and c.concept_class_id != 'Survey'"
+}
 
+function do_device(){
 ############################################################
 # insert standard device data into cb_search_all_events
 ############################################################
@@ -415,7 +435,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 where c.standard_concept = 'S'
 and c.domain_id = 'Device'
 and de.device_concept_id != 0"
+}
 
+function do_drug(){
 #########################################################
 #   insert standard drug data into cb_search_all_events
 #########################################################
@@ -438,7 +460,9 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = d.drug_concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = d.visit_occurrence_id)
 WHERE d.drug_concept_id is not null
     and d.drug_concept_id != 0"
+}
 
+function do_visit(){
 ##########################################################
 #   insert standard visit data into cb_search_all_events
 ##########################################################
@@ -460,3 +484,15 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = v.person_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = v.visit_concept_id)
 WHERE v.visit_concept_id is not null
     and v.visit_concept_id != 0"
+}
+
+##########################################################
+#   call function mapped to domain_token in DOMAIN_FUNCTION
+##########################################################
+if [[ -n "${DOMAIN_FUNCTION[$DOMAIN_TOKEN]}" ]]; then
+  echo "calling ${DOMAIN_FUNCTION[$DOMAIN_TOKEN]}"
+  "${DOMAIN_FUNCTION[$DOMAIN_TOKEN]}"
+else
+  echo "Failed - Domain token $DOMAIN_TOKEN is not mapped to any function call"
+  exit 1
+fi
