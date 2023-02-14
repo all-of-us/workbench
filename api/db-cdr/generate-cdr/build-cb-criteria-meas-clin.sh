@@ -8,14 +8,14 @@ export BQ_DATASET=$2        # dataset
 
 echo "Creating Clinical - STANDARD LOINC"
 
+CB_CRITERIA_START_ID=11000000000
+CB_CRITERIA_END_ID=12000000000
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
-
-CB_CRITERIA_START_ID=11000000000
-CB_CRITERIA_END_ID=12000000000
 
 echo "MEASUREMENT - Clinical - STANDARD LOINC"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \

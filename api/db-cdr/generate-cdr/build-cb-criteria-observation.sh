@@ -9,6 +9,9 @@ export BQ_DATASET=$2        # dataset
 
 echo "Creating observation criteria"
 
+CB_CRITERIA_START_ID=16000000000
+CB_CRITERIA_END_ID=17000000000
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Creating temp table for $TBL_CBC"
@@ -16,9 +19,6 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 echo "Creating temp table for $TBL_CBAT"
 TBL_CBAT=$(createTmpTable $TBL_CBAT)
 ####### end common block ###########
-
-CB_CRITERIA_START_ID=16000000000
-CB_CRITERIA_END_ID=17000000000
 
 bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`

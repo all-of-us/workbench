@@ -11,6 +11,9 @@ export BQ_DATASET=$2        # dataset
 
 echo "Creating ICD10PCS source hierarchy"
 
+CB_CRITERIA_START_ID=9000000000
+CB_CRITERIA_END_ID=10000000000
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Creating temp table for $TBL_CBC"
@@ -22,9 +25,6 @@ TBL_PAS=$(createTmpTable $TBL_PAS)
 echo "Creating temp table for $TBL_PCA"
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-
-CB_CRITERIA_START_ID=9000000000
-CB_CRITERIA_END_ID=10000000000
 
 echo "ICD10PCS - SOURCE - adding root"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \

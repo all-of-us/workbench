@@ -11,6 +11,9 @@ export BQ_DATASET=$2        # dataset
 
 echo "Creating CPT4 hierarchy"
 
+CB_CRITERIA_START_ID=1000000000
+CB_CRITERIA_END_ID=2000000000
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Creating temp table for $TBL_CBC"
@@ -20,9 +23,6 @@ TBL_CBA=$(createTmpTable $TBL_CBA)
 echo "Creating temp table for $TBL_ANC"
 TBL_ANC=$(createTmpTable $TBL_ANC)
 ####### end common block ###########
-
-CB_CRITERIA_START_ID=1000000000
-CB_CRITERIA_END_ID=2000000000
 
 echo "CPT4 - SOURCE - insert root"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
