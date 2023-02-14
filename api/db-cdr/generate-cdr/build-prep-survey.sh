@@ -26,6 +26,7 @@ if [[ -n "${ID_START_MAP[$FILE_NAME]}" ]]; then
   echo "$FILE_NAME start ID $ID"
 else
   echo "Failed - Filename $FILE_NAME is not mapped to start ID"
+  exit 1
 fi
 
 if [[ "$CREATE_SURVEYS" == false ]]
