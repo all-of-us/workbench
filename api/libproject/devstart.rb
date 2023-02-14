@@ -746,12 +746,17 @@ def build_search_all_events(cmd_name, *args)
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.add_option(
+    "--domain-token [domain-token]",
+    ->(opts, v) { opts.domain_token = v},
+    "Generate for domain-token. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and domain_token }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.domain_token}}
   end
 end
 
