@@ -15,6 +15,7 @@ declare -A DOMAIN_FUNCTION
 DOMAIN_FUNCTION["condition"]="do_condition"
 DOMAIN_FUNCTION["procedure"]="do_procedure"
 DOMAIN_FUNCTION["measurement"]="do_measurement"
+DOMAIN_FUNCTION["measurement_source"]="do_measurement_source"
 DOMAIN_FUNCTION["observation"]="do_observation"
 DOMAIN_FUNCTION["device"]="do_device"
 DOMAIN_FUNCTION["drug"]="do_drug"
@@ -124,7 +125,7 @@ WHERE po.procedure_concept_id is not null
           and standard_concept = 'S'
         )"
 }
-function do_measurement(){
+function do_measurement_source(){
 ##############################################################
 # insert source measurement data into cb_search_all_events
 ##############################################################
@@ -156,7 +157,7 @@ WHERE m.measurement_source_concept_id is not null
 #####################################################################
 # update source diastolic pressure data into cb_search_all_events
 #####################################################################
-echo "Updating diastolic pressure data into cb_search_all_events"
+echo "Updating source diastolic pressure data into cb_search_all_events"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.diastolic = meas.diastolic
@@ -177,7 +178,7 @@ WHERE meas.person_id = sad.person_id
 #####################################################################
 #   update source systolic pressure data into cb_search_all_events
 #####################################################################
-echo "Updating systolic pressure data into cb_search_all_events"
+echo "Updating source systolic pressure data into cb_search_all_events"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.systolic = meas.systolic
@@ -194,7 +195,9 @@ WHERE meas.person_id = sad.person_id
     and sad.is_standard = 0
     -- this is intentional as we want to update systolic on the diastolic row
     and sad.concept_id = 903115"
+}
 
+function do_measurement(){
 ################################################################
 #   insert standard measurement data into cb_search_all_events
 ################################################################
