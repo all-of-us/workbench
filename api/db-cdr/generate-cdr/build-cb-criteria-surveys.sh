@@ -10,6 +10,9 @@ export BQ_DATASET=$2        # dataset
 
 echo "Creating survey hierarchy"
 
+CB_CRITERIA_START_ID=3000000000
+CB_CRITERIA_END_ID=4000000000
+
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
 echo "Creating temp table for $TBL_CBC"
@@ -17,9 +20,6 @@ TBL_CBC=$(createTmpTable $TBL_CBC)
 echo "Creating temp table for $TBL_PCA"
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
-
-CB_CRITERIA_START_ID=3000000000
-CB_CRITERIA_END_ID=4000000000
 
 echo "PPI SURVEYS - insert data"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
