@@ -1189,17 +1189,12 @@ def build_cb_criteria(cmd_name, *args)
     ->(opts, v) { opts.script = v},
     "Script. Required."
   )
-  op.add_option(
-    "--id-prefix [id-prefix]",
-    ->(opts, v) { opts.id_prefix = v},
-    "ID Prefix."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -1223,21 +1218,16 @@ def build_cb_criteria_demographics(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--id-prefix [id-prefix]",
-    ->(opts, v) { opts.id_prefix = v},
-    "ID Prefix."
-  )
-  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.id_prefix }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
