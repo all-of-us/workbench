@@ -58,9 +58,8 @@ browserTest('create a workspace', async browser => {
   const confirmButton =
     await page.waitForSelector('[role="button"][aria-label="Confirm Delete"]')
   await expect(confirmButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
-  const confirmationTextSelector = '[role="dialog"] input[placeholder="type DELETE to confirm"]'
-  await page.waitForSelector(confirmationTextSelector)
-  await page.type(confirmationTextSelector, 'delete')
+  await page.waitForSelector('[role="dialog"] input[placeholder="type DELETE to confirm"]')
+    .then(eh => eh.type('delete'))
   await expect(confirmButton.evaluate(n => n.style.cursor)).resolves.toBe('pointer')
   await confirmButton.click()
 
