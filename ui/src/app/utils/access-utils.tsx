@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Redirect } from 'react-router-dom';
-import * as fp from 'lodash/fp';
 
 import {
   AccessModule,
@@ -308,17 +307,65 @@ export const getAccessModuleConfig = (
   );
 };
 
-// the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
-export const rtAccessRenewalModules = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
-];
-
 export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
   return renewal === '1';
+};
+
+const getEarliestExpiration = (statuses: AccessModuleStatus[]): number =>
+  statuses
+    // exclude bypassed modules
+    ?.filter((moduleStatus) => !moduleStatus.bypassEpochMillis)
+    // exclude remaining modules without expiration dates
+    .filter((moduleStatus) => !!moduleStatus.expirationEpochMillis)
+    .map((moduleStatus) => moduleStatus.expirationEpochMillis)
+    .reduce(
+      (minSoFar, current) => (minSoFar ? Math.min(minSoFar, current) : current),
+      undefined
+    );
+
+interface ExpirationStatus {
+  accessTierShortName: AccessTierShortNames;
+  earliestExpiration: number;
+}
+const earliestExpirationByTier = (profile: Profile): ExpirationStatus[] => {
+  const {
+    accessModules: { modules },
+  } = profile;
+
+  const rtExpiration = getEarliestExpiration(
+    modules?.filter(
+      (moduleStatus) =>
+        getAccessModuleConfig(moduleStatus.moduleName).requiredForRTAccess
+    )
+  );
+
+  const ctExpiration = getEarliestExpiration(
+    modules?.filter(
+      (moduleStatus) =>
+        getAccessModuleConfig(moduleStatus.moduleName).requiredForCTAccess
+    )
+  );
+
+  const rtMaybe = rtExpiration
+    ? [
+        {
+          accessTierShortName: AccessTierShortNames.Registered,
+          earliestExpiration: rtExpiration,
+        },
+      ]
+    : [];
+
+  const ctMaybe = ctExpiration
+    ? [
+        {
+          accessTierShortName: AccessTierShortNames.Controlled,
+          earliestExpiration: ctExpiration,
+        },
+      ]
+    : [];
+
+  return [...rtMaybe, ...ctMaybe];
 };
 
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
@@ -327,22 +374,13 @@ export const NOTIFICATION_THRESHOLD_DAYS = 30;
 // but only if it is within the threshold.
 // if it is not, or no expiration dates are present in the profile for this tier: return undefined.
 export const maybeDaysRemaining = (
-  profile: Profile,
-  accessTier: AccessTierShortNames = AccessTierShortNames.Registered
+    profile: Profile,
+    accessTier: AccessTierShortNames = AccessTierShortNames.Registered
 ): number | undefined => {
-  const tierFilter = (status: AccessModuleStatus): boolean =>
-    accessTier === AccessTierShortNames.Registered
-      ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
-      : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
-
-  const earliestExpiration: number = fp.flow(
-    fp.get(['accessModules', 'modules']),
-    fp.filter(tierFilter),
-    fp.map<AccessModuleStatus, number>((m) => m.expirationEpochMillis),
-    // remove the undefined expirationEpochMillis
-    fp.compact,
-    fp.min
-  )(profile);
+  const { earliestExpiration } =
+    earliestExpirationByTier(profile).find(
+      (exp) => exp.accessTierShortName === accessTier
+    ) || {};
 
   if (earliestExpiration) {
     // show the number of full remaining days, e.g. 30 if 30.7 remain or 0 if only a partial day remains
@@ -651,13 +689,14 @@ export const getStatusText = (status: AccessModuleStatus) => {
 };
 
 export const hasRtExpired = (profile: Profile): boolean => {
-  return rtAccessRenewalModules
-    .filter(
-      (moduleName) => getAccessModuleConfig(moduleName).isEnabledInEnvironment
-    )
-    .map((module: AccessModule) => getAccessModuleStatusByName(profile, module))
-    .some(
-      (status: AccessModuleStatus) =>
-        hasExpired(status.expirationEpochMillis) && !status?.bypassEpochMillis
+  return profile?.accessModules?.modules.some((status: AccessModuleStatus) => {
+    const { isEnabledInEnvironment, requiredForRTAccess } =
+      getAccessModuleConfig(status.moduleName);
+    return (
+      isEnabledInEnvironment &&
+      requiredForRTAccess &&
+      !status?.bypassEpochMillis &&
+      hasExpired(status.expirationEpochMillis)
     );
+  });
 };

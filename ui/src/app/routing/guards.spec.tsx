@@ -27,39 +27,49 @@ const newUserModuleState: AccessModuleStatus[] = [
   },
 ];
 
-const allCompleteNotExpiring: AccessModuleStatus[] = Object.keys(
-  AccessModule
-).map((key) => ({
-  moduleName: AccessModule[key],
-  completionEpochMillis: Date.now(),
-  expirationEpochMillis: nowPlusDays(365),
-}));
+const allAccessModuleNames = [
+  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.ERACOMMONS,
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+];
 
-const allCompleteExpiringSoon: AccessModuleStatus[] = Object.keys(
-  AccessModule
-).map((key) => ({
-  moduleName: AccessModule[key],
-  completionEpochMillis: Date.now(),
-  expirationEpochMillis: nowPlusDays(1),
-}));
+const allCompleteNotExpiring: AccessModuleStatus[] = allAccessModuleNames.map(
+  (moduleName) => ({
+    moduleName,
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(365),
+  })
+);
 
-const allBypassedPPComplete: AccessModuleStatus[] = Object.keys(
-  AccessModule
-).map((key) => {
-  const moduleName = AccessModule[key];
-  return [
-    AccessModule.PROFILECONFIRMATION,
-    AccessModule.PUBLICATIONCONFIRMATION,
-  ].includes(moduleName)
-    ? {
-        moduleName: AccessModule[key],
-        completionEpochMillis: Date.now(),
-      }
-    : {
-        moduleName: AccessModule[key],
-        bypassEpochMillis: Date.now(),
-      };
-});
+const allCompleteExpiringSoon: AccessModuleStatus[] = allAccessModuleNames.map(
+  (moduleName) => ({
+    moduleName,
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(1),
+  })
+);
+
+const allBypassedPPComplete: AccessModuleStatus[] = allAccessModuleNames.map(
+  (moduleName) => {
+    return [
+      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PUBLICATIONCONFIRMATION,
+    ].includes(moduleName)
+      ? {
+          moduleName,
+          completionEpochMillis: Date.now(),
+        }
+      : {
+          moduleName,
+          bypassEpochMillis: Date.now(),
+        };
+  }
+);
 
 // 2FA is missing (initial, not renewable)
 const allCompleteMissingOneInitial: AccessModuleStatus[] =

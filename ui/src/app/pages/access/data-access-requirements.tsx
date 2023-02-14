@@ -26,10 +26,10 @@ import {
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
   GetStartedButton,
+  hasRtExpired,
   isCompliant,
   isEligibleModule,
   isRenewalCompleteForModule,
-  maybeDaysRemaining,
   syncModulesExternal,
 } from 'app/utils/access-utils';
 import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
@@ -479,11 +479,11 @@ const InitialInnerHeader = () => (
   </div>
 );
 
-const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
-  const { hasExpired } = props;
+const AnnualInnerHeader = (props: { rtExpired: boolean }) => {
+  const { rtExpired } = props;
   return (
     <div style={styles.renewalInnerHeaderContainer}>
-      {hasExpired && (
+      {rtExpired && (
         <ExclamationTriangle
           size={40}
           color={colors.warning}
@@ -494,10 +494,10 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
         data-test-id='annual-renewal-header'
         style={{
           ...{ ...styles.renewalHeaderYearly },
-          ...(hasExpired && styles.renewalHeaderYearlyExpired),
+          ...(rtExpired && styles.renewalHeaderYearlyExpired),
         }}
       >
-        {hasExpired
+        {rtExpired
           ? 'Researcher workbench access has expired'
           : 'Yearly Researcher Workbench access renewal'}
       </div>
@@ -514,12 +514,14 @@ const AnnualInnerHeader = (props: { hasExpired: boolean }) => {
   );
 };
 
-const InnerHeader = (props: { pageMode: DARPageMode; hasExpired: boolean }) =>
-  props.pageMode === DARPageMode.INITIAL_REGISTRATION ? (
+const InnerHeader = (props: { pageMode: DARPageMode; rtExpired: boolean }) => {
+  const { pageMode, rtExpired } = props;
+  return pageMode === DARPageMode.INITIAL_REGISTRATION ? (
     <InitialInnerHeader />
   ) : (
-    <AnnualInnerHeader hasExpired={props.hasExpired} />
+    <AnnualInnerHeader {...{ rtExpired }} />
   );
+};
 
 const SelfBypass = (props: { onClick: () => void }) => (
   <FlexRow data-test-id='self-bypass' style={styles.selfBypass}>
@@ -724,8 +726,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       );
     }, [nextActive, nextRequired]);
 
-    const daysRemaining = maybeDaysRemaining(profile);
-    const hasExpired = daysRemaining && daysRemaining <= 0;
+    const rtExpired = hasRtExpired(profile);
 
     return (
       <FlexColumn style={styles.pageWrapper}>
@@ -736,7 +737,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>
-          <InnerHeader {...{ pageMode, hasExpired }} />
+          <InnerHeader {...{ pageMode, rtExpired }} />
           <React.Fragment>{cards}</React.Fragment>
         </FadeBox>
       </FlexColumn>

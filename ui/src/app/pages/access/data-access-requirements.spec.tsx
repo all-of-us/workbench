@@ -20,7 +20,6 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
-  rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
@@ -47,6 +46,14 @@ import {
   getEligibleModules,
   initialRequiredModules,
 } from './data-access-requirements';
+
+// the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
+const rtAccessRenewalModules = [
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.DATAUSERCODEOFCONDUCT,
+];
 
 const stubProfile = ProfileStubVariables.PROFILE_STUB as Profile;
 const load = jest.fn();
