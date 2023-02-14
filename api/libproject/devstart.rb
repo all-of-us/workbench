@@ -751,7 +751,7 @@ def build_search_all_events(cmd_name, *args)
     ->(opts, v) { opts.domain_token = v},
     "Generate for domain-token. Required."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and domain_token }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token }
   op.parse.validate
 
   common = Common.new
