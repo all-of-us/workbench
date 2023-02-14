@@ -1,27 +1,30 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='ICD10CM - SOURCE'
+
 TBL_CBC='cb_criteria'
 TBL_PAS='prep_ancestor_staging'
 TBL_PCA='prep_concept_ancestor'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-ID_PREFIX=$3
+
+echo "Creating ICD10CM source hierarchy"
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
-echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
+echo "Creating temp table for $TBL_PAS"
 TBL_PAS=$(createTmpTable $TBL_PAS)
+echo "Creating temp table for $TBL_PCA"
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
 
+CB_CRITERIA_START_ID=8000000000
+CB_CRITERIA_END_ID=9000000000
+
 echo "ICD10CM - SOURCE - inserting root"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -59,7 +62,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\`
 WHERE concept_id = 2500000000"
 
 echo "ICD10CM - SOURCE - inserting second level"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id
@@ -113,7 +116,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_concept_merged\` c on  b.concept_id_2 = c.co
 for i in {1..6};
 do
     echo "ICD10CM - SOURCE - inserting level $i"
-    bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+    bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
         (
               id
@@ -170,7 +173,7 @@ do
 done
 
 echo "ICD10CM - SOURCE - add items into ancestor staging to use in next query"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PAS\`
     (
           ancestor_concept_id
@@ -201,7 +204,7 @@ FROM
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` WHERE type = 'ICD10CM') e on d.id = e.parent_id"
 
 echo "ICD10CM - SOURCE - insert into prep_concept_ancestor"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -239,7 +242,7 @@ WHERE type = 'ICD10CM'
 and is_standard = 0"
 
 echo "ICD10CM - SOURCE - update item counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -258,7 +261,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "ICD10CM - SOURCE - generate rollup counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt

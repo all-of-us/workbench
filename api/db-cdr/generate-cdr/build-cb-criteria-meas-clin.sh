@@ -1,23 +1,24 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='MEASUREMENT - Clinical - STANDARD LOINC'
+
 TBL_CBC='cb_criteria'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-ID_PREFIX=$3
+
+echo "Creating Clinical - STANDARD LOINC"
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
-echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
 
+CB_CRITERIA_START_ID=11000000000
+CB_CRITERIA_END_ID=12000000000
+
 echo "MEASUREMENT - Clinical - STANDARD LOINC"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
     (
           id

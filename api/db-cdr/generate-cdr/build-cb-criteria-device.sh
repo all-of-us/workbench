@@ -1,20 +1,21 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='DEVICE'
+
 TBL_CBC='cb_criteria'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-ID_PREFIX=$3
+
+echo "Creating Device criteria"
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
-echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 ####### end common block ###########
+
+CB_CRITERIA_START_ID=17000000000
+CB_CRITERIA_END_ID=18000000000
 
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\`
