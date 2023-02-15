@@ -197,8 +197,10 @@ public interface LeonardoMapper {
         leonardoListRuntimeResponse.getDiskConfig());
   }
 
-  @Mapping(target = "createdDate", source = "app.auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "app.auditInfo.dateAccessed")
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appCreator", source = "auditInfo.creator", ignore = true)
+  @Mapping(target = "appType", ignore = true)
   @Mapping(target = "appName", source = "appName")
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   @Mapping(target = "autopauseThreshold", ignore = true)
@@ -206,6 +208,8 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  @Mapping(target = "appCreator", source = "auditInfo.creator", ignore = true)
+  @Mapping(target = "appType", ignore = true)
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   UserAppEnvironment toApiApp(LeonardoListAppResponse app);

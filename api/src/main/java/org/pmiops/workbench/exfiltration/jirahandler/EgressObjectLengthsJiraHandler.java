@@ -1,12 +1,5 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
-
-import java.time.Clock;
-import java.util.Optional;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
@@ -14,11 +7,17 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraContent;
-import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Provider;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
+
+import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
 
 @Service(OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
 public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
@@ -29,9 +28,7 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public EgressObjectLengthsJiraHandler(
-      Clock clock, Provider<WorkbenchConfig> workbenchConfigProvider, JiraService jiraService) {
-    super(clock, jiraService);
+  public EgressObjectLengthsJiraHandler(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 

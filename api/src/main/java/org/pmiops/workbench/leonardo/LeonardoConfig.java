@@ -1,11 +1,6 @@
 package org.pmiops.workbench.leonardo;
 
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -20,6 +15,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+
 @org.springframework.context.annotation.Configuration
 public class LeonardoConfig {
   public static final String USER_RUNTIMES_API = "userRuntimesApi";
@@ -29,6 +30,8 @@ public class LeonardoConfig {
   public static final String SERVICE_DISKS_API = "svcDisksApi";
 
   public static final String USER_APPS_API = "userAppsApi";
+
+  public static final String SERVICE_APPS_API = "serviceAppsApi";
 
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
@@ -168,6 +171,15 @@ public class LeonardoConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public AppsApi appsApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    AppsApi api = new AppsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_APPS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public AppsApi serviceAppsApi(
+      @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     AppsApi api = new AppsApi();
     api.setApiClient(apiClient);
     return api;

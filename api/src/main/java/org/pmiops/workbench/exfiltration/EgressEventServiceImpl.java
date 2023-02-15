@@ -2,14 +2,8 @@ package org.pmiops.workbench.exfiltration;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
@@ -19,10 +13,24 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.SumologicEgressEvent;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.utils.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
@@ -35,6 +43,8 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final EgressEventAuditor egressEventAuditor;
   private final UserService userService;
   private final TaskQueueService taskQueueService;
+
+  private final LeonardoApiClient leonardoApiClient;
   private final WorkspaceDao workspaceDao;
   private final EgressEventDao egressEventDao;
 
@@ -49,12 +59,14 @@ public class EgressEventServiceImpl implements EgressEventService {
       EgressEventAuditor egressEventAuditor,
       UserService userService,
       TaskQueueService taskQueueService,
+      LeonardoApiClient leonardoApiClient,
       WorkspaceDao workspaceDao,
       EgressEventDao egressEventDao) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.userService = userService;
     this.taskQueueService = taskQueueService;
+    this.leonardoApiClient = leonardoApiClient;
     this.workspaceDao = workspaceDao;
     this.egressEventDao = egressEventDao;
   }
@@ -73,22 +85,51 @@ public class EgressEventServiceImpl implements EgressEventService {
     } else {
       workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
     }
+    List<Optional<DbUser>> egressUsers = findEgressUsers(event, dbWorkspaceMaybe);
+
+    for (Optional<DbUser> egressUserMaybe : egressUsers) {
+      logger.warning(
+          String.format(
+              "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM name %s)",
+              workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmName()));
+      this.egressEventAuditor.fireEgressEventForUser(event, egressUserMaybe.orElse(null));
+
+      Optional<DbEgressEvent> maybeEvent =
+          this.maybePersistEgressEvent(event, egressUserMaybe, dbWorkspaceMaybe);
+      maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+    }
+  }
+
+  @NotNull
+  private List<Optional<DbUser>> findEgressUsers(
+      SumologicEgressEvent event, Optional<DbWorkspace> dbWorkspace) {
+
+    if (dbWorkspace.isPresent() && StringUtils.isNotEmpty(event.getSrcGkeCluster())) {
+      List<Optional<DbUser>> workspaceOwnersOrWriters = findAppUsers(dbWorkspace.get());
+      return workspaceOwnersOrWriters;
+    }
 
     Optional<DbUser> dbUserMaybe =
         vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
     if (!dbUserMaybe.isPresent()) {
-      logger.warning(String.format("user not found by given VM prefix: %s", event.getVmPrefix()));
+      logger.warning(String.format("User not found by given VM prefix: %s", event.getVmPrefix()));
     }
+    return Collections.singletonList(dbUserMaybe);
+  }
 
-    logger.warning(
-        String.format(
-            "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM prefix %s)",
-            workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
-    this.egressEventAuditor.fireEgressEvent(event);
-
-    Optional<DbEgressEvent> maybeEvent =
-        this.maybePersistEgressEvent(event, dbUserMaybe, dbWorkspaceMaybe);
-    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+  private List<Optional<DbUser>> findAppUsers(DbWorkspace dbWorkspace) {
+    List<UserAppEnvironment> userAppEnvironments =
+        leonardoApiClient.listAppsInProject(dbWorkspace.getGoogleProject());
+    List<String> appUsersList =
+        userAppEnvironments.stream()
+            .filter(
+                u ->
+                    u.getStatus().equals(AppStatus.RUNNING)
+                        || u.getStatus().equals(AppStatus.PROVISIONING))
+            .map(u -> u.getAppCreator())
+            .collect(Collectors.toList());
+    List<DbUser> usersByUsernames = userService.findUsersByUsernames(appUsersList);
+    return usersByUsernames.stream().map(Optional::of).collect(Collectors.toList());
   }
 
   private boolean isEventStale(SumologicEgressEvent egressEvent) {
