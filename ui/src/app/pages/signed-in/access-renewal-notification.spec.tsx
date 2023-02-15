@@ -16,10 +16,6 @@ import {
   AccessRenewalNotificationProps,
 } from './access-renewal-notification';
 
-const load = jest.fn();
-const reload = jest.fn();
-const updateCache = jest.fn();
-
 const allModules = [
   AccessModule.DATAUSERCODEOFCONDUCT,
   AccessModule.COMPLIANCETRAINING,
@@ -100,6 +96,10 @@ const ctExpiresFirst = [
     expirationEpochMillis: nowPlusDays(5),
   },
 ];
+
+const load = jest.fn();
+const reload = jest.fn();
+const updateCache = jest.fn();
 
 const updateModules = (modules: AccessModuleStatus[]) => {
   profileStore.set({
