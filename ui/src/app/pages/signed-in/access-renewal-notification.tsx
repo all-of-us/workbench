@@ -35,7 +35,9 @@ export const AccessRenewalNotificationMaybe = (props: {
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
-      bannerTextWidth='177px'
+      bannerTextWidth={
+        props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
+      }
     />
   ) : null;
 };
