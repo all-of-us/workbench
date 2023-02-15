@@ -319,6 +319,8 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
+    // If true, enable enableConceptSetsInCohortBuilder
+    public boolean enableConceptSetsInCohortBuilder;
   }
 
   public static class ActionAuditConfig {
