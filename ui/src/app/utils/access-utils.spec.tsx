@@ -39,10 +39,18 @@ import {
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 
+import { AccessTierShortNames } from './access-tiers';
+
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
 const arbitraryModuleName = AccessModule.PUBLICATIONCONFIRMATION;
 
 describe('maybeDaysRemaining', () => {
+  beforeEach(() => {
+    serverConfigStore.set({
+      config: defaultServerConfig,
+    });
+  });
+
   it('returns undefined when the profile has no accessModules', () => {
     const noModules: Profile = {
       ...ProfileStubVariables.PROFILE_STUB,
@@ -144,6 +152,119 @@ describe('maybeDaysRemaining', () => {
     };
 
     expect(maybeDaysRemaining(thirtyDaysPlusExpiration)).toEqual(30);
+  });
+
+  // RW-9550
+  it('is not affected by Controlled Tier training by default', () => {
+    const ctExpected = 5;
+    const rtExpected = 10;
+
+    const expirationsInWindow: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.COMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+          {
+            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+        ],
+      },
+    };
+
+    // even though CT expires sooner
+    expect(maybeDaysRemaining(expirationsInWindow)).toEqual(rtExpected);
+  });
+
+  // RW-9550
+  it('is not affected by Controlled Tier training when RT is requested explicitly', () => {
+    const ctExpected = 5;
+    const rtExpected = 10;
+
+    const expirationsInWindow: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.COMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+          {
+            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+        ],
+      },
+    };
+
+    // even though CT expires sooner
+    expect(
+      maybeDaysRemaining(expirationsInWindow, AccessTierShortNames.Registered)
+    ).toEqual(rtExpected);
+  });
+
+  // RW-9546
+  it('returns the earliest Controlled Tier expiration when CT is requested', () => {
+    const ctExpected = 5;
+    const rtExpected = 10;
+
+    const expirationsInWindow: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.COMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+          {
+            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
+          },
+        ],
+      },
+    };
+
+    expect(
+      maybeDaysRemaining(expirationsInWindow, AccessTierShortNames.Controlled)
+    ).toEqual(ctExpected);
+  });
+
+  // RW-9546
+  it('includes RT expirations in the CT earliest-expiration calculation', () => {
+    const rtExpires = 5;
+    const ctExpires = 10;
+    const expected = 5;
+
+    const expirationsInWindow: Profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.COMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(rtExpires) + ONE_MINUTE_IN_MILLIS,
+          },
+          {
+            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            expirationEpochMillis:
+              nowPlusDays(ctExpires) + ONE_MINUTE_IN_MILLIS,
+          },
+        ],
+      },
+    };
+
+    expect(
+      maybeDaysRemaining(expirationsInWindow, AccessTierShortNames.Controlled)
+    ).toEqual(expected);
   });
 });
 

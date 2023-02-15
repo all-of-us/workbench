@@ -12,6 +12,7 @@ import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demograp
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -111,7 +112,12 @@ export const NavBar = () => {
       </div>
       <SignedInAouHeaderWithDisplayTag />
       <Breadcrumb />
-      <AccessRenewalNotificationMaybe />
+      <AccessRenewalNotificationMaybe
+        accessTier={AccessTierShortNames.Registered}
+      />
+      <AccessRenewalNotificationMaybe
+        accessTier={AccessTierShortNames.Controlled}
+      />
       <StatusAlertBannerMaybe />
       <TakeDemographicSurveyV2BannerMaybe />
       <NewUserSatisfactionSurveyBannerMaybe />

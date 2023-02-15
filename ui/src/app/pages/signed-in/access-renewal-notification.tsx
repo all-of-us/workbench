@@ -1,22 +1,41 @@
 import * as React from 'react';
 
 import { NotificationBanner } from 'app/components/notification-banner';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
   maybeDaysRemaining,
 } from 'app/utils/access-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 
-export const AccessRenewalNotificationMaybe = () => {
+export interface AccessRenewalNotificationProps {
+  accessTier: AccessTierShortNames;
+}
+export const AccessRenewalNotificationMaybe = (
+  props: AccessRenewalNotificationProps
+) => {
   const { profile } = useStore(profileStore);
-  const daysRemaining = maybeDaysRemaining(profile);
-  const notificationText =
-    'Time for access renewal. ' +
-    `${
-      daysRemaining >= 0
-        ? daysRemaining + ' days remaining.'
-        : 'Your access has expired.'
-    }`;
+  const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
+
+  // special handling for Controlled Tier: don't render when RT is more urgent
+  // because CT renewal is redundant in that case
+  if (
+    props.accessTier === AccessTierShortNames.Controlled &&
+    maybeDaysRemaining(profile, AccessTierShortNames.Registered) <=
+      daysRemaining
+  ) {
+    return null;
+  }
+
+  const accessType =
+    props.accessTier === AccessTierShortNames.Controlled
+      ? 'Controlled Tier access'
+      : 'access';
+
+  const timeLeft =
+    daysRemaining >= 0
+      ? daysRemaining + ' days remaining.'
+      : 'Your access has expired.';
 
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
@@ -26,11 +45,13 @@ export const AccessRenewalNotificationMaybe = () => {
   return daysRemaining !== undefined ? (
     <NotificationBanner
       dataTestId='access-renewal-notification'
-      text={notificationText}
+      text={`Time for ${accessType} renewal. ${timeLeft}`}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
-      bannerTextWidth='177px'
+      bannerTextWidth={
+        props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
+      }
     />
   ) : null;
 };
