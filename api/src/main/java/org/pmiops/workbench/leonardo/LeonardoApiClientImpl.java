@@ -620,7 +620,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 appsApiAsService.listApp(
-                    LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail, false, ""));
+                    LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    false,
+                    "",
+                    "creator"));
 
     // Only the app creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.

@@ -119,7 +119,7 @@ public class EgressEventServiceImpl implements EgressEventService {
 
   private List<Optional<DbUser>> findAppUsers(DbWorkspace dbWorkspace) {
     List<UserAppEnvironment> userAppEnvironments =
-        leonardoApiClient.listAppsInProject(dbWorkspace.getGoogleProject());
+        leonardoApiClient.listAppsInProjectCreatedByCreator(dbWorkspace.getGoogleProject());
     List<String> appUsersList =
         userAppEnvironments.stream()
             .filter(
