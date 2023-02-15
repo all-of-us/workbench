@@ -61,6 +61,46 @@ const allCompleteOneExpired = (moduleName: AccessModule) => [
   },
 ];
 
+const rtExpiresFirst = [
+  ...allCompleteNotExpiring.filter(
+    (status) =>
+      ![
+        AccessModule.COMPLIANCETRAINING,
+        AccessModule.CTCOMPLIANCETRAINING,
+      ].includes(status.moduleName)
+  ),
+  {
+    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(5),
+  },
+  {
+    moduleName: AccessModule.CTCOMPLIANCETRAINING,
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(10),
+  },
+];
+
+const ctExpiresFirst = [
+  ...allCompleteNotExpiring.filter(
+    (status) =>
+      ![
+        AccessModule.COMPLIANCETRAINING,
+        AccessModule.CTCOMPLIANCETRAINING,
+      ].includes(status.moduleName)
+  ),
+  {
+    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(10),
+  },
+  {
+    moduleName: AccessModule.CTCOMPLIANCETRAINING,
+    completionEpochMillis: Date.now(),
+    expirationEpochMillis: nowPlusDays(5),
+  },
+];
+
 const updateModules = (modules: AccessModuleStatus[]) => {
   profileStore.set({
     profile: {
@@ -168,29 +208,30 @@ describe('Access Renewal Notification', () => {
       allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
     ],
     [
+      true,
+      'for RT when RT is expiring sooner',
+      AccessTierShortNames.Registered,
+      rtExpiresFirst,
+    ],
+    [
       // Showing the RT banner appears in this case, so CT is not needed
       false,
       'for CT when RT is expiring sooner',
       AccessTierShortNames.Controlled,
-      [
-        ...allCompleteNotExpiring.filter(
-          (status) =>
-            ![
-              AccessModule.COMPLIANCETRAINING,
-              AccessModule.CTCOMPLIANCETRAINING,
-            ].includes(status.moduleName)
-        ),
-        {
-          moduleName: AccessModule.COMPLIANCETRAINING, // RT
-          completionEpochMillis: Date.now(),
-          expirationEpochMillis: nowPlusDays(5),
-        },
-        {
-          moduleName: AccessModule.CTCOMPLIANCETRAINING,
-          completionEpochMillis: Date.now(),
-          expirationEpochMillis: nowPlusDays(10),
-        },
-      ],
+      rtExpiresFirst,
+    ],
+    [
+      // Still need to show RT, because it's more important
+      true,
+      'for RT when CT is expiring sooner',
+      AccessTierShortNames.Registered,
+      ctExpiresFirst,
+    ],
+    [
+      true,
+      'for CT when CT is expiring sooner',
+      AccessTierShortNames.Controlled,
+      ctExpiresFirst,
     ],
   ])(
     'display=%s %s',
