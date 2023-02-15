@@ -320,14 +320,24 @@ export const wasReferredFromRenewal = (queryParams): boolean => {
   const renewal = parseQueryParams(queryParams).get('renewal');
   return renewal === '1';
 };
+
 export const NOTIFICATION_THRESHOLD_DAYS = 30;
 
-// return the number of full days remaining to expiration in the soonest-to-expire module,
+// return the number of full days remaining to expiration in the soonest-to-expire module for a given tier,
 // but only if it is within the threshold.
-// if it is not, or no expiration dates are present in the profile: return undefined.
-export const maybeDaysRemaining = (profile: Profile): number | undefined => {
+// if it is not, or no expiration dates are present in the profile for this tier: return undefined.
+export const maybeDaysRemaining = (
+  profile: Profile,
+  accessTier: AccessTierShortNames = AccessTierShortNames.Registered
+): number | undefined => {
+  const tierFilter = (status: AccessModuleStatus): boolean =>
+    accessTier === AccessTierShortNames.Registered
+      ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
+      : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
+
   const earliestExpiration: number = fp.flow(
     fp.get(['accessModules', 'modules']),
+    fp.filter(tierFilter),
     fp.map<AccessModuleStatus, number>((m) => m.expirationEpochMillis),
     // remove the undefined expirationEpochMillis
     fp.compact,

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { AccessTierShortNames } from '../../utils/access-tiers';
 import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
@@ -13,6 +12,7 @@ import { TakeDemographicSurveyV2BannerMaybe } from 'app/components/take-demograp
 import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renewal-notification';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
