@@ -8,9 +8,13 @@ import {
 } from 'app/utils/access-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 
-export const AccessRenewalNotificationMaybe = (props: {
+export interface AccessRenewalNotificationProps {
   accessTier: AccessTierShortNames;
-}) => {
+}
+
+export const AccessRenewalNotificationMaybe = (
+  props: AccessRenewalNotificationProps
+) => {
   const { profile } = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
 
