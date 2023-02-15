@@ -2,6 +2,7 @@ import * as React from 'react';
 import { CSSProperties } from 'react';
 import Interactive from 'react-interactive';
 import { Link } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
 import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -322,6 +323,41 @@ export const ButtonWithLocationState = ({
         {children}
       </Clickable>
     </RouteLink>
+  );
+};
+
+// uses HashLink to allow navigation to anchor IDs on the same page
+
+// example: if you have a component with id='user-info', then you can create a HashLinkButton which navigates to it:
+// <HashLinkButton path='#user-info'/>
+
+export const HashLinkButton = ({
+  children,
+  path = '',
+  type = 'primary',
+  style = {},
+  disabled = false,
+  propagateDataTestId = false,
+  ...props
+}) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId
+    ? props
+    : fp.omit(['data-test-id'], props);
+  const computedStyle = fp.merge(
+    computeStyle(buttonVariants[type], { disabled }),
+    { style }
+  );
+  return path ? (
+    <HashLink to={path} {...computedStyle}>
+      <Clickable disabled={disabled} {...childProps}>
+        {children}
+      </Clickable>
+    </HashLink>
+  ) : (
+    <Clickable disabled={disabled} {...computedStyle} {...childProps}>
+      {children}
+    </Clickable>
   );
 };
 

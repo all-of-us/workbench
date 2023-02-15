@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { useQuery } from 'app/components/app-router';
-import { Button } from 'app/components/buttons';
+import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
@@ -90,6 +90,15 @@ export const styles = reactStyles({
     borderRadius: '5px',
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.success, 0.82),
+  },
+  controlledRenewal: {
+    height: '87px',
+    padding: '1em',
+    marginLeft: '3%',
+    marginRight: '3%',
+    borderRadius: '5px',
+    color: colors.primary,
+    backgroundColor: colorWithWhiteness(colors.highlight, 0.82),
   },
   completedHeader: {
     fontSize: '18px',
@@ -530,6 +539,21 @@ const Completed = () => (
   </FlexRow>
 );
 
+const ControlledTierRenewalCTA = () => (
+  <FlexRow
+    data-test-id='controlled-tier-renewal-cta'
+    style={styles.controlledRenewal}
+  >
+    <FlexColumn>
+      <div style={styles.completedHeader}>Controlled Tier Access Renewal</div>
+      <div style={styles.completedText}>Please update your modules below.</div>
+    </FlexColumn>
+    <HashLinkButton path='#controlled-card' style={{ marginLeft: 'auto' }}>
+      Get Started
+    </HashLinkButton>
+  </FlexRow>
+);
+
 // TODO is there a better way?
 const Additional = additional;
 const Electronic = electronic;
@@ -598,7 +622,9 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       profile,
       pageMode
     );
-    const isComplete = profile && !nextRequired;
+
+    const ctNeedsRenewal = true;
+    const isComplete = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (
       <RegisteredTierCard
@@ -685,6 +711,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
         {isComplete && <Completed />}
+        {ctNeedsRenewal && <ControlledTierRenewalCTA />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
