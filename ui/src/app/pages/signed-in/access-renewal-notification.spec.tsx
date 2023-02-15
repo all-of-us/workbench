@@ -40,7 +40,9 @@ const allCompleteNotExpiring: AccessModuleStatus[] = allModules.map(
 );
 
 const allCompleteOneExpiring = (moduleName: AccessModule) => [
-  ...allCompleteNotExpiring,
+  ...allCompleteNotExpiring.filter(
+    (status) => status.moduleName !== moduleName
+  ),
   {
     moduleName,
     completionEpochMillis: Date.now(),
@@ -49,7 +51,9 @@ const allCompleteOneExpiring = (moduleName: AccessModule) => [
 ];
 
 const allCompleteOneExpired = (moduleName: AccessModule) => [
-  ...allCompleteNotExpiring,
+  ...allCompleteNotExpiring.filter(
+    (status) => status.moduleName !== moduleName
+  ),
   {
     moduleName,
     completionEpochMillis: Date.now(),
@@ -120,7 +124,8 @@ describe('Access Renewal Notification', () => {
       allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
     ],
     [
-      true,
+      // Showing the RT banner appears in this case, so CT is not needed
+      false,
       'for CT when there is one expiring module',
       AccessTierShortNames.Controlled,
       allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
@@ -132,7 +137,8 @@ describe('Access Renewal Notification', () => {
       allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
     ],
     [
-      true,
+      // Showing the RT banner appears in this case, so CT is not needed
+      false,
       'for CT when there is one expired module',
       AccessTierShortNames.Controlled,
       allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
@@ -148,6 +154,43 @@ describe('Access Renewal Notification', () => {
       'for RT when only CT training is expired',
       AccessTierShortNames.Registered,
       allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
+    ],
+    [
+      true,
+      'for CT when only CT training is expiring',
+      AccessTierShortNames.Controlled,
+      allCompleteOneExpiring(AccessModule.CTCOMPLIANCETRAINING),
+    ],
+    [
+      true,
+      'for CT when only CT training is expired',
+      AccessTierShortNames.Controlled,
+      allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
+    ],
+    [
+      // Showing the RT banner appears in this case, so CT is not needed
+      false,
+      'for CT when RT is expiring sooner',
+      AccessTierShortNames.Controlled,
+      [
+        ...allCompleteNotExpiring.filter(
+          (status) =>
+            ![
+              AccessModule.COMPLIANCETRAINING,
+              AccessModule.CTCOMPLIANCETRAINING,
+            ].includes(status.moduleName)
+        ),
+        {
+          moduleName: AccessModule.COMPLIANCETRAINING, // RT
+          completionEpochMillis: Date.now(),
+          expirationEpochMillis: nowPlusDays(5),
+        },
+        {
+          moduleName: AccessModule.CTCOMPLIANCETRAINING,
+          completionEpochMillis: Date.now(),
+          expirationEpochMillis: nowPlusDays(10),
+        },
+      ],
     ],
   ])(
     'display=%s %s',

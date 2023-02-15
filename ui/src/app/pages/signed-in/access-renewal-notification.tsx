@@ -18,10 +18,21 @@ export const AccessRenewalNotificationMaybe = (
   const { profile } = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
 
+  // special handling for Controlled Tier: don't display when RT is more urgent
+  // because CT renewal is redundant in that case
+  if (
+    props.accessTier === AccessTierShortNames.Controlled &&
+    maybeDaysRemaining(profile, AccessTierShortNames.Registered) <=
+      daysRemaining
+  ) {
+    return null;
+  }
+
   const accessType =
     props.accessTier === AccessTierShortNames.Controlled
       ? 'Controlled Tier access'
       : 'access';
+
   const timeLeft =
     daysRemaining >= 0
       ? daysRemaining + ' days remaining.'
