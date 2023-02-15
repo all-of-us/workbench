@@ -623,7 +623,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode
     );
 
-    const ctNeedsRenewal = true;
+    const ctNeedsRenewal =
+      isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
+      !isRenewalCompleteForModule(
+        getAccessModuleStatusByName(profile, ctModule)
+      );
     const isComplete = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (

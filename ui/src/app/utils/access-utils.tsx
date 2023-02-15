@@ -505,19 +505,6 @@ export const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
   );
 };
 
-export const isRtRenewalComplete = (profile: Profile): boolean => {
-  const modules = profile?.accessModules?.modules;
-  return rtAccessRenewalModules
-    .filter(
-      (moduleName) => getAccessModuleConfig(moduleName).isEnabledInEnvironment
-    )
-    .every((moduleName) =>
-      isRenewalCompleteForModule(
-        getAccessModuleStatusByNameOrEmpty(modules, moduleName)
-      )
-    );
-};
-
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
   nextReviewDate: string;
