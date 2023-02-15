@@ -374,8 +374,8 @@ export const NOTIFICATION_THRESHOLD_DAYS = 30;
 // but only if it is within the threshold.
 // if it is not, or no expiration dates are present in the profile for this tier: return undefined.
 export const maybeDaysRemaining = (
-    profile: Profile,
-    accessTier: AccessTierShortNames = AccessTierShortNames.Registered
+  profile: Profile,
+  accessTier: AccessTierShortNames = AccessTierShortNames.Registered
 ): number | undefined => {
   const { earliestExpiration } =
     earliestExpirationByTier(profile).find(
