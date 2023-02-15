@@ -238,9 +238,7 @@ describe('Access Renewal Notification', () => {
     async (expected, condition, accessTier, moduleStatuses) => {
       updateModules(moduleStatuses);
 
-      const wrapper = component({
-        accessTier,
-      });
+      const wrapper = component({ accessTier });
       expect(wrapper.exists()).toBeTruthy();
 
       const banner = wrapper.find({

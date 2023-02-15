@@ -11,14 +11,13 @@ import { profileStore, useStore } from 'app/utils/stores';
 export interface AccessRenewalNotificationProps {
   accessTier: AccessTierShortNames;
 }
-
 export const AccessRenewalNotificationMaybe = (
   props: AccessRenewalNotificationProps
 ) => {
   const { profile } = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
 
-  // special handling for Controlled Tier: don't display when RT is more urgent
+  // special handling for Controlled Tier: don't render when RT is more urgent
   // because CT renewal is redundant in that case
   if (
     props.accessTier === AccessTierShortNames.Controlled &&
