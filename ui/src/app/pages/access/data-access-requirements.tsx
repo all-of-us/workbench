@@ -91,6 +91,13 @@ export const styles = reactStyles({
     color: colors.primary,
     backgroundColor: colorWithWhiteness(colors.success, 0.82),
   },
+  completedHeader: {
+    fontSize: '18px',
+    fontWeight: 600,
+  },
+  completedText: {
+    fontSize: '14px',
+  },
   controlledRenewal: {
     height: '87px',
     padding: '1em',
@@ -98,13 +105,13 @@ export const styles = reactStyles({
     marginRight: '3%',
     borderRadius: '5px',
     color: colors.primary,
-    backgroundColor: colorWithWhiteness(colors.highlight, 0.82),
+    backgroundColor: colorWithWhiteness(colors.primary, 0.82),
   },
-  completedHeader: {
+  controlledRenewalHeader: {
     fontSize: '18px',
     fontWeight: 600,
   },
-  completedText: {
+  controlledRenewalText: {
     fontSize: '14px',
   },
   selfBypass: {
@@ -539,14 +546,18 @@ const Completed = () => (
   </FlexRow>
 );
 
-const ControlledTierRenewalCTA = () => (
+const ControlledTierRenewalBanner = () => (
   <FlexRow
-    data-test-id='controlled-tier-renewal-cta'
+    data-test-id='controlled-tier-renewal-banner'
     style={styles.controlledRenewal}
   >
     <FlexColumn>
-      <div style={styles.completedHeader}>Controlled Tier Access Renewal</div>
-      <div style={styles.completedText}>Please update your modules below.</div>
+      <div style={styles.controlledRenewalHeader}>
+        Controlled Tier Access Renewal
+      </div>
+      <div style={styles.controlledRenewalText}>
+        Please update your modules below.
+      </div>
     </FlexColumn>
     <HashLinkButton
       path='?pageMode=ANNUAL_RENEWAL#controlled-card'
@@ -626,12 +637,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode
     );
 
-    const ctNeedsRenewal =
+    const showCtRenewalBanner =
+      pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
       !isRenewalCompleteForModule(
         getAccessModuleStatusByName(profile, ctModule)
       );
-    const isComplete = profile && !nextRequired && !ctNeedsRenewal;
+    const isComplete = profile && !nextRequired && !showCtRenewalBanner;
 
     const rtCard = (
       <RegisteredTierCard
@@ -718,7 +730,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
         {isComplete && <Completed />}
-        {ctNeedsRenewal && <ControlledTierRenewalCTA />}
+        {showCtRenewalBanner && <ControlledTierRenewalBanner />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
