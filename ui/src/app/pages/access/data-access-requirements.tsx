@@ -548,7 +548,10 @@ const ControlledTierRenewalCTA = () => (
       <div style={styles.completedHeader}>Controlled Tier Access Renewal</div>
       <div style={styles.completedText}>Please update your modules below.</div>
     </FlexColumn>
-    <HashLinkButton path='#controlled-card' style={{ marginLeft: 'auto' }}>
+    <HashLinkButton
+      path='?pageMode=ANNUAL_RENEWAL#controlled-card'
+      style={{ marginLeft: 'auto' }}
+    >
       Get Started
     </HashLinkButton>
   </FlexRow>
