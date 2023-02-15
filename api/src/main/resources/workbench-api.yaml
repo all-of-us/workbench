@@ -4716,6 +4716,10 @@ definitions:
         type: boolean
         default: true
         description: Whether a captcha check is part of the new user registration process
+      enableConceptSetsInCohortBuilder:
+        type: boolean
+        default: false
+        description: Whether to enable adding ConceptSets to CohortBuilder.
 
   RuntimeImage:
     type: object

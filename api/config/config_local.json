@@ -117,7 +117,8 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableUpdatedDemographicSurvey": true
+    "enableUpdatedDemographicSurvey": true,
+    "enableConceptSetsInCohortBuilder": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
