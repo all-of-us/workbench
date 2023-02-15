@@ -532,20 +532,6 @@ const SelfBypass = (props: { onClick: () => void }) => (
   </FlexRow>
 );
 
-const Completed = () => (
-  <FlexRow data-test-id='dar-completed' style={styles.completed}>
-    <FlexColumn>
-      <div style={styles.completedHeader}>
-        Thank you for completing all the necessary steps
-      </div>
-      <div style={styles.completedText}>
-        Researcher Workbench data access is complete.
-      </div>
-    </FlexColumn>
-    <GetStartedButton style={{ marginLeft: 'auto' }} />
-  </FlexRow>
-);
-
 const ControlledTierRenewalBanner = () => (
   <FlexRow
     data-test-id='controlled-tier-renewal-banner'
@@ -565,6 +551,20 @@ const ControlledTierRenewalBanner = () => (
     >
       Get Started
     </HashLinkButton>
+  </FlexRow>
+);
+
+const CompletionBanner = () => (
+  <FlexRow data-test-id='dar-completed' style={styles.completed}>
+    <FlexColumn>
+      <div style={styles.completedHeader}>
+        Thank you for completing all the necessary steps
+      </div>
+      <div style={styles.completedText}>
+        Researcher Workbench data access is complete.
+      </div>
+    </FlexColumn>
+    <GetStartedButton style={{ marginLeft: 'auto' }} />
   </FlexRow>
 );
 
@@ -643,7 +643,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       !isRenewalCompleteForModule(
         getAccessModuleStatusByName(profile, ctModule)
       );
-    const isComplete = profile && !nextRequired && !showCtRenewalBanner;
+    const showCompletionBanner =
+      profile && !nextRequired && !showCtRenewalBanner;
 
     const rtCard = (
       <RegisteredTierCard
@@ -729,8 +730,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
-        {isComplete && <Completed />}
         {showCtRenewalBanner && <ControlledTierRenewalBanner />}
+        {showCompletionBanner && <CompletionBanner />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
