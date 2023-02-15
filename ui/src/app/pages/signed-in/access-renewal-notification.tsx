@@ -1,22 +1,27 @@
 import * as React from 'react';
 
 import { NotificationBanner } from 'app/components/notification-banner';
+import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
   maybeDaysRemaining,
 } from 'app/utils/access-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 
-export const AccessRenewalNotificationMaybe = () => {
+export const AccessRenewalNotificationMaybe = (props: {
+  accessTier: AccessTierShortNames;
+}) => {
   const { profile } = useStore(profileStore);
-  const daysRemaining = maybeDaysRemaining(profile);
-  const notificationText =
-    'Time for access renewal. ' +
-    `${
-      daysRemaining >= 0
-        ? daysRemaining + ' days remaining.'
-        : 'Your access has expired.'
-    }`;
+  const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
+
+  const accessType =
+    props.accessTier === AccessTierShortNames.Controlled
+      ? 'Controlled Tier access'
+      : 'access';
+  const timeLeft =
+    daysRemaining >= 0
+      ? daysRemaining + ' days remaining.'
+      : 'Your access has expired.';
 
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
@@ -26,7 +31,7 @@ export const AccessRenewalNotificationMaybe = () => {
   return daysRemaining !== undefined ? (
     <NotificationBanner
       dataTestId='access-renewal-notification'
-      text={notificationText}
+      text={`Time for ${accessType} renewal. ${timeLeft}`}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}

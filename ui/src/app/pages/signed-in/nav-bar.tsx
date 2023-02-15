@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
+import { AccessTierShortNames } from '../../utils/access-tiers';
 import { Breadcrumb } from 'app/components/breadcrumb';
 import { CTAvailableBannerMaybe } from 'app/components/ct-available-banner-maybe';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
@@ -111,7 +112,12 @@ export const NavBar = () => {
       </div>
       <SignedInAouHeaderWithDisplayTag />
       <Breadcrumb />
-      <AccessRenewalNotificationMaybe />
+      <AccessRenewalNotificationMaybe
+        accessTier={AccessTierShortNames.Registered}
+      />
+      <AccessRenewalNotificationMaybe
+        accessTier={AccessTierShortNames.Controlled}
+      />
       <StatusAlertBannerMaybe />
       <TakeDemographicSurveyV2BannerMaybe />
       <NewUserSatisfactionSurveyBannerMaybe />
