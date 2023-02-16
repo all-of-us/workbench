@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { useQuery } from 'app/components/app-router';
-import { Button } from 'app/components/buttons';
+import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Header } from 'app/components/headers';
@@ -96,6 +96,22 @@ export const styles = reactStyles({
     fontWeight: 600,
   },
   completedText: {
+    fontSize: '14px',
+  },
+  controlledRenewal: {
+    height: '87px',
+    padding: '1em',
+    marginLeft: '3%',
+    marginRight: '3%',
+    borderRadius: '5px',
+    color: colors.primary,
+    backgroundColor: colorWithWhiteness(colors.primary, 0.82),
+  },
+  controlledRenewalHeader: {
+    fontSize: '18px',
+    fontWeight: 600,
+  },
+  controlledRenewalText: {
     fontSize: '14px',
   },
   selfBypass: {
@@ -516,7 +532,29 @@ const SelfBypass = (props: { onClick: () => void }) => (
   </FlexRow>
 );
 
-const Completed = () => (
+const ControlledTierRenewalBanner = () => (
+  <FlexRow
+    data-test-id='controlled-tier-renewal-banner'
+    style={styles.controlledRenewal}
+  >
+    <FlexColumn>
+      <div style={styles.controlledRenewalHeader}>
+        Controlled Tier Access Renewal
+      </div>
+      <div style={styles.controlledRenewalText}>
+        Please update your modules below.
+      </div>
+    </FlexColumn>
+    <HashLinkButton
+      path='?pageMode=ANNUAL_RENEWAL#controlled-card'
+      style={{ marginLeft: 'auto' }}
+    >
+      Get Started
+    </HashLinkButton>
+  </FlexRow>
+);
+
+const CompletionBanner = () => (
   <FlexRow data-test-id='dar-completed' style={styles.completed}>
     <FlexColumn>
       <div style={styles.completedHeader}>
@@ -598,7 +636,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       profile,
       pageMode
     );
-    const isComplete = profile && !nextRequired;
+
+    const showCtRenewalBanner =
+      pageMode === DARPageMode.ANNUAL_RENEWAL &&
+      isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
+      !isRenewalCompleteForModule(
+        getAccessModuleStatusByName(profile, ctModule)
+      );
+    const showCompletionBanner =
+      profile && !nextRequired && !showCtRenewalBanner;
 
     const rtCard = (
       <RegisteredTierCard
@@ -684,7 +730,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
-        {isComplete && <Completed />}
+        {showCtRenewalBanner && <ControlledTierRenewalBanner />}
+        {showCompletionBanner && <CompletionBanner />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
