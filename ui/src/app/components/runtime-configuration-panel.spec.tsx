@@ -935,11 +935,11 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
+    setCurrentDisk(existingDisk());
     const wrapper = await component();
-    console.log(wrapper.html());
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await mustClickButton(wrapper, 'Next');
-
+    await mustClickButton(wrapper, 'Next');
     expect(
       wrapper.find(WarningMessage).text().includes('deletion')
     ).toBeTruthy();
@@ -1060,25 +1060,29 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
+    setCurrentDisk(existingDisk());
     const wrapper = await component();
 
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
-    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 20);
+    await pickDetachableDiskSize(wrapper, 1010);
 
     await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
 
+    await mustClickButton(wrapper, 'Update');
     expect(updateSpy).toHaveBeenCalled();
     expect(deleteSpy).toHaveBeenCalledTimes(0);
+
   });
 
   it('should send a delete call if an update requires delete', async () => {
+    setCurrentDisk(existingDisk());
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
+    await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
@@ -1538,7 +1542,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentDisk(disk);
 
     const wrapper = await component();
-    enableDetachable(wrapper, false);
+    pickComputeType(wrapper, ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
 
