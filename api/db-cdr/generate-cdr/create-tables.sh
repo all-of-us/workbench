@@ -9,7 +9,7 @@ set -e
 
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
-export CREATE_SURVEYS=$3     # Create surveys flag
+export CREATE_PREP_SURVEYS=$3     # Create surveys flag
 
 function deleteAndCreateTable(){
   local table_name=$1
@@ -63,7 +63,7 @@ do
         deleteAndCreateTable "$table_name"
       fi
     elif [[ "$table_name" == 'prep_survey' ]]; then
-      if [[ "$CREATE_SURVEYS" == true ]]; then
+      if [[ "$CREATE_PREP_SURVEYS" == true ]]; then
         deleteAndCreateTable "$table_name"
       else
         echo "Keeping existing prep_survey table"

@@ -7,7 +7,6 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 export FILE_NAME=$3          # Filename to process
-export CREATE_SURVEYS=$4     # Create surveys flag
 
 # ID Starting id position
 # map filename_staged.csv to start ID
@@ -27,12 +26,6 @@ if [[ -n "${ID_START_MAP[$FILE_NAME]}" ]]; then
 else
   echo "Failed - Filename $FILE_NAME is not mapped to start ID"
   exit 1
-fi
-
-if [[ "$CREATE_SURVEYS" == false ]]
-then
-  echo "Skipping creation of the prep_survey table for $FILE_NAME."
-  exit 0
 fi
 
 BUCKET="all-of-us-workbench-private-cloudsql"

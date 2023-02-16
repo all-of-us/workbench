@@ -8,13 +8,6 @@ export BQ_PROJECT=$1     # project
 export BQ_DATASET=$2     # dataset
 export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
-export DATA_BROWSER=$5   # data browser build
-
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of cloudsql tables."
-  exit 0
-fi
 
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project_id="$BQ_PROJECT" ls --max_results=1000)
