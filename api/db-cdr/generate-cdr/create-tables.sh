@@ -9,7 +9,7 @@ set -e
 
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
-export CREATE_SURVEYS=$3     # Create surveys flag
+export CREATE_PREP_TABLES=$3     # Create surveys flag
 
 function deleteAndCreateTable(){
   local table_name=$1
@@ -30,7 +30,7 @@ function deleteAndCreateTable(){
   wait
 }
 
-INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3", "R2021Q3R5", "C2021Q2R1", "C2021Q3R6", "R2022Q2R2", "C2022Q2R2", "R2022Q2R6", "SR2022Q2R6", "SC2022Q2R6", "SC2021Q2R1")
+INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4" "R2020Q4R3" "R2021Q3R5" "C2021Q2R1" "C2021Q3R6" "R2022Q2R2" "C2022Q2R2" "R2022Q2R6" "SR2022Q2R6" "SC2022Q2R6" "SC2021Q2R1")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
@@ -62,11 +62,13 @@ do
       if [[ "$TABLE_LIST" == *"zip3_ses_map"* ]]; then
         deleteAndCreateTable "$table_name"
       fi
-    elif [[ "$table_name" == 'prep_survey' ]]; then
-      if [[ "$CREATE_SURVEYS" == true ]]; then
+    # We need to check for any tables that start with prep_ in case we are not building them
+    # We need to check for ds_data_dictionary cause it's the only non prep_ table that is built in the build-static-prep-tables.sh
+    elif [[ "$table_name" == prep* ]] || [[ "$table_name" == 'ds_data_dictionary' ]]; then
+      if [[ "$CREATE_PREP_TABLES" == true ]]; then
         deleteAndCreateTable "$table_name"
       else
-        echo "Keeping existing prep_survey table"
+        echo "Keeping existing table: $table_name"
       fi
     else
       deleteAndCreateTable "$table_name"
