@@ -13,7 +13,7 @@ import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renew
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { profileStore, useStore } from 'app/utils/stores';
+import { profileStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   headerContainer: {
@@ -53,6 +53,9 @@ const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
 export const NavBar = () => {
+  const {
+    config: { enableControlledTierTrainingRenewal },
+  } = useStore(serverConfigStore);
   const [showSideNav, setShowSideNav] = useState(false);
   const [barsTransform, setBarsTransform] = useState(barsTransformNotRotated);
   const [hovering, setHovering] = useState(false);
@@ -115,9 +118,11 @@ export const NavBar = () => {
       <AccessRenewalNotificationMaybe
         accessTier={AccessTierShortNames.Registered}
       />
-      <AccessRenewalNotificationMaybe
-        accessTier={AccessTierShortNames.Controlled}
-      />
+      {enableControlledTierTrainingRenewal && (
+        <AccessRenewalNotificationMaybe
+          accessTier={AccessTierShortNames.Controlled}
+        />
+      )}
       <StatusAlertBannerMaybe />
       <TakeDemographicSurveyV2BannerMaybe />
       <NewUserSatisfactionSurveyBannerMaybe />
