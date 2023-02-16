@@ -224,7 +224,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
+            registeredTierAccessSubstitutionMap(expirationTime, user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -250,7 +250,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
+            registeredTierAccessSubstitutionMap(expirationTime, user));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -502,14 +502,19 @@ public class MailServiceImpl implements MailService {
   }
 
   private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
-      Instant expirationTime, String username) {
+      Instant expirationTime, DbUser user) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
-        .put(EmailSubstitutionField.USERNAME, username)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.URL, getUiUrlAsHref())
+        .put(EmailSubstitutionField.TIER, "Registered")
+        .put(
+            EmailSubstitutionField.FIRST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
+        .put(EmailSubstitutionField.BADGE_URL, getRTBadgeImage())
         .build();
   }
 
@@ -700,6 +705,10 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
   }
 
+  private String getRTBadgeImage() {
+    return cloudStorageClientProvider.get().getImageUrl("registered-tier-badge.svg");
+  }
+
   private String formatPercentage(double threshold) {
     return NumberFormat.getPercentInstance().format(threshold);
   }
@@ -717,8 +726,8 @@ public class MailServiceImpl implements MailService {
   }
 
   private String formatCentralTime(Instant date) {
-    // e.g. April 5, 2021 at 1:23PM Central Time
-    return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
+    // e.g. April 5, 2021 at 1:23PM CT
+    return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'CT'")
         .withLocale(Locale.US)
         .withZone(ZoneId.of("America/Chicago"))
         .format(date);
