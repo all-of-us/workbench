@@ -32,7 +32,7 @@ import {
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
   findMachineByName,
-  Machine,
+  Machine, MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
@@ -682,7 +682,9 @@ export const withAnalysisConfigDefaults = (
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
     if (detachable === false) {
-      detachableType = null;
+      detachableType = DiskType.Standard;
+      detachable = true;
+      size = MIN_DISK_SIZE_GB;
     } else if (detachable === true || existingDisk) {
       detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
@@ -795,8 +797,8 @@ export const toAnalysisConfig = (
       computeType: null,
       machine: null,
       diskConfig: {
-        size: null,
-        detachable: null,
+        size: 150,
+        detachable: true,
         detachableType: null,
         existingDiskName: null,
       },

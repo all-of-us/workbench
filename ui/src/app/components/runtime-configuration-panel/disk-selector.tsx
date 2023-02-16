@@ -151,7 +151,7 @@ export const DiskSelector = ({
               )
             }
             checked={
-              isComputeTypeStandard(computeType) || diskConfig.detachable
+              diskConfig.detachable
             }
             disabled={disabled || !!disableDetachableReason}
           />

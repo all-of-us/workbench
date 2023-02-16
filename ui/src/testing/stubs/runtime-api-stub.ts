@@ -22,7 +22,7 @@ import { stubDisk } from './disks-api-stub';
 export const defaultGceConfig = (): GceConfig => ({
   // Set the default disk size a bit over the minimum for ease of testing
   // decreases in the disk size.
-  diskSize: MIN_DISK_SIZE_GB + 30,
+  diskSize: DATAPROC_MIN_DISK_SIZE_GB ,
   machineType: 'n1-standard-4',
 });
 
@@ -44,6 +44,7 @@ export const defaultRuntime = () => ({
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
   gceConfig: defaultGceConfig(),
+  gcePersistentDisk: {size: DATAPROC_MIN_DISK_SIZE_GB},
   errors: [],
 });
 

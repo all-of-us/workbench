@@ -23,9 +23,15 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: DEFAULT_MACHINE_NAME,
-        diskSize: MIN_DISK_SIZE_GB,
+        diskSize: 150,
         gpuConfig: null,
       },
+      gceWithPdConfig: {
+        diskType: 'pd-standard',
+        labels: {},
+        name: 'stub-disk',
+        size: 150
+      }
     },
   },
   hailAnalysis: {
