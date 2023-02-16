@@ -333,7 +333,7 @@ export const ButtonWithLocationState = ({
 
 export const HashLinkButton = ({
   children,
-  path = '',
+  path,
   type = 'primary',
   style = {},
   disabled = false,
@@ -348,16 +348,12 @@ export const HashLinkButton = ({
     computeStyle(buttonVariants[type], { disabled }),
     { style }
   );
-  return path ? (
-    <HashLink to={path} {...computedStyle}>
+  return (
+    <HashLink smooth to={path} {...computedStyle}>
       <Clickable disabled={disabled} {...childProps}>
         {children}
       </Clickable>
     </HashLink>
-  ) : (
-    <Clickable disabled={disabled} {...computedStyle} {...childProps}>
-      {children}
-    </Clickable>
   );
 };
 
