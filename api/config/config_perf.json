@@ -103,7 +103,7 @@
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 3650,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
     }
