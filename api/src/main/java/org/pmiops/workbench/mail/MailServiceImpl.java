@@ -226,44 +226,74 @@ public class MailServiceImpl implements MailService {
             formatCentralTime(expirationTime));
     log.info(logMsg);
 
+    String resource;
+
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        break;
+      default:
+        resource = null;
+    }
+
     final String htmlMessage =
-        buildHtml(
-            REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user, tierShortName));
+        buildHtml(resource, accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Your access to All of Us Registered Tier Data will expire "
+        "Your access to All of Us "
+            + StringUtils.capitalize(tierShortName)
+            + " Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
-            "User %s (%s) will lose registered tier access in %d days",
-            user.getUsername(), user.getContactEmail(), daysRemaining),
+            "User %s (%s) will lose " + tierShortName + " tier access in %d days",
+            user.getUsername(),
+            user.getContactEmail(),
+            daysRemaining),
         htmlMessage);
   }
 
   @Override
   public void alertUserAccessTierExpiration(
       final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException {
+    String resource;
+
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        break;
+      default:
+        resource = null;
+    }
+
+    String capitalizedAccessTierShortName = StringUtils.capitalize(tierShortName);
 
     final String logMsg =
         String.format(
-            "Registered Tier access expired for user %s (%s) on %s.",
-            user.getUsername(), user.getContactEmail(), formatCentralTime(expirationTime));
+            capitalizedAccessTierShortName + " Tier access expired for user %s (%s) on %s.",
+            user.getUsername(),
+            user.getContactEmail(),
+            formatCentralTime(expirationTime));
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(
-            REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user, tierShortName));
+        buildHtml(resource, accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Your access to All of Us Registered Tier Data has expired",
+        "Your access to All of Us " + capitalizedAccessTierShortName + " Tier Data has expired",
         String.format(
-            "Registered Tier access expired for user %s (%s)",
-            user.getUsername(), user.getContactEmail()),
+            capitalizedAccessTierShortName + " Tier access expired for user %s (%s)",
+            user.getUsername(),
+            user.getContactEmail()),
         htmlMessage);
   }
 
@@ -506,7 +536,7 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
+  private ImmutableMap<EmailSubstitutionField, String> accessTierSubstitutionMap(
       Instant expirationTime, DbUser user, String tierShortName) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
