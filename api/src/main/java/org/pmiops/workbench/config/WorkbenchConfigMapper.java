@@ -82,5 +82,8 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableConceptSetsInCohortBuilder",
       source = "config.featureFlags.enableConceptSetsInCohortBuilder")
+  @Mapping(
+      target = "enableControlledTierTrainingRenewal",
+      source = "config.featureFlags.enableControlledTierTrainingRenewal")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
