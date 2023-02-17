@@ -67,7 +67,10 @@ const TemporaryTrainingModule = (props: { profile: Profile }) => {
   const moduleName = AccessModule.CTCOMPLIANCETRAINING;
   const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
-    <FlexRow data-test-id={`module-${moduleName}`}>
+    <FlexRow
+      data-test-id={`module-${moduleName}`}
+      style={{ paddingTop: '1.4em' }}
+    >
       <FlexRow style={styles.moduleCTA} />
       <FlexRow style={styles.backgroundModuleBox}>
         <ModuleIcon
