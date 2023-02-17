@@ -96,9 +96,7 @@ export const DiskSelector = ({
                 existingDiskName: null,
               })
             }
-            checked={
-              !isComputeTypeStandard(computeType) && !diskConfig.detachable
-            }
+            checked={!diskConfig.detachable}
           />
           <FlexColumn>
             <label style={styles.diskLabel}>Standard disk</label>
