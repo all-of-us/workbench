@@ -6,7 +6,6 @@ import {
   DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
   DEFAULT_MACHINE_NAME,
-  MIN_DISK_SIZE_GB,
 } from './machines';
 
 export const runtimePresets: {
@@ -26,12 +25,6 @@ export const runtimePresets: {
         diskSize: 150,
         gpuConfig: null,
       },
-      gceWithPdConfig: {
-        diskType: 'pd-standard',
-        labels: {},
-        name: 'stub-disk',
-        size: 150
-      }
     },
   },
   hailAnalysis: {

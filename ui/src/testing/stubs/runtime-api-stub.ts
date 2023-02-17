@@ -9,10 +9,7 @@ import {
 } from 'generated/fetch';
 
 import { disksApi } from 'app/services/swagger-fetch-clients';
-import {
-  DATAPROC_MIN_DISK_SIZE_GB,
-  MIN_DISK_SIZE_GB,
-} from 'app/utils/machines';
+import { DATAPROC_MIN_DISK_SIZE_GB } from 'app/utils/machines';
 
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
@@ -22,7 +19,7 @@ import { stubDisk } from './disks-api-stub';
 export const defaultGceConfig = (): GceConfig => ({
   // Set the default disk size a bit over the minimum for ease of testing
   // decreases in the disk size.
-  diskSize: DATAPROC_MIN_DISK_SIZE_GB ,
+  diskSize: DATAPROC_MIN_DISK_SIZE_GB,
   machineType: 'n1-standard-4',
 });
 
@@ -44,7 +41,7 @@ export const defaultRuntime = () => ({
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
   gceConfig: defaultGceConfig(),
-  gcePersistentDisk: {size: DATAPROC_MIN_DISK_SIZE_GB},
+  gcePersistentDisk: { size: DATAPROC_MIN_DISK_SIZE_GB },
   errors: [],
 });
 

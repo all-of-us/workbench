@@ -539,11 +539,11 @@ describe('RuntimeConfigurationPanel', () => {
       machineType: 'n1-highmem-8',
       gpuConfig: null,
       persistentDisk: {
-          diskType: "pd-standard",
-          labels: {},
-          name: "stub-disk",
-          size: MIN_DISK_SIZE_GB + 10,
-      }
+        diskType: 'pd-standard',
+        labels: {},
+        name: 'stub-disk',
+        size: MIN_DISK_SIZE_GB + 10,
+      },
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
@@ -1073,7 +1073,6 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Update');
     expect(updateSpy).toHaveBeenCalled();
     expect(deleteSpy).toHaveBeenCalledTimes(0);
-
   });
 
   it('should send a delete call if an update requires delete', async () => {

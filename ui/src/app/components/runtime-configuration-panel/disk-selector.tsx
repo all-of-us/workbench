@@ -150,9 +150,7 @@ export const DiskSelector = ({
                 )
               )
             }
-            checked={
-              diskConfig.detachable
-            }
+            checked={diskConfig.detachable}
             disabled={disabled || !!disableDetachableReason}
           />
           <FlexColumn>

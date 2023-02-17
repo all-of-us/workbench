@@ -32,7 +32,8 @@ import {
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
   findMachineByName,
-  Machine, MIN_DISK_SIZE_GB,
+  Machine,
+  MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
