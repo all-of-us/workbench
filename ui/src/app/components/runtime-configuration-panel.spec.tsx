@@ -607,7 +607,7 @@ describe('RuntimeConfigurationPanel', () => {
       RuntimeConfigurationType.UserOverride
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        {"diskType": "pd-standard", "labels": {}, "name": "stub-disk", "size": 120}
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
