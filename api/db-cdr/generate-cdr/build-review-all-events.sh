@@ -6,8 +6,7 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DATA_BROWSER=$3 # data browser flag
-export DOMAIN_TOKEN=$4
+export DOMAIN_TOKEN=$3
 
 function do_survey(){
 #########################################
@@ -295,12 +294,6 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_I
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 }
-
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the cb_review_all_events table."
-  exit 0
-fi
 
 if [[ "$DOMAIN_TOKEN" = "survey" ]]; then
   do_survey
