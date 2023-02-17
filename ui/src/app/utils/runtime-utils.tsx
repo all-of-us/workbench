@@ -798,7 +798,7 @@ export const toAnalysisConfig = (
       computeType: null,
       machine: null,
       diskConfig: {
-        size: 150,
+        size: DATAPROC_MIN_DISK_SIZE_GB,
         detachable: true,
         detachableType: null,
         existingDiskName: null,
