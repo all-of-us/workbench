@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+
 import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> sendAccessExpirationEmails() {
-    userService.getAllUsers().forEach(userService::maybeSendAccessExpirationEmail);
+    userService
+        .getAllUsers()
+        .forEach(
+            user ->
+                userService.maybeSendAccessTierExpirationEmail(user, REGISTERED_TIER_SHORT_NAME));
     return ResponseEntity.noContent().build();
   }
 }

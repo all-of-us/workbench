@@ -1,10 +1,16 @@
 package org.pmiops.workbench.db.dao;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
+
 import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -806,11 +812,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   @Override
-  public void maybeSendAccessExpirationEmail(DbUser user) {
-    // TODO combine with CT expiration logic when available to send AT MOST ONE email
-
-    final Optional<Timestamp> rtExpiration = getRegisteredTierExpirationForEmails(user);
-    rtExpiration.ifPresent(expiration -> maybeSendRegisteredTierExpirationEmail(user, expiration));
+  public void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
+    final Optional<Timestamp> rtExpiration = getTierExpirationForEmails(user, tierShortName);
+    rtExpiration.ifPresent(
+        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, "registered"));
   }
 
   @Override
@@ -831,12 +836,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
    */
-  private Optional<Timestamp> getRegisteredTierExpirationForEmails(DbUser user) {
+  private Optional<Timestamp> getTierExpirationForEmails(DbUser user, String tierShortName) {
+
+    List<DbAccessModuleName> requiredModules;
+
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        requiredModules = REQUIRED_MODULES_FOR_REGISTERED_TIER;
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        requiredModules = REQUIRED_MODULES_FOR_CONTROLLED_TIER;
+        break;
+      default:
+        requiredModules = new ArrayList<>();
+    }
+
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     Set<Optional<Long>> expirations =
         accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getBypassEpochMillis() == null)
+            .filter(
+                a ->
+                    requiredModules.contains(
+                        accessModuleNameMapper.clientAccessModuleToStorage(a.getModuleName())))
             .map(a -> Optional.ofNullable(a.getExpirationEpochMillis()))
             .collect(Collectors.toSet());
 
@@ -857,7 +880,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void maybeSendRegisteredTierExpirationEmail(DbUser user, Timestamp expiration) {
+  private void maybeSendAccessTierExpirationEmail(
+      DbUser user, Timestamp expiration, String tierShortName) {
     long millisRemaining = expiration.getTime() - clock.millis();
     long daysRemaining = TimeUnit.DAYS.convert(millisRemaining, TimeUnit.MILLISECONDS);
 
@@ -865,11 +889,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     try {
       // we only want to send the expiration email on the day of the actual expiration
       if (millisRemaining < 0 && daysRemaining == 0) {
-        mailService.alertUserRegisteredTierExpiration(user, expiration.toInstant());
+        mailService.alertUserAccessTierExpiration(user, expiration.toInstant(), tierShortName);
       } else {
         if (thresholds.contains(daysRemaining)) {
-          mailService.alertUserRegisteredTierWarningThreshold(
-              user, daysRemaining, expiration.toInstant());
+          mailService.alertUserAccessTierWarningThreshold(
+              user, daysRemaining, expiration.toInstant(), tierShortName);
         }
       }
     } catch (final MessagingException e) {

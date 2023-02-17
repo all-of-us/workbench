@@ -48,6 +48,7 @@ import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class MailServiceImpl implements MailService {
@@ -209,8 +210,9 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserRegisteredTierWarningThreshold(
-      final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
+  public void alertUserAccessTierWarningThreshold(
+      final DbUser user, long daysRemaining, Instant expirationTime, String tierShortName)
+      throws MessagingException {
 
     final String logMsg =
         String.format(
@@ -224,7 +226,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user));
+            registeredTierAccessSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -238,8 +240,8 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
-      throws MessagingException {
+  public void alertUserAccessTierExpiration(
+      final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException {
 
     final String logMsg =
         String.format(
@@ -250,7 +252,7 @@ public class MailServiceImpl implements MailService {
     final String htmlMessage =
         buildHtml(
             REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user));
+            registeredTierAccessSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
@@ -502,7 +504,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
-      Instant expirationTime, DbUser user) {
+      Instant expirationTime, DbUser user, String tierShortName) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
@@ -510,11 +512,11 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
         .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.URL, getUiUrlAsHref())
-        .put(EmailSubstitutionField.TIER, "Registered")
+        .put(EmailSubstitutionField.TIER, StringUtils.capitalize(tierShortName))
         .put(
             EmailSubstitutionField.FIRST_NAME,
             HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
-        .put(EmailSubstitutionField.BADGE_URL, getRTBadgeImage())
+        .put(EmailSubstitutionField.BADGE_URL, getBadgeImage(tierShortName))
         .build();
   }
 
@@ -705,7 +707,10 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
   }
 
-  private String getRTBadgeImage() {
+  private String getBadgeImage(String tierShortName) {
+    if (tierShortName.equals("controlled")) {
+      return cloudStorageClientProvider.get().getImageUrl("controlled-tier-badge.svg");
+    }
     return cloudStorageClientProvider.get().getImageUrl("registered-tier-badge.svg");
   }
 

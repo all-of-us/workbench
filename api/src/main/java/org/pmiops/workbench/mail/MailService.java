@@ -31,11 +31,12 @@ public interface MailService {
 
   void alertUserInitialCreditsExpiration(final DbUser user) throws MessagingException;
 
-  void alertUserRegisteredTierWarningThreshold(
-      final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException;
-
-  void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
+  void alertUserAccessTierWarningThreshold(
+      final DbUser user, long daysRemaining, Instant expirationTime, String tierShortName)
       throws MessagingException;
+
+  void alertUserAccessTierExpiration(
+      final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException;
 
   /**
    * Notifies the specified users via BCC that there is an unused persistent disk. CC could also be
