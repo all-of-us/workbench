@@ -2,12 +2,15 @@ import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+import { DemoChartInfo } from 'generated/fetch';
+
 import { getChartObj } from 'app/pages/data/cohort/utils';
 import colors from 'app/styles/colors';
 
 interface Props {
+  data: DemoChartInfo[];
+  legendTitle: string;
   mode: string;
-  data: any;
 }
 
 interface State {
@@ -34,7 +37,7 @@ export class ComboChart extends React.Component<Props, State> {
   }
 
   getChartOptions() {
-    const { mode } = this.props;
+    const { legendTitle, mode } = this.props;
     const normalized = mode === 'normalized';
     const { categories, series } = this.getCategoriesAndSeries();
     const height = Math.max(categories.length * 30, 200);
@@ -65,7 +68,11 @@ export class ComboChart extends React.Component<Props, State> {
       },
       colors: colors.chartColors,
       legend: {
-        enabled: false,
+        title: {
+          style: { fontWeight: 'normal' },
+          text: legendTitle,
+        },
+        reversed: true,
       },
       plotOptions: {
         bar: {
@@ -74,6 +81,28 @@ export class ComboChart extends React.Component<Props, State> {
         },
         series: {
           stacking: normalized ? 'percent' : 'normal',
+          events: {
+            legendItemClick: function () {
+              const seriesIndex = this.index;
+              if (this.visible && this.chart.restIsHidden) {
+                for (let i = 0; i < this.chart.series.length; i++) {
+                  if (this.chart.series[i].index !== seriesIndex) {
+                    this.chart.series[i].show();
+                  }
+                }
+                this.chart.restIsHidden = false;
+              } else {
+                for (let i = 0; i < this.chart.series.length; i++) {
+                  if (this.chart.series[i].index !== seriesIndex) {
+                    this.chart.series[i].hide();
+                  }
+                }
+                this.show();
+                this.chart.restIsHidden = true;
+              }
+              return false;
+            },
+          },
         },
       },
       series,
@@ -83,31 +112,20 @@ export class ComboChart extends React.Component<Props, State> {
 
   getCategoriesAndSeries() {
     const { data } = this.props;
-    const codeMap = {
-      M: 'Male',
-      F: 'Female',
-      'No matching concept': 'Unknown',
-    };
-    const getKey = (dat) => {
-      const gender = !!codeMap[dat.name] ? codeMap[dat.name] : dat.name;
-      return `${gender} ${dat.ageRange || 'Unknown'}`;
-    };
     const categories = data
-      .reduce((acc, datum) => {
-        const key = getKey(datum);
-        if (!acc.includes(key)) {
-          acc.push(key);
+      .reduce((acc, { name }) => {
+        if (!acc.includes(name)) {
+          acc.push(name);
         }
         return acc;
       }, [])
       .sort((a, b) => (a > b ? 1 : -1));
     const series = data
-      .reduce((acc, datum) => {
-        const key = getKey(datum);
-        const obj = { x: categories.indexOf(key), y: datum.count };
-        const index = acc.findIndex((d) => d.name === datum.race);
+      .reduce((acc, { ageRange, count, name }) => {
+        const obj = { x: categories.indexOf(name), y: count };
+        const index = acc.findIndex((d) => d.name === ageRange);
         if (index === -1) {
-          acc.push({ name: datum.race, data: [obj] });
+          acc.push({ name: ageRange, data: [obj] });
         } else {
           acc[index].data.push(obj);
         }

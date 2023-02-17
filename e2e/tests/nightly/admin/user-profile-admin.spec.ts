@@ -520,7 +520,7 @@ describe('User Profile Admin page', () => {
     await userAdminPage.searchUser(userName);
 
     const adminTable = new AdminTable(page);
-    const nameColumnIndex = await adminTable.getNameColindex();
+    const nameColumnIndex = await adminTable.getNameColIndex();
     // Click name to navigate to User Profile Admin page
     await userAdminPage.clickUserName(1, nameColumnIndex);
 

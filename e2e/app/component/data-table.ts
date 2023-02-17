@@ -19,7 +19,7 @@ export default class DataTable extends Table {
     );
   }
 
-  getBodyTable(): Table {
+  getTable(): Table {
     return new Table(
       this.page,
       `${this.getXpath()}//table[contains(concat(" ", normalize-space(@class), " "), " p-datatable-table ")]`

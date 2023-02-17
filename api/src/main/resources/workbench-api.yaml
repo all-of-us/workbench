@@ -1675,25 +1675,6 @@ paths:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/admin/users/sendTerraTosReminderEmails":
-    post:
-      tags:
-        - userAdmin
-      consumes:
-        - application/json
-      description: >
-        Send emails to currently-registered users who have not yet agreed to the most recent
-        version of Terra's Terms of Service. Requires COMMUNICATIONS_ADMIN Authority.
-      operationId: sendTerraTosReminderEmails
-      responses:
-        200:
-          description: 'A response containing the emails of the users who were notified'
-          schema:
-            "$ref": "#/definitions/TerraTosReminderEmailsResponse"
-        403:
-          description: User doesn't have the COMMUNICATIONS_ADMIN authority
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/admin/workspaces/{workspaceNamespace}/locked":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4103,7 +4084,7 @@ paths:
           schema:
             type: integer
             format: int64
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderOrSex}/{age}":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/chartinfo/{genderSexRaceOrEth}/{age}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -4116,10 +4097,10 @@ paths:
       operationId: findDemoChartInfo
       parameters:
       - in: path
-        name: genderOrSex
+        name: genderSexRaceOrEth
         type: string
         required: true
-        description: represents gender or sex at birth
+        description: represents gender, sex at birth, race or ethnicity
       - in: path
         name: age
         type: string
@@ -4735,6 +4716,10 @@ definitions:
         type: boolean
         default: true
         description: Whether a captcha check is part of the new user registration process
+      enableConceptSetsInCohortBuilder:
+        type: boolean
+        default: false
+        description: Whether to enable adding ConceptSets to CohortBuilder.
 
   RuntimeImage:
     type: object
@@ -8917,12 +8902,14 @@ definitions:
     - AGE
     - AGE_AT_CONSENT
     - AGE_AT_CDR
-  GenderOrSexType:
+  GenderSexRaceOrEthType:
     type: string
-    description: represents gender or sex at birth
+    description: represents gender, sex at birth, race or ethnicity
     enum:
     - GENDER
     - SEX_AT_BIRTH
+    - RACE
+    - ETHNICITY
   DemoChartInfoListResponse:
     type: object
     required:
@@ -8936,15 +8923,11 @@ definitions:
     type: object
     required:
     - name
-    - race
     - ageRange
     - count
     properties:
       name:
-        description: gender or sex at birth of subject
-        type: string
-      race:
-        description: race of subject
+        description: gender, sex at birth, race or ethnicity of subject
         type: string
       ageRange:
         description: age range of subject
@@ -10413,16 +10396,3 @@ definitions:
       - NEUTRAL
       - SATISFIED
       - VERY_SATISFIED
-
-  TerraTosReminderEmailsResponse:
-    type: object
-    properties:
-      users:
-        type: array
-        items:
-          type: object
-          properties:
-            username:
-              type: string
-            contactEmail:
-              type: string

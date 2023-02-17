@@ -319,6 +319,8 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
+    // If true, enable enableConceptSetsInCohortBuilder
+    public boolean enableConceptSetsInCohortBuilder;
   }
 
   public static class ActionAuditConfig {
@@ -446,9 +448,5 @@ public class WorkbenchConfig {
   public static class TermsOfServiceConfig {
     // which All of Us Terms of Service is considered current
     public int latestAouVersion;
-
-    // When the current version of the Terra Terms of Service was released,
-    // in ISO 8601 string format
-    public String latestTerraTosTimestamp;
   }
 }

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import {
+  AppsApi,
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
@@ -16,6 +17,7 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
+import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -39,6 +41,7 @@ import {
   mountWithRouter,
   waitForFakeTimersAndUpdate,
 } from 'testing/react-test-helpers';
+import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
@@ -53,7 +56,6 @@ import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { ConfirmDeleteModal } from './confirm-delete-modal';
 import { HelpSidebar } from './help-sidebar';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
@@ -170,6 +172,7 @@ describe('HelpSidebar', () => {
     registerApiClient(DataSetApi, dataSetStub);
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
+    registerApiClient(AppsApi, new AppsApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({
@@ -235,7 +238,7 @@ describe('HelpSidebar', () => {
       .first()
       .simulate('click');
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(wrapper.find(ConfirmDeleteModal).exists()).toBeTruthy();
+    expect(wrapper.find(ConfirmWorkspaceDeleteModal).exists()).toBeTruthy();
   });
 
   it('should show workspace share modal on clicking share workspace', async () => {

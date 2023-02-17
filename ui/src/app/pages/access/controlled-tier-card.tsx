@@ -129,7 +129,11 @@ export const ControlledTierCard = (props: {
   const { enableComplianceTraining } = serverConfigStore.get().config;
 
   return (
-    <FlexRow data-test-id='controlled-card' style={styles.card}>
+    <FlexRow
+      id='controlled-card'
+      data-test-id='controlled-card'
+      style={styles.card}
+    >
       <FlexColumn>
         <div style={styles.cardStep}>Step 2</div>
         <div style={styles.cardHeader}>Additional Data Access</div>

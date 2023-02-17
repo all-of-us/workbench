@@ -190,7 +190,8 @@ public class DisksControllerTest {
             NOW.toString(),
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProject(GOOGLE_PROJECT_ID, false))
+    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
+            GOOGLE_PROJECT_ID, false))
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
@@ -204,22 +205,6 @@ public class DisksControllerTest {
 
     assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
         .containsExactly(expectedGceDisk, expectedRStudioDisk);
-  }
-
-  @Test
-  public void testListPD_nameNotMatchingPrefix() throws ApiException {
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        newListPdResponse(
-            "rstudio1",
-            LeonardoDiskStatus.READY,
-            NOW.minusSeconds(100).toString(),
-            AppType.RSTUDIO);
-
-    rstudioDisk.auditInfo(rstudioDisk.getAuditInfo().creator("other@gmail.com"));
-    when(mockLeonardoApiClient.listPersistentDiskByProject(GOOGLE_PROJECT_ID, false))
-        .thenReturn(ImmutableList.of(rstudioDisk));
-
-    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody()).isEmpty();
   }
 
   @Test

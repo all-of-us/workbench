@@ -7,7 +7,8 @@ import {
   AgeType,
   CdrVersionTiersResponse,
   Cohort,
-  GenderOrSexType,
+  DemoChartInfo,
+  GenderSexRaceOrEthType,
   ResourceType,
   TemporalTime,
   WorkspaceAccessLevel,
@@ -28,7 +29,7 @@ import { GenderChart } from 'app/pages/data/cohort/gender-chart';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import {
   ageTypeToText,
-  genderOrSexTypeToText,
+  genderSexRaceOrEthTypeToText,
   mapRequest,
 } from 'app/pages/data/cohort/utils';
 import {
@@ -152,14 +153,14 @@ interface State {
   ageType: AgeType;
   apiCallCheck: number;
   apiError: boolean;
-  chartData: any;
+  chartData: DemoChartInfo[];
   cohortSizeError: boolean;
   currentGraphOptions: {
     ageType: AgeType;
-    genderOrSexType: GenderOrSexType;
+    chartType: GenderSexRaceOrEthType;
   };
   deleting: boolean;
-  genderOrSexType: GenderOrSexType;
+  chartType: GenderSexRaceOrEthType;
   initializing: boolean;
   loading: boolean;
   refreshing: boolean;
@@ -192,10 +193,10 @@ export const ListOverview = fp.flow(
         cohortSizeError: false,
         currentGraphOptions: {
           ageType: AgeType.AGEATCDR,
-          genderOrSexType: GenderOrSexType.GENDER,
+          chartType: GenderSexRaceOrEthType.RACE,
         },
         deleting: false,
-        genderOrSexType: GenderOrSexType.GENDER,
+        chartType: GenderSexRaceOrEthType.RACE,
         initializing: true,
         loading: false,
         refreshing: false,
@@ -272,10 +273,10 @@ export const ListOverview = fp.flow(
       this.setState({ refreshing: true });
       this.callApi()
         .then((response) => {
-          const { ageType, genderOrSexType } = this.state;
+          const { ageType, chartType } = this.state;
           this.setState({
             chartData: response.items,
-            currentGraphOptions: { ageType, genderOrSexType },
+            currentGraphOptions: { ageType, chartType },
           });
         })
         .catch((error) => {
@@ -288,13 +289,13 @@ export const ListOverview = fp.flow(
 
     callApi() {
       const { searchRequest } = this.props;
-      const { ageType, genderOrSexType } = this.state;
+      const { ageType, chartType } = this.state;
       const { id, namespace } = currentWorkspaceStore.getValue();
       const request = mapRequest(searchRequest);
       return cohortBuilderApi().findDemoChartInfo(
         namespace,
         id,
-        genderOrSexType.toString(),
+        chartType.toString(),
         ageType.toString(),
         request,
         { signal: this.aborter.signal }
@@ -492,17 +493,29 @@ export const ListOverview = fp.flow(
       ];
     }
 
-    get genderOrSexItems() {
+    get chartTypeItems() {
       return [
         {
-          label: genderOrSexTypeToText(GenderOrSexType.GENDER),
+          label: genderSexRaceOrEthTypeToText(GenderSexRaceOrEthType.ETHNICITY),
           command: () =>
-            this.setState({ genderOrSexType: GenderOrSexType.GENDER }),
+            this.setState({ chartType: GenderSexRaceOrEthType.ETHNICITY }),
         },
         {
-          label: genderOrSexTypeToText(GenderOrSexType.SEXATBIRTH),
+          label: genderSexRaceOrEthTypeToText(GenderSexRaceOrEthType.RACE),
           command: () =>
-            this.setState({ genderOrSexType: GenderOrSexType.SEXATBIRTH }),
+            this.setState({ chartType: GenderSexRaceOrEthType.RACE }),
+        },
+        {
+          label: genderSexRaceOrEthTypeToText(GenderSexRaceOrEthType.GENDER),
+          command: () =>
+            this.setState({ chartType: GenderSexRaceOrEthType.GENDER }),
+        },
+        {
+          label: genderSexRaceOrEthTypeToText(
+            GenderSexRaceOrEthType.SEXATBIRTH
+          ),
+          command: () =>
+            this.setState({ chartType: GenderSexRaceOrEthType.SEXATBIRTH }),
         },
       ];
     }
@@ -537,10 +550,10 @@ export const ListOverview = fp.flow(
     }
 
     get disableRefreshButton() {
-      const { ageType, currentGraphOptions, genderOrSexType } = this.state;
+      const { ageType, currentGraphOptions, chartType } = this.state;
       return (
         ageType === currentGraphOptions.ageType &&
-        genderOrSexType === currentGraphOptions.genderOrSexType
+        chartType === currentGraphOptions.chartType
       );
     }
 
@@ -559,10 +572,10 @@ export const ListOverview = fp.flow(
         ageType,
         apiError,
         chartData,
+        chartType,
         cohortSizeError,
         currentGraphOptions,
         deleting,
-        genderOrSexType,
         loading,
         refreshing,
         saveModalOpen,
@@ -741,7 +754,7 @@ export const ListOverview = fp.flow(
                   <div style={refreshing ? styles.disabled : {}}>
                     <Menu
                       appendTo={document.body}
-                      model={this.genderOrSexItems}
+                      model={this.chartTypeItems}
                       popup={true}
                       ref={(el) => (this.genderOrSexMenu = el)}
                     />
@@ -749,7 +762,7 @@ export const ListOverview = fp.flow(
                       style={styles.menuButton}
                       onClick={(event) => this.genderOrSexMenu.toggle(event)}
                     >
-                      {genderOrSexTypeToText(genderOrSexType)}{' '}
+                      {genderSexRaceOrEthTypeToText(chartType)}{' '}
                       <ClrIcon
                         style={{ float: 'right' }}
                         shape='caret down'
@@ -791,18 +804,18 @@ export const ListOverview = fp.flow(
                   ) : (
                     <React.Fragment>
                       <div style={styles.cardHeader}>
-                        {genderOrSexTypeToText(
-                          currentGraphOptions.genderOrSexType
+                        {genderSexRaceOrEthTypeToText(
+                          currentGraphOptions.chartType
                         )}
                       </div>
                       <div style={{ padding: '0.75rem 1.125rem' }}>
                         {!!chartData.length && <GenderChart data={chartData} />}
                       </div>
                       <div style={styles.cardHeader}>
-                        {genderOrSexTypeToText(
-                          currentGraphOptions.genderOrSexType
-                        )}
-                        , {ageTypeToText(currentGraphOptions.ageType)}, and Race
+                        {genderSexRaceOrEthTypeToText(
+                          currentGraphOptions.chartType
+                        )}{' '}
+                        and {ageTypeToText(currentGraphOptions.ageType)}
                         <ClrIcon
                           shape='sort-by'
                           className={stackChart ? 'is-info' : ''}
@@ -812,8 +825,11 @@ export const ListOverview = fp.flow(
                       <div style={{ padding: '0.75rem 1.125rem' }}>
                         {!!chartData.length && (
                           <ComboChart
-                            mode={stackChart ? 'stacked' : 'normalized'}
                             data={chartData}
+                            legendTitle={ageTypeToText(
+                              currentGraphOptions.ageType
+                            )}
+                            mode={stackChart ? 'stacked' : 'normalized'}
                           />
                         )}
                       </div>

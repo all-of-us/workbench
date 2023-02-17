@@ -245,10 +245,10 @@ public class LeonardoApiClientTest {
 
   @Test
   public void testListAppSuccess() throws Exception {
-    leonardoApiClient.listAppsInProject(GOOGLE_PROJECT_ID);
+    leonardoApiClient.listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
     verify(userAppsApi)
         .listAppByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS);
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS, "creator");
   }
 
   @Test

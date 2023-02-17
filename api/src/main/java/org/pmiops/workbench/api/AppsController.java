@@ -84,7 +84,8 @@ public class AppsController implements AppsApiDelegate {
     validateCanPerformApiAction(dbWorkspace);
 
     ListAppsResponse response = new ListAppsResponse();
-    response.addAll(leonardoApiClient.listAppsInProject(dbWorkspace.getGoogleProject()));
+    response.addAll(
+        leonardoApiClient.listAppsInProjectCreatedByCreator(dbWorkspace.getGoogleProject()));
     return ResponseEntity.ok(response);
   }
 

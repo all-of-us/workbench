@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { ResourceType, Workspace, WorkspaceAccessLevel } from 'generated/fetch';
+import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
 import {
   Button,
@@ -11,7 +11,7 @@ import {
   StyledRouterLink,
 } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
-import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
 import {
@@ -367,17 +367,17 @@ export const WorkspaceCard = fp.flow(withNavigation)(
             </FlexRow>
           </WorkspaceCardBase>
           {confirmDeleting && (
-            <ConfirmDeleteModal
+            <ConfirmWorkspaceDeleteModal
               data-test-id='confirm-delete-modal'
-              resourceType={ResourceType.WORKSPACE}
-              resourceName={workspace.name}
+              closeFunction={() => {
+                this.setState({ confirmDeleting: false });
+              }}
               receiveDelete={() => {
                 AnalyticsTracker.Workspaces.Delete();
                 this.deleteWorkspace();
               }}
-              closeFunction={() => {
-                this.setState({ confirmDeleting: false });
-              }}
+              workspaceNamespace={workspace.namespace}
+              workspaceName={workspace.name}
             />
           )}
           {showShareModal && (

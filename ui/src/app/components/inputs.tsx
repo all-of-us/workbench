@@ -457,9 +457,17 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
 export const Select = ({ value, options, onChange, ...props }) => {
   return (
     <RSelect
+      classNamePrefix='react-select'
       value={options.find((o) => o.value === value)}
       options={options}
       onChange={(o) => onChange(o?.value)}
+      styles={{
+        input: (baseStyles) => ({
+          ...baseStyles,
+          width: '100%',
+          zIndex: 1,
+        }),
+      }}
       {...props}
     />
   );

@@ -63,8 +63,6 @@ public interface AccessTierService {
    */
   List<String> getAccessTierShortNamesForUser(DbUser user);
 
-  List<DbUser> getAllRegisteredTierUsers();
-
   DbAccessTier getRegisteredTierOrThrow();
 
   Optional<DbAccessTier> getAccessTierByName(String accessTierShortName);

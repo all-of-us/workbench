@@ -644,7 +644,7 @@ const prepackagedConceptSetToString = {
   FITBIT_INTRADAY_STEPS: 'Fitbit Intra Day Steps',
   FITBIT_SLEEP_DAILY_SUMMARY: 'Fitbit Sleep Daily Summary',
   FITBIT_SLEEP_LEVEL: 'Fitbit Sleep Level',
-  WHOLE_GENOME: 'Whole Genome Sequencing Data',
+  WHOLE_GENOME: 'Short Read Whole Genome Sequencing Data',
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
 

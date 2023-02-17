@@ -6,14 +6,8 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DATA_BROWSER=$3 # data browser build
-export TABLE_TOKEN=$4  # specific table to build
+export TABLE_TOKEN=$3  # specific table to build
 
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the ds tables."
-  exit 0
-fi
 
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
@@ -349,9 +343,9 @@ function do_PFHH(){
           AND type = 'PPI'
           AND subtype = 'ANSWER'
       ) b on a.value_source_concept_id = b.answer_concept_id
-  JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.answer_concept_id = CAST(c.value AS INT64)
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
-  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
+  WHERE a.is_standard = 0"
 }
 
 function do_COPE_vaccine(){

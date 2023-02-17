@@ -13,7 +13,9 @@ describe('GenderChart', () => {
   });
 
   it('should render', () => {
-    const wrapper = shallow(<ComboChart data={[]} mode='percent' />);
+    const wrapper = shallow(
+      <ComboChart data={[]} legendTitle='Age' mode='percent' />
+    );
     expect(wrapper.exists()).toBeTruthy();
   });
 });

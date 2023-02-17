@@ -117,7 +117,8 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableUpdatedDemographicSurvey": true
+    "enableUpdatedDemographicSurvey": true,
+    "enableConceptSetsInCohortBuilder": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -171,7 +172,6 @@
     ]
   },
   "termsOfService": {
-    "latestAouVersion": 1,
-    "latestTerraTosTimestamp": "2023-01-11T22:23:00Z"
+    "latestAouVersion": 1
   }
 }

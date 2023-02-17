@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AccessTierServiceImpl implements AccessTierService {
-  private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
 
   private final AccessTierDao accessTierDao;
@@ -34,12 +31,10 @@ public class AccessTierServiceImpl implements AccessTierService {
 
   @Autowired
   public AccessTierServiceImpl(
-      Provider<WorkbenchConfig> configProvider,
       Clock clock,
       AccessTierDao accessTierDao,
       UserAccessTierDao userAccessTierDao,
       FireCloudService fireCloudService) {
-    this.configProvider = configProvider;
     this.clock = clock;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
@@ -176,14 +171,6 @@ public class AccessTierServiceImpl implements AccessTierService {
   public List<String> getAccessTierShortNamesForUser(DbUser user) {
     return getAccessTiersForUser(user).stream()
         .map(DbAccessTier::getShortName)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<DbUser> getAllRegisteredTierUsers() {
-    return userAccessTierDao.getAllByAccessTier(getRegisteredTierOrThrow()).stream()
-        .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
-        .map(DbUserAccessTier::getUser)
         .collect(Collectors.toList());
   }
 

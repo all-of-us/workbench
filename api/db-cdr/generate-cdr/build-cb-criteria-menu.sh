@@ -6,13 +6,6 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DATA_BROWSER=$3 # data browser build
-
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the cb_criteria_menu table."
-  exit 0
-fi
 
 echo "Getting fitbit count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`

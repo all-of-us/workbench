@@ -35,7 +35,7 @@ describe('User Admin Table', () => {
     await bypassPopup.clickCancelBypass();
 
     //get the name column index separately since it is a frozen column
-    const nameColIndex = await adminTable.getNameColindex();
+    const nameColIndex = await adminTable.getNameColIndex();
 
     //click on the name link to navigate to the admin-user-profile page
     const userProfileAdmin = await userAdminPage.clickNameLink(1, nameColIndex);

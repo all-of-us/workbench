@@ -118,7 +118,7 @@ public class AppsControllerTest {
   @Test
   public void testListAppSuccess() throws Exception {
     controller.listAppsInWorkspace(WORKSPACE_NS);
-    verify(mockLeonardoApiClient).listAppsInProject(GOOGLE_PROJECT_ID);
+    verify(mockLeonardoApiClient).listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
   }
 
   @Test

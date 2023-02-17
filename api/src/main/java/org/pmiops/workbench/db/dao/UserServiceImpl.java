@@ -818,42 +818,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     directoryService.signOut(user.getUsername());
   }
 
-  @Override
-  public List<DbUser> sendTerraTosReminderEmails() {
-    List<DbUser> usersToRemind =
-        accessTierService.getAllRegisteredTierUsers().stream()
-            .filter(u -> shouldSendTerraTosReminderEmail(u.getUserId()))
-            .collect(Collectors.toList());
-
-    try {
-      for (DbUser user : usersToRemind) {
-        mailService.sendTerraTosReminderEmail(user);
-      }
-    } catch (MessagingException e) {
-      throw new ServerErrorException(e);
-    }
-
-    return usersToRemind;
-  }
-
-  @Override
-  public boolean shouldSendTerraTosReminderEmail(long userId) {
-    Timestamp latestTerraTosTime =
-        Timestamp.from(Instant.parse(configProvider.get().termsOfService.latestTerraTosTimestamp));
-
-    // the user is compliant if they have a TOS entry with a Terra agreement time after
-    // the latest Terra ToS was released
-    boolean userIsCompliant =
-        userTermsOfServiceDao
-            .findFirstByUserIdOrderByTosVersionDesc(userId)
-            .flatMap(dbTos -> Optional.ofNullable(dbTos.getTerraAgreementTime()))
-            .map(userAgreementTime -> userAgreementTime.after(latestTerraTosTime))
-            .orElse(false);
-
-    // send emails to noncompliant users
-    return !userIsCompliant;
-  }
-
   /**
    * Return the user's registered tier access expiration time, for the purpose of sending an access
    * renewal reminder or expiration email.

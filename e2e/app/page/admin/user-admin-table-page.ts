@@ -47,7 +47,7 @@ export default class UserAdminTablePage extends AuthenticatedPage {
   // click on the Bypass link to access the bypass modal
   async clickBypassLink(rowIndex = 1, colIndex = 1): Promise<BypassPopup> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     await getPropValue<string>(cell, 'textContent');
     await cell.click();
@@ -58,8 +58,7 @@ export default class UserAdminTablePage extends AuthenticatedPage {
   // click on the name link in the frozen column to navigate to the admin user profile page
   async clickNameLink(rowIndex = 1, colIndex = 1): Promise<UserProfileAdminPage> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getFrozenBody();
-    const cell = await bodyTable.getCellLink(rowIndex, colIndex);
+    const cell = await dataTable.getCellLink(rowIndex, colIndex);
     await cell.click();
     const newTarget = await browser.waitForTarget((target) => target.opener() === this.page.target());
     const newPage = await newTarget.page();
@@ -68,15 +67,14 @@ export default class UserAdminTablePage extends AuthenticatedPage {
 
   async clickUserName(rowIndex = 1, colIndex = 1): Promise<void> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getFrozenBody();
-    const cell = await bodyTable.getCellLink(rowIndex, colIndex);
+    const cell = await dataTable.getCellLink(rowIndex, colIndex);
     await cell.click();
   }
 
   // get the username email
   async getUserNameEmail(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     const textContent = await getPropValue<string>(cell, 'textContent');
     return textContent;
@@ -85,15 +83,15 @@ export default class UserAdminTablePage extends AuthenticatedPage {
   //extract only the Username text to verify the search box result
   async getUsernameText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    return getPropValue<string>(cell, 'textContent');
+    return getPropValue<string>(cell, 'innerText');
   }
 
   // extract only the User Lockout text
   async getUserLockoutText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     const textContent = await getPropValue<string>(cell, 'textContent');
     return textContent;
@@ -102,7 +100,7 @@ export default class UserAdminTablePage extends AuthenticatedPage {
   // extract only the status text to verify the user status
   async getStatusText(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     const textContent = await getPropValue<string>(cell, 'textContent');
     return textContent;
@@ -111,7 +109,7 @@ export default class UserAdminTablePage extends AuthenticatedPage {
   // click on the Audit link to navigate to the user audit page
   async clickAuditLink(rowIndex = 1, colIndex = 1): Promise<UserAuditPage> {
     const dataTable = this.getUserAdminTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCellLink(rowIndex, colIndex);
     await getPropValue<string>(cell, 'textContent');
     await cell.click();
