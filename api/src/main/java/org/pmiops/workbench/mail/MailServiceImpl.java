@@ -82,9 +82,9 @@ public class MailServiceImpl implements MailService {
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
   private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
-      "emails/rt_access_expired/content.html";
+      "emails/access_expired/content.html";
   private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
-      "emails/rt_access_threshold/content.html";
+      "emails/access_threshold/content.html";
   private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
       "emails/setup_gcp_billing_account/content.html";
   private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
@@ -264,10 +264,10 @@ public class MailServiceImpl implements MailService {
 
     switch (tierShortName) {
       case REGISTERED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        resource = REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE;
         break;
       case CONTROLLED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
+        resource = REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE;
         break;
       default:
         resource = null;
