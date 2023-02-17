@@ -24,18 +24,18 @@
           Thank you for using the All of Us Researcher Workbench.
           Your access to All of Us ${TIER} Tier data requires annual renewal,
           and the renewal deadline for your account
-          <a href="mailto:${USERNAME}">${USERNAME}</a> is coming up.
+          <a href="mailto:${USERNAME}">${USERNAME}</a> has passed.
         </mj-text>
       </mj-column>
     </mj-section>
     <mj-wrapper padding="0px 75px 10px 75px">
       <!-- width = 450px -->
-      <mj-section background-color="#F2F2F2" border-radius="5px" padding="10px 0px">
+      <mj-section background-color="#F7D4CE" border-radius="5px" padding="10px 0px">
           <mj-column vertical-align="middle" width="75px">
             <mj-image align="left" width="50px" src="${BADGE_URL}" />
           </mj-column>
           <mj-column vertical-align="middle" width="375px">
-            <mj-text color="#DE4F34" padding="0">${TIER} Tier Access <span style="font-weight:600">Expiring</span></mj-text>
+            <mj-text color="#DE4F34" padding="0">${TIER} Tier Access <span style="font-weight:600">Expired</span></mj-text>
             <mj-text color="#DE4F34" padding="0">Renew by: <span style="font-weight:600">${EXPIRATION_DATE}</span></mj-text>
           </mj-column>
       </mj-section>
@@ -44,7 +44,7 @@
     <mj-section>
       <mj-column>
         <mj-text>
-          You will lose access to the data and to any workspaces within the ${TIER} Tier of Research Workbench.
+          You have lost access to the data and to any workspaces within the ${TIER} Tier of Research Workbench.
           Any code or data you've created will remain as-is, but will be inaccessible until you complete renewal.
         </mj-text>
       </mj-column>
