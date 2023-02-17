@@ -1708,7 +1708,54 @@ describe('DataAccessRequirements', () => {
     expectNoCtRenewalBanner(wrapper);
   });
 
-  it('should show the correct state when RT modules are complete but CT training is expired', async () => {
+  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=false', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        unsafeAllowSelfBypass: true,
+        enableControlledTierTrainingRenewal: false,
+      },
+    });
+
+    expireAllRTModules();
+    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expectNoCompletionBanner(wrapper);
+    expectNoCtRenewalBanner(wrapper);
+  });
+
+  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=true', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        unsafeAllowSelfBypass: true,
+        enableControlledTierTrainingRenewal: true,
+      },
+    });
+
     expireAllRTModules();
     addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
 
