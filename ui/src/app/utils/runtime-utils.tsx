@@ -682,11 +682,7 @@ export const withAnalysisConfigDefaults = (
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
   if (computeType === ComputeType.Standard) {
-    if (detachable === false) {
-      detachableType = DiskType.Standard;
-      detachable = true;
-      size = MIN_DISK_SIZE_GB;
-    } else if (detachable === true || existingDisk) {
+    if (detachable === true || existingDisk) {
       detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
@@ -696,8 +692,9 @@ export const withAnalysisConfigDefaults = (
       }
     } else {
       // Detachable unspecified and no existing disk.
-      detachable = false;
-      detachableType = null;
+      detachableType = DiskType.Standard;
+      detachable = true;
+      size = MIN_DISK_SIZE_GB;
     }
   } else if (computeType === ComputeType.Dataproc) {
     detachable = false;

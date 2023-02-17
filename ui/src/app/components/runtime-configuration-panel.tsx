@@ -303,12 +303,6 @@ const PanelMain = fp.flow(
         analysisConfig.computeType === ComputeType.Dataproc,
         () => 'Reattachable disks are unsupported for this compute type',
       ],
-      [
-        runtimeExists &&
-          existingAnalysisConfig?.diskConfig?.detachable === false,
-        () =>
-          'To use a detachable disk, first delete your analysis environment',
-      ],
       () => null
     );
 
