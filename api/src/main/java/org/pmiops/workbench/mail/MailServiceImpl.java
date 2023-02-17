@@ -1,5 +1,8 @@
 package org.pmiops.workbench.mail;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -708,10 +711,19 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getBadgeImage(String tierShortName) {
-    if (tierShortName.equals("controlled")) {
-      return cloudStorageClientProvider.get().getImageUrl("controlled-tier-badge.svg");
+    String imageURL;
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        imageURL = "registered-tier-badge.svg";
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        imageURL = "controlled-tier-badge.svg";
+        break;
+      default:
+        imageURL = null;
     }
-    return cloudStorageClientProvider.get().getImageUrl("registered-tier-badge.svg");
+
+    return cloudStorageClientProvider.get().getImageUrl(imageURL);
   }
 
   private String formatPercentage(double threshold) {

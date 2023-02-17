@@ -815,7 +815,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
     final Optional<Timestamp> rtExpiration = getTierExpirationForEmails(user, tierShortName);
     rtExpiration.ifPresent(
-        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, "registered"));
+        expiration ->
+            maybeSendAccessTierExpirationEmail(user, expiration, REGISTERED_TIER_SHORT_NAME));
   }
 
   @Override
