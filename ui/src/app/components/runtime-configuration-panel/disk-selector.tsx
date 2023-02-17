@@ -78,7 +78,7 @@ export const DiskSelector = ({
       )}
       <TooltipTrigger
         content={
-          'To creating a new  Standard VM environment, you will have to use a reattachable persistent disk'
+          'To create a new Standard VM environment, you will have to use a reattachable persistent disk'
         }
         disabled={!isComputeTypeStandard(computeType)}
       >
