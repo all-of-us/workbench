@@ -18,6 +18,7 @@ import {
 } from 'app/utils/access-tiers';
 import {
   DARPageMode,
+  getAccessModuleConfig,
   getAccessModuleStatusByName,
   isCompliant,
   redirectToNiH,
@@ -27,6 +28,7 @@ import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
+import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
@@ -57,6 +59,32 @@ const ControlledTierEraModule = (props: {
       active={false}
       moduleAction={redirectToNiH}
     />
+  );
+};
+
+// Placeholder until CT Training has been updated; see TemporaryRASModule for inspiration
+const TemporaryTrainingModule = (props: { profile: Profile }) => {
+  const moduleName = AccessModule.CTCOMPLIANCETRAINING;
+  const { DARTitleComponent } = getAccessModuleConfig(moduleName);
+  return (
+    <FlexRow data-test-id={`module-${moduleName}`}>
+      <FlexRow style={styles.moduleCTA} />
+      <FlexRow style={styles.backgroundModuleBox}>
+        <ModuleIcon
+          {...{ moduleName }}
+          completedOrBypassed={false}
+          eligible={false}
+        />
+        <FlexColumn style={styles.backgroundModuleText}>
+          <DARTitleComponent profile={props.profile} />
+          <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
+            <b>Temporarily disabled.</b> Due to technical difficulties, this
+            step is disabled. Renewing Controlled Tier Training will be possible
+            in early March 2023.
+          </div>
+        </FlexColumn>
+      </FlexRow>
+    </FlexRow>
   );
 };
 
@@ -126,7 +154,8 @@ export const ControlledTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
-  const { enableComplianceTraining } = serverConfigStore.get().config;
+  const { enableComplianceTraining, enableControlledTierTrainingRenewal } =
+    serverConfigStore.get().config;
 
   return (
     <FlexRow
@@ -196,9 +225,12 @@ export const ControlledTierCard = (props: {
           )}
         {enableComplianceTraining &&
           pageMode === DARPageMode.ANNUAL_RENEWAL &&
-          isEligible && (
+          isEligible &&
+          (enableControlledTierTrainingRenewal ? (
             <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-          )}
+          ) : (
+            <TemporaryTrainingModule {...{ profile }} />
+          ))}
       </FlexColumn>
     </FlexRow>
   );

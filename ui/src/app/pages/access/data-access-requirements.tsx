@@ -637,15 +637,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode
     );
 
-    const showCtRenewalBanner =
-      enableControlledTierTrainingRenewal &&
+    const ctNeedsRenewal =
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
       !isRenewalCompleteForModule(
         getAccessModuleStatusByName(profile, ctModule)
       );
-    const showCompletionBanner =
-      profile && !nextRequired && !showCtRenewalBanner;
+    const showCtRenewalBanner =
+      enableControlledTierTrainingRenewal && ctNeedsRenewal;
+    const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (
       <RegisteredTierCard
