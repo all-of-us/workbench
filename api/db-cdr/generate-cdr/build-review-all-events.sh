@@ -6,7 +6,10 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
+export DATA_BROWSER=$3 # data browser flag
+export DOMAIN_TOKEN=$4
 
+function do_survey(){
 #########################################
 # insert survey data into cb_review_survey #
 #########################################
@@ -36,7 +39,9 @@ JOIN
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+}
 
+function do_drug(){
 ###########################################
 # insert drug data into cb_review_all_events #
 ###########################################
@@ -80,7 +85,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on t.ROUTE_CONCEPT_ID = c3.CONC
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.VISIT_CONCEPT_ID = c4.CONCEPT_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
+}
 
+function do_condition(){
 ################################################
 # insert condition data into cb_review_all_events #
 ################################################
@@ -109,7 +116,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.CONDITION_SOURCE_CONCEPT_I
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
+}
 
+function do_lab(){
 ##########################################
 # insert lab data into cb_review_all_events #
 ##########################################
@@ -146,7 +155,9 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on m.visit_occurrence_i
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on m.person_id = p.person_id
 where c1.concept_class_id = 'Lab Test'"
+}
 
+function do_vital(){
 ############################################
 # insert vital data into cb_review_all_events #
 ############################################
@@ -183,7 +194,9 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on m.visit_occurrence_i
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on m.person_id = p.person_id
 where c1.concept_class_id != 'Lab Test'"
+}
 
+function do_observation(){
 ###################################################
 # insert observation data into cb_review_all_events #
 ###################################################
@@ -212,7 +225,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
+}
 
+function do_physical_measurement(){
 ##########################################################
 # insert physicalMeasurement data into cb_review_all_events #
 ##########################################################
@@ -248,7 +263,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on t.UNIT_CONCEPT_ID = c3.CONCE
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
+}
 
+function do_procedure(){
 ################################################
 # insert procedure data into cb_review_all_events #
 ################################################
@@ -277,3 +294,31 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.PROCEDURE_SOURCE_CONCEPT_I
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
+}
+
+if [[ "$DATA_BROWSER" == true ]]
+then
+  echo "Building index for data browser. Skipping creation of the cb_review_all_events table."
+  exit 0
+fi
+
+if [[ "$DOMAIN_TOKEN" = "survey" ]]; then
+  do_survey
+elif [[ "$DOMAIN_TOKEN" = "drug" ]]; then
+  do_drug
+elif [[ "$DOMAIN_TOKEN" = "condition" ]]; then
+  do_condition
+elif [[ "$DOMAIN_TOKEN" = "lab" ]]; then
+  do_lab
+elif [[ "$DOMAIN_TOKEN" = "vital" ]]; then
+  do_vital
+elif [[ "$DOMAIN_TOKEN" = "observation" ]]; then
+  do_observation
+elif [[ "$DOMAIN_TOKEN" = "physical_measurement" ]]; then
+  do_physical_measurement
+elif [[ "$DOMAIN_TOKEN" = "procedure" ]]; then
+  do_procedure
+else
+  echo "Failed to build ds_ tables. Unknown domain $DOMAIN_TOKEN"
+  exit 1
+fi
