@@ -813,10 +813,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
   @Override
   public void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
-    final Optional<Timestamp> rtExpiration = getTierExpirationForEmails(user, tierShortName);
-    rtExpiration.ifPresent(
-        expiration ->
-            maybeSendAccessTierExpirationEmail(user, expiration, REGISTERED_TIER_SHORT_NAME));
+    final Optional<Timestamp> accessTierExpiration =
+        getTierExpirationForEmails(user, tierShortName);
+    accessTierExpiration.ifPresent(
+        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
   }
 
   @Override
