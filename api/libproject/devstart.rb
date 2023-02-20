@@ -833,13 +833,18 @@ def build_review_all_events(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+    "--domain-token [domain-token]",
+    ->(opts, v) { opts.domain_token = v},
+    "Generate for domain-token. Required."
+  )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.domain_token}}
   end
 end
 
