@@ -833,6 +833,11 @@ def build_review_all_events(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
+  op.add_option(
+    "--domain-token [domain-token]",
+    ->(opts, v) { opts.domain_token = v},
+    "Generate for domain-token. Required."
+  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
