@@ -709,37 +709,42 @@ Common.register_command({
   :fn => ->(*args) { build_search_all_events("build-search-all-events", *args) }
 })
 
-def build_ds_tables(cmd_name, *args)
+def build_cdr_indices_tables_by_domain(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project - Required."
   )
   op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset - Required."
   )
   op.add_option(
-      "--table-token [table-token]",
-      ->(opts, v) { opts.table_token = v},
-      "Generate specified table - Required"
+    "--script [script]",
+    ->(opts, v) { opts.script = v},
+    "Script - Required."
+  )
+  op.add_option(
+    "--domain [domain]",
+    ->(opts, v) { opts.domain = v},
+    "Generate specified table by domain - Required"
   )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.table_token}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script and opts.domain }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.table_token}}
+    common.run_inline %W{./generate-cdr/#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.domain}}
   end
 end
 
 Common.register_command({
-  :invocation => "build-ds-tables",
-  :description => "Generates the big query denormalized tables for dataset builder",
-  :fn => ->(*args) { build_ds_tables("build-ds-tables", *args) }
+  :invocation => "build-cdr-indices-tables-by-domain",
+  :description => "Builds tables for review and dataset builder by domain",
+  :fn => ->(*args) { build_cdr_indices_tables_by_domain("build-cdr-indices-tables-by-domain", *args) }
 })
 
 def build_review_all_events(cmd_name, *args)
