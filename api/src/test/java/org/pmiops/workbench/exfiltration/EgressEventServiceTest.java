@@ -316,14 +316,4 @@ public class EgressEventServiceTest {
         .creator(dbUser.getContactEmail());
     return userAppEnvironment;
   }
-
-  private static UserAppEnvironment userCromwellAppEnvironmentForUser(DbUser dbUser) {
-    UserAppEnvironment userAppEnvironment = new UserAppEnvironment();
-    userAppEnvironment
-        .appName("cromwell-app-name")
-        .appType(AppType.CROMWELL)
-        .status(AppStatus.RUNNING)
-        .creator(dbUser.getContactEmail());
-    return userAppEnvironment;
-  }
 }

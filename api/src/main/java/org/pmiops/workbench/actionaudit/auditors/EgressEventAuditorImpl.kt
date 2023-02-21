@@ -140,55 +140,45 @@ constructor(
         updatedEvent: DbEgressEvent
     ) {
         val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
-            DbEgressEventTargetProperty.values(),
-            previousEvent,
-            updatedEvent
-        )
+                DbEgressEventTargetProperty.values(),
+                previousEvent,
+                updatedEvent)
         val dbWorkspaceMaybe = Optional.ofNullable(updatedEvent.workspace)
         val actionId = actionIdProvider.get()
         val admin = userProvider.get()
         actionAuditService.send(changesByProperty.entries.map {
             ActionAuditEvent(
-                timestamp = clock.millis(),
-                actionId = actionId,
-                actionType = ActionType.EDIT,
-                agentType = AgentType.ADMINISTRATOR,
-                agentIdMaybe = admin.userId,
-                agentEmailMaybe = admin.username,
-                targetType = TargetType.WORKSPACE,
-                targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null),
-                targetPropertyMaybe = it.key,
-                previousValueMaybe = it.value.previousValue,
-                newValueMaybe = it.value.newValue
+                    timestamp = clock.millis(),
+                    actionId = actionId,
+                    actionType = ActionType.EDIT,
+                    agentType = AgentType.ADMINISTRATOR,
+                    agentIdMaybe = admin.userId,
+                    agentEmailMaybe = admin.username,
+                    targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = dbWorkspaceMaybe.map { it.workspaceId }.orElse(null),
+                    targetPropertyMaybe = it.key,
+                    previousValueMaybe = it.value.previousValue,
+                    newValueMaybe = it.value.newValue
             )
         })
     }
 
     override fun fireFailedToParseEgressEventRequest(request: SumologicEgressEventRequest) {
-        fireEventSet(
-            baseEvent = getGenericBaseEvent(), comment = String.format(
+        fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
-                request.eventsJsonArray
-            )
-        )
+                request.eventsJsonArray))
     }
 
     override fun fireBadApiKey(apiKey: String, request: SumologicEgressEventRequest) {
-        fireEventSet(
-            baseEvent = getGenericBaseEvent(), comment = String.format(
+        fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
-                apiKey, request.toString()
-            )
-        )
+                apiKey, request.toString()))
     }
 
     private fun fireFailedToFindWorkspace(event: SumologicEgressEvent) {
-        fireEventSet(
-            baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
+        fireEventSet(baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
                 "Failed to find workspace for high-egress event: %s",
-                event.toString()
-            )
-        )
+                event.toString()))
     }
 
     /**
@@ -196,30 +186,22 @@ constructor(
      * to record properties of the egress event and a human-readable comment. Either the egress event
      * or the comment may be null, in which case those row(s) won't be generated.
      */
-    private fun fireEventSet(
-        baseEvent: ActionAuditEvent,
-        egressEvent: SumologicEgressEvent? = null,
-        comment: String? = null
-    ) {
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: SumologicEgressEvent? = null, comment: String? = null) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
-                EgressEventTargetProperty.values(), egressEvent
-            )
+                    EgressEventTargetProperty.values(), egressEvent)
             events.addAll(propertyValues.map {
                 baseEvent.copy(
-                    targetPropertyMaybe = it.key,
-                    newValueMaybe = it.value
-                )
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
             })
         }
         if (comment != null) {
-            events.add(
-                baseEvent.copy(
+            events.add(baseEvent.copy(
                     targetPropertyMaybe = EgressEventCommentTargetProperty.COMMENT.propertyName,
                     newValueMaybe = comment
-                )
-            )
+            ))
         }
         actionAuditService.send(events)
     }
@@ -232,24 +214,20 @@ constructor(
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
-                DbEgressEventTargetProperty.values(), egressEvent
-            )
+                    DbEgressEventTargetProperty.values(), egressEvent)
             events.addAll(propertyValues.map {
                 baseEvent.copy(
-                    targetPropertyMaybe = it.key,
-                    newValueMaybe = it.value
-                )
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
             })
         }
         if (escalation != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
-                EgressEscalationTargetProperty.values(), escalation
-            )
+                    EgressEscalationTargetProperty.values(), escalation)
             events.addAll(propertyValues.map {
                 baseEvent.copy(
-                    targetPropertyMaybe = it.key,
-                    newValueMaybe = it.value
-                )
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
             })
         }
         actionAuditService.send(events)
@@ -262,14 +240,14 @@ constructor(
      */
     private fun getGenericBaseEvent(): ActionAuditEvent {
         return ActionAuditEvent(
-            timestamp = clock.millis(),
-            actionId = actionIdProvider.get(),
-            actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
-            agentType = AgentType.SYSTEM,
-            agentIdMaybe = null,
-            agentEmailMaybe = null,
-            targetType = TargetType.WORKSPACE,
-            targetIdMaybe = null
+                timestamp = clock.millis(),
+                actionId = actionIdProvider.get(),
+                actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
+                agentType = AgentType.SYSTEM,
+                agentIdMaybe = null,
+                agentEmailMaybe = null,
+                targetType = TargetType.WORKSPACE,
+                targetIdMaybe = null
         )
     }
 
