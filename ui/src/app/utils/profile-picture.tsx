@@ -1,11 +1,5 @@
-declare const gapi: any;
+import { authStore } from 'app/utils/stores';
 
 export const getProfilePictureSrc = () => {
-  return gapi?.auth2
-    ? gapi.auth2
-        .getAuthInstance()
-        .currentUser.get()
-        .getBasicProfile()
-        .getImageUrl()
-    : null;
+  return authStore.get().auth?.user?.profile.picture;
 };

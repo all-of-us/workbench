@@ -40,12 +40,12 @@ import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
   cookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
-  LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN,
 } from 'app/utils/cookies';
 import {
   authStore,
   serverConfigStore,
   stackdriverErrorReporterStore,
+  useStore,
 } from 'app/utils/stores';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 
@@ -149,43 +149,22 @@ const useOverriddenApiUrl = () => {
 };
 
 export const AppRoutingComponent: React.FunctionComponent = () => {
-  const { authLoaded, authError } = useAuthentication();
+  useAuthentication();
+  const { authLoaded } = useStore(authStore);
   const isUserDisabledInDb = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
-  const loadLocalStorageAccessToken = () => {
-    // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
-    // an infinite loop
-    // Enable test access token override via local storage. Intended to support Puppeteer testing flows.
-    if (environment.allowTestAccessTokenOverride && !authLoaded) {
-      const localStorageTestAccessToken = window.localStorage.getItem(
-        LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-      );
-      if (localStorageTestAccessToken) {
-        // The client has already configured an access token override. Skip the normal oauth flow.
-        authStore.set({
-          ...authStore.get(),
-          authLoaded: true,
-          isSignedIn: true,
-        });
-      }
-    }
-  };
   const redirectToTOSPage = useShowTOS();
 
   useEffect(() => {
     bindClients();
     loadErrorReporter();
     initializeAnalytics();
-    loadLocalStorageAccessToken();
   }, []);
 
   const firstPartyCookiesEnabled = cookiesEnabled();
-  const thirdPartyCookiesEnabled = !(
-    authError &&
-    authError.length > 0 &&
-    authError.includes('Cookies')
-  );
+  // TODO is third-party cookie logic still necessary? See RW-9484.
+  const thirdPartyCookiesEnabled = true;
 
   return (
     <React.Fragment>
