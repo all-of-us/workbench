@@ -938,7 +938,7 @@ Common.register_command({
   :fn => ->(*args) { build_cb_criteria_menu("build-cb-criteria-menu", *args) }
 })
 
-def build_cloudsql_tables(cmd_name, *args)
+def build_output_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--bq-project [bq-project]",
@@ -960,58 +960,25 @@ def build_cloudsql_tables(cmd_name, *args)
       ->(opts, v) { opts.output_dataset = v},
       "Output dataset - Required."
   )
+  op.add_option(
+    "--script [script]",
+    ->(opts, v) { opts.script = v},
+    "Script - Required."
+  )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset and opts.script }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
+    common.run_inline %W{./generate-cdr/#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
   end
 end
 
 Common.register_command({
-  :invocation => "build-cloudsql-tables",
-  :description => "Generates all tables that will be imported into cloudsql",
-  :fn => ->(*args) { build_cloudsql_tables("build-cloudsql-tables", *args) }
-})
-
-def build_backup_cb_ds_tables(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-  op.add_option(
-      "--output-project [output-project]",
-      ->(opts, v) { opts.output_project = v},
-      "Output Project - Required."
-  )
-  op.add_option(
-      "--output-dataset [output-dataset]",
-      ->(opts, v) { opts.output_dataset = v},
-      "Output dataset - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-backup-cb-ds-tables",
-  :description => "Archive cb_ and ds_ tables",
-  :fn => ->(*args) { build_backup_cb_ds_tables("build-backup-cb-ds-tables", *args) }
+  :invocation => "build-output-tables",
+  :description => "Build tables for output dataset",
+  :fn => ->(*args) { build_output_tables("build-output-tables", *args) }
 })
 
 def build_cb_criteria_attribute_tables_and_cleanup(cmd_name, *args)
