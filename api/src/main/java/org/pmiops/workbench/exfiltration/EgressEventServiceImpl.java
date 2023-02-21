@@ -104,7 +104,8 @@ public class EgressEventServiceImpl implements EgressEventService {
       SumologicEgressEvent event, Optional<DbWorkspace> dbWorkspace) {
 
     // This case is when the Egress is from a GCE cluster.
-    if (StringUtils.isNotEmpty(event.getVmPrefix()) && StringUtils.isEmpty(event.getSrcGkeCluster())) {
+    if (StringUtils.isNotEmpty(event.getVmPrefix())
+        && StringUtils.isEmpty(event.getSrcGkeCluster())) {
       Optional<DbUser> dbUserMaybe =
           vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
       if (!dbUserMaybe.isPresent()) {
