@@ -775,34 +775,6 @@ Common.register_command({
   :fn => ->(*args) { build_review_all_events("build-review-all-events", *args) }
 })
 
-def build_cb_criteria_missing_codes(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-missing-codes.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-cb-criteria-missing-codes",
-  :description => "Adds other codes not already captured",
-  :fn => ->(*args) { build_cb_criteria_missing_codes("build-cb-criteria-missing-codes", *args) }
-})
-
 def build_cb_criteria_menu(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
