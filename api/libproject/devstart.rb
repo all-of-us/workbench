@@ -775,7 +775,7 @@ Common.register_command({
   :fn => ->(*args) { build_review_all_events("build-review-all-events", *args) }
 })
 
-def build_output_tables(cmd_name, *args)
+def build_cdr_indices_output_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
       "--bq-project [bq-project]",
@@ -813,9 +813,9 @@ def build_output_tables(cmd_name, *args)
 end
 
 Common.register_command({
-  :invocation => "build-output-tables",
-  :description => "Build tables for output dataset",
-  :fn => ->(*args) { build_output_tables("build-output-tables", *args) }
+  :invocation => "build-cdr-indices-output-tables",
+  :description => "Build CDR indices tables for output dataset",
+  :fn => ->(*args) { build_cdr_indices_output_tables("build-cdr-indices-output-tables", *args) }
 })
 
 def stage_redcap_files(cmd_name, *args)
