@@ -521,32 +521,32 @@ def create_cdr_indices(cmd_name, *args)
   op.add_option(
     "--branch [branch]",
     ->(opts, v) { opts.branch = v},
-    "Branch. Optional - Default is main."
+    "Branch - Optional - Default is main."
   )
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project name"
+    "Project name - Required"
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
     ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
+    "CDR version - Required."
   )
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
+    "Generate for data browser - Optional - Default is false"
   )
   op.add_option(
     "--create-prep-tables [create-prep-tables]",
     ->(opts, v) { opts.create_prep_tables = v},
-    "Create all prep tables. Optional - Default is true"
+    "Create all prep tables - Optional - Default is true"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
@@ -576,17 +576,17 @@ def build_prep_survey(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
   op.add_option(
       "--filename [filename]",
       ->(opts, v) { opts.filename = v},
-      "Filename"
+      "Filename - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.filename}
@@ -610,17 +610,17 @@ def create_tables(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project name"
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ Dataset name"
+      "BQ Dataset - Required."
   )
   op.add_option(
     "--create-prep-tables [create-prep-tables]",
     ->(opts, v) { opts.create_prep_tables = v},
-    "Create all prep tables. Optional - Default is true"
+    "Create all prep tables - Optional - Default is true"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -643,12 +643,12 @@ def build_static_prep_tables(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -671,12 +671,12 @@ def build_prep_concept_merged(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -699,12 +699,12 @@ def build_cb_survey_version(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -728,22 +728,22 @@ def build_search_all_events(cmd_name, *args)
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
+    "BQ Project - Required."
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
+    "Generate for data browser - Optional - Default is false"
   )
   op.add_option(
     "--domain-token [domain-token]",
     ->(opts, v) { opts.domain_token = v},
-    "Generate for domain-token. Required."
+    "Generate for domain-token - Required."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token }
   op.parse.validate
@@ -765,12 +765,12 @@ def build_ds_linking(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -793,17 +793,17 @@ def build_ds_tables(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
   op.add_option(
       "--table-token [table-token]",
       ->(opts, v) { opts.table_token = v},
-      "Generate specified table. Required"
+      "Generate specified table - Required"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.table_token}
@@ -826,17 +826,17 @@ def build_review_all_events(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
   op.add_option(
     "--domain-token [domain-token]",
     ->(opts, v) { opts.domain_token = v},
-    "Generate for domain-token. Required."
+    "Generate for domain-token - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token}
@@ -859,12 +859,12 @@ def build_cb_search_person(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -887,12 +887,12 @@ def build_cb_criteria_missing_codes(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -915,12 +915,12 @@ def build_cb_criteria_menu(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -943,22 +943,22 @@ def build_cloudsql_tables(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
   op.add_option(
       "--output-project [output-project]",
       ->(opts, v) { opts.output_project = v},
-      "Output Project. Required."
+      "Output Project - Required."
   )
   op.add_option(
       "--output-dataset [output-dataset]",
       ->(opts, v) { opts.output_dataset = v},
-      "Output dataset. Required."
+      "Output dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
@@ -981,22 +981,22 @@ def build_backup_cb_ds_tables(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
   op.add_option(
       "--output-project [output-project]",
       ->(opts, v) { opts.output_project = v},
-      "Output Project. Required."
+      "Output Project - Required."
   )
   op.add_option(
       "--output-dataset [output-dataset]",
       ->(opts, v) { opts.output_dataset = v},
-      "Output dataset. Required."
+      "Output dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
@@ -1019,12 +1019,12 @@ def build_cb_criteria_attribute_tables_and_cleanup(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -1047,12 +1047,12 @@ def build_cb_criteria_full_text_synonym(cmd_name, *args)
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
-      "BQ Project. Required."
+      "BQ Project - Required."
   )
   op.add_option(
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset. Required."
+      "BQ dataset - Required."
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -1075,13 +1075,13 @@ def stage_redcap_files(cmd_name, *args)
   op.add_option(
       "--date [date]",
       ->(opts, v) { opts.date = v},
-      "Redcap file date"
+      "Redcap file date - Required."
   )
   op.add_option(
-        "--dataset [dataset]",
-        ->(opts, v) { opts.dataset = v},
-        "Dataset name"
-    )
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Dataset name - Required."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.date and opts.dataset }
   op.parse.validate
 
@@ -1102,17 +1102,17 @@ def build_prep_table(cmd_name, *args)
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
+    "BQ Project - Required."
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--script [script]",
     ->(opts, v) { opts.script = v},
-    "Script. Required."
+    "Script - Required."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
@@ -1134,17 +1134,17 @@ def build_cb_criteria(cmd_name, *args)
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
+    "BQ Project - Required."
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--script [script]",
     ->(opts, v) { opts.script = v},
-    "Script. Required."
+    "Script - Required."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
@@ -1167,17 +1167,17 @@ def build_cb_criteria_demographics(cmd_name, *args)
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
+    "BQ Project - Required."
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
+    "Generate for data browser - Optional - Default is false"
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
@@ -1253,22 +1253,22 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
-    "BQ Project. Required."
+    "BQ Project - Required."
   )
   op.add_option(
     "--bq-dataset [bq-dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BQ dataset. Required."
+    "BQ dataset - Required."
   )
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project. Required."
+    "Project - Required."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
     ->(opts, v) { opts.cdr_version = v},
-    "CDR version. Required."
+    "CDR version - Required."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
   op.parse.validate
