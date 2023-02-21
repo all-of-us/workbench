@@ -638,7 +638,7 @@ Common.register_command({
   :fn => ->(*args) { create_cdr_indices_tables("create-cdr-indices-tables", *args) }
 })
 
-def build_tables(cmd_name, *args)
+def build_cdr_indices_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -666,9 +666,9 @@ def build_tables(cmd_name, *args)
 end
 
 Common.register_command({
-  :invocation => "build-tables",
-  :description => "Build tables for specified script",
-  :fn => ->(*args) { build_tables("build-tables", *args) }
+  :invocation => "build-cdr-indices-tables",
+  :description => "Build CDR indices tables for specified script",
+  :fn => ->(*args) { build_cdr_indices_tables("build-cdr-indices-tables", *args) }
 })
 
 def build_search_all_events(cmd_name, *args)
