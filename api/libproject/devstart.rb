@@ -747,39 +747,6 @@ Common.register_command({
   :fn => ->(*args) { build_cdr_indices_tables_by_domain("build-cdr-indices-tables-by-domain", *args) }
 })
 
-def build_review_all_events(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-  op.add_option(
-    "--domain-token [domain-token]",
-    ->(opts, v) { opts.domain_token = v},
-    "Generate for domain-token - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.domain_token}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-review-all-events",
-  :description => "Generates the big query denormalized tables for review",
-  :fn => ->(*args) { build_review_all_events("build-review-all-events", *args) }
-})
-
 def build_cdr_indices_output_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
