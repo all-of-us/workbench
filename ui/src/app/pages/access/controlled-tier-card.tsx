@@ -9,7 +9,7 @@ import {
   ControlledTierBadge,
   MinusCircle,
 } from 'app/components/icons';
-import { SUPPORT_EMAIL } from 'app/components/support';
+import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {
@@ -32,7 +32,7 @@ import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
-const handleClickSupportButton = (url) => () => {
+const handleRequestAccessButton = (url) => () => {
   const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
   window.open(adjustedUrl);
 };
@@ -81,9 +81,9 @@ const TemporaryTrainingModule = (props: { profile: Profile }) => {
         <FlexColumn style={styles.backgroundModuleText}>
           <DARTitleComponent profile={props.profile} />
           <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
-            <b>Temporarily disabled.</b> Due to technical difficulties, this
-            step is disabled. Renewing Controlled Tier Training will be possible
-            in early March 2023.
+            <b>Temporarily unavailable</b>: Renewal of Controlled Tier training
+            will be available in early March 2023. Please email{' '}
+            <SupportMailto /> if you have questions.
           </div>
         </FlexColumn>
       </FlexRow>
@@ -186,7 +186,7 @@ export const ControlledTierCard = (props: {
             </div>
             <div style={styles.requestAccess}>
               <Button
-                onClick={handleClickSupportButton(institutionRequestAccessUrl)}
+                onClick={handleRequestAccessButton(institutionRequestAccessUrl)}
               >
                 Request Access
               </Button>
