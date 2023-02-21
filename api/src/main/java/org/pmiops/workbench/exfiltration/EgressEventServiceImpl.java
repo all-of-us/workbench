@@ -2,6 +2,16 @@ package org.pmiops.workbench.exfiltration;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -20,17 +30,6 @@ import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.utils.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class EgressEventServiceImpl implements EgressEventService {
@@ -104,29 +103,37 @@ public class EgressEventServiceImpl implements EgressEventService {
   private List<Optional<DbUser>> findEgressUsers(
       SumologicEgressEvent event, Optional<DbWorkspace> dbWorkspace) {
 
-    if (dbWorkspace.isPresent() && StringUtils.isNotEmpty(event.getSrcGkeCluster())) {
-      List<Optional<DbUser>> workspaceOwnersOrWriters = findAppUsers(dbWorkspace.get());
-      return workspaceOwnersOrWriters;
+    // This case is when the Egress is from a GCE cluster.
+    if (StringUtils.isNotEmpty(event.getVmPrefix())) {
+      Optional<DbUser> dbUserMaybe =
+          vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
+      if (!dbUserMaybe.isPresent()) {
+        logger.warning(String.format("User not found by given VM prefix: %s", event.getVmPrefix()));
+      }
+      return Collections.singletonList(dbUserMaybe);
     }
 
-    Optional<DbUser> dbUserMaybe =
-        vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
-    if (!dbUserMaybe.isPresent()) {
-      logger.warning(String.format("User not found by given VM prefix: %s", event.getVmPrefix()));
+    // This is the GKE case
+    if (dbWorkspace.isPresent() && StringUtils.isNotEmpty(event.getSrcGkeCluster())) {
+      List<Optional<DbUser>> appUsers = findAppUsers(dbWorkspace.get());
+      return appUsers;
     }
-    return Collections.singletonList(dbUserMaybe);
+
+    return Collections.emptyList();
   }
 
   private List<Optional<DbUser>> findAppUsers(DbWorkspace dbWorkspace) {
     List<UserAppEnvironment> userAppEnvironments =
-        leonardoApiClient.listAppsInProjectCreatedByCreator(dbWorkspace.getGoogleProject());
+        leonardoApiClient.listAppsInProjectCreatedByCreatorAsService(
+            dbWorkspace.getGoogleProject());
     List<String> appUsersList =
         userAppEnvironments.stream()
             .filter(
                 u ->
                     u.getStatus().equals(AppStatus.RUNNING)
-                        || u.getStatus().equals(AppStatus.PROVISIONING))
-            .map(u -> u.getAppCreator())
+                        || u.getStatus().equals(AppStatus.PROVISIONING)
+                        || u.getStatus().equals(AppStatus.STARTING))
+            .map(u -> u.getCreator())
             .collect(Collectors.toList());
     List<DbUser> usersByUsernames = userService.findUsersByUsernames(appUsersList);
     return usersByUsernames.stream().map(Optional::of).collect(Collectors.toList());

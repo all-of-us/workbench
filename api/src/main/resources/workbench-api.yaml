@@ -6374,7 +6374,7 @@ definitions:
         description: The user-supplied name for the user app. Read only.
       appType:
         "$ref": "#/definitions/AppType"
-      appCreator:
+      creator:
         type: string
         description: The creator of the app
       createdDate:

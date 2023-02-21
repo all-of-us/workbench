@@ -1,6 +1,9 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.Clock;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
@@ -17,10 +20,6 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.Clock;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 @Service
 public abstract class EgressJiraHandler {

@@ -1,5 +1,10 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
+import java.time.Instant;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
+import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;
@@ -17,12 +22,6 @@ import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Provider;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 @Service(ExfiltrationConstants.SUMOLOGIC_JIRA_HANDLER_QUALIFIER)
 public class EgressSumologicJiraHandler extends EgressJiraHandler {

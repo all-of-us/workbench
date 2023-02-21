@@ -1,5 +1,18 @@
 package org.pmiops.workbench.exfiltration;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.inject.Provider;
+import javax.mail.MessagingException;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -16,20 +29,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-
-import javax.annotation.Nullable;
-import javax.inject.Provider;
-import javax.mail.MessagingException;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /** Service for automated egress alert remediation. */
 public abstract class EgressRemediationService {

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.leonardo;
 
+import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
@@ -10,9 +12,6 @@ import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.notebooks.model.StorageLink;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Encapsulate Leonardo's Notebooks API interaction details and provide a simple/mockable interface
@@ -105,6 +104,8 @@ public interface LeonardoApiClient {
    */
   List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId);
 
+  List<UserAppEnvironment> listAppsInProjectCreatedByCreatorAsService(String googleProjectId);
+
   /**
    * Deletes a Leonardo app
    *
@@ -115,9 +116,7 @@ public interface LeonardoApiClient {
   void deleteApp(String appName, DbWorkspace dbWorkspace, boolean deleteDisk)
       throws WorkbenchException;
 
-  /**
-   * @return true if Leonardo service is okay, false otherwise.
-   */
+  /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
 
   int stopAllUserAppsAsService(String userEmail);

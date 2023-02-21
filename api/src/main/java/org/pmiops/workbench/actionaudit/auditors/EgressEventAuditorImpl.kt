@@ -1,7 +1,19 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import org.pmiops.workbench.actionaudit.*
-import org.pmiops.workbench.actionaudit.targetproperties.*
+import java.time.Clock
+import java.util.Optional
+import java.util.logging.Logger
+import javax.inject.Provider
+import org.pmiops.workbench.actionaudit.ActionAuditEvent
+import org.pmiops.workbench.actionaudit.ActionAuditService
+import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.AgentType
+import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.DbEgressEventTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEscalationTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.dao.WorkspaceDao
@@ -14,10 +26,6 @@ import org.pmiops.workbench.workspaces.WorkspaceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.time.Clock
-import java.util.*
-import java.util.logging.Logger
-import javax.inject.Provider
 
 @Service
 class EgressEventAuditorImpl @Autowired
@@ -72,7 +80,6 @@ constructor(
                     // 3. Dataproc worker nodes: all-of-us-<user_id>-w-<index>
                     it.runtimeName.equals(event.vmPrefix)
                 }
-
 
             if (vmOwner != null) {
                 agentEmail = vmOwner.username

@@ -1,6 +1,11 @@
 package org.pmiops.workbench.leonardo;
 
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -14,12 +19,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
 
 @org.springframework.context.annotation.Configuration
 public class LeonardoConfig {

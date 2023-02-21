@@ -199,8 +199,7 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appCreator", source = "auditInfo.creator", ignore = true)
-  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "appName", source = "appName")
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   @Mapping(target = "autopauseThreshold", ignore = true)
@@ -208,8 +207,7 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appCreator", source = "auditInfo.creator", ignore = true)
-  @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   UserAppEnvironment toApiApp(LeonardoListAppResponse app);

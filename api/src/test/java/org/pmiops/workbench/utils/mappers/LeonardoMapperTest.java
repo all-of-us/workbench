@@ -96,7 +96,8 @@ public class LeonardoMapperTest {
             .appName(APP_NAME)
             .status(AppStatus.RUNNING)
             .googleProject(GOOGLE_PROJECT)
-            .labels(labels);
+            .labels(labels)
+            .creator("bob@gmail.com");
   }
 
   @Test

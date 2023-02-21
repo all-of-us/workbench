@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -88,7 +89,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           LeonardoRuntimeStatus.UPDATING);
 
   private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
-      ImmutableSet.of(LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING);
+      ImmutableSet.of(
+          LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
 
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
@@ -121,7 +123,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
-      Provider<AppsApi> serviceAppsApiProvider1,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
@@ -136,7 +137,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
     this.appsApiProvider = appsApiProvider;
-    this.serviceAppsApiProvider = serviceAppsApiProvider1;
+    this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
@@ -576,6 +577,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, LEONARDO_CREATOR_ROLE);
+  }
+
+  @Override
+  public List<UserAppEnvironment> listAppsInProjectCreatedByCreatorAsService(
+      String googleProjectId) {
+    AppsApi appsApi = serviceAppsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, null);
+  }
+
+  @NotNull
+  private List<UserAppEnvironment> getUserAppEnvironments(
+      String googleProjectId, AppsApi appsApi, String leonardoCreatorRole) {
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
             (context) ->
@@ -584,7 +598,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* labels= */ null,
                     /* includeDeleted= */ false,
                     /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
-                    LEONARDO_CREATOR_ROLE));
+                    leonardoCreatorRole));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
@@ -623,7 +637,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
                     false,
                     "",
-                    "creator"));
+                    null));
 
     // Only the app creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
