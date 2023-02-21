@@ -31,6 +31,11 @@ class GcloudContextV2
     @options_parser.add_validator ->(opts) { raise ArgumentError unless opts.project}
   end
 
+  def initialize(options_parser)
+    @options_parser = options_parser
+    # empty ctor
+  end
+
   def validate()
     common = Common.new
     @project = @options_parser.opts.project
