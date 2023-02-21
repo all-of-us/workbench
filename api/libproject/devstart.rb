@@ -604,7 +604,7 @@ Common.register_command({
   :fn => ->(*args) { build_prep_survey("build-prep-survey", *args) }
 })
 
-def create_tables(cmd_name, *args)
+def create_cdr_indices_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.create_prep_tables = true
   op.add_option(
@@ -628,14 +628,14 @@ def create_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/create-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.create_prep_tables}}
+    common.run_inline %W{./generate-cdr/create-cdr-indices-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.create_prep_tables}}
   end
 end
 
 Common.register_command({
-  :invocation => "create-tables",
+  :invocation => "create-cdr-indices-tables",
   :description => "Create the CDR indices tables.",
-  :fn => ->(*args) { create_tables("create-tables", *args) }
+  :fn => ->(*args) { create_cdr_indices_tables("create-cdr-indices-tables", *args) }
 })
 
 def build_tables(cmd_name, *args)
