@@ -818,34 +818,6 @@ Common.register_command({
   :fn => ->(*args) { build_output_tables("build-output-tables", *args) }
 })
 
-def build_cb_criteria_full_text_synonym(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-full-text-synonym.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-cb-criteria-full-text-synonym",
-  :description => "Populate other cb_* tables",
-  :fn => ->(*args) { build_cb_criteria_full_text_synonym("build-cb-criteria-full-text-synonym", *args) }
-})
-
 def stage_redcap_files(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
