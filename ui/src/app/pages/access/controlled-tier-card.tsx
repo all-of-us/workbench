@@ -32,7 +32,7 @@ import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
-const handleClickSupportButton = (url) => () => {
+const handleRequestAccessButton = (url) => () => {
   const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
   window.open(adjustedUrl);
 };
@@ -186,7 +186,7 @@ export const ControlledTierCard = (props: {
             </div>
             <div style={styles.requestAccess}>
               <Button
-                onClick={handleClickSupportButton(institutionRequestAccessUrl)}
+                onClick={handleRequestAccessButton(institutionRequestAccessUrl)}
               >
                 Request Access
               </Button>
