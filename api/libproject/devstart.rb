@@ -638,32 +638,37 @@ Common.register_command({
   :fn => ->(*args) { create_tables("create-tables", *args) }
 })
 
-def build_static_prep_tables(cmd_name, *args)
+def build_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project - Required."
   )
   op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset - Required."
+  )
+  op.add_option(
+    "--script [script]",
+    ->(opts, v) { opts.script = v},
+    "Script - Required."
   )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-static-prep-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
+    common.run_inline %W{./generate-cdr/build-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
 Common.register_command({
-  :invocation => "build-static-prep-tables",
-  :description => "Create prep tables from csv files in Google bucket",
-  :fn => ->(*args) { build_static_prep_tables("build-static-prep-tables", *args) }
+  :invocation => "build-tables",
+  :description => "Build tables for specified script",
+  :fn => ->(*args) { build_tables("build-tables", *args) }
 })
 
 def build_prep_concept_merged(cmd_name, *args)
