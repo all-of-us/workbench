@@ -671,34 +671,6 @@ Common.register_command({
   :fn => ->(*args) { build_tables("build-tables", *args) }
 })
 
-def build_cb_survey_version(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-survey-version.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-cb-survey-version",
-  :description => "Generates the cb_survey_version table",
-  :fn => ->(*args) { build_cb_survey_version("build-cb-survey-version", *args) }
-})
-
 def build_search_all_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
