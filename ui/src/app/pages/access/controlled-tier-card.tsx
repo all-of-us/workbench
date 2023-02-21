@@ -9,7 +9,7 @@ import {
   ControlledTierBadge,
   MinusCircle,
 } from 'app/components/icons';
-import { SUPPORT_EMAIL } from 'app/components/support';
+import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {
@@ -81,9 +81,9 @@ const TemporaryTrainingModule = (props: { profile: Profile }) => {
         <FlexColumn style={styles.backgroundModuleText}>
           <DARTitleComponent profile={props.profile} />
           <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
-            <b>Temporarily disabled.</b> Due to technical difficulties, this
-            step is disabled. Renewing Controlled Tier Training will be possible
-            in early March 2023.
+            <b>Temporarily unavailable</b>: Renewal of Controlled Tier training
+            will be available in early March 2023. Please email{' '}
+            <SupportMailto /> if you have questions.
           </div>
         </FlexColumn>
       </FlexRow>
