@@ -709,34 +709,6 @@ Common.register_command({
   :fn => ->(*args) { build_search_all_events("build-search-all-events", *args) }
 })
 
-def build_ds_linking(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--bq-project [bq-project]",
-      ->(opts, v) { opts.bq_project = v},
-      "BQ Project - Required."
-  )
-  op.add_option(
-      "--bq-dataset [bq-dataset]",
-      ->(opts, v) { opts.bq_dataset = v},
-      "BQ dataset - Required."
-  )
-
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
-  op.parse.validate
-
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
-  end
-end
-
-Common.register_command({
-  :invocation => "build-ds-linking",
-  :description => "Generates the big query denormalized tables for dataset builder",
-  :fn => ->(*args) { build_ds_linking("build-ds-linking", *args) }
-})
-
 def build_ds_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
