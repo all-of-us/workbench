@@ -447,9 +447,7 @@ export const AttributesPage = fp.flow(
       setIsCOPEOrMinuteSurvey(true);
       setLoading(false);
     } else {
-      if (
-        !options.find((option) => option.value === AttrName.ANY.toString())
-      ) {
+      if (!options.find((option) => option.value === AttrName.ANY.toString())) {
         options.unshift({
           label: optionUtil.ANY.display,
           value: AttrName[AttrName.ANY],
