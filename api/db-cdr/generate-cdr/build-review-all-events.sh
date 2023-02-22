@@ -6,7 +6,7 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DOMAIN_TOKEN=$3
+export DOMAIN=$3
 
 function do_survey(){
 #########################################
@@ -295,23 +295,23 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 }
 
-if [[ "$DOMAIN_TOKEN" = "survey" ]]; then
+if [[ "$DOMAIN" = "survey" ]]; then
   do_survey
-elif [[ "$DOMAIN_TOKEN" = "drug" ]]; then
+elif [[ "$DOMAIN" = "drug" ]]; then
   do_drug
-elif [[ "$DOMAIN_TOKEN" = "condition" ]]; then
+elif [[ "$DOMAIN" = "condition" ]]; then
   do_condition
-elif [[ "$DOMAIN_TOKEN" = "lab" ]]; then
+elif [[ "$DOMAIN" = "lab" ]]; then
   do_lab
-elif [[ "$DOMAIN_TOKEN" = "vital" ]]; then
+elif [[ "$DOMAIN" = "vital" ]]; then
   do_vital
-elif [[ "$DOMAIN_TOKEN" = "observation" ]]; then
+elif [[ "$DOMAIN" = "observation" ]]; then
   do_observation
-elif [[ "$DOMAIN_TOKEN" = "physical_measurement" ]]; then
+elif [[ "$DOMAIN" = "physical_measurement" ]]; then
   do_physical_measurement
-elif [[ "$DOMAIN_TOKEN" = "procedure" ]]; then
+elif [[ "$DOMAIN" = "procedure" ]]; then
   do_procedure
 else
-  echo "Failed to build ds_ tables. Unknown domain $DOMAIN_TOKEN"
+  echo "Failed to build ds_ tables. Unknown domain $DOMAIN"
   exit 1
 fi
