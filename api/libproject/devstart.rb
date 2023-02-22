@@ -3067,8 +3067,8 @@ def verify_preprod_prod_counts(op)
   op.parse.validate
   gcc.validate
   sql = File.read(op.opts.script)
-  sql = sql.gsub(/@schema_name/, op.opts.cdr_db_name)
-  sql = sql.gsub(/@project/, op.opts.project)
+  sql = sql.gsub(/_SCHEMA_NAME_/, op.opts.cdr_db_name)
+  sql = sql.gsub(/_PROJECT_/, op.opts.project)
   env = read_db_vars(gcc)
   user_to_password = {
     "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
