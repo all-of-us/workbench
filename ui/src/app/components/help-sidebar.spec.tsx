@@ -8,6 +8,7 @@ import {
   CohortReviewApi,
   DataSetApi,
   ErrorCode,
+  NotebooksApi,
   RuntimeApi,
   RuntimeStatus,
   SecuritySuspendedErrorParameters,
@@ -17,6 +18,7 @@ import {
 } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
+import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -52,11 +54,12 @@ import {
   cohortReviewStubs,
 } from 'testing/stubs/cohort-review-service-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { HelpSidebar } from './help-sidebar';
+import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -100,6 +103,21 @@ jest.mock('app/pages/workspace/workspace-share', () => {
     WorkspaceShare: () => <MockWorkspaceShare />,
   };
 });
+
+const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
+  Promise.reject(
+    new Response(
+      JSON.stringify({
+        errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+        parameters: {
+          suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
+        },
+      }),
+      {
+        status: 412,
+      }
+    )
+  );
 
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
@@ -173,6 +191,7 @@ describe('HelpSidebar', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({
@@ -391,18 +410,7 @@ describe('HelpSidebar', () => {
       suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
     };
     runtimeStub.runtime = null;
-    runtimeStub.getRuntime = () =>
-      Promise.reject(
-        new Response(
-          JSON.stringify({
-            errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
-            parameters: suspendedParams,
-          }),
-          {
-            status: 412,
-          }
-        )
-      );
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
       runtime: undefined,
@@ -541,5 +549,27 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     extractionStatusIcon(wrapper, false);
+  });
+
+  it('should automatically open previously open panel on load', async () => {
+    runtimeStub.getRuntime = () => Promise.resolve(defaultRuntime());
+    const activeIcon = 'apps';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    const wrapper = await component();
+    expect(
+      // @ts-ignore
+      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
+    ).toBeTruthy();
+  });
+
+  it('should not automatically open previously open panel on load if user is suspended', async () => {
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
+    const activeIcon = 'apps';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    const wrapper = await component();
+    expect(
+      // @ts-ignore
+      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
+    ).toBeFalsy();
   });
 });
