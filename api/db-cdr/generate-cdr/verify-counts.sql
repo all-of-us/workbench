@@ -1,8 +1,8 @@
 -- Use database - replace _SCHEMA_NAME_ with database name
-use _SCHEMA_NAME_;
+USE @SCHEMA_NAME;
 -- SQL for project name
 -- Replace _PROJECT_ with GOOGLE_PROJECT name _SCHEMA_NAME_ with database name
-select ' **_PROJECT_ - _SCHEMA_NAME_** ' as project from dual;
+select ' **@PROJECT - @SCHEMA_NAME** ' as project from dual;
 -- SQL for cb_ and ds_ table counts
 select 'cb_criteria' as table_name, count(*) as row_count from cb_criteria
 union
