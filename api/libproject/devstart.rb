@@ -3013,6 +3013,27 @@ Common.register_command({
     :fn => ->(*args) {export_workspace_operations(EXPORT_WORKSPACE_OPERATIONS_CMD, *args)}
 })
 
+def export_import_cloudsql_cdr(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--cdr-db-name [cdr-db-name]",
+    ->(opts, v) { opts.cdr_db_name = v},
+    "cdrDbName - Name used cdr_config. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name }
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{./db-cdr/generate-cdr/export-import-cloudsql-cdr.sh #{op.opts.cdr_db_name}}
+
+end
+
+Common.register_command({
+  :invocation => "export-import-cloudsql-cdr",
+  :description => "Export cdr database from preprod and import to prod.",
+  :fn => ->(*args) { export_import_cloudsql_cdr("export-import-cloudsql-cdr", *args) }
+})
+
 def verify_cloud_cdr_counts(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -3027,6 +3048,7 @@ def verify_cloud_cdr_counts(cmd_name, *args)
   # for preprod
   op.opts.project = "all-of-us-rw-preprod"
   verify_preprod_prod_counts(op)
+
   # for prod
   op.opts.project = "all-of-us-rw-prod"
   verify_preprod_prod_counts(op)
@@ -3045,30 +3067,22 @@ def verify_preprod_prod_counts(op)
   op.parse.validate
   gcc.validate
   sql = File.read(op.opts.script)
-  new_sql = sql.gsub(/@schema_name/, op.opts.cdr_db_name)
+  sql = sql.gsub(/@schema_name/, op.opts.cdr_db_name)
+  sql = sql.gsub(/@project/, op.opts.project)
   env = read_db_vars(gcc)
-
   user_to_password = {
     "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
   }
-
   db_password = user_to_password[op.opts.db_user]
 
   CloudSqlProxyContext.new(gcc.project).run do
-    if op.opts.db_user == "dev-readonly"
-      common.status ""
-      common.status "Database session will be read-only"
-      common.status ""
-    end
-
     common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
     common.status common.bold_term_text(common.red_term_text("======="+op.opts.project+"======="))
     common.run_inline(
-      run_mysql_cmd(
-        " mysql --table --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} --database=#{env["DB_NAME"]} --password=#{db_password} -e \"#{new_sql}\""
-      ),
+      run_mysql_cmd(" mysql --table --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
+          " --database=#{env["DB_NAME"]} --password=#{db_password} -e \"#{sql}\""),
       db_password)
-    common.status common.bold_term_text(common.red_term_text("======="+op.opts.project+"======="))
+    common.status " "
   end
 end
 
@@ -3077,7 +3091,6 @@ def run_mysql_cmd(cmd)
   if Workbench.in_docker?
     return cmd
   end
-  common.status "Outside docker: invoking mysql via docker for portability"
   return "docker run " +
     "--rm " +
     "--network host " +

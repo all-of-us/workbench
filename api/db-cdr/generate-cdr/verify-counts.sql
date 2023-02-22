@@ -1,4 +1,7 @@
 USE @schema_name;
+-- SQL for project name
+select ' **@project - @schema_name** ' as project from dual;
+-- SQL for cb_ and ds_ table counts
 select 'cb_criteria' as table_name, count(*) as row_count from cb_criteria
 union
 select 'cb_criteria_ancestor' as table_name, count(*) as row_count from cb_criteria_ancestor
