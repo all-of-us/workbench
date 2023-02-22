@@ -6428,26 +6428,6 @@ definitions:
           type: integer
           description: if the error is associated with an external API call, the error code will be propagated here
 
-  DiskConfig:
-    description: The configuration of a persistent disk, returned in runtime responses
-    type: object
-    required:
-      - name
-      - size
-      - diskType
-      - blockSize
-    properties:
-      name:
-        type: string
-        description: Name of the persistent disk
-      size:
-        type: integer
-        description: Size of persistent disk in GB
-      diskType:
-        $ref: "#/definitions/DiskType"
-      blockSize:
-        type: integer
-        description: Block size of persistent disk in bytes
   UpdateRuntimeRequest:
     type: object
     required:
@@ -6455,6 +6435,7 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+
   UpdateDiskRequest:
     description: "Updates an existing persistent disk"
     type: object
