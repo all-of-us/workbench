@@ -1,5 +1,5 @@
 -- Use database - replace _SCHEMA_NAME_ with database name
-USE _SCHEMA_NAME_;
+use _SCHEMA_NAME_;
 -- SQL for project name
 -- Replace _PROJECT_ with GOOGLE_PROJECT name _SCHEMA_NAME_ with database name
 select ' **_PROJECT_ - _SCHEMA_NAME_** ' as project from dual;
@@ -25,6 +25,8 @@ union
 select 'ds_data_dictionary' as table_name, count(*) as row_count from ds_data_dictionary
 union
 select 'ds_linking' as table_name, count(*) as row_count from ds_linking
+union
+select 'domain_card' as table_name, count(*) as row_count from domain_card
 union
 select 'survey_module' as table_name, count(*) as row_count from survey_module
 order by 2 desc;
