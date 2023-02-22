@@ -96,7 +96,7 @@ constructor(
                 )
             }
         } else {
-            agentEmail = user.contactEmail
+            agentEmail = user.username
             agentId = user.userId
         }
 
