@@ -3,6 +3,8 @@ import { mount } from 'enzyme';
 
 import {
   AppsApi,
+  AppStatus,
+  AppType,
   NotebooksApi,
   RuntimeApi,
   RuntimeStatus,
@@ -15,7 +17,10 @@ import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { findNodesContainingText } from 'testing/react-test-helpers';
+import {
+  findNodesContainingText,
+  waitOneTickAndUpdate,
+} from 'testing/react-test-helpers';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
@@ -25,8 +30,8 @@ import { AppsPanel } from './apps-panel';
 
 const stubFunction = () => ({});
 
-const component = async () => {
-  return mount(
+const component = async () =>
+  mount(
     <AppsPanel
       workspace={workspaceStubs[0]}
       onClose={stubFunction}
@@ -34,17 +39,16 @@ const component = async () => {
       onClickDeleteRuntime={stubFunction}
     />
   );
-};
 
 describe('AppsPanel', () => {
-  let runtimeStub: RuntimeApiStub;
+  const appsStub = new AppsApiStub();
+  const runtimeStub = new RuntimeApiStub();
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.set({ config: defaultServerConfig });
     environment.showAppsPanel = true;
-    registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
-    runtimeStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeStub);
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,
@@ -58,7 +62,7 @@ describe('AppsPanel', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  // at initial implementation, Jupyter is the only possible ActiveApp
+  // these tests assume that there are no User GKE Apps
   // so what these tests actually show is whether Jupyter is an ActiveApp
   test.each([
     [RuntimeStatus.Running, true, true],
@@ -68,8 +72,12 @@ describe('AppsPanel', () => {
     [RuntimeStatus.Creating, true, true],
     [RuntimeStatus.Deleting, true, true],
     [RuntimeStatus.Updating, true, true],
-    [RuntimeStatus.Deleted, false, true], // not visible [isVisible() = false]
-    [RuntimeStatus.Error, false, true], // not visible [isVisible() = false]
+
+    // not visible [isVisible() = false]
+
+    [RuntimeStatus.Deleted, false, true],
+    [RuntimeStatus.Error, false, true],
+
     [null, false, true],
   ])(
     'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
@@ -118,6 +126,45 @@ describe('AppsPanel', () => {
       expect(runtimeCost.exists()).toBeTruthy();
 
       expect(runtimeCost.text()).toContain(statusText);
+    }
+  );
+
+  // these tests assume that there are no Jupyter runtimes
+  // so what these tests actually show is whether Cromwell is an ActiveApp
+  test.each([
+    [AppStatus.RUNNING, true, true],
+    [AppStatus.STOPPED, true, true],
+    [AppStatus.STOPPING, true, true],
+    [AppStatus.STARTING, true, true],
+    [AppStatus.PROVISIONING, true, true],
+    [AppStatus.DELETING, true, true],
+    [AppStatus.STATUSUNSPECIFIED, true, true],
+    [AppStatus.ERROR, true, true],
+
+    [AppStatus.DELETED, false, true],
+    [null, false, true],
+  ])(
+    'should render / not render ActiveApps and AvailableApps when the Cromwell status is %s',
+    async (status, activeExpected, availableExpected) => {
+      runtimeStub.runtime.status = RuntimeStatus.Deleted;
+      appsStub.listAppsResponse = [{ status, appType: AppType.CROMWELL }];
+
+      const wrapper = await component();
+      expect(wrapper.exists()).toBeTruthy();
+      await waitOneTickAndUpdate(wrapper);
+
+      expect(
+        findNodesContainingText(wrapper, 'Active applications').exists()
+      ).toBe(activeExpected);
+
+      // this changes based on whether there are active applications above this section
+      const availableExpectedHeader = activeExpected
+        ? 'Launch other applications'
+        : 'Launch applications';
+
+      expect(
+        findNodesContainingText(wrapper, availableExpectedHeader).exists()
+      ).toBe(availableExpected);
     }
   );
 });
