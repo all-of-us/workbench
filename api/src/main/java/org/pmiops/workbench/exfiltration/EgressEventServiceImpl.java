@@ -86,6 +86,12 @@ public class EgressEventServiceImpl implements EgressEventService {
     }
     List<Optional<DbUser>> egressUsers = findEgressUsers(event, dbWorkspaceMaybe);
 
+    // This shouldn't typically happen, if it does then there's something really wrong.
+    // We at least need to audit this.
+    if (egressUsers.isEmpty()) {
+      this.egressEventAuditor.fireEgressEvent(event);
+    }
+
     for (Optional<DbUser> egressUserMaybe : egressUsers) {
       logger.warning(
           String.format(
@@ -105,7 +111,7 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     // This case is when the Egress is from a GCE cluster.
     if (StringUtils.isNotEmpty(event.getVmPrefix())
-        && StringUtils.isEmpty(event.getSrcGkeCluster())) {
+        && event.getVmPrefix().startsWith("all-of-us")) {
       Optional<DbUser> dbUserMaybe =
           vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
       if (!dbUserMaybe.isPresent()) {
@@ -129,11 +135,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             dbWorkspace.getGoogleProject());
     List<String> appUsersList =
         userAppEnvironments.stream()
-            .filter(
-                u ->
-                    u.getStatus().equals(AppStatus.RUNNING)
-                        || u.getStatus().equals(AppStatus.PROVISIONING)
-                        || u.getStatus().equals(AppStatus.STARTING))
+            .filter(u -> u.getStatus().equals(AppStatus.RUNNING))
             .map(u -> u.getCreator())
             .collect(Collectors.toList());
     List<DbUser> usersByUsernames = userService.findUsersByUsernames(appUsersList);

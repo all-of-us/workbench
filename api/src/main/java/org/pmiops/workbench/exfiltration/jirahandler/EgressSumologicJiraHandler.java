@@ -132,10 +132,11 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
                 originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())),
         JiraContent.text(
             String.format(
-                "Egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
+                "Egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers, %.2fMiB via GKE\n\n",
                 originalEvent.getGceEgressMib(),
                 originalEvent.getDataprocMasterEgressMib(),
-                originalEvent.getDataprocWorkerEgressMib())),
+                originalEvent.getDataprocWorkerEgressMib(),
+                originalEvent.getGkeEgressMib())),
         JiraContent.text("Workspace admin console (as RW admin):"),
         workspace
             .map(
