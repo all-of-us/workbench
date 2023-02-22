@@ -3087,7 +3087,6 @@ def verify_preprod_prod_counts(op)
 end
 
 def run_mysql_cmd(cmd)
-  common = Common.new
   if Workbench.in_docker?
     return cmd
   end

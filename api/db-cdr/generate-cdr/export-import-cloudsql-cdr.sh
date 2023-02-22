@@ -79,7 +79,7 @@ gsutil rm gs://"$PROJECT_PROD".appspot.com/"$CDR_DB_NAME"_export.sql
 
 # Verify: print out row counts from cdr from preprod and prod for manual verification
 echo "7a. Querying row counts for tables in $CDR_DB_NAME for preprod and prod"
-echo "`./project.rb verify-cloud-cdr-counts --cdr-db-name $CDR_DB_NAME`"
+echo "$(./project.rb verify-cloud-cdr-counts --cdr-db-name "$CDR_DB_NAME")"
 echo -e "7b. \033[0;31m**Manually check row counts for tables match between preprod and prod**\033[0m"
 echo "done!"
 
