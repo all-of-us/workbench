@@ -262,7 +262,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void updateDisk_projectNotFound() {
+  public void updateDisk_workspaceNotFound() {
     int diskSize = 200;
     String diskName = user.generatePDName();
 
@@ -292,7 +292,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void deleteDisk_projectNotFound() {
+  public void deleteDisk_workspaceNotFound() {
     String diskName = user.generatePDName();
 
     doThrow(new NotFoundException())
