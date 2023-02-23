@@ -581,8 +581,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<UserAppEnvironment> listAppsInProjectCreatedByCreatorAsService(
-      String googleProjectId) {
+  public List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId) {
     AppsApi appsApi = serviceAppsApiProvider.get();
     return getUserAppEnvironments(googleProjectId, appsApi, null);
   }

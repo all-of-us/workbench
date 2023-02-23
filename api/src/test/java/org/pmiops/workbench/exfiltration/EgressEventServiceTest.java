@@ -154,7 +154,7 @@ public class EgressEventServiceTest {
 
     doReturn(Collections.singletonList(userRStudioAppEnvironmentForUser(dbUser1)))
         .when(leonardoApiClient)
-        .listAppsInProjectCreatedByCreatorAsService(dbWorkspace.getGoogleProject());
+        .listAppsInProjectAsService(dbWorkspace.getGoogleProject());
 
     doReturn(Collections.singletonList(dbUser1)).when(mockUserService).findUsersByUsernames(any());
 

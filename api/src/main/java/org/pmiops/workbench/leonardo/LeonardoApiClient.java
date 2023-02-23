@@ -104,7 +104,7 @@ public interface LeonardoApiClient {
    */
   List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId);
 
-  List<UserAppEnvironment> listAppsInProjectCreatedByCreatorAsService(String googleProjectId);
+  List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId);
 
   /**
    * Deletes a Leonardo app

@@ -31,13 +31,6 @@ public abstract class EgressJiraHandler {
 
   @Autowired private EgressEventMapper egressEventMapper;
 
-  //  protected EgressJiraHandler(
-  //      Clock clock, JiraService jiraService, EgressEventMapper egressEventMapper) {
-  //    this.clock = clock;
-  //    this.jiraService = jiraService;
-  //    this.egressEventMapper = egressEventMapper;
-  //  }
-
   public abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;
 
