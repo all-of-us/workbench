@@ -53,6 +53,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final AccessModuleService accessModuleService;
+  private final AccessSyncService accessSyncService;
 
   CloudTaskUserController(
       UserDao userDao,
@@ -138,12 +139,16 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
         // of *all* modules, so this serves as a general fallback as well (e.g. due to partial
         // system failures or bugs), ensuring that the database and access tier groups are
         // consistent with access module statuses.
-        user = userService.syncDuccVersionStatus(user, Agent.asSystem());
+        // user = userService.syncDuccVersionStatus(user, Agent.asSystem());
+        user = accessSyncService.updateUserAccessTiers(user, Agent.asSystem(), false);
       } catch (WorkbenchException e) {
         log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;
       }
     }
+
+    accessSyncService.propagateTierAccessToTerra(Agent.asSystem())
+
     if (errorCount > 0) {
       log.severe(
           String.format(

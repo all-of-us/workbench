@@ -51,11 +51,14 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.userServiceAuditor = userServiceAuditor;
   }
 
-  /**
-   * Ensures that the data access tiers for the user reflect the state of other fields on the user
-   */
   @Override
-  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
+  public void propagateTierAccessToTerra(Agent agent) {
+    // for each tier
+      groupsApi.setGroupMembership(...)
+  }
+
+  @Override
+  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent, boolean shouldPropagateToTerra) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
@@ -72,7 +75,20 @@ public class AccessSyncServiceImpl implements AccessSyncService {
         Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
 
-    return userDao.save(dbUser);
+    DbUser saved = userDao.save(dbUser)
+    if (shouldPropagateToTerra) {
+      propagateTierAccessToTerra(agent)
+    }
+
+    return saved
+  }
+
+  /**
+   * Ensures that the data access tiers for the user reflect the state of other fields on the user
+   */
+  @Override
+  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
+    return updateUserAccessTiers(dbUser, agent, true)
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {

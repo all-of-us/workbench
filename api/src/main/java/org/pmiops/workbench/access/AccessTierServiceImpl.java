@@ -73,7 +73,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
-    addToAuthDomainIdempotent(user, accessTier);
+    // addToAuthDomainIdempotent(user, accessTier);
 
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
@@ -107,7 +107,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
-    removeFromAuthDomainIdempotent(user, accessTier);
+    // removeFromAuthDomainIdempotent(user, accessTier);
 
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
