@@ -5,6 +5,7 @@ import {
   AppsApi,
   AppStatus,
   AppType,
+  BillingStatus,
   NotebooksApi,
   RuntimeApi,
   RuntimeStatus,
@@ -12,7 +13,6 @@ import {
 
 import { environment } from 'environments/environment';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 
@@ -24,16 +24,18 @@ import {
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
-import { workspaceDataStub, workspaceStubs } from 'testing/stubs/workspaces';
+import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AppsPanel } from './apps-panel';
 
 const stubFunction = () => ({});
 
+const workspaceStub = workspaceDataStub;
+
 const component = async () =>
   mount(
     <AppsPanel
-      workspace={workspaceStubs[0]}
+      workspace={workspaceStub}
       onClose={stubFunction}
       onClickRuntimeConf={stubFunction}
       onClickDeleteRuntime={stubFunction}
@@ -62,14 +64,13 @@ describe('AppsPanel', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
   beforeEach(() => {
-    currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.set({ config: defaultServerConfig });
     environment.showAppsPanel = true;
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
     runtimeStore.set({
-      workspaceNamespace: workspaceDataStub.namespace,
+      workspaceNamespace: workspaceStub.namespace,
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
@@ -247,5 +248,20 @@ describe('AppsPanel', () => {
 
     expect(findActiveApps(wrapper).exists()).toBeFalsy();
     expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+  });
+
+  it('should show the disabled panel when the workspace has INACTIVE billing status', async () => {
+    workspaceStub.billingStatus = BillingStatus.INACTIVE;
+
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(
+      wrapper.find({ 'data-test-id': 'environment-disabled-panel' }).exists()
+    ).toBeTruthy();
+
+    expect(findActiveApps(wrapper).exists()).toBeFalsy();
+    expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 });
