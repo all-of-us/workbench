@@ -747,8 +747,8 @@ export const toAnalysisConfig = (
       machine: findMachineByName(machineType),
       diskConfig: {
         size: diskSize,
-        detachable: true,
-        detachableType: DiskType.Standard,
+        detachable: false,
+        detachableType: null,
         existingDiskName: null,
       },
       detachedDisk: existingDisk,

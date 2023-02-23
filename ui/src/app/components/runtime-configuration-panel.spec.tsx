@@ -599,6 +599,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickMainDiskSize(wrapper, 150);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
+    await enableDetachable(wrapper, true);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -606,12 +607,14 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.UserOverride
     );
-    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
-      diskType: 'pd-standard',
-      labels: {},
-      name: 'stub-disk',
-      size: 120,
-    });
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual(
+        {
+          diskType: 'pd-standard',
+          labels: {},
+          name: 'stub-disk',
+          size: MIN_DISK_SIZE_GB,
+        }
+    );
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
@@ -836,6 +839,7 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
     const wrapper = await component();
 
     expect(
@@ -873,7 +877,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainRam(wrapper)).toBe(7.5);
   });
 
-  it('should NOT show any warn user about reboot if there are updates that require one - increase disk size', async () => {
+  it('should warn user about reboot if there are updates that require one - increase disk size', async () => {
     const wrapper = await component();
 
     await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 10);
@@ -881,7 +885,9 @@ describe('RuntimeConfigurationPanel', () => {
 
     // After https://precisionmedicineinitiative.atlassian.net/browse/RW-9167 Reattachable persistent disk is default
     // Increase disk size for RPD does not show any error message
-    expect(wrapper.find(WarningMessage).length).toBe(0);
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
   });
 
   it('should not warn user for updates where not needed - number of workers', async () => {
@@ -918,23 +924,27 @@ describe('RuntimeConfigurationPanel', () => {
     expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
   });
 
-  it('should warn user about reboot if there are updates that require one - CPU', async () => {
+  it('should warn user about re-creation if there are updates that require one - CPU', async () => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
     await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
   });
 
-  it('should warn user about reboot if there are updates that require one - Memory', async () => {
+  it('should warn user about re-creation if there are updates that require one - Memory', async () => {
     const wrapper = await component();
 
     // 15 GB -> 26 GB
     await pickMainRam(wrapper, 26);
     await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
@@ -942,13 +952,13 @@ describe('RuntimeConfigurationPanel', () => {
     const wrapper = await component();
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Next');
     expect(
       wrapper.find(WarningMessage).text().includes('deletion')
     ).toBeTruthy();
   });
 
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
     const wrapper = await component();
 
     await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) - 10);
@@ -1063,6 +1073,7 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should send an updateDisk API call if disk changes do not require a delete', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
     setCurrentDisk(existingDisk());
     const wrapper = await component();
 
@@ -1084,7 +1095,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
-    await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
@@ -1762,5 +1772,26 @@ describe('RuntimeConfigurationPanel', () => {
 
     wrapper.update();
     expect(wrapper.text()).toContain('MapReduce History Server');
+  });
+  it('Should disable standard storage option for existing runtime and have reattachable selected', async () => {
+    setCurrentRuntime(runtimeApiStub.runtime);
+    const wrapper = await component();
+
+    const warningMessages = wrapper.find(WarningMessage);
+    expect(warningMessages.length).toBe(2);
+    expect(
+      warningMessages
+        .first()
+        .text()
+        .includes('support reattachable persistent disks')
+    ).toBeTruthy();
+    expect(warningMessages.at(1).text().includes('deletion')).toBeTruthy();
+
+    expect(
+      wrapper
+        .find('[data-test-id="detachable-disk-radio"]')
+        .first()
+        .prop('checked')
+    ).toBeTruthy();
   });
 });

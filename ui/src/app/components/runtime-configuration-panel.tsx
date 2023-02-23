@@ -435,7 +435,11 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
-    const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
+    const runtimeCanBeCreated =
+      !(getErrorMessageContent().length > 0) &&
+        ((analysisConfig.computeType === ComputeType.Standard &&
+      analysisConfig.diskConfig.detachable) || (analysisConfig.computeType === ComputeType.Dataproc &&
+        !analysisConfig.diskConfig.detachable));
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
