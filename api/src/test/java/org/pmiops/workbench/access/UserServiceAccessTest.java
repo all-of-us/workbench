@@ -436,7 +436,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_up_to_date() {
+  public void test_maybeSendAccessTierExpirationEmails_up_to_date() {
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
@@ -449,7 +449,7 @@ public class UserServiceAccessTest {
     // a completion requirement for DUCC
     dbUser.setDuccAgreement(signCurrentDucc(dbUser));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
@@ -457,7 +457,7 @@ public class UserServiceAccessTest {
   // bypassed modules do not expire: so no email
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_bypassed_is_up_to_date() {
+  public void test_maybeSendAccessTierExpirationEmails_bypassed_is_up_to_date() {
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
 
     accessModuleService.updateBypassTime(
@@ -470,13 +470,13 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, now);
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_1() throws MessagingException {
+  public void test_maybeSendAccessTierExpirationEmails_expiring_1() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(
@@ -495,7 +495,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, REGISTERED_TIER_SHORT_NAME);
@@ -505,7 +505,7 @@ public class UserServiceAccessTest {
   // because the user is not expiring soon - they never had access at all
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expired_but_missing() {
+  public void test_maybeSendAccessTierExpirationEmails_expired_but_missing() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(
@@ -524,7 +524,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, false);
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
@@ -533,7 +533,7 @@ public class UserServiceAccessTest {
   // we consider only the unbypassed
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_1_with_bypass()
+  public void test_maybeSendAccessTierExpirationEmails_expiring_1_with_bypass()
       throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -552,7 +552,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, REGISTERED_TIER_SHORT_NAME);
@@ -561,7 +561,7 @@ public class UserServiceAccessTest {
   // bypass times are not relevant to expiration emails
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_1_with_older_bypass()
+  public void test_maybeSendAccessTierExpirationEmails_expiring_1_with_older_bypass()
       throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -580,7 +580,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, REGISTERED_TIER_SHORT_NAME);
@@ -590,7 +590,7 @@ public class UserServiceAccessTest {
   // we sent one yesterday for 1 day already, and we will send another once it actually expires.
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_today() {
+  public void test_maybeSendAccessTierExpirationEmails_expiring_today() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -608,7 +608,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(halfDay));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
@@ -641,7 +641,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_31() {
+  public void test_maybeSendAccessTierExpirationEmails_expiring_31() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -657,7 +657,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(daysPlusSome(31)));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
@@ -665,7 +665,7 @@ public class UserServiceAccessTest {
   // 15 days is sooner, so that's the email we send rather than 30
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_15_and_30()
+  public void test_maybeSendAccessTierExpirationEmails_expiring_15_and_30()
       throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
@@ -688,7 +688,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(fifteenPlus));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(
@@ -702,7 +702,7 @@ public class UserServiceAccessTest {
   // so we send no email
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expiring_14_and_15() {
+  public void test_maybeSendAccessTierExpirationEmails_expiring_14_and_15() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -720,13 +720,13 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, willExpireAfter(daysPlusSome(14)));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_expired() throws MessagingException {
+  public void test_maybeSendAccessTierExpirationEmails_expired() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -744,7 +744,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, expiredBy(oneHour));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierExpiration(dbUser, expirationTime, REGISTERED_TIER_SHORT_NAME);
@@ -754,7 +754,7 @@ public class UserServiceAccessTest {
   // because we sent the expiration email yesterday
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmail_extra_expired() {
+  public void test_maybeSendAccessTierExpirationEmails_extra_expired() {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -775,7 +775,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, extraExpired);
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verifyZeroInteractions(mailService);
   }
