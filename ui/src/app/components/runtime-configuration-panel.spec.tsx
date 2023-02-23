@@ -606,9 +606,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.UserOverride
     );
-    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual(
-        {"diskType": "pd-standard", "labels": {}, "name": "stub-disk", "size": 120}
-    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: 'stub-disk',
+      size: 120,
+    });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
@@ -1059,11 +1062,11 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
+  it('should send an updateDisk API call if disk changes do not require a delete', async () => {
     setCurrentDisk(existingDisk());
     const wrapper = await component();
 
-    const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+    const updateSpy = jest.spyOn(disksApi(), 'updateDisk');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
     await pickDetachableDiskSize(wrapper, 1010);

@@ -20,10 +20,6 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { DiskSizeSelector } from './disk-size-selector';
 
-const isComputeTypeStandard = (computeType) => {
-  return computeType === ComputeType.Standard;
-};
-
 export const DiskSelector = ({
   diskConfig,
   onChange,
@@ -58,7 +54,7 @@ export const DiskSelector = ({
           </StyledExternalLink>
         </FlexRow>
       </FlexColumn>
-      {isComputeTypeStandard(computeType) && (
+      {computeType === ComputeType.Standard && (
         <WarningMessage>
           <AoU /> will now only support reattachable persistent disks as the
           storage disk option for Standard VMs and will discontinue standard
@@ -80,14 +76,14 @@ export const DiskSelector = ({
         content={
           'To create a new Standard VM environment, you will have to use a reattachable persistent disk'
         }
-        disabled={!isComputeTypeStandard(computeType)}
+        disabled={computeType !== ComputeType.Standard}
       >
         <FlexRow style={styles.diskRow}>
           <RadioButton
             name='standardDisk'
             data-test-id='standard-disk-radio'
             style={styles.diskRadio}
-            disabled={disabled || isComputeTypeStandard(computeType)}
+            disabled={disabled || computeType === ComputeType.Standard}
             onChange={() =>
               onChange({
                 ...diskConfig,
@@ -108,7 +104,7 @@ export const DiskSelector = ({
               <DiskSizeSelector
                 idPrefix='standard'
                 diskSize={diskConfig.size}
-                disabled={disabled || isComputeTypeStandard(computeType)}
+                disabled={disabled || computeType === ComputeType.Standard}
                 style={{ marginTop: '11px' }}
                 onChange={(size: number) =>
                   onChange(

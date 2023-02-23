@@ -681,6 +681,9 @@ export const withAnalysisConfigDefaults = (
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
+  // For computeType Standard: We are moving away from storage disk as Standard
+  // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
+  // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
     if (detachable === true || existingDisk) {
       detachable = true;
@@ -691,7 +694,7 @@ export const withAnalysisConfigDefaults = (
         existingDiskName = existingDisk.name;
       }
     } else {
-      // Detachable unspecified and no existing disk.
+      // No existing disk.
       detachableType = DiskType.Standard;
       detachable = true;
       size = MIN_DISK_SIZE_GB;
