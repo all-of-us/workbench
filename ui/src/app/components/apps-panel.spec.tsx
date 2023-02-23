@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AppsApi,
@@ -40,6 +40,24 @@ const component = async () =>
     />
   );
 
+const findActiveApps = (wrapper: ReactWrapper) =>
+  findNodesContainingText(wrapper, 'Active applications');
+
+const findAvailableApps = (wrapper: ReactWrapper, activeAppsExist: boolean) => {
+  // the text changes based on whether there are active applications above this section
+  const availableExpectedHeader = activeAppsExist
+    ? 'Launch other applications'
+    : 'Launch applications';
+
+  return findNodesContainingText(wrapper, availableExpectedHeader);
+};
+
+const findUnexpandedApp = (wrapper: ReactWrapper, appName: string) =>
+  wrapper.find({ 'data-test-id': `${appName}-unexpanded` });
+
+const findExpandedApp = (wrapper: ReactWrapper, appName: string) =>
+  wrapper.find({ 'data-test-id': `${appName}-expanded` });
+
 describe('AppsPanel', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
@@ -55,11 +73,6 @@ describe('AppsPanel', () => {
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
-  });
-
-  it('should render', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
   });
 
   // these tests assume that there are no User GKE Apps
@@ -90,18 +103,10 @@ describe('AppsPanel', () => {
       // sanity check: isVisible() is equivalent to activeExpected
       expect(!!isVisible(status)).toBe(activeExpected);
 
-      expect(
-        findNodesContainingText(wrapper, 'Active applications').exists()
-      ).toBe(activeExpected);
-
-      // this changes based on whether there are active applications above this section
-      const availableExpectedHeader = activeExpected
-        ? 'Launch other applications'
-        : 'Launch applications';
-
-      expect(
-        findNodesContainingText(wrapper, availableExpectedHeader).exists()
-      ).toBe(availableExpected);
+      expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
+      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
+        availableExpected
+      );
     }
   );
 
@@ -141,7 +146,9 @@ describe('AppsPanel', () => {
     [AppStatus.STATUSUNSPECIFIED, true, true],
     [AppStatus.ERROR, true, true],
 
+    // not visible [isVisible() = false]
     [AppStatus.DELETED, false, true],
+
     [null, false, true],
   ])(
     'should render / not render ActiveApps and AvailableApps when the Cromwell status is %s',
@@ -153,18 +160,92 @@ describe('AppsPanel', () => {
       expect(wrapper.exists()).toBeTruthy();
       await waitOneTickAndUpdate(wrapper);
 
-      expect(
-        findNodesContainingText(wrapper, 'Active applications').exists()
-      ).toBe(activeExpected);
-
-      // this changes based on whether there are active applications above this section
-      const availableExpectedHeader = activeExpected
-        ? 'Launch other applications'
-        : 'Launch applications';
-
-      expect(
-        findNodesContainingText(wrapper, availableExpectedHeader).exists()
-      ).toBe(availableExpected);
+      expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
+      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
+        availableExpected
+      );
     }
   );
+
+  it('should render ActiveApps only, when both Jupyter and Cromwell are RUNNING', async () => {
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+    appsStub.listAppsResponse = [
+      { status: AppStatus.RUNNING, appType: AppType.CROMWELL },
+    ];
+
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findActiveApps(wrapper).exists()).toBeTruthy();
+    expect(findAvailableApps(wrapper, true).exists()).toBeFalsy();
+  });
+
+  it('should render AvailableApps only, when neither Jupyter nor Cromwell are present', async () => {
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findActiveApps(wrapper).exists()).toBeFalsy();
+    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+  });
+
+  it('should render AvailableApps only, when both Jupyter and Cromwell are DELETED', async () => {
+    runtimeStub.runtime.status = RuntimeStatus.Deleted;
+    appsStub.listAppsResponse = [
+      { status: AppStatus.DELETED, appType: AppType.CROMWELL },
+    ];
+
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findActiveApps(wrapper).exists()).toBeFalsy();
+    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+  });
+
+  it('should allow a user to expand available apps', async () => {
+    // initial state: no Jupyter runtime or Cromwell app exists
+
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+
+    const wrapper = await component();
+    expect(wrapper.exists()).toBeTruthy();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findActiveApps(wrapper).exists()).toBeFalsy();
+    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+
+    // Click unexpanded Jupyter app
+
+    expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
+    const clickJupyter = findUnexpandedApp(wrapper, 'Jupyter').prop('onClick');
+    await clickJupyter();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeFalsy();
+    expect(findExpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
+
+    // Click unexpanded Cromwell app
+
+    expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+    const clickCromwell = findUnexpandedApp(wrapper, 'Cromwell').prop(
+      'onClick'
+    );
+    await clickCromwell();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeFalsy();
+    expect(findExpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+
+    // the overall apps panel state doesn't change: there are still no ActiveApps
+    // the newly expanded apps are in the AvailableApps section
+
+    expect(findActiveApps(wrapper).exists()).toBeFalsy();
+    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+  });
 });
