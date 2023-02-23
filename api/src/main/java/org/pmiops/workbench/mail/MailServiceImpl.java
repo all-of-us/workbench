@@ -725,10 +725,10 @@ public class MailServiceImpl implements MailService {
     String imageURL;
     switch (tierShortName) {
       case REGISTERED_TIER_SHORT_NAME:
-        imageURL = "registered-tier-badge.svg";
+        imageURL = "registered-tier-badge.png";
         break;
       case CONTROLLED_TIER_SHORT_NAME:
-        imageURL = "controlled-tier-badge.svg";
+        imageURL = "controlled-tier-badge.png";
         break;
       default:
         imageURL = null;
