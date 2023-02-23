@@ -11,7 +11,6 @@ import {
   NotebooksApi,
   RuntimeApi,
   RuntimeStatus,
-  SecuritySuspendedErrorParameters,
   TerraJobStatus,
   WorkspaceAccessLevel,
   WorkspacesApi,
@@ -28,7 +27,6 @@ import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -406,17 +404,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display security suspended UX on compute suspended', async () => {
-    const suspendedParams: SecuritySuspendedErrorParameters = {
-      suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
-    };
-    runtimeStub.runtime = null;
     runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
-    runtimeStore.set({
-      workspaceNamespace: workspaceDataStub.namespace,
-      runtime: undefined,
-      runtimeLoaded: false,
-      loadingError: new ComputeSecuritySuspendedError(suspendedParams),
-    });
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
