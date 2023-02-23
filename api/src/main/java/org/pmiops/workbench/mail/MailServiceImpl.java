@@ -81,10 +81,10 @@ public class MailServiceImpl implements MailService {
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
-  private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
-      "emails/access_expired/content.html";
-  private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
-      "emails/access_threshold/content.html";
+  private static final String TIER_ACCESS_EXPIRED_RESOURCE =
+      "emails/tier_access_expired/content.html";
+  private static final String TIER_ACCESS_THRESHOLD_RESOURCE =
+      "emails/tier_access_threshold/content.html";
   private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
       "emails/setup_gcp_billing_account/content.html";
   private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
@@ -217,36 +217,28 @@ public class MailServiceImpl implements MailService {
       final DbUser user, long daysRemaining, Instant expirationTime, String tierShortName)
       throws MessagingException {
 
+    String capitalizedAccessTierShortName = StringUtils.capitalize(tierShortName);
+
     final String logMsg =
         String.format(
-            "Registered Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            "%s Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            capitalizedAccessTierShortName,
             user.getUsername(),
             user.getContactEmail(),
             daysRemaining,
             formatCentralTime(expirationTime));
     log.info(logMsg);
 
-    String resource;
-
-    switch (tierShortName) {
-      case REGISTERED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
-        break;
-      case CONTROLLED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE;
-        break;
-      default:
-        resource = null;
-    }
-
     final String htmlMessage =
-        buildHtml(resource, accessTierSubstitutionMap(expirationTime, user, tierShortName));
+        buildHtml(
+            TIER_ACCESS_THRESHOLD_RESOURCE,
+            accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
         "Your access to All of Us "
-            + StringUtils.capitalize(tierShortName)
+            + capitalizedAccessTierShortName
             + " Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
@@ -260,19 +252,6 @@ public class MailServiceImpl implements MailService {
   @Override
   public void alertUserAccessTierExpiration(
       final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException {
-    String resource;
-
-    switch (tierShortName) {
-      case REGISTERED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE;
-        break;
-      case CONTROLLED_TIER_SHORT_NAME:
-        resource = REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE;
-        break;
-      default:
-        resource = null;
-    }
-
     String capitalizedAccessTierShortName = StringUtils.capitalize(tierShortName);
 
     final String logMsg =
@@ -284,7 +263,9 @@ public class MailServiceImpl implements MailService {
     log.info(logMsg);
 
     final String htmlMessage =
-        buildHtml(resource, accessTierSubstitutionMap(expirationTime, user, tierShortName));
+        buildHtml(
+            TIER_ACCESS_EXPIRED_RESOURCE,
+            accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
