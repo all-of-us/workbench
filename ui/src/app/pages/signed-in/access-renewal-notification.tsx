@@ -44,7 +44,7 @@ export const AccessRenewalNotificationMaybe = (
       ? { backgroundColor: EXPIRING_SOON }
       : daysRemaining > 6
       ? { backgroundColor: EXPIRING }
-      : {backgroundColor: EXPIRED};
+      : { backgroundColor: EXPIRED };
 
   const iconColor =
     daysRemaining > 13
