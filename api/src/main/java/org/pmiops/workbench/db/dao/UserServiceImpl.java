@@ -810,13 +810,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
-  /** Send an Access Renewal Expiration or Warning email to the user, if appropriate */
+  /** Send Access Renewal Expiration or Warning emails to the user for all tiers, if appropriate */
   @Override
-  public void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
-    final Optional<Timestamp> accessTierExpiration =
-        getTierExpirationForEmails(user, tierShortName);
-    accessTierExpiration.ifPresent(
-        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
+  public void maybeSendAccessExpirationEmails(DbUser user) {
+    maybeSendAccessTierExpirationEmail(user, REGISTERED_TIER_SHORT_NAME);
+    maybeSendAccessTierExpirationEmail(user, CONTROLLED_TIER_SHORT_NAME);
   }
 
   @Override
@@ -904,5 +902,16 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private Timestamp clockNow() {
     return new Timestamp(clock.instant().toEpochMilli());
+  }
+
+  /**
+   * Send an Access Renewal Expiration or Warning email to the user for a specified tier, if
+   * appropriate
+   */
+  private void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
+    final Optional<Timestamp> accessTierExpiration =
+        getTierExpirationForEmails(user, tierShortName);
+    accessTierExpiration.ifPresent(
+        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
   }
 }
