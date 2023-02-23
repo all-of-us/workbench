@@ -435,6 +435,9 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
+    // For computeType Standard: We are moving away from storage disk as Standard
+    // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
+    // Eventually we will be removing this option altogether
     const runtimeCanBeCreated =
       !(getErrorMessageContent().length > 0) &&
         ((analysisConfig.computeType === ComputeType.Standard &&
