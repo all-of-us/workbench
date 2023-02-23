@@ -185,7 +185,7 @@ describe('Access Renewal Notification', () => {
       'for RT when there is one module expiring in couple of weeks',
       AccessTierShortNames.Registered,
       allCompleteOneExpiringInTwoWeeks(AccessModule.DATAUSERCODEOFCONDUCT),
-      EXPIRING,
+      EXPIRING_SOON,
     ],
     [
       // Showing the RT banner appears in this case, so CT is not needed
@@ -236,7 +236,7 @@ describe('Access Renewal Notification', () => {
       'for CT when only CT training is expiring in couple of weeks',
       AccessTierShortNames.Controlled,
       allCompleteOneExpiringInTwoWeeks(AccessModule.CTCOMPLIANCETRAINING),
-      EXPIRING,
+      EXPIRING_SOON,
     ],
     [
       true,
@@ -266,7 +266,7 @@ describe('Access Renewal Notification', () => {
       'for RT when CT is expiring sooner',
       AccessTierShortNames.Registered,
       ctExpiresFirst,
-      EXPIRING_SOON,
+      EXPIRING,
     ],
     [
       true,

@@ -41,15 +41,15 @@ export const AccessRenewalNotificationMaybe = (
 
   const boxColor =
     daysRemaining > 13
-      ? { backgroundColor: EXPIRING }
-      : daysRemaining < 13 && daysRemaining > 6
       ? { backgroundColor: EXPIRING_SOON }
+      : daysRemaining < 13 && daysRemaining > 6
+      ? { backgroundColor: EXPIRING }
       : daysRemaining <= 6 && {
           backgroundColor: EXPIRED,
         };
 
   const iconColor =
-    daysRemaining < 13 && daysRemaining > 6
+    daysRemaining > 13
       ? { color: colors.primary }
       : daysRemaining <= 6 && { color: colors.danger };
 
