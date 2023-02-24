@@ -1564,7 +1564,6 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
     runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
-    console.log(wrapper.html());
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
@@ -1664,7 +1663,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it.skip('should allow creating gce with GPU', async () => {
+  it('should allow creating gce with GPU', async () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
@@ -1677,13 +1676,15 @@ describe('RuntimeConfigurationPanel', () => {
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
-      'nvidia-tesla-t4'
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
+      'stub-disk'
     );
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.numOfGpus).toEqual(2);
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
+      2
+    );
   });
 
-  it.skip('should allow creating gce without GPU', async () => {
+  it('should allow creating gce without GPU', async () => {
     if (!enableGpu) {
       return;
     }
@@ -1692,10 +1693,10 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {

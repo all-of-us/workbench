@@ -33,7 +33,6 @@ import {
   DEFAULT_MACHINE_TYPE,
   findMachineByName,
   Machine,
-  MIN_DISK_SIZE_GB,
 } from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
@@ -697,7 +696,6 @@ export const withAnalysisConfigDefaults = (
       // No existing disk.
       detachableType = DiskType.Standard;
       detachable = true;
-      size = MIN_DISK_SIZE_GB;
     }
   } else if (computeType === ComputeType.Dataproc) {
     detachable = false;
