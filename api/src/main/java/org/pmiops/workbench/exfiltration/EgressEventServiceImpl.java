@@ -86,8 +86,8 @@ public class EgressEventServiceImpl implements EgressEventService {
     }
     List<Optional<DbUser>> egressUsers = findEgressUsers(event, dbWorkspaceMaybe);
 
-    // This shouldn't typically happen, if it does then there's something really wrong.
-    // We at least need to audit this.
+    // This would happen if we receive a second GKE Egress for the same event when the app is being STOPPED,
+    // we just audit in this case since we can't know the user
     if (egressUsers.isEmpty()) {
       this.egressEventAuditor.fireEgressEvent(event);
     }

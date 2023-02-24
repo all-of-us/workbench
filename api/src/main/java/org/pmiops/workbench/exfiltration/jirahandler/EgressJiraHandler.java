@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
@@ -16,8 +15,6 @@ import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
-import org.pmiops.workbench.model.SumologicEgressEvent;
-import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +25,6 @@ public abstract class EgressJiraHandler {
 
   @Autowired private Clock clock;
   @Autowired private JiraService jiraService;
-
-  @Autowired private EgressEventMapper egressEventMapper;
 
   public abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;
@@ -42,11 +37,6 @@ public abstract class EgressJiraHandler {
 
   protected SearchResults searchJiraIssuesWithLabel(
       DbEgressEvent event, String envShortName, String label) throws ApiException {
-    SumologicEgressEvent sumologicEgressEvent = egressEventMapper.toSumoLogicEvent(event);
-    String vmName = sumologicEgressEvent.getVmPrefix();
-    if (StringUtils.isNotEmpty(sumologicEgressEvent.getSrcGkeCluster())) {
-      vmName = sumologicEgressEvent.getVmName();
-    }
     return jiraService.searchIssues(
         // Ideally we would use Resolution = Unresolved here, but due to a misconfiguration of
         // RW Jira, transitioning to Won't Fix / Duplicate do not currently resolve an issue.
@@ -57,7 +47,7 @@ public abstract class EgressJiraHandler {
                 + " AND status not in (Done, \"Won't Fix\", Duplicate)"
                 + " ORDER BY created DESC",
             IssueProperty.EGRESS_VM_PREFIX.key(),
-            vmName,
+            event.getUser().getRuntimeName(),
             IssueProperty.RW_ENVIRONMENT.key(),
             envShortName,
             IssueProperty.LABELS,
