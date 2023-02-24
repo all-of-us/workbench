@@ -84,8 +84,12 @@ export const shouldShowApp = (app: UserAppEnvironment): boolean =>
 export const canCreateApp = (app: UserAppEnvironment): boolean =>
   !isVisible(app?.status);
 
+// matches Leonardo code
+// val deletableStatuses: Set[AppStatus] = Set(Unspecified, Running, Error)
 export const isDeletable = (status: AppStatus): boolean =>
-  [AppStatus.RUNNING, AppStatus.ERROR].includes(status);
+  [AppStatus.RUNNING, AppStatus.ERROR, AppStatus.STATUSUNSPECIFIED].includes(
+    status
+  );
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
   app && isDeletable(app.status);
