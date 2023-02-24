@@ -361,7 +361,7 @@ describe('RuntimeConfigurationPanel', () => {
     // not general analysis. Ensure this test passes for the right reasons when fixing.
     const computeDefaults = wrapper.find('#compute-resources').first();
     expect(computeDefaults.text()).toEqual(
-      '- Compute size of 4 CPUs, 15 GB memory, and a 150 GB disk'
+      '- Compute size of 4 CPUs, 15 GB memory, and a 120 GB disk'
     );
   });
 
@@ -607,14 +607,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.UserOverride
     );
-    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual(
-        {
-          diskType: 'pd-standard',
-          labels: {},
-          name: 'stub-disk',
-          size: MIN_DISK_SIZE_GB,
-        }
-    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: 'stub-disk',
+      size: MIN_DISK_SIZE_GB,
+    });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
