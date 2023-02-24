@@ -810,7 +810,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return accessSyncService.updateUserAccessTiers(dbUser, Agent.asUser(dbUser));
   }
 
-  /** Send Access Renewal Expiration or Warning emails to the user for all tiers, if appropriate */
+  /** Send Access Renewal Expiration or Warning emails to the user, if appropriate */
   @Override
   public void maybeSendAccessTierExpirationEmails(DbUser user) {
     maybeSendAccessTierExpirationEmail(user, REGISTERED_TIER_SHORT_NAME);
