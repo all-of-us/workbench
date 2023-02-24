@@ -44,7 +44,6 @@ export const defaultRuntime = () => ({
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
   gceConfig: defaultGceConfig(),
-  gcePersistentDisk: { size: MIN_DISK_SIZE_GB },
   errors: [],
 });
 
