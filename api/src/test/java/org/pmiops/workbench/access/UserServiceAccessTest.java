@@ -516,9 +516,6 @@ public class UserServiceAccessTest {
 
   @Test
   public void test_maybeSendAccessTierExpirationEmails_expiring_1_ct() throws MessagingException {
-    // these are up to date
-    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
-
     // expiring in 1 day (plus some) will trigger the 1-day warning
 
     final Duration oneDayPlusSome = daysPlusSome(1);
