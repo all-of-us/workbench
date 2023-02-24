@@ -4681,6 +4681,10 @@ definitions:
         type: boolean
         default: false
         description: Whether users are able to use the RStudio GKE app.
+      enableDataExplorer:
+        type: boolean
+        default: false
+        description: Whether to enable visual data explorer.
 
   RuntimeImage:
     type: object
