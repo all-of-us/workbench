@@ -946,7 +946,6 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
-    setCurrentDisk(existingDisk());
     const wrapper = await component();
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await mustClickButton(wrapper, 'Next');
@@ -1068,6 +1067,36 @@ describe('RuntimeConfigurationPanel', () => {
         .first()
         .prop('disabled')
     ).toBeTruthy();
+  });
+
+  it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.UserOverride,
+      gceConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+      },
+    });
+
+    const wrapper = await component();
+    const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
+    const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
+
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
+
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
+
+    await mustClickButton(wrapper, 'Update');
+    expect(updateSpy).toHaveBeenCalled();
+    expect(deleteSpy).toHaveBeenCalledTimes(0);
   });
 
   it('should send an updateDisk API call if disk changes do not require a delete', async () => {
