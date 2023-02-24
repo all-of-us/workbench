@@ -20,6 +20,9 @@ export const setupCustomValidators = () => {
 
 export const exposeAccessTokenSetter = () => {
   if (environment.allowTestAccessTokenOverride) {
+    // Called by e2e tests. In e2e tests we circumvent Google sign-in because
+    // puppeteer could be flagged as a bot by Google sign-in.
+    // @ts-ignore
     window.setTestAccessTokenOverride = (token: string) => {
       // Disclaimer: console.log statements here are unlikely to captured by
       // Puppeteer, since it typically reloads the page immediately after

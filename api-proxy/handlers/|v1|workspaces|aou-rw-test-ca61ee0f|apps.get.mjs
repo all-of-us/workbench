@@ -1,15 +1,15 @@
 const matchReq = req =>
-  req.url.pathname === '/v2/workspaces/aou-rw-local1-a312fa3d/testspace/resources'
-  && req.url.search === '?resourceTypesToFetch=COHORT%2CCOHORT_REVIEW%2CCONCEPT_SET%2CDATASET'
+  req.url.pathname === '/v1/workspaces/aou-rw-test-ca61ee0f/apps'
+  && req.url.search === ''
   && req.method === 'GET'
 
 const body = JSON.stringify(
 {
-  message: null,
-  statusCode: 500,
-  errorClassName: 'org.pmiops.workbench.exceptions.ServerErrorException',
+  message: 'Workspace not found: aou-rw-test-ca61ee0f',
+  statusCode: 404,
+  errorClassName: 'org.pmiops.workbench.exceptions.NotFoundException',
   errorCode: null,
-  errorUniqueId: 'f7b2a3fa-a95e-446a-9d89-6370149eafb5',
+  errorUniqueId: '7e9bd131-e875-43cd-8d65-1b567bfc94af',
   parameters: null
 }
 )
@@ -25,6 +25,6 @@ const headers = {
 const handleReq = (req, res) => {
   if (!matchReq(req)) { return }
   Object.keys(headers).forEach(h => res.setHeader(h, headers[h]))
-  res.status(500).mwrite(body).mend()
+  res.status(404).mwrite(body).mend()
 }
 export default handleReq

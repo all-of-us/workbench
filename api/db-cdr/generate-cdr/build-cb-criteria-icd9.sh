@@ -1,24 +1,28 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='ICD9 - SOURCE'
+
 TBL_CBC='cb_criteria'
 TBL_CBA='cb_criteria_ancestor'
 TBL_PAS='prep_ancestor_staging'
 TBL_PCA='prep_concept_ancestor'
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-ID_PREFIX=$3
+
+echo "Creating ICD9 hierarchy"
+
+CB_CRITERIA_START_ID=7000000000
+CB_CRITERIA_END_ID=8000000000
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
-echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
+echo "Creating temp table for $TBL_CBA"
 TBL_CBA=$(createTmpTable $TBL_CBA)
+echo "Creating temp table for $TBL_PAS"
 TBL_PAS=$(createTmpTable $TBL_PAS)
+echo "Creating temp table for $TBL_PCA"
 TBL_PCA=$(createTmpTable $TBL_PCA)
 ####### end common block ###########
 

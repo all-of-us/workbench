@@ -516,7 +516,7 @@ Common.register_command({
 def create_cdr_indices(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
-  op.opts.create_surveys = true
+  op.opts.create_prep_tables = true
   op.opts.branch = "main"
   op.add_option(
     "--branch [branch]",
@@ -544,9 +544,9 @@ def create_cdr_indices(cmd_name, *args)
     "Generate for data browser. Optional - Default is false"
   )
   op.add_option(
-    "--create-surveys [create-surveys]",
-    ->(opts, v) { opts.create_surveys = v},
-    "Create all surveys. Optional - Default is true"
+    "--create-prep-tables [create-prep-tables]",
+    ->(opts, v) { opts.create_prep_tables = v},
+    "Create all prep tables. Optional - Default is true"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version}
@@ -561,7 +561,7 @@ def create_cdr_indices(cmd_name, *args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}, \"create_surveys\": #{op.opts.create_surveys} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_create_cdr_indices\": true, \"cdr_source_project\": \"#{cdr_source}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser}, \"create_prep_tables\": #{op.opts.create_prep_tables} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -573,7 +573,6 @@ Common.register_command({
 
 def build_prep_survey(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.create_surveys = true
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -589,18 +588,13 @@ def build_prep_survey(cmd_name, *args)
       ->(opts, v) { opts.filename = v},
       "Filename"
   )
-  op.add_option(
-    "--create-surveys [create-surveys]",
-    ->(opts, v) { opts.create_surveys = v},
-    "Create all surveys. Optional - Default is true"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.filename}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename} #{op.opts.create_surveys}}
+    common.run_inline %W{./generate-cdr/build-prep-survey.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.filename}}
   end
 end
 
@@ -612,7 +606,7 @@ Common.register_command({
 
 def create_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.create_surveys = true
+  op.opts.create_prep_tables = true
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -624,9 +618,9 @@ def create_tables(cmd_name, *args)
       "BQ Dataset name"
   )
   op.add_option(
-    "--create-surveys [create-surveys]",
-    ->(opts, v) { opts.create_surveys = v},
-    "Create all surveys. Optional - Default is true"
+    "--create-prep-tables [create-prep-tables]",
+    ->(opts, v) { opts.create_prep_tables = v},
+    "Create all prep tables. Optional - Default is true"
   )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
@@ -634,7 +628,7 @@ def create_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/create-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.create_surveys}}
+    common.run_inline %W{./generate-cdr/create-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.create_prep_tables}}
   end
 end
 
@@ -746,12 +740,17 @@ def build_search_all_events(cmd_name, *args)
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.add_option(
+    "--domain-token [domain-token]",
+    ->(opts, v) { opts.domain_token = v},
+    "Generate for domain-token. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-search-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.domain_token}}
   end
 end
 
@@ -763,7 +762,6 @@ Common.register_command({
 
 def build_ds_linking(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -774,18 +772,13 @@ def build_ds_linking(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-ds-linking.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -797,7 +790,6 @@ Common.register_command({
 
 def build_ds_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -807,11 +799,6 @@ def build_ds_tables(cmd_name, *args)
       "--bq-dataset [bq-dataset]",
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
-  )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
   )
   op.add_option(
       "--table-token [table-token]",
@@ -824,7 +811,7 @@ def build_ds_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser} #{op.opts.table_token}}
+    common.run_inline %W{./generate-cdr/build-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.table_token}}
   end
 end
 
@@ -836,7 +823,6 @@ Common.register_command({
 
 def build_review_all_events(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -848,17 +834,17 @@ def build_review_all_events(cmd_name, *args)
       "BQ dataset. Required."
   )
   op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
+    "--domain-token [domain-token]",
+    ->(opts, v) { opts.domain_token = v},
+    "Generate for domain-token. Required."
   )
 
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.domain_token}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-review-all-events.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.domain_token}}
   end
 end
 
@@ -870,7 +856,6 @@ Common.register_command({
 
 def build_cb_search_person(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -881,18 +866,13 @@ def build_cb_search_person(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cb-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -932,7 +912,6 @@ Common.register_command({
 
 def build_cb_criteria_menu(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -943,18 +922,13 @@ def build_cb_criteria_menu(cmd_name, *args)
       ->(opts, v) { opts.bq_dataset = v},
       "BQ dataset. Required."
   )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-menu.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-menu.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -966,7 +940,6 @@ Common.register_command({
 
 def build_cloudsql_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -987,18 +960,13 @@ def build_cloudsql_tables(cmd_name, *args)
       ->(opts, v) { opts.output_dataset = v},
       "Output dataset. Required."
   )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cloudsql-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
   end
 end
 
@@ -1010,7 +978,6 @@ Common.register_command({
 
 def build_backup_cb_ds_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
       "--bq-project [bq-project]",
       ->(opts, v) { opts.bq_project = v},
@@ -1031,18 +998,13 @@ def build_backup_cb_ds_tables(cmd_name, *args)
       ->(opts, v) { opts.output_dataset = v},
       "Output dataset. Required."
   )
-  op.add_option(
-      "--data-browser [data-browser]",
-      ->(opts, v) { opts.data_browser = v},
-      "Generate for data browser. Optional - Default is false"
-  )
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.output_project and opts.output_dataset}
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-backup-cb-ds-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.output_project} #{op.opts.output_dataset}}
   end
 end
 
@@ -1184,17 +1146,12 @@ def build_cb_criteria(cmd_name, *args)
     ->(opts, v) { opts.script = v},
     "Script. Required."
   )
-  op.add_option(
-    "--id-prefix [id-prefix]",
-    ->(opts, v) { opts.id_prefix = v},
-    "ID Prefix."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.script }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-#{op.opts.script}.sh #{op.opts.bq_project} #{op.opts.bq_dataset}}
   end
 end
 
@@ -1218,21 +1175,16 @@ def build_cb_criteria_demographics(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--id-prefix [id-prefix]",
-    ->(opts, v) { opts.id_prefix = v},
-    "ID Prefix."
-  )
-  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.id_prefix }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.id_prefix} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/build-cb-criteria-demographics.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.data_browser}}
   end
 end
 
@@ -1298,7 +1250,6 @@ Common.register_command({
 
 def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.data_browser = false
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -1319,11 +1270,6 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
   )
-  op.add_option(
-    "--data-browser [data-browser]",
-    ->(opts, v) { opts.data_browser = v},
-    "Generate for data browser. Optional - Default is false"
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
   op.parse.validate
   gcc = GcloudContextV2.new(op)
@@ -1333,7 +1279,7 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/import-cdr-indices-build-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.data_browser}}
+      common.run_inline %W{./generate-cdr/import-cdr-indices-build-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
   end
 end
@@ -3066,3 +3012,89 @@ Common.register_command({
     :description => "Export the workspace_operations table.",
     :fn => ->(*args) {export_workspace_operations(EXPORT_WORKSPACE_OPERATIONS_CMD, *args)}
 })
+
+def export_import_cloudsql_cdr(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--cdr-db-name [cdr-db-name]",
+    ->(opts, v) { opts.cdr_db_name = v},
+    "cdrDbName - Name used cdr_config. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name }
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{./db-cdr/generate-cdr/export-import-cloudsql-cdr.sh #{op.opts.cdr_db_name}}
+
+end
+
+Common.register_command({
+  :invocation => "export-import-cloudsql-cdr",
+  :description => "Export cdr database from preprod and import to prod.",
+  :fn => ->(*args) { export_import_cloudsql_cdr("export-import-cloudsql-cdr", *args) }
+})
+
+def verify_cloud_cdr_counts(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--cdr-db-name [cdr-db-name]",
+    ->(opts, v) { opts.cdr_db_name = v},
+    "cdrDbName - Name used cdr_config. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name }
+  op.opts.db_user = "dev-readonly" # do not override always read-only user
+  op.opts.script= "db-cdr/generate-cdr/verify-counts.sql" # script cannot do any modifications
+
+  # for preprod
+  op.opts.project = "all-of-us-rw-preprod"
+  verify_preprod_prod_counts(op)
+
+  # for prod
+  op.opts.project = "all-of-us-rw-prod"
+  verify_preprod_prod_counts(op)
+
+end
+
+Common.register_command({
+  :invocation => "verify-cloud-cdr-counts",
+  :description => "Connect to a Cloud SQL database via mysql and run the provided sql file.",
+  :fn => ->(*args) { verify_cloud_cdr_counts("verify-cloud-cdr-counts", *args) }
+})
+
+def verify_preprod_prod_counts(op)
+  common = Common.new
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  sql = File.read(op.opts.script)
+  sql = sql.gsub(/@SCHEMA_NAME/, op.opts.cdr_db_name)
+  sql = sql.gsub(/@PROJECT/, op.opts.project)
+  env = read_db_vars(gcc)
+  user_to_password = {
+    "dev-readonly" => env["DEV_READONLY_DB_PASSWORD"],
+  }
+  db_password = user_to_password[op.opts.db_user]
+
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
+    common.status common.bold_term_text(common.red_term_text("======="+op.opts.project+"======="))
+    common.run_inline(
+      run_mysql_cmd(" mysql --table --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user} " +
+          " --database=#{env["DB_NAME"]} --password=#{db_password} -e \"#{sql}\""),
+      db_password)
+    common.status " "
+  end
+end
+
+def run_mysql_cmd(cmd)
+  if Workbench.in_docker?
+    return cmd
+  end
+  return "docker run " +
+    "--rm " +
+    "--network host " +
+    "--entrypoint '' " +
+    "-it " +
+    "mariadb:10.2 " +
+    cmd
+end

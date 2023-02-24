@@ -319,6 +319,11 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
+    // If true, enable enableConceptSetsInCohortBuilder
+    public boolean enableConceptSetsInCohortBuilder;
+    // Whether users are directed to complete Controlled Tier Training renewal.
+    // If false, hide or add text indicating that it is not currently available.
+    public boolean enableControlledTierTrainingRenewal;
   }
 
   public static class ActionAuditConfig {

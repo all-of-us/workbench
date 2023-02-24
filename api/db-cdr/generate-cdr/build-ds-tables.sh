@@ -6,14 +6,8 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DATA_BROWSER=$3 # data browser build
-export TABLE_TOKEN=$4  # specific table to build
+export TABLE_TOKEN=$3  # specific table to build
 
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the ds tables."
-  exit 0
-fi
 
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"

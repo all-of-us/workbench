@@ -1,19 +1,20 @@
 #!/bin/bash
 
 set -e
-SQL_FOR='PPI SURVEYS'
+
 TBL_CBC='cb_criteria'
 TBL_PCA='prep_concept_ancestor'
 
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
-ID_PREFIX=$3
+
+echo "Creating survey hierarchy"
+
+CB_CRITERIA_START_ID=3000000000
+CB_CRITERIA_END_ID=4000000000
 
 ####### common block for all make-cb-criteria-dd-*.sh scripts ###########
 source ./generate-cdr/cb-criteria-utils.sh
-echo "Running in parallel and Multitable mode - " "$ID_PREFIX - $SQL_FOR"
-CB_CRITERIA_START_ID=$[$ID_PREFIX*10**9] # 3  billion
-CB_CRITERIA_END_ID=$[$[ID_PREFIX+1]*10**9] # 4  billion
 echo "Creating temp table for $TBL_CBC"
 TBL_CBC=$(createTmpTable $TBL_CBC)
 echo "Creating temp table for $TBL_PCA"
@@ -152,7 +153,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` e on
 # the concept_id of the answer is the concept_id for the question
 # we do this because there are a few answers that are attached to a topic and we want to get those as well
 echo "PPI SURVEYS - add items to ancestor table"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.$TBL_PCA\`
     (
           ancestor_concept_id
@@ -363,7 +364,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
  )"
 
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -391,7 +392,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate answer counts for question concept_id = 1585747"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -420,7 +421,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate question counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.item_count = y.cnt
@@ -448,7 +449,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.concept_id"
 
 echo "PPI SURVEYS - generate survey counts"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -478,7 +479,7 @@ and x.concept_id = y.ancestor_concept_id"
 # are duplicated in both Cope Surveys and Cope Vaccine Surveys. We only show them
 # in the vaccinations survey, so we need to update count to not include these concepts.
 echo "PPI SURVEYS - Correct Survey counts for Cope Survey"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -507,7 +508,7 @@ WHERE x.domain_id = 'SURVEY'
 and x.concept_id = y.ancestor_concept_id"
 
 echo "PPI SURVEYS - update Minute Survey Name"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.name = 'COVID-19 Vaccine Survey'
 WHERE code = 'cope_vaccine4'
@@ -530,7 +531,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 )"
 
 echo "PPI SURVEYS - generate answer counts for PFHH survey only"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
 SET x.item_count = y.count
     , x.est_count = y.count
@@ -560,7 +561,7 @@ AND x.subtype = 'ANSWER'
 AND CAST(x.value AS INT64) = y.value_source_concept_id"
 
 echo "PPI SURVEYS - generate question counts for PFHH survey only"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` z
 SET z.rollup_count = y.cnt,
     z.item_count = y.cnt,
@@ -598,7 +599,7 @@ AND z.is_group = 1
 AND z.concept_id = y.question_concept_id"
 
 echo "PPI SURVEYS - update survey count for PFHH survey only"
-bq --quiet --project_id=$BQ_PROJECT query --batch --nouse_legacy_sql \
+bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.$TBL_CBC\` x
  SET x.rollup_count = y.cnt
      , x.est_count = y.cnt

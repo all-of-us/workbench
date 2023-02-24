@@ -6,13 +6,6 @@ set -e
 
 export BQ_PROJECT=$1                # CDR project
 export BQ_DATASET=$2                # CDR dataset
-export DATA_BROWSER=$3              # data browser build
-
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the cb_search_person table."
-  exit 0
-fi
 
 ################################################
 # insert person data into cb_search_person
