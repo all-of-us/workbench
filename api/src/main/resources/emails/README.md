@@ -15,6 +15,7 @@ be rendered [consistently across many email clients](https://mjml.io/faq#email-c
 
 We do not currently have the infrastructure to support node packages in our backend, so you will
 need to install MJML locally:
+
 ```npm install -g mjml@4.13.0```
 
 *Note: We do not currently have a package.json for our api, but for consistency, please use version
