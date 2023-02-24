@@ -73,7 +73,7 @@ public class TestMockFactory {
    * them bypassable and non-expirable. So we should default to this, unless required for product
    * reasons.
    *
-   * <p>RAS_LOGIN_GOV and CT_COMPLIANCE_TRAINING are bypassable and non-expirable for this reason.
+   * <p>RAS_LOGIN_GOV is bypassable and non-expirable for this reason.
    */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
@@ -99,7 +99,7 @@ public class TestMockFactory {
               .setBypassable(true),
           new DbAccessModule()
               .setName(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
-              .setExpirable(false)
+              .setExpirable(true)
               .setBypassable(true),
           new DbAccessModule()
               .setName(DbAccessModuleName.PROFILE_CONFIRMATION)

@@ -2,9 +2,13 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.common.collect.ImmutableList;
@@ -476,7 +480,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmails_expiring_1() throws MessagingException {
+  public void test_maybeSendAccessTierExpirationEmails_expiring_1_rt() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(
@@ -484,6 +488,8 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, now);
+    accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING, now);
 
     // a completion requirement for DUCC
     dbUser.setDuccAgreement(signCurrentDucc(dbUser));
@@ -499,6 +505,40 @@ public class UserServiceAccessTest {
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, REGISTERED_TIER_SHORT_NAME);
+
+    // Control Tier Threshold Email is sent because RT Compliance Training is a requirement for CT
+    verify(mailService)
+        .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+
+    // No expiration email is sent.
+    verify(mailService, never()).alertUserAccessTierExpiration(any(), any(), any());
+  }
+
+  @Test
+  public void test_maybeSendAccessTierExpirationEmails_expiring_1_ct() throws MessagingException {
+    // these are up to date
+    final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
+
+    // expiring in 1 day (plus some) will trigger the 1-day warning
+
+    final Duration oneDayPlusSome = daysPlusSome(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().plus(oneDayPlusSome);
+    accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
+
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
+
+    // Controlled Tier Threshold email is sent.
+    verify(mailService)
+        .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+
+    // Registered Tier Threshold Email is not sent
+    verify(mailService, never())
+        .alertUserAccessTierWarningThreshold(
+            any(), anyLong(), any(), eq(REGISTERED_TIER_SHORT_NAME));
+
+    // No expiration email is sent.
+    verify(mailService, never()).alertUserAccessTierExpiration(any(), any(), any());
   }
 
   // if any module is incomplete, we don't send an email
@@ -517,6 +557,8 @@ public class UserServiceAccessTest {
     final Duration oneDayPlusSome = daysPlusSome(1);
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
+    accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // but this module is incomplete (and also not bypassed)
     accessModuleService.updateCompletionTime(
@@ -633,7 +675,7 @@ public class UserServiceAccessTest {
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(thirtyPlus));
 
-    userService.maybeSendAccessTierExpirationEmail(dbUser, REGISTERED_TIER_SHORT_NAME);
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
 
     verify(mailService)
         .alertUserAccessTierWarningThreshold(
@@ -726,7 +768,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_maybeSendAccessTierExpirationEmails_expired() throws MessagingException {
+  public void test_maybeSendAccessTierExpirationEmails_expired_rt() throws MessagingException {
     // these are up to date
     final Timestamp now = new Timestamp(PROVIDED_CLOCK.millis());
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
@@ -746,8 +788,40 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
+    // Registered Tier Expiration Email is sent
     verify(mailService)
         .alertUserAccessTierExpiration(dbUser, expirationTime, REGISTERED_TIER_SHORT_NAME);
+
+    // Controlled Tier Expiration Email is sent because RT Compliance is a requirement for CT Tier.
+    verify(mailService)
+        .alertUserAccessTierExpiration(dbUser, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+
+    // No expiring soon emails are sent
+    verify(mailService, never())
+        .alertUserAccessTierWarningThreshold(any(), anyLong(), any(), any());
+  }
+
+  @Test
+  public void test_maybeSendAccessTierExpirationEmails_expired_ct() throws MessagingException {
+    // but this is expired
+    final Duration oneHour = Duration.ofHours(1);
+    final Instant expirationTime = PROVIDED_CLOCK.instant().minus(oneHour);
+    accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING, expiredBy(oneHour));
+
+    userService.maybeSendAccessTierExpirationEmails(dbUser);
+
+    // Controlled Tier Expiration Email is sent
+    verify(mailService)
+        .alertUserAccessTierExpiration(dbUser, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+
+    // Registered Tier Expiration Email is not sent
+    verify(mailService, never())
+        .alertUserAccessTierExpiration(any(), any(), eq(REGISTERED_TIER_SHORT_NAME));
+
+    // No expiring soon emails are sent
+    verify(mailService, never())
+        .alertUserAccessTierWarningThreshold(any(), anyLong(), any(), any());
   }
 
   // don't send an email if we have been expired for more than a day
