@@ -21,6 +21,7 @@ import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
 import { DataComponent } from 'app/pages/data/data-component';
 import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
+import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -50,6 +51,10 @@ const ConceptSetActionsPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(ConceptSetActions);
+const DataExplorerPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(DataExplorer);
 const DataComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
@@ -422,6 +427,13 @@ export const WorkspaceRoutes = () => {
             pageKey: 'conceptSetActions',
           }}
         />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/data-explorer`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <DataExplorer />
       </AppRoute>
       <AppRoute exact={false} path={`${path}`}>
         <Redirect to={'/not-found'} />
