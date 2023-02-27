@@ -4,6 +4,8 @@ import { mount } from 'enzyme';
 
 import { AccessModule, AccessModuleStatus } from 'generated/fetch';
 
+import { AlarmExclamation } from 'app/components/icons';
+import colors from 'app/styles/colors';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { EXPIRED, EXPIRING, EXPIRING_SOON } from 'app/utils/constants';
 import { nowPlusDays } from 'app/utils/dates';
@@ -27,6 +29,8 @@ const allModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
 ];
+
+const EMPTY_STRING = '';
 
 const allCompleteNotExpiring: AccessModuleStatus[] = allModules.map(
   (moduleName) => ({
@@ -150,28 +154,32 @@ describe('Access Renewal Notification', () => {
       'for RT when there are no modules',
       AccessTierShortNames.Registered,
       [],
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       false,
       'for CT when there are no modules',
       AccessTierShortNames.Controlled,
       [],
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       false,
       'for RT when there are no expiring modules',
       AccessTierShortNames.Registered,
       allCompleteNotExpiring,
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       false,
       'for CT when there are no expiring modules',
       AccessTierShortNames.Controlled,
       allCompleteNotExpiring,
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       true,
@@ -179,6 +187,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Registered,
       allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
       EXPIRED,
+      colors.danger,
     ],
     [
       true,
@@ -186,6 +195,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Registered,
       allCompleteOneExpiringInTwoWeeks(AccessModule.DATAUSERCODEOFCONDUCT),
       EXPIRING_SOON,
+      colors.primary,
     ],
     [
       // Showing the RT banner appears in this case, so CT is not needed
@@ -193,7 +203,8 @@ describe('Access Renewal Notification', () => {
       'for CT when there is one expiring module',
       AccessTierShortNames.Controlled,
       allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       true,
@@ -201,6 +212,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Registered,
       allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
       EXPIRED,
+      colors.danger,
     ],
     [
       // Showing the RT banner appears in this case, so CT is not needed
@@ -208,21 +220,24 @@ describe('Access Renewal Notification', () => {
       'for CT when there is one expired module',
       AccessTierShortNames.Controlled,
       allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       false,
       'for RT when only CT training is expiring',
       AccessTierShortNames.Registered,
       allCompleteOneExpiring(AccessModule.CTCOMPLIANCETRAINING),
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       false,
       'for RT when only CT training is expired',
       AccessTierShortNames.Registered,
       allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       true,
@@ -230,6 +245,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Controlled,
       allCompleteOneExpiring(AccessModule.CTCOMPLIANCETRAINING),
       EXPIRED,
+      colors.danger,
     ],
     [
       true,
@@ -237,6 +253,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Controlled,
       allCompleteOneExpiringInTwoWeeks(AccessModule.CTCOMPLIANCETRAINING),
       EXPIRING_SOON,
+      colors.warning,
     ],
     [
       true,
@@ -244,6 +261,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Controlled,
       allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
       EXPIRED,
+      colors.danger,
     ],
     [
       true,
@@ -251,6 +269,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Registered,
       rtExpiresFirst,
       EXPIRED,
+      colors.danger,
     ],
     [
       // Showing the RT banner appears in this case, so CT is not needed
@@ -258,7 +277,8 @@ describe('Access Renewal Notification', () => {
       'for CT when RT is expiring sooner',
       AccessTierShortNames.Controlled,
       rtExpiresFirst,
-      '',
+      EMPTY_STRING,
+      EMPTY_STRING,
     ],
     [
       // Still need to show RT, because it's more important
@@ -267,6 +287,7 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Registered,
       ctExpiresFirst,
       EXPIRING,
+      colors.warning,
     ],
     [
       true,
@@ -274,10 +295,18 @@ describe('Access Renewal Notification', () => {
       AccessTierShortNames.Controlled,
       ctExpiresFirst,
       EXPIRED,
+      colors.danger,
     ],
   ])(
     'display=%s %s',
-    async (expected, condition, accessTier, moduleStatuses, bannerColor) => {
+    async (
+      expected,
+      condition,
+      accessTier,
+      moduleStatuses,
+      bannerColor,
+      iconColor
+    ) => {
       updateModules(moduleStatuses);
 
       const wrapper = component({ accessTier });
@@ -289,6 +318,9 @@ describe('Access Renewal Notification', () => {
       expect(banner.exists()).toEqual(expected);
       if (expected) {
         expect(banner.first().props().style.backgroundColor).toBe(bannerColor);
+        expect(wrapper.find(AlarmExclamation).prop('style').color).toBe(
+          iconColor
+        );
       }
     }
   );

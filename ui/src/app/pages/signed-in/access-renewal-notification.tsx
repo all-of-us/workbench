@@ -19,6 +19,8 @@ export const AccessRenewalNotificationMaybe = (
   const { profile } = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
 
+  const moreThan14daysRemaining = daysRemaining > 13;
+
   // special handling for Controlled Tier: don't render when RT is more urgent
   // because CT renewal is redundant in that case
   if (
@@ -39,17 +41,15 @@ export const AccessRenewalNotificationMaybe = (
       ? daysRemaining + ' days remaining.'
       : 'Your access has expired.';
 
-  const boxColor =
-    daysRemaining > 13
-      ? { backgroundColor: EXPIRING_SOON }
-      : daysRemaining > 6
-      ? { backgroundColor: EXPIRING }
-      : { backgroundColor: EXPIRED };
+  const boxColor = moreThan14daysRemaining
+    ? { backgroundColor: EXPIRING_SOON }
+    : daysRemaining > 6
+    ? { backgroundColor: EXPIRING }
+    : { backgroundColor: EXPIRED };
 
-  const iconColor =
-    daysRemaining > 13
-      ? { color: colors.primary }
-      : daysRemaining <= 6 && { color: colors.danger };
+  const iconColor = moreThan14daysRemaining
+    ? { color: colors.primary }
+    : daysRemaining <= 6 && { color: colors.danger };
 
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
