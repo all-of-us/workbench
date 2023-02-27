@@ -93,23 +93,23 @@ describe('AppsPanel', () => {
   // these tests assume that there are no User GKE Apps
   // so what these tests actually show is whether Jupyter is an ActiveApp
   test.each([
-    [RuntimeStatus.Running, true, true],
-    [RuntimeStatus.Stopped, true, true],
-    [RuntimeStatus.Stopping, true, true],
-    [RuntimeStatus.Starting, true, true],
-    [RuntimeStatus.Creating, true, true],
-    [RuntimeStatus.Deleting, true, true],
-    [RuntimeStatus.Updating, true, true],
+    [RuntimeStatus.Running, true],
+    [RuntimeStatus.Stopped, true],
+    [RuntimeStatus.Stopping, true],
+    [RuntimeStatus.Starting, true],
+    [RuntimeStatus.Creating, true],
+    [RuntimeStatus.Deleting, true],
+    [RuntimeStatus.Updating, true],
 
     // not visible [isVisible() = false]
 
-    [RuntimeStatus.Deleted, false, true],
-    [RuntimeStatus.Error, false, true],
+    [RuntimeStatus.Deleted, false],
+    [RuntimeStatus.Error, false],
 
-    [null, false, true],
+    [null, false],
   ])(
     'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
-    async (status, activeExpected, availableExpected) => {
+    async (status, activeExpected) => {
       runtimeStub.runtime.status = status;
 
       const wrapper = await component();
@@ -118,10 +118,10 @@ describe('AppsPanel', () => {
       // sanity check: isVisible() is equivalent to activeExpected
       expect(!!isVisible(status)).toBe(activeExpected);
 
+      // no User GKE Apps, so there is always at least one Available app (Cromwell)
+      expect(findAvailableApps(wrapper, activeExpected).exists()).toBeTruthy();
+
       expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
-      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
-        availableExpected
-      );
     }
   );
 
@@ -152,22 +152,22 @@ describe('AppsPanel', () => {
   // these tests assume that there are no Jupyter runtimes
   // so what these tests actually show is whether a GKE app is an ActiveApp
   test.each([
-    [AppStatus.RUNNING, true, true],
-    [AppStatus.STOPPED, true, true],
-    [AppStatus.STOPPING, true, true],
-    [AppStatus.STARTING, true, true],
-    [AppStatus.PROVISIONING, true, true],
-    [AppStatus.DELETING, true, true],
-    [AppStatus.STATUSUNSPECIFIED, true, true],
-    [AppStatus.ERROR, true, true],
+    [AppStatus.RUNNING, true],
+    [AppStatus.STOPPED, true],
+    [AppStatus.STOPPING, true],
+    [AppStatus.STARTING, true],
+    [AppStatus.PROVISIONING, true],
+    [AppStatus.DELETING, true],
+    [AppStatus.STATUSUNSPECIFIED, true],
+    [AppStatus.ERROR, true],
 
     // not visible [isVisible() = false]
-    [AppStatus.DELETED, false, true],
+    [AppStatus.DELETED, false],
 
-    [null, false, true],
+    [null, false],
   ])(
     'should render / not render ActiveApps and AvailableApps when a GKE app status is %s',
-    async (status, activeExpected, availableExpected) => {
+    async (status, activeExpected) => {
       runtimeStub.runtime.status = RuntimeStatus.Deleted;
       appsStub.listAppsResponse = [{ status, appType: AppType.CROMWELL }];
 
@@ -175,10 +175,10 @@ describe('AppsPanel', () => {
       expect(wrapper.exists()).toBeTruthy();
       await waitOneTickAndUpdate(wrapper);
 
+      // no Jupyter runtimes, so there is always at least one Available app (Jupyter)
+      expect(findAvailableApps(wrapper, activeExpected).exists()).toBeTruthy();
+
       expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
-      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
-        availableExpected
-      );
     }
   );
 
