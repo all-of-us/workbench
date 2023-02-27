@@ -262,6 +262,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         }
         <Clickable
           disabled={!trashEnabled}
+          data-test-id={`delete-${appType}`}
           style={
             trashEnabled
               ? styles.enabledTrashButton
