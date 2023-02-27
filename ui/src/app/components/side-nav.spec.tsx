@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { mount } from 'enzyme';
 
+import * as Authentication from 'app/utils/authentication';
 import * as ProfilePicture from 'app/utils/profile-picture';
+import { notificationStore } from 'app/utils/stores';
 
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 
@@ -21,6 +23,31 @@ describe('SideNav', () => {
   it('should render', () => {
     const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();
+  });
+
+  it('should show an error when signout fails', () => {
+    const signOutSpy = jest.spyOn(Authentication, 'signOut');
+    signOutSpy.mockImplementation(() => {
+      throw new Error();
+    });
+    const wrapper = mount(
+      <SideNav
+        {...props}
+        profile={{
+          ...ProfileStubVariables.PROFILE_STUB,
+          givenName: 'TestGivenName',
+          familyName: 'TestFamilyName',
+        }}
+      />
+    );
+    wrapper
+      .find('[data-test-id="TestGivenNameTestFamilyName-menu-item"]')
+      .first()
+      .simulate('click');
+
+    expect(notificationStore.get()).toBeNull();
+    wrapper.find('[data-test-id="SignOut-menu-item"]').simulate('click');
+    expect(notificationStore.get()).toBeTruthy();
   });
 
   it('disables options when user not registered', () => {

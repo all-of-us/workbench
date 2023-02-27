@@ -6,14 +6,8 @@ set -e
 
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
-export DATA_BROWSER=$3 # data browser build
-export TABLE_TOKEN=$4  # specific table to build
+export DOMAIN=$3       # specific domain table to build
 
-if [[ "$DATA_BROWSER" == true ]]
-then
-  echo "Building index for data browser. Skipping creation of the ds tables."
-  exit 0
-fi
 
 function do_ds_condition_occurrence(){
   echo "ds_condition_occurrence - inserting data"
@@ -443,35 +437,35 @@ GROUP BY a.person_id,
         survey_version_name"
 }
 
-if [[ "$TABLE_TOKEN" = "ds_observation" ]]; then
+if [[ "$DOMAIN" = "observation" ]]; then
   do_ds_observation
-elif [[ "$TABLE_TOKEN" = "ds_condition_occurrence" ]]; then
+elif [[ "$DOMAIN" = "condition" ]]; then
   do_ds_condition_occurrence
-elif [[ "$TABLE_TOKEN" = "ds_drug_exposure" ]]; then
+elif [[ "$DOMAIN" = "drug" ]]; then
   do_ds_drug_exposure
-elif [[ "$TABLE_TOKEN" = "ds_visit_occurrence" ]]; then
+elif [[ "$DOMAIN" = "visit" ]]; then
   do_ds_visit_occurrence
-elif [[ "$TABLE_TOKEN" = "ds_measurement" ]]; then
+elif [[ "$DOMAIN" = "measurement" ]]; then
   do_ds_measurement
-elif [[ "$TABLE_TOKEN" = "ds_procedure_occurrence" ]]; then
+elif [[ "$DOMAIN" = "procedure" ]]; then
   do_ds_procedure_occurrence
-elif [[ "$TABLE_TOKEN" = "ds_device" ]]; then
+elif [[ "$DOMAIN" = "device" ]]; then
   do_ds_device
-elif [[ "$TABLE_TOKEN" = "ds_person" ]]; then
+elif [[ "$DOMAIN" = "person" ]]; then
   do_ds_person
-elif [[ "$TABLE_TOKEN" = "ds_zip_code_socioeconomic" ]]; then
+elif [[ "$DOMAIN" = "zip_code_socioeconomic" ]]; then
   do_ds_zip_code_socioeconomic
-elif [[ "$TABLE_TOKEN" = "all_except_cope_and_pfhh" ]]; then
+elif [[ "$DOMAIN" = "all_except_cope_and_pfhh" ]]; then
   do_COPE_and_PFHH
-elif [[ "$TABLE_TOKEN" = "pfhh" ]]; then
+elif [[ "$DOMAIN" = "pfhh" ]]; then
   do_PFHH
-elif [[ "$TABLE_TOKEN" = "cope" ]]; then
+elif [[ "$DOMAIN" = "cope" ]]; then
   do_COPE
-elif [[ "$TABLE_TOKEN" = "cope_minute" ]]; then
+elif [[ "$DOMAIN" = "cope_minute" ]]; then
   do_COPE_vaccine
-elif [[ "$TABLE_TOKEN" = "fitbit" ]]; then
+elif [[ "$DOMAIN" = "fitbit" ]]; then
   do_fitbit
 else
-  echo "Failed to build ds_ tables. Unknown table $TABLE_TOKEN"
+  echo "Failed to build ds_ tables. Unknown table $DOMAIN"
   exit 1
 fi

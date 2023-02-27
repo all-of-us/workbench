@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
 import org.apache.arrow.util.VisibleForTesting;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -23,7 +22,6 @@ public class AppsController implements AppsApiDelegate {
   private final LeonardoApiClient leonardoApiClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceService workspaceService;
   private final LeonardoApiHelper leonardoApiHelper;
 
@@ -32,13 +30,11 @@ public class AppsController implements AppsApiDelegate {
       LeonardoApiClient leonardoApiClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceService workspaceService,
       LeonardoApiHelper leonardoApiHelper) {
     this.leonardoApiClient = leonardoApiClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceService = workspaceService;
     this.leonardoApiHelper = leonardoApiHelper;
   }
@@ -59,6 +55,7 @@ public class AppsController implements AppsApiDelegate {
       String workspaceNamespace, String appName, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     validateCanPerformApiAction(dbWorkspace);
+
     leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
     return ResponseEntity.ok(new EmptyResponse());
   }

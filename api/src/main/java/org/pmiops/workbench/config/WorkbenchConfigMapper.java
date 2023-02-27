@@ -79,5 +79,11 @@ public interface WorkbenchConfigMapper {
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
+  @Mapping(
+      target = "enableConceptSetsInCohortBuilder",
+      source = "config.featureFlags.enableConceptSetsInCohortBuilder")
+  @Mapping(
+      target = "enableControlledTierTrainingRenewal",
+      source = "config.featureFlags.enableControlledTierTrainingRenewal")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

@@ -38,7 +38,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskConfig;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
@@ -113,8 +112,6 @@ public interface LeonardoMapper {
       @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
     leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
   }
-
-  DiskConfig toDiskConfig(LeonardoDiskConfig leonardoDiskConfig);
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")

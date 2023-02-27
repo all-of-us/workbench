@@ -115,7 +115,8 @@ export interface IconConfig {
 
 const displayRuntimeStatusIcon = (
   icon: IconConfig,
-  workspaceNamespace: string
+  workspaceNamespace: string,
+  userSuspended: boolean
 ) => {
   const { showAppsPanel } = environment;
 
@@ -146,7 +147,7 @@ const displayRuntimeStatusIcon = (
         data-test-id={'help-sidebar-icon-' + icon.id}
       />
       <RuntimeStatusIcon
-        {...{ workspaceNamespace }}
+        {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />
     </FlexRow>
@@ -312,9 +313,11 @@ interface DisplayIconProps {
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
   genomicExtractionJobs: GenomicExtractionJob[];
+  userSuspended: boolean;
 }
 const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
-  const { workspace, genomicExtractionJobs, criteria, concept } = props;
+  const { workspace, genomicExtractionJobs, criteria, concept, userSuspended } =
+    props;
   return switchCase(
     icon.id,
     [
@@ -350,7 +353,7 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
     ],
     [
       'runtimeConfig',
-      () => displayRuntimeStatusIcon(icon, workspace.namespace),
+      () => displayRuntimeStatusIcon(icon, workspace.namespace, userSuspended),
     ],
     [
       'cromwellConfig',
@@ -415,10 +418,20 @@ export const showCriteriaIcon = (pageKey: string, criteria: Array<Selection>) =>
   pageKey === 'cohortBuilder' && !!criteria;
 export const showConceptIcon = (pageKey: string) => pageKey === 'conceptSets';
 
-const runtimeTooltip = (baseTooltip: string, loadingError: Error): string => {
+const runtimeTooltip = (
+  baseTooltip: string,
+  loadingError: Error,
+  userSuspended: boolean
+): string => {
+  const suspendedMessage = `Security suspended: ${baseTooltip}`;
+
+  if (userSuspended) {
+    return suspendedMessage;
+  }
+
   if (loadingError) {
     if (loadingError instanceof ComputeSecuritySuspendedError) {
-      return `Security suspended: ${baseTooltip}`;
+      return suspendedMessage;
     }
     return `${baseTooltip} (unknown error)`;
   }
@@ -431,9 +444,12 @@ interface IconConfigProps {
   pageKey: string;
   criteria: Array<Selection>;
   loadingError: Error;
+  userSuspended: boolean;
 }
 const iconConfig = (props: IconConfigProps): IconConfig => {
-  const { iconId, pageKey, criteria, loadingError } = props;
+  const { iconId, pageKey, criteria, loadingError, userSuspended } = props;
+
+  const disableEnvironmentSidebarIcons = !!loadingError || userSuspended;
 
   // TODO: not sure why the iconKey needs to be converted to string here
   const config: { [iconKey: string]: IconConfig } = {
@@ -499,42 +515,54 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
     },
     apps: {
       id: 'apps',
-      disabled: !!loadingError,
+      disabled: disableEnvironmentSidebarIcons,
       faIcon: null,
       label: 'Cloud Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Applications', loadingError),
+      tooltip: runtimeTooltip('Applications', loadingError, userSuspended),
       hasContent: true,
     },
     runtimeConfig: {
       id: 'runtimeConfig',
-      disabled: !!loadingError,
+      disabled: disableEnvironmentSidebarIcons,
       faIcon: null,
       label: 'Jupyter Icon',
       showIcon: () => true,
       style: { width: '36px' },
-      tooltip: runtimeTooltip('Cloud Analysis Environment', loadingError),
+      tooltip: runtimeTooltip(
+        'Cloud Analysis Environment',
+        loadingError,
+        userSuspended
+      ),
       hasContent: true,
     },
     cromwellConfig: {
       id: 'cromwellConfig',
-      disabled: !!loadingError,
+      disabled: disableEnvironmentSidebarIcons,
       faIcon: null,
       label: 'Cromwell Icon',
       showIcon: () => true,
       style: { width: '36px' },
-      tooltip: runtimeTooltip('Cromwell Cloud Environment', loadingError),
+      tooltip: runtimeTooltip(
+        'Cromwell Cloud Environment',
+        loadingError,
+        userSuspended
+      ),
       hasContent: true,
     },
     terminal: {
       id: 'terminal',
-      disabled: !!loadingError,
+      disabled: disableEnvironmentSidebarIcons,
       faIcon: faTerminal,
       label: 'Terminal Icon',
       showIcon: () => true,
       style: { height: '22px', width: '22px' },
-      tooltip: runtimeTooltip('Cloud Analysis Terminal', loadingError),
+      tooltip: runtimeTooltip(
+        'Cloud Analysis Terminal',
+        loadingError,
+        userSuspended
+      ),
       hasContent: false,
     },
     genomicExtractions: {
@@ -566,6 +594,7 @@ interface HelpSidebarIconsProps {
   onIconClick: (icon: IconConfig) => void;
   pageKey: string;
   criteria: Array<Selection>;
+  userSuspended: boolean;
 }
 export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   const {
@@ -575,6 +604,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     onIconClick,
     pageKey,
     criteria,
+    userSuspended,
   } = props;
   const { loadingError } = useStore(runtimeStore);
   const { enableGenomicExtraction } = serverConfigStore.get().config;
@@ -588,7 +618,13 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     'annotations',
   ];
   const keys: SidebarIconId[] = defaultIcons.filter((iconId) =>
-    iconConfig({ iconId, pageKey, criteria, loadingError }).showIcon()
+    iconConfig({
+      iconId,
+      pageKey,
+      criteria,
+      loadingError,
+      userSuspended,
+    }).showIcon()
   );
 
   if (
@@ -610,7 +646,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   }
 
   const icons = keys.map((iconId) =>
-    iconConfig({ iconId, pageKey, criteria, loadingError })
+    iconConfig({ iconId, pageKey, criteria, loadingError, userSuspended })
   );
 
   return (
