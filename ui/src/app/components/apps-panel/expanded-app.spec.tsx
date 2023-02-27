@@ -108,7 +108,7 @@ describe('ExpandedApp', () => {
   //     const wrapper = await component(UIAppType.JUPYTER, undefined);
   //     expect(wrapper.exists()).toBeTruthy();
   //
-  //     const pauseButton = wrapper.find({ 'data-test-id': 'pause-Jupyter' });
+  //     const pauseButton = wrapper.find({ 'data-test-id': 'pause-resume-Jupyter' });
   //     expect(pauseButton.exists()).toBeTruthy();
   //     const cursorStyle = pauseButton.prop('style').cursor;
   //
@@ -140,7 +140,7 @@ describe('ExpandedApp', () => {
   ])(
     '%s allow deletion when the Cromwell app status is %s',
     async (shouldOrNot, status, expectedCanDelete) => {
-      const appName = 'my-running-cromwell';
+      const appName = 'my-cromwell';
       const deleteDiskWithUserApp = true; // always true currently
 
       const wrapper = await component(UIAppType.CROMWELL, {
@@ -172,10 +172,19 @@ describe('ExpandedApp', () => {
     }
   );
 
-  test.each([['should', 'pausing', AppStatus.RUNNING, true]])(
+  test.each([
+    ['should', 'pausing', AppStatus.RUNNING, true, false],
+    ['should', 'resuming', AppStatus.STOPPED, false, true],
+  ])(
     '%s allow %s when the Cromwell app status is %s',
-    async (shouldOrNot, action, status, expectedCanPause) => {
-      const appName = 'my-running-cromwell';
+    async (
+      shouldOrNot,
+      action,
+      status,
+      expectedCanPause,
+      expectedCanResume
+    ) => {
+      const appName = 'my-cromwell';
 
       const wrapper = await component(UIAppType.CROMWELL, {
         appName,
@@ -184,7 +193,9 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({ 'data-test-id': 'pause-CROMWELL' });
+      const pauseButton = wrapper.find({
+        'data-test-id': 'pause-resume-CROMWELL',
+      });
       expect(pauseButton.exists()).toBeTruthy();
       const cursorStyle = pauseButton.prop('style').cursor;
 
@@ -196,6 +207,17 @@ describe('ExpandedApp', () => {
         await onClick();
 
         expect(pauseSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
+      } else if (expectedCanResume) {
+        expect(cursorStyle).not.toEqual('not-allowed');
+
+        const resumeSpy = jest.spyOn(leoAppsApi(), 'startApp');
+        const { onClick } = pauseButton.props();
+        await onClick();
+
+        expect(resumeSpy).toHaveBeenCalledWith(
+          workspace.googleProject,
+          appName
+        );
       } else {
         expect(cursorStyle).toEqual('not-allowed');
       }
