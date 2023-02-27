@@ -61,7 +61,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
 };
 
 export const isVisible = (status: AppStatus): boolean =>
-  status && ![AppStatus.DELETED].includes(status);
+  status && status !== AppStatus.DELETED;
 
 export const shouldShowApp = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);

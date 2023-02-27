@@ -39,13 +39,16 @@ const styles = reactStyles({
 const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
-    <Clickable {...{ onClick }}>
+    <Clickable {...{ onClick }} data-test-id={`${appType}-unexpanded`}>
       <FlexRow style={styles.availableApp}>
         <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
     </Clickable>
   );
 };
+
+// in display order
+const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
 
 export const AppsPanel = (props: {
   workspace: Workspace;
@@ -56,10 +59,7 @@ export const AppsPanel = (props: {
   const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
 
-  // in display order
-  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
-
-  // all apps besides Jupyter
+  // all GKE apps (not Jupyter)
   const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
   useEffect(() => {
     appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);

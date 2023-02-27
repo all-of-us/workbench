@@ -185,7 +185,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           );
         };
   return (
-    <FlexColumn style={styles.expandedAppContainer}>
+    <FlexColumn
+      style={styles.expandedAppContainer}
+      data-test-id={`${appType}-expanded`}
+    >
       <FlexRow>
         <div>
           <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
