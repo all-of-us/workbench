@@ -2,6 +2,12 @@ import * as React from 'react';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { SelectButton } from 'primereact/selectbutton';
+import {
+  faChartBar,
+  faChartColumn,
+  faChartLine,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Button, Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -235,18 +241,21 @@ const CreateChartModal = ({
         Create New Chart
       </ModalTitle>
       <ModalBody style={{ lineHeight: '1.5rem' }}>
+        <TextInput
+          placeholder='CHART NAME'
+          onChange={(value) =>
+            setFormState((prevState) => ({ ...prevState, name: value }))
+          }
+          onBlur={() => {}}
+        />
+        <h4 style={{ color: '#302973', marginTop: '0.75rem' }}>Chart Type</h4>
         <SelectButton
+          style={{ marginTop: '0.25rem' }}
           options={Object.values(ChartType)}
           value={formState.chartType}
           onChange={(e) =>
             setFormState((prevState) => ({ ...prevState, chartType: e.value }))
           }
-        />
-        <TextInput
-          onChange={(value) =>
-            setFormState((prevState) => ({ ...prevState, name: value }))
-          }
-          onBlur={() => {}}
         />
       </ModalBody>
       <ModalFooter>
@@ -276,6 +285,35 @@ const CreateChartModal = ({
       </ModalFooter>
     </Modal>
   );
+};
+
+const ChartIcon = ({ chartType }) => {
+  switch (chartType) {
+    case ChartType.Bar:
+      return (
+        <FontAwesomeIcon
+          title='Bar Chart'
+          style={{ color: colors.primary, marginLeft: '0.25rem' }}
+          icon={faChartBar}
+        />
+      );
+    case ChartType.Column:
+      return (
+        <FontAwesomeIcon
+          title='Column Chart'
+          style={{ color: colors.primary, marginLeft: '0.25rem' }}
+          icon={faChartColumn}
+        />
+      );
+    case ChartType.Line:
+      return (
+        <FontAwesomeIcon
+          title='Line Chart'
+          style={{ color: colors.primary, marginLeft: '0.25rem' }}
+          icon={faChartLine}
+        />
+      );
+  }
 };
 
 export const DataExplorer = ({}) => {
@@ -314,11 +352,12 @@ export const DataExplorer = ({}) => {
                 <ClrIcon shape='plus-circle' class='is-solid' size={18} />
               </Clickable>
             </div>
-            <div>
+            <div style={{ padding: '0.5rem' }}>
               {chartList.map((chartItem, index) => (
-                <div key={index}>
+                <div key={index} style={{ marginBottom: '0.25rem' }}>
                   <Clickable onClick={() => setSelectedChart(chartItem)}>
                     {chartItem.name}
+                    <ChartIcon chartType={chartItem.chartType} />
                   </Clickable>
                 </div>
               ))}
@@ -339,7 +378,6 @@ export const DataExplorer = ({}) => {
         <CreateChartModal
           close={() => setShowCreateModal(false)}
           submit={(newChart) => {
-            console.log(newChart);
             setChartList((prevState) => [...prevState, newChart]);
             setShowCreateModal(false);
           }}
