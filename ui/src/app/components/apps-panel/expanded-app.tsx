@@ -79,6 +79,7 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
+      dataTestId='pause-Jupyter'
       externalStatus={fromRuntimeStatus(status)}
       onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
@@ -101,10 +102,11 @@ const JupyterButtonRow = (props: {
 };
 
 const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
-  const { googleProject, appName, status } = props.userApp || {};
+  const { googleProject, appName, status, appType } = props.userApp || {};
 
   return (
     <PauseResumeButton
+      dataTestId={`pause-${appType}`}
       externalStatus={fromUserAppStatus(status)}
       onPause={() => leoAppsApi().stopApp(googleProject, appName)}
       onResume={() => leoAppsApi().startApp(googleProject, appName)}
