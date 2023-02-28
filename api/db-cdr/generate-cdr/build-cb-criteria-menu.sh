@@ -88,6 +88,8 @@ insertCriteriaMenu "
 ($((++ID)),0,'Domains','VISIT','VISIT','Visits',0,$ID),
 ($((++ID)),0,'Domains','OBSERVATION','','Observations',0,$ID),
 ($((++ID)),0,'Domains','DEVICE','','Devices',0,$ID),
+($((++ID)),0,'Other','CONCEPT_SET','','Concept Set',0,$ID),
+($((++ID)),0,'Other','CONCEPT_QUICK_ADD','','Concept Quick Add',0,$ID),
 ($((++ID)),1,'Program Data','PERSON','AGE','Age',0,1),
 ($((++ID)),1,'Program Data','PERSON','DECEASED','Deceased',0,2),
 ($((++ID)),1,'Program Data','PERSON','ETHNICITY','Ethnicity',0,3),
