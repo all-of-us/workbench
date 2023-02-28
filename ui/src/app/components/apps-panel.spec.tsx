@@ -300,6 +300,22 @@ describe('AppsPanel', () => {
     ).toBeTruthy();
   });
 
+  it('should not be possible to pause or resume an RStudio app', async () => {
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    const rstudioPanel = findExpandedApp(wrapper, 'RStudio');
+
+    expect(
+      rstudioPanel
+        .find({ 'data-test-id': `rstudio-pause-button` })
+        .prop('disabled')
+    ).toBeTruthy();
+  });
+
   it('should be able to launch an RStudio app', async () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [];
