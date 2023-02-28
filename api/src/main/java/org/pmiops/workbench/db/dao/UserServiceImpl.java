@@ -835,21 +835,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
    */
-  private Optional<Timestamp> getTierExpirationForEmails(DbUser user, String tierShortName) {
-
-    List<DbAccessModuleName> requiredModules;
-
-    switch (tierShortName) {
-      case REGISTERED_TIER_SHORT_NAME:
-        requiredModules = REQUIRED_MODULES_FOR_REGISTERED_TIER;
-        break;
-      case CONTROLLED_TIER_SHORT_NAME:
-        requiredModules = REQUIRED_MODULES_FOR_CONTROLLED_TIER;
-        break;
-      default:
-        requiredModules = new ArrayList<>();
-    }
-
+  private Optional<Timestamp> getTierExpirationForEmails(
+      DbUser user, List<DbAccessModuleName> requiredModules) {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     Set<Optional<Long>> expirations =
@@ -906,8 +893,24 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   // Send an Access Renewal Expiration or Warning email to the user, if appropriate
   private void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
+    List<DbAccessModuleName> requiredModules;
+
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        requiredModules = REQUIRED_MODULES_FOR_REGISTERED_TIER;
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        requiredModules =
+            REQUIRED_MODULES_FOR_CONTROLLED_TIER.stream()
+                .filter(rm -> !REQUIRED_MODULES_FOR_REGISTERED_TIER.contains(rm))
+                .collect(Collectors.toList());
+        break;
+      default:
+        requiredModules = new ArrayList<>();
+    }
+
     final Optional<Timestamp> accessTierExpiration =
-        getTierExpirationForEmails(user, tierShortName);
+        getTierExpirationForEmails(user, requiredModules);
     accessTierExpiration.ifPresent(
         expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
   }

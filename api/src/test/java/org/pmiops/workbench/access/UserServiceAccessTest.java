@@ -790,8 +790,8 @@ public class UserServiceAccessTest {
         .alertUserAccessTierExpiration(dbUser, expirationTime, REGISTERED_TIER_SHORT_NAME);
 
     // Controlled Tier Expiration Email is sent because RT Compliance is a requirement for CT Tier.
-    verify(mailService)
-        .alertUserAccessTierExpiration(dbUser, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+    verify(mailService, never())
+        .alertUserAccessTierExpiration(any(), any(), eq(CONTROLLED_TIER_SHORT_NAME));
 
     // No expiring soon emails are sent
     verify(mailService, never())
