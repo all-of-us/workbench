@@ -192,7 +192,9 @@ describe('Access Renewal Notification', () => {
       true,
       'for RT when there is one module expiring in couple of weeks',
       AccessTierShortNames.Registered,
-      allCompleteOneExpiringInMoreThanTwoWeeks(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpiringInMoreThanTwoWeeks(
+        AccessModule.DATAUSERCODEOFCONDUCT
+      ),
       colors.notificationBanner.EXPIRING_SOON,
       colors.primary,
     ],
@@ -250,7 +252,9 @@ describe('Access Renewal Notification', () => {
       true,
       'for CT when only CT training is expiring in couple of weeks',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpiringInMoreThanTwoWeeks(AccessModule.CTCOMPLIANCETRAINING),
+      allCompleteOneExpiringInMoreThanTwoWeeks(
+        AccessModule.CTCOMPLIANCETRAINING
+      ),
       colors.notificationBanner.EXPIRING_SOON,
       colors.primary,
     ],
