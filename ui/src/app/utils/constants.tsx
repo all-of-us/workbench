@@ -1,5 +1,3 @@
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-
 export const DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE = '8/21/2022';
 
 export const DEMOGRAPHIC_SURVEY_V2_PATH = '/demographic-survey';
@@ -91,8 +89,3 @@ export const STATE_CODE_MAPPING = {
 // ANALYSIS (NEW): APPS LIST
 export const JUPYTER_APP = 'JUPYTER';
 export const APP_LIST = [JUPYTER_APP];
-
-// Access Tier Notification color
-export const EXPIRING_SOON = colorWithWhiteness(colors.secondary, 0.6);
-export const EXPIRING = colorWithWhiteness(colors.warning, 0.9);
-export const EXPIRED = colorWithWhiteness(colors.danger, 0.5);
