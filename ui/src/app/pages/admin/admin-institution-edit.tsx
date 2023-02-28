@@ -158,9 +158,9 @@ const EraRequiredSwitch = (props: {
   } = useStore(serverConfigStore);
   return (
     <CommonToggle
-      {...{ onToggle }}
       name='eRA account required'
       dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
+      onToggle={(e) => onToggle(e.value)}
       checked={tierConfig.eraRequired}
       disabled={
         !enableRasLoginGovLinking ||
@@ -178,9 +178,9 @@ const EnableCtSwitch = (props: {
   const { institution, onToggle } = props;
   return (
     <CommonToggle
-      {...{ onToggle }}
       name='Controlled tier enabled'
       dataTestId='controlled-enabled-switch'
+      onToggle={(e) => onToggle(e.value)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
           ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
