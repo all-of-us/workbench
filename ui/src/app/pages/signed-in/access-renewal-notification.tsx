@@ -55,6 +55,8 @@ export const AccessRenewalNotificationMaybe = (
     () => colors.warning
   );
 
+  const iconStyle = { color: iconColor };
+  const boxStyle = { backgroundColor: boxColor };
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
   const fullPagePath = pathname + search;
@@ -64,14 +66,13 @@ export const AccessRenewalNotificationMaybe = (
     <NotificationBanner
       dataTestId='access-renewal-notification'
       text={`Time for ${accessType} renewal. ${timeLeft}`}
-      boxStyle={{ backgroundColor: boxColor }}
       buttonText='Get Started'
       buttonPath={ACCESS_RENEWAL_PATH}
       buttonDisabled={fullPagePath === ACCESS_RENEWAL_PATH}
-      iconStyle={{ color: iconColor }}
       bannerTextWidth={
         props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
       }
+      {...{ boxStyle, iconStyle }}
     />
   ) : null;
 };
