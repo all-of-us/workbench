@@ -554,8 +554,6 @@ public class UserServiceAccessTest {
     final Duration oneDayPlusSome = daysPlusSome(1);
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
-    accessModuleService.updateCompletionTime(
-        dbUser, DbAccessModuleName.CT_COMPLIANCE_TRAINING, willExpireAfter(oneDayPlusSome));
 
     // but this module is incomplete (and also not bypassed)
     accessModuleService.updateCompletionTime(
