@@ -433,7 +433,13 @@ export const WorkspaceRoutes = () => {
         path={`${path}/data-explorer`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        <DataExplorer />
+        <DataExplorerPage
+          routeData={{
+            title: 'Visual Data Explorer',
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: 'data',
+          }}
+        />
       </AppRoute>
       <AppRoute exact={false} path={`${path}`}>
         <Redirect to={'/not-found'} />

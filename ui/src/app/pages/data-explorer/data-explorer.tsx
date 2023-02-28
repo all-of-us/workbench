@@ -19,10 +19,11 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
 import { getChartObj } from 'app/pages/data/cohort/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 
-const { useState } = React;
+const { useEffect, useState } = React;
 
 enum ChartType {
   Bar = 'Bar',
@@ -316,10 +317,15 @@ const ChartIcon = ({ chartType }) => {
   }
 };
 
-export const DataExplorer = ({}) => {
+export const DataExplorer = withSpinnerOverlay()(({ hideSpinner }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [chartList, setChartList] = useState([]);
   const [selectedChart, setSelectedChart] = useState<ChartConfig>();
+
+  useEffect(() => {
+    hideSpinner();
+  }, []);
+
   return (
     <>
       <FadeBox style={{ margin: 'auto', paddingTop: '1.5rem', width: '95.7%' }}>
@@ -385,4 +391,4 @@ export const DataExplorer = ({}) => {
       )}
     </>
   );
-};
+});
