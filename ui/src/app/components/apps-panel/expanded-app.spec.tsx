@@ -77,8 +77,13 @@ describe('ExpandedApp', () => {
   test.each([
     ['should', RuntimeStatus.Running, true],
     ['should', RuntimeStatus.Stopped, true],
+
     ['should not', RuntimeStatus.Stopping, false],
     ['should not', RuntimeStatus.Starting, false],
+    ['should not', RuntimeStatus.Error, false],
+    ['should not', RuntimeStatus.Unknown, false],
+    ['should not', undefined, false],
+    ['should not', null, false],
   ])(
     '%s allow deletion when the Jupyter app status is %s',
     async (shouldOrNot, status, expectedCanDelete) => {
@@ -173,9 +178,12 @@ describe('ExpandedApp', () => {
     ['should', AppStatus.RUNNING, true],
     ['should', AppStatus.ERROR, true],
     ['should', AppStatus.STATUSUNSPECIFIED, true],
+
     ['should not', AppStatus.STOPPED, false],
     ['should not', AppStatus.STARTING, false],
     ['should not', AppStatus.STOPPING, false],
+    ['should not', undefined, false],
+    ['should not', null, false],
   ])(
     '%s allow deletion when the Cromwell app status is %s',
     async (shouldOrNot, status, expectedCanDelete) => {
