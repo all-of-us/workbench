@@ -10,6 +10,7 @@ import {
   InstitutionMembershipRequirement,
 } from 'generated/fetch';
 
+import { Toggle } from 'app/components/inputs';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
@@ -38,7 +39,7 @@ const findRTERARequired = (wrapper) =>
   wrapper
     .find('[data-test-id="registered-era-required-switch"]')
     .first()
-    .instance() as InputSwitch;
+    .instance() as Toggle;
 
 const findCTDetails = (wrapper) =>
   wrapper.find('[data-test-id="controlled-card-details"]');
@@ -51,12 +52,12 @@ const findCTERARequired = (wrapper) =>
   wrapper
     .find('[data-test-id="controlled-era-required-switch"]')
     .first()
-    .instance() as InputSwitch;
+    .instance() as Toggle;
 const findCTEnabled = (wrapper) =>
   wrapper
     .find('[data-test-id="controlled-enabled-switch"]')
     .first()
-    .instance() as InputSwitch;
+    .instance() as Toggle;
 
 const findRTAddress = (wrapper) =>
   wrapper.find('[data-test-id="registered-email-address"]');
