@@ -3,7 +3,6 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { mount } from 'enzyme';
 import { Dropdown } from 'primereact/dropdown';
-import { InputSwitch } from 'primereact/inputswitch';
 
 import {
   InstitutionApi,
