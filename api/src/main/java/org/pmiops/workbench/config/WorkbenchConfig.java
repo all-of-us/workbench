@@ -1,10 +1,6 @@
 package org.pmiops.workbench.config;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 
 /**
@@ -324,6 +320,8 @@ public class WorkbenchConfig {
     // Whether users are directed to complete Controlled Tier Training renewal.
     // If false, hide or add text indicating that it is not currently available.
     public boolean enableControlledTierTrainingRenewal;
+    // If true, enable using the RStudio GKE app
+    public boolean enableRStudioGKEApp;
   }
 
   public static class ActionAuditConfig {

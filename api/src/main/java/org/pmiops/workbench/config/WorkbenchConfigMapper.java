@@ -85,5 +85,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableControlledTierTrainingRenewal",
       source = "config.featureFlags.enableControlledTierTrainingRenewal")
+  @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

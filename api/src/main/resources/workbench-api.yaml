@@ -4673,6 +4673,10 @@ definitions:
         description: >
           Whether users are directed to complete Controlled Tier Training renewal.
           If false, hide or add text indicating that it is not currently available.
+      enableRStudioGKEApp:
+        type: boolean
+        default: false
+        description: Whether users are able to use the RStudio GKE app.
 
   RuntimeImage:
     type: object

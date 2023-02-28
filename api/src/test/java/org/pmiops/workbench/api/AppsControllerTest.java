@@ -1,9 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -84,6 +82,7 @@ public class AppsControllerTest {
 
     user = new DbUser();
     createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
+    config.featureFlags.enableRStudioGKEApp = true;
     testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
@@ -107,6 +106,15 @@ public class AppsControllerTest {
 
     assertThrows(
         ForbiddenException.class, () -> controller.createApp(WORKSPACE_NS, createAppRequest));
+  }
+
+  @Test
+  public void testCreateStudioAppFail_featureNotEnabled() throws Exception {
+    config.featureFlags.enableRStudioGKEApp = false;
+    CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> controller.createApp(WORKSPACE_NS, createRStudioAppRequest));
   }
 
   @Test

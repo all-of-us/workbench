@@ -370,4 +370,21 @@ describe('AppsPanel', () => {
       'Error Creating RStudio Environment'
     );
   });
+
+  it('should not show RStudio if the feature flag is disabled', async () => {
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableRStudioGKEApp: false,
+      },
+    });
+
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toBeFalsy();
+  });
 });
