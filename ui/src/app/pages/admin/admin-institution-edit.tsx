@@ -3,7 +3,6 @@ import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import { InputSwitch } from 'primereact/inputswitch';
 import validate from 'validate.js';
 
 import {
@@ -17,7 +16,7 @@ import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
-import { TextArea, TextInputWithLabel } from 'app/components/inputs';
+import { TextArea, TextInputWithLabel, Toggle } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import {
   Modal,
@@ -113,6 +112,25 @@ enum InstitutionMode {
   EDIT,
 }
 
+interface CommonToggleProps {
+  name: string;
+  checked: boolean;
+  dataTestId: string;
+  onToggle: (boolean) => void;
+  disabled?: boolean;
+}
+const CommonToggle = (props: CommonToggleProps) => {
+  const { name, checked, dataTestId, disabled, onToggle } = props;
+  return (
+    <Toggle
+      {...{ checked, dataTestId, disabled, name, onToggle }}
+      style={{ paddingBottom: 0, flexGrow: 0 }}
+      height={24}
+      width={50}
+    />
+  );
+};
+
 const isAddressInvalid = (emailAddress: string): boolean => {
   const errors = validate({ emailAddress }, { emailAddress: { email: true } });
   return errors?.emailAddress && errors.emailAddress.length > 0;
@@ -132,16 +150,17 @@ const nonEmpty = (item: string): boolean => item && !!item.trim();
 
 const EraRequiredSwitch = (props: {
   tierConfig: InstitutionTierConfig;
-  onChange: (boolean) => void;
+  onToggle: (boolean) => void;
 }) => {
-  const { tierConfig, onChange } = props;
+  const { tierConfig, onToggle } = props;
   const {
     config: { enableRasLoginGovLinking },
   } = useStore(serverConfigStore);
   return (
-    <InputSwitch
-      data-test-id={`${tierConfig.accessTierShortName}-era-required-switch`}
-      onChange={(v) => onChange(v.value)}
+    <CommonToggle
+      {...{ onToggle }}
+      name='eRA account required'
+      dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
       checked={tierConfig.eraRequired}
       disabled={
         !enableRasLoginGovLinking ||
@@ -154,13 +173,14 @@ const EraRequiredSwitch = (props: {
 
 const EnableCtSwitch = (props: {
   institution: Institution;
-  onChange: (boolean) => void;
+  onToggle: (boolean) => void;
 }) => {
-  const { institution, onChange } = props;
+  const { institution, onToggle } = props;
   return (
-    <InputSwitch
-      data-test-id='controlled-enabled-switch'
-      onChange={(v) => onChange(v.value)}
+    <CommonToggle
+      {...{ onToggle }}
+      name='Controlled tier enabled'
+      dataTestId='controlled-enabled-switch'
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
           ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
@@ -177,6 +197,7 @@ const RequirementDropdown = (props: {
   const { tierConfig, onChange } = props;
   return (
     <Dropdown
+      appendTo='self'
       style={{ width: '24rem' }}
       data-test-id={`${tierConfig.accessTierShortName}-agreement-dropdown`}
       placeholder='Select type'
@@ -265,17 +286,13 @@ const TierConfig = (props: TierConfigProps) => {
         <FlexRow style={{ gap: '0.45rem' }}>
           <EraRequiredSwitch
             tierConfig={tierConfig}
-            onChange={setEraRequired}
+            onToggle={setEraRequired}
           />
-          eRA account required
           {accessTierShortName === AccessTierShortNames.Controlled && (
-            <React.Fragment>
-              <EnableCtSwitch
-                institution={institution}
-                onChange={setEnableControlledTier}
-              />
-              Controlled tier enabled
-            </React.Fragment>
+            <EnableCtSwitch
+              institution={institution}
+              onToggle={setEnableControlledTier}
+            />
           )}
         </FlexRow>
         {tierConfig.membershipRequirement !==
@@ -860,6 +877,7 @@ export const AdminInstitutionEdit = fp.flow(
                 </div>
                 <label style={styles.label}>Institution Type</label>
                 <Dropdown
+                  appendTo='self'
                   style={{ width: '24rem' }}
                   data-test-id='organization-dropdown'
                   placeholder='Organization Type'
