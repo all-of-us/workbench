@@ -60,6 +60,19 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
 };
 
+export const defaultRStudioConfig: CreateAppRequest = {
+  appType: AppType.RSTUDIO,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.Standard,
+  },
+};
+
 export const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
 

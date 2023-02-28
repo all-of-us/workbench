@@ -48,7 +48,11 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
 };
 
 // in display order
-const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
+const appsToDisplay = [
+  UIAppType.JUPYTER,
+  UIAppType.RSTUDIO,
+  UIAppType.CROMWELL,
+];
 
 export const AppsPanel = (props: {
   workspace: Workspace;
