@@ -65,18 +65,15 @@ export const AppsPanel = (props: {
     appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
   }, []);
 
-  const appStates = [
-    {
-      appType: UIAppType.JUPYTER,
-      initializeAsExpanded: isVisible(runtime?.status),
-    },
-    {
-      appType: UIAppType.CROMWELL,
-      initializeAsExpanded: shouldShowApp(
-        findApp(userApps, UIAppType.CROMWELL)
-      ),
-    },
-  ];
+  const appStates = appsToDisplay.map((appType) => {
+    return {
+      appType,
+      initializeAsExpanded:
+        appType === UIAppType.JUPYTER
+          ? isVisible(runtime?.status)
+          : shouldShowApp(findApp(userApps, appType)),
+    };
+  });
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
