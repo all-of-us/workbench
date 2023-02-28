@@ -506,9 +506,9 @@ public class UserServiceAccessTest {
     verify(mailService)
         .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, REGISTERED_TIER_SHORT_NAME);
 
-    // Control Tier Threshold Email is sent because RT Compliance Training is a requirement for CT
-    verify(mailService)
-        .alertUserAccessTierWarningThreshold(dbUser, 1, expirationTime, CONTROLLED_TIER_SHORT_NAME);
+    verify(mailService, never())
+        .alertUserAccessTierWarningThreshold(
+            any(), anyLong(), any(), eq(CONTROLLED_TIER_SHORT_NAME));
 
     // No expiration email is sent.
     verify(mailService, never()).alertUserAccessTierExpiration(any(), any(), any());
@@ -789,7 +789,6 @@ public class UserServiceAccessTest {
     verify(mailService)
         .alertUserAccessTierExpiration(dbUser, expirationTime, REGISTERED_TIER_SHORT_NAME);
 
-    // Controlled Tier Expiration Email is sent because RT Compliance is a requirement for CT Tier.
     verify(mailService, never())
         .alertUserAccessTierExpiration(any(), any(), eq(CONTROLLED_TIER_SHORT_NAME));
 
