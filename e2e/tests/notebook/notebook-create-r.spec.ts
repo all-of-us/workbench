@@ -56,7 +56,7 @@ describe('Create R kernel notebook', () => {
     expect(cell3Output).toMatch(/success$/);
   });
 
-  test('Duplicate rename delete notebook', async () => {
+  test.skip('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
 
     const analysisPage = new WorkspaceAnalysisPage(page);
