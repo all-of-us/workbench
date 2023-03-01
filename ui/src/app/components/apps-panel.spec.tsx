@@ -72,7 +72,6 @@ describe('AppsPanel', () => {
       config: { ...defaultServerConfig, enableCromwellGKEApp: true },
     });
     registerApiClient(AppsApi, appsStub);
-    appsStub.createApp = () => Promise.resolve({});
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
     workspaceStub.billingStatus = BillingStatus.ACTIVE;
