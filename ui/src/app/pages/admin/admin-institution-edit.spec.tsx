@@ -152,17 +152,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
-    await findCTEnabled(wrapper).simulate('change', {
-      target: { checked: true },
-    });
+    await findCTEnabled(wrapper).simulate('change');
 
     expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
     expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
 
-    await findCTEnabled(wrapper).simulate('change', {
-      target: { checked: true },
-    });
+    await findCTEnabled(wrapper).simulate('change');
+
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
@@ -187,9 +184,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    await findCTEnabled(wrapper).simulate('change', {
-      target: { checked: true },
-    });
+    await findCTEnabled(wrapper).simulate('change');
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
@@ -235,9 +230,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    await findCTEnabled(wrapper).simulate('change', {
-      target: { checked: true },
-    });
+    await findCTEnabled(wrapper).simulate('change');
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
@@ -901,9 +894,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    await findCTEnabled(wrapper).simulate('change', {
-      target: { checked: true },
-    });
+    await findCTEnabled(wrapper).simulate('change');
     await waitOneTickAndUpdate(wrapper);
 
     await simulateComponentChange(
