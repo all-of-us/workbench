@@ -120,6 +120,7 @@
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
     "enableControlledTierTrainingRenewal": false,
+    "enableCromwellGKEApp": false,
     "enableRStudioGKEApp": false
   },
   "actionAudit": {

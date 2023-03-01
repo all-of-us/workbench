@@ -11,7 +11,6 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -69,8 +68,9 @@ describe('AppsPanel', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
   beforeEach(() => {
-    serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = true;
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+    });
     registerApiClient(AppsApi, appsStub);
     appsStub.createApp = () => Promise.resolve({});
     registerApiClient(NotebooksApi, new NotebooksApiStub());

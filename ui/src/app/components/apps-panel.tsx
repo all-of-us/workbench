@@ -61,7 +61,7 @@ export const AppsPanel = (props: {
   const appsToDisplay = [
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
-    UIAppType.CROMWELL,
+    ...(config.enableCromwellGKEApp ? [UIAppType.CROMWELL] : []),
   ];
 
   // all GKE apps (not Jupyter)

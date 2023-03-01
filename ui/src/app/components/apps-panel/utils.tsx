@@ -1,6 +1,7 @@
 import {
   AppStatus,
   AppType,
+  ConfigResponse,
   CreateAppRequest,
   DiskType,
   RuntimeStatus,
@@ -159,3 +160,7 @@ export const toUserEnvironmentStatusByAppType = (
   appType === UIAppType.JUPYTER
     ? fromRuntimeStatus(status as RuntimeStatus)
     : fromUserAppStatus(status as AppStatus);
+
+export const showAppsPanel = (config: ConfigResponse) => {
+  return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
+};

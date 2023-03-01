@@ -61,8 +61,6 @@ export interface EnvironmentBase {
   shouldShowDisplayTag: boolean;
   // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
   allowTestAccessTokenOverride: boolean;
-  // Show the AppsPanel component to enable the use of User Apps in the UI
-  showAppsPanel: boolean;
   // Show the new Analysis Tab in the UI
   showNewAnalysisTab: boolean;
 }

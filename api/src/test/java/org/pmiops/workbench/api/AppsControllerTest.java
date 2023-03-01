@@ -109,7 +109,16 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateStudioAppFail_featureNotEnabled() throws Exception {
+  public void testCreateCromwellAppFail_featureNotEnabled() throws Exception {
+    config.featureFlags.enableCromwellGKEApp = false;
+    CreateAppRequest createCromwellAppRequest = new CreateAppRequest().appType(AppType.CROMWELL);
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> controller.createApp(WORKSPACE_NS, createCromwellAppRequest));
+  }
+
+  @Test
+  public void testCreateRStudioAppFail_featureNotEnabled() throws Exception {
     config.featureFlags.enableRStudioGKEApp = false;
     CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
     assertThrows(
