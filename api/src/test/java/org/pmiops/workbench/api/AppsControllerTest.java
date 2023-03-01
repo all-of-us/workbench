@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
 import java.time.Duration;
