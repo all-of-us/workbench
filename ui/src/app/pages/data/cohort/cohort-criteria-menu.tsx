@@ -12,6 +12,7 @@ import {
   validateInputForMySQL,
   withCurrentWorkspace,
 } from 'app/utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useRef, useState } = React;
 
@@ -241,8 +242,19 @@ export const CohortCriteriaMenu = withCurrentWorkspace()(
         )
       );
     };
+
+    const hasConceptSetsMenuItem = (index: number) => {
+      return menuOptions[index].some(
+        (menuOption) => 'Other' === menuOption.category
+      );
+    };
+
     const showMenuItem = (index: number) => {
-      return domainCounts === null || categoryHasResults(index);
+      if (hasConceptSetsMenuItem(index)) {
+        return serverConfigStore.get().config.enableConceptSetsInCohortBuilder;
+      } else {
+        return domainCounts === null || categoryHasResults(index);
+      }
     };
 
     const closeAndClearMenu = () => {
