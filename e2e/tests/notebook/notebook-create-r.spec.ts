@@ -20,6 +20,8 @@ describe('Create R kernel notebook', () => {
   const workspaceName = 'e2eCreateRKernelNotebookTest';
   const rNotebookName = makeRandomName('R');
 
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
   test.skip('Run R code', async () => {
     await loadWorkspace(page, workspaceName);
 
@@ -55,6 +57,9 @@ describe('Create R kernel notebook', () => {
     await notebook.save();
     expect(cell3Output).toMatch(/success$/);
   });
+
+  /*Skipping the test below as they will be moved to the new version of e2e test.
+   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
 
   test.skip('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
