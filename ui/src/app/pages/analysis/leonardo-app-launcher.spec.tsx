@@ -7,7 +7,7 @@ import { createMemoryHistory } from 'history';
 import { mockNavigate } from 'setupTests';
 
 import {
-  DiskApi,
+  DisksApi,
   ErrorCode,
   Runtime,
   RuntimeApi,
@@ -107,7 +107,7 @@ describe('NotebookLauncher', () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     registerApiClient(RuntimeApi, runtimeStub);
-    registerApiClient(DiskApi, new DisksApiStub());
+    registerApiClient(DisksApi, new DisksApiStub());
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
     registerApiClientNotebooks(ProxyApi, new ProxyApiStub());
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());
