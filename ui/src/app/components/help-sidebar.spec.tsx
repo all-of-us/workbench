@@ -330,13 +330,35 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display apps icon for writable workspaces when showAppsPanel is true', async () => {
+  it('should display apps icon for writable workspaces when Cromwell is enabled', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: true,
+        enableRStudioGKEApp: false,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(1);
+  });
+
+  it('should display apps icon for writable workspaces when RStudio is enabled', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: false,
+        enableRStudioGKEApp: true,
+      },
     });
     const wrapper = await component();
     expect(

@@ -640,14 +640,13 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     }).showIcon()
   );
 
-  if (
-    config.enableCromwellGKEApp &&
-    WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-  ) {
-    keys.push('apps', 'cromwellConfig');
-  }
-
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
+    if (showAppsPanel(config)) {
+      keys.push('apps');
+    }
+    if (config.enableCromwellGKEApp) {
+      keys.push('cromwellConfig');
+    }
     keys.push('runtimeConfig', 'terminal');
   }
 
