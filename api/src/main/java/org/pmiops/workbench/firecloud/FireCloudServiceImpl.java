@@ -468,6 +468,16 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public void setGroupMembership(String groupName, List<String> emails) {
+    GroupsApi groupsApi = groupsApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          groupsApi.setGroupMembership(groupName, MEMBER_ROLE, emails);
+          return null;
+        });
+  }
+
+  @Override
   public boolean isUserMemberOfGroupWithCache(String email, String groupName) {
     return retryHandler.run(
         (context) -> {

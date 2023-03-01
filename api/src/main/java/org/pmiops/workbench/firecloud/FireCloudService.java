@@ -125,6 +125,8 @@ public interface FireCloudService {
 
   void removeUserFromGroup(String email, String groupName);
 
+  void setGroupMembership(String groupName, List<String> emails);
+
   boolean isUserMemberOfGroupWithCache(String email, String groupName);
 
   String staticNotebooksConvert(byte[] notebook);

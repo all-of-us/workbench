@@ -120,7 +120,7 @@ public class AccessTierServiceImpl implements AccessTierService {
                         .setLastUpdated(now())));
   }
 
-  private void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+  public void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
     if (!fireCloudService.isUserMemberOfGroupWithCache(username, authDomainName)) {
@@ -131,7 +131,7 @@ public class AccessTierServiceImpl implements AccessTierService {
     }
   }
 
-  private void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+  public void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
     if (fireCloudService.isUserMemberOfGroupWithCache(username, authDomainName)) {
