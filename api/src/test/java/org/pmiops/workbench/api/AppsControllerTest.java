@@ -84,7 +84,6 @@ public class AppsControllerTest {
 
     user = new DbUser();
     createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
-    config.featureFlags.enableRStudioGKEApp = true;
     testWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
@@ -96,12 +95,18 @@ public class AppsControllerTest {
 
   @Test
   public void testCreateAppSuccess() throws Exception {
+    config.featureFlags.enableCromwellGKEApp = true;
+    config.featureFlags.enableRStudioGKEApp = true;
+
     controller.createApp(WORKSPACE_NS, createAppRequest);
     verify(mockLeonardoApiClient).createApp(createAppRequest, testWorkspace);
   }
 
   @Test
   public void testCreateAppFail_validateActiveBilling() {
+    config.featureFlags.enableCromwellGKEApp = true;
+    config.featureFlags.enableRStudioGKEApp = true;
+
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
@@ -111,8 +116,20 @@ public class AppsControllerTest {
   }
 
   @Test
+  public void testCreateCromwellAppSuccess_featureEnabled() {
+    config.featureFlags.enableCromwellGKEApp = true;
+    config.featureFlags.enableRStudioGKEApp = true;
+    CreateAppRequest createCromwellAppRequest = new CreateAppRequest().appType(AppType.CROMWELL);
+
+    controller.createApp(WORKSPACE_NS, createCromwellAppRequest);
+
+    verify(mockLeonardoApiClient).createApp(createCromwellAppRequest, testWorkspace);
+  }
+
+  @Test
   public void testCreateCromwellAppFail_featureNotEnabled() throws Exception {
     config.featureFlags.enableCromwellGKEApp = false;
+    config.featureFlags.enableRStudioGKEApp = true;
     CreateAppRequest createCromwellAppRequest = new CreateAppRequest().appType(AppType.CROMWELL);
     assertThrows(
         UnsupportedOperationException.class,
@@ -120,7 +137,19 @@ public class AppsControllerTest {
   }
 
   @Test
+  public void testCreateRStudioAppSuccess_featureEnabled() {
+    config.featureFlags.enableCromwellGKEApp = true;
+    config.featureFlags.enableRStudioGKEApp = true;
+    CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
+
+    controller.createApp(WORKSPACE_NS, createRStudioAppRequest);
+
+    verify(mockLeonardoApiClient).createApp(createRStudioAppRequest, testWorkspace);
+  }
+
+  @Test
   public void testCreateRStudioAppFail_featureNotEnabled() throws Exception {
+    config.featureFlags.enableCromwellGKEApp = true;
     config.featureFlags.enableRStudioGKEApp = false;
     CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
     assertThrows(
