@@ -55,4 +55,6 @@ public interface CloudStorageClient {
   String getCaptchaServerKey();
 
   FileDetail blobToFileDetail(Blob blob, String bucketName, Set<String> workspaceUsers);
+
+  String getGoogleOAuthClientSecret();
 }

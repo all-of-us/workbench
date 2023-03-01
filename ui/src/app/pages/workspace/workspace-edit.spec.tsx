@@ -53,7 +53,7 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
 
-jest.mock('app/utils/workbench-gapi-client', () => ({
+jest.mock('app/utils/project-billing-info', () => ({
   getBillingAccountInfo: () =>
     new Promise((resolve) =>
       resolve({ billingAccountName: 'billing-account' })
@@ -987,6 +987,7 @@ describe('WorkspaceEdit', () => {
 
     let billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
@@ -1010,6 +1011,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props.value).toEqual('free-tier');
@@ -1031,6 +1033,7 @@ describe('WorkspaceEdit', () => {
 
     const billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
 
     expect(billingDropDown.props.value).toEqual('free-tier');
@@ -1052,6 +1055,7 @@ describe('WorkspaceEdit', () => {
 
     const billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
@@ -1074,6 +1078,7 @@ describe('WorkspaceEdit', () => {
 
     const billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
@@ -1099,6 +1104,7 @@ describe('WorkspaceEdit', () => {
 
     let billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
@@ -1123,6 +1129,7 @@ describe('WorkspaceEdit', () => {
 
     billingDropDown = wrapper
       .find('[data-test-id="billing-dropdown"]')
+      .first()
       .instance() as Dropdown;
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props.value).toEqual('billing-account');

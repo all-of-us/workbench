@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -9,15 +10,14 @@ import {
   Criteria,
   GenomicExtractionJob,
   ParticipantCohortStatus,
-  ResourceType,
   RuntimeError,
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { SelectionList } from 'app/cohort-search/selection-list/selection-list.component';
 import { AppsPanel } from 'app/components/apps-panel';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
-import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
+import { ConfigurationPanel } from 'app/components/configuration-panel';
+import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
 import {
@@ -30,15 +30,15 @@ import {
 import { HelpTips } from 'app/components/help-tips';
 import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
 import { RuntimeErrorModal } from 'app/components/runtime-error-modal';
 import { Spinner } from 'app/components/spinners';
+import { SelectionList } from 'app/pages/data/cohort/selection-list';
 import { SidebarContent } from 'app/pages/data/cohort-review/sidebar-content.component';
 import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { participantStore } from 'app/services/review-state.service';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
@@ -56,7 +56,11 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { PanelContent } from 'app/utils/runtime-utils';
+import {
+  ComputeSecuritySuspendedError,
+  maybeUnwrapSecuritySuspendedError,
+  PanelContent,
+} from 'app/utils/runtime-utils';
 import {
   routeDataStore,
   runtimeStore,
@@ -141,6 +145,13 @@ const styles = reactStyles({
   },
 });
 
+const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
+  'apps',
+  'runtimeConfig',
+  'cromwellConfig',
+  'terminal',
+] as SidebarIconId[];
+
 export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 const pageKeyToAnalyticsLabels = {
@@ -156,7 +167,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props extends NavigationProps {
+interface Props extends NavigationProps, UserSuspendedProps {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -175,6 +186,38 @@ enum CurrentModal {
   HasRuntimeError,
 }
 
+interface UserSuspendedProps {
+  userSuspended: boolean;
+}
+
+// We use runtime API errors as a proxy for whether the user is suspended
+const withUserSuspended = () => (WrappedComponent) => (props) => {
+  const [userSuspended, setUserSuspended] = useState(undefined);
+
+  useEffect(() => {
+    runtimeApi()
+      .getRuntime(props.workspace.namespace)
+      .then(() => {
+        setUserSuspended(false);
+      })
+      .catch((e) => {
+        maybeUnwrapSecuritySuspendedError(e)
+          .then((error) => {
+            setUserSuspended(error instanceof ComputeSecuritySuspendedError);
+          })
+          .catch(() => {
+            setUserSuspended(false);
+          });
+      });
+  }, []);
+
+  if (userSuspended === undefined) {
+    return null;
+  } else {
+    return <WrappedComponent {...props} userSuspended={userSuspended} />;
+  }
+};
+
 interface State {
   activeIcon: SidebarIconId;
   filteredContent: Array<any>;
@@ -188,6 +231,7 @@ interface State {
 }
 
 export const HelpSidebar = fp.flow(
+  withUserSuspended(),
   withCurrentCohortCriteria(),
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
@@ -246,11 +290,18 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
+      let initialActiveIcon = localStorage.getItem(
+        LOCAL_STORAGE_KEY_SIDEBAR_STATE
+      ) as SidebarIconId;
+      if (
+        this.props.userSuspended &&
+        SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED.includes(initialActiveIcon)
+      ) {
+        initialActiveIcon = null;
+      }
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(
-        localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE) as SidebarIconId
-      );
+      this.setActiveIcon(initialActiveIcon);
       this.subscriptions.push(
         participantStore.subscribe((participant) =>
           this.setState({ participant })
@@ -417,9 +468,9 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '45',
             bodyPadding: '0 1.875rem',
             renderBody: () => (
-              <RuntimeConfigurationPanel
+              <ConfigurationPanel
+                {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
-                initialPanelContent={runtimeConfPanelInitialState}
               />
             ),
             showFooter: false,
@@ -437,6 +488,42 @@ export const HelpSidebar = fp.flow(
                 onClickDeleteRuntime={() =>
                   this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
                 }
+              />
+            ),
+            showFooter: false,
+          };
+        case 'cromwellConfig':
+          return {
+            headerPadding: '1.125rem',
+            renderHeader: () => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  Cromwell Cloud Environment
+                </h3>
+                <div
+                  style={{
+                    border: `2px ${colors.primary} solid`,
+                    borderRadius: '8px',
+                    padding: '0 0.5rem',
+                    marginLeft: '0.5rem',
+                  }}
+                >
+                  Beta
+                </div>
+              </div>
+            ),
+            bodyWidthRem: '55',
+            bodyPadding: '0 1.875rem',
+            renderBody: () => (
+              <ConfigurationPanel
+                type='cromwell'
+                onClose={() => this.setActiveIcon(null)}
+                runtimeConfPanelInitialState={null}
               />
             ),
             showFooter: false,
@@ -523,6 +610,13 @@ export const HelpSidebar = fp.flow(
       );
       const shouldRenderWorkspaceMenu =
         !showConceptIcon(pageKey) && !showCriteriaIcon(pageKey, criteria);
+
+      const closeButton = (
+        <CloseButton
+          style={{ marginLeft: 'auto' }}
+          onClose={() => this.setActiveIcon(null)}
+        />
+      );
 
       return (
         <div id='help-sidebar'>
@@ -636,10 +730,7 @@ export const HelpSidebar = fp.flow(
                             }}
                           >
                             {sidebarContent.renderHeader()}
-                            <CloseButton
-                              style={{ marginLeft: 'auto' }}
-                              onClose={() => this.setActiveIcon(null)}
-                            />
+                            {closeButton}
                           </FlexRow>
                         )}
 
@@ -705,13 +796,13 @@ export const HelpSidebar = fp.flow(
             [
               CurrentModal.Delete,
               () => (
-                <ConfirmDeleteModal
+                <ConfirmWorkspaceDeleteModal
                   closeFunction={() =>
                     this.setState({ currentModal: CurrentModal.None })
                   }
-                  resourceType={ResourceType.WORKSPACE}
                   receiveDelete={() => this.deleteWorkspace()}
-                  resourceName={this.props.workspace.name}
+                  workspaceNamespace={this.props.workspace.namespace}
+                  workspaceName={this.props.workspace.name}
                 />
               ),
             ],

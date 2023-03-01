@@ -40,12 +40,12 @@ export default class CohortReviewPage extends AuthenticatedPage {
    */
   async clickParticipantLink(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getDataTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
-    const textContent = await getPropValue<string>(cell, 'textContent');
+    const innerText = await getPropValue<string>(cell, 'innerText');
     await cell.click();
     await waitWhileLoading(this.page);
-    return textContent;
+    return innerText;
   }
   /**
    * Get the participant ID in specified row
@@ -54,7 +54,7 @@ export default class CohortReviewPage extends AuthenticatedPage {
    */
   async getParticipantLinkId(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getDataTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
     const textContent = await getPropValue<string>(cell, 'textContent');
     return textContent;

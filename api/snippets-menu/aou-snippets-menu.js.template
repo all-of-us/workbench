@@ -11,7 +11,8 @@ define([
     const pyMenus = [
       {{PY_DATASET_MENU_JSON}},
       {{PY_GCS_MENU_JSON}},
-      {{PY_SQL_MENU_JSON}}
+      {{PY_SQL_MENU_JSON}},
+      {{PY_CROMWELL_JSON}}
     ];
     const rMenus = [
       {{R_DATASET_MENU_JSON}},

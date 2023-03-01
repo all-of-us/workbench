@@ -36,6 +36,11 @@ Please refer to the  [CDR Indices Playbook](https://docs.google.com/document/d/1
 for a step-by-step guide.
 
 ## CDR indices commands
-
-### Full CDR indices build run in CircleCi
-`./project.rb circle-build-cdr-indices --project all-of-us-rw-preprod --bq-dataset C2021Q2R1 --cdr-version c_2021q2_4 --wgv-project aou-res-curation-output-prod --wgv-dataset C2021Q2R1 --wgv-table prep_wgs_metadata`
+**Full CDR indices build run in CircleCi:**
+- *Note Static table-name references are used for building genomic data (CT). These tables enumerated below are expected to be in the `bq-dataset`*
+  - `prep_wgs_metadata`
+  - `prep_longreads_metadata`
+  - `prep_microarray_metadata`
+  - `prep_structural_variants_metadata`
+  
+  `./project.rb create-cdr-indices --project all-of-us-rw-preprod --bq-dataset C2021Q2R1 --cdr-version c_2021q2_4`

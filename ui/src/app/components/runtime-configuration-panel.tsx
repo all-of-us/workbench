@@ -4,7 +4,6 @@ import { Dropdown } from 'primereact/dropdown';
 import { validate } from 'validate.js';
 
 import {
-  BillingStatus,
   DataprocConfig,
   GpuConfig,
   Runtime,
@@ -28,12 +27,10 @@ import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gp
 import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
 import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
 import { SparkConsolePanel } from 'app/components/runtime-configuration-panel/spark-console-panel';
-import { StartStopRuntimeButton } from 'app/components/runtime-configuration-panel/start-stop-runtime-button';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { RuntimeCostEstimator } from 'app/components/runtime-cost-estimator';
 import { RuntimeSummary } from 'app/components/runtime-summary';
 import { Spinner } from 'app/components/spinners';
-import { disksApi, workspacesApi } from 'app/services/swagger-fetch-clients';
+import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   cond,
@@ -55,7 +52,6 @@ import {
   validLeoDataprocMasterMachineTypes,
   validLeoGceMachineTypes,
 } from 'app/utils/machines';
-import { formatUsd } from 'app/utils/numbers';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import {
   AnalysisConfig,
@@ -82,66 +78,19 @@ import {
 } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 
+import { UIAppType } from './apps-panel/utils';
+import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
+
 const { useState, useEffect, Fragment } = React;
 
-const CostInfo = ({
-  runtimeChanged,
-  analysisConfig,
-  currentUser,
-  workspace,
-  creatorFreeCreditsRemaining,
-}) => {
-  const remainingCredits =
-    creatorFreeCreditsRemaining === null ? (
-      <Spinner size={10} />
-    ) : (
-      formatUsd(creatorFreeCreditsRemaining)
-    );
-
-  return (
-    <FlexRow data-test-id='cost-estimator'>
-      <div
-        style={{
-          padding: '.495rem .75rem',
-          ...(runtimeChanged
-            ? {
-                backgroundColor: colorWithWhiteness(colors.warning, 0.9),
-              }
-            : {}),
-        }}
-      >
-        <RuntimeCostEstimator {...{ analysisConfig }} />
-      </div>
-      {isUsingFreeTierBillingAccount(workspace) &&
-        currentUser === workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from your remaining {remainingCredits} of free
-            credits.
-          </div>
-        )}
-      {isUsingFreeTierBillingAccount(workspace) &&
-        currentUser !== workspace.creator && (
-          <div style={styles.costsDrawnFrom}>
-            Costs will draw from workspace creator's remaining{' '}
-            {remainingCredits} of free credits.
-          </div>
-        )}
-      {!isUsingFreeTierBillingAccount(workspace) && (
-        <div style={styles.costsDrawnFrom}>
-          Costs will be charged to billing account{' '}
-          {workspace.billingAccountName}.
-        </div>
-      )}
-    </FlexRow>
-  );
-};
-
 const CreatePanel = ({
-  creatorFreeCreditsRemaining,
   profile,
   setPanelContent,
   workspace,
   analysisConfig,
+  creatorFreeCreditsRemaining,
+  status,
+  setRuntimeStatus,
 }) => {
   const displayName =
     analysisConfig.computeType === ComputeType.Dataproc
@@ -150,19 +99,18 @@ const CreatePanel = ({
 
   return (
     <div data-test-id='runtime-create-panel' style={styles.controlSection}>
-      <FlexRow style={styles.costPredictorWrapper}>
-        <StartStopRuntimeButton
-          workspaceNamespace={workspace.namespace}
-          googleProject={workspace.googleProject}
-        />
-        <CostInfo
-          runtimeChanged={false}
-          analysisConfig={analysisConfig}
-          currentUser={profile.username}
-          workspace={workspace}
-          creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-        />
-      </FlexRow>
+      <EnvironmentInformedActionPanel
+        {...{
+          creatorFreeCreditsRemaining,
+          profile,
+          workspace,
+          analysisConfig,
+          status,
+        }}
+        onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+        onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
+        appType={UIAppType.JUPYTER}
+      />
       <FlexRow
         style={{ justifyContent: 'space-between', alignItems: 'center' }}
       >
@@ -192,10 +140,10 @@ export const PresetSelector = ({
   return (
     <Dropdown
       id='runtime-presets-menu'
+      appendTo='self'
       disabled={disabled}
       style={{
         marginTop: '21px',
-        display: 'inline-block',
         color: colors.primary,
       }}
       placeholder='Recommended environments'
@@ -236,9 +184,10 @@ const PanelMain = fp.flow(
     profileState,
     onClose = () => {},
     initialPanelContent,
+    creatorFreeCreditsRemaining,
   }) => {
     const { profile } = profileState;
-    const { namespace, id, cdrVersionId, googleProject } = workspace;
+    const { namespace, cdrVersionId, googleProject } = workspace;
     const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const { hasWgsData: allowDataproc } = findCdrVersion(
@@ -286,10 +235,6 @@ const PanelMain = fp.flow(
     const initializePanelContent = (): PanelContent =>
       cond(
         [!!initialPanelContent, () => initialPanelContent],
-        [
-          workspace.billingStatus === BillingStatus.INACTIVE,
-          () => PanelContent.Disabled,
-        ],
         // If there's a pendingRuntime, this means there's already a create/update
         // in progress, even if the runtime store doesn't actively reflect this yet.
         // Show the customize panel in this event.
@@ -376,28 +321,7 @@ const PanelMain = fp.flow(
       );
       updateMessaging = diffsToUpdateMessaging(configDiffs);
     }
-    const runtimeChanged = configDiffs.length > 0;
-
-    const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
-      useState(null);
-    useEffect(() => {
-      const aborter = new AbortController();
-      const fetchFreeCredits = async () => {
-        const { freeCreditsRemaining } =
-          await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(
-            namespace,
-            id,
-            { signal: aborter.signal }
-          );
-        setCreatorFreeCreditsRemaining(freeCreditsRemaining);
-      };
-
-      fetchFreeCredits();
-
-      return function cleanup() {
-        aborter.abort();
-      };
-    }, []);
+    const environmentChanged = configDiffs.length > 0;
 
     // Leonardo enforces a minimum limit for disk size, 4000 GB is our arbitrary limit for not making a
     // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
@@ -521,7 +445,7 @@ const PanelMain = fp.flow(
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =
-      runtimeChanged &&
+      environmentChanged &&
       [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
         status as RuntimeStatus
       ) &&
@@ -631,11 +555,15 @@ const PanelMain = fp.flow(
             () => (
               <Fragment>
                 <CreatePanel
-                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-                  profile={profile}
-                  setPanelContent={(value) => setPanelContent(value)}
-                  workspace={workspace}
-                  analysisConfig={analysisConfig}
+                  {...{
+                    analysisConfig,
+                    creatorFreeCreditsRemaining,
+                    profile,
+                    setPanelContent,
+                    setRuntimeStatus,
+                    status,
+                    workspace,
+                  }}
                 />
                 <FlexRow
                   style={{ justifyContent: 'flex-end', marginTop: '1.5rem' }}
@@ -712,38 +640,39 @@ const PanelMain = fp.flow(
             () => (
               <div style={{ marginBottom: '10px' }}>
                 <div style={styles.controlSection}>
-                  <FlexRow style={styles.costPredictorWrapper}>
-                    <StartStopRuntimeButton
-                      workspaceNamespace={workspace.namespace}
-                      googleProject={workspace.googleProject}
-                    />
-                    <CostInfo
-                      {...{
-                        runtimeChanged,
-                        analysisConfig,
-                        workspace,
-                        creatorFreeCreditsRemaining,
-                        currentUser: profile.username,
-                      }}
-                    />
-                  </FlexRow>
-                  {currentRuntime?.errors && currentRuntime.errors.length > 0 && (
-                    <ErrorMessage iconPosition={'top'} iconSize={16}>
-                      <div>
-                        An error was encountered with your cloud environment.
-                        Please re-attempt creation of the environment and
-                        contact support if the error persists.
-                      </div>
-                      <div>Error details:</div>
-                      {currentRuntime.errors.map((err, idx) => {
-                        return (
-                          <div style={{ fontFamily: 'monospace' }} key={idx}>
-                            {err.errorMessage}
-                          </div>
-                        );
-                      })}
-                    </ErrorMessage>
-                  )}
+                  <EnvironmentInformedActionPanel
+                    {...{
+                      creatorFreeCreditsRemaining,
+                      profile,
+                      workspace,
+                      analysisConfig,
+                      status,
+                      environmentChanged,
+                    }}
+                    onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
+                    onResume={() =>
+                      setRuntimeStatus(RuntimeStatusRequest.Start)
+                    }
+                    appType={UIAppType.JUPYTER}
+                  />
+                  {currentRuntime?.errors &&
+                    currentRuntime.errors.length > 0 && (
+                      <ErrorMessage iconPosition={'top'} iconSize={16}>
+                        <div>
+                          An error was encountered with your cloud environment.
+                          Please re-attempt creation of the environment and
+                          contact support if the error persists.
+                        </div>
+                        <div>Error details:</div>
+                        {currentRuntime.errors.map((err, idx) => {
+                          return (
+                            <div style={{ fontFamily: 'monospace' }} key={idx}>
+                              {err.errorMessage}
+                            </div>
+                          );
+                        })}
+                      </ErrorMessage>
+                    )}
                   <PresetSelector
                     {...{
                       allowDataproc,
@@ -810,6 +739,7 @@ const PanelMain = fp.flow(
                       <FlexRow style={{ gap: '10px', alignItems: 'center' }}>
                         <Dropdown
                           id='runtime-compute'
+                          appendTo='self'
                           disabled={!allowDataproc || disableControls}
                           style={{ width: '15rem' }}
                           options={[ComputeType.Standard, ComputeType.Dataproc]}
@@ -876,6 +806,7 @@ const PanelMain = fp.flow(
                       </label>
                       <Dropdown
                         id='runtime-autopause'
+                        appendTo='self'
                         disabled={disableControls}
                         style={{ width: '15rem' }}
                         options={Array.from(
@@ -1050,6 +981,7 @@ const PanelMain = fp.flow(
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
   initialPanelContent = null,
+  creatorFreeCreditsRemaining = null,
 }) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
@@ -1057,5 +989,9 @@ export const RuntimeConfigurationPanel = ({
   }
 
   // TODO: can we remove this indirection?
-  return <PanelMain {...{ onClose, initialPanelContent }} />;
+  return (
+    <PanelMain
+      {...{ onClose, initialPanelContent, creatorFreeCreditsRemaining }}
+    />
+  );
 };

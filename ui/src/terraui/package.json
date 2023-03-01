@@ -1,5 +1,7 @@
 {
   "devDependencies": {
-    "esbuild": "^0.15.16"
+    "esbuild": "^0.15.16",
+    "esbuild-plugin-alias": "^0.2.1",
+    "esbuild-plugin-svgr": "^1.0.1"
   }
 }

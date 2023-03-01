@@ -84,8 +84,13 @@ export default class DataResourceCard extends BaseCard {
     }
 
     const dataTableRows = await datatable.getRowCount();
+
     if (dataTableRows >= 1) {
-      return datatable;
+      const firstRow = await datatable.getRow(1);
+      const className = (await (await firstRow.getProperty('className')).jsonValue()) as string;
+      if (!className.includes('p-datatable-emptymessage')) {
+        return datatable;
+      }
     }
     return null;
   }

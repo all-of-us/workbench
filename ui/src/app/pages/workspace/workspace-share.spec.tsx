@@ -11,13 +11,13 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import FakeTimers from '@sinonjs/fake-timers';
 import {
   registerApiClient,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
-import * as Lolex from 'lolex';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
@@ -170,7 +170,7 @@ describe('WorkspaceShare', () => {
   });
 
   it('adds user correctly', async () => {
-    const clock = Lolex.install({ shouldAdvanceTime: true });
+    const clock = FakeTimers.install({ shouldAdvanceTime: true });
     const wrapper = component();
     await searchForUser(wrapper, clock, 'luna');
     clock.uninstall();
@@ -205,7 +205,7 @@ describe('WorkspaceShare', () => {
   });
 
   it('saves acl correctly after changes made', async () => {
-    const clock = Lolex.install({ shouldAdvanceTime: true });
+    const clock = FakeTimers.install({ shouldAdvanceTime: true });
     const wrapper = component();
     await searchForUser(wrapper, clock, 'luna');
 

@@ -21,7 +21,7 @@
  */
 
 import {
-  AuthDomainApi,
+  AppsApi,
   BaseAPI, // internal
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
@@ -32,7 +32,6 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
-  DiskApi,
   DisksApi,
   EgressEventsAdminApi,
   FeaturedWorkspacesConfigApi, // internal
@@ -98,7 +97,7 @@ function bindCtor<T extends BaseAPI>(ctor: new () => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
-export const authDomainApi = bindCtor(AuthDomainApi);
+export const appsApi = bindCtor(AppsApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const cohortAnnotationDefinitionApi = bindCtor(
   CohortAnnotationDefinitionApi
@@ -109,6 +108,7 @@ export const cohortsApi = bindCtor(CohortsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
+export const disksApi = bindCtor(DisksApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspacesConfigApi = bindCtor(
   FeaturedWorkspacesConfigApi
@@ -117,16 +117,14 @@ export const institutionApi = bindCtor(InstitutionApi);
 export const notebooksApi = bindCtor(NotebooksApi);
 export const profileApi = bindCtor(ProfileApi);
 export const runtimeApi = bindCtor(RuntimeApi);
-export const statusApi = bindCtor(StatusApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
+export const statusApi = bindCtor(StatusApi);
+export const surveysApi = bindCtor(SurveysApi);
 export const userAdminApi = bindCtor(UserAdminApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
-export const diskApi = bindCtor(DiskApi);
-export const disksApi = bindCtor(DisksApi);
-export const surveysApi = bindCtor(SurveysApi);
 
 export const getApiBaseUrl = () => {
   if (cookiesEnabled()) {

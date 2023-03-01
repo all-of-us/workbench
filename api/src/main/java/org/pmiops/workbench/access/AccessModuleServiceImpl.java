@@ -140,7 +140,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       DbUserAccessModule dbUserAccessModule) {
     return Optional.of(dbUserAccessModule)
         .map(a -> userAccessModuleMapper.dbToModule(a, getExpirationTime(a).orElse(null)))
-        .filter(a -> isModuleStatusReturnedInProfile(a.getModuleName()));
+        .filter(a -> isModuleEnabledInEnvironment(a.getModuleName()));
   }
 
   @VisibleForTesting
@@ -162,7 +162,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName) {
     // if the module is not required, the user is always compliant
-    if (!isModuleRequiredInEnvironment(
+    if (!isModuleEnabledInEnvironment(
         accessModuleNameMapper.storageAccessModuleToClient(accessModuleName))) {
       return true;
     }
@@ -252,11 +252,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   // Do we require this module's completion for users to be compliant with the appropriate tier(s)?
-  // This differs temporarily from whether we display this module in the user's
-  // Profile.accessModules because we have two Feature Flags for RAS.
-  // When the RAS roll-out is complete, we can collapse these two methods again.
-
-  private boolean isModuleRequiredInEnvironment(AccessModule module) {
+  private boolean isModuleEnabledInEnvironment(AccessModule module) {
     final AccessConfig accessConfig = configProvider.get().access;
 
     switch (module) {
@@ -268,26 +264,9 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       case CT_COMPLIANCE_TRAINING:
         return accessConfig.enableComplianceTraining;
       case RAS_LINK_LOGIN_GOV:
-        return accessConfig.enforceRasLoginGovLinking;
+        return accessConfig.enableRasLoginGovLinking;
       default:
         return true;
     }
-  }
-
-  // Do we display this module in the user's Profile.accessModules ? This differs temporarily from
-  // whether the module is *required* in the environment because we have two Feature Flags for RAS.
-  // When the RAS roll-out is complete, we can collapse these two methods again.
-
-  private boolean isModuleStatusReturnedInProfile(AccessModule module) {
-    final AccessConfig accessConfig = configProvider.get().access;
-
-    // temporary special case: always return RAS in Profile.accessModules when this FF = true
-    // even when we do not require it for tier membership
-    if (accessConfig.enableRasLoginGovLinking && module == AccessModule.RAS_LINK_LOGIN_GOV) {
-      return true;
-    }
-
-    // for every other case
-    return isModuleRequiredInEnvironment(module);
   }
 }

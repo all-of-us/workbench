@@ -11,7 +11,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -68,10 +67,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public void deleteWorkspace(String username, Workspace workspace) {
+  public void deleteWorkspace(String username, String wsNamespace, String wsId) {
     final DbUser dbUser = userDao.findUserByUsername(username);
-    final String wsNamespace = workspace.getNamespace();
-    final String wsId = workspace.getId();
 
     // also confirms that the workspace exists in the DB
     DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, wsId);

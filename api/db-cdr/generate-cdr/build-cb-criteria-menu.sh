@@ -4,8 +4,8 @@
 
 set -e
 
-export BQ_PROJECT=$1  # project
-export BQ_DATASET=$2  # dataset
+export BQ_PROJECT=$1   # project
+export BQ_DATASET=$2   # dataset
 
 echo "Getting fitbit count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`

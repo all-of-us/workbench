@@ -22,7 +22,6 @@ import {
   dataSetApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
@@ -58,9 +57,9 @@ describe('ExportDatasetModal', () => {
     registerApiClient(DataSetApi, datasetApiStub);
 
     workspace = workspaceDataStub;
-    currentWorkspaceStore.next(workspace);
 
     testProps = {
+      workspace,
       closeFunction: () => {},
       dataset: dataset,
     };

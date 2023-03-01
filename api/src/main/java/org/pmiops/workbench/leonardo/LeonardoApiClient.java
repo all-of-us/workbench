@@ -77,7 +77,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks by google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted);
 
   /**
@@ -98,11 +98,11 @@ public interface LeonardoApiClient {
   UserAppEnvironment getAppByNameByProjectId(String googleProjectId, String appName);
 
   /**
-   * Lists all apps the user has permission on in the given workspace GCP project
+   * Lists all apps the user creates in the given workspace GCP project
    *
    * @param googleProjectId the GCP project the app belongs to
    */
-  List<UserAppEnvironment> listAppsInProject(String googleProjectId);
+  List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId);
 
   /**
    * Deletes a Leonardo app

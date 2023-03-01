@@ -30,16 +30,10 @@ describe('WorkspaceLibrary', () => {
   let publishedWorkspaceStubs = [];
   let PHENOTYPE_LIBRARY_WORKSPACES;
   let TUTORIAL_WORKSPACE;
-  let PUBLISHED_WORKSPACE;
 
-  const suffixes = [
-    ' Phenotype Library',
-    ' Tutorial Workspace',
-    ' Published Workspace',
-  ];
+  const suffixes = [' Phenotype Library', ' Tutorial Workspace'];
 
   const props = {
-    enablePublishedWorkspaces: true,
     hideSpinner: () => {},
     showSpinner: () => {},
   };
@@ -76,7 +70,6 @@ describe('WorkspaceLibrary', () => {
 
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];
     TUTORIAL_WORKSPACE = publishedWorkspaceStubs[1];
-    PUBLISHED_WORKSPACE = publishedWorkspaceStubs[2];
   });
 
   it('renders', () => {
@@ -121,21 +114,6 @@ describe('WorkspaceLibrary', () => {
       .find('[data-test-id="workspace-card-name"]')
       .map((c) => c.text());
     expect(cardNameList.length).toBe(0);
-  });
-
-  it('should display published workspaces', async () => {
-    registerApiClient(
-      WorkspacesApi,
-      new WorkspacesApiStub(publishedWorkspaceStubs)
-    );
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="Published Workspaces"]').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cardNameList = wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .map((c) => c.text());
-    expect(cardNameList).toEqual([PUBLISHED_WORKSPACE.name]);
   });
 
   it('should have tutorial workspaces as default tab', async () => {

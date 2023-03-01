@@ -175,6 +175,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "Genomics Undergrad Lesson Plan Exemplar (v6)",
+      "namespace": "aou-rw-e88a6e91",
+      "id": "duplicateofcontroltierusersupportcontentv6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "Phenotype - Breast Cancer (v6)",
       "namespace": "aou-rw-6e6a2ca5",
       "id": "duplicateofphenotypebreastcancerv6",
@@ -221,6 +227,12 @@
       "namespace": "aou-rw-0e2ce67a",
       "id": "phenotypetype2diabetesv6",
       "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Demo-Geographic Variation in Obesity (V4)",
+      "namespace": "aou-rw-808a79c0",
+      "id": "demogeographicvariationinobesityv4",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

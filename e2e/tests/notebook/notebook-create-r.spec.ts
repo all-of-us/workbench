@@ -20,7 +20,7 @@ describe('Create R kernel notebook', () => {
   const workspaceName = 'e2eCreateRKernelNotebookTest';
   const rNotebookName = makeRandomName('R');
 
-  test('Run R code', async () => {
+  test.skip('Run R code', async () => {
     await loadWorkspace(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);

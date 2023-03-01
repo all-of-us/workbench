@@ -32,6 +32,7 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
   column: {
@@ -39,7 +40,7 @@ const styles = reactStyles({
   },
   typeColumn: {
     textAlign: 'left',
-    width: '130px',
+    width: '140px',
   },
   modifiedDateColumn: {
     textAlign: 'left',
@@ -98,7 +99,7 @@ interface Props {
   existingNameList: string[];
   workspaceResources: WorkspaceResource[];
   onUpdate: Function;
-  workspaces: Workspace[];
+  workspaces: WorkspaceData[];
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   recentResourceSource?: boolean;
 }
@@ -125,9 +126,13 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
   };
   const resourceTypeNameMap = getResourceMap();
 
-  const renderResourceMenu = (resource: WorkspaceResource) => {
+  const renderResourceMenu = (
+    resource: WorkspaceResource,
+    workspace: WorkspaceData
+  ) => {
     return renderResourceCard({
       resource,
+      workspace,
       menuOnly: true,
       existingNameList: resourceTypeNameMap.get(getType(resource)),
       onUpdate: reloadResources,
@@ -161,6 +166,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
           const workspace = workspaces.find(
             (w) => w.namespace === r.workspaceNamespace
           );
+
           // Don't return resources where we no longer have access to the workspace.
           // For example: the owner has unshared the workspace, but a recent-resource entry remains.
           return workspace
@@ -168,7 +174,7 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
                 {
                   resource: r,
                   workspace,
-                  menu: renderResourceMenu(r),
+                  menu: renderResourceMenu(r, workspace),
                   resourceType: getTypeString(r),
                   resourceName: getDisplayName(r),
                   formattedLastModified: displayDateWithoutHours(
@@ -221,14 +227,15 @@ export const ResourceList = fp.flow(withCdrVersions())((props: Props) => {
 
   return (
     <React.Fragment>
-      <div data-test-id='resources-table'>
+      <div data-test-id='resources-table' style={{ flex: 1 }}>
         {tableData?.length > 0 && (
           <DataTable
+            filterDisplay='row'
             data-test-id='resource-list'
             value={tableData}
-            scrollable={true}
             sortMode='multiple'
             paginator
+            breakpoint='0px'
             rows={ROWS_PER_PAGE_RESOURCE_TABLE}
           >
             <Column field='menu' style={styles.menu} />

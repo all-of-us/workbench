@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -23,8 +22,6 @@ import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.model.TerraTosReminderEmailsResponse;
-import org.pmiops.workbench.model.TerraTosReminderEmailsResponseUsers;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.http.ResponseEntity;
@@ -122,21 +119,5 @@ public class UserAdminController implements UserAdminApiDelegate {
                     userService.findUsersByUsernames(request.getUsernames()).stream()
                         .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.COMMUNICATIONS_ADMIN})
-  public ResponseEntity<TerraTosReminderEmailsResponse> sendTerraTosReminderEmails() {
-    List<DbUser> emailsSent = userService.sendTerraTosReminderEmails();
-
-    return ResponseEntity.ok(
-        new TerraTosReminderEmailsResponse()
-            .users(emailsSent.stream().map(this::toResponse).collect(Collectors.toList())));
-  }
-
-  private TerraTosReminderEmailsResponseUsers toResponse(DbUser user) {
-    return new TerraTosReminderEmailsResponseUsers()
-        .contactEmail(user.getContactEmail())
-        .username(user.getUsername());
   }
 }

@@ -210,21 +210,17 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
     }
 
     componentDidMount(): void {
-      document.addEventListener(
-        'mousedown',
-        this.handleClickOutsideSearch,
-        false
-      );
+      document
+        .getElementById('root')
+        .addEventListener('mousedown', this.handleClickOutsideSearch, false);
 
       this.loadUserRoles();
     }
 
     componentWillUnmount(): void {
-      document.removeEventListener(
-        'mousedown',
-        this.handleClickOutsideSearch,
-        false
-      );
+      document
+        .getElementById('root')
+        .removeEventListener('mousedown', this.handleClickOutsideSearch, false);
     }
 
     async loadUserRoles() {

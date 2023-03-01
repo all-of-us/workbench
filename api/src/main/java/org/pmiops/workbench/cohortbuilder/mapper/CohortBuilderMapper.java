@@ -67,7 +67,6 @@ public interface CohortBuilderMapper {
   default DemoChartInfo fieldValueListToDemoChartInfo(FieldValueList row) {
     DemoChartInfo demoChartInfo = new DemoChartInfo();
     FieldValues.getString(row, "name").ifPresent(demoChartInfo::setName);
-    FieldValues.getString(row, "race").ifPresent(demoChartInfo::setRace);
     FieldValues.getString(row, "ageRange").ifPresent(demoChartInfo::setAgeRange);
     FieldValues.getLong(row, "count").ifPresent(demoChartInfo::setCount);
     return demoChartInfo;

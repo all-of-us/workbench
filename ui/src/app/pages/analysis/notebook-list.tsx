@@ -205,6 +205,7 @@ export const NotebookList = withCurrentWorkspace()(
                 display: 'flex',
                 flexWrap: 'wrap',
                 justifyContent: 'flex-start',
+                flex: 1,
               }}
             >
               {showWaitingForNotebookTransferMsg ? (
@@ -222,7 +223,7 @@ export const NotebookList = withCurrentWorkspace()(
                   </div>
                 </FlexColumn>
               ) : (
-                <FlexColumn>
+                <FlexColumn style={{ flex: 1 }}>
                   <FlexRow
                     style={{ ...styles.heading, paddingBottom: '0.75rem' }}
                   >
@@ -242,7 +243,7 @@ export const NotebookList = withCurrentWorkspace()(
                           !this.canWrite()
                         }
                       >
-                        <FontAwesomeIcon icon={faPlusCircle}></FontAwesomeIcon>
+                        <FontAwesomeIcon icon={faPlusCircle} />
                       </Clickable>
                     </TooltipTrigger>
                     <ListPageHeader>Create a New Notebook</ListPageHeader>

@@ -28,7 +28,6 @@ import {
 import { bindApiClients as notebooksBindApiClients } from 'app/services/notebooks-swagger-fetch-clients';
 import {
   bindApiClients,
-  configApi,
   getApiBaseUrl,
 } from 'app/services/swagger-fetch-clients';
 import {
@@ -37,11 +36,10 @@ import {
   useShowTOS,
 } from 'app/utils/access-utils';
 import { initializeAnalytics } from 'app/utils/analytics';
-import { useAuthentication } from 'app/utils/authentication';
+import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
   cookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
-  LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN,
 } from 'app/utils/cookies';
 import {
   authStore,
@@ -50,8 +48,6 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
-
-declare const gapi: any;
 
 const CookiePolicyPage = fp.flow(
   withRouteData,
@@ -70,46 +66,17 @@ const UserDisabledPage = fp.flow(
   withRoutingSpinner
 )(UserDisabled);
 
-interface RoutingProps {
-  onSignIn: () => void;
-  signIn: () => void;
-  subscribeToInactivitySignOut: () => void;
-  signOut: () => void;
-}
-
-const currentAccessToken = () => {
-  const tokenOverride = window.localStorage.getItem(
-    LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-  );
-
-  if (tokenOverride) {
-    return tokenOverride;
-  } else if (!gapi.auth2) {
-    return null;
-  } else {
-    const authResponse = gapi.auth2
-      .getAuthInstance()
-      .currentUser.get()
-      .getAuthResponse(true);
-    if (authResponse !== null) {
-      return authResponse.access_token;
-    } else {
-      return null;
-    }
-  }
-};
-
 const bindClients = () => {
   bindApiClients(
     new Configuration({
       basePath: getApiBaseUrl(),
-      accessToken: () => currentAccessToken(),
+      accessToken: () => getAccessToken(),
     })
   );
   notebooksBindApiClients(
     new Configuration({
       basePath: environment.leoApiUrl,
-      accessToken: () => currentAccessToken(),
+      accessToken: () => getAccessToken(),
     })
   );
 };
@@ -140,21 +107,6 @@ const ScrollToTop = () => {
   }, [location]);
 
   return <React.Fragment />;
-};
-
-const useServerConfig = () => {
-  const { config } = useStore(serverConfigStore);
-
-  useEffect(() => {
-    const load = async () => {
-      const serverConfig = await configApi().getConfig();
-      serverConfigStore.set({ config: serverConfig });
-    };
-
-    load();
-  }, []);
-
-  return config;
 };
 
 const useOverriddenApiUrl = () => {
@@ -196,60 +148,26 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<
-  RoutingProps
-> = () => {
-  const config = useServerConfig();
-  const { authLoaded, authError } = useAuthentication();
+export const AppRoutingComponent: React.FunctionComponent = () => {
+  useAuthentication();
+  const { authLoaded } = useStore(authStore);
   const isUserDisabledInDb = useIsUserDisabled();
   const overriddenUrl = useOverriddenApiUrl();
 
-  const loadLocalStorageAccessToken = () => {
-    // Ordinarily this sort of thing would go in authentication.tsx - but setting authStore in there causes
-    // an infinite loop
-    // Enable test access token override via local storage. Intended to support
-    // Puppeteer testing flows. This is handled in the server config callback
-    // for signin timing consistency. Normally we cannot sign in until we've
-    // loaded the oauth client ID from the config service.
-    if (config && environment.allowTestAccessTokenOverride && !authLoaded) {
-      const localStorageTestAccessToken = window.localStorage.getItem(
-        LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN
-      );
-      if (localStorageTestAccessToken) {
-        // The client has already configured an access token override. Skip the normal oauth flow.
-        authStore.set({
-          ...authStore.get(),
-          authLoaded: true,
-          isSignedIn: true,
-        });
-      }
-    }
-  };
   const redirectToTOSPage = useShowTOS();
 
   useEffect(() => {
-    if (config) {
-      // Bootstrapping that requires server config
-      bindClients();
-      loadErrorReporter();
-      initializeAnalytics();
-      loadLocalStorageAccessToken();
-    }
-  }, [config]);
+    bindClients();
+    loadErrorReporter();
+    initializeAnalytics();
+  }, []);
 
   const firstPartyCookiesEnabled = cookiesEnabled();
-  const thirdPartyCookiesEnabled = !(
-    authError &&
-    authError.length > 0 &&
-    authError.includes('Cookies')
-  );
+  // TODO is third-party cookie logic still necessary? See RW-9484.
+  const thirdPartyCookiesEnabled = true;
 
   return (
     <React.Fragment>
-      {/* for outdated-browser-rework https://www.npmjs.com/package/outdated-browser-rework*/}
-      {/* Check checkBrowserSupport() function defined in index.ts and implemented in setup.ts*/}
-      {/* The outdated browser banner should be shown on all pages not just for authenticated user*/}
-      <div id='outdated' />
       {authLoaded && isUserDisabledInDb !== undefined && (
         <React.Fragment>
           {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}

@@ -80,7 +80,7 @@ const buildColumn = (props: ColumnProps) => {
       sortable={!!sortField}
       excludeGlobalFilter={!filterable}
       filterField={filterable && sortField}
-      filterMatchMode={filterable && 'contains'}
+      filterMatchMode={filterable ? 'contains' : null}
     />
   );
 };
@@ -279,6 +279,7 @@ export const AdminUserTable = withUserProfile()(
                 frozenWidth='200px'
                 globalFilter={filter}
                 paginator={true}
+                breakpoint='0px'
                 rows={10}
                 rowsPerPageOptions={[5, 10, 50, 100]}
                 scrollable

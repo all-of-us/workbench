@@ -55,6 +55,8 @@ describe('AdminEgressAudit', () => {
     const wrapper = component();
     await waitForFakeTimersAndUpdate(wrapper);
 
+    wrapper.find('#egress-event-status-dropdown').first().simulate('click');
+
     wrapper
       .find('.p-dropdown-item')
       .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })

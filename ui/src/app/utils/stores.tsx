@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { AuthContextProps } from 'react-oidc-context';
 import { useParams } from 'react-router';
 
 import {
@@ -34,7 +35,7 @@ export const routeDataStore = atom<RouteDataStore>({});
 export interface AuthStore {
   authLoaded: boolean;
   isSignedIn: boolean;
-  authError?: string;
+  auth?: AuthContextProps;
 }
 
 export const authStore = atom<AuthStore>({

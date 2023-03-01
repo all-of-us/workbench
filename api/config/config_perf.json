@@ -100,7 +100,6 @@
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 3650,
@@ -119,7 +118,8 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableGkeApp": false
+    "enableConceptSetsInCohortBuilder": false,
+    "enableControlledTierTrainingRenewal": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
@@ -161,7 +161,6 @@
     }]
   },
   "termsOfService": {
-    "latestAouVersion": 1,
-    "latestTerraTosTimestamp": "1985-10-26T01:22:33Z"
+    "latestAouVersion": 1
   }
 }

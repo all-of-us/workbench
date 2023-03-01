@@ -63,7 +63,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
     selctionColumnIndex = 1
   ): Promise<{ name: string; code: string; vocabulary: string; participantCount: string }> {
     const dataTable = this.getDataTable();
-    const bodyTable = dataTable.getBodyTable();
+    const bodyTable = dataTable.getTable();
 
     // Name column #2
     const nameCell = await bodyTable.getCell(rowIndex, 2);
@@ -86,18 +86,6 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
     await elemt.click();
 
     return { name: nameValue, code: codeValue, vocabulary: vocabValue, participantCount: partiCountValue };
-  }
-
-  /**
-   * Check Select All Checkbox in data table.
-   */
-  async dataTableSelectAllRows(): Promise<void> {
-    const dataTable = this.getDataTable();
-    const headerTable = dataTable.getHeaderTable();
-
-    const selectCheckCell = await headerTable.getHeaderCell(1);
-    const elemt = (await selectCheckCell.$x('.//*[@role="checkbox"]'))[0];
-    await elemt.click();
   }
 
   getDataTable(): DataTable {

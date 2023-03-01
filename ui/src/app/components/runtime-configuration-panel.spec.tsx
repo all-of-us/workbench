@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 import { ReactWrapper } from 'enzyme';
 
 import {
-  BillingStatus,
   DisksApi,
   ProfileApi,
   RuntimeConfigurationType,
@@ -814,9 +813,11 @@ describe('RuntimeConfigurationPanel', () => {
       .first()
       .simulate('click');
 
+    wrapper.find('div[id="runtime-ram"]').simulate('click');
+
     const memoryOptions = wrapper
-      .find('#runtime-ram')
-      .first()
+      .find('div[id="runtime-ram"]')
+      .find('.p-dropdown-items')
       .find('.p-dropdown-item');
     expect(memoryOptions.exists()).toBeTruthy();
 
@@ -1107,23 +1108,23 @@ describe('RuntimeConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
-    expect(runningCost(wrapper).text()).toEqual('$0.20/hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
+    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickMainDiskSize(wrapper, 300);
-    expect(runningCost(wrapper).text()).toEqual('$0.40/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
 
     await pickPreset(wrapper, { displayName: 'General Analysis' });
-    expect(runningCost(wrapper).text()).toEqual('$0.20/hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
+    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    expect(runningCost(wrapper).text()).toEqual('$0.73/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
 
     // Bump up all the worker values to increase the price on everything.
     await pickNumWorkers(wrapper, 4);
@@ -1131,8 +1132,8 @@ describe('RuntimeConfigurationPanel', () => {
     await pickWorkerCpu(wrapper, 8);
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
-    expect(runningCost(wrapper).text()).toEqual('$2.88/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.14/hour');
+    expect(runningCost(wrapper).text()).toEqual('$2.88 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.14 per hour');
   });
 
   it('should update the cost estimator when master machine changes', async () => {
@@ -1156,21 +1157,21 @@ describe('RuntimeConfigurationPanel', () => {
     // with Master disk size: 1000
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
-    expect(runningCost(wrapper).text()).toEqual('$0.77/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.07/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.77 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.07 per hour');
 
     // Change the Master disk size or master size to 150
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
 
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
-    expect(runningCost(wrapper).text()).toEqual('$0.73/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
-    expect(runningCost(wrapper).text()).toEqual('$0.87/hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.13/hour');
+    expect(runningCost(wrapper).text()).toEqual('$0.87 per hour');
+    expect(storageCost(wrapper).text()).toEqual('$0.13 per hour');
   });
 
   it('should allow runtime deletion', async () => {
@@ -1213,7 +1214,7 @@ describe('RuntimeConfigurationPanel', () => {
     const wrapper = await component();
 
     expect(
-      wrapper.find('[data-test-id="runtime-status-icon-running"]').exists()
+      wrapper.find('[data-test-id="environment-status-icon-running"]').exists()
     ).toBeTruthy();
   });
 
@@ -1221,7 +1222,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     expect(
-      wrapper.find('[data-test-id="runtime-status-icon-none"]').exists()
+      wrapper.find('[data-test-id="environment-status-icon-none"]').exists()
     ).toBeTruthy();
   });
 
@@ -1557,7 +1558,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, 150);
-    // This should make the cost about $50/hour.
+    // This should make the cost about $50 per hour.
     await pickNumWorkers(wrapper, 200);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
@@ -1600,7 +1601,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
-    // This should make the cost about $50/hour.
+    // This should make the cost about $50 per hour.
     await pickNumWorkers(wrapper, 20000);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
@@ -1621,11 +1622,11 @@ describe('RuntimeConfigurationPanel', () => {
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
-    // This should make the cost about $140/hour.
+    // This should make the cost about $140 per hour.
     await pickNumWorkers(wrapper, 600);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
 
-    // This should make the cost around $160/hour.
+    // This should make the cost around $160 per hour.
     await pickNumWorkers(wrapper, 700);
     // We don't want to disable for user provided billing. Just put a warning.
     expect(getCreateButton().prop('disabled')).toBeFalsy();
@@ -1638,25 +1639,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickNumWorkers(wrapper, 2);
     expect(getCreateButton().prop('disabled')).toBeFalsy();
-  });
-
-  it('should render disabled panel when creator billing disabled', async () => {
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingStatus: BillingStatus.INACTIVE,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    });
-    const wrapper = await component();
-
-    const disabledPanel = wrapper.find({
-      'data-test-id': 'runtime-disabled-panel',
-    });
-    expect(disabledPanel.exists()).toBeTruthy();
-    const createPanel = wrapper.find({
-      'data-test-id': 'runtime-create-panel',
-    });
-    expect(createPanel.exists()).toBeFalsy();
   });
 
   it('should allow creating gce with GPU', async () => {

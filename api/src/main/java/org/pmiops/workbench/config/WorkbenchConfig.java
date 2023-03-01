@@ -277,11 +277,8 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, new users are required to finish identity verification using RAS/login.gov.
-    // This will be replaced with enforceRasLoginGovLinking.
+    // If true, all users are required to finish identity verification using RAS/login.gov.
     public boolean enableRasLoginGovLinking;
-    // If true, all users are required to finish identity verification using RAS/login.gov
-    public boolean enforceRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
 
@@ -322,8 +319,11 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable demographicSurveyV2 in the UI
     public boolean enableUpdatedDemographicSurvey;
-    // If true, allow creating GKE application using Terra Leonardo
-    public boolean enableGkeApp;
+    // If true, enable enableConceptSetsInCohortBuilder
+    public boolean enableConceptSetsInCohortBuilder;
+    // Whether users are directed to complete Controlled Tier Training renewal.
+    // If false, hide or add text indicating that it is not currently available.
+    public boolean enableControlledTierTrainingRenewal;
   }
 
   public static class ActionAuditConfig {
@@ -443,6 +443,7 @@ public class WorkbenchConfig {
   }
 
   public static class E2ETestUserConfig {
+    public int workspaceDeletionBatchSize;
     public List<String> testUserEmails;
   }
 
@@ -450,9 +451,5 @@ public class WorkbenchConfig {
   public static class TermsOfServiceConfig {
     // which All of Us Terms of Service is considered current
     public int latestAouVersion;
-
-    // When the current version of the Terra Terms of Service was released,
-    // in ISO 8601 string format
-    public String latestTerraTosTimestamp;
   }
 }

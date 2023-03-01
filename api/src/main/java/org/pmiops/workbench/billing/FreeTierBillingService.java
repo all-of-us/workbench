@@ -298,11 +298,16 @@ public class FreeTierBillingService {
         workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
+    Iterable<DbUser> userByUserIdIn =
+        userDao.findAllById(userCosts.keySet().stream().collect(Collectors.toList()));
+    Map<Long, DbUser> usersCache = new HashMap<>();
+    userByUserIdIn.iterator().forEachRemaining(u -> usersCache.put(u.getUserId(), u));
+
     userCosts.forEach(
         (userId, currentCost) -> {
           final double previousCost = previousUserCosts.getOrDefault(userId, 0.0);
           maybeAlertOnCostThresholds(
-              userDao.findUserByUserId(userId),
+              usersCache.get(userId),
               Math.max(currentCost, previousCost),
               previousCost,
               costThresholdsInDescOrder);

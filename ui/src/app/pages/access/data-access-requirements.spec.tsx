@@ -140,24 +140,38 @@ describe('DataAccessRequirements', () => {
       ]
     );
 
-  const expireAllModules = () => {
+  const oneExpiredModule = (moduleName: AccessModule): AccessModuleStatus => {
     const expiredTime = oneHourAgo();
+    return {
+      moduleName,
+      completionEpochMillis: expiredTime - 1,
+      expirationEpochMillis: expiredTime,
+    };
+  };
+
+  const expireAllRTModules = () => {
     const { profile } = profileStore.get();
 
     const newProfile = fp.set(
       'accessModules',
       {
-        modules: rtAccessRenewalModules.map(
-          (m) =>
-            ({
-              moduleName: m,
-              completionEpochMillis: expiredTime - 1,
-              expirationEpochMillis: expiredTime,
-            } as AccessModuleStatus)
-        ),
+        modules: rtAccessRenewalModules.map(oneExpiredModule),
       },
       profile
     );
+    profileStore.set({ profile: newProfile, load, reload, updateCache });
+  };
+
+  const addOneModule = (newModuleStatus: AccessModuleStatus) => {
+    const { profile } = profileStore.get();
+
+    const newProfile: Profile = {
+      ...profile,
+      accessModules: {
+        modules: [...profile.accessModules.modules, newModuleStatus],
+      },
+    };
+
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   };
 
@@ -238,19 +252,28 @@ describe('DataAccessRequirements', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
   };
 
-  const expectComplete = (wrapper: ReactWrapper) =>
+  const expectCompletionBanner = (wrapper: ReactWrapper) =>
     expect(
       findNodesByExactText(
         wrapper,
         'Thank you for completing all the necessary steps'
       ).length
     ).toBe(1);
-  const expectIncomplete = (wrapper: ReactWrapper) =>
+  const expectNoCompletionBanner = (wrapper: ReactWrapper) =>
     expect(
       findNodesByExactText(
         wrapper,
         'Thank you for completing all the necessary steps'
       ).length
+    ).toBe(0);
+
+  const expectCtRenewalBanner = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(wrapper, 'Controlled Tier Access Renewal').length
+    ).toBe(1);
+  const expectNoCtRenewalBanner = (wrapper: ReactWrapper) =>
+    expect(
+      findNodesByExactText(wrapper, 'Controlled Tier Access Renewal').length
     ).toBe(0);
 
   beforeEach(async () => {
@@ -280,30 +303,11 @@ describe('DataAccessRequirements', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enforceRasLoginGovLinking: false,
       },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
-
-  it(
-    'should return the RAS module from getEligibleModules when ' +
-      'enforceRasLoginGovLinking is enabled, enableRasLoginGovLinking is not',
-    () => {
-      serverConfigStore.set({
-        config: {
-          ...defaultServerConfig,
-          enableRasLoginGovLinking: false,
-          enforceRasLoginGovLinking: true,
-        },
-      });
-      const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-      expect(
-        enabledModules.includes(AccessModule.RASLINKLOGINGOV)
-      ).toBeTruthy();
-    }
-  );
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
     serverConfigStore.set({
@@ -403,7 +407,6 @@ describe('DataAccessRequirements', () => {
         config: {
           ...defaultServerConfig,
           enableRasLoginGovLinking: false,
-          enforceRasLoginGovLinking: false,
         },
       });
 
@@ -584,7 +587,6 @@ describe('DataAccessRequirements', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enforceRasLoginGovLinking: false,
       },
     });
     const wrapper = component();
@@ -1614,8 +1616,9 @@ describe('DataAccessRequirements', () => {
   });
 
   // ACCESS_RENEWAL specific tests
-  it('should show the correct state when all items are complete', async () => {
-    expireAllModules();
+
+  it('should show the correct state when all RT modules are complete', async () => {
+    expireAllRTModules();
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
@@ -1640,13 +1643,12 @@ describe('DataAccessRequirements', () => {
 
     await waitOneTickAndUpdate(wrapper);
 
-    expectComplete(wrapper);
-    expect(true).toEqual(true);
+    expectCompletionBanner(wrapper);
   });
 
-  it('should show the correct state when all modules are expired', async () => {
+  it('should show the correct state when all RT modules are expired', async () => {
     setCompletionTimes(oneYearAgo);
-    expireAllModules();
+    expireAllRTModules();
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
     await waitOneTickAndUpdate(wrapper);
 
@@ -1655,11 +1657,10 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectIncomplete(wrapper);
-    expect(true).toEqual(true);
+    expectNoCompletionBanner(wrapper);
   });
 
-  it('should show the correct state when all modules are incomplete', async () => {
+  it('should show the correct state when all RT modules are incomplete', async () => {
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
 
     await waitOneTickAndUpdate(wrapper);
@@ -1669,11 +1670,124 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
+  });
+
+  it('should show the correct state when RT and CT modules are complete', async () => {
+    expireAllRTModules();
+    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.CTCOMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expectCompletionBanner(wrapper);
+    expectNoCtRenewalBanner(wrapper);
+  });
+
+  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=false', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        unsafeAllowSelfBypass: true,
+        enableControlledTierTrainingRenewal: false,
+      },
+    });
+
+    expireAllRTModules();
+    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expectNoCompletionBanner(wrapper);
+    expectNoCtRenewalBanner(wrapper);
+  });
+
+  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=true', async () => {
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        unsafeAllowSelfBypass: true,
+        enableControlledTierTrainingRenewal: true,
+      },
+    });
+
+    expireAllRTModules();
+    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+
+    updateOneModuleExpirationTime(
+      AccessModule.PROFILECONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.PUBLICATIONCONFIRMATION,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.COMPLIANCETRAINING,
+      oneYearFromNow()
+    );
+    updateOneModuleExpirationTime(
+      AccessModule.DATAUSERCODEOFCONDUCT,
+      oneYearFromNow()
+    );
+
+    setCompletionTimes(() => Date.now());
+
+    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
+
+    await waitOneTickAndUpdate(wrapper);
+
+    expectNoCompletionBanner(wrapper);
+    expectCtRenewalBanner(wrapper);
   });
 
   it('should show the correct state when profile confirmation is complete', async () => {
-    expireAllModules();
+    expireAllRTModules();
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
@@ -1690,11 +1804,11 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
   });
 
   it('should show the correct state when profile and publication confirmations are complete', async () => {
-    expireAllModules();
+    expireAllRTModules();
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
@@ -1716,11 +1830,11 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
   });
 
-  it('should show the correct state when all items except DUCC are complete', async () => {
-    expireAllModules();
+  it('should show the correct state when all RT modules except DUCC are complete', async () => {
+    expireAllRTModules();
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILECONFIRMATION,
@@ -1744,11 +1858,11 @@ describe('DataAccessRequirements', () => {
     // Incomplete
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
   });
 
   it('should ignore modules which are not expirable', async () => {
-    expireAllModules();
+    expireAllRTModules();
 
     const newModules = [
       ...profileStore.get().profile.accessModules.modules,
@@ -1794,11 +1908,11 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
     expect(findNodesByExactText(wrapper, 'Completed').length).toBe(2);
 
-    expectComplete(wrapper);
+    expectCompletionBanner(wrapper);
   });
 
-  it('should show the correct state when items are bypassed', async () => {
-    expireAllModules();
+  it('should show the correct state when modules are bypassed', async () => {
+    expireAllRTModules();
 
     // won't bypass Profile and Publication confirmation because those are unbypassable
     setBypassTimes(() => Date.now());
@@ -1813,11 +1927,11 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
     expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
   });
 
-  it('should show the correct state when all items are complete or bypassed', async () => {
-    expireAllModules();
+  it('should show the correct state when all RT modules are complete or bypassed', async () => {
+    expireAllRTModules();
 
     setCompletionTimes(() => Date.now());
 
@@ -1844,7 +1958,7 @@ describe('DataAccessRequirements', () => {
       findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
     ).toBe(2);
 
-    expectComplete(wrapper);
+    expectCompletionBanner(wrapper);
   });
 
   it('should show the correct state when modules are disabled', async () => {
@@ -1888,7 +2002,7 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(0);
 
     // all of the necessary steps = 3 rather than the usual 4
-    expectComplete(wrapper);
+    expectCompletionBanner(wrapper);
   });
 
   // RW-7473: sync expiring/expired Training module to gain access
@@ -1925,7 +2039,7 @@ describe('DataAccessRequirements', () => {
     expect(findNodesByExactText(wrapper, 'View & Sign').length).toBe(1);
     expect(findNodesByExactText(wrapper, 'Complete Training').length).toBe(1);
 
-    expectIncomplete(wrapper);
+    expectNoCompletionBanner(wrapper);
 
     expectButtonEnabled(findNodesByExactText(wrapper, 'Review').parent());
 

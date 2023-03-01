@@ -31,7 +31,6 @@ export const CopySnippetModal = ({ title, copyText, closeFunction }: Props) => {
           type='secondaryLight'
           style={{ paddingLeft: '0' }}
           onClick={() => {
-            // @ts-ignore: Unreachable code error. TODO: We can remove this once TS is upgraded to >= 3.4
             navigator.clipboard.writeText(copyText);
             setIsCopied(true);
 

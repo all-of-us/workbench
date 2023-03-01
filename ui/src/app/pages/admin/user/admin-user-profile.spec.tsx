@@ -520,7 +520,7 @@ describe('AdminUserProfile', () => {
     const table = wrapper.find('[data-test-id="access-module-table"]');
     expect(table.exists()).toBeTruthy();
 
-    const tableRows = table.find('.p-datatable-row');
+    const tableRows = table.find('tbody tr[role="row"]');
     expect(tableRows.length).toEqual(accessModulesForTable.length);
 
     // confirm that the accessModulesForTable are listed in order with expected title text
@@ -601,7 +601,7 @@ describe('AdminUserProfile', () => {
 
       const tableRows = wrapper
         .find('[data-test-id="access-module-table"]')
-        .find('.p-datatable-row');
+        .find('tbody tr[role="row"]');
       expect(tableRows.length).toEqual(accessModulesForTable.length);
 
       // the previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
@@ -624,7 +624,6 @@ describe('AdminUserProfile', () => {
       config: {
         ...defaultServerConfig,
         enableRasLoginGovLinking: false,
-        enforceRasLoginGovLinking: false,
         enableEraCommons: false,
         enableComplianceTraining: false,
       },
@@ -646,7 +645,7 @@ describe('AdminUserProfile', () => {
 
     const tableRows = wrapper
       .find('[data-test-id="access-module-table"]')
-      .find('.p-datatable-row');
+      .find('tbody tr[role="row"]');
     expect(tableRows.length).toEqual(expectedModules.length);
 
     // confirm that the expectedModules are listed in order with expected title text
@@ -723,7 +722,7 @@ describe('AdminUserProfile', () => {
         ).exists()
       ).toBeTruthy();
 
-      const tableRows = moduleTable.find('.p-datatable-row');
+      const tableRows = moduleTable.find('tbody tr[role="row"]');
       expect(tableRows.length).toEqual(accessModulesForTable.length);
 
       // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index

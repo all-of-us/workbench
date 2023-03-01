@@ -4,8 +4,8 @@
 
 set -e
 
-export BQ_PROJECT=$1  # project
-export BQ_DATASET=$2  # dataset
+export BQ_PROJECT=$1     # project
+export BQ_DATASET=$2     # dataset
 export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
 

@@ -1,19 +1,19 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 
 import { Criteria, Domain } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
-import { ListSearch } from 'app/cohort-search/list-search/list-search.component';
-import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
-import { CriteriaTree } from 'app/cohort-search/tree/tree.component';
-import { domainToTitle, typeToTitle } from 'app/cohort-search/utils';
 import { Clickable, StyledExternalLink } from 'app/components/buttons';
 import { FlexRowWrap } from 'app/components/flex';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { AoU } from 'app/components/text-wrappers';
+import { ListSearch } from 'app/pages/data/cohort/list-search';
+import { Selection } from 'app/pages/data/cohort/selection-list';
+import { CriteriaTree } from 'app/pages/data/cohort/tree';
+import { domainToTitle, typeToTitle } from 'app/pages/data/cohort/utils';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import {
@@ -58,7 +58,7 @@ const styles = reactStyles({
     textAlign: 'right',
     verticalAlign: 'middle',
   },
-  growl: {
+  toast: {
     position: 'absolute',
     right: '0',
     top: 0,
@@ -83,21 +83,21 @@ const styles = reactStyles({
     margin: '0 0 0 1.125rem',
   },
 });
-export const growlCSS =
+export const toastCSS =
   `
-  .p-growl {
+  .p-toast {
     position: sticky;
   }
-  .p-growl.p-growl-topright {
+  .p-toast.p-toast-topright {
     height: 1.5rem;
     width: 9.6rem;
     line-height: 1.05rem;
   }
-  .p-growl .p-growl-item-container .p-growl-item .p-growl-image {
+  .p-toast .p-toast-item-container .p-toast-item .p-toast-image {
     font-size: 1.5rem !important;
     margin-top: 0.285rem
   }
-  .p-growl-item-container:after {
+  .p-toast-item-container:after {
     content:"";
     position: absolute;
     left: 97.5%;
@@ -110,22 +110,22 @@ export const growlCSS =
   `;
     border-bottom: 0.75rem solid transparent;
   }
-  .p-growl-item-container {
+  .p-toast-item-container {
     background-color: ` +
   colorWithWhiteness(colors.success, 0.6) +
   `!important;
   }
-  .p-growl-item {
+  .p-toast-item {
     padding: 0rem !important;
     background-color: ` +
   colorWithWhiteness(colors.success, 0.6) +
   `!important;
     margin-left: 0.45rem;
   }
-  .p-growl-message {
+  .p-toast-message {
     margin-left: 0.5em
   }
-  .p-growl-details {
+  .p-toast-details {
     margin-top: 0.15rem;
   }
  `;
@@ -139,7 +139,7 @@ interface Props extends RouteComponentProps<MatchParams> {
 interface State {
   backMode: string;
   autocompleteSelection: Criteria;
-  growlVisible: boolean;
+  toastVisible: boolean;
   groupSelections: Array<number>;
   hierarchyNode: Criteria;
   mode: string;
@@ -155,8 +155,8 @@ export const CriteriaSearch = fp.flow(
   withRouter
 )(
   class extends React.Component<Props, State> {
-    growl: any;
-    growlTimer: NodeJS.Timer;
+    toast: any;
+    toastTimer: NodeJS.Timer;
     subscription: Subscription;
 
     constructor(props: Props) {
@@ -164,7 +164,7 @@ export const CriteriaSearch = fp.flow(
       this.state = {
         autocompleteSelection: undefined,
         backMode: 'list',
-        growlVisible: false,
+        toastVisible: false,
         hierarchyNode: undefined,
         groupSelections: [],
         mode: 'list',
@@ -234,10 +234,10 @@ export const CriteriaSearch = fp.flow(
       return source === 'concept' || source === 'conceptSetDetails';
     }
 
-    getGrowlStyle() {
+    getToastStyle() {
       return !this.isConcept
-        ? styles.growl
-        : { ...styles.growl, marginRight: '3.75rem', paddingTop: '4.125rem' };
+        ? styles.toast
+        : { ...styles.toast, marginRight: '3.75rem', paddingTop: '4.125rem' };
     }
 
     searchContentStyle(mode: string) {
@@ -311,22 +311,22 @@ export const CriteriaSearch = fp.flow(
       this.isConcept
         ? currentConceptStore.next(criteriaList)
         : currentCohortCriteriaStore.next(criteriaList);
-      const growlMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
-      this.growl.show({
+      const toastMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
+      this.toast.show({
         severity: 'success',
-        detail: growlMessage,
+        detail: toastMessage,
         closable: false,
         life: 2000,
       });
-      if (!!this.growlTimer) {
-        clearTimeout(this.growlTimer);
+      if (!!this.toastTimer) {
+        clearTimeout(this.toastTimer);
       }
-      // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
-      this.growlTimer = global.setTimeout(
-        () => this.setState({ growlVisible: false }),
+      // This is to set style display: 'none' on the toast so it doesn't block the nav icons in the sidebar
+      this.toastTimer = global.setTimeout(
+        () => this.setState({ toastVisible: false }),
         2500
       );
-      this.setState({ growlVisible: true });
+      this.setState({ toastVisible: true });
     };
 
     getListSearchSelectedIds() {
@@ -412,17 +412,17 @@ export const CriteriaSearch = fp.flow(
         hierarchyNode,
         loadingSubtree,
         treeSearchTerms,
-        growlVisible,
+        toastVisible,
       } = this.state;
       return (
         <div id='criteria-search-container'>
           {loadingSubtree && <SpinnerOverlay />}
-          <Growl
-            ref={(el) => (this.growl = el)}
+          <Toast
+            ref={(el) => (this.toast = el)}
             style={
-              !growlVisible
-                ? { ...styles.growl, display: 'none' }
-                : styles.growl
+              !toastVisible
+                ? { ...styles.toast, display: 'none' }
+                : styles.toast
             }
           />
           <FlexRowWrap
@@ -491,13 +491,13 @@ export const CriteriaSearch = fp.flow(
                 : { height: '100%', minHeight: '22.5rem' }
             }
           >
-            <style>{growlCSS}</style>
-            <Growl
-              ref={(el) => (this.growl = el)}
+            <style>{toastCSS}</style>
+            <Toast
+              ref={(el) => (this.toast = el)}
               style={
-                !growlVisible
-                  ? { ...this.getGrowlStyle(), display: 'none' }
-                  : this.getGrowlStyle()
+                !toastVisible
+                  ? { ...this.getToastStyle(), display: 'none' }
+                  : this.getToastStyle()
               }
             />
             {hierarchyNode && (

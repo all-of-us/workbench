@@ -16,8 +16,8 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookIcon } from 'app/icons/notebook-icon';
 import { ReminderIcon } from 'app/icons/reminder';
 import {
-  jupyterApi,
-  proxyApi,
+  leoJupyterApi,
+  leoProxyApi,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -462,7 +462,7 @@ export const LeonardoAppLauncher = fp.flow(
 
     private async initializeNotebookCookies(c: Runtime) {
       return await this.runtimeRetry(() =>
-        proxyApi().setCookie(c.googleProject, c.runtimeName, {
+        leoProxyApi().setCookie(c.googleProject, c.runtimeName, {
           withCredentials: true,
           crossDomain: true,
           credentials: 'include',
@@ -594,7 +594,7 @@ export const LeonardoAppLauncher = fp.flow(
         );
       }
       if (this.isOpeningTerminal()) {
-        proxyApi().connectToTerminal(
+        leoProxyApi().connectToTerminal(
           runtime.googleProject,
           runtime.runtimeName,
           terminalName
@@ -651,7 +651,7 @@ export const LeonardoAppLauncher = fp.flow(
       // clicking 'new notebook' in the Jupyter UI.
       const workspaceDir = localizedDir.replace(/^workspaces\//, '');
       const jupyterResp = await this.runtimeRetry(() =>
-        jupyterApi().putContents(
+        leoJupyterApi().putContents(
           runtime.googleProject,
           runtime.runtimeName,
           workspaceDir,

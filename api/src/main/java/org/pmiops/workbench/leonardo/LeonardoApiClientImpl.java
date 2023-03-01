@@ -52,6 +52,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
+import org.pmiops.workbench.model.KubernetesRuntimeConfig;
+import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -72,6 +74,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+  private static final String LEONARDO_BASE_URL = "LEONARDO_BASE_URL";
 
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
@@ -85,6 +88,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
   private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
   private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
+
+  // The Leonardo user role who creates Leonardo APP or disks.
+  private static final String LEONARDO_CREATOR_ROLE = "creator";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
@@ -498,20 +504,27 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
-                googleProject, null, includeDeleted, LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS));
+                googleProject,
+                null,
+                includeDeleted,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_CREATOR_ROLE));
   }
 
   @Override
   public void createApp(CreateAppRequest createAppRequest, DbWorkspace dbWorkspace)
       throws WorkbenchException {
     AppsApi appsApi = appsApiProvider.get();
+
     AppType appType = createAppRequest.getAppType();
+    KubernetesRuntimeConfig kubernetesRuntimeConfig = createAppRequest.getKubernetesRuntimeConfig();
+    PersistentDiskRequest persistentDiskRequest = createAppRequest.getPersistentDiskRequest();
 
     LeonardoCreateAppRequest leonardoCreateAppRequest = new LeonardoCreateAppRequest();
     Map<String, String> appLabels =
@@ -523,12 +536,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     LeonardoPersistentDiskRequest diskRequest =
         leonardoMapper
-            .toLeonardoPersistentDiskRequest(createAppRequest.getPersistentDiskRequest())
+            .toLeonardoPersistentDiskRequest(persistentDiskRequest)
             .labels(
                 upsertLeonardoLabel(
-                    createAppRequest.getPersistentDiskRequest().getLabels(),
+                    persistentDiskRequest.getLabels(),
                     LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
-                    appTypeToLabelValue(createAppRequest.getAppType())));
+                    appTypeToLabelValue(appType)));
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
@@ -537,8 +550,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))
         .kubernetesRuntimeConfig(
-            leonardoMapper.toLeonardoKubernetesRuntimeConfig(
-                createAppRequest.getKubernetesRuntimeConfig()))
+            leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
         .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
         .labels(appLabels);
@@ -568,7 +580,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<UserAppEnvironment> listAppsInProject(String googleProjectId) {
+  public List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
@@ -577,7 +589,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     googleProjectId,
                     /* labels= */ null,
                     /* includeDeleted= */ false,
-                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS));
+                    /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    LEONARDO_CREATOR_ROLE));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
@@ -627,7 +640,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         || workspace.isTerraV2Workspace()) {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }
-
+    customEnvironmentVariables.put(
+        LEONARDO_BASE_URL, workbenchConfigProvider.get().firecloud.leoBaseUrl);
     customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
 
     return customEnvironmentVariables;

@@ -5,7 +5,7 @@ import HighchartsReact from 'highcharts-react-official';
 
 import { ParticipantChartData } from 'generated/fetch';
 
-import { getChartObj } from 'app/cohort-search/utils';
+import { getChartObj } from 'app/pages/data/cohort/utils';
 import moment from 'moment';
 
 export class IndividualParticipantsCharts extends React.Component<{

@@ -10,7 +10,7 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryParameterUtil;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +19,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   private static final String SEARCH_PERSON_TABLE = "cb_search_person";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-      "SELECT ${genderOrSex} as name,\n"
-          + "race,\n"
+      "SELECT ${genderSexRaceOrEthType} as name,\n"
           + "CASE ${ageRange1}\n"
           + "${ageRange2}\n"
           + "ELSE '> 65'\n"
@@ -32,7 +31,7 @@ public class ChartQueryBuilder extends QueryBuilder {
   private static final String PERSON_IDS_IN_SQL = "${mainTable}.person_id in UNNEST(${personIds}) ";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "GROUP BY name, race, ageRange\n" + "ORDER BY name, race, ageRange\n";
+      "GROUP BY name, ageRange\n" + "ORDER BY name, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
       "SELECT standard_name as name, standard_concept_id as conceptId, COUNT(DISTINCT person_id) as count\n"
@@ -99,7 +98,9 @@ public class ChartQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
-            .replace("${genderOrSex}", participantCriteria.getGenderOrSexType().toString())
+            .replace(
+                "${genderSexRaceOrEthType}",
+                participantCriteria.getGenderSexRaceOrEthType().toString())
             .replace("${ageRange1}", getAgeRangeSql(18, 44, participantCriteria.getAgeType()))
             .replace("${ageRange2}", getAgeRangeSql(45, 64, participantCriteria.getAgeType()));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
@@ -118,7 +119,7 @@ public class ChartQueryBuilder extends QueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     String sqlTemplate =
         DEMO_CHART_INFO_SQL_TEMPLATE
-            .replace("${genderOrSex}", GenderOrSexType.GENDER.toString())
+            .replace("${genderSexRaceOrEthType}", GenderSexRaceOrEthType.GENDER.toString())
             .replace("${ageRange1}", getAgeRangeSql(18, 44, AgeType.AGE))
             .replace("${ageRange2}", getAgeRangeSql(45, 64, AgeType.AGE));
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate);
@@ -235,7 +236,6 @@ public class ChartQueryBuilder extends QueryBuilder {
    * @param lo - lower bound of the age range
    * @param hi - upper bound of the age range
    * @param ageType - age type enum
-   * @return
    */
   private static String getAgeRangeSql(int lo, int hi, AgeType ageType) {
     String ageSql =

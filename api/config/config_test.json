@@ -100,7 +100,6 @@
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4, 5],
     "renewal": {
       "expiryDays": 3650,
@@ -119,7 +118,8 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableGkeApp": true
+    "enableConceptSetsInCohortBuilder": false,
+    "enableControlledTierTrainingRenewal": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -139,7 +139,7 @@
     "exportDemoSurveyV2": true
   },
   "captcha": {
-    "enableCaptcha": true,
+    "enableCaptcha": false,
     "useTestCaptcha": true
   },
   "reporting": {
@@ -167,6 +167,7 @@
     }]
   },
   "e2eTestUsers": {
+    "workspaceDeletionBatchSize": 15,
     "testUserEmails": [
       "puppeteer-tester-7@fake-research-aou.org",
       "puppeteer-writer-1@fake-research-aou.org",
@@ -178,7 +179,6 @@
     ]
   },
   "termsOfService": {
-    "latestAouVersion": 1,
-    "latestTerraTosTimestamp": "1985-10-26T01:22:33Z"
+    "latestAouVersion": 1
   }
 }

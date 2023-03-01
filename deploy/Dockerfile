@@ -13,6 +13,7 @@ RUN apt-get update \
   nodejs \
   npm \
   wait-for-it \
+  zip \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

@@ -62,11 +62,19 @@ describe('ResourceList', () => {
     expect(wrapper.exists()).toBeTruthy();
 
     expect(
-      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).text()
+      resourceTableColumns(wrapper)
+        .at(RESOURCE_TYPE_COLUMN_NUMBER)
+        .find('div')
+        .first()
+        .text()
     ).toBe('Cohort');
-    expect(resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).text()).toBe(
-      COHORT_NAME
-    );
+    expect(
+      resourceTableColumns(wrapper)
+        .at(NAME_COLUMN_NUMBER)
+        .find('div')
+        .first()
+        .text()
+    ).toBe(COHORT_NAME);
   });
 
   it('should not render a resource when its workspace is not available', async () => {

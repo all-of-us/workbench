@@ -122,12 +122,8 @@ commands:
       - run:
           command: git submodule update -f --init --recursive
 
-  deploy-to-staging-perf:
-    description: "Deploy API and UI to staging or perf App Engine"
-    parameters:
-      project_name:
-        type: string
-        default: ""
+  deploy-to-staging-command:
+    description: "Deploy API and UI to staging App Engine"
     steps:
       - checkout-code
       - attach_workspace:
@@ -137,14 +133,14 @@ commands:
           working_directory: ~/workbench/deploy
           command: |
             ./project.rb deploy \
-              --project << parameters.project_name >> \
+              --project all-of-us-rw-staging \
               --account << pipeline.parameters.circle-service-account >> \
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
               --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
               --key-file ~/workbench/api/circle-sa-key.json \
               --promote
-          name: Deploy API and UI to << parameters.project_name >> App Engine
+          name: Deploy API and UI to all-of-us-rw-staging App Engine
 
   gcloud-auth-login:
     description: "Activate CircleCI service account credential"
@@ -443,6 +439,7 @@ jobs:
 
   ui-unit-test:
     executor: workbench-executor
+    resource_class: large
     steps:
       - checkout-code
       - halt-test-check:
@@ -548,6 +545,7 @@ jobs:
 
   ui-deploy-to-test:
     executor: workbench-executor
+    resource_class: large
     steps:
       - checkout-code
       - attach_workspace:
@@ -562,7 +560,7 @@ jobs:
               --account << pipeline.parameters.circle-service-account >> \
               --version circle-ci-test \
               --key-file circle-sa-key.json \
-              --promote
+              --promote --quiet
 
   api-deploy-to-test:
     executor: workbench-executor
@@ -582,21 +580,15 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
-  # In staging and perf, we deploy all at once in order to track and control
-  # the release for a tagged version only. In "test", we maintain individual
+  # In staging, we deploy all at once in order to track and control the
+  # release for a tagged version only. In "test", we maintain individual
   # release jobs for API and UI to allow faster deploys and because we lack
   # a version tag.
   deploy-to-staging:
     executor: workbench-executor
+    resource_class: large
     steps:
-      - deploy-to-staging-perf:
-          project_name: "all-of-us-rw-staging"
-
-  deploy-to-perf:
-    executor: workbench-executor
-    steps:
-      - deploy-to-staging-perf:
-          project_name: "all-of-us-rw-perf"
+      - deploy-to-staging-command
 
   puppeteer-generate-access-tokens:
     executor: puppeteer-executor
@@ -825,15 +817,6 @@ workflows:
       - api-integration-test:
           <<: *filter-release-tags
       - deploy-to-staging:
-          <<: *filter-release-tags
-          requires:
-            - api-local-test
-            - api-unit-test
-            - api-bigquery-test
-            - api-deps-check
-            - api-integration-test
-            - ui-unit-test
-      - deploy-to-perf:
           <<: *filter-release-tags
           requires:
             - api-local-test

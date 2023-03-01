@@ -235,19 +235,6 @@ input[type=text]:focus, input[type=password]:focus {
   background-color: #FFEEEE;
 }
 
-/*
- * ngx-popper => default background is transparent.
- * That is usually unusable.  Also we'd rather it wrap
- * at some point than just grow infinitely wide
- */
-.ngxp__container {
-  background: #fff;
-  max-width: 18rem;
-  /* I dunno why THEY don't set these /whatever */
-  position: relative;
-  z-index: 999;
-}
-
 /**
  * Style overrides for noUiSlider
  */
@@ -416,6 +403,10 @@ iframe#launcher {
   border-top: 1px solid #c8c8c8;
 }
 
+body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
 .p-paginator {
   height: 3rem;
   display: flex;
@@ -429,4 +420,64 @@ iframe#launcher {
 
 body .p-paginator .p-paginator-pages {
   height: auto;
+}
+
+.p-button.p-button-secondary {
+  background-color: #f4f4f4;
+  border-color: #f4f4f4;
+  color: #333;
+}
+
+.p-button.p-button-secondary:enabled:hover {
+  background-color: #c8c8c8;
+  border-color: #c8c8c8;
+  color: #333;
+}
+
+body .p-menu .p-menuitem-link {
+  display: block;
+}
+
+.p-tabview .p-tabview-nav li {
+  padding: 0.571em 0.7em;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background-color: transparent;
+  color: #2691d0;
+  border: none;
+  display: inline-block;
+  padding: 0;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background-color: transparent;
+  color: #2691d0;
+  border-bottom: 3px solid #2691d0;
+}
+
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background-color: transparent;
+  color: #2691d0;
+  border: none;
+  display: inline-block;
+  padding: 0;
+}
+
+.p-datatable .p-sortable-column .p-column-title,
+.p-datatable .p-sortable-column .p-sortable-column-icon,
+.p-datatable .p-sortable-column .p-sortable-column-badge {
+  display: flex;
+  align-items: center;
+}
+
+/* React Select styling to increase size of underlying input tag
+  Would prefer not to use !important, but seems like how input is styled in
+  React-Select is not working as expected. More details can be found here:
+  https://github.com/JedWatson/react-select/issues/4106#issuecomment-743959376
+*/
+
+.react-select__input,
+.react-select__input input {
+  width: 100% !important;
 }

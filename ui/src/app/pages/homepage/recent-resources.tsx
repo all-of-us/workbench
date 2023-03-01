@@ -15,12 +15,21 @@ import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCdrVersions } from 'app/utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
+
+// these types contain the same data in a slightly different shape
+const convert = (wr: WorkspaceResponse): WorkspaceData => {
+  const { workspace, accessLevel } = wr;
+  return {
+    ...workspace,
+    accessLevel,
+  };
+};
 
 interface Props {
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspaces: WorkspaceResponse[];
 }
-
 export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
@@ -69,7 +78,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           >
             <ResourceList
               recentResourceSource
-              workspaces={props.workspaces.map((w) => w.workspace)}
+              workspaces={props.workspaces.map(convert)}
               workspaceResources={resources}
               onUpdate={loadResources}
             />

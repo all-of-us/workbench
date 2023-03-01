@@ -192,7 +192,7 @@ export default class RuntimePanel extends BaseSidebar {
   }
 
   buildStatusIconDataTestId = (startStopIconState: StartStopIconState): string => {
-    return `//*[@data-test-id="runtime-status-icon-${startStopIconState}"]`;
+    return `//*[@data-test-id="environment-status-icon-${startStopIconState}"]`;
   };
 
   /**
@@ -228,7 +228,8 @@ export default class RuntimePanel extends BaseSidebar {
     }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
     await this.getDeleteIcon();
-    await this.waitUntilVisible();
+    const timeoutForDeletion = 3 * 60 * 1000;
+    await this.waitUntilVisible(timeoutForDeletion);
     // Wait for visible texts
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button

@@ -28,6 +28,7 @@ import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { convertAPIError, reportError } from 'app/utils/errors';
+import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
 import landingBackgroundImage from 'assets/images/login-group.png';
@@ -287,9 +288,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   // TODO: Move Previous, Next, and Submit buttons out of each of the
   // steps and into this component
   render() {
-    const showFooter =
-      environment.enableFooter &&
-      this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
+    const showFooter = this.state.currentStep !== SignInStep.TERMS_OF_SERVICE;
     const backgroundImages = StepToImageConfig.get(this.state.currentStep);
     return (
       <FlexColumn
@@ -403,6 +402,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private onSubmit = async () => {
+    const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
       loading: true,
     });
@@ -425,7 +425,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
       reportError(error);
       const { message } = await convertAPIError(error);
       this.props.showProfileErrorModal(message);
-      if (environment.enableCaptcha) {
+      if (enableCaptcha) {
         // Reset captcha
         this.captchaRef.current.reset();
         this.setState({ captchaToken: null, captcha: true, loading: false });
@@ -442,7 +442,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private renderNavigation(currentStep: SignInStep) {
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
+      const { enableCaptcha } = serverConfigStore.get().config;
       const { captcha, errors, loading } = this.state;
+      const invalid = !!errors || (enableCaptcha && !captcha);
       return (
         <div
           style={{
@@ -451,7 +453,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             marginLeft: '1.5rem',
           }}
         >
-          {environment.enableCaptcha && (
+          {enableCaptcha && (
             <div style={{ paddingBottom: '1.5rem' }}>
               <ReCAPTCHA
                 sitekey={environment.captchaSiteKey}
@@ -476,7 +478,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             </Button>
             <TooltipTrigger
               content={
-                (errors || !captcha) && (
+                invalid && (
                   <DemographicSurveyValidationMessage
                     {...{ captcha, errors }}
                     isAccountCreation
@@ -486,7 +488,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             >
               <Button
                 aria-label='Submit'
-                disabled={!!errors || !this.state.captcha || loading}
+                disabled={invalid || loading}
                 type='primary'
                 data-test-id='submit-button'
                 onClick={this.onSubmit}

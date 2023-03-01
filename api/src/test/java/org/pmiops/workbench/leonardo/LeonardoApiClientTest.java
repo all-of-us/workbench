@@ -111,6 +111,7 @@ public class LeonardoApiClientTest {
   private static final String CDR_BUCKET = "gs://cdr-bucket";
   private static final String CDR_STORAGE_BASE_PATH = "v99";
   private static final String WGS_PATH = "wgs/cram/manifest.csv";
+  private static final String LEONARDO_BASE_URL = "http://LeonardoUrl/dummy";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -128,6 +129,7 @@ public class LeonardoApiClientTest {
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.userApps.rStudioDescriptorPath = RSTUDIO_DESCRIPTOR_PATH;
+    config.firecloud.leoBaseUrl = LEONARDO_BASE_URL;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
 
@@ -174,6 +176,7 @@ public class LeonardoApiClientTest {
     appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true");
     appLabels.put(LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY, LOGGED_IN_USER_EMAIL);
 
+    customEnvironmentVariables.put("LEONARDO_BASE_URL", LEONARDO_BASE_URL);
     customEnvironmentVariables.put("WORKSPACE_CDR", "cdr.bq");
     customEnvironmentVariables.put("WORKSPACE_NAMESPACE", WORKSPACE_NS);
     customEnvironmentVariables.put("WORKSPACE_BUCKET", "gs://" + WORKSPACE_BUCKET);
@@ -242,10 +245,10 @@ public class LeonardoApiClientTest {
 
   @Test
   public void testListAppSuccess() throws Exception {
-    leonardoApiClient.listAppsInProject(GOOGLE_PROJECT_ID);
+    leonardoApiClient.listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
     verify(userAppsApi)
         .listAppByProject(
-            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS);
+            GOOGLE_PROJECT_ID, null, false, LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS, "creator");
   }
 
   @Test

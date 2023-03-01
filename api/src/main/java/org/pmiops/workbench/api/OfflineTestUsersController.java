@@ -4,11 +4,14 @@ import static org.pmiops.workbench.firecloud.IntegrationTestUsers.COMPLIANT_USER
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +25,18 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ImpersonatedUserService impersonatedUserService;
   private final ImpersonatedWorkspaceService impersonatedWorkspaceService;
+  private final TaskQueueService taskQueueService;
 
   @Autowired
   public OfflineTestUsersController(
       Provider<WorkbenchConfig> workbenchConfigProvider,
       ImpersonatedUserService impersonatedUserService,
-      ImpersonatedWorkspaceService impersonatedWorkspaceService) {
+      ImpersonatedWorkspaceService impersonatedWorkspaceService,
+      TaskQueueService taskQueueService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.impersonatedUserService = impersonatedUserService;
     this.impersonatedWorkspaceService = impersonatedWorkspaceService;
+    this.taskQueueService = taskQueueService;
   }
 
   @Override
@@ -75,33 +81,28 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     if (testUserConf == null) {
       LOGGER.info("This environment does not have a test user config block.  Exiting.");
     } else {
-      testUserConf.testUserEmails.forEach(this::deleteAllOwnedWorkspaces);
+      taskQueueService.groupAndPushDeleteTestWorkspaceTasks(
+          testUserConf.testUserEmails.stream()
+              .flatMap(this::enumerateWorkspaces)
+              .collect(Collectors.toList()));
     }
 
     return ResponseEntity.ok().build();
   }
 
-  private void deleteAllOwnedWorkspaces(String username) {
+  private Stream<TestUserWorkspace> enumerateWorkspaces(String username) {
     List<WorkspaceResponse> workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
         String.format(
-            "Test user %s currently owns %d workspaces; deleting.", username, workspaces.size()));
+            "Test user %s currently owns %d workspaces; queueing for deletion",
+            username, workspaces.size()));
 
-    workspaces.forEach(
-        workspace -> {
-          try {
-            impersonatedWorkspaceService.deleteWorkspace(username, workspace.getWorkspace());
-          } catch (NotFoundException e) {
-            LOGGER.info(
-                String.format(
-                    "Workspace %s/%s was not found - may have been concurrently deleted",
-                    workspace.getWorkspace().getNamespace(), workspace.getWorkspace().getId()));
-          }
-        });
-
-    workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
-    LOGGER.info(
-        String.format(
-            "After deletions, test user %s now owns %d workspaces", username, workspaces.size()));
+    return workspaces.stream()
+        .map(
+            ws ->
+                new TestUserWorkspace()
+                    .username(username)
+                    .wsNamespace(ws.getWorkspace().getNamespace())
+                    .wsFirecloudId(ws.getWorkspace().getId()));
   }
 }

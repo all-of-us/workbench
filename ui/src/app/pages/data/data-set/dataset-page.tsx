@@ -644,7 +644,7 @@ const prepackagedConceptSetToString = {
   FITBIT_INTRADAY_STEPS: 'Fitbit Intra Day Steps',
   FITBIT_SLEEP_DAILY_SUMMARY: 'Fitbit Sleep Daily Summary',
   FITBIT_SLEEP_LEVEL: 'Fitbit Sleep Level',
-  WHOLE_GENOME: 'Whole Genome Sequencing Data',
+  WHOLE_GENOME: 'Short Read Whole Genome Sequencing Data',
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
 
@@ -1500,6 +1500,7 @@ export const DatasetPage = fp.flow(
         <DataTable
           key={selectedPreviewDomain}
           scrollable={true}
+          breakpoint='0px'
           style={{ width: '100%' }}
           value={getDataTableValue(filteredPreviewData.values)}
         >
@@ -2066,6 +2067,7 @@ export const DatasetPage = fp.flow(
             ModalState.Export,
             () => (
               <ExportDatasetModal
+                {...{ workspace }}
                 dataset={dataSet}
                 closeFunction={() => setModalState(ModalState.None)}
               />

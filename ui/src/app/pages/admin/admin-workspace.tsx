@@ -156,7 +156,7 @@ const NameCell = (props: NameCellProps) => {
       >
         <Button
           style={styles.previewButton}
-          disabled={!accessReason || !accessReason.trim()}
+          disabled={!accessReason?.trim()}
           onClick={navigateToPreview}
         >
           Preview
@@ -234,6 +234,7 @@ const FileDetailsTable = (props: FileDetailsProps) => {
         value={tableData}
         style={styles.fileDetailsTable}
         rows={100}
+        breakpoint='0px'
         paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink'
         currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
       >

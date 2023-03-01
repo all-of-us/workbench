@@ -10,8 +10,8 @@ import {
   ErrorResponse,
 } from 'generated/fetch';
 
-import { Selection } from 'app/cohort-search/selection-list/selection-list.component';
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
+import { Selection } from 'app/pages/data/cohort/selection-list';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 

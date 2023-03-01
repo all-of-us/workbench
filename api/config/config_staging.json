@@ -100,7 +100,6 @@
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasLoginGovLinking": true,
-    "enforceRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 365,
@@ -119,7 +118,8 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableGkeApp": false
+    "enableConceptSetsInCohortBuilder": false,
+    "enableControlledTierTrainingRenewal": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -161,6 +161,7 @@
     }]
   },
   "e2eTestUsers": {
+    "workspaceDeletionBatchSize": 15,
     "testUserEmails": [
       "puppeteer-tester-1@staging.fake-research-aou.org",
       "puppeteer-writer-1@staging.fake-research-aou.org",
@@ -172,7 +173,6 @@
     ]
   },
   "termsOfService": {
-    "latestAouVersion": 1,
-    "latestTerraTosTimestamp": "2030-12-31T12:34:56Z"
+    "latestAouVersion": 1
   }
 }

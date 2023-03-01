@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { BillingStatus, Workspace } from 'generated/fetch';
+import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -13,7 +14,7 @@ import { runtimeStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import { UIAppType } from './apps-panel/utils';
+import { findApp, shouldShowApp, UIAppType } from './apps-panel/utils';
 
 const styles = reactStyles({
   header: {
@@ -38,7 +39,7 @@ const styles = reactStyles({
 const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
-    <Clickable {...{ onClick }}>
+    <Clickable {...{ onClick }} data-test-id={`${appType}-unexpanded`}>
       <FlexRow style={styles.availableApp}>
         <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
@@ -46,31 +47,33 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   );
 };
 
+// in display order
+const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
+
 export const AppsPanel = (props: {
   workspace: Workspace;
   onClose: Function;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
-  const { onClose } = props;
+  const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
 
-  // in display order
-  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+  // all GKE apps (not Jupyter)
+  const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
+  useEffect(() => {
+    appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
+  }, []);
 
-  const appStates = [
-    {
-      appType: UIAppType.JUPYTER,
-      expandable: true,
-      shouldExpandByDefault: isVisible(runtime?.status),
-    },
-    // RStudio is not implemented yet, so we don't expand it
-    {
-      appType: UIAppType.RSTUDIO,
-      expandable: false,
-      shouldExpandByDefault: false,
-    },
-  ];
+  const appStates = appsToDisplay.map((appType) => {
+    return {
+      appType,
+      initializeAsExpanded:
+        appType === UIAppType.JUPYTER
+          ? isVisible(runtime?.status)
+          : shouldShowApp(findApp(userApps, appType)),
+    };
+  });
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
@@ -81,7 +84,7 @@ export const AppsPanel = (props: {
   // all will be shown in expanded mode
   const showInActiveSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    appStates.find((s) => s.appType === appType)?.shouldExpandByDefault;
+    appStates.find((s) => s.appType === appType)?.initializeAsExpanded;
   const showActiveSection = appsToDisplay.some(showInActiveSection);
 
   // show apps that have shouldExpand = false in the Available section
@@ -89,62 +92,64 @@ export const AppsPanel = (props: {
   // BUT some of these may be userExpandedApps, which are shown in Expanded mode
   const showInAvailableSection = (appType: UIAppType): boolean =>
     appsToDisplay.includes(appType) &&
-    !appStates.find((s) => s.appType === appType)?.shouldExpandByDefault;
+    !appStates.find((s) => s.appType === appType)?.initializeAsExpanded;
   const showAvailableSection = appsToDisplay.some(showInAvailableSection);
-
-  const ActiveApps = (sectionProps: { showCloseButtonHere: boolean }) => (
-    <FlexColumn>
-      <FlexRow>
-        <h3 style={styles.header}>Active applications</h3>
-        {sectionProps.showCloseButtonHere && (
-          <CloseButton {...{ onClose }} style={styles.closeButton} />
-        )}
-      </FlexRow>
-      {appsToDisplay.map(
-        (appType) =>
-          showInActiveSection(appType) && (
-            <ExpandedApp {...{ ...props, appType }} key={appType} />
-          )
-      )}
-    </FlexColumn>
-  );
-
-  const AvailableApps = (sectionProps: { showCloseButtonHere: boolean }) => (
-    <FlexColumn>
-      <FlexRow>
-        <h3 style={styles.header}>Launch other applications</h3>
-        {sectionProps.showCloseButtonHere && (
-          <CloseButton {...{ onClose }} style={styles.closeButton} />
-        )}
-      </FlexRow>
-      {appsToDisplay.map(
-        (appType) =>
-          showInAvailableSection(appType) &&
-          (userExpandedApps.includes(appType) ? (
-            <ExpandedApp {...{ ...props, appType }} key={appType} />
-          ) : (
-            <UnexpandedApp
-              {...{ appType }}
-              key={appType}
-              onClick={() =>
-                appStates.find((s) => s.appType === appType)?.expandable &&
-                addToExpandedApps(appType)
-              }
-            />
-          ))
-      )}
-    </FlexColumn>
-  );
 
   return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
     <div>
       {showActiveSection && (
-        <ActiveApps showCloseButtonHere={showActiveSection} />
+        <FlexColumn>
+          <FlexRow>
+            <h3 style={styles.header}>Active applications</h3>
+            <CloseButton {...{ onClose }} style={styles.closeButton} />
+          </FlexRow>
+          {appsToDisplay.map(
+            (appType) =>
+              showInActiveSection(appType) && (
+                <ExpandedApp
+                  {...{ ...props, appType }}
+                  key={appType}
+                  initialUserAppInfo={findApp(userApps, appType)}
+                />
+              )
+          )}
+        </FlexColumn>
       )}
       {showAvailableSection && (
-        <AvailableApps showCloseButtonHere={!showActiveSection} />
+        <FlexColumn>
+          <FlexRow>
+            <h3 style={styles.header}>
+              {showActiveSection
+                ? 'Launch other applications'
+                : 'Launch applications'}
+            </h3>
+            {
+              // only show the close button in the Available section if there is no Active section
+              !showActiveSection && (
+                <CloseButton {...{ onClose }} style={styles.closeButton} />
+              )
+            }
+          </FlexRow>
+          {appsToDisplay.map(
+            (appType) =>
+              showInAvailableSection(appType) &&
+              (userExpandedApps.includes(appType) ? (
+                <ExpandedApp
+                  {...{ ...props, appType }}
+                  key={appType}
+                  initialUserAppInfo={findApp(userApps, appType)}
+                />
+              ) : (
+                <UnexpandedApp
+                  {...{ appType }}
+                  key={appType}
+                  onClick={() => addToExpandedApps(appType)}
+                />
+              ))
+          )}
+        </FlexColumn>
       )}
     </div>
   );

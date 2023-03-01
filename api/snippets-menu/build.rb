@@ -14,6 +14,7 @@ def build_snippets_menu()
     "{{PY_DATASET_MENU_JSON}}" => "py-dataset-snippets-menu.json",
     "{{PY_GCS_MENU_JSON}}" => "py-gcs-snippets-menu.json",
     "{{PY_SQL_MENU_JSON}}" => "py-sql-snippets-menu.json",
+    "{{PY_CROMWELL_JSON}}" => "py-cromwell-snippets-menu.json",
     "{{R_DATASET_MENU_JSON}}" => "r-dataset-snippets-menu.json",
     "{{R_GCS_MENU_JSON}}" => "r-gcs-snippets-menu.json",
     "{{R_SQL_MENU_JSON}}" => "r-sql-snippets-menu.json",

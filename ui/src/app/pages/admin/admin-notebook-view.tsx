@@ -97,7 +97,7 @@ const AdminNotebookViewComponent = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    if (!accessReason || !accessReason.trim()) {
+    if (!accessReason?.trim()) {
       setErrorMessage(
         'Error: must include accessReason query parameter in URL'
       );

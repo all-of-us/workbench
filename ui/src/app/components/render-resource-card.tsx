@@ -15,9 +15,11 @@ import {
   isDataSet,
   isNotebook,
 } from 'app/utils/resources';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 interface RenderResourceCardProps {
   resource: WorkspaceResource;
+  workspace: WorkspaceData;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
   menuOnly: boolean;
@@ -34,9 +36,7 @@ function renderResourceCard(props: RenderResourceCardProps) {
     [isConceptSet, () => <ConceptSetResourceCard {...props} />],
     [
       isDataSet,
-      () => (
-        <DatasetResourceCard {...props} inactiveBilling={inactiveBilling} />
-      ),
+      () => <DatasetResourceCard {...{ ...props, inactiveBilling }} />,
     ],
     [
       isNotebook,

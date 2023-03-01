@@ -480,6 +480,12 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: role
+          description: Optional filter that excludes persistent disks you did not create. Accepts "creator" or nothing.
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of persistent disks
@@ -541,6 +547,12 @@ paths:
             Optional label keys of the labels returned in response. Example:
             Querying by key1,key2,key3
             returns all labels key1/val1 key2/val2 and key3 and val3 for each app in response
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: role
+          description: Optional filter that excludes persistent disks you did not create. Accepts "creator" or nothing.
           required: false
           schema:
             type: string
@@ -1187,6 +1199,12 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: role
+          description: Optional filter that excludes apps you did not create. Accepts "creator" or nothing.
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: List of apps
@@ -1252,6 +1270,12 @@ paths:
             Optional label keys of the labels returned in response. Example:
             Querying by key1,key2,key3
             returns all labels key1/val1 key2/val2 and key3 and val3 for each app in response
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: role
+          description: Optional filter that excludes apps you did not create. Accepts "creator" or nothing.
           required: false
           schema:
             type: string
@@ -1896,11 +1920,12 @@ components:
     AppStatus:
       type: string
       enum:
-        - DELETING
         - DELETED
+        - DELETING
         - ERROR
         - PROVISIONING
         - RUNNING
+        - STARTING
         - STATUS_UNSPECIFIED
         - STOPPED
         - STOPPING

@@ -42,11 +42,19 @@ describe('RecentResourcesComponent', () => {
     expect(wrapper.exists()).toBeTruthy();
 
     expect(
-      resourceTableColumns(wrapper).at(RESOURCE_TYPE_COLUMN_NUMBER).text()
+      resourceTableColumns(wrapper)
+        .at(RESOURCE_TYPE_COLUMN_NUMBER)
+        .find('div')
+        .first()
+        .text()
     ).toBe('Cohort');
-    expect(resourceTableColumns(wrapper).at(NAME_COLUMN_NUMBER).text()).toBe(
-      userMetricsApiStubResources[0].cohort.name
-    );
+    expect(
+      resourceTableColumns(wrapper)
+        .at(NAME_COLUMN_NUMBER)
+        .find('div')
+        .first()
+        .text()
+    ).toBe(userMetricsApiStubResources[0].cohort.name);
   });
 
   it('should not render resources when their workspace is not available', async () => {

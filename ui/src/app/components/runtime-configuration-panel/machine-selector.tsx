@@ -50,6 +50,7 @@ export const MachineSelector = ({
           }
           disabled={disabled}
           value={cpu}
+          appendTo='self'
         />
       </FlexRow>
       <FlexRow style={styles.labelAndInput}>
@@ -79,6 +80,7 @@ export const MachineSelector = ({
           }
           disabled={disabled}
           value={memory}
+          appendTo='self'
         />
       </FlexRow>
     </Fragment>

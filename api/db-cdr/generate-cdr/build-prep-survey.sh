@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This generates the prep_survey table.
 
@@ -7,7 +7,26 @@ set -e
 export BQ_PROJECT=$1         # CDR project
 export BQ_DATASET=$2         # CDR dataset
 export FILE_NAME=$3          # Filename to process
-export ID=$4                 # Starting id position
+
+# ID Starting id position
+# map filename_staged.csv to start ID
+declare -A ID_START_MAP
+ID_START_MAP["basics_staged.csv"]=1000
+ID_START_MAP["lifestyle_staged.csv"]=4000
+ID_START_MAP["overallhealth_staged.csv"]=8000
+ID_START_MAP["healthcareaccessutiliza_staged.csv"]=20000
+ID_START_MAP["cope_staged.csv"]=24000
+ID_START_MAP["socialdeterminantsofhea_staged.csv"]=32000
+ID_START_MAP["newyearminutesurveyonco_staged.csv"]=42000
+ID_START_MAP["personalandfamilyhealth_staged.csv"]=50000
+
+if [[ -n "${ID_START_MAP[$FILE_NAME]}" ]]; then
+  ID="${ID_START_MAP[$FILE_NAME]}"
+  echo "$FILE_NAME start ID $ID"
+else
+  echo "Failed - Filename $FILE_NAME is not mapped to start ID"
+  exit 1
+fi
 
 BUCKET="all-of-us-workbench-private-cloudsql"
 SCHEMA_PATH="generate-cdr/bq-schemas"

@@ -91,13 +91,13 @@ import {
   NavigationProps,
   nextWorkspaceWarmupStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
-import { delay } from 'app/utils/subscribable';
-import { withNavigation } from 'app/utils/with-navigation-hoc';
 import {
   getBillingAccountInfo,
   GoogleBillingAccountInfo,
-} from 'app/utils/workbench-gapi-client';
+} from 'app/utils/project-billing-info';
+import { serverConfigStore } from 'app/utils/stores';
+import { delay } from 'app/utils/subscribable';
+import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { supportUrls } from 'app/utils/zendesk';
 

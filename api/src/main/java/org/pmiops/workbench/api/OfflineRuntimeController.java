@@ -214,7 +214,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       disks =
           disksApiProvider
               .get()
-              .listDisks(/* labels */ null, /* includeDeleted */ false, LEONARDO_DISK_LABEL_KEYS);
+              .listDisks(
+                  /* labels */ null, /* includeDeleted */ false, LEONARDO_DISK_LABEL_KEYS, null);
     } catch (ApiException e) {
       throw new ServerErrorException("listDisks failed", e);
     }

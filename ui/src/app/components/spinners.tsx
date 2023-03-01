@@ -35,7 +35,7 @@ export const Spinner = ({ dark = false, size = 72, style = {}, ...props }) => {
       viewBox='0 0 72 72'
       width={size}
       height={size}
-      style={{ animation: '1s linear infinite spin', ...style }}
+      style={{ animation: '1s linear infinite rotation', ...style }}
       {...props}
     >
       <circle

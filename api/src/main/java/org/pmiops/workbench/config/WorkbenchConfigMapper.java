@@ -65,7 +65,6 @@ public interface WorkbenchConfigMapper {
       target = "enableResearchReviewPrompt",
       source = "config.featureFlags.enableResearchPurposePrompt")
   @Mapping(target = "enableRasLoginGovLinking", source = "config.access.enableRasLoginGovLinking")
-  @Mapping(target = "enforceRasLoginGovLinking", source = "config.access.enforceRasLoginGovLinking")
   @Mapping(
       target = "enableGenomicExtraction",
       source = "config.featureFlags.enableGenomicExtraction")
@@ -79,6 +78,12 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableUpdatedDemographicSurvey",
       source = "config.featureFlags.enableUpdatedDemographicSurvey")
-  @Mapping(target = "enableGkeApp", source = "config.featureFlags.enableGkeApp")
+  @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
+  @Mapping(
+      target = "enableConceptSetsInCohortBuilder",
+      source = "config.featureFlags.enableConceptSetsInCohortBuilder")
+  @Mapping(
+      target = "enableControlledTierTrainingRenewal",
+      source = "config.featureFlags.enableControlledTierTrainingRenewal")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

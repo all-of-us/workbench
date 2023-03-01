@@ -81,7 +81,6 @@ public class AppsControllerTest {
   @BeforeEach
   public void setUp() {
     config = WorkbenchConfig.createEmptyConfig();
-    config.featureFlags.enableGkeApp = true;
 
     user = new DbUser();
     createAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
@@ -119,7 +118,7 @@ public class AppsControllerTest {
   @Test
   public void testListAppSuccess() throws Exception {
     controller.listAppsInWorkspace(WORKSPACE_NS);
-    verify(mockLeonardoApiClient).listAppsInProject(GOOGLE_PROJECT_ID);
+    verify(mockLeonardoApiClient).listAppsInProjectCreatedByCreator(GOOGLE_PROJECT_ID);
   }
 
   @Test
@@ -133,14 +132,6 @@ public class AppsControllerTest {
   public void testCanPerformAppActions() {
     // does not throw
     controller.validateCanPerformApiAction(testWorkspace);
-  }
-
-  @Test
-  public void testCanPerformAppActions_featureNotEnabled() throws Exception {
-    config.featureFlags.enableGkeApp = false;
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.validateCanPerformApiAction(testWorkspace));
   }
 
   @Test

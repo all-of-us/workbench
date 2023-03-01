@@ -12,8 +12,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
@@ -38,17 +36,14 @@ public class DisksController implements DisksApiDelegate {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoMapper leonardoMapper;
   private final WorkspaceService workspaceService;
-  private final Provider<DbUser> userProvider;
 
   @Autowired
   public DisksController(
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoMapper leonardoMapper,
-      Provider<DbUser> userProvider,
       WorkspaceService workspaceService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoMapper = leonardoMapper;
-    this.userProvider = userProvider;
     this.workspaceService = workspaceService;
   }
 
@@ -91,7 +86,7 @@ public class DisksController implements DisksApiDelegate {
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
     List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProject(googleProject, false);
+        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false);
 
     List<Disk> diskList =
         findTheMostRecentActiveDisks(
@@ -116,10 +111,7 @@ public class DisksController implements DisksApiDelegate {
 
     List<Disk> activeDisks =
         disksToValidate.stream()
-            .filter(
-                d ->
-                    ACTIVE_DISK_STATUSES.contains(d.getStatus())
-                        && d.getCreator().equals(userProvider.get().getUsername()))
+            .filter(d -> ACTIVE_DISK_STATUSES.contains(d.getStatus()))
             .collect(Collectors.toList());
     if (activeDisks.size() > (AppType.values().length + 1)) {
       String diskNameList =

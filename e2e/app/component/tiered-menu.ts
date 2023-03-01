@@ -4,7 +4,9 @@ import BaseMenu from './base-menu';
 const menuXpath =
   '//*[contains(concat(" ", normalize-space(@class), " "), " p-tieredmenu ")' +
   ' or contains(concat(" ", normalize-space(@class), " "), " p-menu ")]' +
-  '[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")][.//*[@role="menuitem"]]';
+  '[contains(concat(" ", normalize-space(@class), " "), " p-menu-overlay-visible ")' +
+  ' or contains(concat(" ", normalize-space(@class), " "), " p-connected-overlay-enter-done ")]' +
+  '[.//*[@role="menuitem"]]';
 
 export default class TieredMenu extends BaseMenu {
   constructor(page: Page, xpath: string = menuXpath) {

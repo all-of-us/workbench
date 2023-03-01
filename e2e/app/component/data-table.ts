@@ -12,28 +12,11 @@ export default class DataTable extends Table {
     super(page, xpath, container);
   }
 
-  getHeaderTable(): Table {
+  getTable(): Table {
     return new Table(
       this.page,
-      `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table" or @role="grid"]`
+      `${this.getXpath()}//table[contains(concat(" ", normalize-space(@class), " "), " p-datatable-table ")]`
     );
-  }
-
-  getBodyTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-body-table"]`);
-  }
-
-  getFooterTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`);
-  }
-
-  /**
-   * Finds table column names. Returns in array of string.
-   * @returns {Array<string>}
-   */
-  async getColumnNames(): Promise<string[]> {
-    const headerTable = this.getHeaderTable();
-    return headerTable.getColumnNames();
   }
 
   async getNumRecords(): Promise<number[]> {

@@ -26,7 +26,7 @@ import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCardResponse;
 import org.pmiops.workbench.model.EthnicityInfoListResponse;
-import org.pmiops.workbench.model.GenderOrSexType;
+import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
@@ -179,19 +179,21 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> findDemoChartInfo(
       String workspaceNamespace,
       String workspaceId,
-      String genderOrSex,
+      String genderSexRaceOrEth,
       String age,
       CohortDefinition cohortDefinition) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    GenderOrSexType genderOrSexType = validateGenderOrSexType(genderOrSex);
+    GenderSexRaceOrEthType genderSexRaceOrEthType =
+        validateGenderSexRaceOrEthType(genderSexRaceOrEth);
     AgeType ageType = validateAgeType(age);
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (cohortDefinition.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
     return ResponseEntity.ok(
-        response.items(chartService.findDemoChartInfo(genderOrSexType, ageType, cohortDefinition)));
+        response.items(
+            chartService.findDemoChartInfo(genderSexRaceOrEthType, ageType, cohortDefinition)));
   }
 
   @Override
@@ -389,13 +391,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     String.format(BAD_REQUEST_MESSAGE, "age type parameter", age)));
   }
 
-  protected GenderOrSexType validateGenderOrSexType(String genderOrSex) {
-    return Optional.ofNullable(genderOrSex)
-        .map(GenderOrSexType::fromValue)
+  protected GenderSexRaceOrEthType validateGenderSexRaceOrEthType(String genderSexRaceOrEth) {
+    return Optional.ofNullable(genderSexRaceOrEth)
+        .map(GenderSexRaceOrEthType::fromValue)
         .orElseThrow(
             () ->
                 new BadRequestException(
                     String.format(
-                        BAD_REQUEST_MESSAGE, "gender or sex at birth parameter", genderOrSex)));
+                        BAD_REQUEST_MESSAGE,
+                        "gender, sex at birth, race or ethnicity parameter",
+                        genderSexRaceOrEth)));
   }
 }

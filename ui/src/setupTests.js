@@ -5,7 +5,7 @@
  * @copyright 2017 Airbnb, Inc.
  */
 const enzyme = require('enzyme');
-const Adapter = require('enzyme-adapter-react-16');
+const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 
 const { setupCustomValidators } = require('app/services/setup');
 const { stubPopupDimensions } = require('app/components/popups');

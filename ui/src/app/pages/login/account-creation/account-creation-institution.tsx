@@ -401,6 +401,7 @@ export class AccountCreationInstitution extends React.Component<
                   }))}
                   value={institutionShortName}
                   onChange={(e) => this.onInstitutionChange(e.value)}
+                  appendTo='self'
                 />
                 {this.state.institutionLoadError && (
                   <ErrorDiv data-test-id='data-load-error'>
@@ -478,6 +479,7 @@ export class AccountCreationInstitution extends React.Component<
                         institutionShortName
                       )}
                       value={institutionalRoleEnum}
+                      appendTo='self'
                       onChange={(e) =>
                         this.updateAffiliationValue(
                           'institutionalRoleEnum',

@@ -104,7 +104,7 @@ describe('runtime-utils', () => {
         },
       })
     );
-    waitForFakeTimersAndUpdate(wrapper);
+    await waitForFakeTimersAndUpdate(wrapper);
     expect(runtime('1').text()).toEqual('foo');
     expect(runtime('2').text()).toEqual('foo');
   });

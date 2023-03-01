@@ -245,6 +245,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                   emptyMessage={<EmptyTableMessage />}
                   sortField={!jobs || jobs.length > 0 ? 'dateStarted' : ''}
                   sortOrder={-1}
+                  breakpoint='0px'
                   value={jobs.map((job) =>
                     mapJobToTableRow(job, workspace, () => {
                       mutate();

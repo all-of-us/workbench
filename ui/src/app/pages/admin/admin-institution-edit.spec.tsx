@@ -32,6 +32,7 @@ const findRTDetails = (wrapper) =>
 const findRTDropdown = (wrapper) =>
   wrapper
     .find('[data-test-id="registered-agreement-dropdown"]')
+    .first()
     .instance() as Dropdown;
 const findRTERARequired = (wrapper) =>
   wrapper
@@ -44,6 +45,7 @@ const findCTDetails = (wrapper) =>
 const findCTDropdown = (wrapper) =>
   wrapper
     .find('[data-test-id="controlled-agreement-dropdown"]')
+    .first()
     .instance() as Dropdown;
 const findCTERARequired = (wrapper) =>
   wrapper
