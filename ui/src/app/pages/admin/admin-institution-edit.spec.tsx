@@ -17,6 +17,7 @@ import { serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   simulateComponentChange,
+  toggleCheckbox,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import {
@@ -152,13 +153,14 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
-    await findCTEnabled(wrapper).simulate('change');
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
+    await toggleCheckbox(findCTEnabled(wrapper));
 
     expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
     expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
 
-    await findCTEnabled(wrapper).simulate('change');
+    await toggleCheckbox(findCTEnabled(wrapper));
 
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
@@ -183,8 +185,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
           value: testDomains,
         },
       });
-
-    await findCTEnabled(wrapper).simulate('change');
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled(wrapper));
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
@@ -230,7 +232,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    await findCTEnabled(wrapper).simulate('change');
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled(wrapper));
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
@@ -894,7 +897,10 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    await findCTEnabled(wrapper).simulate('change');
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
+    await toggleCheckbox(findCTEnabled(wrapper));
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
+
     await waitOneTickAndUpdate(wrapper);
 
     await simulateComponentChange(
