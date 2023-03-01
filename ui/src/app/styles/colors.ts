@@ -54,9 +54,9 @@ export default {
     error: '#DB3214',
   },
   notificationBanner: {
-    EXPIRING_SOON: `rgb(196, 222, 244)`,
-    EXPIRING: `rgb(254, 245, 232)`,
-    EXPIRED: `rgb(237, 153, 138)`,
+    expiring: `rgb(196, 222, 244)`,
+    expiring_in_two_weeks: `rgb(254, 245, 232)`,
+    expiring_within_one_week: `rgb(237, 153, 138)`,
   },
 };
 

@@ -21,7 +21,6 @@ export const AccessRenewalNotificationMaybe = (
 
   const twoWeeksOrMoreRemaining = daysRemaining >= 14;
   const oneWeekOrMoreRemaining = daysRemaining >= 7;
-  const lessThanAWeekRemaining = daysRemaining <= 6;
 
   // special handling for Controlled Tier: don't render when RT is more urgent
   // because CT renewal is redundant in that case
@@ -43,16 +42,16 @@ export const AccessRenewalNotificationMaybe = (
       ? daysRemaining + ' days remaining.'
       : 'Your access has expired.';
 
-  const boxColor = cond(
-    [twoWeeksOrMoreRemaining, () => colors.notificationBanner.EXPIRING_SOON],
-    [oneWeekOrMoreRemaining, () => colors.notificationBanner.EXPIRING],
-    () => colors.notificationBanner.EXPIRED
-  );
-
-  const iconColor = cond(
-    [twoWeeksOrMoreRemaining, () => colors.primary],
-    [lessThanAWeekRemaining, () => colors.danger],
-    () => colors.warning
+  const [boxColor, iconColor] = cond(
+    [
+      twoWeeksOrMoreRemaining,
+      () => [colors.notificationBanner.expiring, colors.primary],
+    ],
+    [
+      oneWeekOrMoreRemaining,
+      () => [colors.notificationBanner.expiring_in_two_weeks, colors.warning],
+    ],
+    () => [colors.notificationBanner.expiring_within_one_week, colors.danger]
   );
 
   const iconStyle = { color: iconColor };
