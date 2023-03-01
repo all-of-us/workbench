@@ -376,6 +376,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
       'n1-standard-4'
     );
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
   });
 
   it('should show customize after create', async () => {
@@ -408,11 +409,13 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
     expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        .persistentDisk.size
     );
   });
 
@@ -596,7 +599,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickMainCpu(wrapper, 8);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
-    await pickMainDiskSize(wrapper, 150);
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
     await enableDetachable(wrapper, true);
@@ -605,7 +608,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.GeneralAnalysis
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
       diskType: 'pd-standard',
@@ -658,16 +661,19 @@ describe('RuntimeConfigurationPanel', () => {
 
       expect(getMainCpu(wrapper)).toEqual(
         findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .machineType
         ).cpu
       );
       expect(getMainRam(wrapper)).toEqual(
         findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
+          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+            .machineType
         ).memory
       );
       expect(getDetachableDiskSize(wrapper)).toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .persistentDisk.size
       );
     }
   );
@@ -809,7 +815,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.GeneralAnalysis
     );
   });
 

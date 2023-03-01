@@ -556,7 +556,9 @@ const compareAutopauseThreshold = (
 const presetEquals = (a: Runtime, b: Runtime): boolean => {
   const strip = fp.flow(
     // In the future, things like toolDockerImage and autopause may be considerations.
-    fp.pick(['gceConfig', 'dataprocConfig']),
+    // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
+    // should have persistent disk
+    fp.pick(['gceWithPdConfig', 'dataprocConfig']),
     // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
     fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
   );
