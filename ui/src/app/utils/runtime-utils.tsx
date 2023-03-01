@@ -686,7 +686,7 @@ export const withAnalysisConfigDefaults = (
   // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
   // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
-    if (detachable === true || existingDisk) {
+    if (existingDisk) {
       detachable = true;
       size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =

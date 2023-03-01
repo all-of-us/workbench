@@ -887,7 +887,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 10);
     await mustClickButton(wrapper, 'Next');
 
-    // After https://precisionmedicineinitiative.atlassian.net/browse/RW-9167 Reattachable persistent disk is default
+    // After https://precisionmedicineinitiative.atlassian.net/browse/RW-9167 Re-attachable persistent disk is default
     // Increase disk size for RPD does not show any error message
     expect(
       wrapper.find(WarningMessage).text().includes('re-creation')
