@@ -53,10 +53,7 @@ const findCTERARequired = (wrapper) =>
     .first()
     .instance() as Toggle;
 const findCTEnabled = (wrapper) =>
-  wrapper
-    .find('[data-test-id="controlled-enabled-switch"]')
-    .first()
-    .instance() as Toggle;
+  wrapper.find('input[data-test-id="controlled-enabled-switch"]').first();
 
 const findRTAddress = (wrapper) =>
   wrapper.find('[data-test-id="registered-email-address"]');
@@ -155,14 +152,18 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
+    await findCTEnabled(wrapper).simulate('change', {
+      target: { checked: true },
+    });
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), false);
-    expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
     expect(findCTAddressInput(wrapper).exists()).toBeFalsy();
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    await findCTEnabled(wrapper).simulate('change', {
+      target: { checked: true },
+    });
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('foo@verily.com');
   });
@@ -186,8 +187,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    await findCTEnabled(wrapper).simulate('change', {
+      target: { checked: true },
+    });
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
     // CT copies RT's requirements: domain, ERA = true, domain list is equal
@@ -232,8 +235,10 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
         },
       });
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    await findCTEnabled(wrapper).simulate('change', {
+      target: { checked: true },
+    });
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
     // CT copies RT's requirements: address, ERA = true
@@ -253,7 +258,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
     expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
 
@@ -271,7 +276,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
     expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
   });
 
   it('should update institution tier requirement', async () => {
@@ -762,14 +767,12 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
-
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
-
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
-    expect(findCTEnabled(wrapper).props.checked).toBeTruthy();
+    findCTEnabled(wrapper).simulate('change', { target: { checked: true } });
+    expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), false);
+    findCTEnabled(wrapper).simulate('change', { target: { checked: false } });
     expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
@@ -898,7 +901,9 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    await simulateComponentChange(wrapper, findCTEnabled(wrapper), true);
+    await findCTEnabled(wrapper).simulate('change', {
+      target: { checked: true },
+    });
     await waitOneTickAndUpdate(wrapper);
 
     await simulateComponentChange(

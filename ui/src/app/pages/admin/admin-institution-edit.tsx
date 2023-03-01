@@ -160,7 +160,7 @@ const EraRequiredSwitch = (props: {
     <CommonToggle
       name='eRA account required'
       dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
-      onToggle={(e) => onToggle(e.value)}
+      onToggle={(e) => onToggle(e)}
       checked={tierConfig.eraRequired}
       disabled={
         !enableRasLoginGovLinking ||
@@ -180,7 +180,7 @@ const EnableCtSwitch = (props: {
     <CommonToggle
       name='Controlled tier enabled'
       dataTestId='controlled-enabled-switch'
-      onToggle={(e) => onToggle(e.value)}
+      onToggle={(e) => onToggle(e)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
           ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
