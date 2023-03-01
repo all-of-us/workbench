@@ -195,7 +195,7 @@ describe('Access Renewal Notification', () => {
       allCompleteOneExpiringInMoreThanTwoWeeks(
         AccessModule.DATAUSERCODEOFCONDUCT
       ),
-      colors.notificationBanner.expiring,
+      colors.notificationBanner.expiring_after_two_weeks,
       colors.primary,
     ],
     [
@@ -255,7 +255,7 @@ describe('Access Renewal Notification', () => {
       allCompleteOneExpiringInMoreThanTwoWeeks(
         AccessModule.CTCOMPLIANCETRAINING
       ),
-      colors.notificationBanner.expiring,
+      colors.notificationBanner.expiring_after_two_weeks,
       colors.primary,
     ],
     [
@@ -289,7 +289,7 @@ describe('Access Renewal Notification', () => {
       'for RT when CT is expiring sooner',
       AccessTierShortNames.Registered,
       ctExpiresFirst,
-      colors.notificationBanner.expiring_in_two_weeks,
+      colors.notificationBanner.expiring_within_two_weeks,
       colors.warning,
     ],
     [

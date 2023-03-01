@@ -45,11 +45,17 @@ export const AccessRenewalNotificationMaybe = (
   const [boxColor, iconColor] = cond(
     [
       twoWeeksOrMoreRemaining,
-      () => [colors.notificationBanner.expiring, colors.primary],
+      () => [
+        colors.notificationBanner.expiring_after_two_weeks,
+        colors.primary,
+      ],
     ],
     [
       oneWeekOrMoreRemaining,
-      () => [colors.notificationBanner.expiring_in_two_weeks, colors.warning],
+      () => [
+        colors.notificationBanner.expiring_within_two_weeks,
+        colors.warning,
+      ],
     ],
     () => [colors.notificationBanner.expiring_within_one_week, colors.danger]
   );
