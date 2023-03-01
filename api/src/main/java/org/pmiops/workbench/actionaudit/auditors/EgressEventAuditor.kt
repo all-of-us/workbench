@@ -22,7 +22,7 @@ interface EgressEventAuditor {
      * Decorates a Sumologic-reported high-egress event with Workbench metadata and
      * fires an audit event log in the target workspace for the specified user.
      */
-    fun fireEgressEventForUser(event: SumologicEgressEvent, user: DbUser?)
+    fun fireEgressEventForUser(event: SumologicEgressEvent, user: DbUser)
 
     /**
      * Decorates a high-egress event with remediation metadata and fires an audit event log in the

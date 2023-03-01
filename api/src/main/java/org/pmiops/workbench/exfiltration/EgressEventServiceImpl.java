@@ -48,7 +48,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final EgressEventDao egressEventDao;
 
   // Workspace namespace placeholder in Egress alert when workspace namespace is missing.
-  // It may happens when workspace is deleted from db, or we are not able to retrieve workspace
+  // It may happen when workspace is deleted from db, or we are not able to retrieve workspace
   // by google project id.
   @VisibleForTesting static final String NOT_FOUND_WORKSPACE_NAMESPACE = "NOT_FOUND";
 
@@ -84,30 +84,35 @@ public class EgressEventServiceImpl implements EgressEventService {
     } else {
       workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
     }
-    List<Optional<DbUser>> egressUsers = findEgressUsers(event, dbWorkspaceMaybe);
+    List<DbUser> egressUsers = findEgressUsers(event, dbWorkspaceMaybe);
 
     // This would happen if we receive a second GKE Egress for the same event when the app is being
     // STOPPED,
     // we just audit in this case since we can't know the user
     if (egressUsers.isEmpty()) {
+      logger.warning(
+          String.format(
+              "An egress event happened for workspace: %s, but we're unable to find a user for it. " +
+                      "This could be because it was triggered by a GKE up that is currently not running.",
+              workspaceNamespace));
       this.egressEventAuditor.fireEgressEvent(event);
     }
 
-    for (Optional<DbUser> egressUserMaybe : egressUsers) {
+    for (DbUser egressDbUser : egressUsers) {
       logger.warning(
           String.format(
               "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM name %s)",
               workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmName()));
-      this.egressEventAuditor.fireEgressEventForUser(event, egressUserMaybe.orElse(null));
+      this.egressEventAuditor.fireEgressEventForUser(event, egressDbUser);
 
       Optional<DbEgressEvent> maybeEvent =
-          this.maybePersistEgressEvent(event, egressUserMaybe, dbWorkspaceMaybe);
+          this.maybePersistEgressEvent(event, Optional.of(egressDbUser), dbWorkspaceMaybe);
       maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
     }
   }
 
   @NotNull
-  private List<Optional<DbUser>> findEgressUsers(
+  private List<DbUser> findEgressUsers(
       SumologicEgressEvent event, Optional<DbWorkspace> dbWorkspace) {
 
     // This case is when the Egress is from a GCE cluster.
@@ -117,20 +122,21 @@ public class EgressEventServiceImpl implements EgressEventService {
           vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
       if (!dbUserMaybe.isPresent()) {
         logger.warning(String.format("User not found by given VM prefix: %s", event.getVmPrefix()));
+        return Collections.emptyList();
       }
-      return Collections.singletonList(dbUserMaybe);
+      return Collections.singletonList(dbUserMaybe.get());
     }
 
     // This is the GKE case
     if (dbWorkspace.isPresent() && StringUtils.isNotEmpty(event.getSrcGkeCluster())) {
-      List<Optional<DbUser>> appUsers = findAppUsers(dbWorkspace.get());
+      List<DbUser> appUsers = findAppUsers(dbWorkspace.get());
       return appUsers;
     }
 
     return Collections.emptyList();
   }
 
-  private List<Optional<DbUser>> findAppUsers(DbWorkspace dbWorkspace) {
+  private List<DbUser> findAppUsers(DbWorkspace dbWorkspace) {
     List<UserAppEnvironment> userAppEnvironments =
         leonardoApiClient.listAppsInProjectAsService(dbWorkspace.getGoogleProject());
     List<String> appUsersList =
@@ -139,7 +145,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             .map(u -> u.getCreator())
             .collect(Collectors.toList());
     List<DbUser> usersByUsernames = userService.findUsersByUsernames(appUsersList);
-    return usersByUsernames.stream().map(Optional::of).collect(Collectors.toList());
+    return usersByUsernames.stream().collect(Collectors.toList());
   }
 
   private boolean isEventStale(SumologicEgressEvent egressEvent) {

@@ -1,8 +1,5 @@
 package org.pmiops.workbench.leonardo;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
@@ -55,6 +52,8 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.*;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
@@ -588,7 +587,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @NotNull
   private List<UserAppEnvironment> getUserAppEnvironments(
-      String googleProjectId, AppsApi appsApi, String leonardoCreatorRole) {
+      String googleProjectId, AppsApi appsApi, String leonardoAppRole) {
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
             (context) ->
@@ -597,7 +596,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* labels= */ null,
                     /* includeDeleted= */ false,
                     /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
-                    leonardoCreatorRole));
+                    leonardoAppRole));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
@@ -633,10 +632,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         leonardoRetryHandler.run(
             (context) ->
                 appsApiAsService.listApp(
-                    LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
-                    false,
-                    "",
-                    null));
+                    /* labels =*/ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    /* includeDeleted = */false,
+                    /* includeLabels = */ LEONARDO_APP_LABEL_KEYS,
+                    /* role = */null));
 
     // Only the app creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.
@@ -656,7 +655,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   if (!userEmail.equals(r.getAuditInfo().getCreator())) {
                     log.severe(
                         String.format(
-                            "listRuntime query by label returned a runtime not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
+                            "listApp query by label returned an app not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
                             r.getCloudContext().getCloudResource(),
                             r.getAppName(),
                             r.getAuditInfo().getCreator(),
