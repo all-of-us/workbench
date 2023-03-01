@@ -12,11 +12,12 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 
+import { CommonToggle } from 'app/components/admin/common-toggle';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { SemiBoldHeader } from 'app/components/headers';
-import { TextArea, TextInputWithLabel, Toggle } from 'app/components/inputs';
+import { TextArea, TextInputWithLabel } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
 import {
   Modal,
@@ -94,42 +95,10 @@ const styles = reactStyles({
   },
 });
 
-// The easiest way to override primereact style.
-const css = `
-  body .p-inputswitch {
-    height: 18px;
-    width: 33px;
-    border-radius: 15px;
-    font-size:11px;
-  }
-  body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-    background-color: #659F3D;
- }
-`;
-
 enum InstitutionMode {
   ADD,
   EDIT,
 }
-
-interface CommonToggleProps {
-  name: string;
-  checked: boolean;
-  dataTestId: string;
-  onToggle: (boolean) => void;
-  disabled?: boolean;
-}
-const CommonToggle = (props: CommonToggleProps) => {
-  const { name, checked, dataTestId, disabled, onToggle } = props;
-  return (
-    <Toggle
-      {...{ checked, dataTestId, disabled, name, onToggle }}
-      style={{ paddingBottom: 0, flexGrow: 0 }}
-      height={24}
-      width={50}
-    />
-  );
-};
 
 const isAddressInvalid = (emailAddress: string): boolean => {
   const errors = validate({ emailAddress }, { emailAddress: { email: true } });
@@ -826,7 +795,6 @@ export const AdminInstitutionEdit = fp.flow(
 
       return (
         <div>
-          <style>{css}</style>
           <FadeBox
             style={{
               marginTop: '1.5rem',
