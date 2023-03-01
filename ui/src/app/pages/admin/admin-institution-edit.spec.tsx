@@ -764,11 +764,12 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
-    findCTEnabled(wrapper).simulate('change', { target: { checked: true } });
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
+    toggleCheckbox(findCTEnabled(wrapper));
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
-    findCTEnabled(wrapper).simulate('change', { target: { checked: false } });
+    toggleCheckbox(findCTEnabled(wrapper));
     expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
