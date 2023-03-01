@@ -1,5 +1,8 @@
 package org.pmiops.workbench.leonardo;
 
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
@@ -52,8 +55,6 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.*;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
@@ -633,9 +634,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             (context) ->
                 appsApiAsService.listApp(
                     /* labels =*/ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
-                    /* includeDeleted = */false,
-                    /* includeLabels = */ LEONARDO_APP_LABEL_KEYS,
-                    /* role = */null));
+                    /* includeDeleted = */ false,
+                    /* includeLabels = */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* role = */ null));
 
     // Only the app creator has start/stop permissions, therefore we impersonate here.
     // If/when IA-2996 is resolved, switch this back to the service.

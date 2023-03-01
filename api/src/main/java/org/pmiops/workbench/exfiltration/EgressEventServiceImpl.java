@@ -92,8 +92,8 @@ public class EgressEventServiceImpl implements EgressEventService {
     if (egressUsers.isEmpty()) {
       logger.warning(
           String.format(
-              "An egress event happened for workspace: %s, but we're unable to find a user for it. " +
-                      "This could be because it was triggered by a GKE up that is currently not running.",
+              "An egress event happened for workspace: %s, but we're unable to find a user for it. "
+                  + "This could be because it was triggered by a GKE up that is currently not running.",
               workspaceNamespace));
       this.egressEventAuditor.fireEgressEvent(event);
     }

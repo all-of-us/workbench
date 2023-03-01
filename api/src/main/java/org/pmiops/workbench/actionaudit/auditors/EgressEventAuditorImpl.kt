@@ -79,7 +79,6 @@ constructor(
         }
 
         fireEvent(agentId, agentEmail, dbWorkspace, event)
-
     }
 
     override fun fireEgressEventForUser(event: SumologicEgressEvent, user: DbUser) {

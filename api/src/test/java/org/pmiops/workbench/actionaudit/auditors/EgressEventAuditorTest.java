@@ -153,48 +153,49 @@ public class EgressEventAuditorTest {
   @Test
   public void testFireEgressEventForUser() {
     egressEventAuditor.fireEgressEventForUser(
-            new SumologicEgressEvent()
-                    .projectName(EGRESS_EVENT_PROJECT_NAME)
-                    .vmPrefix(EGRESS_EVENT_VM_PREFIX)
-                    .timeWindowStart(0l)
-                    .egressMib(12.3)
-                    .gceEgressMib(0.0)
-                    .dataprocMasterEgressMib(10.0)
-                    .dataprocWorkerEgressMib(2.3), dbUser);
+        new SumologicEgressEvent()
+            .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .vmPrefix(EGRESS_EVENT_VM_PREFIX)
+            .timeWindowStart(0l)
+            .egressMib(12.3)
+            .gceEgressMib(0.0)
+            .dataprocMasterEgressMib(10.0)
+            .dataprocWorkerEgressMib(2.3),
+        dbUser);
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
     // Ensure all events have the expected set of constant fields.
     assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
-            .containsExactly(AgentType.USER);
+        .containsExactly(AgentType.USER);
     assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
-            .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
+        .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
     assertThat(events.stream().map(event -> event.getAgentIdMaybe()).collect(Collectors.toSet()))
-            .containsExactly(USER_ID);
+        .containsExactly(USER_ID);
     assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
-            .containsExactly(USER_EMAIL);
+        .containsExactly(USER_EMAIL);
     assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
-            .containsExactly(WORKSPACE_ID);
+        .containsExactly(WORKSPACE_ID);
 
     // We should have distinct event rows with values from the egress event.
     assertThat(
             events.stream()
-                    .filter(
-                            event ->
-                                    event.getTargetPropertyMaybe()
-                                            == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
-                    .map(event -> event.getNewValueMaybe())
-                    .collect(Collectors.toSet()))
-            .containsExactly("12.3");
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEventTargetProperty.EGRESS_MIB.getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .containsExactly("12.3");
     assertThat(
             events.stream()
-                    .filter(
-                            event ->
-                                    event.getTargetPropertyMaybe()
-                                            == EgressEventTargetProperty.VM_NAME.getPropertyName())
-                    .map(event -> event.getNewValueMaybe())
-                    .collect(Collectors.toSet()))
-            .containsExactly(EGRESS_EVENT_VM_PREFIX);
+                .filter(
+                    event ->
+                        event.getTargetPropertyMaybe()
+                            == EgressEventTargetProperty.VM_NAME.getPropertyName())
+                .map(event -> event.getNewValueMaybe())
+                .collect(Collectors.toSet()))
+        .containsExactly(EGRESS_EVENT_VM_PREFIX);
   }
 
   @Test
