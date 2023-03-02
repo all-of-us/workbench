@@ -62,35 +62,6 @@ const ControlledTierEraModule = (props: {
   );
 };
 
-// Placeholder until CT Training has been updated; see TemporaryRASModule for inspiration
-const TemporaryTrainingModule = (props: { profile: Profile }) => {
-  const moduleName = AccessModule.CTCOMPLIANCETRAINING;
-  const { DARTitleComponent } = getAccessModuleConfig(moduleName);
-  return (
-    <FlexRow
-      data-test-id={`module-${moduleName}`}
-      style={{ paddingTop: '1.4em' }}
-    >
-      <FlexRow style={styles.moduleCTA} />
-      <FlexRow style={styles.backgroundModuleBox}>
-        <ModuleIcon
-          {...{ moduleName }}
-          completedOrBypassed={false}
-          eligible={false}
-        />
-        <FlexColumn style={styles.backgroundModuleText}>
-          <DARTitleComponent profile={props.profile} />
-          <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
-            <b>Temporarily unavailable</b>: Renewal of Controlled Tier training
-            will be available in early March 2023. Please email{' '}
-            <SupportMailto /> if you have questions.
-          </div>
-        </FlexColumn>
-      </FlexRow>
-    </FlexRow>
-  );
-};
-
 const ControlledTierStep = (props: {
   enabled: boolean;
   text: String;
@@ -157,8 +128,7 @@ export const ControlledTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
-  const { enableComplianceTraining, enableControlledTierTrainingRenewal } =
-    serverConfigStore.get().config;
+  const { enableComplianceTraining } = serverConfigStore.get().config;
 
   return (
     <FlexRow
@@ -228,12 +198,9 @@ export const ControlledTierCard = (props: {
           )}
         {enableComplianceTraining &&
           pageMode === DARPageMode.ANNUAL_RENEWAL &&
-          isEligible &&
-          (enableControlledTierTrainingRenewal ? (
+          isEligible && (
             <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-          ) : (
-            <TemporaryTrainingModule {...{ profile }} />
-          ))}
+          )}
       </FlexColumn>
     </FlexRow>
   );
