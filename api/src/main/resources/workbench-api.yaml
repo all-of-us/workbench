@@ -6382,6 +6382,9 @@ definitions:
         description: The user-supplied name for the user app. Read only.
       appType:
         "$ref": "#/definitions/AppType"
+      creator:
+        type: string
+        description: The creator of the app
       createdDate:
         type: string
         description: The date and time the user app was created, in ISO-8601 format. Read only.
@@ -7000,6 +7003,17 @@ definitions:
         description: Prefix of the research VM(s) that generated egress, including
           the user ID, e.g. all-of-us-260.
         type: string
+      vm_name:
+        description: The VM name that caused the egress.
+        type: string
+      src_gke_cluster:
+        description: The GKE cluster that caused the egress.
+        type: string
+      gke_egress_mib:
+        description: The amount of egress by the GKE cluster during the
+          window, in mebibytes (MiB).
+        type: number
+        format: double
   ListEgressEventsRequest:
     type: object
     properties:

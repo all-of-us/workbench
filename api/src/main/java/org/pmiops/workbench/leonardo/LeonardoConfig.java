@@ -30,6 +30,8 @@ public class LeonardoConfig {
 
   public static final String USER_APPS_API = "userAppsApi";
 
+  public static final String SERVICE_APPS_API = "serviceAppsApi";
+
   // Identifiers for the Swagger2 APIs for Jupyter and Welder, used for creating/localizing files.
   private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String SERVICE_NOTEBOOKS_CLIENT = "notebooksSvcApiClient";
@@ -168,6 +170,15 @@ public class LeonardoConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public AppsApi appsApi(
       @Qualifier(USER_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
+    AppsApi api = new AppsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_APPS_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public AppsApi serviceAppsApi(
+      @Qualifier(SERVICE_LEONARDO_CLIENT) org.pmiops.workbench.leonardo.ApiClient apiClient) {
     AppsApi api = new AppsApi();
     api.setApiClient(apiClient);
     return api;

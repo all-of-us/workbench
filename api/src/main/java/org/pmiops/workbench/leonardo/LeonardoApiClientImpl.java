@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -36,20 +37,7 @@ import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
+import org.pmiops.workbench.leonardo.model.*;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -100,6 +88,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
 
+  private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
+      ImmutableSet.of(
+          LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
+
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
   private final LeonardoApiClientFactory leonardoApiClientFactory;
@@ -111,6 +103,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
   private final Provider<AppsApi> appsApiProvider;
+  private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
@@ -128,7 +121,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
-      Provider<AppsApi> appsApiProvider,
+      @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
@@ -143,6 +137,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
     this.appsApiProvider = appsApiProvider;
+    this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
@@ -582,6 +577,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, LEONARDO_CREATOR_ROLE);
+  }
+
+  @Override
+  public List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId) {
+    AppsApi appsApi = serviceAppsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, null);
+  }
+
+  @NotNull
+  private List<UserAppEnvironment> getUserAppEnvironments(
+      String googleProjectId, AppsApi appsApi, String leonardoAppRole) {
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
             (context) ->
@@ -590,7 +597,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* labels= */ null,
                     /* includeDeleted= */ false,
                     /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
-                    LEONARDO_CREATOR_ROLE));
+                    leonardoAppRole));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
@@ -617,6 +624,74 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public int stopAllUserAppsAsService(String userEmail) {
+    AppsApi appsApiAsService = serviceAppsApiProvider.get();
+    List<LeonardoListAppResponse> apps =
+        leonardoRetryHandler.run(
+            (context) ->
+                appsApiAsService.listApp(
+                    /* labels =*/ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    /* includeDeleted = */ false,
+                    /* includeLabels = */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* role = */ null));
+
+    // Only the app creator has start/stop permissions, therefore we impersonate here.
+    // If/when IA-2996 is resolved, switch this back to the service.
+    AppsApi appsApiAsImpersonatedUser = new AppsApi();
+    try {
+      appsApiAsImpersonatedUser.setApiClient(
+          leonardoApiClientFactory.newImpersonatedApiClient(userEmail));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+
+    List<Boolean> results =
+        apps.stream()
+            .filter(r -> STOPPABLE_APP_STATUSES.contains(r.getStatus()))
+            .filter(
+                r -> {
+                  if (!userEmail.equals(r.getAuditInfo().getCreator())) {
+                    log.severe(
+                        String.format(
+                            "listApp query by label returned an app not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
+                            r.getCloudContext().getCloudResource(),
+                            r.getAppName(),
+                            r.getAuditInfo().getCreator(),
+                            userEmail));
+                    return false;
+                  }
+                  return true;
+                })
+            .parallel()
+            .map(
+                r -> {
+                  try {
+                    leonardoRetryHandler.runAndThrowChecked(
+                        (context) -> {
+                          appsApiAsImpersonatedUser.stopApp(
+                              r.getCloudContext().getCloudResource(), r.getAppName());
+                          return null;
+                        });
+                  } catch (ApiException e) {
+                    log.log(
+                        Level.WARNING,
+                        String.format(
+                            "failed to stop runtime '%s/%s'",
+                            r.getCloudContext().getCloudResource(), r.getAppName()),
+                        e);
+                    return false;
+                  }
+                  return true;
+                })
+            .collect(Collectors.toList());
+    if (results.contains(false)) {
+      throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
+    }
+
+    return results.size();
   }
 
   /** The general environment variables that can be used in all Apps. */

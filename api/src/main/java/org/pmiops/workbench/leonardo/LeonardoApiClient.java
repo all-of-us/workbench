@@ -104,6 +104,8 @@ public interface LeonardoApiClient {
    */
   List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId);
 
+  List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId);
+
   /**
    * Deletes a Leonardo app
    *
@@ -116,4 +118,6 @@ public interface LeonardoApiClient {
 
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
+
+  int stopAllUserAppsAsService(String userEmail);
 }
