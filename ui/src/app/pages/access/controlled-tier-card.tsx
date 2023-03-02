@@ -9,7 +9,7 @@ import {
   ControlledTierBadge,
   MinusCircle,
 } from 'app/components/icons';
-import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
+import { SUPPORT_EMAIL } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {
@@ -18,7 +18,6 @@ import {
 } from 'app/utils/access-tiers';
 import {
   DARPageMode,
-  getAccessModuleConfig,
   getAccessModuleStatusByName,
   isCompliant,
   redirectToNiH,
@@ -28,7 +27,6 @@ import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
-import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
