@@ -84,6 +84,8 @@ const defaultServerConfig: ConfigResponse = {
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   enableControlledTierTrainingRenewal: true,
+  enableCromwellGKEApp: true,
+  enableRStudioGKEApp: true,
 };
 
 export default defaultServerConfig;

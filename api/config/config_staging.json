@@ -119,7 +119,9 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": false
+    "enableControlledTierTrainingRenewal": false,
+    "enableCromwellGKEApp": true,
+    "enableRStudioGKEApp": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

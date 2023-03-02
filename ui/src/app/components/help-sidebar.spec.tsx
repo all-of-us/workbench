@@ -16,7 +16,6 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -331,26 +330,54 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display apps icon for writable workspaces when showAppsPanel is true', async () => {
+  it('should display apps icon for writable workspaces when Cromwell is enabled', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = true;
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: true,
+        enableRStudioGKEApp: false,
+      },
+    });
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
   });
 
-  it('should not display apps icon for writable workspaces when showAppsPanel is false', async () => {
+  it('should display apps icon for writable workspaces when RStudio is enabled', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = false;
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: false,
+        enableRStudioGKEApp: true,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(1);
+  });
+
+  it('should not display apps icon for writable workspaces when no apps are enabled', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: false,
+        enableRStudioGKEApp: false,
+      },
+    });
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length

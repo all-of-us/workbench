@@ -2,10 +2,12 @@ package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
 import org.apache.arrow.util.VisibleForTesting;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListAppsResponse;
@@ -24,6 +26,7 @@ public class AppsController implements AppsApiDelegate {
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceService workspaceService;
   private final LeonardoApiHelper leonardoApiHelper;
+  private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public AppsController(
@@ -31,12 +34,14 @@ public class AppsController implements AppsApiDelegate {
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceService workspaceService,
-      LeonardoApiHelper leonardoApiHelper) {
+      LeonardoApiHelper leonardoApiHelper,
+      Provider<WorkbenchConfig> configProvider) {
     this.leonardoApiClient = leonardoApiClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceService = workspaceService;
     this.leonardoApiHelper = leonardoApiHelper;
+    this.configProvider = configProvider;
   }
 
   @Override
@@ -45,6 +50,12 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     validateCanPerformApiAction(dbWorkspace);
+    if ((createAppRequest.getAppType() == AppType.RSTUDIO
+            && !configProvider.get().featureFlags.enableRStudioGKEApp)
+        || (createAppRequest.getAppType() == AppType.CROMWELL
+            && !configProvider.get().featureFlags.enableCromwellGKEApp)) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
 
     leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
