@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
+import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { isVisible } from 'app/utils/runtime-utils';
 import {
@@ -19,13 +20,18 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
+import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
   findNodesContainingText,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsRStudioResponse,
+} from 'testing/stubs/apps-api-stub';
+import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
@@ -67,6 +73,7 @@ const findExpandedApp = (wrapper: ReactWrapper, appName: string) =>
 describe('AppsPanel', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
+  const leoAppsStub = new LeoAppsApiStub();
   beforeEach(() => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableCromwellGKEApp: true },
@@ -74,6 +81,7 @@ describe('AppsPanel', () => {
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     registerApiClient(RuntimeApi, runtimeStub);
+    registerLeoApiClient(LeoAppsApi, leoAppsStub);
     workspaceStub.billingStatus = BillingStatus.ACTIVE;
     runtimeStore.set({
       workspaceNamespace: workspaceStub.namespace,
@@ -178,7 +186,7 @@ describe('AppsPanel', () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
     appsStub.listAppsResponse = [
       { status: AppStatus.RUNNING, appType: AppType.CROMWELL },
-      { status: AppStatus.RUNNING, appType: AppType.RSTUDIO },
+      createListAppsRStudioResponse({ status: AppStatus.RUNNING }),
     ];
 
     const wrapper = await component();
@@ -205,7 +213,7 @@ describe('AppsPanel', () => {
     runtimeStub.runtime.status = RuntimeStatus.Deleted;
     appsStub.listAppsResponse = [
       { status: AppStatus.DELETED, appType: AppType.CROMWELL },
-      { status: AppStatus.DELETED, appType: AppType.RSTUDIO },
+      createListAppsRStudioResponse({ status: AppStatus.DELETED }),
     ];
 
     const wrapper = await component();
@@ -299,20 +307,56 @@ describe('AppsPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should not be possible to pause or resume an RStudio app', async () => {
+  it('should pause a running RStudio app', async () => {
     runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
+    const userAppEnvironment = createListAppsRStudioResponse({
+      status: AppStatus.RUNNING,
+    });
+    appsStub.listAppsResponse = [userAppEnvironment];
     const wrapper = await component();
     await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
     const rstudioPanel = findExpandedApp(wrapper, 'RStudio');
+    const stopAppSpy = jest.spyOn(leoAppsStub, 'stopApp');
 
     expect(
-      rstudioPanel
-        .find({ 'data-test-id': `rstudio-pause-button` })
-        .prop('disabled')
-    ).toBeTruthy();
+      rstudioPanel.find({ 'data-test-id': `apps-panel-button-Resume` }).exists()
+    ).toBeFalsy();
+    const pauseButton = rstudioPanel.find({
+      'data-test-id': `apps-panel-button-Pause`,
+    });
+    expect(pauseButton.exists()).toBeTruthy();
+
+    pauseButton.simulate('click');
+    expect(stopAppSpy).toHaveBeenCalledWith(
+      userAppEnvironment.googleProject,
+      userAppEnvironment.appName
+    );
+  });
+
+  it('should resume a stopped RStudio app', async () => {
+    runtimeStub.runtime.status = undefined;
+    const userAppEnvironment = createListAppsRStudioResponse({
+      status: AppStatus.STOPPED,
+    });
+    appsStub.listAppsResponse = [userAppEnvironment];
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+    const rstudioPanel = findExpandedApp(wrapper, 'RStudio');
+    const startAppSpy = jest.spyOn(leoAppsStub, 'startApp');
+
+    expect(
+      rstudioPanel.find({ 'data-test-id': `apps-panel-button-Pause` }).exists()
+    ).toBeFalsy();
+    const pauseButton = rstudioPanel.find({
+      'data-test-id': `apps-panel-button-Resume`,
+    });
+    expect(pauseButton.exists()).toBeTruthy();
+
+    pauseButton.simulate('click');
+    expect(startAppSpy).toHaveBeenCalledWith(
+      userAppEnvironment.googleProject,
+      userAppEnvironment.appName
+    );
   });
 
   it('should be able to launch an RStudio app', async () => {
@@ -346,7 +390,7 @@ describe('AppsPanel', () => {
   it('should be able to delete an RStudio app', async () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [
-      { status: AppStatus.RUNNING, appType: AppType.RSTUDIO },
+      createListAppsRStudioResponse({ status: AppStatus.RUNNING }),
     ];
     const wrapper = await component();
     await waitOneTickAndUpdate(wrapper);
