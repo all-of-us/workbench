@@ -4,6 +4,7 @@ package org.pmiops.workbench.mail;
 public enum EmailSubstitutionField {
   ACTION("ACTION"),
   ALL_OF_US("ALL_OF_US"),
+  BADGE_URL("BADGE_URL"),
   BILLING_ACCOUNT_DETAILS("BILLING_ACCOUNT_DETAILS"),
   BULLET_1("BULLET_1"),
   BULLET_2("BULLET_2"),
@@ -32,6 +33,7 @@ public enum EmailSubstitutionField {
   REMAINING_DAYS("REMAINING_DAYS"),
   RT_STEPS("RT_STEPS"),
   SURVEY_LINK("SURVEY_LINK"),
+  TIER("TIER"),
   TOS_HREF("TOS_HREF"),
   URL("URL"),
   USED_CREDITS("USED_CREDITS"),

@@ -37,7 +37,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Override
   public ResponseEntity<Void> sendAccessExpirationEmails() {
-    userService.getAllUsers().forEach(userService::maybeSendAccessExpirationEmail);
+    userService.getAllUsers().forEach(userService::maybeSendAccessTierExpirationEmails);
     return ResponseEntity.noContent().build();
   }
 }
