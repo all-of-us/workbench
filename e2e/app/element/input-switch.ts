@@ -16,8 +16,11 @@ export default class InputSwitch extends BaseElement {
       await this.click();
       await this.page.waitForTimeout(500);
       const isChecked = await this.isChecked();
-      if (isChecked || maxAttempts <= 0) {
+      if (isChecked) {
         return;
+      }
+      if (maxAttempts <= 0) {
+        throw Error('maxAttempts reached in input-switch.check().click()');
       }
       maxAttempts--;
       await this.page.waitForTimeout(1000).then(click); // 1 second pause before try again

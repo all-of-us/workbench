@@ -35,7 +35,7 @@ export default class Checkbox extends BaseElement {
         return;
       }
       if (maxAttempts <= 0) {
-        return;
+        throw Error('maxAttempts reached in checkbox.check().click()');
       }
       maxAttempts--;
       await this.page.waitForTimeout(1000).then(click); // 1 second pause then try again
