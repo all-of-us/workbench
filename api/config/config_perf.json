@@ -119,7 +119,7 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": false,
+    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": false
   },
