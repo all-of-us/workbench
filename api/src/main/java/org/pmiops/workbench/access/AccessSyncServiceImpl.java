@@ -72,7 +72,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
         Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
     if (shouldPropagateToTerra) {
-      tiersForRemoval.forEach(tier -> accessTierService.removeFromAuthDomainIdempotent(dbUser, tier));
+      tiersForRemoval.forEach(
+          tier -> accessTierService.removeFromAuthDomainIdempotent(dbUser, tier));
     }
 
     return userDao.save(dbUser);

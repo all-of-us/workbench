@@ -16,8 +16,8 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.sam.api.GroupApi;
 import org.pmiops.workbench.sam.ApiException;
+import org.pmiops.workbench.sam.api.GroupApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -159,8 +159,11 @@ public class AccessTierServiceImpl implements AccessTierService {
   @Override
   public void propagateAllAuthDomainMembership() {
     for (DbAccessTier accessTier : accessTierDao.findAll()) {
-      List <String> userEmails = userAccessTierDao.getAllByAccessTier(accessTier).stream()
-      .map(DbUserAccessTier::getUser).map(DbUser::getUsername).collect(Collectors.toList());
+      List<String> userEmails =
+          userAccessTierDao.getAllByAccessTier(accessTier).stream()
+              .map(DbUserAccessTier::getUser)
+              .map(DbUser::getUsername)
+              .collect(Collectors.toList());
       setAuthDomainMembership(accessTier.getShortName(), userEmails);
     }
   }
