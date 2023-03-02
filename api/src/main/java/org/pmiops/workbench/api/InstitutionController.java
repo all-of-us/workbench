@@ -121,7 +121,8 @@ public class InstitutionController implements InstitutionApiDelegate {
     institutionService
         .getAffiliatedUsers(shortName)
         .forEach(
-            u -> accessSyncService.updateUserAccessTiers(u, Agent.asAdmin(userProvider.get())));
+            u -> accessSyncService
+                .updateUserAccessTiers(u, Agent.asAdmin(userProvider.get()), false));
     accessTierService.propagateAllAuthDomainMembership();
     return ResponseEntity.ok(institution);
   }

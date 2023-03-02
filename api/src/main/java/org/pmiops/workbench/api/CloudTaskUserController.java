@@ -142,11 +142,6 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           }
         }
 
-        // Note: each module synchronization calls updateUserAccessTiers() which checks the status
-        // of *all* modules, so this serves as a general fallback as well (e.g. due to partial
-        // system failures or bugs), ensuring that the database and access tier groups are
-        // consistent with access module statuses.
-        // user = userService.syncDuccVersionStatus(user, Agent.asSystem());
         user = accessSyncService.updateUserAccessTiers(user, Agent.asSystem(), false);
       } catch (WorkbenchException e) {
         log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
