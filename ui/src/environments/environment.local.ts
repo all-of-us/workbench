@@ -20,6 +20,5 @@ export const environment: Environment = {
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
-  showAppsPanel: true,
   showNewAnalysisTab: true,
 };

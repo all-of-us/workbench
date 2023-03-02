@@ -16,12 +16,12 @@ import {
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
+import { CommonToggle } from 'app/components/admin/common-toggle';
 import { AlertDanger } from 'app/components/alert';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow, FlexSpacer } from 'app/components/flex';
 import { CaretRight, ClrIcon } from 'app/components/icons';
-import { Toggle } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
@@ -313,29 +313,6 @@ export const accessModulesForTable = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
 ];
-
-interface CommonToggleProps {
-  name: string;
-  checked: boolean;
-  dataTestId: string;
-  onToggle: () => void;
-  disabled?: boolean;
-}
-const CommonToggle = (props: CommonToggleProps) => {
-  const { name, checked, dataTestId, disabled, onToggle } = props;
-  return (
-    <Toggle
-      name={name}
-      checked={checked}
-      data-test-id={dataTestId}
-      onToggle={() => onToggle()}
-      style={{ paddingBottom: 0, flexGrow: 0 }}
-      height={24}
-      width={50}
-      disabled={disabled}
-    />
-  );
-};
 
 interface AccessModuleTableProps {
   oldProfile: Profile;

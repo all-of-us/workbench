@@ -73,6 +73,7 @@ interface NotificationProps {
   buttonOnClick?: () => void;
   bannerTextWidth: CSSProperties['width'];
   buttonAriaLabel?: string;
+  iconStyle?: CSSProperties;
 }
 
 export const NotificationBanner = ({
@@ -88,10 +89,11 @@ export const NotificationBanner = ({
   buttonOnClick,
   buttonAriaLabel,
   bannerTextWidth,
+  iconStyle,
 }: NotificationProps) => {
   return (
     <FlexRow data-test-id={dataTestId} style={{ ...styles.box, ...boxStyle }}>
-      <AlarmExclamation style={styles.icon} />
+      <AlarmExclamation style={{ ...styles.icon, ...iconStyle }} />
       <div style={{ ...styles.text, ...textStyle, width: bannerTextWidth }}>
         {text}
       </div>

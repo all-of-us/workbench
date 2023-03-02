@@ -121,3 +121,7 @@ export const expectButtonEnabled = (buttonWrapper: ReactWrapper) =>
   expectButtonState(buttonWrapper, true);
 export const expectButtonDisabled = (buttonWrapper: ReactWrapper) =>
   expectButtonState(buttonWrapper, false);
+
+// When simulate is used with an input element of type checkbox, it will negate its current state.
+export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
+  checkBoxWrapper.simulate('change');

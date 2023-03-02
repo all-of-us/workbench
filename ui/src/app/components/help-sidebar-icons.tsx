@@ -17,12 +17,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
+  ConfigResponse,
   Criteria,
   GenomicExtractionJob,
   TerraJobStatus,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
@@ -35,7 +35,7 @@ import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
-import { appAssets, UIAppType } from './apps-panel/utils';
+import { appAssets, showAppsPanel, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIcon } from './runtime-status-icon';
@@ -116,10 +116,9 @@ export interface IconConfig {
 const displayRuntimeStatusIcon = (
   icon: IconConfig,
   workspaceNamespace: string,
-  userSuspended: boolean
+  userSuspended: boolean,
+  config: ConfigResponse
 ) => {
-  const { showAppsPanel } = environment;
-
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
@@ -129,11 +128,11 @@ const displayRuntimeStatusIcon = (
     alignItems: 'center',
     justifyContent: 'space-around',
   };
-  const iconStyle: CSSProperties = showAppsPanel
+  const iconStyle: CSSProperties = showAppsPanel(config)
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
 
-  const iconSrc = showAppsPanel ? jupyterAssets.icon : thunderstorm;
+  const iconSrc = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
 
   // We always want to show the thunderstorm or Jupyter icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
@@ -314,10 +313,18 @@ interface DisplayIconProps {
   concept?: Array<Criteria>;
   genomicExtractionJobs: GenomicExtractionJob[];
   userSuspended: boolean;
+  icon: IconConfig;
 }
-const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
-  const { workspace, genomicExtractionJobs, criteria, concept, userSuspended } =
-    props;
+const DisplayIcon = (props: DisplayIconProps) => {
+  const {
+    workspace,
+    genomicExtractionJobs,
+    criteria,
+    concept,
+    userSuspended,
+    icon,
+  } = props;
+  const { config } = useStore(serverConfigStore);
   return switchCase(
     icon.id,
     [
@@ -353,7 +360,13 @@ const displayIcon = (icon: IconConfig, props: DisplayIconProps) => {
     ],
     [
       'runtimeConfig',
-      () => displayRuntimeStatusIcon(icon, workspace.namespace, userSuspended),
+      () =>
+        displayRuntimeStatusIcon(
+          icon,
+          workspace.namespace,
+          userSuspended,
+          config
+        ),
     ],
     [
       'cromwellConfig',
@@ -608,7 +621,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   } = props;
   const { loadingError } = useStore(runtimeStore);
   const { enableGenomicExtraction } = serverConfigStore.get().config;
-  const { showAppsPanel } = environment;
+  const { config } = useStore(serverConfigStore);
   const defaultIcons: SidebarIconId[] = [
     'criteria',
     'concept',
@@ -627,14 +640,13 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     }).showIcon()
   );
 
-  if (
-    showAppsPanel &&
-    WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-  ) {
-    keys.push('apps', 'cromwellConfig');
-  }
-
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
+    if (showAppsPanel(config)) {
+      keys.push('apps');
+    }
+    if (config.enableCromwellGKEApp) {
+      keys.push('cromwellConfig');
+    }
     keys.push('runtimeConfig', 'terminal');
   }
 
@@ -668,7 +680,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
                 }
               }}
             >
-              {displayIcon(icon, props)}
+              <DisplayIcon {...{ ...props, icon }} />
             </div>
           </TooltipTrigger>
         </div>
