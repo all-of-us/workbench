@@ -79,7 +79,6 @@ const PauseRuntimeButton = (props: { workspace: Workspace }) => {
 
   return (
     <PauseResumeButton
-      dataTestId='pause-resume-Jupyter'
       externalStatus={fromRuntimeStatus(status)}
       onPause={() => setRuntimeStatus(RuntimeStatusRequest.Stop)}
       onResume={() => setRuntimeStatus(RuntimeStatusRequest.Start)}
@@ -102,11 +101,10 @@ const JupyterButtonRow = (props: {
 };
 
 const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
-  const { googleProject, appName, status, appType } = props.userApp || {};
+  const { googleProject, appName, status } = props.userApp || {};
 
   return (
     <PauseResumeButton
-      dataTestId={`pause-resume-${appType}`}
       externalStatus={fromUserAppStatus(status)}
       onPause={() => leoAppsApi().stopApp(googleProject, appName)}
       onResume={() => leoAppsApi().startApp(googleProject, appName)}
@@ -264,7 +262,6 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         }
         <Clickable
           disabled={!trashEnabled}
-          data-test-id={`delete-${appType}`}
           style={
             trashEnabled
               ? styles.enabledTrashButton

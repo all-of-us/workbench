@@ -52,7 +52,6 @@ interface Props {
   icon: IconProp;
   buttonText: string;
   disabled?: boolean;
-  dataTestId?: string;
 }
 export const AppsPanelButton = (props: Props) => {
   const { disabled, onClick, icon, buttonText } = props;

@@ -12,10 +12,9 @@ interface Props {
   externalStatus: UserEnvironmentStatus;
   onPause: Function;
   onResume: Function;
-  dataTestId: string;
 }
 export const PauseResumeButton = (props: Props) => {
-  const { externalStatus, onPause, onResume, dataTestId } = props;
+  const { externalStatus, onPause, onResume } = props;
 
   const [envStatus, setEnvStatus] =
     useState<UserEnvironmentStatus>(externalStatus);
@@ -67,7 +66,5 @@ export const PauseResumeButton = (props: Props) => {
     () => [faPause, 'Pause', true]
   );
 
-  return (
-    <AppsPanelButton {...{ icon, buttonText, disabled, onClick, dataTestId }} />
-  );
+  return <AppsPanelButton {...{ icon, buttonText, disabled, onClick }} />;
 };

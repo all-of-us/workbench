@@ -62,7 +62,6 @@ describe('ExpandedApp', () => {
   runtimeStub.runtime.googleProject = googleProject;
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = true;
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     leoRegisterApiClient(LeoAppsApi, new LeoAppsApiStub());
@@ -92,7 +91,9 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({ 'data-test-id': 'delete-Jupyter' });
+      const deletion = wrapper.find({
+        'data-test-id': 'Jupyter-delete-button',
+      });
       expect(deletion.exists()).toBeTruthy();
       const cursorStyle = deletion.prop('style').cursor;
 
@@ -110,25 +111,26 @@ describe('ExpandedApp', () => {
   );
 
   test.each([
-    ['should', 'pausing', RuntimeStatus.Running, true, false],
-    ['should', 'resuming', RuntimeStatus.Stopped, false, true],
+    ['should', 'Pause', RuntimeStatus.Running, true, false],
+    ['should', 'Resume', RuntimeStatus.Stopped, false, true],
 
-    ['should not', 'pausing/resuming', RuntimeStatus.Stopping, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Starting, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Deleted, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Deleting, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Unknown, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Error, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Creating, false, false],
-    ['should not', 'pausing/resuming', RuntimeStatus.Updating, false, false],
+    ['should not', 'Pausing', RuntimeStatus.Stopping, false, false],
+    ['should not', 'Resuming', RuntimeStatus.Starting, false, false],
 
-    ['should not', 'pausing/resuming', undefined, false, false],
-    ['should not', 'pausing/resuming', null, false, false],
+    ['should not', 'Pause', RuntimeStatus.Deleted, false, false],
+    ['should not', 'Pause', RuntimeStatus.Deleting, false, false],
+    ['should not', 'Pause', RuntimeStatus.Unknown, false, false],
+    ['should not', 'Pause', RuntimeStatus.Error, false, false],
+    ['should not', 'Pause', RuntimeStatus.Creating, false, false],
+    ['should not', 'Pause', RuntimeStatus.Updating, false, false],
+
+    ['should not', 'Pause', undefined, false, false],
+    ['should not', 'Pause', null, false, false],
   ])(
-    '%s allow pausing when the Jupyter app status is %s',
+    '%s allow clicking %s when the Jupyter app status is %s',
     async (
       shouldOrNot,
-      action,
+      buttonText,
       status,
       expectedCanPause,
       expectedCanResume
@@ -139,7 +141,7 @@ describe('ExpandedApp', () => {
       expect(wrapper.exists()).toBeTruthy();
 
       const pauseButton = wrapper.find({
-        'data-test-id': 'pause-resume-Jupyter',
+        'data-test-id': `apps-panel-button-${buttonText}`,
       });
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
@@ -197,7 +199,9 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({ 'data-test-id': 'delete-Cromwell' });
+      const deletion = wrapper.find({
+        'data-test-id': 'Cromwell-delete-button',
+      });
       expect(deletion.exists()).toBeTruthy();
       const cursorStyle = deletion.prop('style').cursor;
 
@@ -220,24 +224,25 @@ describe('ExpandedApp', () => {
   );
 
   test.each([
-    ['should', 'pausing', AppStatus.RUNNING, true, false],
-    ['should', 'resuming', AppStatus.STOPPED, false, true],
+    ['should', 'Pause', AppStatus.RUNNING, true, false],
+    ['should', 'Resume', AppStatus.STOPPED, false, true],
 
-    ['should not', 'pause/resume', AppStatus.DELETED, false, false],
-    ['should not', 'pause/resume', AppStatus.DELETING, false, false],
-    ['should not', 'pause/resume', AppStatus.ERROR, false, false],
-    ['should not', 'pause/resume', AppStatus.PROVISIONING, false, false],
-    ['should not', 'pause/resume', AppStatus.STARTING, false, false],
-    ['should not', 'pause/resume', AppStatus.STATUSUNSPECIFIED, false, false],
-    ['should not', 'pause/resume', AppStatus.STOPPING, false, false],
+    ['should not', 'Resuming', AppStatus.STARTING, false, false],
+    ['should not', 'Pausing', AppStatus.STOPPING, false, false],
 
-    ['should not', 'pause/resume', undefined, false, false],
-    ['should not', 'pause/resume', null, false, false],
+    ['should not', 'Pause', AppStatus.DELETED, false, false],
+    ['should not', 'Pause', AppStatus.DELETING, false, false],
+    ['should not', 'Pause', AppStatus.ERROR, false, false],
+    ['should not', 'Pause', AppStatus.PROVISIONING, false, false],
+    ['should not', 'Pause', AppStatus.STATUSUNSPECIFIED, false, false],
+
+    ['should not', 'Pause', undefined, false, false],
+    ['should not', 'Pause', null, false, false],
   ])(
-    '%s allow %s when the Cromwell app status is %s',
+    '%s allow clicking %s when the Cromwell app status is %s',
     async (
       shouldOrNot,
-      action,
+      buttonText,
       status,
       expectedCanPause,
       expectedCanResume
@@ -253,7 +258,7 @@ describe('ExpandedApp', () => {
       expect(wrapper.exists()).toBeTruthy();
 
       const pauseButton = wrapper.find({
-        'data-test-id': 'pause-resume-CROMWELL',
+        'data-test-id': `apps-panel-button-${buttonText}`,
       });
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
