@@ -60,7 +60,9 @@ export default class SelectMenu extends BaseMenu {
   async getAllOptionTexts(): Promise<string[]> {
     const selector = `${this.getXpath()}//*[@role="option"]/text()`;
     await this.open();
-    return this.getMenuItemTexts(selector);
+    const options = this.getMenuItemTexts(selector);
+    await this.toggle();
+    return options;
   }
 
   /**
