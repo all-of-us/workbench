@@ -53,6 +53,11 @@ export default {
     stopped: '#F8C954',
     error: '#DB3214',
   },
+  notificationBanner: {
+    expiring_after_two_weeks: `rgb(196, 222, 244)`,
+    expiring_within_two_weeks: `rgb(254, 245, 232)`,
+    expiring_within_one_week: `rgb(237, 153, 138)`,
+  },
 };
 
 class Rgba {

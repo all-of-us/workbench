@@ -3,7 +3,6 @@ import { CSSProperties } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
-import { InputSwitch } from 'primereact/inputswitch';
 import validate from 'validate.js';
 
 import {
@@ -13,6 +12,7 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 
+import { CommonToggle } from 'app/components/admin/common-toggle';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -95,19 +95,6 @@ const styles = reactStyles({
   },
 });
 
-// The easiest way to override primereact style.
-const css = `
-  body .p-inputswitch {
-    height: 18px;
-    width: 33px;
-    border-radius: 15px;
-    font-size:11px;
-  }
-  body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-    background-color: #659F3D;
- }
-`;
-
 enum InstitutionMode {
   ADD,
   EDIT,
@@ -132,16 +119,17 @@ const nonEmpty = (item: string): boolean => item && !!item.trim();
 
 const EraRequiredSwitch = (props: {
   tierConfig: InstitutionTierConfig;
-  onChange: (boolean) => void;
+  onToggle: (boolean) => void;
 }) => {
-  const { tierConfig, onChange } = props;
+  const { tierConfig, onToggle } = props;
   const {
     config: { enableRasLoginGovLinking },
   } = useStore(serverConfigStore);
   return (
-    <InputSwitch
-      data-test-id={`${tierConfig.accessTierShortName}-era-required-switch`}
-      onChange={(v) => onChange(v.value)}
+    <CommonToggle
+      name='eRA account required'
+      dataTestId={`${tierConfig.accessTierShortName}-era-required-switch`}
+      onToggle={(e) => onToggle(e)}
       checked={tierConfig.eraRequired}
       disabled={
         !enableRasLoginGovLinking ||
@@ -154,13 +142,14 @@ const EraRequiredSwitch = (props: {
 
 const EnableCtSwitch = (props: {
   institution: Institution;
-  onChange: (boolean) => void;
+  onToggle: (boolean) => void;
 }) => {
-  const { institution, onChange } = props;
+  const { institution, onToggle } = props;
   return (
-    <InputSwitch
-      data-test-id='controlled-enabled-switch'
-      onChange={(v) => onChange(v.value)}
+    <CommonToggle
+      name='Controlled tier enabled'
+      dataTestId='controlled-enabled-switch'
+      onToggle={(e) => onToggle(e)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
           ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
@@ -177,6 +166,7 @@ const RequirementDropdown = (props: {
   const { tierConfig, onChange } = props;
   return (
     <Dropdown
+      appendTo='self'
       style={{ width: '24rem' }}
       data-test-id={`${tierConfig.accessTierShortName}-agreement-dropdown`}
       placeholder='Select type'
@@ -265,17 +255,13 @@ const TierConfig = (props: TierConfigProps) => {
         <FlexRow style={{ gap: '0.45rem' }}>
           <EraRequiredSwitch
             tierConfig={tierConfig}
-            onChange={setEraRequired}
+            onToggle={setEraRequired}
           />
-          eRA account required
           {accessTierShortName === AccessTierShortNames.Controlled && (
-            <React.Fragment>
-              <EnableCtSwitch
-                institution={institution}
-                onChange={setEnableControlledTier}
-              />
-              Controlled tier enabled
-            </React.Fragment>
+            <EnableCtSwitch
+              institution={institution}
+              onToggle={setEnableControlledTier}
+            />
           )}
         </FlexRow>
         {tierConfig.membershipRequirement !==
@@ -809,7 +795,6 @@ export const AdminInstitutionEdit = fp.flow(
 
       return (
         <div>
-          <style>{css}</style>
           <FadeBox
             style={{
               marginTop: '1.5rem',
@@ -860,6 +845,7 @@ export const AdminInstitutionEdit = fp.flow(
                 </div>
                 <label style={styles.label}>Institution Type</label>
                 <Dropdown
+                  appendTo='self'
                   style={{ width: '24rem' }}
                   data-test-id='organization-dropdown'
                   placeholder='Organization Type'

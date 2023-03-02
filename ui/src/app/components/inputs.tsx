@@ -563,6 +563,7 @@ interface ToggleProps {
   style?: React.CSSProperties;
   height?: number;
   width?: number;
+  dataTestId?: string;
 }
 
 export class Toggle extends React.Component<ToggleProps> {
@@ -571,8 +572,16 @@ export class Toggle extends React.Component<ToggleProps> {
   }
 
   render() {
-    const { name, checked, disabled, onToggle, style, height, width } =
-      this.props;
+    const {
+      name,
+      checked,
+      disabled,
+      onToggle,
+      style,
+      height,
+      width,
+      dataTestId,
+    } = this.props;
 
     // the minimum of height and width to ensure the handle is inside the toggle
     // minus a 1-pixel gap on both sides
@@ -589,6 +598,7 @@ export class Toggle extends React.Component<ToggleProps> {
         }}
       >
         <Switch
+          data-test-id={dataTestId}
           onChange={onToggle}
           checked={checked}
           checkedIcon={false}

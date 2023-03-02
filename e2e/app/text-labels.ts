@@ -203,7 +203,7 @@ export const ConceptSets = {
   FitbitHeartRateLevel: 'Fitbit Heart Rate Level',
   FitbitHeartRateSummary: 'Fitbit Heart Rate Summary',
   FitbitIntraDaySteps: 'Fitbit Intra Day Steps',
-  WholeGenomeSequenceVariantData: 'Whole Genome Sequencing Data'
+  WholeGenomeSequenceVariantData: 'Short Read Whole Genome Sequencing Data'
 };
 
 export const DataSets = {

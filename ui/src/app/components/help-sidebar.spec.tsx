@@ -8,15 +8,15 @@ import {
   CohortReviewApi,
   DataSetApi,
   ErrorCode,
+  NotebooksApi,
   RuntimeApi,
   RuntimeStatus,
-  SecuritySuspendedErrorParameters,
   TerraJobStatus,
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
+import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -26,7 +26,6 @@ import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
@@ -52,11 +51,12 @@ import {
   cohortReviewStubs,
 } from 'testing/stubs/cohort-review-service-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { HelpSidebar } from './help-sidebar';
+import { HelpSidebar, LOCAL_STORAGE_KEY_SIDEBAR_STATE } from './help-sidebar';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -100,6 +100,21 @@ jest.mock('app/pages/workspace/workspace-share', () => {
     WorkspaceShare: () => <MockWorkspaceShare />,
   };
 });
+
+const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
+  Promise.reject(
+    new Response(
+      JSON.stringify({
+        errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+        parameters: {
+          suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
+        },
+      }),
+      {
+        status: 412,
+      }
+    )
+  );
 
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
@@ -173,6 +188,7 @@ describe('HelpSidebar', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({
@@ -314,26 +330,54 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display apps icon for writable workspaces when showAppsPanel is true', async () => {
+  it('should display apps icon for writable workspaces when Cromwell is enabled', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = true;
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: true,
+        enableRStudioGKEApp: false,
+      },
+    });
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
   });
 
-  it('should not display apps icon for writable workspaces when showAppsPanel is false', async () => {
+  it('should display apps icon for writable workspaces when RStudio is enabled', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
     });
-    serverConfigStore.set({ config: defaultServerConfig });
-    environment.showAppsPanel = false;
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: false,
+        enableRStudioGKEApp: true,
+      },
+    });
+    const wrapper = await component();
+    expect(
+      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
+    ).toBe(1);
+  });
+
+  it('should not display apps icon for writable workspaces when no apps are enabled', async () => {
+    currentWorkspaceStore.next({
+      ...currentWorkspaceStore.value,
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    });
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        enableCromwellGKEApp: false,
+        enableRStudioGKEApp: false,
+      },
+    });
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
@@ -387,28 +431,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display security suspended UX on compute suspended', async () => {
-    const suspendedParams: SecuritySuspendedErrorParameters = {
-      suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
-    };
-    runtimeStub.runtime = null;
-    runtimeStub.getRuntime = () =>
-      Promise.reject(
-        new Response(
-          JSON.stringify({
-            errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
-            parameters: suspendedParams,
-          }),
-          {
-            status: 412,
-          }
-        )
-      );
-    runtimeStore.set({
-      workspaceNamespace: workspaceDataStub.namespace,
-      runtime: undefined,
-      runtimeLoaded: false,
-      loadingError: new ComputeSecuritySuspendedError(suspendedParams),
-    });
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -541,5 +564,27 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     extractionStatusIcon(wrapper, false);
+  });
+
+  it('should automatically open previously open panel on load', async () => {
+    runtimeStub.getRuntime = () => Promise.resolve(defaultRuntime());
+    const activeIcon = 'apps';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    const wrapper = await component();
+    expect(
+      // @ts-ignore
+      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
+    ).toBeTruthy();
+  });
+
+  it('should not automatically open previously open panel on load if user is suspended', async () => {
+    runtimeStub.getRuntime = COMPUTE_SUSPENDED_RESPONSE_STUB;
+    const activeIcon = 'apps';
+    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    const wrapper = await component();
+    expect(
+      // @ts-ignore
+      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
+    ).toBeFalsy();
   });
 });

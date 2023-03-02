@@ -1,4 +1,5 @@
 import {
+  BillingStatus,
   RecentWorkspace,
   RecentWorkspaceResponse,
   SpecificPopulationEnum,
@@ -55,6 +56,7 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     },
     published: false,
     billingAccountName: 'billing-account',
+    billingStatus: BillingStatus.ACTIVE,
     adminLocked: false,
   };
 }

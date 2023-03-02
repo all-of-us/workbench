@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
@@ -20,6 +22,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
@@ -104,7 +107,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void testGetPD() throws ApiException {
+  public void test_getDisk() throws ApiException {
     String createDate = "2021-08-06T16:57:29.827954Z";
     String pdName = "pdName";
     LeonardoGetPersistentDiskResponse getResponse =
@@ -132,7 +135,36 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void testListPD() throws ApiException {
+  public void test_getDisk_nullProject() {
+    String createDate = "2021-08-06T16:57:29.827954Z";
+    String pdName = "pdName";
+    LeonardoGetPersistentDiskResponse getResponse =
+        new LeonardoGetPersistentDiskResponse()
+            .name(pdName)
+            .size(300)
+            .diskType(LeonardoDiskType.STANDARD)
+            .status(LeonardoDiskStatus.READY)
+            .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
+            .googleProject(GOOGLE_PROJECT_ID);
+
+    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
+        .thenReturn(getResponse);
+
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(null)).thenThrow(new NotFoundException());
+
+    assertThrows(NotFoundException.class, () -> disksController.getDisk(null, pdName));
+  }
+
+  @Test
+  public void test_getDisk_nullDisk() {
+    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, null))
+        .thenThrow(new NotFoundException());
+
+    assertThrows(NotFoundException.class, () -> disksController.getDisk(WORKSPACE_NS, null));
+  }
+
+  @Test
+  public void test_listDisksInWorkspace() throws ApiException {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
@@ -208,7 +240,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void testUpdateDisk() throws ApiException {
+  public void updateDisk() throws ApiException {
     int diskSize = 200;
     String diskName = user.generatePDName();
     disksController.updateDisk(WORKSPACE_NS, diskName, diskSize);
@@ -216,10 +248,58 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void testDeleteDisk() throws ApiException {
+  public void updateDisk_notFound() {
+    int diskSize = 200;
+    String diskName = user.generatePDName();
+
+    doThrow(new NotFoundException())
+        .when(mockLeonardoApiClient)
+        .updatePersistentDisk(GOOGLE_PROJECT_ID, diskName, diskSize);
+
+    assertThrows(
+        NotFoundException.class,
+        () -> disksController.updateDisk(WORKSPACE_NS, diskName, diskSize));
+  }
+
+  @Test
+  public void updateDisk_workspaceNotFound() {
+    int diskSize = 200;
+    String diskName = user.generatePDName();
+
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS))
+        .thenThrow(new NotFoundException());
+
+    assertThrows(
+        NotFoundException.class,
+        () -> disksController.updateDisk(WORKSPACE_NS, diskName, diskSize));
+  }
+
+  @Test
+  public void deleteDisk() throws ApiException {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
     verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
+  }
+
+  @Test
+  public void deleteDisk_notFound() {
+    String diskName = user.generatePDName();
+
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS))
+        .thenThrow(new NotFoundException());
+
+    assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
+  }
+
+  @Test
+  public void deleteDisk_workspaceNotFound() {
+    String diskName = user.generatePDName();
+
+    doThrow(new NotFoundException())
+        .when(mockLeonardoApiClient)
+        .deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
+
+    assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
   }
 
   private LeonardoListPersistentDiskResponse newListPdResponse(

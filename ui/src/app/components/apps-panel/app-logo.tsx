@@ -8,5 +8,12 @@ export const AppLogo = (props: {
   style: CSSProperties;
 }) => {
   const { logo } = appAssets.find((aa) => aa.appType === props.appType);
-  return <img src={logo} alt={props.appType.toString()} style={props.style} />;
+  return (
+    <img
+      src={logo}
+      alt={props.appType}
+      aria-label={props.appType}
+      style={props.style}
+    />
+  );
 };

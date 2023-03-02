@@ -71,8 +71,10 @@ export default class NotebookCell extends NotebookFrame {
         return cell;
       }
       if (maxAttempts <= 0) {
-        console.warn(`Notebook cell[${this.getCellIndex()}] is not in edit_mode or selected.`);
-        return cell;
+        throw Error(
+          'maxAttempts reached in notebook-cell.focus().clickAndCheck(): ' +
+            `Notebook cell[${this.getCellIndex()}] is not in edit_mode or selected.`
+        );
       }
       await this.page.waitForTimeout(2000); // Pause 2 seconds then retry
       return clickAndCheck();

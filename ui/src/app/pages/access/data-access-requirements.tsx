@@ -614,7 +614,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // Local Variables
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass },
+      config: { unsafeAllowSelfBypass, enableControlledTierTrainingRenewal },
     } = useStore(serverConfigStore);
 
     const query = useQuery();
@@ -637,14 +637,15 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       pageMode
     );
 
-    const showCtRenewalBanner =
+    const ctNeedsRenewal =
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
       !isRenewalCompleteForModule(
         getAccessModuleStatusByName(profile, ctModule)
       );
-    const showCompletionBanner =
-      profile && !nextRequired && !showCtRenewalBanner;
+    const showCtRenewalBanner =
+      enableControlledTierTrainingRenewal && ctNeedsRenewal;
+    const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (
       <RegisteredTierCard

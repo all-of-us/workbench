@@ -1,18 +1,24 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { faGear, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import {
+  faGear,
+  faPause,
+  faPlay,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,
@@ -29,6 +35,7 @@ import { RuntimeCost } from './runtime-cost';
 import {
   canCreateApp,
   canDeleteApp,
+  defaultRStudioConfig,
   fromRuntimeStatus,
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
@@ -147,6 +154,75 @@ const CromwellButtonRow = (props: {
   );
 };
 
+const RStudioButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  const { userApp, workspaceNamespace } = props;
+  const [launching, setLaunching] = useState(false);
+
+  const onClickLaunch = withErrorModal(
+    {
+      title: 'Error Creating RStudio Environment',
+      message: 'Please refresh the page.',
+    },
+    async () => {
+      setLaunching(true);
+      await appsApi().createApp(workspaceNamespace, defaultRStudioConfig);
+    }
+  );
+
+  const launchButtonDisabled = launching || !canCreateApp(userApp);
+
+  return (
+    <FlexRow>
+      <TooltipTrigger
+        disabled={false}
+        content='Support for configuring RStudio is not yet available'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <SettingsButton
+            disabled={true}
+            onClick={() => {}}
+            data-test-id='rstudio-settings-button'
+          />
+        </div>
+      </TooltipTrigger>
+      <TooltipTrigger
+        disabled={false}
+        content='Support for pausing RStudio is not yet available'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            disabled={true}
+            onClick={() => {}}
+            icon={faPause}
+            buttonText='Pause'
+            data-test-id='rstudio-pause-button'
+          />
+        </div>
+      </TooltipTrigger>
+      <TooltipTrigger
+        disabled={!launchButtonDisabled}
+        content='An RStudio app exists or is being created'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            disabled={launchButtonDisabled}
+            onClick={onClickLaunch}
+            icon={faPlay}
+            buttonText={launching ? 'Launching' : 'Launch'}
+            data-test-id='rstudio-launch-button'
+          />
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+  );
+};
+
 interface ExpandedAppProps {
   appType: UIAppType;
   initialUserAppInfo: UserAppEnvironment;
@@ -185,7 +261,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           );
         };
   return (
-    <FlexColumn style={styles.expandedAppContainer}>
+    <FlexColumn
+      style={styles.expandedAppContainer}
+      data-test-id={`${appType}-expanded`}
+    >
       <FlexRow>
         <div>
           <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
@@ -208,6 +287,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
               : styles.disabledTrashButton
           }
           onClick={onClickDelete}
+          data-test-id={`${appType}-delete-button`}
         >
           <FontAwesomeIcon icon={faTrashCan} />
         </Clickable>
@@ -221,11 +301,27 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
             (refresh to update)
           </div>
-          {/* TODO: generalize to other User Apps*/}
-          <CromwellButtonRow
-            userApp={initialUserAppInfo}
-            workspaceNamespace={workspace.namespace}
-          />
+          {cond(
+            [
+              appType === UIAppType.CROMWELL,
+              () => (
+                <CromwellButtonRow
+                  userApp={initialUserAppInfo}
+                  workspaceNamespace={workspace.namespace}
+                />
+              ),
+            ],
+            [
+              appType === UIAppType.RSTUDIO,
+              () => (
+                <RStudioButtonRow
+                  userApp={initialUserAppInfo}
+                  workspaceNamespace={workspace.namespace}
+                />
+              ),
+            ],
+            () => null
+          )}
         </FlexColumn>
       )}
     </FlexColumn>

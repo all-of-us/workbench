@@ -10,7 +10,7 @@ import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { isVisible } from 'app/utils/runtime-utils';
-import { runtimeStore, useStore } from 'app/utils/stores';
+import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
@@ -39,7 +39,7 @@ const styles = reactStyles({
 const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
-    <Clickable {...{ onClick }}>
+    <Clickable {...{ onClick }} data-test-id={`${appType}-unexpanded`}>
       <FlexRow style={styles.availableApp}>
         <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
@@ -55,28 +55,30 @@ export const AppsPanel = (props: {
 }) => {
   const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
+  const { config } = useStore(serverConfigStore);
 
   // in display order
-  const appsToDisplay = [UIAppType.JUPYTER, UIAppType.CROMWELL];
+  const appsToDisplay = [
+    UIAppType.JUPYTER,
+    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    ...(config.enableCromwellGKEApp ? [UIAppType.CROMWELL] : []),
+  ];
 
-  // all apps besides Jupyter
+  // all GKE apps (not Jupyter)
   const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
   useEffect(() => {
     appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
   }, []);
 
-  const appStates = [
-    {
-      appType: UIAppType.JUPYTER,
-      initializeAsExpanded: isVisible(runtime?.status),
-    },
-    {
-      appType: UIAppType.CROMWELL,
-      initializeAsExpanded: shouldShowApp(
-        findApp(userApps, UIAppType.CROMWELL)
-      ),
-    },
-  ];
+  const appStates = appsToDisplay.map((appType) => {
+    return {
+      appType,
+      initializeAsExpanded:
+        appType === UIAppType.JUPYTER
+          ? isVisible(runtime?.status)
+          : shouldShowApp(findApp(userApps, appType)),
+    };
+  });
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);

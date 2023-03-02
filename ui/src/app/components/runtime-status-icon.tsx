@@ -54,8 +54,10 @@ export const RuntimeStatusIcon = fp.flow(
     style: CSSProperties;
     compoundRuntimeOps: CompoundRuntimeOpStore;
     workspaceNamespace: string;
+    userSuspended: boolean;
   }) => {
-    const { style, compoundRuntimeOps, workspaceNamespace } = props;
+    const { style, compoundRuntimeOps, workspaceNamespace, userSuspended } =
+      props;
 
     const { runtime, loadingError } = useStore(runtimeStore);
     let status = runtime?.status;
@@ -76,8 +78,11 @@ export const RuntimeStatusIcon = fp.flow(
     return (
       <FlexRow {...{ style }} data-test-id='runtime-status-icon-container'>
         {(() => {
-          if (loadingError) {
-            if (loadingError instanceof ComputeSecuritySuspendedError) {
+          if (loadingError || userSuspended) {
+            if (
+              loadingError instanceof ComputeSecuritySuspendedError ||
+              userSuspended
+            ) {
               return (
                 <FontAwesomeIcon
                   icon={faLock}

@@ -15,16 +15,6 @@ export default class adminTable extends Table {
     return this.userLinkElement.asElement();
   }
 
-  getHeaderRow(): Table {
-    return new Table(
-      this.page,
-      `${this.getXpath()}
-      //div[@class="p-datatable-wrapper"]
-      //table[@class="p-datatable-table"]
-      //thead//tr`
-    );
-  }
-
   getTable(): Table {
     return new Table(
       this.page,

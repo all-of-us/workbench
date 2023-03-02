@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as fp from 'lodash/fp';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -37,7 +38,7 @@ import { ConceptListPage } from 'app/pages/data/concept/concept-list';
 import { WorkspaceActionsMenu } from 'app/pages/workspace/workspace-actions-menu';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { participantStore } from 'app/services/review-state.service';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
@@ -55,7 +56,11 @@ import {
   NavigationProps,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { PanelContent } from 'app/utils/runtime-utils';
+import {
+  ComputeSecuritySuspendedError,
+  maybeUnwrapSecuritySuspendedError,
+  PanelContent,
+} from 'app/utils/runtime-utils';
 import {
   routeDataStore,
   runtimeStore,
@@ -140,6 +145,13 @@ const styles = reactStyles({
   },
 });
 
+const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
+  'apps',
+  'runtimeConfig',
+  'cromwellConfig',
+  'terminal',
+] as SidebarIconId[];
+
 export const LEONARDO_APP_PAGE_KEY = 'leonardo_app';
 
 const pageKeyToAnalyticsLabels = {
@@ -155,7 +167,7 @@ const pageKeyToAnalyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-interface Props extends NavigationProps {
+interface Props extends NavigationProps, UserSuspendedProps {
   pageKey: string;
   profileState: any;
   shareFunction: Function;
@@ -174,6 +186,38 @@ enum CurrentModal {
   HasRuntimeError,
 }
 
+interface UserSuspendedProps {
+  userSuspended: boolean;
+}
+
+// We use runtime API errors as a proxy for whether the user is suspended
+const withUserSuspended = () => (WrappedComponent) => (props) => {
+  const [userSuspended, setUserSuspended] = useState(undefined);
+
+  useEffect(() => {
+    runtimeApi()
+      .getRuntime(props.workspace.namespace)
+      .then(() => {
+        setUserSuspended(false);
+      })
+      .catch((e) => {
+        maybeUnwrapSecuritySuspendedError(e)
+          .then((error) => {
+            setUserSuspended(error instanceof ComputeSecuritySuspendedError);
+          })
+          .catch(() => {
+            setUserSuspended(false);
+          });
+      });
+  }, []);
+
+  if (userSuspended === undefined) {
+    return null;
+  } else {
+    return <WrappedComponent {...props} userSuspended={userSuspended} />;
+  }
+};
+
 interface State {
   activeIcon: SidebarIconId;
   filteredContent: Array<any>;
@@ -187,6 +231,7 @@ interface State {
 }
 
 export const HelpSidebar = fp.flow(
+  withUserSuspended(),
   withCurrentCohortCriteria(),
   withCurrentCohortSearchContext(),
   withCurrentConcept(),
@@ -245,11 +290,18 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
+      let initialActiveIcon = localStorage.getItem(
+        LOCAL_STORAGE_KEY_SIDEBAR_STATE
+      ) as SidebarIconId;
+      if (
+        this.props.userSuspended &&
+        SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED.includes(initialActiveIcon)
+      ) {
+        initialActiveIcon = null;
+      }
       // This is being set here instead of the constructor to show the opening animation of the side panel and
       // indicate to the user that it's something they can close.
-      this.setActiveIcon(
-        localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE) as SidebarIconId
-      );
+      this.setActiveIcon(initialActiveIcon);
       this.subscriptions.push(
         participantStore.subscribe((participant) =>
           this.setState({ participant })

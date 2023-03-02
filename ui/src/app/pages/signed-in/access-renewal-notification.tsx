@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import { NotificationBanner } from 'app/components/notification-banner';
+import colors from 'app/styles/colors';
+import { cond } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,
@@ -16,6 +18,9 @@ export const AccessRenewalNotificationMaybe = (
 ) => {
   const { profile } = useStore(profileStore);
   const daysRemaining = maybeDaysRemaining(profile, props.accessTier);
+
+  const twoWeeksOrMoreRemaining = daysRemaining >= 14;
+  const oneWeekOrMoreRemaining = daysRemaining >= 7;
 
   // special handling for Controlled Tier: don't render when RT is more urgent
   // because CT renewal is redundant in that case
@@ -37,6 +42,26 @@ export const AccessRenewalNotificationMaybe = (
       ? daysRemaining + ' days remaining.'
       : 'Your access has expired.';
 
+  const [boxColor, iconColor] = cond(
+    [
+      twoWeeksOrMoreRemaining,
+      () => [
+        colors.notificationBanner.expiring_after_two_weeks,
+        colors.primary,
+      ],
+    ],
+    [
+      oneWeekOrMoreRemaining,
+      () => [
+        colors.notificationBanner.expiring_within_two_weeks,
+        colors.warning,
+      ],
+    ],
+    () => [colors.notificationBanner.expiring_within_one_week, colors.danger]
+  );
+
+  const iconStyle = { color: iconColor };
+  const boxStyle = { backgroundColor: boxColor };
   // Must use pathname and search because ACCESS_RENEWAL_PATH includes a path with a search parameter.
   const { pathname, search } = window.location;
   const fullPagePath = pathname + search;
@@ -52,6 +77,7 @@ export const AccessRenewalNotificationMaybe = (
       bannerTextWidth={
         props.accessTier === AccessTierShortNames.Registered ? '177px' : '250px'
       }
+      {...{ boxStyle, iconStyle }}
     />
   ) : null;
 };

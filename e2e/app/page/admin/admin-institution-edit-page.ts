@@ -129,7 +129,7 @@ export default class InstitutionEditPage extends AuthenticatedPage {
 
   // get the Institution's RT-eRA-account-required-switch and verify if enabled
   getRtEratoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="registered-era-required-switch"]/div/input[@type="checkbox"]';
+    const xpath = '//input[@data-test-id="registered-era-required-switch"]';
     return new Checkbox(this.page, xpath);
   }
 
@@ -156,13 +156,13 @@ export default class InstitutionEditPage extends AuthenticatedPage {
 
   // get the Institution's controlled-era-required-switch and verify if disabled
   getCtEratoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="controlled-era-required-switch"]/div/input[@type="checkbox"]';
+    const xpath = '//input[@data-test-id="controlled-era-required-switch"]';
     return new Checkbox(this.page, xpath);
   }
 
   // get the Institution's controlled-enabled-switch to verify if it is enabled or disabled
   getCtEnabledtoggle(): Checkbox {
-    const xpath = '//div[@data-test-id="controlled-enabled-switch"]/div/input[@type="checkbox"]';
+    const xpath = '//input[@data-test-id="controlled-enabled-switch"]';
     return new Checkbox(this.page, xpath);
   }
 

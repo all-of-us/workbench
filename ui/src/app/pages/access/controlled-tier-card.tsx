@@ -9,7 +9,7 @@ import {
   ControlledTierBadge,
   MinusCircle,
 } from 'app/components/icons';
-import { SUPPORT_EMAIL } from 'app/components/support';
+import { SUPPORT_EMAIL, SupportMailto } from 'app/components/support';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import colors from 'app/styles/colors';
 import {
@@ -18,6 +18,7 @@ import {
 } from 'app/utils/access-tiers';
 import {
   DARPageMode,
+  getAccessModuleConfig,
   getAccessModuleStatusByName,
   isCompliant,
   redirectToNiH,
@@ -27,10 +28,11 @@ import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { DataDetail, styles } from './data-access-requirements';
 import { Module } from './module';
+import { ModuleIcon } from './module-icon';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
-const handleClickSupportButton = (url) => () => {
+const handleRequestAccessButton = (url) => () => {
   const adjustedUrl = getCustomOrDefaultUrl(url, `mailto:${SUPPORT_EMAIL}`);
   window.open(adjustedUrl);
 };
@@ -57,6 +59,35 @@ const ControlledTierEraModule = (props: {
       active={false}
       moduleAction={redirectToNiH}
     />
+  );
+};
+
+// Placeholder until CT Training has been updated; see TemporaryRASModule for inspiration
+const TemporaryTrainingModule = (props: { profile: Profile }) => {
+  const moduleName = AccessModule.CTCOMPLIANCETRAINING;
+  const { DARTitleComponent } = getAccessModuleConfig(moduleName);
+  return (
+    <FlexRow
+      data-test-id={`module-${moduleName}`}
+      style={{ paddingTop: '1.4em' }}
+    >
+      <FlexRow style={styles.moduleCTA} />
+      <FlexRow style={styles.backgroundModuleBox}>
+        <ModuleIcon
+          {...{ moduleName }}
+          completedOrBypassed={false}
+          eligible={false}
+        />
+        <FlexColumn style={styles.backgroundModuleText}>
+          <DARTitleComponent profile={props.profile} />
+          <div style={{ fontSize: '14px', marginTop: '0.5em' }}>
+            <b>Temporarily unavailable</b>: Renewal of Controlled Tier training
+            will be available in early March 2023. Please email{' '}
+            <SupportMailto /> if you have questions.
+          </div>
+        </FlexColumn>
+      </FlexRow>
+    </FlexRow>
   );
 };
 
@@ -126,7 +157,8 @@ export const ControlledTierCard = (props: {
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const ctDisplayName = AccessTierDisplayNames.Controlled;
 
-  const { enableComplianceTraining } = serverConfigStore.get().config;
+  const { enableComplianceTraining, enableControlledTierTrainingRenewal } =
+    serverConfigStore.get().config;
 
   return (
     <FlexRow
@@ -154,7 +186,7 @@ export const ControlledTierCard = (props: {
             </div>
             <div style={styles.requestAccess}>
               <Button
-                onClick={handleClickSupportButton(institutionRequestAccessUrl)}
+                onClick={handleRequestAccessButton(institutionRequestAccessUrl)}
               >
                 Request Access
               </Button>
@@ -196,9 +228,12 @@ export const ControlledTierCard = (props: {
           )}
         {enableComplianceTraining &&
           pageMode === DARPageMode.ANNUAL_RENEWAL &&
-          isEligible && (
+          isEligible &&
+          (enableControlledTierTrainingRenewal ? (
             <ModulesForAnnualRenewal profile={profile} modules={[ctModule]} />
-          )}
+          ) : (
+            <TemporaryTrainingModule {...{ profile }} />
+          ))}
       </FlexColumn>
     </FlexRow>
   );

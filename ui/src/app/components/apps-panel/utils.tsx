@@ -1,6 +1,7 @@
 import {
   AppStatus,
   AppType,
+  ConfigResponse,
   CreateAppRequest,
   DiskType,
   RuntimeStatus,
@@ -60,8 +61,21 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
 };
 
+export const defaultRStudioConfig: CreateAppRequest = {
+  appType: AppType.RSTUDIO,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.Standard,
+  },
+};
+
 export const isVisible = (status: AppStatus): boolean =>
-  status && ![AppStatus.DELETED].includes(status);
+  status && status !== AppStatus.DELETED;
 
 export const shouldShowApp = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);
@@ -143,14 +157,10 @@ export const toUserEnvironmentStatusByAppType = (
   status: AppStatus | RuntimeStatus,
   appType: UIAppType
 ): UserEnvironmentStatus =>
-  cond<UserEnvironmentStatus>(
-    [
-      appType === UIAppType.CROMWELL,
-      () => fromUserAppStatus(status as AppStatus),
-    ],
-    [
-      appType === UIAppType.JUPYTER,
-      () => fromRuntimeStatus(status as RuntimeStatus),
-    ],
-    () => UserEnvironmentStatus.UNKNOWN
-  );
+  appType === UIAppType.JUPYTER
+    ? fromRuntimeStatus(status as RuntimeStatus)
+    : fromUserAppStatus(status as AppStatus);
+
+export const showAppsPanel = (config: ConfigResponse) => {
+  return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
+};

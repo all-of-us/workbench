@@ -35,20 +35,36 @@ host: api.pmi-ops.org
 securityDefinitions:
   aou_oauth:
     x-aou-note: |
-      Establish the fact that *some endpoints* are OAuth protected
-      by defining an `aou_oauth` security mode, which we'll assigning
-      to any protected endpoints below.
+      Users authenticate with our API using a Google-issued OIDC access token.
 
-      TODO: Vet/fix this token and/or authorization URL to work in practice.
-      These are currently included simply to satisfy the Swagger specification,
-      as this is not directly used to dictate oauth details (just used to
-      annotate which methods require oauth).
+      This is a non-standard use of Swagger 2.0's oauth2 type. The aou_auth
+      entry under security (below) serves to establish the fact
+      that all endpoints are protected. This annotation ensures that client
+      libraries know to send bearer tokens when calling, but otherwise only
+      provides a minimal OAuth2 implementation. Future Swagger versions may
+      provide a better mapping to our authorization and authentication flows.
 
-      The aou_auth entry under security (below) serves to establish the fact
-      that all endpoints are protected: this annotation ensures that client
-      libraries know to send bearer tokens when calling
+      We use the OAuth2 authorization code grant with the PKCE extension
+      (https://oauth.net/2/pkce/) on public clients
+      (https://oauth.net/2/client-types/). However, Google only supports the
+      authorization code grant for confidential clients. To enable public client
+      access, we provide an endpoint that forwards token-related requests to
+      Google with the client secret added.
+
+      Because we do not provide a full OAuth implementation, adding the scope
+      property is at best documentation and at worst may lead to unexpected
+      behavior. Instead, we document them here.
+
+      Required Google scopes:
+      - https://www.googleapis.com/auth/userinfo.email
+      - openid
+      - https://www.googleapis.com/auth/userinfo.profile
+
+      In addition to the above, the following scope is required for endpoints
+      that leverage billing information:
+      - https://www.googleapis.com/auth/cloud-billing
     authorizationUrl: ''
-    tokenUrl: ''
+    tokenUrl: /oauth2/token
     type: oauth2
     flow: accessCode
 schemes:
@@ -1028,75 +1044,6 @@ paths:
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
         - in: path
-          name: diskName
-          description: diskName
-          type: string
-          required: true
-        - in: query
-          name: diskSize
-          type: integer
-          description: Update disk disk Size
-          required: true
-      responses:
-        "200":
-          description: Persistent disk update request accepted
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        "404":
-          description: Bad Request
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  "/v1/disks/{workspaceNamespace}":
-    get:
-      summary: Get the user's workspace persistent disk.
-      description: Returns the current user's latest created persistent disk, if any, which has been created
-        for the given workspace.
-      operationId: getDisk
-      tags:
-        - disk
-      parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: The persistent disk for this user and workspace.
-          schema:
-            "$ref": "#/definitions/Disk"
-        404:
-          description: No persistent disk exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-    delete:
-      summary: Delete a persistent disk.
-      description: Delete the current user's latest created persistent disk
-      operationId: deleteDisk
-      tags:
-        - disk
-      parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-        - in: query
-          name: diskName
-          description: diskName
-          type: string
-          required: true
-      responses:
-        200:
-          description: Success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        404:
-          description: No persistent disk exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-    patch:
-      summary: Updates the configuration of a persistent disk
-      description: In order to update the configuration of a persistent disk, it must first be ready
-      operationId: updateDisk
-      tags:
-        - disk
-      parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-        - in: query
           name: diskName
           description: diskName
           type: string
@@ -4720,6 +4667,20 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable adding ConceptSets to CohortBuilder.
+      enableControlledTierTrainingRenewal:
+        type: boolean
+        default: true
+        description: >
+          Whether users are directed to complete Controlled Tier Training renewal.
+          If false, hide or add text indicating that it is not currently available.
+      enableCromwellGKEApp:
+        type: boolean
+        default: false
+        description: Whether users are able to use the Cromwell GKE app.
+      enableRStudioGKEApp:
+        type: boolean
+        default: false
+        description: Whether users are able to use the RStudio GKE app.
 
   RuntimeImage:
     type: object
@@ -6475,26 +6436,6 @@ definitions:
           type: integer
           description: if the error is associated with an external API call, the error code will be propagated here
 
-  DiskConfig:
-    description: The configuration of a persistent disk, returned in runtime responses
-    type: object
-    required:
-      - name
-      - size
-      - diskType
-      - blockSize
-    properties:
-      name:
-        type: string
-        description: Name of the persistent disk
-      size:
-        type: integer
-        description: Size of persistent disk in GB
-      diskType:
-        $ref: "#/definitions/DiskType"
-      blockSize:
-        type: integer
-        description: Block size of persistent disk in bytes
   UpdateRuntimeRequest:
     type: object
     required:
@@ -6502,6 +6443,7 @@ definitions:
     properties:
       runtime:
         "$ref": "#/definitions/Runtime"
+
   UpdateDiskRequest:
     description: "Updates an existing persistent disk"
     type: object
