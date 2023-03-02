@@ -52,12 +52,6 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   }
 
   @Override
-  public void propagateTierAccessToTerra(Agent agent) {
-    // for each tier
-      groupsApi.setGroupMembership(...)
-  }
-
-  @Override
   public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent, boolean shouldPropagateToTerra) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
@@ -89,7 +83,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
    */
   @Override
   public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
-    return updateUserAccessTiers(dbUser, agent, true)
+    return updateUserAccessTiers(dbUser, agent, true);
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {

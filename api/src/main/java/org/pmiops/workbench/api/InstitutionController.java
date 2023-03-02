@@ -4,6 +4,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessSyncService;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.model.DbUser;
@@ -27,15 +28,18 @@ public class InstitutionController implements InstitutionApiDelegate {
   private final InstitutionService institutionService;
   private final Provider<DbUser> userProvider;
   private final AccessSyncService accessSyncService;
+  private final AccessTierService accessTierService;
 
   @Autowired
   InstitutionController(
       final InstitutionService institutionService,
       final Provider<DbUser> userProvider,
-      final AccessSyncService accessSyncService) {
+      final AccessSyncService accessSyncService,
+      final AccessTierService accessTierService) {
     this.institutionService = institutionService;
     this.userProvider = userProvider;
     this.accessSyncService = accessSyncService;
+    this.accessTierService = accessTierService;
   }
 
   private Institution getInstitutionImpl(final String shortName) {
@@ -118,7 +122,7 @@ public class InstitutionController implements InstitutionApiDelegate {
         .getAffiliatedUsers(shortName)
         .forEach(
             u -> accessSyncService.updateUserAccessTiers(u, Agent.asAdmin(userProvider.get())));
-    accessSyncService.propagateTierAccessToTerra(Agent.asAdmin(userProvider.get()))
+    accessTierService.propagateAllAuthDomainMembership();
     return ResponseEntity.ok(institution);
   }
 

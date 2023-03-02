@@ -14,7 +14,10 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.sam.api.GroupApi;
+import org.pmiops.workbench.sam.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   private final UserAccessTierDao userAccessTierDao;
 
   private final FireCloudService fireCloudService;
+  private final SamApiClientFactory samApiClientFactory;
 
   private static final Logger log = Logger.getLogger(AccessTierServiceImpl.class.getName());
 
@@ -34,11 +38,13 @@ public class AccessTierServiceImpl implements AccessTierService {
       Clock clock,
       AccessTierDao accessTierDao,
       UserAccessTierDao userAccessTierDao,
-      FireCloudService fireCloudService) {
+      FireCloudService fireCloudService,
+      SamApiClientFactory samApiClientFactory) {
     this.clock = clock;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
     this.fireCloudService = fireCloudService;
+    this.samApiClientFactory = samApiClientFactory;
   }
 
   /**
@@ -73,8 +79,6 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
-    // addToAuthDomainIdempotent(user, accessTier);
-
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
 
@@ -107,8 +111,6 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
-    // removeFromAuthDomainIdempotent(user, accessTier);
-
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
         .filter(entry -> entry.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
@@ -120,6 +122,7 @@ public class AccessTierServiceImpl implements AccessTierService {
                         .setLastUpdated(now())));
   }
 
+  @Override
   public void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
@@ -131,6 +134,7 @@ public class AccessTierServiceImpl implements AccessTierService {
     }
   }
 
+  @Override
   public void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
     final String username = dbUser.getUsername();
     final String authDomainName = accessTier.getAuthDomainName();
@@ -140,6 +144,24 @@ public class AccessTierServiceImpl implements AccessTierService {
           String.format(
               "Removed user %s from auth domain for tier '%s'",
               username, accessTier.getShortName()));
+    }
+  }
+
+  private void setAuthDomainMembership(String authDomainName, List<String> memberEmails) {
+    final GroupApi api = new GroupApi(samApiClientFactory.newApiClient());
+    try {
+      api.overwriteGroupPolicyEmails(memberEmails, authDomainName, "member");
+    } catch (ApiException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
+  @Override
+  public void propagateAllAuthDomainMembership() {
+    for (DbAccessTier accessTier : accessTierDao.findAll()) {
+      List <String> userEmails = userAccessTierDao.getAllByAccessTier(accessTier).stream()
+      .map(DbUserAccessTier::getUser).map(DbUser::getUsername).collect(Collectors.toList());
+      setAuthDomainMembership(accessTier.getShortName(), userEmails);
     }
   }
 

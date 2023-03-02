@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -54,16 +56,21 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final UserService userService;
   private final AccessModuleService accessModuleService;
   private final AccessSyncService accessSyncService;
+  private final AccessTierService accessTierService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
-      AccessModuleService accessModuleService) {
+      AccessModuleService accessModuleService,
+      AccessSyncService accessSyncService,
+      AccessTierService accessTierService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
+    this.accessSyncService = accessSyncService;
+    this.accessTierService = accessTierService;
   }
 
   @Override
@@ -147,7 +154,7 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
       }
     }
 
-    accessSyncService.propagateTierAccessToTerra(Agent.asSystem())
+    accessTierService.propagateAllAuthDomainMembership();
 
     if (errorCount > 0) {
       log.severe(

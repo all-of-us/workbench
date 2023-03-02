@@ -44,6 +44,9 @@ public interface AccessTierService {
    */
   void removeUserFromTier(DbUser user, DbAccessTier accessTier);
 
+  void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier);
+  void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier);
+  void propagateAllAuthDomainMembership();
   /**
    * Return the list of tiers a user has access to: those where a DbUserAccessTier exists with
    * status ENABLED

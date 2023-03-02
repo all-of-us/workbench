@@ -44,9 +44,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorReport'
-
+  /api/groups/v1/{groupName}/{policyName}:
+    get:
+      tags:
+        - Group
+      summary: Get email addresses for members of the policy
+      operationId: GetGroupPolicyEmails
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+      responses:
+        200:
+          description: Email addresses in the policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfEmails'
+        404:
+          description: Group could not be found or you do not have the required permissions
+            on this group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    put:
+      tags:
+        - Group
+      summary: Overwrite email addresses of members of the policy
+      operationId: OverwriteGroupPolicyEmails
+      parameters:
+        - name: groupName
+          in: path
+          description: Name of group
+          required: true
+          schema:
+            type: string
+        - name: policyName
+          in: path
+          description: Name of policy
+          required: true
+          schema:
+            type: string
+            enum:
+              - member
+              - admin
+      requestBody:
+        description: The list of emails
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/ArrayOfEmails'
+        required: true
+      responses:
+        201:
+          description: Policy successfully updated
+          content: {}
+        404:
+          description: Group does not exist or you are not a member of the policy
+            for the group
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: emailAddresses
 components:
   schemas:
+    ArrayOfEmails:
+      type: array
+      description: An array of email addresses
+      example:
+        - person@company.com
+        - group_name@company.com
+        - foo@bar.com
+      items:
+        type: string
     ErrorReport:
       required:
         - causes
