@@ -75,7 +75,7 @@ export default class SelectMenu extends BaseMenu {
         return;
       }
       if (maxAttempts <= 0) {
-        return;
+        throw Error('maxAttempts reached in select-menu.open().click()');
       }
       maxAttempts--;
       await this.page.waitForTimeout(1000).then(click); // one second pause before try again
