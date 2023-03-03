@@ -175,6 +175,12 @@ export const WorkspaceNavBar = fp.flow(
     if (environment.showNewAnalysisTab && tabs.length === 3) {
       tabs.push({ name: 'Analysis (New)', link: 'apps' });
     }
+    if (
+      serverConfigStore.get().config.enableDataExplorer &&
+      !tabs.find((tab) => tab.name === 'Data Explorer')
+    ) {
+      tabs.push({ name: 'Data Explorer', link: 'data-explorer' });
+    }
   }, []);
 
   const appsTabStyle = (selected) => {

@@ -121,7 +121,8 @@
     "enableConceptSetsInCohortBuilder": true,
     "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": true
+    "enableRStudioGKEApp": true,
+    "enableDataExplorer": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
