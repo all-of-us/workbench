@@ -54,6 +54,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -147,6 +148,7 @@ public class WorkspaceAdminServiceTest {
     DataSetMapper.class,
     FirecloudMapper.class,
     LeonardoApiClient.class,
+    SamApiClientFactory.class,
     UserMapper.class,
     UserService.class,
     WorkspaceAuthService.class,

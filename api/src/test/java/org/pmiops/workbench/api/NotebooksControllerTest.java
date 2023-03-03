@@ -32,6 +32,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -89,6 +90,7 @@ public class NotebooksControllerTest {
 
   @MockBean private NotebooksService mockNotebookService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
+  @MockBean private SamApiClientFactory samApiClientFactory;
 
   @Autowired private CloudStorageClient mockCloudStorageClient;
   @Autowired private FireCloudService mockFireCloudService;

@@ -73,6 +73,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Cohort;
@@ -217,6 +218,7 @@ public class CohortsControllerTest {
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
     ReviewQueryBuilder.class,
+    SamApiClientFactory.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,

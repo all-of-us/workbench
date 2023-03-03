@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -43,12 +45,16 @@ public class CloudTaskUserControllerTest {
   @Autowired private UserDao userDao;
 
   @Autowired private AccessModuleService mockAccessModuleService;
+  @Autowired private AccessSyncService mockAccessSyncService;
+  @Autowired private AccessTierService mockAccessTierService;
   @Autowired private UserService mockUserService;
 
   @TestConfiguration
   @Import({FakeClockConfiguration.class, CloudTaskUserController.class})
   @MockBean({
     AccessModuleService.class,
+    AccessSyncService.class,
+    AccessTierService.class,
     CloudResourceManagerService.class,
     UserService.class,
   })
@@ -103,10 +109,14 @@ public class CloudTaskUserControllerTest {
     // we only sync 2FA users with completed 2FA
     verify(mockUserService).syncTwoFactorAuthStatus(userA, Agent.asSystem());
 
-    // we sync DUCC for all users
-    verify(mockUserService).syncDuccVersionStatus(userA, Agent.asSystem());
-    verify(mockUserService).syncDuccVersionStatus(userB, Agent.asSystem());
+    // we sync access for all users
+    verify(mockAccessSyncService).updateUserAccessTiers(userA, Agent.asSystem(), false);
+    verify(mockAccessSyncService).updateUserAccessTiers(userB, Agent.asSystem(), false);
+
+    verify(mockAccessTierService).propagateAllAuthDomainMembership();
 
     verifyNoMoreInteractions(mockUserService);
+    verifyNoMoreInteractions(mockAccessSyncService);
+    verifyNoMoreInteractions(mockAccessTierService);
   }
 }

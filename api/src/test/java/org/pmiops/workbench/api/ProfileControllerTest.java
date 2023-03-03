@@ -69,6 +69,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.InstitutionServiceImpl;
@@ -140,6 +141,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ShibbolethService mockShibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
+  @MockBean private SamApiClientFactory samApiClientFactory;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private AccessModuleService accessModuleService;

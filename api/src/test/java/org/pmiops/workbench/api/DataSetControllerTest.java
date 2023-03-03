@@ -105,6 +105,7 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
@@ -215,6 +216,7 @@ public class DataSetControllerTest {
   @MockBean private GenomicExtractionService mockGenomicExtractionService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean BucketAuditQueryService bucketAuditQueryService;
+  @MockBean private SamApiClientFactory samApiClientFactory;
 
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)

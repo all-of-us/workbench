@@ -63,6 +63,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -222,6 +223,7 @@ public class RuntimeControllerTest {
   @MockBean UserServiceAuditor mockUserServiceAuditor;
   @MockBean WorkspaceAuthService mockWorkspaceAuthService;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
+  @MockBean SamApiClientFactory samApiClientFactory;
 
   @Qualifier(LeonardoConfig.USER_RUNTIMES_API)
   @MockBean

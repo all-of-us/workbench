@@ -1,5 +1,7 @@
 package org.pmiops.workbench.access;
 
+import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -16,6 +19,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.sam.ApiClient;
 import org.pmiops.workbench.sam.ApiException;
 import org.pmiops.workbench.sam.api.GroupApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +152,17 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   private void setAuthDomainMembership(String authDomainName, List<String> memberEmails) {
-    final GroupApi api = new GroupApi(samApiClientFactory.newApiClient());
+    final List<String> SCOPES =
+        ImmutableList.of(
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email");
+    final ApiClient client = samApiClientFactory.newApiClient();
+    try {
+      client.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    final GroupApi api = new GroupApi(client);
     try {
       api.overwriteGroupPolicyEmails(memberEmails, authDomainName, "member");
     } catch (ApiException e) {
