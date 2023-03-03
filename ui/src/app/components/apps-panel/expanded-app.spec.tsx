@@ -10,7 +10,6 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import {
   leoAppsApi,
   leoRuntimesApi,

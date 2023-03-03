@@ -11,7 +11,12 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
+import {
+  defaultRStudioConfig,
+  fromUserAppStatusWithFallback,
+  toAppType,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -184,6 +189,15 @@ describe('AppsPanel', () => {
         ).toBeTruthy();
 
         expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
+
+        const expandedApp = findExpandedApp(wrapper, UIAppType[appType]);
+        expect(expandedApp.exists()).toEqual(activeExpected);
+
+        if (activeExpected) {
+          expect(expandedApp.first().text()).toContain(
+            fromUserAppStatusWithFallback(status)
+          );
+        }
       }
     );
   });
