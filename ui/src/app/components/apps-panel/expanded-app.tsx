@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import {
-  faGear,
-  faPause,
-  faPlay,
-  faTrashCan,
-} from '@fortawesome/free-solid-svg-icons';
+import { faGear, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { UserAppEnvironment, Workspace } from 'generated/fetch';
@@ -189,21 +184,7 @@ const RStudioButtonRow = (props: {
           />
         </div>
       </TooltipTrigger>
-      <TooltipTrigger
-        disabled={false}
-        content='Support for pausing RStudio is not yet available'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={true}
-            onClick={() => {}}
-            icon={faPause}
-            buttonText='Pause'
-            data-test-id='rstudio-pause-button'
-          />
-        </div>
-      </TooltipTrigger>
+      <PauseUserAppButton {...{ userApp }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='An RStudio app exists or is being created'
