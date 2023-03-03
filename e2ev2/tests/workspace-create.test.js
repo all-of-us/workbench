@@ -51,7 +51,7 @@ browserTest('create a workspace', async browser => {
   const workspacePageTitleLink =
     await page.waitForSelector('a[href="/workspaces"] + span + div > a')
   await expect(workspacePageTitleLink.evaluate(e => e.innerText)).resolves.toBe(wsName)
-  await page.click('[aria-label="Open Actions Menu"]')
+  await page.waitForSelector('[aria-label="Open Actions Menu"]').then(eh => eh.click())
   // side menu pops up
   await page.click('[aria-label="Delete"]')
   // modal confirmation pops up
