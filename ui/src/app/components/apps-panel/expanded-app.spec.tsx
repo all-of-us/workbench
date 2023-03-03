@@ -72,19 +72,9 @@ describe('ExpandedApp', () => {
     });
   });
 
-  test.each([
-    ['should', RuntimeStatus.Running, true],
-    ['should', RuntimeStatus.Stopped, true],
-
-    ['should not', RuntimeStatus.Stopping, false],
-    ['should not', RuntimeStatus.Starting, false],
-    ['should not', RuntimeStatus.Error, false],
-    ['should not', RuntimeStatus.Unknown, false],
-    ['should not', undefined, false],
-    ['should not', null, false],
-  ])(
-    '%s allow deletion when the Jupyter app status is %s',
-    async (shouldOrNot, status, expectedCanDelete) => {
+  test.each([RuntimeStatus.Running, RuntimeStatus.Stopped])(
+    'should allow deletion when the Jupyter app status is %s',
+    async (status) => {
       runtimeStub.runtime.status = status;
 
       const wrapper = await component(UIAppType.JUPYTER, undefined);
@@ -95,17 +85,36 @@ describe('ExpandedApp', () => {
       });
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
+      expect(disabled).toBeFalsy();
 
-      if (expectedCanDelete) {
-        expect(disabled).toBeFalsy();
+      const { onClick } = deletion.props();
+      await onClick();
 
-        const { onClick } = deletion.props();
-        await onClick();
+      expect(onClickDeleteRuntime).toHaveBeenCalled();
+    }
+  );
 
-        expect(onClickDeleteRuntime).toHaveBeenCalled();
-      } else {
-        expect(disabled).toBeTruthy();
-      }
+  test.each([
+    RuntimeStatus.Stopping,
+    RuntimeStatus.Starting,
+    RuntimeStatus.Error,
+    RuntimeStatus.Unknown,
+    undefined,
+    null,
+  ])(
+    'should not allow deletion when the Jupyter app status is %s',
+    async (status) => {
+      runtimeStub.runtime.status = status;
+
+      const wrapper = await component(UIAppType.JUPYTER, undefined);
+      expect(wrapper.exists()).toBeTruthy();
+
+      const deletion = wrapper.find({
+        'data-test-id': 'Jupyter-delete-button',
+      });
+      expect(deletion.exists()).toBeTruthy();
+      const { disabled } = deletion.props();
+      expect(disabled).toBeTruthy();
     }
   );
 
