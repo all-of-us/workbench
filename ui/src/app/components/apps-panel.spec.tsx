@@ -307,7 +307,23 @@ describe('AppsPanel', () => {
 
     expect(
       rstudioPanel
-        .find({ 'data-test-id': `rstudio-settings-button` })
+        .find({ 'data-test-id': 'RStudio-settings-button' })
+        .prop('disabled')
+    ).toBeTruthy();
+  });
+
+  it('should not be possible to configure a Cromwell app', async () => {
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+    await findUnexpandedApp(wrapper, 'Cromwell').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    const cromwellPanel = findExpandedApp(wrapper, 'Cromwell');
+
+    expect(
+      cromwellPanel
+        .find({ 'data-test-id': 'Cromwell-settings-button' })
         .prop('disabled')
     ).toBeTruthy();
   });

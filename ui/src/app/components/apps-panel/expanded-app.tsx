@@ -127,7 +127,11 @@ const CromwellButtonRow = (props: {
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
-          <SettingsButton disabled={true} onClick={() => {}} />
+          <SettingsButton
+            disabled={true}
+            onClick={() => {}}
+            data-test-id='Cromwell-settings-button'
+          />
         </div>
       </TooltipTrigger>
       <PauseUserAppButton {...{ userApp }} />
@@ -180,7 +184,7 @@ const RStudioButtonRow = (props: {
           <SettingsButton
             disabled={true}
             onClick={() => {}}
-            data-test-id='rstudio-settings-button'
+            data-test-id='RStudio-settings-button'
           />
         </div>
       </TooltipTrigger>
