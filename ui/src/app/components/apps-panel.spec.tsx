@@ -152,24 +152,29 @@ describe('AppsPanel', () => {
   // these tests assume that there are no Jupyter runtimes
   // so what these tests actually show is whether a GKE app is an ActiveApp
   test.each([
-    [AppStatus.RUNNING, true],
-    [AppStatus.STOPPED, true],
-    [AppStatus.STOPPING, true],
-    [AppStatus.STARTING, true],
-    [AppStatus.PROVISIONING, true],
-    [AppStatus.DELETING, true],
-    [AppStatus.STATUSUNSPECIFIED, true],
-    [AppStatus.ERROR, true],
+    [AppType.CROMWELL, AppStatus.RUNNING, true],
+    [AppType.CROMWELL, AppStatus.STOPPED, true],
+    [AppType.CROMWELL, AppStatus.STOPPING, true],
+    [AppType.CROMWELL, AppStatus.STARTING, true],
+    [AppType.CROMWELL, AppStatus.PROVISIONING, true],
+    [AppType.CROMWELL, AppStatus.DELETING, true],
+    [AppType.CROMWELL, AppStatus.STATUSUNSPECIFIED, true],
+    [AppType.CROMWELL, AppStatus.ERROR, true],
 
     // not visible [isVisible() = false]
-    [AppStatus.DELETED, false],
+    [AppType.CROMWELL, AppStatus.DELETED, false],
 
-    [null, false],
+    [AppType.CROMWELL, null, false],
+
+    // RStudio should have the same behavior.  Choose a few to demonstrate.
+
+    [AppType.RSTUDIO, AppStatus.RUNNING, true],
+    [AppType.RSTUDIO, AppStatus.DELETED, false],
   ])(
-    'should render / not render ActiveApps and AvailableApps when a GKE app status is %s',
-    async (status, activeExpected) => {
+    'should render / not render ActiveApps and AvailableApps when %s status is %s',
+    async (appType, status, activeExpected) => {
       runtimeStub.runtime.status = RuntimeStatus.Deleted;
-      appsStub.listAppsResponse = [{ status, appType: AppType.CROMWELL }];
+      appsStub.listAppsResponse = [{ status, appType }];
 
       const wrapper = await component();
       expect(wrapper.exists()).toBeTruthy();
