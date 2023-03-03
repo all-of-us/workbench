@@ -13,8 +13,8 @@ import {
 import {
   leoAppsApi,
   leoRuntimesApi,
+  registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
-import { registerApiClient as leoRegisterApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { AppsApi as LeoAppsApi, RuntimesApi } from 'notebooks-generated/fetch';
@@ -72,6 +72,84 @@ describe('ExpandedApp', () => {
     });
   });
 
+  it('should allow pausing when the Jupyter app is Running', async () => {
+    runtimeStub.runtime.status = RuntimeStatus.Running;
+
+    const wrapper = await component(UIAppType.JUPYTER, undefined);
+    expect(wrapper.exists()).toBeTruthy();
+
+    const pauseButton = wrapper.find({
+      'data-test-id': 'apps-panel-button-Pause',
+    });
+    expect(pauseButton.exists()).toBeTruthy();
+    const { disabled } = pauseButton.props();
+    expect(disabled).toBeFalsy();
+
+    const pauseSpy = jest.spyOn(leoRuntimesApi(), 'stopRuntime');
+    const { onClick } = pauseButton.props();
+    await onClick();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(pauseSpy).toHaveBeenCalledWith(
+      workspace.googleProject,
+      runtimeStub.runtime.runtimeName
+    );
+  });
+
+  it('should allow resuming when the Jupyter app is Stopped', async () => {
+    runtimeStub.runtime.status = RuntimeStatus.Stopped;
+
+    const wrapper = await component(UIAppType.JUPYTER, undefined);
+    expect(wrapper.exists()).toBeTruthy();
+
+    const pauseButton = wrapper.find({
+      'data-test-id': 'apps-panel-button-Resume',
+    });
+    expect(pauseButton.exists()).toBeTruthy();
+    const { disabled } = pauseButton.props();
+    expect(disabled).toBeFalsy();
+
+    const resumeSpy = jest.spyOn(leoRuntimesApi(), 'startRuntime');
+    const { onClick } = pauseButton.props();
+    await onClick();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(resumeSpy).toHaveBeenCalledWith(
+      workspace.googleProject,
+      runtimeStub.runtime.runtimeName
+    );
+  });
+
+  test.each([
+    [RuntimeStatus.Stopping, 'Pausing'],
+    [RuntimeStatus.Starting, 'Resuming'],
+
+    [RuntimeStatus.Deleted, 'Pause'],
+    [RuntimeStatus.Deleting, 'Pause'],
+    [RuntimeStatus.Unknown, 'Pause'],
+    [RuntimeStatus.Error, 'Pause'],
+    [RuntimeStatus.Creating, 'Pause'],
+    [RuntimeStatus.Updating, 'Pause'],
+
+    [undefined, 'Pause'],
+    [null, 'Pause'],
+  ])(
+    'should not allow clicking pause/resume when the Jupyter app status is %s',
+    async (status, buttonText) => {
+      runtimeStub.runtime.status = status;
+
+      const wrapper = await component(UIAppType.JUPYTER, undefined);
+      expect(wrapper.exists()).toBeTruthy();
+
+      const pauseButton = wrapper.find({
+        'data-test-id': `apps-panel-button-${buttonText}`,
+      });
+      expect(pauseButton.exists()).toBeTruthy();
+      const { disabled } = pauseButton.props();
+      expect(disabled).toBeTruthy();
+    }
+  );
+
   test.each([RuntimeStatus.Running, RuntimeStatus.Stopped])(
     'should allow deletion when the Jupyter app status is %s',
     async (status) => {
@@ -118,181 +196,145 @@ describe('ExpandedApp', () => {
     }
   );
 
-  test.each([
-    ['should', 'Pause', RuntimeStatus.Running, true, false],
-    ['should', 'Resume', RuntimeStatus.Stopped, false, true],
+  const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO];
+  describe.each(gkeAppTypes)('GKE App %s', (appType) => {
+    it('should allow clicking Pause when the app status is RUNNING', async () => {
+      const appName = 'my-app';
 
-    ['should not', 'Pausing', RuntimeStatus.Stopping, false, false],
-    ['should not', 'Resuming', RuntimeStatus.Starting, false, false],
-
-    ['should not', 'Pause', RuntimeStatus.Deleted, false, false],
-    ['should not', 'Pause', RuntimeStatus.Deleting, false, false],
-    ['should not', 'Pause', RuntimeStatus.Unknown, false, false],
-    ['should not', 'Pause', RuntimeStatus.Error, false, false],
-    ['should not', 'Pause', RuntimeStatus.Creating, false, false],
-    ['should not', 'Pause', RuntimeStatus.Updating, false, false],
-
-    ['should not', 'Pause', undefined, false, false],
-    ['should not', 'Pause', null, false, false],
-  ])(
-    '%s allow clicking %s when the Jupyter app status is %s',
-    async (
-      shouldOrNot,
-      buttonText,
-      status,
-      expectedCanPause,
-      expectedCanResume
-    ) => {
-      runtimeStub.runtime.status = status;
-
-      const wrapper = await component(UIAppType.JUPYTER, undefined);
+      const wrapper = await component(appType, {
+        appName,
+        googleProject,
+        status: AppStatus.RUNNING,
+      });
       expect(wrapper.exists()).toBeTruthy();
 
       const pauseButton = wrapper.find({
-        'data-test-id': `apps-panel-button-${buttonText}`,
+        'data-test-id': 'apps-panel-button-Pause',
       });
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
+      expect(disabled).toBeFalsy();
 
-      if (expectedCanPause) {
-        expect(disabled).toBeFalsy();
+      const pauseSpy = jest.spyOn(leoAppsApi(), 'stopApp');
+      const { onClick } = pauseButton.props();
+      await onClick();
 
-        const pauseSpy = jest.spyOn(leoRuntimesApi(), 'stopRuntime');
-        const { onClick } = pauseButton.props();
-        await onClick();
-        await waitOneTickAndUpdate(wrapper);
+      expect(pauseSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
+    });
 
-        expect(pauseSpy).toHaveBeenCalledWith(
-          workspace.googleProject,
-          runtimeStub.runtime.runtimeName
-        );
-      } else if (expectedCanResume) {
-        expect(disabled).toBeFalsy();
+    it('should allow clicking Resume when the app status is STOPPED', async () => {
+      const appName = 'my-app';
 
-        const resumeSpy = jest.spyOn(leoRuntimesApi(), 'startRuntime');
-        const { onClick } = pauseButton.props();
-        await onClick();
-        await waitOneTickAndUpdate(wrapper);
+      const wrapper = await component(appType, {
+        appName,
+        googleProject,
+        status: AppStatus.STOPPED,
+      });
+      expect(wrapper.exists()).toBeTruthy();
 
-        expect(resumeSpy).toHaveBeenCalledWith(
-          workspace.googleProject,
-          runtimeStub.runtime.runtimeName
-        );
-      } else {
+      const pauseButton = wrapper.find({
+        'data-test-id': 'apps-panel-button-Resume',
+      });
+      expect(pauseButton.exists()).toBeTruthy();
+      const { disabled } = pauseButton.props();
+      expect(disabled).toBeFalsy();
+
+      const resumeSpy = jest.spyOn(leoAppsApi(), 'startApp');
+      const { onClick } = pauseButton.props();
+      await onClick();
+
+      expect(resumeSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
+    });
+
+    test.each([
+      [AppStatus.STARTING, 'Resuming'],
+      [AppStatus.STOPPING, 'Pausing'],
+
+      [AppStatus.DELETED, 'Pause'],
+      [AppStatus.DELETING, 'Pause'],
+      [AppStatus.ERROR, 'Pause'],
+      [AppStatus.PROVISIONING, 'Pause'],
+      [AppStatus.STATUSUNSPECIFIED, 'Pause'],
+
+      [undefined, 'Pause'],
+      [null, 'Pause'],
+    ])(
+      'should not allow clicking pause/resume when the app status is %s',
+      async (status, buttonText) => {
+        const appName = 'my-app';
+
+        const wrapper = await component(appType, {
+          appName,
+          googleProject,
+          status,
+        });
+        expect(wrapper.exists()).toBeTruthy();
+
+        const pauseButton = wrapper.find({
+          'data-test-id': `apps-panel-button-${buttonText}`,
+        });
+        expect(pauseButton.exists()).toBeTruthy();
+        const { disabled } = pauseButton.props();
         expect(disabled).toBeTruthy();
       }
-    }
-  );
+    );
 
-  test.each([
-    ['should', AppStatus.RUNNING, true],
-    ['should', AppStatus.ERROR, true],
-    ['should', AppStatus.STATUSUNSPECIFIED, true],
-
-    ['should not', AppStatus.STOPPED, false],
-    ['should not', AppStatus.STARTING, false],
-    ['should not', AppStatus.STOPPING, false],
-    ['should not', undefined, false],
-    ['should not', null, false],
-  ])(
-    '%s allow deletion when the Cromwell app status is %s',
-    async (shouldOrNot, status, expectedCanDelete) => {
-      const appName = 'my-cromwell';
+    test.each([
+      AppStatus.RUNNING,
+      AppStatus.ERROR,
+      AppStatus.STATUSUNSPECIFIED,
+    ])('should allow deletion when the app status is %s', async (status) => {
+      const appName = 'my-app';
       const deleteDiskWithUserApp = true; // always true currently
 
-      const wrapper = await component(UIAppType.CROMWELL, {
+      const wrapper = await component(appType, {
         appName,
         status,
-        appType: AppType.CROMWELL,
       });
       expect(wrapper.exists()).toBeTruthy();
 
       const deletion = wrapper.find({
-        'data-test-id': 'Cromwell-delete-button',
+        'data-test-id': `${appType}-delete-button`,
       });
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
+      expect(disabled).toBeFalsy();
 
-      if (expectedCanDelete) {
-        expect(disabled).toBeFalsy();
+      const deleteSpy = jest.spyOn(appsApi(), 'deleteApp');
+      const { onClick } = deletion.props();
+      await onClick();
 
-        const deleteSpy = jest.spyOn(appsApi(), 'deleteApp');
-        const { onClick } = deletion.props();
-        await onClick();
-
-        expect(deleteSpy).toHaveBeenCalledWith(
-          workspace.namespace,
-          appName,
-          deleteDiskWithUserApp
-        );
-      } else {
-        expect(disabled).toBeTruthy();
-      }
-    }
-  );
-
-  test.each([
-    ['should', 'Pause', AppStatus.RUNNING, true, false],
-    ['should', 'Resume', AppStatus.STOPPED, false, true],
-
-    ['should not', 'Resuming', AppStatus.STARTING, false, false],
-    ['should not', 'Pausing', AppStatus.STOPPING, false, false],
-
-    ['should not', 'Pause', AppStatus.DELETED, false, false],
-    ['should not', 'Pause', AppStatus.DELETING, false, false],
-    ['should not', 'Pause', AppStatus.ERROR, false, false],
-    ['should not', 'Pause', AppStatus.PROVISIONING, false, false],
-    ['should not', 'Pause', AppStatus.STATUSUNSPECIFIED, false, false],
-
-    ['should not', 'Pause', undefined, false, false],
-    ['should not', 'Pause', null, false, false],
-  ])(
-    '%s allow clicking %s when the Cromwell app status is %s',
-    async (
-      shouldOrNot,
-      buttonText,
-      status,
-      expectedCanPause,
-      expectedCanResume
-    ) => {
-      const appName = 'my-cromwell';
-
-      const wrapper = await component(UIAppType.CROMWELL, {
-        appType: AppType.CROMWELL,
+      expect(deleteSpy).toHaveBeenCalledWith(
+        workspace.namespace,
         appName,
-        googleProject,
-        status,
-      });
-      expect(wrapper.exists()).toBeTruthy();
+        deleteDiskWithUserApp
+      );
+    });
 
-      const pauseButton = wrapper.find({
-        'data-test-id': `apps-panel-button-${buttonText}`,
-      });
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
+    test.each([
+      AppStatus.STOPPED,
+      AppStatus.STARTING,
+      AppStatus.STOPPING,
+      undefined,
+      null,
+    ])(
+      'should not allow deletion when the app status is %s',
+      async (status) => {
+        const appName = 'my-app';
 
-      if (expectedCanPause) {
-        expect(disabled).toBeFalsy();
+        const wrapper = await component(appType, {
+          appName,
+          status,
+        });
+        expect(wrapper.exists()).toBeTruthy();
 
-        const pauseSpy = jest.spyOn(leoAppsApi(), 'stopApp');
-        const { onClick } = pauseButton.props();
-        await onClick();
-
-        expect(pauseSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
-      } else if (expectedCanResume) {
-        expect(disabled).toBeFalsy();
-
-        const resumeSpy = jest.spyOn(leoAppsApi(), 'startApp');
-        const { onClick } = pauseButton.props();
-        await onClick();
-
-        expect(resumeSpy).toHaveBeenCalledWith(
-          workspace.googleProject,
-          appName
-        );
-      } else {
+        const deletion = wrapper.find({
+          'data-test-id': `${appType}-delete-button`,
+        });
+        expect(deletion.exists()).toBeTruthy();
+        const { disabled } = deletion.props();
         expect(disabled).toBeTruthy();
       }
-    }
-  );
+    );
+  });
 });
