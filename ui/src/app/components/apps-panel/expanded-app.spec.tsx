@@ -4,7 +4,6 @@ import { mount } from 'enzyme';
 import {
   AppsApi,
   AppStatus,
-  AppType,
   NotebooksApi,
   RuntimeStatus,
   UserAppEnvironment,

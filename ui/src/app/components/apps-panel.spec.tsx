@@ -14,7 +14,6 @@ import {
 import {
   defaultRStudioConfig,
   fromUserAppStatusWithFallback,
-  toAppType,
   UIAppType,
 } from 'app/components/apps-panel/utils';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
