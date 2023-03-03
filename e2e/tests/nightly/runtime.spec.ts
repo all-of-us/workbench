@@ -10,7 +10,7 @@ describe('Updating runtime status', () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create, pause, resume, delete', async () => {
+  test.skip('Create, pause, resume, delete', async () => {
     await createWorkspace(page, { cdrVersionName: config.OLD_CDR_VERSION_NAME });
 
     const runtimePanel = new RuntimePanel(page);

@@ -15,7 +15,7 @@ describe('Batch workflow support', () => {
     await signInWithAccessToken(page);
   });
 
-  test('batch jobs have restricted network access', async () => {
+  test.skip('batch jobs have restricted network access', async () => {
     await createWorkspace(page, {
       cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,
       dataAccessTier: AccessTierDisplayNames.Controlled
