@@ -15,6 +15,7 @@ describe('Batch workflow support', () => {
     await signInWithAccessToken(page);
   });
 
+  //TODO: Refactor to contract test(s) https://precisionmedicineinitiative.atlassian.net/browse/RW-9658
   test.skip('batch jobs have restricted network access', async () => {
     await createWorkspace(page, {
       cdrVersionName: config.CONTROLLED_TIER_CDR_VERSION_NAME,

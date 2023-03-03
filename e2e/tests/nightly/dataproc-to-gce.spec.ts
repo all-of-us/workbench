@@ -15,6 +15,7 @@ describe('Updating runtime compute type', () => {
 
   const workspaceName = makeRandomName('e2eDataprocToGceTest');
 
+  //TODO: Refactor to contract test(s) https://precisionmedicineinitiative.atlassian.net/browse/RW-9658
   test.skip('Switch from dataproc to GCE', async () => {
     await findOrCreateWorkspace(page, {
       workspaceName,
