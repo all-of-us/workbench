@@ -97,35 +97,46 @@ describe('AppsPanel', () => {
   // these tests assume that there are no User GKE Apps
   // so what these tests actually show is whether Jupyter is an ActiveApp
   test.each([
-    [RuntimeStatus.Running, true],
-    [RuntimeStatus.Stopped, true],
-    [RuntimeStatus.Stopping, true],
-    [RuntimeStatus.Starting, true],
-    [RuntimeStatus.Creating, true],
-    [RuntimeStatus.Deleting, true],
-    [RuntimeStatus.Updating, true],
-
-    // not visible [isVisible() = false]
-
-    [RuntimeStatus.Deleted, false],
-    [RuntimeStatus.Error, false],
-
-    [null, false],
+    RuntimeStatus.Running,
+    RuntimeStatus.Stopped,
+    RuntimeStatus.Stopping,
+    RuntimeStatus.Starting,
+    RuntimeStatus.Creating,
+    RuntimeStatus.Deleting,
+    RuntimeStatus.Updating,
   ])(
-    'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
-    async (status, activeExpected) => {
+    'should render ActiveApps and AvailableApps when the runtime status is %s',
+    async (status) => {
       runtimeStub.runtime.status = status;
 
       const wrapper = await component();
       expect(wrapper.exists()).toBeTruthy();
 
       // sanity check: isVisible() is equivalent to activeExpected
-      expect(!!isVisible(status)).toBe(activeExpected);
+      expect(!!isVisible(status)).toBeTruthy();
 
       // no User GKE Apps, so there is always at least one Available app (Cromwell)
-      expect(findAvailableApps(wrapper, activeExpected).exists()).toBeTruthy();
+      expect(findAvailableApps(wrapper, true).exists()).toBeTruthy();
 
-      expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
+      expect(findActiveApps(wrapper).exists()).toBeTruthy();
+    }
+  );
+
+  test.each([RuntimeStatus.Deleted, RuntimeStatus.Error, null])(
+    'should not render ActiveApps and AvailableApps when the runtime status is %s',
+    async (status) => {
+      runtimeStub.runtime.status = status;
+
+      const wrapper = await component();
+      expect(wrapper.exists()).toBeTruthy();
+
+      // sanity check: isVisible() is equivalent to activeExpected
+      expect(!!isVisible(status)).toBeFalsy();
+
+      // no User GKE Apps, so there is always at least one Available app (Cromwell)
+      expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+
+      expect(findActiveApps(wrapper).exists()).toBeFalsy();
     }
   );
 
@@ -159,22 +170,17 @@ describe('AppsPanel', () => {
 
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
     test.each([
-      [AppStatus.RUNNING, true],
-      [AppStatus.STOPPED, true],
-      [AppStatus.STOPPING, true],
-      [AppStatus.STARTING, true],
-      [AppStatus.PROVISIONING, true],
-      [AppStatus.DELETING, true],
-      [AppStatus.STATUSUNSPECIFIED, true],
-      [AppStatus.ERROR, true],
-
-      // not visible [isVisible() = false]
-      [AppStatus.DELETED, false],
-
-      [null, false],
+      AppStatus.RUNNING,
+      AppStatus.STOPPED,
+      AppStatus.STOPPING,
+      AppStatus.STARTING,
+      AppStatus.PROVISIONING,
+      AppStatus.DELETING,
+      AppStatus.STATUSUNSPECIFIED,
+      AppStatus.ERROR,
     ])(
-      'should render / not render ActiveApps and AvailableApps when status is %s',
-      async (status, activeExpected) => {
+      'should render ActiveApps and AvailableApps when status is %s',
+      async (status) => {
         runtimeStub.runtime.status = RuntimeStatus.Deleted;
         appsStub.listAppsResponse = [{ status, appType }];
 
@@ -183,20 +189,35 @@ describe('AppsPanel', () => {
         await waitOneTickAndUpdate(wrapper);
 
         // no Jupyter runtimes, so there is always at least one Available app (Jupyter)
-        expect(
-          findAvailableApps(wrapper, activeExpected).exists()
-        ).toBeTruthy();
+        expect(findAvailableApps(wrapper, true).exists()).toBeTruthy();
 
-        expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
+        expect(findActiveApps(wrapper).exists()).toBeTruthy();
 
         const expandedApp = findExpandedApp(wrapper, UIAppType[appType]);
-        expect(expandedApp.exists()).toEqual(activeExpected);
+        expect(expandedApp.exists()).toBeTruthy();
+        expect(expandedApp.first().text()).toContain(
+          fromUserAppStatusWithFallback(status)
+        );
+      }
+    );
 
-        if (activeExpected) {
-          expect(expandedApp.first().text()).toContain(
-            fromUserAppStatusWithFallback(status)
-          );
-        }
+    test.each([AppStatus.DELETED, null])(
+      'should not render ActiveApps and AvailableApps when status is %s',
+      async (status) => {
+        runtimeStub.runtime.status = RuntimeStatus.Deleted;
+        appsStub.listAppsResponse = [{ status, appType }];
+
+        const wrapper = await component();
+        expect(wrapper.exists()).toBeTruthy();
+        await waitOneTickAndUpdate(wrapper);
+
+        // no Jupyter runtimes, so there is always at least one Available app (Jupyter)
+        expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+
+        expect(findActiveApps(wrapper).exists()).toBeFalsy();
+
+        const expandedApp = findExpandedApp(wrapper, UIAppType[appType]);
+        expect(expandedApp.exists()).toBeFalsy();
       }
     );
   });
