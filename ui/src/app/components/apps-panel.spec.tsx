@@ -435,20 +435,31 @@ describe('AppsPanel', () => {
     );
   });
 
-  it('should not show RStudio if the feature flag is disabled', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
+  test.each([
+    [true, true],
+    [true, false],
+    [false, true],
+    [false, false],
+  ])(
+    'should / should not show apps when the feature flags are Rstudio=%s, Cromwell=%s',
+    async (enableRStudioGKEApp, enableCromwellGKEApp) => {
+      serverConfigStore.set({
+        config: {
+          ...defaultServerConfig,
+          enableRStudioGKEApp,
+          enableCromwellGKEApp,
+        },
+      });
 
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableRStudioGKEApp: false,
-      },
-    });
+      const wrapper = await component();
+      await waitOneTickAndUpdate(wrapper);
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toBeFalsy();
-  });
+      expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
+        enableRStudioGKEApp
+      );
+      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toEqual(
+        enableCromwellGKEApp
+      );
+    }
+  );
 });

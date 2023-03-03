@@ -95,17 +95,17 @@ describe('ExpandedApp', () => {
         'data-test-id': 'Jupyter-delete-button',
       });
       expect(deletion.exists()).toBeTruthy();
-      const cursorStyle = deletion.prop('style').cursor;
+      const { disabled } = deletion.props();
 
       if (expectedCanDelete) {
-        expect(cursorStyle).not.toEqual('not-allowed');
+        expect(disabled).toBeFalsy();
 
         const { onClick } = deletion.props();
         await onClick();
 
         expect(onClickDeleteRuntime).toHaveBeenCalled();
       } else {
-        expect(cursorStyle).toEqual('not-allowed');
+        expect(disabled).toBeTruthy();
       }
     }
   );
@@ -203,10 +203,10 @@ describe('ExpandedApp', () => {
         'data-test-id': 'Cromwell-delete-button',
       });
       expect(deletion.exists()).toBeTruthy();
-      const cursorStyle = deletion.prop('style').cursor;
+      const { disabled } = deletion.props();
 
       if (expectedCanDelete) {
-        expect(cursorStyle).not.toEqual('not-allowed');
+        expect(disabled).toBeFalsy();
 
         const deleteSpy = jest.spyOn(appsApi(), 'deleteApp');
         const { onClick } = deletion.props();
@@ -218,7 +218,7 @@ describe('ExpandedApp', () => {
           deleteDiskWithUserApp
         );
       } else {
-        expect(cursorStyle).toEqual('not-allowed');
+        expect(disabled).toBeTruthy();
       }
     }
   );
