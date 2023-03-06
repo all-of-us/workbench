@@ -27,7 +27,7 @@ There are two commands that you should be aware of.
 
 First, in order to convert an mjml file to an html file, you can run:
 
-```mjml index.mjml index.html```
+```mjml index.mjml > index.html```
 
 If you want to update an html file everytime that an mjml file is updated, you can run:
 
