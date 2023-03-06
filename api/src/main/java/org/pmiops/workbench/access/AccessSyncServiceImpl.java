@@ -2,9 +2,10 @@ package org.pmiops.workbench.access;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierAccess;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {
     // If user does NOT have access to RT, they should not have access to any TIER
     if (!shouldGrantUserTierAccess(
-        dbUser, REQUIRED_MODULES_FOR_REGISTERED_TIER, REGISTERED_TIER_SHORT_NAME)) {
+        dbUser, getRequiredModulesForRegisteredTierAccess(), REGISTERED_TIER_SHORT_NAME)) {
       return Collections.emptyList();
     }
 
@@ -92,7 +93,9 @@ public class AccessSyncServiceImpl implements AccessSyncService {
         .ifPresent(
             tier -> {
               if (shouldGrantUserTierAccess(
-                  dbUser, REQUIRED_MODULES_FOR_CONTROLLED_TIER, CONTROLLED_TIER_SHORT_NAME)) {
+                  dbUser,
+                  getRequiredModulesForControlledTierAccess(),
+                  CONTROLLED_TIER_SHORT_NAME)) {
                 userAccessTiers.add(tier);
               }
             });
@@ -101,7 +104,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
   }
 
   private boolean shouldGrantUserTierAccess(
-      DbUser user, List<DbAccessModuleName> requiredModules, String tierShortName) {
+      DbUser user, Collection<DbAccessModuleName> requiredModules, String tierShortName) {
     boolean allStandardRequiredModulesCompliant =
         requiredModules.stream()
             .allMatch(moduleName -> accessModuleService.isModuleCompliant(user, moduleName));

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierAccess;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -66,7 +65,7 @@ public class DbAccessModule {
 
   @Transient
   public boolean getRequiredForRTAccess() {
-    return REQUIRED_MODULES_FOR_REGISTERED_TIER.contains(name);
+    return getRequiredModulesForRegisteredTierAccess().contains(name);
   }
 
   @Transient

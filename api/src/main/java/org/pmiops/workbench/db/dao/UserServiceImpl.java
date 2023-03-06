@@ -2,17 +2,17 @@ package org.pmiops.workbench.db.dao;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_CONTROLLED_TIER;
-import static org.pmiops.workbench.access.AccessUtils.REQUIRED_MODULES_FOR_REGISTERED_TIER;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForControlledTierRenewal;
+import static org.pmiops.workbench.access.AccessUtils.getRequiredModulesForRegisteredTierRenewal;
 
 import com.google.api.services.oauth2.model.Userinfo;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -823,20 +823,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /**
-   * Return the user's registered tier access expiration time, for the purpose of sending an access
-   * renewal reminder or expiration email.
+   * Return the user's access expiration time for a given set of modules, for the purpose of sending
+   * an access renewal reminder or expiration email.
    *
    * <p>First: ignore any bypassed modules. These are in compliance and do not need to be renewed.
    *
    * <p>Next: do all un-bypassed modules have expiration times? If yes, return the min (earliest).
-   * If no, either the AAR feature flag is not set or the user does not have access for reasons
-   * other than access renewal compliance. In either negative case, we should not send an email.
+   * If no, the user does not have access for reasons other than access renewal compliance. In this
+   * case, we should not send an email.
    *
    * <p>Note that this method may return EMPTY for both valid and invalid users, so this method
    * SHOULD NOT BE USED FOR ACCESS DECISIONS.
    */
   private Optional<Timestamp> getTierExpirationForEmails(
-      DbUser user, List<DbAccessModuleName> requiredModules) {
+      DbUser user, Collection<DbAccessModuleName> requiredModules) {
     // Collection<Optional<T>> is usually a code smell.
     // Here we do need to know if any are EMPTY, for the next step.
     Set<Optional<Long>> expirations =
@@ -893,25 +893,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   // Send an Access Renewal Expiration or Warning email to the user, if appropriate
   private void maybeSendAccessTierExpirationEmail(DbUser user, String tierShortName) {
-    List<DbAccessModuleName> requiredModules;
-
+    final Collection<DbAccessModuleName> moduleNames;
     switch (tierShortName) {
       case REGISTERED_TIER_SHORT_NAME:
-        requiredModules = REQUIRED_MODULES_FOR_REGISTERED_TIER;
+        moduleNames = getRequiredModulesForRegisteredTierRenewal();
         break;
       case CONTROLLED_TIER_SHORT_NAME:
-        requiredModules =
-            REQUIRED_MODULES_FOR_CONTROLLED_TIER.stream()
-                .filter(rm -> !REQUIRED_MODULES_FOR_REGISTERED_TIER.contains(rm))
-                .collect(Collectors.toList());
+        moduleNames = getRequiredModulesForControlledTierRenewal();
         break;
       default:
-        requiredModules = new ArrayList<>();
+        moduleNames = Collections.emptyList();
     }
 
-    final Optional<Timestamp> accessTierExpiration =
-        getTierExpirationForEmails(user, requiredModules);
-    accessTierExpiration.ifPresent(
-        expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
+    getTierExpirationForEmails(user, moduleNames)
+        .ifPresent(
+            expiration -> maybeSendAccessTierExpirationEmail(user, expiration, tierShortName));
   }
 }
