@@ -1,16 +1,24 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { faGear, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import {
+  faGear,
+  faPlay,
+  faRocket,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { UserAppEnvironment, Workspace } from 'generated/fetch';
+import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
-import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
+import {
+  leoAppsApi,
+  leoProxyApi,
+} from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
@@ -171,6 +179,21 @@ const RStudioButtonRow = (props: {
     }
   );
 
+  const onClickOpen = withErrorModal(
+    {
+      title: 'Error Opening RStudio Environment',
+      message: 'Please try again.',
+    },
+    async () => {
+      await leoProxyApi().setCookie(userApp.googleProject, userApp.appName, {
+        credentials: 'include',
+      });
+      window.open(userApp.proxyUrls.rstudio, '_blank').focus();
+    }
+  );
+
+  const showOpenButton = userApp?.status === AppStatus.RUNNING;
+
   const launchButtonDisabled = launching || !canCreateApp(userApp);
 
   return (
@@ -189,21 +212,30 @@ const RStudioButtonRow = (props: {
         </div>
       </TooltipTrigger>
       <PauseUserAppButton {...{ userApp }} />
-      <TooltipTrigger
-        disabled={!launchButtonDisabled}
-        content='An RStudio app exists or is being created'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={launchButtonDisabled}
-            onClick={onClickLaunch}
-            icon={faPlay}
-            buttonText={launching ? 'Launching' : 'Launch'}
-            data-test-id='rstudio-launch-button'
-          />
-        </div>
-      </TooltipTrigger>
+      {showOpenButton ? (
+        <AppsPanelButton
+          onClick={onClickOpen}
+          icon={faRocket}
+          buttonText='Open'
+          data-test-id='RStudio-open-button'
+        />
+      ) : (
+        <TooltipTrigger
+          disabled={!launchButtonDisabled}
+          content='An RStudio app exists or is being created'
+        >
+          {/* tooltip trigger needs a div for some reason */}
+          <div>
+            <AppsPanelButton
+              disabled={launchButtonDisabled}
+              onClick={onClickLaunch}
+              icon={faPlay}
+              buttonText={launching ? 'Launching' : 'Launch'}
+              data-test-id='RStudio-launch-button'
+            />
+          </div>
+        </TooltipTrigger>
+      )}
     </FlexRow>
   );
 };

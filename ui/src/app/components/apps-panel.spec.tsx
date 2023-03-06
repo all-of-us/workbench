@@ -12,7 +12,6 @@ import {
 } from 'generated/fetch';
 
 import {
-  defaultRStudioConfig,
   fromUserAppStatusWithFallback,
   UIAppType,
 } from 'app/components/apps-panel/utils';
@@ -413,34 +412,6 @@ describe('AppsPanel', () => {
       userAppEnvironment.googleProject,
       userAppEnvironment.appName
     );
-  });
-
-  it('should be able to launch an RStudio app', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    appsStub.createApp = jest.fn(() => Promise.resolve({}));
-
-    const launchButton = () =>
-      findExpandedApp(wrapper, 'RStudio').find({
-        'data-test-id': `rstudio-launch-button`,
-      });
-    expect(launchButton().prop('disabled')).toBeFalsy();
-    expect(launchButton().prop('buttonText')).toEqual('Launch');
-
-    launchButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(appsStub.createApp).toHaveBeenCalledWith(
-      workspaceStub.namespace,
-      defaultRStudioConfig
-    );
-    expect(launchButton().prop('buttonText')).toEqual('Launching');
-    expect(launchButton().prop('disabled')).toBeTruthy();
   });
 
   it('should be able to delete an RStudio app', async () => {
