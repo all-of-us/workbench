@@ -11,7 +11,11 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
+import {
+  defaultRStudioConfig,
+  fromUserAppStatusWithFallback,
+  UIAppType,
+} from 'app/components/apps-panel/utils';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { isVisible } from 'app/utils/runtime-utils';
@@ -93,35 +97,46 @@ describe('AppsPanel', () => {
   // these tests assume that there are no User GKE Apps
   // so what these tests actually show is whether Jupyter is an ActiveApp
   test.each([
-    [RuntimeStatus.Running, true, true],
-    [RuntimeStatus.Stopped, true, true],
-    [RuntimeStatus.Stopping, true, true],
-    [RuntimeStatus.Starting, true, true],
-    [RuntimeStatus.Creating, true, true],
-    [RuntimeStatus.Deleting, true, true],
-    [RuntimeStatus.Updating, true, true],
-
-    // not visible [isVisible() = false]
-
-    [RuntimeStatus.Deleted, false, true],
-    [RuntimeStatus.Error, false, true],
-
-    [null, false, true],
+    RuntimeStatus.Running,
+    RuntimeStatus.Stopped,
+    RuntimeStatus.Stopping,
+    RuntimeStatus.Starting,
+    RuntimeStatus.Creating,
+    RuntimeStatus.Deleting,
+    RuntimeStatus.Updating,
   ])(
-    'should render / not render ActiveApps and AvailableApps when the runtime status is %s',
-    async (status, activeExpected, availableExpected) => {
+    'should render ActiveApps and AvailableApps when the runtime status is %s',
+    async (status) => {
       runtimeStub.runtime.status = status;
 
       const wrapper = await component();
       expect(wrapper.exists()).toBeTruthy();
 
       // sanity check: isVisible() is equivalent to activeExpected
-      expect(!!isVisible(status)).toBe(activeExpected);
+      expect(!!isVisible(status)).toBeTruthy();
 
-      expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
-      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
-        availableExpected
-      );
+      // no User GKE Apps, so there is always at least one Available app (Cromwell)
+      expect(findAvailableApps(wrapper, true).exists()).toBeTruthy();
+
+      expect(findActiveApps(wrapper).exists()).toBeTruthy();
+    }
+  );
+
+  test.each([RuntimeStatus.Deleted, RuntimeStatus.Error, null])(
+    'should not render ActiveApps and AvailableApps when the runtime status is %s',
+    async (status) => {
+      runtimeStub.runtime.status = status;
+
+      const wrapper = await component();
+      expect(wrapper.exists()).toBeTruthy();
+
+      // sanity check: isVisible() is equivalent to activeExpected
+      expect(!!isVisible(status)).toBeFalsy();
+
+      // no User GKE Apps, so there is always at least one Available app (Cromwell)
+      expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+
+      expect(findActiveApps(wrapper).exists()).toBeFalsy();
     }
   );
 
@@ -151,36 +166,61 @@ describe('AppsPanel', () => {
 
   // these tests assume that there are no Jupyter runtimes
   // so what these tests actually show is whether a GKE app is an ActiveApp
-  test.each([
-    [AppStatus.RUNNING, true, true],
-    [AppStatus.STOPPED, true, true],
-    [AppStatus.STOPPING, true, true],
-    [AppStatus.STARTING, true, true],
-    [AppStatus.PROVISIONING, true, true],
-    [AppStatus.DELETING, true, true],
-    [AppStatus.STATUSUNSPECIFIED, true, true],
-    [AppStatus.ERROR, true, true],
+  const gkeAppTypes = [AppType.CROMWELL, AppType.RSTUDIO];
 
-    // not visible [isVisible() = false]
-    [AppStatus.DELETED, false, true],
+  describe.each(gkeAppTypes)('GKE App %s', (appType) => {
+    test.each([
+      AppStatus.RUNNING,
+      AppStatus.STOPPED,
+      AppStatus.STOPPING,
+      AppStatus.STARTING,
+      AppStatus.PROVISIONING,
+      AppStatus.DELETING,
+      AppStatus.STATUSUNSPECIFIED,
+      AppStatus.ERROR,
+    ])(
+      'should render ActiveApps and AvailableApps when status is %s',
+      async (status) => {
+        runtimeStub.runtime.status = RuntimeStatus.Deleted;
+        appsStub.listAppsResponse = [{ status, appType }];
 
-    [null, false, true],
-  ])(
-    'should render / not render ActiveApps and AvailableApps when a GKE app status is %s',
-    async (status, activeExpected, availableExpected) => {
-      runtimeStub.runtime.status = RuntimeStatus.Deleted;
-      appsStub.listAppsResponse = [{ status, appType: AppType.CROMWELL }];
+        const wrapper = await component();
+        expect(wrapper.exists()).toBeTruthy();
+        await waitOneTickAndUpdate(wrapper);
 
-      const wrapper = await component();
-      expect(wrapper.exists()).toBeTruthy();
-      await waitOneTickAndUpdate(wrapper);
+        // no Jupyter runtimes, so there is always at least one Available app (Jupyter)
+        expect(findAvailableApps(wrapper, true).exists()).toBeTruthy();
 
-      expect(findActiveApps(wrapper).exists()).toBe(activeExpected);
-      expect(findAvailableApps(wrapper, activeExpected).exists()).toBe(
-        availableExpected
-      );
-    }
-  );
+        expect(findActiveApps(wrapper).exists()).toBeTruthy();
+
+        const expandedApp = findExpandedApp(wrapper, UIAppType[appType]);
+        expect(expandedApp.exists()).toBeTruthy();
+        expect(expandedApp.first().text()).toContain(
+          fromUserAppStatusWithFallback(status)
+        );
+      }
+    );
+
+    test.each([AppStatus.DELETED, null])(
+      'should not render ActiveApps and AvailableApps when status is %s',
+      async (status) => {
+        runtimeStub.runtime.status = RuntimeStatus.Deleted;
+        appsStub.listAppsResponse = [{ status, appType }];
+
+        const wrapper = await component();
+        expect(wrapper.exists()).toBeTruthy();
+        await waitOneTickAndUpdate(wrapper);
+
+        // no Jupyter runtimes, so there is always at least one Available app (Jupyter)
+        expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+
+        expect(findActiveApps(wrapper).exists()).toBeFalsy();
+
+        const expandedApp = findExpandedApp(wrapper, UIAppType[appType]);
+        expect(expandedApp.exists()).toBeFalsy();
+      }
+    );
+  });
 
   it('should render ActiveApps only, when all apps are RUNNING', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
@@ -302,7 +342,23 @@ describe('AppsPanel', () => {
 
     expect(
       rstudioPanel
-        .find({ 'data-test-id': `rstudio-settings-button` })
+        .find({ 'data-test-id': 'RStudio-settings-button' })
+        .prop('disabled')
+    ).toBeTruthy();
+  });
+
+  it('should not be possible to configure a Cromwell app', async () => {
+    runtimeStub.runtime.status = undefined;
+    appsStub.listAppsResponse = [];
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+    await findUnexpandedApp(wrapper, 'Cromwell').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    const cromwellPanel = findExpandedApp(wrapper, 'Cromwell');
+
+    expect(
+      cromwellPanel
+        .find({ 'data-test-id': 'Cromwell-settings-button' })
         .prop('disabled')
     ).toBeTruthy();
   });
@@ -430,20 +486,31 @@ describe('AppsPanel', () => {
     );
   });
 
-  it('should not show RStudio if the feature flag is disabled', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
+  test.each([
+    [true, true],
+    [true, false],
+    [false, true],
+    [false, false],
+  ])(
+    'should / should not show apps when the feature flags are Rstudio=%s, Cromwell=%s',
+    async (enableRStudioGKEApp, enableCromwellGKEApp) => {
+      serverConfigStore.set({
+        config: {
+          ...defaultServerConfig,
+          enableRStudioGKEApp,
+          enableCromwellGKEApp,
+        },
+      });
 
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableRStudioGKEApp: false,
-      },
-    });
+      const wrapper = await component();
+      await waitOneTickAndUpdate(wrapper);
 
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toBeFalsy();
-  });
+      expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
+        enableRStudioGKEApp
+      );
+      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toEqual(
+        enableCromwellGKEApp
+      );
+    }
+  );
 });
