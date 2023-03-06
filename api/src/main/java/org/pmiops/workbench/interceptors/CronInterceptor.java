@@ -9,8 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import java.util.logging.Logger;
+
 @Service
 public class CronInterceptor extends HandlerInterceptorAdapter {
+  private static final Logger log = Logger.getLogger(CronInterceptor.class.getName());
+
   public static final String GAE_CRON_HEADER = "X-Appengine-Cron";
   private static final String CRON_TAG = "cron";
 
@@ -20,6 +24,12 @@ public class CronInterceptor extends HandlerInterceptorAdapter {
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
     }
+
+
+    log.severe("~~~CloudTaskInterceptor");
+    log.severe(request.getRequestURI());
+    log.severe(request.getServletPath());
+    log.severe(request.getRemoteUser());
 
     HandlerMethod method = (HandlerMethod) handler;
     ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);

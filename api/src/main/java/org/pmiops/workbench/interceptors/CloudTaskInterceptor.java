@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import java.util.logging.Logger;
+
 /**
  * Interceptor for endpoints with tag cloudTask. All such endpoints should have tagged as
  * "cloudTask" and a valid value for request hander X-AppEngine-QueueName which app engine itself
@@ -18,12 +20,20 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 @Service
 public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
+  private static final Logger log = Logger.getLogger(CloudTaskInterceptor.class.getName());
+
   public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
   private static final String CLOUD_TASK_TAG = "cloudTask";
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
+
+    log.severe("~~~CloudTaskInterceptor");
+    log.severe(request.getRequestURI());
+    log.severe(request.getServletPath());
+    log.severe(request.getRemoteUser());
+
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
     }

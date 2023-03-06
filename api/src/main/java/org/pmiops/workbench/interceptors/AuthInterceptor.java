@@ -84,6 +84,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     // from a previous request.
     SecurityContextHolder.clearContext();
 
+    log.severe("~~~authInter");
+    log.severe(request.getRequestURI());
+    log.severe(request.getServletPath());
+    log.severe(request.getRemoteUser());
+
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
