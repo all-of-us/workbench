@@ -447,7 +447,7 @@ describe('AppsPanel', () => {
 
     findExpandedApp(wrapper, 'RStudio')
       .find({
-        'data-test-id': `rstudio-launch-button`,
+        'data-test-id': `RStudio-launch-button`,
       })
       .simulate('click');
     await waitOneTickAndUpdate(wrapper);
