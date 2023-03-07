@@ -11,24 +11,34 @@ import {
 
 import {
   leoAppsApi,
+  leoProxyApi,
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { runtimeStore, serverConfigStore } from 'app/utils/stores';
-import { AppsApi as LeoAppsApi, RuntimesApi } from 'notebooks-generated/fetch';
+import {
+  notificationStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
+import {
+  AppsApi as LeoAppsApi,
+  ProxyApi,
+  RuntimesApi,
+} from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
+import { LeoProxyApiStub } from 'testing/stubs/leo-proxy-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { RuntimesApiStub } from 'testing/stubs/runtimes-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { ExpandedApp } from './expanded-app';
-import { UIAppType } from './utils';
+import { defaultRStudioConfig, UIAppType } from './utils';
 
 const googleProject = 'project-for-test';
 const workspace = {
@@ -37,6 +47,13 @@ const workspace = {
 };
 const onClickRuntimeConf = jest.fn();
 const onClickDeleteRuntime = jest.fn();
+
+function minus<T>(a1: T[], a2: T[]): T[] {
+  return a1.filter((e) => !a2.includes(e));
+}
+const ALL_STATUSES = Object.keys(AppStatus)
+  .map((k) => AppStatus[k])
+  .concat([null, undefined]);
 
 const component = async (
   appType: UIAppType,
@@ -57,12 +74,14 @@ const component = async (
 describe('ExpandedApp', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
+  const leoProxyApiStub = new LeoProxyApiStub();
   runtimeStub.runtime.googleProject = googleProject;
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     leoRegisterApiClient(LeoAppsApi, new LeoAppsApiStub());
+    leoRegisterApiClient(ProxyApi, leoProxyApiStub);
     leoRegisterApiClient(RuntimesApi, new RuntimesApiStub());
     runtimeStore.set({
       workspaceNamespace: workspace.namespace,
@@ -334,6 +353,136 @@ describe('ExpandedApp', () => {
         const { disabled } = deletion.props();
         expect(disabled).toBeTruthy();
       }
+    );
+  });
+
+  it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
+    const appName = 'my-app';
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName,
+      googleProject,
+      status: AppStatus.RUNNING,
+    });
+
+    const launchButton = wrapper.find({
+      'data-test-id': 'RStudio-launch-button',
+    });
+    expect(launchButton.exists()).toBeTruthy();
+    expect(launchButton.prop('disabled')).toBeFalsy();
+
+    const setCookieSpy = jest.spyOn(leoProxyApi(), 'setCookie');
+    launchButton.simulate('click');
+
+    expect(setCookieSpy).toHaveBeenCalledWith(
+      workspace.googleProject,
+      appName,
+      { credentials: 'include' }
+    );
+  });
+
+  describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
+    test.each(minus(ALL_STATUSES, [AppStatus.RUNNING]))(
+      'Status %s',
+      async (appStatus) => {
+        const wrapper = await component(UIAppType.RSTUDIO, {
+          appName: 'my-app',
+          googleProject,
+          status: appStatus,
+        });
+
+        const launchButton = wrapper.find({
+          'data-test-id': 'RStudio-launch-button',
+        });
+        expect(launchButton.prop('disabled')).toBeTruthy();
+      }
+    );
+  });
+
+  it('should show an error if launching RStudio fails', async () => {
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName: 'my-app',
+      googleProject,
+      status: AppStatus.RUNNING,
+    });
+
+    leoProxyApiStub.setCookie = () => Promise.reject();
+    wrapper
+      .find({
+        'data-test-id': 'RStudio-launch-button',
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Opening RStudio Environment'
+    );
+  });
+
+  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
+  const createDisabledStatuses = minus(ALL_STATUSES, createEnabledStatuses);
+
+  describe('should allow creating an RStudio app for certain app statuses', () => {
+    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
+      const wrapper = await component(UIAppType.RSTUDIO, {
+        appName: 'my-app',
+        googleProject,
+        status: appStatus,
+      });
+      appsStub.createApp = jest.fn(() => Promise.resolve({}));
+
+      const createButton = () =>
+        wrapper.find({
+          'data-test-id': `RStudio-create-button`,
+        });
+      expect(createButton().exists()).toBeTruthy();
+      expect(createButton().prop('disabled')).toBeFalsy();
+      expect(createButton().prop('buttonText')).toEqual('Create');
+
+      createButton().simulate('click');
+      await waitOneTickAndUpdate(wrapper);
+
+      expect(appsStub.createApp).toHaveBeenCalledWith(
+        workspace.namespace,
+        defaultRStudioConfig
+      );
+      expect(createButton().prop('buttonText')).toEqual('Creating');
+      expect(createButton().prop('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('should disable the RStudio create button for all other app statuses', () => {
+    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
+      const wrapper = await component(UIAppType.RSTUDIO, {
+        appName: 'my-app',
+        googleProject,
+        status: appStatus,
+      });
+
+      const createButton = wrapper.find({
+        'data-test-id': `RStudio-create-button`,
+      });
+      expect(createButton.exists()).toBeTruthy();
+      expect(createButton.prop('disabled')).toBeTruthy();
+    });
+  });
+
+  it('should show an error if the initial request to create RStudio fails', async () => {
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName: 'my-app',
+      googleProject,
+      status: null,
+    });
+    appsStub.createApp = jest.fn(() => Promise.reject());
+
+    wrapper
+      .find({
+        'data-test-id': `RStudio-create-button`,
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Creating RStudio Environment'
     );
   });
 });

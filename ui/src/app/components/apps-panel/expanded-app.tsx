@@ -1,16 +1,24 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { faGear, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import {
+  faGear,
+  faPlay,
+  faRocket,
+  faTrashCan,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { UserAppEnvironment, Workspace } from 'generated/fetch';
+import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
-import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
+import {
+  leoAppsApi,
+  leoProxyApi,
+} from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
@@ -158,49 +166,65 @@ const RStudioButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
-  const [launching, setLaunching] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  const onClickLaunch = withErrorModal(
+  const onClickCreate = withErrorModal(
     {
       title: 'Error Creating RStudio Environment',
       message: 'Please refresh the page.',
     },
     async () => {
-      setLaunching(true);
+      setCreating(true);
       await appsApi().createApp(workspaceNamespace, defaultRStudioConfig);
     }
   );
 
-  const launchButtonDisabled = launching || !canCreateApp(userApp);
+  const onClickLaunch = withErrorModal(
+    {
+      title: 'Error Opening RStudio Environment',
+      message: 'Please try again.',
+    },
+    async () => {
+      await leoProxyApi().setCookie(userApp.googleProject, userApp.appName, {
+        credentials: 'include',
+      });
+      window.open(userApp.proxyUrls.rstudio, '_blank').focus();
+    }
+  );
+
+  const createButtonDisabled = creating || !canCreateApp(userApp);
+  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
 
   return (
     <FlexRow>
       <TooltipTrigger
-        disabled={false}
-        content='Support for configuring RStudio is not yet available'
+        disabled={!createButtonDisabled}
+        content='An RStudio app exists or is being created'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
-          <SettingsButton
-            disabled={true}
-            onClick={() => {}}
-            data-test-id='RStudio-settings-button'
+          <AppsPanelButton
+            disabled={createButtonDisabled}
+            onClick={onClickCreate}
+            icon={faPlay}
+            buttonText={creating ? 'Creating' : 'Create'}
+            data-test-id='RStudio-create-button'
           />
         </div>
       </TooltipTrigger>
       <PauseUserAppButton {...{ userApp }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
-        content='An RStudio app exists or is being created'
+        content='Environment must be running to launch RStudio'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
           <AppsPanelButton
-            disabled={launchButtonDisabled}
             onClick={onClickLaunch}
-            icon={faPlay}
-            buttonText={launching ? 'Launching' : 'Launch'}
-            data-test-id='rstudio-launch-button'
+            disabled={launchButtonDisabled}
+            icon={faRocket}
+            buttonText='Launch'
+            data-test-id='RStudio-launch-button'
           />
         </div>
       </TooltipTrigger>

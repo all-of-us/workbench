@@ -12,18 +12,13 @@ import {
 } from 'generated/fetch';
 
 import {
-  defaultRStudioConfig,
   fromUserAppStatusWithFallback,
   UIAppType,
 } from 'app/components/apps-panel/utils';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { isVisible } from 'app/utils/runtime-utils';
-import {
-  notificationStore,
-  runtimeStore,
-  serverConfigStore,
-} from 'app/utils/stores';
+import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -331,22 +326,6 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 
-  it('should not be possible to configure an RStudio app', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const rstudioPanel = findExpandedApp(wrapper, 'RStudio');
-
-    expect(
-      rstudioPanel
-        .find({ 'data-test-id': 'RStudio-settings-button' })
-        .prop('disabled')
-    ).toBeTruthy();
-  });
-
   it('should not be possible to configure a Cromwell app', async () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [];
@@ -415,34 +394,6 @@ describe('AppsPanel', () => {
     );
   });
 
-  it('should be able to launch an RStudio app', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    appsStub.createApp = jest.fn(() => Promise.resolve({}));
-
-    const launchButton = () =>
-      findExpandedApp(wrapper, 'RStudio').find({
-        'data-test-id': `rstudio-launch-button`,
-      });
-    expect(launchButton().prop('disabled')).toBeFalsy();
-    expect(launchButton().prop('buttonText')).toEqual('Launch');
-
-    launchButton().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(appsStub.createApp).toHaveBeenCalledWith(
-      workspaceStub.namespace,
-      defaultRStudioConfig
-    );
-    expect(launchButton().prop('buttonText')).toEqual('Launching');
-    expect(launchButton().prop('disabled')).toBeTruthy();
-  });
-
   it('should be able to delete an RStudio app', async () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [
@@ -464,28 +415,6 @@ describe('AppsPanel', () => {
     expect(deleteButton().prop('disabled')).toBeTruthy();
   });
 
-  it('should show an error if the initial request to launch RStudio fails', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    appsStub.createApp = jest.fn(() => Promise.reject());
-
-    findExpandedApp(wrapper, 'RStudio')
-      .find({
-        'data-test-id': `rstudio-launch-button`,
-      })
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get().title).toEqual(
-      'Error Creating RStudio Environment'
-    );
-  });
-
   test.each([
     [true, true],
     [true, false],
@@ -501,6 +430,7 @@ describe('AppsPanel', () => {
           enableCromwellGKEApp,
         },
       });
+      appsStub.listAppsResponse = [];
 
       const wrapper = await component();
       await waitOneTickAndUpdate(wrapper);
