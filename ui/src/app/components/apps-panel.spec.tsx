@@ -430,6 +430,7 @@ describe('AppsPanel', () => {
           enableCromwellGKEApp,
         },
       });
+      appsStub.listAppsResponse = [];
 
       const wrapper = await component();
       await waitOneTickAndUpdate(wrapper);
