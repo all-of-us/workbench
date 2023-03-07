@@ -82,9 +82,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableConceptSetsInCohortBuilder",
       source = "config.featureFlags.enableConceptSetsInCohortBuilder")
-  @Mapping(
-      target = "enableControlledTierTrainingRenewal",
-      source = "config.featureFlags.enableControlledTierTrainingRenewal")
   @Mapping(target = "enableCromwellGKEApp", source = "config.featureFlags.enableCromwellGKEApp")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")

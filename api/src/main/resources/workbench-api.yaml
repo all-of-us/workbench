@@ -4669,12 +4669,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable adding ConceptSets to CohortBuilder.
-      enableControlledTierTrainingRenewal:
-        type: boolean
-        default: true
-        description: >
-          Whether users are directed to complete Controlled Tier Training renewal.
-          If false, hide or add text indicating that it is not currently available.
       enableCromwellGKEApp:
         type: boolean
         default: false
