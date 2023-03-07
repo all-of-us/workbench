@@ -356,7 +356,7 @@ describe('ExpandedApp', () => {
     );
   });
 
-  it('should allow opening RStudio when the RStudio app status is RUNNING', async () => {
+  it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
     const appName = 'my-app';
     const wrapper = await component(UIAppType.RSTUDIO, {
       appName,
@@ -364,13 +364,14 @@ describe('ExpandedApp', () => {
       status: AppStatus.RUNNING,
     });
 
-    const openButton = wrapper.find({
-      'data-test-id': 'RStudio-open-button',
+    const launchButton = wrapper.find({
+      'data-test-id': 'RStudio-launch-button',
     });
-    expect(openButton.exists()).toBeTruthy();
+    expect(launchButton.exists()).toBeTruthy();
+    expect(launchButton.prop('disabled')).toBeFalsy();
 
     const setCookieSpy = jest.spyOn(leoProxyApi(), 'setCookie');
-    openButton.simulate('click');
+    launchButton.simulate('click');
 
     expect(setCookieSpy).toHaveBeenCalledWith(
       workspace.googleProject,
@@ -379,45 +380,7 @@ describe('ExpandedApp', () => {
     );
   });
 
-  describe('should not show the open button when the RStudio app status is not RUNNING', () => {
-    test.each(minus(ALL_STATUSES, [AppStatus.RUNNING]))(
-      'Status %s',
-      async (appStatus) => {
-        const wrapper = await component(UIAppType.RSTUDIO, {
-          appName: 'my-app',
-          googleProject,
-          status: appStatus,
-        });
-
-        const openButton = wrapper.find({
-          'data-test-id': 'RStudio-open-button',
-        });
-        expect(openButton.exists()).toBeFalsy();
-      }
-    );
-  });
-
-  it('should show an error if opening RStudio fails', async () => {
-    const wrapper = await component(UIAppType.RSTUDIO, {
-      appName: 'my-app',
-      googleProject,
-      status: AppStatus.RUNNING,
-    });
-
-    leoProxyApiStub.setCookie = () => Promise.reject();
-    wrapper
-      .find({
-        'data-test-id': 'RStudio-open-button',
-      })
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get().title).toEqual(
-      'Error Opening RStudio Environment'
-    );
-  });
-
-  describe('should show the launch button when the RStudio app status is not RUNNING', () => {
+  describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
     test.each(minus(ALL_STATUSES, [AppStatus.RUNNING]))(
       'Status %s',
       async (appStatus) => {
@@ -430,32 +393,36 @@ describe('ExpandedApp', () => {
         const launchButton = wrapper.find({
           'data-test-id': 'RStudio-launch-button',
         });
-        expect(launchButton.exists()).toBeTruthy();
+        expect(launchButton.prop('disabled')).toBeTruthy();
       }
     );
   });
 
-  it('should not show the launch button when the RStudio app status is RUNNING', async () => {
+  it('should show an error if launching RStudio fails', async () => {
     const wrapper = await component(UIAppType.RSTUDIO, {
       appName: 'my-app',
       googleProject,
       status: AppStatus.RUNNING,
     });
 
-    const launchButton = wrapper.find({
-      'data-test-id': 'RStudio-launch-button',
-    });
-    expect(launchButton.exists()).toBeFalsy();
+    leoProxyApiStub.setCookie = () => Promise.reject();
+    wrapper
+      .find({
+        'data-test-id': 'RStudio-launch-button',
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Opening RStudio Environment'
+    );
   });
 
-  const launchEnabledStatuses = [AppStatus.DELETED, null, undefined];
-  const launchDisabledStatuses = minus(ALL_STATUSES, [
-    ...launchEnabledStatuses,
-    AppStatus.RUNNING,
-  ]);
+  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
+  const createDisabledStatuses = minus(ALL_STATUSES, createEnabledStatuses);
 
-  describe('should allow launching the RStudio app for certain app statuses', () => {
-    test.each(launchEnabledStatuses)('Status %s', async (appStatus) => {
+  describe('should allow creating an RStudio app for certain app statuses', () => {
+    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
       const wrapper = await component(UIAppType.RSTUDIO, {
         appName: 'my-app',
         googleProject,
@@ -463,39 +430,39 @@ describe('ExpandedApp', () => {
       });
       appsStub.createApp = jest.fn(() => Promise.resolve({}));
 
-      const launchButton = () =>
+      const createButton = () =>
         wrapper.find({
-          'data-test-id': `RStudio-launch-button`,
+          'data-test-id': `RStudio-create-button`,
         });
-      expect(launchButton().exists()).toBeTruthy();
-      expect(launchButton().prop('disabled')).toBeFalsy();
-      expect(launchButton().prop('buttonText')).toEqual('Launch');
+      expect(createButton().exists()).toBeTruthy();
+      expect(createButton().prop('disabled')).toBeFalsy();
+      expect(createButton().prop('buttonText')).toEqual('Create');
 
-      launchButton().simulate('click');
+      createButton().simulate('click');
       await waitOneTickAndUpdate(wrapper);
 
       expect(appsStub.createApp).toHaveBeenCalledWith(
         workspace.namespace,
         defaultRStudioConfig
       );
-      expect(launchButton().prop('buttonText')).toEqual('Launching');
-      expect(launchButton().prop('disabled')).toBeTruthy();
+      expect(createButton().prop('buttonText')).toEqual('Creating');
+      expect(createButton().prop('disabled')).toBeTruthy();
     });
   });
 
-  describe('should disable the RStudio launch button for all other app statuses', () => {
-    test.each(launchDisabledStatuses)('Status %s', async (appStatus) => {
+  describe('should disable the RStudio create button for all other app statuses', () => {
+    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
       const wrapper = await component(UIAppType.RSTUDIO, {
         appName: 'my-app',
         googleProject,
         status: appStatus,
       });
 
-      const launchButton = wrapper.find({
-        'data-test-id': `RStudio-launch-button`,
+      const createButton = wrapper.find({
+        'data-test-id': `RStudio-create-button`,
       });
-      expect(launchButton.exists()).toBeTruthy();
-      expect(launchButton.prop('disabled')).toBeTruthy();
+      expect(createButton.exists()).toBeTruthy();
+      expect(createButton.prop('disabled')).toBeTruthy();
     });
   });
 });

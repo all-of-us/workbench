@@ -330,22 +330,6 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 
-  it('should not be possible to configure an RStudio app', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'RStudio').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const rstudioPanel = findExpandedApp(wrapper, 'RStudio');
-
-    expect(
-      rstudioPanel
-        .find({ 'data-test-id': 'RStudio-settings-button' })
-        .prop('disabled')
-    ).toBeTruthy();
-  });
-
   it('should not be possible to configure a Cromwell app', async () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [];
