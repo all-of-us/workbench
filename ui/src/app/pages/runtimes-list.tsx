@@ -10,6 +10,12 @@ import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
+// Runtime-List tables hidden columns
+const WORKSPACE_NAME_COLUMN_INDEX = 2;
+const DELETE_CLOUD_ENV_COLUMN_INDEX = 11;
+const PD_STATUS_COLUMN_INDEX = 5;
+const DELETE_PD_COLUMN_INDEX = 10;
+
 const ajax = (signal) => {
   const jsonLeoFetch = (path) =>
     fetch(environment.leoApiUrl + path, {
@@ -34,6 +40,61 @@ const ajax = (signal) => {
   };
 };
 
+const css =
+  `
+div[aria-label="cloud environments"] 
+div[role="columnheader"]:nth-child(` +
+  WORKSPACE_NAME_COLUMN_INDEX +
+  `), 
+div[aria-label="cloud environments"] 
+div[role="columnheader"]:nth-child(` +
+  DELETE_CLOUD_ENV_COLUMN_INDEX +
+  `),
+div[aria-label="cloud environments"] 
+.table-cell:nth-child(` +
+  WORKSPACE_NAME_COLUMN_INDEX +
+  `),
+div[aria-label="cloud environments"] 
+.table-cell:nth-child(` +
+  DELETE_CLOUD_ENV_COLUMN_INDEX +
+  `){
+   display: none !important
+}
+
+div[aria-label="persistent disks"] 
+div[role="columnheader"]:nth-child(` +
+  WORKSPACE_NAME_COLUMN_INDEX +
+  `),
+div[aria-label="persistent disks"] 
+div[role="columnheader"]:nth-child(` +
+  PD_STATUS_COLUMN_INDEX +
+  `),
+div[aria-label="persistent disks"] 
+div[role="columnheader"]:nth-child(` +
+  DELETE_PD_COLUMN_INDEX +
+  `), 
+div[aria-label="persistent disks"] 
+.table-cell:nth-child(` +
+  WORKSPACE_NAME_COLUMN_INDEX +
+  `),
+div[aria-label="persistent disks"] 
+.table-cell:nth-child(` +
+  PD_STATUS_COLUMN_INDEX +
+  `),
+div[aria-label="persistent disks"] 
+.table-cell:nth-child(` +
+  DELETE_PD_COLUMN_INDEX +
+  `)
+{
+   display: none !important
+}
+
+div[style*="z-index: 2"]:has(>div>svg) {
+  display: none !important
+}
+
+`;
+
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -52,6 +113,7 @@ export const RuntimesList = fp.flow(
     render() {
       return (
         <>
+          <style>{css}</style>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
             <Environments
