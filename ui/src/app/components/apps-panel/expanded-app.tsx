@@ -166,7 +166,7 @@ const RStudioButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
-  const [launching, setLaunching] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const onClickCreate = withErrorModal(
     {
@@ -174,7 +174,7 @@ const RStudioButtonRow = (props: {
       message: 'Please refresh the page.',
     },
     async () => {
-      setLaunching(true);
+      setCreating(true);
       await appsApi().createApp(workspaceNamespace, defaultRStudioConfig);
     }
   );
@@ -192,7 +192,7 @@ const RStudioButtonRow = (props: {
     }
   );
 
-  const createButtonDisabled = launching || !canCreateApp(userApp);
+  const createButtonDisabled = creating || !canCreateApp(userApp);
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
 
   return (
@@ -207,7 +207,7 @@ const RStudioButtonRow = (props: {
             disabled={createButtonDisabled}
             onClick={onClickCreate}
             icon={faPlay}
-            buttonText={launching ? 'Creating' : 'Create'}
+            buttonText={creating ? 'Creating' : 'Create'}
             data-test-id='RStudio-create-button'
           />
         </div>
