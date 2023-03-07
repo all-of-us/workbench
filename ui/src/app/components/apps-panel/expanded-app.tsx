@@ -215,7 +215,7 @@ const RStudioButtonRow = (props: {
       <PauseUserAppButton {...{ userApp }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
-        content='RStudio must be running to launch it'
+        content='Environment must be running to launch RStudio'
       >
         {/* tooltip trigger needs a div for some reason */}
         <div>
