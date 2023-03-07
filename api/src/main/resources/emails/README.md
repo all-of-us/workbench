@@ -27,11 +27,11 @@ There are two commands that you should be aware of.
 
 First, in order to convert an mjml file to an html file, you can run:
 
-```mjml index.mjml index.html```
+```mjml index.mjml -o index.html```
 
 If you want to update an html file everytime that an mjml file is updated, you can run:
 
-```mjml --watch index.mjml index.html```
+```mjml --watch index.mjml -o index.html```
 
 If you are interested in more of MJML's commands, please refer to the
 [CLI documentation.](https://documentation.mjml.io/#command-line-interface)
