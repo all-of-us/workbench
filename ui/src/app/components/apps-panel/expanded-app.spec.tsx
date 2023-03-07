@@ -465,4 +465,24 @@ describe('ExpandedApp', () => {
       expect(createButton.prop('disabled')).toBeTruthy();
     });
   });
+
+  it('should show an error if the initial request to create RStudio fails', async () => {
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName: 'my-app',
+      googleProject,
+      status: null,
+    });
+    appsStub.createApp = jest.fn(() => Promise.reject());
+
+    wrapper
+      .find({
+        'data-test-id': `RStudio-create-button`,
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Creating RStudio Environment'
+    );
+  });
 });
