@@ -10,20 +10,20 @@ import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
-// Hidden columns Index
+// Indexes of hidden columns
 const workspace = 2;
-const delete_cloud_environment = 11;
-const status_pd = 5;
-const delete_pd = 10;
+const deleteCloudEnvironment = 11;
+const pdStatus = 5;
+const pdDelete = 10;
 
-const hiddenTableColumn = [
+const hiddenTableColumns = [
   {
     tableName: 'cloud environments',
-    columnsToHide: [workspace, delete_cloud_environment],
+    columnIndexesToHide: [workspace, deleteCloudEnvironment],
   },
   {
     tableName: 'persistent disks',
-    columnsToHide: [workspace, status_pd, delete_pd],
+    columnIndexesToHide: [workspace, pdStatus, pdDelete],
   },
 ];
 
@@ -52,19 +52,19 @@ const ajax = (signal) => {
 };
 
 const css =
-  hiddenTableColumn.map(({ tableName, columnsToHide }) =>
-    columnsToHide
+  hiddenTableColumns.map(({ tableName, columnIndexesToHide }) =>
+    columnIndexesToHide
       .map(
-        (column) =>
+        (columnIndex) =>
           `div[aria-label="` +
           tableName +
           `"] div[role="columnheader"]:nth-child(` +
-          column +
+          columnIndex +
           `),
        div[aria-label="` +
           tableName +
           `"] .table-cell:nth-child(` +
-          column +
+          columnIndex +
           `)`
       )
       .join(',\n')
