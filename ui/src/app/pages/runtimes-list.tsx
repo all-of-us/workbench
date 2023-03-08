@@ -10,11 +10,22 @@ import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
-// Runtime-List tables hidden columns
-const WORKSPACE_NAME_COLUMN_INDEX = 2;
-const DELETE_CLOUD_ENV_COLUMN_INDEX = 11;
-const PD_STATUS_COLUMN_INDEX = 5;
-const DELETE_PD_COLUMN_INDEX = 10;
+// Hidden columns Index
+const workspace = 2;
+const delete_cloud_environment = 11;
+const status_pd = 5;
+const delete_pd = 10;
+
+const hiddenTableColumn = [
+  {
+    tableName: 'cloud environments',
+    columnsToHide: [workspace, delete_cloud_environment],
+  },
+  {
+    tableName: 'persistent disks',
+    columnsToHide: [workspace, status_pd, delete_pd],
+  },
+];
 
 const ajax = (signal) => {
   const jsonLeoFetch = (path) =>
@@ -41,59 +52,30 @@ const ajax = (signal) => {
 };
 
 const css =
-  `
-div[aria-label="cloud environments"] 
-div[role="columnheader"]:nth-child(` +
-  WORKSPACE_NAME_COLUMN_INDEX +
-  `), 
-div[aria-label="cloud environments"] 
-div[role="columnheader"]:nth-child(` +
-  DELETE_CLOUD_ENV_COLUMN_INDEX +
-  `),
-div[aria-label="cloud environments"] 
-.table-cell:nth-child(` +
-  WORKSPACE_NAME_COLUMN_INDEX +
-  `),
-div[aria-label="cloud environments"] 
-.table-cell:nth-child(` +
-  DELETE_CLOUD_ENV_COLUMN_INDEX +
-  `){
-   display: none !important
-}
-
-div[aria-label="persistent disks"] 
-div[role="columnheader"]:nth-child(` +
-  WORKSPACE_NAME_COLUMN_INDEX +
-  `),
-div[aria-label="persistent disks"] 
-div[role="columnheader"]:nth-child(` +
-  PD_STATUS_COLUMN_INDEX +
-  `),
-div[aria-label="persistent disks"] 
-div[role="columnheader"]:nth-child(` +
-  DELETE_PD_COLUMN_INDEX +
-  `), 
-div[aria-label="persistent disks"] 
-.table-cell:nth-child(` +
-  WORKSPACE_NAME_COLUMN_INDEX +
-  `),
-div[aria-label="persistent disks"] 
-.table-cell:nth-child(` +
-  PD_STATUS_COLUMN_INDEX +
-  `),
-div[aria-label="persistent disks"] 
-.table-cell:nth-child(` +
-  DELETE_PD_COLUMN_INDEX +
-  `)
-{
-   display: none !important
-}
-
-div[style*="z-index: 2"]:has(>div>svg) {
-  display: none !important
-}
-
-`;
+  hiddenTableColumn.map(({ tableName, columnsToHide }) =>
+    columnsToHide
+      .map(
+        (column) =>
+          `div[aria-label="` +
+          tableName +
+          `"] div[role="columnheader"]:nth-child(` +
+          column +
+          `),
+       div[aria-label="` +
+          tableName +
+          `"] .table-cell:nth-child(` +
+          column +
+          `)`
+      )
+      .join(',\n')
+  ) +
+  ` {
+         display: none !important
+        }
+      
+       div[style*="z-index: 2"]:has(>div>svg) {
+          display: none !important
+        }`;
 
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,

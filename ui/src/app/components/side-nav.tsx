@@ -154,7 +154,7 @@ const DARActive = () => {
   return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
 };
 
-const cloudEnviornmentActive = () => {
+const cloudEnvironmentsActive = () => {
   return window.location.pathname === '/runtimes';
 };
 
@@ -280,7 +280,7 @@ export const SideNav = (props: SideNavProps) => {
     {
       label: 'Cloud Environments',
       href: '/runtimes',
-      active: cloudEnviornmentActive(),
+      active: cloudEnvironmentsActive(),
     },
   ];
 
