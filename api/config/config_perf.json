@@ -57,7 +57,7 @@
     "extractionDestinationDataset": "fc-aou-cdr-perf-ct.wgs_extraction_destination",
     "minExtractionScatterTasks": 20,
     "extractionScatterTasksPerSample": 4,
-    "gatkJarUri": "gs:\/\/all-of-us-workbench-test-genomics\/wgs\/gatk-package-4.2.0.0-533-g9c2aa67-SNAPSHOT-local.jar",
+    "gatkJarUri": "gs:\/\/gvs_quickstart_storage\/jars\/gatk-package-4.2.0.0-531-gf8f4ede-SNAPSHOT-local.jar",
     "enableJiraTicketingOnFailure": true
   },
   "cdr": {
