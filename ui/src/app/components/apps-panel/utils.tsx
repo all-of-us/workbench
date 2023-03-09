@@ -84,8 +84,12 @@ export const shouldShowApp = (app: UserAppEnvironment): boolean =>
 export const canCreateApp = (app: UserAppEnvironment): boolean =>
   !isVisible(app?.status);
 
+// matches Leonardo code
+// https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
 export const isDeletable = (status: AppStatus): boolean =>
-  [AppStatus.RUNNING, AppStatus.ERROR].includes(status);
+  [AppStatus.STATUSUNSPECIFIED, AppStatus.RUNNING, AppStatus.ERROR].includes(
+    status
+  );
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
   app && isDeletable(app.status);

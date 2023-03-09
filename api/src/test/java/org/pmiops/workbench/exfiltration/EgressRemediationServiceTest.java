@@ -177,7 +177,7 @@ public class EgressRemediationServiceTest {
 
   @Test
   public void testRemediateEgressEvent_alreadyRemediated() {
-    long eventId = saveNewEvent(newEvent().setStatus(DbEgressEventStatus.REMEDIATED));
+    long eventId = saveNewEvent(newGCEEvent().setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
@@ -352,6 +352,24 @@ public class EgressRemediationServiceTest {
   }
 
   @Test
+  public void testRemediateGKEEgressEvent_suspendCompute() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    long eventId = saveNewGKEEvent();
+    egressRemediationService.remediateEgressEvent(eventId);
+
+    assertThat(getDbUser().getDisabled()).isFalse();
+    assertComputeSuspended(Duration.ofMinutes(1));
+
+    DbEgressEvent event = egressEventDao.findById(eventId).get();
+    assertThat(event.getStatus()).isEqualTo(DbEgressEventStatus.REMEDIATED);
+
+    verify(mockMailService)
+        .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+  }
+
+  @Test
   public void testRemediateEgressEvent_disableUser() throws Exception {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(disableUserAfter(1));
@@ -452,7 +470,7 @@ public class EgressRemediationServiceTest {
     assertThat(description.isPresent()).isTrue();
     AtlassianDocument doc = (AtlassianDocument) description.get();
     assertThat(JiraContent.documentToString(doc))
-        .contains("User running notebook: " + getDbUser().getUsername());
+        .contains("User running the app/runtime: " + getDbUser().getUsername());
   }
 
   @Test
@@ -492,7 +510,11 @@ public class EgressRemediationServiceTest {
   }
 
   private long saveNewEvent() {
-    return saveNewEvent(newEvent());
+    return saveNewEvent(newGCEEvent());
+  }
+
+  private long saveNewGKEEvent() {
+    return saveNewEvent(newGKEEvent());
   }
 
   private long saveNewEvent(DbEgressEvent e) {
@@ -519,10 +541,10 @@ public class EgressRemediationServiceTest {
 
   private DbEgressEvent oldEvent(Duration age) {
     Timestamp creationTime = Timestamp.from(FakeClockConfiguration.NOW.toInstant().minus(age));
-    return newEvent().setStatus(DbEgressEventStatus.REMEDIATED).setCreationTime(creationTime);
+    return newGCEEvent().setStatus(DbEgressEventStatus.REMEDIATED).setCreationTime(creationTime);
   }
 
-  private DbEgressEvent newEvent() {
+  private DbEgressEvent newGCEEvent() {
     return new DbEgressEvent()
         .setUser(getDbUser())
         .setWorkspace(dbWorkspace)
@@ -540,6 +562,28 @@ public class EgressRemediationServiceTest {
                                 .toEpochMilli())
                         .timeWindowDuration(Duration.ofHours(1L).toMillis())
                         .vmPrefix(getDbUser().getRuntimeName())));
+  }
+
+  private DbEgressEvent newGKEEvent() {
+    return new DbEgressEvent()
+        .setUser(getDbUser())
+        .setWorkspace(dbWorkspace)
+        .setCreationTime(FakeClockConfiguration.NOW)
+        .setStatus(DbEgressEventStatus.PENDING)
+        .setSumologicEvent(
+            new Gson()
+                .toJson(
+                    new SumologicEgressEvent()
+                        .egressMib(200.0)
+                        .timeWindowStart(
+                            FakeClockConfiguration.NOW
+                                .toInstant()
+                                .minus(Duration.ofHours(1L))
+                                .toEpochMilli())
+                        .timeWindowDuration(Duration.ofHours(1L).toMillis())
+                        .vmPrefix("some-vm-name")
+                        .vmName("some-vm-name")
+                        .srcGkeCluster("some-gke-cluster")));
   }
 
   private Escalation suspendComputeAfter(int afterIncidentCount, Duration duration) {

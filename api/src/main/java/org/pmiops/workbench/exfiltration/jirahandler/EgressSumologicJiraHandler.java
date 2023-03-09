@@ -1,11 +1,11 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
@@ -33,11 +33,7 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
 
   @Autowired
   public EgressSumologicJiraHandler(
-      Clock clock,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      EgressEventMapper egressEventMapper,
-      JiraService jiraService) {
-    super(clock, jiraService);
+      Provider<WorkbenchConfig> workbenchConfigProvider, EgressEventMapper egressEventMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.egressEventMapper = egressEventMapper;
   }
@@ -66,13 +62,22 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     Optional<DbUser> user = Optional.ofNullable(event.getUser());
     WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
+    String jiraDescription = "";
+    if (StringUtils.isNotEmpty(originalEvent.getSrcGkeCluster())) {
+      jiraDescription =
+          String.format(
+              "User App Cluster name: %s, VM Name: %s\n",
+              originalEvent.getSrcGkeCluster(), originalEvent.getVmName());
+    } else {
+      jiraDescription =
+          String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix());
+    }
     return Stream.concat(
         Stream.of(
-            JiraContent.text(
-                String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix())),
+            JiraContent.text(jiraDescription),
             JiraContent.text(
                 String.format(
-                    "User running notebook: %s\n",
+                    "User running the app/runtime: %s\n",
                     user.map(DbUser::getUsername).orElse("unknown"))),
             JiraContent.text("User admin console (as workbench admin user): "),
             user.map(
@@ -127,10 +132,11 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
                 originalEvent.getEgressMib(), originalEvent.getTimeWindowDuration())),
         JiraContent.text(
             String.format(
-                "Egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers\n\n",
+                "Egress breakdown: GCE - %.2f MiB, Dataproc - %.2fMiB via master, %.2fMiB via workers, %.2fMiB via GKE\n\n",
                 originalEvent.getGceEgressMib(),
                 originalEvent.getDataprocMasterEgressMib(),
-                originalEvent.getDataprocWorkerEgressMib())),
+                originalEvent.getDataprocWorkerEgressMib(),
+                originalEvent.getGkeEgressMib())),
         JiraContent.text("Workspace admin console (as RW admin):"),
         workspace
             .map(

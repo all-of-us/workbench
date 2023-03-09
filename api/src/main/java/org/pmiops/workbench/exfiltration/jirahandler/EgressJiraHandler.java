@@ -15,6 +15,7 @@ import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.jira.model.IssueBean;
 import org.pmiops.workbench.jira.model.SearchResults;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,13 +23,8 @@ public abstract class EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressJiraHandler.class.getName());
 
-  private final Clock clock;
-  private final JiraService jiraService;
-
-  protected EgressJiraHandler(Clock clock, JiraService jiraService) {
-    this.clock = clock;
-    this.jiraService = jiraService;
-  }
+  @Autowired private Clock clock;
+  @Autowired private JiraService jiraService;
 
   public abstract void logEventToJira(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;

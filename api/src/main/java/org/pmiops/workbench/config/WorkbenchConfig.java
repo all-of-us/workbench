@@ -328,6 +328,8 @@ public class WorkbenchConfig {
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app
     public boolean enableRStudioGKEApp;
+    // If true, enable visual data explorer
+    public boolean enableDataExplorer;
   }
 
   public static class ActionAuditConfig {

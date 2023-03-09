@@ -248,7 +248,7 @@ public abstract class EgressRemediationService {
         user,
         Agent.asSystem());
 
-    stopUserRuntimes(user.getUsername());
+    stopUserRuntimesAndApps(user.getUsername());
   }
 
   protected void disableUser(DbUser user) {
@@ -261,11 +261,15 @@ public abstract class EgressRemediationService {
         Agent.asSystem());
 
     // also stop any running compute, killing any active egress processes the user may have
-    stopUserRuntimes(user.getUsername());
+    stopUserRuntimesAndApps(user.getUsername());
   }
 
-  private void stopUserRuntimes(String userEmail) {
-    int stopCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
-    log.info(String.format("stopped %d runtimes for user", stopCount));
+  private void stopUserRuntimesAndApps(String userEmail) {
+    int stoppedRuntimeCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
+    int stoppedAppCount = leonardoNotebooksClient.stopAllUserAppsAsService(userEmail);
+    log.info(
+        String.format(
+            "stopped %d runtimes and %d apps for user %s",
+            stoppedRuntimeCount, stoppedAppCount, userEmail));
   }
 }
