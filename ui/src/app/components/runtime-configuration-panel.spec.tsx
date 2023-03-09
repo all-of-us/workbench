@@ -894,6 +894,21 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeTruthy();
   });
 
+  it('should warn user about re-boot if there are updates that require one - increase disk size', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+      configurationType: RuntimeConfigurationType.UserOverride,
+    });
+    const wrapper = await component();
+
+    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
+    await mustClickButton(wrapper, 'Next');
+
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+  });
+
   it('should not warn user for updates where not needed - number of workers', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
