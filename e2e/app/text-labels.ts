@@ -161,7 +161,8 @@ export enum SideBarLink {
   HelpTips,
   WorkspaceMenu,
   EditAnnotations,
-  GenomicExtractionsHistory
+  GenomicExtractionsHistory,
+  Applications
 }
 
 export const Institution = {

@@ -16,6 +16,17 @@ export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000)
   return false;
 };
 
+export const waitForAsyncFn = async (fn: () => Promise<any>, intervalMs: number, timeoutMs: number): Promise<boolean> => {
+  const start = Date.now();
+  while (Date.now() < start + timeoutMs) {
+    if ((await fn()) === true) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return false;
+};
+
 /**
  * Wait for the window location to match sub-string.
  * @param {Page} page The Puppeteer Page.

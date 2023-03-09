@@ -49,6 +49,9 @@ export default abstract class BaseSidebar extends Container {
       case SideBarLink.GenomicExtractionsHistory:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-genomicExtractions"]`;
         break;
+      case SideBarLink.Applications:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-apps"]`;
+        break;
       default:
         throw new Error(`SideBarLink case ${sidebarLink} is undefined.`);
     }

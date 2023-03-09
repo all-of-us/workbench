@@ -60,6 +60,7 @@ export const AppsPanelButton = (props: Props) => {
       {...{ disabled, onClick }}
       style={{ padding: '0.5em' }}
       data-test-id={`apps-panel-button-${buttonText}`}
+      propagateDataTestId={true}
     >
       <FlexColumn
         style={disabled ? buttonStyles.disabledButton : buttonStyles.button}

@@ -39,7 +39,11 @@ const styles = reactStyles({
 const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
-    <Clickable {...{ onClick }} data-test-id={`${appType}-unexpanded`}>
+    <Clickable
+      {...{ onClick }}
+      data-test-id={`${appType}-unexpanded`}
+      propagateDataTestId={true}
+    >
       <FlexRow style={styles.availableApp}>
         <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
