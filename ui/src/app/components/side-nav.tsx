@@ -154,6 +154,10 @@ const DARActive = () => {
   return window.location.pathname === DATA_ACCESS_REQUIREMENTS_PATH;
 };
 
+const cloudEnvironmentsActive = () => {
+  return window.location.pathname === '/runtimes';
+};
+
 const institutionAdminActive = () => {
   return window.location.pathname.startsWith('/admin/institution');
 };
@@ -262,6 +266,23 @@ export const SideNav = (props: SideNavProps) => {
       profile.contactEmail
     );
   };
+  const userOptionsSubMenu = [
+    {
+      label: 'Profile',
+      href: '/profile',
+      active: profileActive(),
+    },
+    {
+      label: 'Data Access Requirements',
+      href: DATA_ACCESS_REQUIREMENTS_PATH,
+      active: DARActive(),
+    },
+    {
+      label: 'Cloud Environments',
+      href: '/runtimes',
+      active: cloudEnvironmentsActive(),
+    },
+  ];
 
   return (
     <div style={styles.sideNav}>
@@ -272,22 +293,17 @@ export const SideNav = (props: SideNavProps) => {
         onToggleSideNav={() => onToggleSideNav()}
         containsSubItems={true}
       />
-      {showUserOptions && (
-        <SideNavItem
-          content={'Profile'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href='/profile'
-          active={profileActive()}
-        />
-      )}
-      {showUserOptions && (
-        <SideNavItem
-          content={'Data Access Requirements'}
-          onToggleSideNav={() => onToggleSideNav()}
-          href={DATA_ACCESS_REQUIREMENTS_PATH}
-          active={DARActive()}
-        />
-      )}
+      {showUserOptions &&
+        userOptionsSubMenu.map((menu) => {
+          return (
+            <SideNavItem
+              content={menu.label}
+              onToggleSideNav={() => onToggleSideNav()}
+              href={menu.href}
+              active={menu.active}
+            />
+          );
+        })}
       {showUserOptions && (
         <SideNavItem
           content={'Sign Out'}
