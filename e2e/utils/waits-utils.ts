@@ -5,7 +5,11 @@ import Container from 'app/container';
 import { makeDateTimeStr } from './str-utils';
 import { getAttrValue } from './element-utils';
 
-export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
+export const waitForFn = async (
+  fn: () => any,
+  interval = 2000,
+  timeout = 10000
+): Promise<boolean> => {
   const start = Date.now();
   while (Date.now() < start + timeout) {
     if (fn()) {
