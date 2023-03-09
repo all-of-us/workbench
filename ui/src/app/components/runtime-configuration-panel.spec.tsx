@@ -881,7 +881,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainRam(wrapper)).toBe(7.5);
   });
 
-  it('should warn user about reboot if there are updates that require one - increase disk size', async () => {
+  it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
     const wrapper = await component();
 
     await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 10);
@@ -926,6 +926,39 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
 
     expect(wrapper.find(WarningMessage).exists()).toBeFalsy();
+  });
+
+  it('should warn user about reboot if there are updates that require one - CPU', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const wrapper = await component();
+
+    await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
+    await mustClickButton(wrapper, 'Next');
+
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
+  });
+
+  it('should warn user about reboot if there are updates that require one - Memory', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
+    const wrapper = await component();
+
+    // 15 GB -> 26 GB
+    await pickMainRam(wrapper, 26);
+    await mustClickButton(wrapper, 'Next');
+
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
   });
 
   it('should warn user about re-creation if there are updates that require one - CPU', async () => {
@@ -1123,7 +1156,6 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should send a delete call if an update requires delete', async () => {
-    setCurrentDisk(existingDisk());
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
@@ -1698,7 +1730,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should allow creating gce with GPU', async () => {
+  it('should allow creating gcePD with GPU', async () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
@@ -1711,6 +1743,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
       'stub-disk'
     );
@@ -1807,7 +1840,8 @@ describe('RuntimeConfigurationPanel', () => {
     wrapper.update();
     expect(wrapper.text()).toContain('MapReduce History Server');
   });
-  it('Should disable standard storage option for existing runtime and have reattachable selected', async () => {
+  it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
+    // set GCE Runtime as current runtime
     setCurrentRuntime(runtimeApiStub.runtime);
     const wrapper = await component();
 
