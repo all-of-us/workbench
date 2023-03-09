@@ -971,9 +971,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickMainRam(wrapper, 26);
     await mustClickButton(wrapper, 'Next');
 
-    expect(
-      wrapper.find(WarningMessage).text().includes('re-creation')
-    ).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about re-creation if there are updates that require one - CPU', async () => {
