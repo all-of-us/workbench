@@ -5,6 +5,7 @@ import {
   SpecificPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceResponse,
 } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
@@ -63,6 +64,17 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
 
 export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
   return suffixes.map((suffix) => buildWorkspaceStub(suffix));
+}
+
+export function buildWorkspaceResponseStubs(
+  suffixes: string[]
+): WorkspaceResponse[] {
+  return suffixes.map((suffix) => {
+    return {
+      workspace: buildWorkspaceStub(suffix),
+      accessLevel: WorkspaceAccessLevel.WRITER,
+    };
+  });
 }
 
 function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {

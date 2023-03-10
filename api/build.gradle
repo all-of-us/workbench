@@ -465,6 +465,8 @@ dependencies {
     compile "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
     compile "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
+    compile("au.com.dius.pact.provider:junit5:4.1.7")
+    compile("au.com.dius.pact.provider:junit5spring:4.1.7")
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"

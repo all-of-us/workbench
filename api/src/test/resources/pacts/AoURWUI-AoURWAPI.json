@@ -1,0 +1,86 @@
+{
+  "consumer": {
+    "name": "AoURWUI"
+  },
+  "interactions": [
+    {
+      "description": "a request for all dogs with the builder pattern",
+      "providerStates": [
+        {
+          "name": "I have a list of dogs"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v1/workspaces"
+      },
+      "response": {
+        "body": {
+          "items": [
+            {
+              "accessLevel": "WRITER",
+              "workspace": {
+                "accessTierShortName": "registered",
+                "adminLocked": false,
+                "billingAccountName": "billing-account",
+                "billingStatus": "ACTIVE",
+                "cdrVersionId": "fakeCdrVersionGunicorn",
+                "creationTime": 1678387160259,
+                "id": "1Gunicorn",
+                "lastModifiedTime": 1678387160259,
+                "name": "defaultWorkspaceGunicorn",
+                "namespace": "defaultNamespaceGunicorn",
+                "published": false,
+                "researchPurpose": {
+                  "ancestry": false,
+                  "anticipatedFindings": "",
+                  "commercialPurpose": false,
+                  "controlSet": false,
+                  "diseaseFocusedResearch": false,
+                  "disseminateResearchFindingList": [],
+                  "drugDevelopment": true,
+                  "educational": true,
+                  "ethics": true,
+                  "intendedStudy": "",
+                  "methodsDevelopment": false,
+                  "needsReviewPrompt": false,
+                  "otherPurpose": false,
+                  "otherPurposeDetails": "",
+                  "populationDetails": [
+                    "AGE_OLDER_MORE_THAN_75",
+                    "RACE_NHPI"
+                  ],
+                  "populationHealth": true,
+                  "reasonForAllOfUs": "",
+                  "researchOutcomeList": [],
+                  "reviewRequested": false,
+                  "scientificApproach": "",
+                  "socialBehavioral": false
+                }
+              }
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "11.0.0"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "AoURWAPI"
+  }
+}

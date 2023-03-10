@@ -49,8 +49,12 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceCount = 0;
   newWorkspaceOperationCount = 0;
 
-  constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => {
+  constructor(
+    workspaces?: Workspace[],
+    workspaceUserRoles?: UserRole[],
+    basePath?: string
+  ) {
+    super(undefined, basePath, (..._: any[]) => {
       throw stubNotImplementedError;
     });
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
