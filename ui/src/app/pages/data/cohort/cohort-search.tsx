@@ -165,11 +165,12 @@ interface Props extends RouteComponentProps<MatchParams> {
 }
 
 interface State {
-  toastVisible: boolean;
+  initCriteriaSearch: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
   showAddConceptSetModal: boolean;
   showUnsavedModal: boolean;
+  toastVisible: boolean;
   unsavedChanges: boolean;
 }
 
@@ -184,11 +185,12 @@ export const CohortSearch = fp.flow(
     constructor(props: Props) {
       super(props);
       this.state = {
-        toastVisible: false,
+        initCriteriaSearch: false,
         selectedIds: [],
         selections: [],
         showAddConceptSetModal: false,
         showUnsavedModal: false,
+        toastVisible: false,
         unsavedChanges: false,
       };
     }
@@ -213,6 +215,8 @@ export const CohortSearch = fp.flow(
         this.selectStructuralVariantData();
       } else if (domain === 'CONCEPT_SET') {
         this.setState({ showAddConceptSetModal: true });
+      } else {
+        this.setState({ initCriteriaSearch: true });
       }
 
       currentCohortCriteriaStore.next(selections);
@@ -457,11 +461,12 @@ export const CohortSearch = fp.flow(
         cohortContext: { domain, type },
       } = this.props;
       const {
-        toastVisible,
+        initCriteriaSearch,
         selectedIds,
         selections,
         showAddConceptSetModal,
         showUnsavedModal,
+        toastVisible,
       } = this.state;
       return (
         !!cohortContext && (
@@ -515,11 +520,13 @@ export const CohortSearch = fp.flow(
                         />
                       </div>
                     ) : (
-                      <CriteriaSearch
-                        backFn={() => this.checkUnsavedChanges()}
-                        cohortContext={cohortContext}
-                        conceptSearchTerms={cohortContext.searchTerms}
-                      />
+                      initCriteriaSearch && (
+                        <CriteriaSearch
+                          backFn={() => this.checkUnsavedChanges()}
+                          cohortContext={cohortContext}
+                          conceptSearchTerms={cohortContext.searchTerms}
+                        />
+                      )
                     )}
                   </div>
                 </div>
