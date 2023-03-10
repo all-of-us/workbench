@@ -1144,7 +1144,6 @@ describe('RuntimeConfigurationPanel', () => {
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
     await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
 
     await mustClickButton(wrapper, 'Update');
     expect(updateSpy).toHaveBeenCalled();
