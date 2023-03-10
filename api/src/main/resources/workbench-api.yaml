@@ -4257,6 +4257,8 @@ definitions:
     - STRUCTURAL_VARIANT_DATA
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
+    - CONCEPT_SET
+    - CONCEPT_QUICK_ADD
   Surveys:
     type: string
     description: a survey for concepts

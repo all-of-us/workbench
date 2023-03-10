@@ -132,7 +132,7 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
-  if (domain === 'CONCEPT_SET') {
+  if (domain === Domain.CONCEPTSET) {
     item.type = selections[0]?.domainId;
   }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
@@ -213,7 +213,7 @@ export const CohortSearch = fp.flow(
         this.selectArrayData();
       } else if (domain === Domain.STRUCTURALVARIANTDATA) {
         this.selectStructuralVariantData();
-      } else if (domain === 'CONCEPT_SET') {
+      } else if (domain === Domain.CONCEPTSET) {
         this.setState({ showAddConceptSetModal: true });
       } else {
         this.setState({ initCriteriaSearch: true });
