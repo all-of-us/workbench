@@ -28,11 +28,31 @@ public class ExceptionUtils {
     return false;
   }
 
+  public static boolean isGoogleUnauthorizedException(IOException e) {
+    if (e instanceof GoogleJsonResponseException) {
+      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
+      return code == 401;
+    }
+    return false;
+  }
+
+  public static boolean isGoogleForbiddenException(IOException e) {
+    if (e instanceof GoogleJsonResponseException) {
+      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
+      return code == 403;
+    }
+    return false;
+  }
+
   public static WorkbenchException convertGoogleIOException(IOException e) {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
       throw new ConflictException(e);
+    } else if (isGoogleUnauthorizedException(e)) {
+      throw new UnauthorizedException(e);
+    } else if (isGoogleForbiddenException(e)) {
+      throw new ForbiddenException(e);
     } else if (e instanceof TokenResponseException) {
       throw codeToException(((TokenResponseException) e).getStatusCode());
     }
