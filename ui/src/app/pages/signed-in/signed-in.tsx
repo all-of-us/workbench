@@ -17,10 +17,7 @@ import { cdrVersionsApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
-import {
-  DEMOGRAPHIC_SURVEY_SESSION_KEY,
-  DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
-} from 'app/utils/constants';
+import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -128,9 +125,6 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     DEMOGRAPHIC_SURVEY_SESSION_KEY
   );
 
-  const pastSurveyDueDate =
-    +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) < +new Date();
-
   return (
     <FlexColumn
       style={{
@@ -156,8 +150,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {pastSurveyDueDate &&
-              !profileState.profile.demographicSurveyV2 &&
+              {!profileState.profile.demographicSurveyV2 &&
               !hasDismissedDemographicSurvey ? (
                 <DemographicSurveyPage
                   routeData={{ title: 'Demographic Survey' }}
