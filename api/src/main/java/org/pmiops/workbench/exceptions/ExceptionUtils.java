@@ -28,31 +28,11 @@ public class ExceptionUtils {
     return false;
   }
 
-  public static boolean isGoogleUnauthorizedException(IOException e) {
-    if (e instanceof GoogleJsonResponseException) {
-      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
-      return code == 401;
-    }
-    return false;
-  }
-
-  public static boolean isGoogleForbiddenException(IOException e) {
-    if (e instanceof GoogleJsonResponseException) {
-      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
-      return code == 403;
-    }
-    return false;
-  }
-
   public static WorkbenchException convertGoogleIOException(IOException e) {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
       throw new ConflictException(e);
-    } else if (isGoogleUnauthorizedException(e)) {
-      throw new UnauthorizedException(e);
-    } else if (isGoogleForbiddenException(e)) {
-      throw new ForbiddenException(e);
     } else if (e instanceof TokenResponseException) {
       throw codeToException(((TokenResponseException) e).getStatusCode());
     }
@@ -71,7 +51,7 @@ public class ExceptionUtils {
   }
 
   public static WorkbenchException convertNotebookException(
-      org.pmiops.workbench.notebooks.ApiException e) {
+          org.pmiops.workbench.notebooks.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -79,7 +59,7 @@ public class ExceptionUtils {
   }
 
   public static WorkbenchException convertLeonardoException(
-      org.pmiops.workbench.leonardo.ApiException e) {
+          org.pmiops.workbench.leonardo.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -87,7 +67,7 @@ public class ExceptionUtils {
   }
 
   public static WorkbenchException convertShibbolethException(
-      org.pmiops.workbench.shibboleth.ApiException e) {
+          org.pmiops.workbench.shibboleth.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -103,7 +83,7 @@ public class ExceptionUtils {
 
   public static boolean isServiceUnavailable(int code) {
     return code == HttpServletResponse.SC_SERVICE_UNAVAILABLE
-        || code == HttpServletResponse.SC_BAD_GATEWAY;
+            || code == HttpServletResponse.SC_BAD_GATEWAY;
   }
 
   public static boolean isInternalServerError(int code) {
