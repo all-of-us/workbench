@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  AppStatus,
   DisksApi,
   ProfileApi,
   WorkspaceAccessLevel,
@@ -21,7 +22,10 @@ import {
   mountWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsCromwellResponse,
+} from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -30,6 +34,7 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
@@ -115,5 +120,49 @@ describe('CromwellConfigurationPanel', () => {
       defaultCromwellConfig
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
+  const createDisabledStatuses = minus(
+    ALL_GKE_APP_STATUSES,
+    createEnabledStatuses
+  );
+
+  describe('should allow creating a Cromwell app for certain app statuses', () => {
+    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
+      jest
+        .spyOn(appsApi(), 'listAppsInWorkspace')
+        .mockImplementationOnce(() =>
+          Promise.resolve([
+            createListAppsCromwellResponse({ status: appStatus }),
+          ])
+        );
+      const wrapper = await component();
+      expect(
+        wrapper
+          .find('#cromwell-cloud-environment-create-button')
+          .first()
+          .prop('disabled')
+      ).toBeFalsy();
+    });
+  });
+
+  describe('should allow creating a Cromwell app for certain app statuses', () => {
+    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
+      jest
+        .spyOn(appsApi(), 'listAppsInWorkspace')
+        .mockImplementationOnce(() =>
+          Promise.resolve([
+            createListAppsCromwellResponse({ status: appStatus }),
+          ])
+        );
+      const wrapper = await component();
+      expect(
+        wrapper
+          .find('#cromwell-cloud-environment-create-button')
+          .first()
+          .prop('disabled')
+      ).toBeTruthy();
+    });
   });
 });
