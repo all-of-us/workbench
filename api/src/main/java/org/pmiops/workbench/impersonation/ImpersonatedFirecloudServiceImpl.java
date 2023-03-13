@@ -84,7 +84,8 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
             r ->
                 samRetryHandler.run(
                     (context) -> {
-                      resourcesApi.deleteResourceV2(SAM_KUBERNETES_RESOURCE_NAME, r.getResourceId());
+                      resourcesApi.deleteResourceV2(
+                          SAM_KUBERNETES_RESOURCE_NAME, r.getResourceId());
                       return null;
                     }));
   }
