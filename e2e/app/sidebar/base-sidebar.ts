@@ -31,8 +31,11 @@ export default abstract class BaseSidebar extends Container {
   async clickIcon(sidebarLink: SideBarLink): Promise<void> {
     let xpath;
     switch (sidebarLink) {
-      case SideBarLink.ComputeConfiguration:
+      case SideBarLink.RuntimeConfiguration:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-runtimeConfig"]`;
+        break;
+      case SideBarLink.CromwellConfiguration:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-cromwellConfig"]`;
         break;
       case SideBarLink.DataDictionary:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-dataDictionary"]`;
@@ -48,6 +51,9 @@ export default abstract class BaseSidebar extends Container {
         break;
       case SideBarLink.GenomicExtractionsHistory:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-genomicExtractions"]`;
+        break;
+      case SideBarLink.Applications:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-apps"]`;
         break;
       default:
         throw new Error(`SideBarLink case ${sidebarLink} is undefined.`);

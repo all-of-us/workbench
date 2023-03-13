@@ -226,7 +226,7 @@ export default class RuntimePanel extends BaseSidebar {
     if (isOpen) {
       return;
     }
-    await this.clickIcon(SideBarLink.ComputeConfiguration);
+    await this.clickIcon(SideBarLink.RuntimeConfiguration);
     await this.getDeleteIcon();
     const timeoutForDeletion = 3 * 60 * 1000;
     await this.waitUntilVisible(timeoutForDeletion);
