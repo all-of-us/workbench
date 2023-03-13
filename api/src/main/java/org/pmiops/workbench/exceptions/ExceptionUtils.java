@@ -39,6 +39,10 @@ public class ExceptionUtils {
     throw new ServerErrorException(e);
   }
 
+  public static boolean isConflictException(Throwable e) {
+    return (e instanceof ConflictException);
+  }
+
   public static boolean isSocketTimeoutException(Throwable e) {
     return (e instanceof SocketTimeoutException);
   }
@@ -62,6 +66,10 @@ public class ExceptionUtils {
       org.pmiops.workbench.leonardo.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
+    }
+    if (isConflictException(e.getCause())) {
+      throw new ConflictException(
+          "Please wait a few minutes and try to create your environment again.");
     }
     throw codeToException(e.getCode());
   }
