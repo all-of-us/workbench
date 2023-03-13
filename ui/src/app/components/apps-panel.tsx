@@ -9,6 +9,7 @@ import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabl
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { isVisible } from 'app/utils/runtime-utils';
 import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 
@@ -150,7 +151,13 @@ export const AppsPanel = (props: {
                 <UnexpandedApp
                   {...{ appType }}
                   key={appType}
-                  onClick={() => addToExpandedApps(appType)}
+                  onClick={() => {
+                    if (appType === UIAppType.CROMWELL) {
+                      setSidebarActiveIconStore.next('cromwellConfig');
+                    } else {
+                      addToExpandedApps(appType);
+                    }
+                  }}
                 />
               ))
           )}
