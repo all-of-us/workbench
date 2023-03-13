@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading, waitForFn } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/sidebar/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
