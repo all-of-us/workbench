@@ -1,5 +1,5 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import ApplicationsPanel from 'app/sidebar/applications-panel';
+import AppsPanel from 'app/sidebar/apps-panel';
 import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
@@ -18,7 +18,7 @@ describe('Cromwell GKE app', () => {
   test('Create and delete a Cromwell GKE app', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
-    const applicationsPanel = new ApplicationsPanel(page);
+    const applicationsPanel = new AppsPanel(page);
     await applicationsPanel.open();
 
     // Cromwell is not running, so it appears in unexpanded mode

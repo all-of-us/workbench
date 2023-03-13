@@ -52,7 +52,7 @@ export default abstract class BaseSidebar extends Container {
       case SideBarLink.GenomicExtractionsHistory:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-genomicExtractions"]`;
         break;
-      case SideBarLink.Applications:
+      case SideBarLink.UserApps:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-apps"]`;
         break;
       default:

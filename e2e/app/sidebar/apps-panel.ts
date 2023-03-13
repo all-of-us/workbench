@@ -5,7 +5,7 @@ import { logger } from 'libs/logger';
 
 const defaultXpath = '//*[@data-test-id="apps-panel"]';
 
-export default class ApplicationsPanel extends BaseSidebar {
+export default class AppsPanel extends BaseSidebar {
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page);
     super.setXpath(`${super.getXpath()}${xpath}`);
@@ -17,7 +17,7 @@ export default class ApplicationsPanel extends BaseSidebar {
     if (isOpen) {
       return;
     }
-    await this.clickIcon(SideBarLink.Applications);
+    await this.clickIcon(SideBarLink.UserApps);
     await this.getDeleteIcon();
     const timeoutForDeletion = 3 * 60 * 1000;
     await this.waitUntilVisible(timeoutForDeletion);
