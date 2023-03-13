@@ -5,19 +5,11 @@ import Container from 'app/container';
 import { makeDateTimeStr } from './str-utils';
 import { getAttrValue } from './element-utils';
 
-// does not await async functions - DO NOT USE
-export const badWaitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
-  const start = Date.now();
-  while (Date.now() < start + timeout) {
-    if (fn()) {
-      return true;
-    }
-    await new Promise((resolve) => setTimeout(resolve, interval));
-  }
-  return false;
-};
-
-export const waitForFn = async (fn: () => Promise<boolean>, interval = 2000, timeout = 10000): Promise<boolean> => {
+export const waitForFn = async (
+  fn: (() => Promise<boolean>) | (() => boolean),
+  interval = 2000,
+  timeout = 10000
+): Promise<boolean> => {
   const start = Date.now();
   while (Date.now() < start + timeout) {
     if (await fn()) {

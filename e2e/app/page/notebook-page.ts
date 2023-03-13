@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { Dialog, ElementHandle, Frame, Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitForDocumentTitle, badWaitForFn, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading, waitForFn } from 'utils/waits-utils';
 import { ResourceCard } from 'app/text-labels';
 import RuntimePanel, { StartStopIconState } from 'app/sidebar/runtime-panel';
 import NotebookCell, { CellType } from './notebook-cell';
@@ -161,7 +161,7 @@ export default class NotebookPage extends NotebookFrame {
     // Wait for file existence locally, to confirm download completion.
     const downloadFilename = path.join(downloadPath, filename);
     expect(
-      await badWaitForFn(() => fs.existsSync(downloadFilename), /* interval */ undefined, /* timeout */ 90 * 1000)
+      await waitForFn(() => fs.existsSync(downloadFilename), /* interval */ undefined, /* timeout */ 90 * 1000)
     ).toBeTruthy();
 
     const downloadSizeMB = fs.statSync(downloadFilename).size / 1e6;
@@ -580,7 +580,7 @@ export default class NotebookPage extends NotebookFrame {
     const fileSize = await getPropValue(fileSizeElement, 'textContent');
 
     // Fail if upload proceeded without a dialog prompt.
-    expect(await badWaitForFn(() => sawDialog)).toBeTruthy();
+    expect(await waitForFn(() => sawDialog)).toBeTruthy();
 
     await newPage.close();
     await this.page.bringToFront();
