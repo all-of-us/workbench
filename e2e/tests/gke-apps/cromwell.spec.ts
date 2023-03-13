@@ -51,6 +51,8 @@ describe('Cromwell GKE app', () => {
     // 1. closes the apps panel
     // 2. opens the config panel
 
+    console.log('creating a new Cromwell');
+
     await launchButton.click();
     await page.waitForXPath(applicationsPanel.getXpath(), { visible: false });
     const configPanel = new CromwellConfigurationPanel(page);
@@ -75,6 +77,8 @@ describe('Cromwell GKE app', () => {
     const expandedCromwell = BaseElement.asBaseElement(page, await page.waitForXPath(expandedCromwellXpath));
     expect(await expandedCromwell.getTextContent()).toContain('status: PROVISIONING');
 
+    console.log('Cromwell status: PROVISIONING');
+
     // poll for "Running" by repeatedly closing and opening
 
     const isRunning = await waitForFn(
@@ -88,6 +92,8 @@ describe('Cromwell GKE app', () => {
     );
     expect(isRunning).toBeTruthy();
 
+    console.log('Cromwell status: Running');
+
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
@@ -99,6 +105,8 @@ describe('Cromwell GKE app', () => {
     await applicationsPanel.close();
     await applicationsPanel.open();
     expect(await expandedCromwell.getTextContent()).toContain('status: Deleting');
+
+    console.log('Cromwell status: Deleting');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening
 
@@ -113,4 +121,6 @@ describe('Cromwell GKE app', () => {
     );
     expect(isDeleted).toBeTruthy();
   });
+
+  console.log('Cromwell deleted');
 });
