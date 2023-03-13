@@ -14,4 +14,10 @@ public class ExceptionUtilsTest {
     assertThrows(
         GatewayTimeoutException.class, () -> ExceptionUtils.convertNotebookException(cause));
   }
+
+  @Test
+  public void convertLeonardoConflictException() throws Exception {
+    ApiException cause = new ApiException(new ConflictException());
+    assertThrows(AppConflictException.class, () -> ExceptionUtils.convertNotebookException(cause));
+  }
 }
