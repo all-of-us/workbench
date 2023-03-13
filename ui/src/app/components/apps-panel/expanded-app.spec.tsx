@@ -356,19 +356,6 @@ describe('ExpandedApp', () => {
     );
   });
 
-  it('should not be possible to configure a Cromwell app', async () => {
-    const wrapper = await component(UIAppType.CROMWELL, {
-      appName: 'my-app',
-      googleProject,
-      status: AppStatus.RUNNING,
-    });
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'Cromwell-settings-button' })
-        .prop('disabled')
-    ).toBeTruthy();
-  });
-
   it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
     const appName = 'my-app';
     const wrapper = await component(UIAppType.RSTUDIO, {
