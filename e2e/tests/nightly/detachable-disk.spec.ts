@@ -56,6 +56,7 @@ describe('Updating runtime status', () => {
 
     // Create a new runtime, reattaching the PD and increasing the size.
     await runtimePanel.open();
+    await runtimePanel.getCustomizeButton().click();
     await runtimePanel.pickDetachableDisk();
     await runtimePanel.pickDetachableDiskGbs((await runtimePanel.getDetachableDiskGbs()) + 10);
     await runtimePanel.createRuntime({ waitForComplete: false });
