@@ -92,9 +92,6 @@ describe('Cromwell GKE app', () => {
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
 
-    // try to figure out why it's failing on the click step below
-    await page.waitForTimeout(30e3);
-
     await deleteButton.click();
 
     // refresh the apps panel and observe that it's Deleting
