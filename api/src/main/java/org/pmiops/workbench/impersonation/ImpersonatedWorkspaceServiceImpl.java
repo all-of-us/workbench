@@ -80,15 +80,15 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     // TODO: do we want to delete workspace resource references and save only metadata?
 
     try {
-      impersonatedFirecloudService.deleteSamKubernetesResourceInWorkspace(
+      impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(
           dbUser, dbWorkspace.getGoogleProject());
     } catch (IOException e) {
       // Ignore exceptions and proceed with workspace deletion, we don' want error here stop us
-      // trying to delete
-      // workspace.
+      // trying to delete workspace.
       logger.log(
           Level.WARNING,
-          String.format("Error occurs while deleting k8s resource for workspace %s", wsNamespace),
+          String.format(
+              "An error occurred while deleting k8s resources for workspace %s", wsNamespace),
           e);
     }
 

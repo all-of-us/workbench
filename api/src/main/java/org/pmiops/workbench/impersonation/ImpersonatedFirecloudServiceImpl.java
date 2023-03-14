@@ -41,11 +41,11 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   public ImpersonatedFirecloudServiceImpl(
       FirecloudApiClientFactory firecloudApiClientFactory,
       SamApiClientFactory samApiClientFactory,
-      FirecloudRetryHandler fire,
+      FirecloudRetryHandler firecloudRetryHandler,
       SamRetryHandler samRetryHandler) {
     this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.samApiClientFactory = samApiClientFactory;
-    this.firecloudRetryHandler = fire;
+    this.firecloudRetryHandler = firecloudRetryHandler;
     this.samRetryHandler = samRetryHandler;
   }
 
@@ -70,8 +70,8 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public void deleteSamKubernetesResourceInWorkspace(@Nonnull DbUser dbUser, String googleProjectId)
-      throws IOException {
+  public void deleteSamKubernetesResourcesInWorkspace(
+      @Nonnull DbUser dbUser, String googleProjectId) throws IOException {
     ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
     List<SamFullyQualifiedResourceId> resourceIds =
         samRetryHandler.run(

@@ -46,46 +46,6 @@ paths:
                 $ref: '#/components/schemas/ErrorReport'
 
   /api/resources/v2/{resourceTypeName}/{resourceId}:
-    post:
-      tags:
-        - Resources
-      summary: Create a new resource with default owner policy
-      operationId: createResourceWithDefaultsV2
-      parameters:
-        - name: resourceTypeName
-          in: path
-          description: Type of resource to create
-          required: true
-          schema:
-            type: string
-        - name: resourceId
-          in: path
-          description: Id of resource to create, must be unique for all resources of
-            given type
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          'application/json':
-            schema:
-              type: object
-      responses:
-        204:
-          description: Successfully created resource
-          content: { }
-        409:
-          description: Resource already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
     delete:
       tags:
         - Resources

@@ -7,7 +7,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 
 /**
- * An impersonation-enabled version to call Firecloud services.
+ * * An impersonation-enabled version of {@link org.pmiops.workbench.firecloud.FireCloudService}
  *
  * <p>REMINDER: With great power comes great responsibility. Impersonation should not be used in
  * production, except where absolutely necessary.
@@ -25,6 +25,6 @@ public interface ImpersonatedFirecloudService {
       throws IOException;
 
   /** Deletes SAM Kubernetes within a Google project. */
-  void deleteSamKubernetesResourceInWorkspace(@Nonnull DbUser dbUser, String googleProjectId)
+  void deleteSamKubernetesResourcesInWorkspace(@Nonnull DbUser dbUser, String googleProjectId)
       throws IOException;
 }
