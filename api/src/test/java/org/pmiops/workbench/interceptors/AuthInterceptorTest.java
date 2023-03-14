@@ -93,6 +93,9 @@ public class AuthInterceptorTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
+    workbenchConfig.server.apiBaseUrl = "api-dot-all-of-us-workbench-test.appspot.com";
+    when(mockRequest.getRequestURI()).thenReturn("api-dot-all-of-us-workbench-test.appspot.com");
+
     user = new DbUser();
     user.setUserId(USER_ID);
     user.setDisabled(false);
@@ -279,5 +282,16 @@ public class AuthInterceptorTest {
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
+  }
+
+  @Test
+  public void preHandle_apiBaseUrlNotMatch() throws Exception {
+    when(mockHandler.getMethod()).thenReturn(getTestMethod());
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
+
+    when(mockRequest.getRequestURI()).thenReturn("url1");
+
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
+    verify(mockResponse).sendError(HttpServletResponse.SC_FORBIDDEN);
   }
 }

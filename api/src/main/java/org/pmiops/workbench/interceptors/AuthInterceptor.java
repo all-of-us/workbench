@@ -107,6 +107,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+    if (!request.getRequestURI().startsWith(workbenchConfigProvider.get().server.apiBaseUrl)) {
+      // Is authentication is required, the request should send to API external URL.
+      // In this case, RequestURI would be apibaseUrl/{request path}.
+      // See https://precisionmedicineinitiative.atlassian.net/browse/RW-9675
+      log.warning(String.format("Request URL %s is not allowed for this request", request.getRequestURI()));
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return false;
+    }
+
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
       log.warning("No bearer token found in request");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
