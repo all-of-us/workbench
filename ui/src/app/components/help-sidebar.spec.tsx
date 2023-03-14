@@ -3,12 +3,14 @@ import { act } from 'react-dom/test-utils';
 
 import {
   AppsApi,
+  AppStatus,
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
   DataSetApi,
   ErrorCode,
   NotebooksApi,
+  ProfileApi,
   RuntimeApi,
   RuntimeStatus,
   TerraJobStatus,
@@ -18,7 +20,11 @@ import {
 
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
+import {
+  profileApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -29,6 +35,7 @@ import {
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
+  profileStore,
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore,
@@ -39,8 +46,12 @@ import defaultServerConfig from 'testing/default-server-config';
 import {
   mountWithRouter,
   waitForFakeTimersAndUpdate,
+  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsCromwellResponse,
+} from 'testing/stubs/apps-api-stub';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
@@ -52,6 +63,7 @@ import {
 } from 'testing/stubs/cohort-review-service-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
+import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -119,6 +131,7 @@ const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
   let runtimeStub: RuntimeApiStub;
+  let appsStub: AppsApiStub;
   let props: {};
 
   const component = async () => {
@@ -174,10 +187,11 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     props = {};
     dataSetStub = new DataSetApiStub();
     runtimeStub = new RuntimeApiStub();
+    appsStub = new AppsApiStub();
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(
@@ -187,7 +201,7 @@ describe('HelpSidebar', () => {
     registerApiClient(DataSetApi, dataSetStub);
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
@@ -200,6 +214,14 @@ describe('HelpSidebar', () => {
       runtimeLoaded: true,
     });
     cdrVersionStore.set(cdrVersionTiersResponse);
+
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    profileStore.set({
+      profile: await profileApi().getMe(),
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    });
 
     // mock timers
     jest.useFakeTimers('modern');
@@ -571,10 +593,7 @@ describe('HelpSidebar', () => {
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
     const wrapper = await component();
-    expect(
-      // @ts-ignore
-      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
-    ).toBeTruthy();
+    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
   });
 
   it('should not automatically open previously open panel on load if user is suspended', async () => {
@@ -582,9 +601,47 @@ describe('HelpSidebar', () => {
     const activeIcon = 'apps';
     localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
     const wrapper = await component();
-    expect(
-      // @ts-ignore
-      wrapper.find('[data-test-id="sidebar-content"]').contains(AppsPanel)
-    ).toBeFalsy();
+    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
+  });
+
+  it('should open the Cromwell config panel after clicking the unexpanded app', async () => {
+    const wrapper = await component();
+    wrapper
+      .find({ 'data-test-id': 'help-sidebar-icon-apps' })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
+
+    wrapper.find({ 'data-test-id': `Cromwell-unexpanded` }).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+  });
+
+  it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
+    appsStub.listAppsResponse = [
+      createListAppsCromwellResponse({ status: AppStatus.RUNNING }),
+    ];
+
+    const wrapper = await component();
+    wrapper
+      .find({ 'data-test-id': 'help-sidebar-icon-apps' })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
+
+    wrapper
+      .find({ 'data-test-id': `Cromwell-expanded` })
+      .find({ 'data-test-id': 'Cromwell-settings-button' })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
   });
 });

@@ -259,7 +259,7 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
   });
 
-  it('should allow a user to expand available apps', async () => {
+  it('should allow a user to expand Jupyter and RStudio', async () => {
     // initial state: no apps exist
 
     runtimeStub.runtime.status = undefined;
@@ -281,18 +281,6 @@ describe('AppsPanel', () => {
 
     expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeFalsy();
     expect(findExpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
-
-    // Click unexpanded Cromwell app
-
-    expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
-    const clickCromwell = findUnexpandedApp(wrapper, 'Cromwell').prop(
-      'onClick'
-    );
-    await clickCromwell();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeFalsy();
-    expect(findExpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
 
     // Click unexpanded RStudio app
 
@@ -324,22 +312,6 @@ describe('AppsPanel', () => {
 
     expect(findActiveApps(wrapper).exists()).toBeFalsy();
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
-  });
-
-  it('should not be possible to configure a Cromwell app', async () => {
-    runtimeStub.runtime.status = undefined;
-    appsStub.listAppsResponse = [];
-    const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
-    await findUnexpandedApp(wrapper, 'Cromwell').simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    const cromwellPanel = findExpandedApp(wrapper, 'Cromwell');
-
-    expect(
-      cromwellPanel
-        .find({ 'data-test-id': 'Cromwell-settings-button' })
-        .prop('disabled')
-    ).toBeTruthy();
   });
 
   it('should pause a running RStudio app', async () => {
