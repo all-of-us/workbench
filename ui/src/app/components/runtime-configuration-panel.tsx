@@ -246,7 +246,11 @@ const PanelMain = fp.flow(
           () => PanelContent.Create,
         ],
         [
+          // General Analysis consist of GCE + PD. Display create page only if
+          // 1) currentRuntime + pd both are deleted and
+          // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
           currentRuntime?.status === RuntimeStatus.Deleted &&
+            !currentRuntime?.gceWithPdConfig &&
             [
               RuntimeConfigurationType.GeneralAnalysis,
               RuntimeConfigurationType.HailGenomicAnalysis,
