@@ -32,15 +32,11 @@ public class ExceptionUtils {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
-      throw new ConflictException("eee");
+      throw new ConflictException(e);
     } else if (e instanceof TokenResponseException) {
       throw codeToException(((TokenResponseException) e).getStatusCode());
     }
     throw new ServerErrorException(e);
-  }
-
-  public static boolean isConflictException(Throwable e) {
-    return (e instanceof ConflictException);
   }
 
   public static boolean isSocketTimeoutException(Throwable e) {
