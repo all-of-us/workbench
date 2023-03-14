@@ -51,7 +51,6 @@ const styles = reactStyles({
     marginLeft: '1em',
     marginBottom: '1em',
     padding: '1em',
-    width: 'fit-content',
   },
   enabledTrashButton: {
     alignSelf: 'center',
@@ -129,34 +128,11 @@ const CromwellButtonRow = (props: {
 
   return (
     <FlexRow>
-      <TooltipTrigger
-        disabled={false}
-        content='Support for configuring Cromwell is not yet available'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <SettingsButton
-            disabled={true}
-            onClick={() => {}}
-            data-test-id='Cromwell-settings-button'
-          />
-        </div>
-      </TooltipTrigger>
+      <SettingsButton
+        onClick={() => setSidebarActiveIconStore.next('cromwellConfig')}
+        data-test-id='Cromwell-settings-button'
+      />
       <PauseUserAppButton {...{ userApp }} />
-      <TooltipTrigger
-        disabled={canCreateApp(userApp)}
-        content='A Cromwell app exists or is being created'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={!canCreateApp(userApp)}
-            onClick={() => setSidebarActiveIconStore.next('cromwellConfig')}
-            icon={faPlay}
-            buttonText='Launch'
-          />
-        </div>
-      </TooltipTrigger>
     </FlexRow>
   );
 };
@@ -304,9 +280,9 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       {appType === UIAppType.JUPYTER ? (
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
-        <FlexColumn style={{ alignItems: 'center' }}>
+        <FlexColumn>
           {/* TODO: keep status updated internally */}
-          <div>
+          <div style={{ textAlign: 'center' }}>
             status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
             (refresh to update)
           </div>
