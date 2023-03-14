@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
+import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +96,7 @@ public class AuthInterceptorTest {
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
     workbenchConfig.server.apiBaseUrl = "api-dot-all-of-us-workbench-test.appspot.com";
-    when(mockRequest.getRequestURI()).thenReturn("api-dot-all-of-us-workbench-test.appspot.com");
+    when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("api-dot-all-of-us-workbench-test.appspot.com"));
 
     user = new DbUser();
     user.setUserId(USER_ID);
@@ -285,13 +287,27 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandle_apiBaseUrlNotMatch() throws Exception {
+  public void preHandle_apiBaseUrlNotMatch_forbidden() throws Exception {
     when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
 
-    when(mockRequest.getRequestURI()).thenReturn("url1");
+    when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isFalse();
     verify(mockResponse).sendError(HttpServletResponse.SC_FORBIDDEN);
+  }
+
+  @Test
+  public void preHandle_apiBaseUrlNotMatch_cloudTask_allowed() throws Exception {
+    when(mockHandler.getMethod()).thenReturn(getTestMethod());
+    when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
+    when(mockHandler.getMethod())
+            .thenReturn(
+                    CloudTaskRdrExportApi.class.getMethod(
+                            "exportResearcherData", ArrayOfLong.class, Boolean.class));
+
+    when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
+
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
   }
 }

@@ -107,11 +107,17 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-    if (!request.getRequestURI().startsWith(workbenchConfigProvider.get().server.apiBaseUrl)) {
-      // Is authentication is required, the request should send to API external URL.
+    if (!request
+            .getRequestURL()
+            .toString()
+            .startsWith(workbenchConfigProvider.get().server.apiBaseUrl)
+        && !InterceptorUtils.isCloudTaskRequest(apiOp)) {
+      // Is authentication is required and not cloud task, the request should send to API external
+      // URL.
       // In this case, RequestURI would be apibaseUrl/{request path}.
       // See https://precisionmedicineinitiative.atlassian.net/browse/RW-9675
-      log.warning(String.format("Request URL %s is not allowed for this request", request.getRequestURI()));
+      log.warning(
+          String.format("Request URL %s is not allowed for this request", request.getRequestURL()));
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
