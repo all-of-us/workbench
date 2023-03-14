@@ -194,11 +194,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
 
-    Map<String, String> customEnvironmentVariables = LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(workspace, fireCloudService, workbenchConfigProvider.get());
+    Map<String, String> customEnvironmentVariables =
+        LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+            workspace, fireCloudService, workbenchConfigProvider.get());
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
-
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -465,7 +466,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
-        .customEnvironmentVariables(LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
+        .customEnvironmentVariables(
+            LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+                dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
         .labels(appLabels);
 
     if (appType.equals(AppType.RSTUDIO)) {
