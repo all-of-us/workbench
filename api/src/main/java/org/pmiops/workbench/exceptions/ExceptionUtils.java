@@ -32,7 +32,7 @@ public class ExceptionUtils {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
-      throw new ConflictException(e);
+      throw new ConflictException("eee");
     } else if (e instanceof TokenResponseException) {
       throw codeToException(((TokenResponseException) e).getStatusCode());
     }
@@ -67,7 +67,7 @@ public class ExceptionUtils {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
-    if (isConflictException(e.getCause())) {
+    if (e.getCode() == HttpServletResponse.SC_CONFLICT) {
       throw new ConflictException(
           "Please wait a few minutes and try to create your environment again.");
     }
