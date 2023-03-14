@@ -37,6 +37,7 @@ import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -447,6 +448,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
         item: { searchParameters, type },
       } = this.props;
       return (
+        !serverConfigStore.get().config.enableConceptSetsInCohortBuilder ||
         this.preventItemEdit ||
         type === Domain.PERSON.toString() ||
         !searchParameters.some(
