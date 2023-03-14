@@ -246,8 +246,9 @@ const PanelMain = fp.flow(
           () => PanelContent.Create,
         ],
         [
-          // General Analysis consist of GCE + PD. Even if runtime has been deleted, PD could still exist
-          // In that case show the configuration page else if everything is deleted show create pannel
+          // General Analysis consist of GCE + PD. Display create page only if
+          // 1) currentRuntime + pd both are deleted and
+          // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
           currentRuntime?.status === RuntimeStatus.Deleted &&
             !currentRuntime?.gceWithPdConfig &&
             [
