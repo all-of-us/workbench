@@ -121,7 +121,7 @@
     "enableConceptSetsInCohortBuilder": false,
     "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": true,
+    "enableRStudioGKEApp": false,
     "enableDataExplorer": false
   },
   "actionAudit": {
