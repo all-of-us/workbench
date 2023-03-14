@@ -19,7 +19,7 @@ public class ExceptionUtilsTest {
   @Test
   public void convertLeonardoConflictException() throws Exception {
     org.pmiops.workbench.leonardo.ApiException cause =
-        new org.pmiops.workbench.leonardo.ApiException(new ConflictException());
+        new org.pmiops.workbench.leonardo.ApiException(409, "Conflict exception");
     WorkbenchException leonardoException =
         assertThrows(ConflictException.class, () -> ExceptionUtils.convertLeonardoException(cause));
     Assertions.assertEquals(
