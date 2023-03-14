@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
@@ -80,6 +81,7 @@ public class CdrVersionServiceTest {
   })
   @MockBean({
     FireCloudService.class,
+    SamApiClientFactory.class,
   })
   static class Configuration {
     @Bean

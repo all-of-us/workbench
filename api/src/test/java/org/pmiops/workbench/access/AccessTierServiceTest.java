@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -47,6 +48,7 @@ public class AccessTierServiceTest {
   })
   @MockBean({
     FireCloudService.class,
+    SamApiClientFactory.class,
   })
   @TestConfiguration
   static class Configuration {

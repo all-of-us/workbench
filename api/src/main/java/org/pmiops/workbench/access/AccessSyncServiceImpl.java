@@ -52,11 +52,8 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     this.userServiceAuditor = userServiceAuditor;
   }
 
-  /**
-   * Ensures that the data access tiers for the user reflect the state of other fields on the user
-   */
   @Override
-  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
+  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent, boolean shouldPropagateToTerra) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     final List<DbAccessTier> newAccessTiers = getUserAccessTiersList(dbUser);
@@ -67,13 +64,28 @@ public class AccessSyncServiceImpl implements AccessSyncService {
 
     // add user to each Access Tier DB table and the tiers' Terra Auth Domains
     newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
+    if (shouldPropagateToTerra) {
+      newAccessTiers.forEach(tier -> accessTierService.addToAuthDomainIdempotent(dbUser, tier));
+    }
 
     // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
     final List<DbAccessTier> tiersForRemoval =
         Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
+    if (shouldPropagateToTerra) {
+      tiersForRemoval.forEach(
+          tier -> accessTierService.removeFromAuthDomainIdempotent(dbUser, tier));
+    }
 
     return userDao.save(dbUser);
+  }
+
+  /**
+   * Ensures that the data access tiers for the user reflect the state of other fields on the user
+   */
+  @Override
+  public DbUser updateUserAccessTiers(DbUser dbUser, Agent agent) {
+    return updateUserAccessTiers(dbUser, agent, true);
   }
 
   private List<DbAccessTier> getUserAccessTiersList(DbUser dbUser) {

@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessModuleService;
+import org.pmiops.workbench.access.AccessSyncService;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -53,16 +55,22 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final AccessModuleService accessModuleService;
+  private final AccessSyncService accessSyncService;
+  private final AccessTierService accessTierService;
 
   CloudTaskUserController(
       UserDao userDao,
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
-      AccessModuleService accessModuleService) {
+      AccessModuleService accessModuleService,
+      AccessSyncService accessSyncService,
+      AccessTierService accessTierService) {
     this.userDao = userDao;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.accessModuleService = accessModuleService;
+    this.accessSyncService = accessSyncService;
+    this.accessTierService = accessTierService;
   }
 
   @Override
@@ -134,16 +142,15 @@ public class CloudTaskUserController implements CloudTaskUserApiDelegate {
           }
         }
 
-        // Note: each module synchronization calls updateUserAccessTiers() which checks the status
-        // of *all* modules, so this serves as a general fallback as well (e.g. due to partial
-        // system failures or bugs), ensuring that the database and access tier groups are
-        // consistent with access module statuses.
-        user = userService.syncDuccVersionStatus(user, Agent.asSystem());
+        user = accessSyncService.updateUserAccessTiers(user, Agent.asSystem(), false);
       } catch (WorkbenchException e) {
         log.log(Level.SEVERE, "failed to synchronize access for user " + user.getUsername(), e);
         errorCount++;
       }
     }
+
+    accessTierService.propagateAllAuthDomainMembership();
+
     if (errorCount > 0) {
       log.severe(
           String.format(

@@ -49,6 +49,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
@@ -113,6 +114,7 @@ public class UserServiceTest {
   })
   @MockBean({
     MailService.class,
+    SamApiClientFactory.class,
   })
   @TestConfiguration
   static class Configuration {
