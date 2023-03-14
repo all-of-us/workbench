@@ -3,19 +3,14 @@ package org.pmiops.workbench.leonardo;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,15 +19,12 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -45,7 +37,6 @@ import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
@@ -58,25 +49,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
-
-  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
-  private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
-  private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
-  private static final String LEONARDO_BASE_URL = "LEONARDO_BASE_URL";
-
-  private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
-  private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
-  private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
-
-  @VisibleForTesting
-  public static final String WGS_CRAM_MANIFEST_PATH_KEY = "WGS_CRAM_MANIFEST_PATH";
-
-  private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
-  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
-      "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
-  private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
-  private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
-
   // The Leonardo user role who creates Leonardo APP or disks.
   private static final String LEONARDO_CREATOR_ROLE = "creator";
 
@@ -214,61 +186,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
   }
 
-  private String joinStoragePaths(String... paths) {
-    final CharMatcher slashMatch = CharMatcher.is('/');
-    return Arrays.stream(paths)
-        .map(slashMatch::trimLeadingFrom)
-        .map(slashMatch::trimTrailingFrom)
-        .filter(p -> !p.isEmpty())
-        .collect(Collectors.joining("/"));
-  }
-
-  private Map<String, String> buildCdrEnvVars(DbCdrVersion cdrVersion) {
-    Map<String, String> vars = new HashMap<>();
-    vars.put(
-        WORKSPACE_CDR_ENV_KEY,
-        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-
-    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
-    String bucketInfix = cdrVersion.getStorageBasePath();
-    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
-      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
-      Map<String, Optional<String>> partialStoragePaths =
-          ImmutableMap.<String, Optional<String>>builder()
-              .put(CDR_STORAGE_PATH_KEY, Optional.of("/"))
-              .put(
-                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsVcfMergedStoragePath()))
-              .put(
-                  WGS_HAIL_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsHailStoragePath()))
-              .put(
-                  WGS_CRAM_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsCramManifestPath()))
-              .put(
-                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayHailStoragePath()))
-              .put(
-                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayVcfSingleSampleStoragePath()))
-              .put(
-                  MICROARRAY_VCF_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayVcfManifestPath()))
-              .put(
-                  MICROARRAY_IDAT_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayIdatManifestPath()))
-              .build();
-      vars.putAll(
-          partialStoragePaths.entrySet().stream()
-              .filter(entry -> entry.getValue().filter(p -> !p.isEmpty()).isPresent())
-              .collect(
-                  Collectors.toMap(
-                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue().get()))));
-    }
-
-    return vars;
-  }
-
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
@@ -277,10 +194,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
 
-    Map<String, String> customEnvironmentVariables = getBaseEnvironmentVariables(workspace);
+    Map<String, String> customEnvironmentVariables = LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(workspace, fireCloudService, workbenchConfigProvider.get());
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
+
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -547,7 +465,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
-        .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
+        .customEnvironmentVariables(LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
         .labels(appLabels);
 
     if (appType.equals(AppType.RSTUDIO)) {
@@ -692,33 +610,5 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
 
     return results.size();
-  }
-
-  /** The general environment variables that can be used in all Apps. */
-  private Map<String, String> getBaseEnvironmentVariables(DbWorkspace workspace) {
-    Map<String, String> customEnvironmentVariables = new HashMap<>();
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
-        fireCloudService
-            .getWorkspace(workspace)
-            .orElseThrow(() -> new NotFoundException("workspace not found"));
-    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspace.getWorkspaceNamespace());
-    // This variable is already made available by Leonardo, but it's only exported in certain
-    // notebooks contexts; this ensures it is always exported. See RW-7096.
-    customEnvironmentVariables.put(
-        WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
-    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
-    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
-    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
-    // ~200x faster for loading large dataframes from Bigquery.
-    // After CA-952 is complete, this should always be exported.
-    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
-        || workspace.isTerraV2Workspace()) {
-      customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
-    }
-    customEnvironmentVariables.put(
-        LEONARDO_BASE_URL, workbenchConfigProvider.get().firecloud.leoBaseUrl);
-    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
-
-    return customEnvironmentVariables;
   }
 }
