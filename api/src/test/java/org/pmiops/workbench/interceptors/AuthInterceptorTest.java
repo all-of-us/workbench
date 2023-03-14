@@ -96,7 +96,8 @@ public class AuthInterceptorTest {
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
     workbenchConfig.server.apiBaseUrl = "api-dot-all-of-us-workbench-test.appspot.com";
-    when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("api-dot-all-of-us-workbench-test.appspot.com"));
+    when(mockRequest.getRequestURL())
+        .thenReturn(new StringBuffer("api-dot-all-of-us-workbench-test.appspot.com"));
 
     user = new DbUser();
     user.setUserId(USER_ID);
@@ -302,9 +303,9 @@ public class AuthInterceptorTest {
     when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockHandler.getMethod())
-            .thenReturn(
-                    CloudTaskRdrExportApi.class.getMethod(
-                            "exportResearcherData", ArrayOfLong.class, Boolean.class));
+        .thenReturn(
+            CloudTaskRdrExportApi.class.getMethod(
+                "exportResearcherData", ArrayOfLong.class, Boolean.class));
 
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
