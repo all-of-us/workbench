@@ -50,6 +50,7 @@ const PanelMain = fp.flow(
     profileState,
     creatorFreeCreditsRemaining,
     onClose,
+    onConflict,
   }) => {
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
@@ -65,9 +66,17 @@ const PanelMain = fp.flow(
     const onCreate = () => {
       if (!creating) {
         setCreating(true);
-        appsApi().createApp(workspace.namespace, defaultCromwellConfig);
-        onClose();
-        setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+        appsApi()
+          .createApp(workspace.namespace, defaultCromwellConfig)
+          .then(() => {
+            onClose();
+            setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+          })
+          .catch((error) => {
+            if (error && error.status === 409) {
+              onConflict();
+            }
+          });
       }
     };
 
@@ -184,6 +193,7 @@ export const CromwellConfigurationPanel = ({
   creatorFreeCreditsRemaining = null,
 }) => {
   const [analysisConfig, setAnalysisConfig] = useState({});
+  const [conflict, setConflict] = useState(false);
 
   useEffect(
     () =>
@@ -214,20 +224,30 @@ export const CromwellConfigurationPanel = ({
 
   return (
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
-      <div>
-        A cloud environment consists of an application configuration, cloud
-        compute and persistent disk(s). This is the server version of Cromwell
-        only. You will need to create a Jupyter terminal environment in order to
-        interact with the workflow.
-      </div>
-      <PanelMain
-        {...{
-          analysisConfig,
-          onClose,
-          initialPanelContent,
-          creatorFreeCreditsRemaining,
-        }}
-      />
+      {!conflict ? (
+        <>
+          <div>
+            A cloud environment consists of an application configuration, cloud
+            compute and persistent disk(s). This is the server version of
+            Cromwell only. You will need to create a Jupyter terminal
+            environment in order to interact with the workflow.
+          </div>
+          <PanelMain
+            {...{
+              analysisConfig,
+              onClose,
+              initialPanelContent,
+              creatorFreeCreditsRemaining,
+            }}
+            onConflict={() => setConflict(true)}
+          />
+        </>
+      ) : (
+        <div>
+          Please wait a few minutes and try to create your Cromwell Server
+          again.
+        </div>
+      )}
     </FlexColumn>
   );
 };
