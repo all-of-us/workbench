@@ -22,22 +22,17 @@ public class LeonardoCustomEnvVarUtils {
 
   private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
   @VisibleForTesting public static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
-
   @VisibleForTesting
   public static String BIGQUERY_STORAGE_API_ENABLED_ENV_KEY = "BIGQUERY_STORAGE_API_ENABLED";
-
   private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
   private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
   private static final String LEONARDO_BASE_URL = "LEONARDO_BASE_URL";
-
   private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
   private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
   private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
-
   @VisibleForTesting
   public static final String WGS_CRAM_MANIFEST_PATH_KEY = "WGS_CRAM_MANIFEST_PATH";
-
   private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
       "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
   private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
