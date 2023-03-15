@@ -7,7 +7,6 @@ import { createMemoryHistory } from 'history';
 import { mockNavigate } from 'setupTests';
 
 import {
-  DisksApi,
   ErrorCode,
   Runtime,
   RuntimeApi,
@@ -42,7 +41,6 @@ import {
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { JupyterApiStub } from 'testing/stubs/jupyter-api-stub';
 import { LeoRuntimesApiStub } from 'testing/stubs/leo-runtimes-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
@@ -107,7 +105,6 @@ describe('NotebookLauncher', () => {
     runtimeStub.runtime.status = RuntimeStatus.Creating;
 
     registerApiClient(RuntimeApi, runtimeStub);
-    registerApiClient(DisksApi, new DisksApiStub());
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
     registerApiClientNotebooks(ProxyApi, new ProxyApiStub());
     registerApiClientNotebooks(LeoRuntimesApi, new LeoRuntimesApiStub());

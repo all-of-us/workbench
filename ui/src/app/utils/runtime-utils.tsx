@@ -556,9 +556,7 @@ const compareAutopauseThreshold = (
 const presetEquals = (a: Runtime, b: Runtime): boolean => {
   const strip = fp.flow(
     // In the future, things like toolDockerImage and autopause may be considerations.
-    // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
-    // should have persistent disk
-    fp.pick(['gceWithPdConfig', 'dataprocConfig']),
+    fp.pick(['gceConfig', 'dataprocConfig']),
     // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
     fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
   );
@@ -673,7 +671,7 @@ export const maybeWithExistingDisk = (
 
 export const withAnalysisConfigDefaults = (
   r: AnalysisConfig,
-  existingPersistentDisk: Disk | null
+  existingDisk: Disk | null
 ): AnalysisConfig => {
   let {
     diskConfig: { size, detachable, detachableType },
@@ -682,22 +680,22 @@ export const withAnalysisConfigDefaults = (
   } = r;
   let existingDiskName = null;
   const computeType = r.computeType ?? ComputeType.Standard;
-  // For computeType Standard: We are moving away from storage disk as Standard
-  // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
-  // Eventually we will be removing this option altogether
   if (computeType === ComputeType.Standard) {
-    if (existingPersistentDisk) {
+    dataprocConfig = null;
+    if (detachable === false) {
+      detachableType = null;
+    } else if (detachable === true || existingDisk) {
       detachable = true;
-      size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
+      size = size ?? existingDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
-        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.Standard;
-      if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
-        existingDiskName = existingPersistentDisk.name;
+        detachableType ?? existingDisk?.diskType ?? DiskType.Standard;
+      if (canUseExistingDisk(r.diskConfig, existingDisk)) {
+        existingDiskName = existingDisk.name;
       }
     } else {
-      // No existing disk.
-      detachableType = DiskType.Standard;
-      detachable = true;
+      // Detachable unspecified and no existing disk.
+      detachable = false;
+      detachableType = null;
     }
   } else if (computeType === ComputeType.Dataproc) {
     detachable = false;
@@ -715,7 +713,7 @@ export const withAnalysisConfigDefaults = (
         dataprocConfig?.numberOfPreemptibleWorkers ??
         defaults.numberOfPreemptibleWorkers,
     };
-    size = size ?? existingPersistentDisk?.size ?? DATAPROC_MIN_DISK_SIZE_GB;
+    size = size ?? existingDisk?.size ?? DATAPROC_MIN_DISK_SIZE_GB;
   } else {
     throw Error(`unknown computeType: '${computeType}'`);
   }
@@ -728,7 +726,7 @@ export const withAnalysisConfigDefaults = (
       detachableType,
       existingDiskName,
     },
-    detachedDisk: detachable ? null : existingPersistentDisk,
+    detachedDisk: detachable ? null : existingDisk,
     dataprocConfig,
     gpuConfig,
     autopauseThreshold:

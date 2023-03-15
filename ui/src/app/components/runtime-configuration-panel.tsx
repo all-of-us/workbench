@@ -307,6 +307,12 @@ const PanelMain = fp.flow(
         analysisConfig.computeType === ComputeType.Dataproc,
         () => 'Reattachable disks are unsupported for this compute type',
       ],
+      [
+        runtimeExists &&
+          existingAnalysisConfig?.diskConfig?.detachable === false,
+        () =>
+          'To use a detachable disk, first delete your analysis environment',
+      ],
       () => null
     );
 
@@ -439,15 +445,7 @@ const PanelMain = fp.flow(
       return warningDivs;
     };
 
-    // For computeType Standard: We are moving away from storage disk as Standard
-    // As part of RW-9167, we are disabling Standard storage disk if computeType is standard
-    // Eventually we will be removing this option altogether
-    const runtimeCanBeCreated =
-      !(getErrorMessageContent().length > 0) &&
-      ((analysisConfig.computeType === ComputeType.Standard &&
-        analysisConfig.diskConfig.detachable) ||
-        (analysisConfig.computeType === ComputeType.Dataproc &&
-          !analysisConfig.diskConfig.detachable));
+    const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
     // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
     // where we get 'status' from
     const runtimeCanBeUpdated =

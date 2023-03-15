@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -20,18 +20,10 @@ export const runtimePresets: {
     runtimeTemplate: {
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
-      // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
-      // should have persistent disk
       // TODO: Support specifying toolDockerImage here.
-
-      gceWithPdConfig: {
-        persistentDisk: {
-          diskType: DiskType.Standard,
-          size: MIN_DISK_SIZE_GB,
-          labels: {},
-          name: null,
-        },
+      gceConfig: {
         machineType: DEFAULT_MACHINE_NAME,
+        diskSize: MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
     },
