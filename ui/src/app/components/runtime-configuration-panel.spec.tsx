@@ -644,37 +644,35 @@ describe('RuntimeConfigurationPanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is GeneralAnalysis',
     async () => {
+      const customMachineType = 'n1-standard-16';
+      const customDiskSize = 1000;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
         gceConfig: {
           ...defaultGceConfig(),
-          machineType: 'n1-standard-16',
-          diskSize: 1000,
+          machineType: customMachineType,
+          diskSize: customDiskSize,
         },
         dataprocConfig: null,
       });
 
-      const wrapper = await component();
-      await mustClickButton(wrapper, 'Customize');
+      // show that the preset values do not match the existing runtime
 
-      expect(getMainCpu(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .machineType
-        ).cpu
-      );
+      const { machineType, persistentDisk } =
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig;
+
+      expect(customMachineType).not.toEqual(machineType);
+      expect(customDiskSize).not.toEqual(persistentDisk.size);
+
+      const wrapper = await component();
+
+      expect(getMainCpu(wrapper)).toEqual(findMachineByName(machineType).cpu);
       expect(getMainRam(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-            .machineType
-        ).memory
+        findMachineByName(machineType).memory
       );
-      expect(getDetachableDiskSize(wrapper)).toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
-          .persistentDisk.size
-      );
+      expect(getDetachableDiskSize(wrapper)).toEqual(persistentDisk.size);
     }
   );
 
@@ -682,6 +680,10 @@ describe('RuntimeConfigurationPanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is HailGenomicsAnalysis',
     async () => {
+      const customMasterMachineType = 'n1-standard-16';
+      const customMasterDiskSize = 999;
+      const customWorkerDiskSize = 444;
+      const customNumberOfWorkers = 5;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
@@ -689,40 +691,39 @@ describe('RuntimeConfigurationPanel', () => {
         gceConfig: null,
         dataprocConfig: {
           ...defaultDataprocConfig(),
-          masterMachineType: 'n1-standard-16',
-          masterDiskSize: 999,
-          workerDiskSize: 444,
-          numberOfWorkers: 5,
+          masterMachineType: customMasterMachineType,
+          masterDiskSize: customMasterDiskSize,
+          workerDiskSize: customWorkerDiskSize,
+          numberOfWorkers: customNumberOfWorkers,
         },
       });
+
+      // show that the preset values do not match the existing runtime
+
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+
+      expect(customMasterMachineType).not.toEqual(masterMachineType);
+      expect(customMasterDiskSize).not.toEqual(masterDiskSize);
+      expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
+      expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
 
       expect(getMainCpu(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-            .masterMachineType
-        ).cpu
+        findMachineByName(masterMachineType).cpu
       );
       expect(getMainRam(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-            .masterMachineType
-        ).memory
+        findMachineByName(masterMachineType).memory
       );
-      expect(getMainDiskSize(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterDiskSize
-      );
-      expect(getWorkerDiskSize(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .workerDiskSize
-      );
-      expect(getNumWorkers(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .numberOfWorkers
-      );
+      expect(getMainDiskSize(wrapper)).toEqual(masterDiskSize);
+      expect(getWorkerDiskSize(wrapper)).toEqual(workerDiskSize);
+      expect(getNumWorkers(wrapper)).toEqual(numberOfWorkers);
     }
   );
 
