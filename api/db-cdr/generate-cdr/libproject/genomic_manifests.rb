@@ -342,6 +342,7 @@ end
 def _build_copy_manifest_row(
   source_path, ingest_base_path, destination, input_section,
   rid = nil, preprod_source_cdr_base_path = nil, preprod_source_ingest_base_path = nil)
+  common = Common.new
   source_name = File.basename(source_path)
   dest_name = source_name
   replace = input_section["filenameReplace"]
@@ -349,7 +350,7 @@ def _build_copy_manifest_row(
     dest_name = _apply_filename_replacement(
       source_name, input_section["filenameMatch"], replace, rid)
     if source_name == dest_name
-      raise ArgumentError.new("filename replacement failed for '#{source_name}'")
+      common.warning "filename replacement failed for '#{source_name}'"
     end
   end
 
