@@ -350,14 +350,15 @@ public class CohortBuilderControllerTest {
             .map(c -> String.valueOf(c.getConceptId()))
             .collect(Collectors.toList());
     ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIds);
-    assertThat(
-        Objects.requireNonNull(
-                controller
-                    .findCriteriaByConceptIdsOrConceptCodes(
-                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-                    .getBody())
-            .getItems()
-            .containsAll(conceptIdsCriteria));
+    List<Criteria> criteria =
+        controller
+            .findCriteriaByConceptIdsOrConceptCodes(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+            .getBody()
+            .getItems();
+
+    assertThat(criteria.size()).isEqualTo(conceptIdsCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptIdsCriteria);
   }
 
   @Test
@@ -377,19 +378,20 @@ public class CohortBuilderControllerTest {
     List<String> conceptCodes =
         conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList());
     ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptCodes);
-    assertThat(
-        Objects.requireNonNull(
-                controller
-                    .findCriteriaByConceptIdsOrConceptCodes(
-                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-                    .getBody())
-            .getItems()
-            .containsAll(conceptCodesCriteria));
+    List<Criteria> criteria =
+        controller
+            .findCriteriaByConceptIdsOrConceptCodes(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+            .getBody()
+            .getItems();
+
+    assertThat(criteria.size()).isEqualTo(conceptCodesCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptCodesCriteria);
   }
 
   @Test
-  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodes() {
-    // add Ids
+  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodesUseIds() {
+    // add concept_ids
     List<Criteria> conceptIdsCriteria = new ArrayList<>();
     conceptIdsCriteria.add(
         createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "1", "Dx1")));
@@ -399,36 +401,78 @@ public class CohortBuilderControllerTest {
         createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3", "Rx3")));
     conceptIdsCriteria.add(
         createResponseCriteria(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4", "Px4")));
-    // add codes
+    // add concept_codes
     List<Criteria> conceptCodesCriteria = new ArrayList<>();
     conceptCodesCriteria.add(
         createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
     conceptCodesCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21")));
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx21")));
     conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31")));
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx31")));
     conceptCodesCriteria.add(
         createResponseCriteria(
-            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41")));
-
+            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px41")));
+    // add existent concept_ids
     List<String> conceptIdsAndCodes =
         conceptIdsCriteria.stream()
             .map(c -> String.valueOf(c.getConceptId()))
             .collect(Collectors.toList());
-    // add codes
+    // add existent concept_codes
     conceptIdsAndCodes.addAll(
         conceptIdsCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList()));
 
     ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIdsAndCodes);
-    assertThat(
-        Objects.requireNonNull(
-                controller
-                    .findCriteriaByConceptIdsOrConceptCodes(
-                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-                    .getBody())
-            .getItems()
-            .containsAll(conceptIdsCriteria));
+    List<Criteria> criteria =
+        controller
+            .findCriteriaByConceptIdsOrConceptCodes(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+            .getBody()
+            .getItems();
+
+    assertThat(criteria.size()).isEqualTo(conceptIdsCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptIdsCriteria);
+  }
+
+  @Test
+  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodesUseCodes() {
+    // add null concept_ids
+    List<Criteria> conceptIdsCriteria = new ArrayList<>();
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx1")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx2")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx3")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px4")));
+    // add concept_codes
+    List<Criteria> conceptCodesCriteria = new ArrayList<>();
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx21")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx31")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px41")));
+    // add non-existent concept_ids
+    List<String> conceptIdsAndCodes = Stream.of("1", "2", "3", "4").collect(Collectors.toList());
+    // add codes
+    conceptIdsAndCodes.addAll(
+        conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList()));
+
+    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIdsAndCodes);
+    List<Criteria> criteria =
+        controller
+            .findCriteriaByConceptIdsOrConceptCodes(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+            .getBody()
+            .getItems();
+
+    assertThat(criteria.size()).isEqualTo(conceptCodesCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptCodesCriteria);
   }
 
   @Test
