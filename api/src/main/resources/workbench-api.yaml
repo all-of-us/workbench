@@ -3845,6 +3845,29 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - cohortBuilder
+      consumes:
+        - application/json
+      description: Return criteria for matching concept_ids, if no match then return criteria for matching concept_codes
+      operationId: findCriteriaByConceptIdsOrConceptCodes
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: ConceptsRequest body
+          schema:
+            "$ref": "#/definitions/ConceptsRequest"
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/autocomplete":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -8515,6 +8538,16 @@ definitions:
         - - type: A Crit Type
             searchParameters:
             - value: A value
+  ConceptsRequest:
+    description: "The ConceptsRequest represents a list of conceptIds or conceptCodes that are used to 
+      lookup concepts. In general conceptId is numeric while concept code is alphanumeric. Lookup is done 
+      matching on concept_ids first and then if no concepts are found lookup uses concept_codes."
+    type: object
+    properties:
+      conceptKeys:
+        type: array
+        items:
+          type: string
   CriteriaRequest:
     description: 'The CriteriaRequest represents any domain specific conceptIds grouped by
       Source/standard flags. This request has been created specifically for use within edit

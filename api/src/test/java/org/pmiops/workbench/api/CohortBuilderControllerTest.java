@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -53,6 +55,7 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.ConceptsRequest;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSearchRequest;
@@ -68,10 +71,13 @@ import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -97,6 +103,8 @@ public class CohortBuilderControllerTest {
 
   @Autowired private CohortReviewMapper cohortReviewMapper;
 
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+
   @Mock private WorkspaceAuthService workspaceAuthService;
   @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
   private static final String WORKSPACE_ID = "workspaceId";
@@ -110,7 +118,15 @@ public class CohortBuilderControllerTest {
     CohortReviewMapperImpl.class
   })
   @MockBean({WorkspaceAuthService.class})
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+      workbenchConfig.featureFlags.enableConceptSetsInCohortBuilder = true;
+      return workbenchConfig;
+    }
+  }
 
   @BeforeEach
   public void setUp() {
@@ -133,7 +149,8 @@ public class CohortBuilderControllerTest {
             bigQueryService, chartQueryBuilder, cohortBuilderMapper, cohortReviewMapper);
 
     controller =
-        new CohortBuilderController(cohortBuilderService, chartService, workspaceAuthService);
+        new CohortBuilderController(
+            cohortBuilderService, chartService, workbenchConfigProvider, workspaceAuthService);
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Collections.singletonList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
@@ -314,6 +331,104 @@ public class CohortBuilderControllerTest {
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(icd9Criteria));
+  }
+
+  @Test
+  public void findCriteriaByConceptIdsOrConceptCodesIdsOnly() {
+    List<Criteria> conceptIdsCriteria = new ArrayList<>();
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "1", "Dx1")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2", "Dx2")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3", "Rx3")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4", "Px4")));
+
+    List<String> conceptIds =
+        conceptIdsCriteria.stream()
+            .map(c -> String.valueOf(c.getConceptId()))
+            .collect(Collectors.toList());
+    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIds);
+    assertThat(
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByConceptIdsOrConceptCodes(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+                    .getBody())
+            .getItems()
+            .containsAll(conceptIdsCriteria));
+  }
+
+  @Test
+  public void findCriteriaByConceptIdsOrConceptCodesCodesOnly() {
+    List<Criteria> conceptCodesCriteria = new ArrayList<>();
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41")));
+
+    List<String> conceptCodes =
+        conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList());
+    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptCodes);
+    assertThat(
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByConceptIdsOrConceptCodes(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+                    .getBody())
+            .getItems()
+            .containsAll(conceptCodesCriteria));
+  }
+
+  @Test
+  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodes() {
+    // add Ids
+    List<Criteria> conceptIdsCriteria = new ArrayList<>();
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "1", "Dx1")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2", "Dx2")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3", "Rx3")));
+    conceptIdsCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4", "Px4")));
+    // add codes
+    List<Criteria> conceptCodesCriteria = new ArrayList<>();
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31")));
+    conceptCodesCriteria.add(
+        createResponseCriteria(
+            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41")));
+
+    List<String> conceptIdsAndCodes =
+        conceptIdsCriteria.stream()
+            .map(c -> String.valueOf(c.getConceptId()))
+            .collect(Collectors.toList());
+    // add codes
+    conceptIdsAndCodes.addAll(
+        conceptIdsCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList()));
+
+    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIdsAndCodes);
+    assertThat(
+        Objects.requireNonNull(
+                controller
+                    .findCriteriaByConceptIdsOrConceptCodes(
+                        WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
+                    .getBody())
+            .getItems()
+            .containsAll(conceptIdsCriteria));
   }
 
   @Test
@@ -1504,6 +1619,20 @@ public class CohortBuilderControllerTest {
     assertThat(response.get(0).getId()).isEqualTo(versionedSurvey.getId());
 
     jdbcTemplate.execute("drop table cb_survey_version");
+  }
+
+  @NotNull
+  private DbCriteria addDbCriteria(
+      Domain domain, CriteriaType criteriaType, String conceptId, String conceptCode) {
+    DbCriteria dbCriteria =
+        DbCriteria.builder()
+            .addDomainId(domain.toString())
+            .addType(criteriaType.toString())
+            .addConceptId(conceptId)
+            .addCode(conceptCode)
+            .build();
+    cbCriteriaDao.save(dbCriteria);
+    return dbCriteria;
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
