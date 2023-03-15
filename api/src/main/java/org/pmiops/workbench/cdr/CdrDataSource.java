@@ -1,10 +1,14 @@
 package org.pmiops.workbench.cdr;
 
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -13,22 +17,8 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Service;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.context.annotation.Bean;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
-import java.util.List;
-import javax.persistence.EntityManager;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.sql.SQLException;
-import javax.persistence.PersistenceException;
 
 @Service("cdrDataSource")
 public class CdrDataSource extends AbstractRoutingDataSource {
