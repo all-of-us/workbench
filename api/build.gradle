@@ -13,7 +13,7 @@ buildscript {
         HIBERNATE_VERSION = '5.6.9.Final'
         JACKSON_DATABIND_VERSION = '2.13.4'
         JACKSON_VERSION = '2.13.4'
-        KOTLIN_VERSION = '1.5.32'
+        KOTLIN_VERSION = '1.7.22'
         LIQUIBASE_VERSION = '4.16.1'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '2.2.0'
@@ -29,6 +29,13 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+//     ext.extraProperties.set('kotlin.version', '1.7.22')
+    // https://github.com/spring-projects/spring-boot/issues/26864
+    // https://github.com/spring-projects/spring-boot/issues/26946
+    // https://github.com/spring-projects/spring-boot/issues/26947
+    // https://github.com/spring-projects/spring-boot/commit/cd808d2f189a7a550adec286c1722b5b6f1c19e7
+    project.getExtensions().getExtraProperties().set('kotlin.version', '1.7.22')
 }
 
 plugins {
@@ -40,7 +47,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '5.12.5'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.32'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
@@ -48,7 +55,7 @@ plugins {
     // the newer release version and have AoU-specific modifications re-applied.
     id 'org.hidetake.swagger.generator' version '2.18.2'
     id 'org.owasp.dependencycheck' version '7.4.4'
-    id 'org.springframework.boot' version '2.3.12.RELEASE'
+    id 'org.springframework.boot' version '2.7.4'
 }
 
 
@@ -261,7 +268,7 @@ sourceSets {
     // SorceSets added by Java plugin. These share a namespace with the ones users create.
     //
     generated {
-        compileClasspath = configurations.generatedCompile
+        compileClasspath = configurations.generatedCompileClasspath
         java {
             srcDir SWAGGER_2_CODEGEN_DIR
             srcDir SWAGGER_3_CODEGEN_DIR
@@ -498,7 +505,7 @@ dependencies {
     generatedCompile 'io.gsonfire:gson-fire:1.8.5'
     generatedCompile 'org.threeten:threetenbp:1.6.2'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$project.ext.KOTLIN_VERSION"
 
     // war plugin. Add this to scope of the compile configuration, but do not include in .war file.
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
@@ -631,8 +638,8 @@ appengineStart {
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
     inputDir = sourceSets.main.java.outputDir
@@ -821,12 +828,12 @@ task exportWorkspaceOperations(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
