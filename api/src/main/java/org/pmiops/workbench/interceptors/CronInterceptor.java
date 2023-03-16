@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 @Service
-public class CronInterceptor extends HandlerInterceptorAdapter {
+public class CronInterceptor implements AsyncHandlerInterceptor {
   public static final String GAE_CRON_HEADER = "X-Appengine-Cron";
   private static final String CRON_TAG = "cron";
 
