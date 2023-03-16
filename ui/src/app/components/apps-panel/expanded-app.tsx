@@ -252,7 +252,10 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     >
       <FlexRow>
         <div>
-          <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
+          <AppLogo
+            {...{ appType }}
+            style={{ marginRight: '1em', padding: '1rem' }}
+          />
         </div>
         {appType === UIAppType.JUPYTER && (
           <RuntimeStatusIcon
