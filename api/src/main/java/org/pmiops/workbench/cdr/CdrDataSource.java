@@ -12,7 +12,6 @@ import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,18 +24,15 @@ public class CdrDataSource extends AbstractRoutingDataSource {
 
   private static final Logger log = Logger.getLogger(CdrDataSource.class.getName());
 
-  private final CdrVersionDao cdrVersionDao;
   private final PoolConfiguration basePoolConfig;
   private final PoolConfiguration cdrPoolConfig;
   private final EntityManagerFactory emFactory;
 
   CdrDataSource(
-      CdrVersionDao cdrVersionDao,
       @Qualifier("poolConfiguration") PoolConfiguration basePoolConfig,
       @Qualifier("cdrPoolConfiguration") PoolConfiguration cdrPoolConfig,
       // Using CdrDbConfig.cdrEntityManagerFactory would cause a circular dependency.
       @Qualifier("entityManagerFactory") EntityManagerFactory emFactory) {
-    this.cdrVersionDao = cdrVersionDao;
     this.basePoolConfig = basePoolConfig;
     this.cdrPoolConfig = cdrPoolConfig;
     this.emFactory = emFactory;
