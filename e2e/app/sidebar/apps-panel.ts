@@ -18,10 +18,7 @@ export default class AppsPanel extends BaseSidebar {
       return;
     }
     await this.clickIcon(SideBarLink.UserApps);
-    // await this.getDeleteIcon();
-    // const timeoutForDeletion = 3 * 60 * 1000;
-    // await this.waitUntilVisible(timeoutForDeletion);
-    // Wait for visible texts
+
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     logger.info(`Opened "${await this.getTitle()}" sidebar`);
   }

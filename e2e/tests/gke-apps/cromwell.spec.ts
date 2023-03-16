@@ -13,6 +13,22 @@ jest.setTimeout(10 * 60 * 1000);
 const getTextFromXPath = async (page: Page, xPath: string): Promise<string> =>
   BaseElement.asBaseElement(page, await page.waitForXPath(xPath)).getTextContent();
 
+const pollForStatus = async (page: Page, appsPanel: AppsPanel, expandedCromwellXpath: string, status: string) => {
+  const success = await waitForFn(
+    async () => {
+      await appsPanel.close();
+      await appsPanel.open();
+
+      return (await getTextFromXPath(page, expandedCromwellXpath)).includes(`status: ${status}`);
+    },
+    10e3, // every 10 sec
+    5 * 60e3 // with a 5 min timeout
+  );
+  expect(success).toBeTruthy();
+
+  console.log(`Cromwell status: ${status}`);
+};
+
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -59,24 +75,10 @@ describe('Cromwell GKE App', () => {
     // the Cromwell status should say PROVISIONING
 
     expect(await getTextFromXPath(page, expandedCromwellXpath)).toContain('status: PROVISIONING');
-
     console.log('Cromwell status: PROVISIONING');
 
     // poll for "Running" by repeatedly closing and opening
-
-    const isRunning = await waitForFn(
-      async () => {
-        await applicationsPanel.close();
-        await applicationsPanel.open();
-
-        return (await getTextFromXPath(page, expandedCromwellXpath)).includes('status: Running');
-      },
-      10e3, // every 10 sec
-      5 * 60e3 // with a 5 min timeout
-    );
-    expect(isRunning).toBeTruthy();
-
-    console.log('Cromwell status: Running');
+    await pollForStatus(page, applicationsPanel, expandedCromwellXpath, 'Running');
 
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
@@ -84,20 +86,7 @@ describe('Cromwell GKE App', () => {
     await deleteButton.click();
 
     // poll for "DELETING" by repeatedly closing and opening
-
-    const isDeleting = await waitForFn(
-      async () => {
-        await applicationsPanel.close();
-        await applicationsPanel.open();
-
-        return (await getTextFromXPath(page, expandedCromwellXpath)).includes('status: DELETING');
-      },
-      10e3, // every 10 sec
-      5 * 60e3 // with a 5 min timeout
-    );
-    expect(isDeleting).toBeTruthy();
-
-    console.log('Cromwell status: DELETING');
+    await pollForStatus(page, applicationsPanel, expandedCromwellXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening
 
