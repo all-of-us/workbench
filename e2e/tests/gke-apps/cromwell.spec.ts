@@ -4,11 +4,16 @@ import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
+import { Page } from 'puppeteer';
 
 // 10 minutes
 jest.setTimeout(10 * 60 * 1000);
 
-describe('Cromwell GKE app', () => {
+// TODO is this already a thing?
+const getTextFromXPath = async (page: Page, xPath: string): Promise<string> =>
+  BaseElement.asBaseElement(page, await page.waitForXPath(xPath)).getTextContent();
+
+describe('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -29,31 +34,10 @@ describe('Cromwell GKE app', () => {
     expect(await unexpandedCromwell.exists()).toBeTruthy();
     await unexpandedCromwell.click();
 
-    // clicking Cromwell expands it, exposing its buttons
-
-    const expandedCromwellXpath = `${applicationsPanel.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
-    await page.waitForXPath(expandedCromwellXpath);
-
-    const settingsXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Settings"]`;
-    const settingsButton = new Button(page, settingsXPath);
-    expect(await settingsButton.exists()).toBeTruthy();
-
-    const pauseXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Pause"]`;
-    const pauseButton = new Button(page, pauseXPath);
-    expect(await pauseButton.exists()).toBeTruthy();
-
-    const launchXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Launch"]`;
-    const launchButton = new Button(page, launchXPath);
-    expect(await launchButton.exists()).toBeTruthy();
-
-    // clicking the launch button does not launch immediately, but instead:
+    // clicking an unexpanded GKE App:
     // 1. closes the apps panel
     // 2. opens the config panel
 
-    console.log('creating a new Cromwell');
-
-    await launchButton.click();
-    await page.waitForXPath(applicationsPanel.getXpath(), { visible: false });
     const configPanel = new CromwellConfigurationPanel(page);
     await configPanel.isVisible();
 
@@ -69,12 +53,12 @@ describe('Cromwell GKE app', () => {
     await page.waitForXPath(configPanel.getXpath(), { visible: false });
 
     await applicationsPanel.isVisible();
+    const expandedCromwellXpath = `${applicationsPanel.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
     await page.waitForXPath(expandedCromwellXpath);
 
     // the Cromwell status should say PROVISIONING
 
-    const expandedCromwell = BaseElement.asBaseElement(page, await page.waitForXPath(expandedCromwellXpath));
-    expect(await expandedCromwell.getTextContent()).toContain('status: PROVISIONING');
+    expect(await getTextFromXPath(page, expandedCromwellXpath)).toContain('status: PROVISIONING');
 
     console.log('Cromwell status: PROVISIONING');
 
@@ -85,7 +69,7 @@ describe('Cromwell GKE app', () => {
         await applicationsPanel.close();
         await applicationsPanel.open();
 
-        return (await expandedCromwell.getTextContent()).includes('status: Running');
+        return (await getTextFromXPath(page, expandedCromwellXpath)).includes('status: Running');
       },
       10e3, // every 10 sec
       5 * 60e3 // with a 5 min timeout
@@ -106,7 +90,7 @@ describe('Cromwell GKE app', () => {
         await applicationsPanel.close();
         await applicationsPanel.open();
 
-        return (await expandedCromwell.getTextContent()).includes('status: DELETING');
+        return (await getTextFromXPath(page, expandedCromwellXpath)).includes('status: DELETING');
       },
       10e3, // every 10 sec
       5 * 60e3 // with a 5 min timeout
@@ -121,7 +105,8 @@ describe('Cromwell GKE app', () => {
       async () => {
         await applicationsPanel.close();
         await applicationsPanel.open();
-        return await unexpandedCromwell.exists();
+        const unexpanded = new Button(page, unexpandedCromwellXPath);
+        return await unexpanded.exists();
       },
       10e3, // every 10 sec
       60e3 // with a 1 min timeout
