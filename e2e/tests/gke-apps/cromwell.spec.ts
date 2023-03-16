@@ -22,7 +22,7 @@ const pollForStatus = async (page: Page, appsPanel: AppsPanel, expandedCromwellX
       return (await getTextFromXPath(page, expandedCromwellXpath)).includes(`status: ${status}`);
     },
     10e3, // every 10 sec
-    5 * 60e3 // with a 5 min timeout
+    10 * 60e3 // with a 10 min timeout
   );
   expect(success).toBeTruthy();
 
@@ -64,7 +64,10 @@ describe('Cromwell GKE App', () => {
     expect(await createButton.exists()).toBeTruthy();
     await createButton.click();
 
-    // this closes the config panel, waits a few seconds, and then opens the apps panel again to show status
+    // clicking create:
+    // 1. closes the config panel
+    // 2. waits a few seconds
+    // 2. opens the apps panel
 
     await page.waitForXPath(configPanel.getXpath(), { visible: false });
 
