@@ -78,7 +78,7 @@ const PanelMain = fp.flow(
             notificationStore.set({
               title: 'Error Creating Cromwell Environment',
               message:
-                'Please wait a few minutes and try to create your Cromwell Server again.',
+                'Please wait a few minutes and try to create your Cromwell Environment again.',
               onDismiss,
             })
           );
