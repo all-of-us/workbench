@@ -21,6 +21,7 @@ import {
   Machine,
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { notificationStore } from 'app/utils/stores';
 
 import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
@@ -50,7 +51,6 @@ const PanelMain = fp.flow(
     profileState,
     creatorFreeCreditsRemaining,
     onClose,
-    onConflict,
   }) => {
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
@@ -63,20 +63,25 @@ const PanelMain = fp.flow(
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
+    const onDismiss = () => {
+      onClose();
+      setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+    };
+
     const onCreate = () => {
       if (!creating) {
         setCreating(true);
         appsApi()
           .createApp(workspace.namespace, defaultCromwellConfig)
-          .then(() => {
-            onClose();
-            setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
-          })
-          .catch((error) => {
-            if (error && error.status === 409) {
-              onConflict();
-            }
-          });
+          .then(() => onDismiss())
+          .catch(() =>
+            notificationStore.set({
+              title: 'Error Creating Cromwell Environment',
+              message:
+                'Please wait a few minutes and try to create your Cromwell Server again.',
+              onDismiss,
+            })
+          );
       }
     };
 
@@ -193,7 +198,6 @@ export const CromwellConfigurationPanel = ({
   creatorFreeCreditsRemaining = null,
 }) => {
   const [analysisConfig, setAnalysisConfig] = useState({});
-  const [conflict, setConflict] = useState(false);
 
   useEffect(
     () =>
@@ -224,30 +228,20 @@ export const CromwellConfigurationPanel = ({
 
   return (
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
-      {!conflict ? (
-        <>
-          <div>
-            A cloud environment consists of an application configuration, cloud
-            compute and persistent disk(s). This is the server version of
-            Cromwell only. You will need to create a Jupyter terminal
-            environment in order to interact with the workflow.
-          </div>
-          <PanelMain
-            {...{
-              analysisConfig,
-              onClose,
-              initialPanelContent,
-              creatorFreeCreditsRemaining,
-            }}
-            onConflict={() => setConflict(true)}
-          />
-        </>
-      ) : (
-        <div>
-          Please wait a few minutes and try to create your Cromwell Server
-          again.
-        </div>
-      )}
+      <div>
+        A cloud environment consists of an application configuration, cloud
+        compute and persistent disk(s). This is the server version of Cromwell
+        only. You will need to create a Jupyter terminal environment in order to
+        interact with the workflow.
+      </div>
+      <PanelMain
+        {...{
+          analysisConfig,
+          onClose,
+          initialPanelContent,
+          creatorFreeCreditsRemaining,
+        }}
+      />
     </FlexColumn>
   );
 };
