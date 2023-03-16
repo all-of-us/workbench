@@ -101,19 +101,26 @@ describe('CromwellConfigurationPanel', () => {
   it('start button should create cromwell and close panel', async () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementationOnce(() => Promise.resolve([]));
+      .mockImplementation((): Promise<any> => Promise.resolve([]));
     const wrapper = await component();
-    const spyCreateApp = jest.spyOn(appsApi(), 'createApp');
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
       .find('#cromwell-cloud-environment-create-button')
       .first();
+
     startButton.simulate('click');
+
+    await waitOneTickAndUpdate(wrapper);
 
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultCromwellConfig
     );
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
