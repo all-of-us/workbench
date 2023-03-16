@@ -113,7 +113,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             .startsWith(workbenchConfigProvider.get().server.apiBaseUrl)
         && !InterceptorUtils.isCloudTaskRequest(apiOp)) {
       // API backend server has two URL:
-      // 1: Default appshot hostname. Cron job and cloud task have to use this URL.
+      // 1: Default appspot hostname. Cron job and cloud task have to use this URL.
       // 2: A Custom URL created by system admins. It is apiBaseUrl config.
       // Cloud Armor can not protect 1, so we add check to enforce all non-cron job and non-cloud
       // task use custom URL.
