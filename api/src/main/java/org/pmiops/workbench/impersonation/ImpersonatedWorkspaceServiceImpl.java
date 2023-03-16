@@ -2,6 +2,7 @@ package org.pmiops.workbench.impersonation;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceService {
-  private static final Logger LOGGER =
+  private static final Logger logger =
       Logger.getLogger(ImpersonatedWorkspaceServiceImpl.class.getName());
 
   private final BillingProjectAuditor billingProjectAuditor;
@@ -79,6 +80,19 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     // TODO: do we want to delete workspace resource references and save only metadata?
 
     try {
+      impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(
+          dbUser, dbWorkspace.getGoogleProject());
+    } catch (IOException e) {
+      // Ignore exceptions and proceed with workspace deletion, we don' want error here stop us
+      // trying to delete workspace.
+      logger.log(
+          Level.WARNING,
+          String.format(
+              "An error occurred while deleting k8s resources for workspace %s", wsNamespace),
+          e);
+    }
+
+    try {
       impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
     } catch (IOException e) {
       throw new ServerErrorException(e);
@@ -95,7 +109,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     } catch (Exception e) {
       String msg =
           String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
-      LOGGER.warning(msg);
+      logger.warning(msg);
     }
   }
 }

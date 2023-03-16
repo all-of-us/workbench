@@ -58,22 +58,20 @@ export const applyPresetOverride = (runtime) => {
     return runtime;
   }
 
-  const newRuntime = { ...runtime };
-
   const runtimePresetKey = fp
     .keys(runtimePresets)
     .find(
       (key) =>
         runtimePresets[key].runtimeTemplate.configurationType ===
-        newRuntime.configurationType
+        runtime.configurationType
     );
 
   if (runtimePresetKey) {
-    newRuntime.gceConfig =
-      runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
-    newRuntime.dataprocConfig =
-      runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+    const { gceConfig, gceWithPdConfig, dataprocConfig } =
+      runtimePresets[runtimePresetKey].runtimeTemplate;
+
+    return { ...runtime, gceConfig, gceWithPdConfig, dataprocConfig };
   }
 
-  return newRuntime;
+  return runtime;
 };

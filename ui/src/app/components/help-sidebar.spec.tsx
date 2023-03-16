@@ -3,6 +3,7 @@ import { act } from 'react-dom/test-utils';
 
 import {
   AppsApi,
+  AppStatus,
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
@@ -47,7 +48,10 @@ import {
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsCromwellResponse,
+} from 'testing/stubs/apps-api-stub';
 import {
   CdrVersionsApiStub,
   cdrVersionTiersResponse,
@@ -127,6 +131,7 @@ const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
 describe('HelpSidebar', () => {
   let dataSetStub: DataSetApiStub;
   let runtimeStub: RuntimeApiStub;
+  let appsStub: AppsApiStub;
   let props: {};
 
   const component = async () => {
@@ -186,6 +191,7 @@ describe('HelpSidebar', () => {
     props = {};
     dataSetStub = new DataSetApiStub();
     runtimeStub = new RuntimeApiStub();
+    appsStub = new AppsApiStub();
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(
@@ -195,7 +201,7 @@ describe('HelpSidebar', () => {
     registerApiClient(DataSetApi, dataSetStub);
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(AppsApi, new AppsApiStub());
+    registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
@@ -609,6 +615,30 @@ describe('HelpSidebar', () => {
     expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
 
     wrapper.find({ 'data-test-id': `Cromwell-unexpanded` }).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+  });
+
+  it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
+    appsStub.listAppsResponse = [
+      createListAppsCromwellResponse({ status: AppStatus.RUNNING }),
+    ];
+
+    const wrapper = await component();
+    wrapper
+      .find({ 'data-test-id': 'help-sidebar-icon-apps' })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
+
+    wrapper
+      .find({ 'data-test-id': `Cromwell-expanded` })
+      .find({ 'data-test-id': 'Cromwell-settings-button' })
+      .simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
