@@ -3,9 +3,6 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
 
-// 30 minutes.
-jest.setTimeout(30 * 60 * 1000);
-
 describe('Notebook Snippets Tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -22,6 +19,7 @@ describe('Notebook Snippets Tests', () => {
     'All of Us Cromwell Setup Python snippets'
   ];
 
+  // regression test for RW-9725
   test('Create notebook and access Python snippets', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
@@ -37,9 +35,10 @@ describe('Notebook Snippets Tests', () => {
     const snippetsMenuXpath = '//*[@class="dropdown-toggle" and contains(normalize-space(text()), "Snippets")]';
     await notebookIFrame.waitForXPath(snippetsMenuXpath);
 
+    const snippetsMenuListXpath = `${snippetsMenuXpath}/following-sibling::ul`;
+
     for (const snippetCategory of expectedSnippetCategories) {
-      const categoryXpath =
-        `${snippetsMenuXpath}/following-sibling::ul` + `//*[contains(normalize-space(text()), "${snippetCategory}")]`;
+      const categoryXpath = `${snippetsMenuListXpath}//*[contains(normalize-space(text()), "${snippetCategory}")]`;
       await notebookIFrame.waitForXPath(categoryXpath);
     }
   });
