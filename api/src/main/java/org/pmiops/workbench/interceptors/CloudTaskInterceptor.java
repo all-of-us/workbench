@@ -19,7 +19,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Service
 public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
   public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
-  private static final String CLOUD_TASK_TAG = "cloudTask";
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -34,13 +33,7 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
 
-    boolean requireCloudTaskHeader = false;
-    for (String tag : apiOp.tags()) {
-      if (CLOUD_TASK_TAG.equals(tag)) {
-        requireCloudTaskHeader = true;
-        break;
-      }
-    }
+    boolean requireCloudTaskHeader = InterceptorUtils.isCloudTaskRequest(apiOp);
 
     boolean hasQueueNameHeader =
         !Strings.isNullOrEmpty(request.getHeader(QUEUE_NAME_REQUEST_HEADER));
