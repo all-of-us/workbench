@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * An impersonation-enabled version to call Firecloud services.
+ * An impersonation-enabled version of {@link org.pmiops.workbench.firecloud.FireCloudServiceImpl}
  *
  * <p>REMINDER: With great power comes great responsibility. Impersonation should not be used in
  * production, except where absolutely necessary.
@@ -72,7 +72,7 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   @Override
   public void deleteSamKubernetesResourcesInWorkspace(
       @Nonnull DbUser dbUser, String googleProjectId) throws IOException {
-    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    ResourcesApi resourcesApi = getImpersonatedResourcesApi(dbUser);
     List<SamFullyQualifiedResourceId> resourceIds =
         samRetryHandler.run(
             (context) ->
@@ -111,7 +111,7 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
         firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 
-  private ResourcesApi getImpersonatedResourceApi(@Nonnull DbUser dbUser) throws IOException {
+  private ResourcesApi getImpersonatedResourcesApi(@Nonnull DbUser dbUser) throws IOException {
     return new ResourcesApi(samApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 }
