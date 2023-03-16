@@ -15,13 +15,13 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import {
   DEFAULT_MACHINE_NAME,
   findMachineByName,
   Machine,
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { notificationStore } from 'app/utils/stores';
 
 import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
@@ -71,17 +71,18 @@ const PanelMain = fp.flow(
     const onCreate = () => {
       if (!creating) {
         setCreating(true);
-        appsApi()
-          .createApp(workspace.namespace, defaultCromwellConfig)
-          .then(() => onDismiss())
-          .catch(() =>
-            notificationStore.set({
-              title: 'Error Creating Cromwell Environment',
-              message:
-                'Please wait a few minutes and try to create your Cromwell Environment again.',
-              onDismiss,
-            })
-          );
+        fetchWithErrorModal(
+          () => appsApi().createApp(workspace.namespace, defaultCromwellConfig),
+          {
+            customErrorResponseFormatter: (error: ApiErrorResponse) =>
+              error?.originalResponse?.status === 409 && {
+                title: 'Error Creating Cromwell Environment',
+                message:
+                  'Please wait a few minutes and try to create your Cromwell Environment again.',
+                onDismiss,
+              },
+          }
+        ).then(() => onDismiss());
       }
     };
 
