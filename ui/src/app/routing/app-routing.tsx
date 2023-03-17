@@ -96,7 +96,7 @@ const loadErrorReporter = () => {
     projectId: config.projectId,
   });
 
-  stackdriverErrorReporterStore.set(reporter);
+  stackdriverErrorReporterStore.set({ reporter });
 };
 
 const ScrollToTop = () => {
