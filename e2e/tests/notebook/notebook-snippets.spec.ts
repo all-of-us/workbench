@@ -2,6 +2,7 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
+import { Language } from 'app/text-labels';
 
 describe('Notebook Snippets Tests', () => {
   beforeEach(async () => {
@@ -9,26 +10,40 @@ describe('Notebook Snippets Tests', () => {
   });
 
   const workspaceName = 'e2eNotebookSnippetsTest';
-  const pyNotebookName = makeRandomName('snippets');
-
-  // more exist, but these are the all-of-us-specific ones
-  const expectedSnippetCategories = [
-    'All of Us Dataset Builder Python snippets',
-    'All of Us Python and Cloud Storage snippets',
-    'All of Us Python and SQL snippets',
-    'All of Us Cromwell Setup Python snippets'
-  ];
 
   // regression test for RW-9725
-  test('Create notebook and access Python snippets', async () => {
+  test.each([
+    [
+      Language.Python,
+      'Python 3',
+      // more exist, but these are the all-of-us-specific ones
+      [
+        'All of Us Dataset Builder Python snippets',
+        'All of Us Python and Cloud Storage snippets',
+        'All of Us Python and SQL snippets',
+        'All of Us Cromwell Setup Python snippets'
+      ]
+    ],
+    [
+      Language.R,
+      'R', // more exist, but these are the all-of-us-specific ones
+      [
+        'All of Us Dataset Builder R snippets',
+        'All of Us R and Cloud Storage snippets',
+        'All of Us R and SQL snippets'
+        // nope, this one does not exist
+        // 'All of Us Cromwell Setup R snippets'
+      ]
+    ]
+  ])('Create notebook and access %s snippets', async (language, expectedKernelName, expectedSnippetCategories) => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
-    const notebook = await dataPage.createNotebook(pyNotebookName);
+    const notebook = await dataPage.createNotebook(makeRandomName('snippets'), language);
 
     // Verify kernel name.
     const kernelName = await notebook.getKernelName();
-    expect(kernelName).toBe('Python 3');
+    expect(kernelName).toBe(expectedKernelName);
 
     const notebookIFrame = await notebook.getIFrame();
 
