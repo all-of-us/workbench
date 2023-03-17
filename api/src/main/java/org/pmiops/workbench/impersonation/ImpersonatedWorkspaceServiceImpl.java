@@ -1,6 +1,7 @@
 package org.pmiops.workbench.impersonation;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +57,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   @Override
   public List<WorkspaceResponse> getOwnedWorkspaces(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
+    if (dbUser == null) {
+      logger.warning(String.format("user %s not found", username));
+      return Collections.emptyList();
+    }
+
     try {
       return workspaceMapper
           .toApiWorkspaceResponses(workspaceDao, impersonatedFirecloudService.getWorkspaces(dbUser))
