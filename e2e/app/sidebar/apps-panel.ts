@@ -1,8 +1,8 @@
 import { Page } from 'puppeteer';
 import { SideBarLink } from 'app/text-labels';
 import BaseEnvironmentPanel from './base-environment-panel';
-import { waitForFn } from '../../utils/waits-utils';
-import BaseElement from '../element/base-element';
+import { waitForFn } from 'utils/waits-utils';
+import BaseElement from 'app/element/base-element';
 
 const defaultXpath = '//*[@data-test-id="apps-panel"]';
 
