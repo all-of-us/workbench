@@ -33,8 +33,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * enforce granular permissions.
  */
 @Service
-public class AuthInterceptor extends HandlerInterceptorAdapter {
+public class AuthInterceptor implements AsyncHandlerInterceptor {
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
   private static final String authName = "aou_oauth";
 

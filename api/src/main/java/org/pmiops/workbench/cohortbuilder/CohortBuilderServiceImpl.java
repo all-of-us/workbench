@@ -578,6 +578,20 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return cbCriteriaDao.findPFHHSurveyAnswerIds(conceptIds);
   }
 
+  @Override
+  public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
+    List<DbCriteria> dbCriteria;
+    dbCriteria = cbCriteriaDao.findByConceptIdIn(conceptKeys);
+
+    if (dbCriteria == null || dbCriteria.isEmpty()) {
+      dbCriteria = cbCriteriaDao.findByCodeIn(conceptKeys);
+    }
+
+    return dbCriteria.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
+
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
       CriteriaSearchRequest request, PageRequest pageRequest) {
     Page<DbCriteria> dbCriteriaPage;

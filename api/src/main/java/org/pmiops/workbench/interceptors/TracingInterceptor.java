@@ -22,11 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 // Interceptor to create a trace of the lifecycle of api calls.
 @Service
-public class TracingInterceptor extends HandlerInterceptorAdapter {
+public class TracingInterceptor implements AsyncHandlerInterceptor {
   private static final Tracer tracer = Tracing.getTracer();
   private static final Logger log = Logger.getLogger(TracingInterceptor.class.getName());
 

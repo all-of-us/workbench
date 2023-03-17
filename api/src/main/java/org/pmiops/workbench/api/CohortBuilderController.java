@@ -6,14 +6,17 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.CardCountResponse;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortDefinition;
+import org.pmiops.workbench.model.ConceptsRequest;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
@@ -47,15 +50,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private final CohortBuilderService cohortBuilderService;
   private final ChartService chartService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   CohortBuilderController(
       CohortBuilderService cohortBuilderService,
       ChartService chartService,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService) {
     this.cohortBuilderService = cohortBuilderService;
     this.chartService = chartService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -335,6 +341,23 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                     cohortDefinition,
                     Objects.requireNonNull(Domain.fromValue(domain)),
                     DEFAULT_COHORT_CHART_DATA_LIMIT)));
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> findCriteriaByConceptIdsOrConceptCodes(
+      String workspaceNamespace, String workspaceId, ConceptsRequest request) {
+
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    if (workbenchConfigProvider.get().featureFlags.enableConceptSetsInCohortBuilder) {
+      System.out.println("enableConceptSetsInCohortBuilder = true");
+      return ResponseEntity.ok(
+          new CriteriaListResponse()
+              .items(
+                  cohortBuilderService.findCriteriaByConceptIdsOrConceptCodes(
+                      request.getConceptKeys())));
+    }
+    return ResponseEntity.ok(new CriteriaListResponse());
   }
 
   protected void validateDomain(String domain) {

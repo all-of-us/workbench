@@ -321,9 +321,6 @@ public class WorkbenchConfig {
     public boolean enableUpdatedDemographicSurvey;
     // If true, enable enableConceptSetsInCohortBuilder
     public boolean enableConceptSetsInCohortBuilder;
-    // Whether users are directed to complete Controlled Tier Training renewal.
-    // If false, hide or add text indicating that it is not currently available.
-    public boolean enableControlledTierTrainingRenewal;
     // If true, enable using the Cromwell GKE app
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app
