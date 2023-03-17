@@ -257,6 +257,7 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
+    config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
     config.firecloud.gceVmZone = "us-central-1";
 
