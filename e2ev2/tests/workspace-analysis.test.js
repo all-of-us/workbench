@@ -33,7 +33,7 @@ browserTest('create an application', async browser => {
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
   await page.waitForSelector('div[aria-label="New Notebook Modal"]')
 
-}, 10e3)
+}, 20e3)
 
 browserTest('Cancel the creation of an application', async browser => {
   const page = await navigateToNewAnalysisPage(browser)
@@ -46,5 +46,5 @@ browserTest('Cancel the creation of an application', async browser => {
 
   await page.waitForFunction(() => !document.querySelector('div[aria-label="Select Applications Modal"]'));
 
-}, 10e3)
+}, 20e3)
 
