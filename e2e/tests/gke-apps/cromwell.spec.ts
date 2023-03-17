@@ -46,7 +46,7 @@ describe('Cromwell GKE App', () => {
     // clicking create:
     // 1. closes the config panel
     // 2. waits a few seconds
-    // 2. opens the apps panel
+    // 3. opens the apps panel
 
     await page.waitForXPath(configPanel.getXpath(), { visible: false });
 
@@ -88,6 +88,4 @@ describe('Cromwell GKE App', () => {
     );
     expect(isDeleted).toBeTruthy();
   });
-
-  console.log('Cromwell deleted');
 });

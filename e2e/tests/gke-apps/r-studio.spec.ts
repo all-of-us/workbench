@@ -74,6 +74,4 @@ describe('RStudio GKE App', () => {
     );
     expect(isDeleted).toBeTruthy();
   });
-
-  console.log('RStudio deleted');
 });
