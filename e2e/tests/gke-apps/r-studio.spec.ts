@@ -49,28 +49,6 @@ describe('RStudio GKE App', () => {
     // poll for "PROVISIONING" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'PROVISIONING');
 
-    // await page.waitForXPath(appsPanel.getXpath(), { visible: false });
-    //
-    // // clicking create:
-    // // 1. closes the config panel
-    // // 2. waits a few seconds
-    // // 2. opens the apps panel
-    //
-    // await page.waitForXPath(configPanel.getXpath(), { visible: false });
-    //
-    // await appsPanel.isVisible();
-    // const expandedRStudioXpath = `${appsPanel.getXpath()}//*[@data-test-id="RStudio-expanded"]`;
-    // await page.waitForXPath(expandedRStudioXpath);
-    //
-    // // the RStudio status should say PROVISIONING
-    //
-    // const RStudioText = await BaseElement.asBaseElement(
-    //   page,
-    //   await page.waitForXPath(expandedRStudioXpath)
-    // ).getTextContent();
-    // expect(RStudioText).toContain('status: PROVISIONING');
-    // console.log('RStudio status: PROVISIONING');
-
     // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'Running');
 
