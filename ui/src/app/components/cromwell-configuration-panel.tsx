@@ -22,7 +22,12 @@ import {
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
-import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
+import {
+  canCreateApp,
+  defaultCromwellConfig,
+  findApp,
+  UIAppType,
+} from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 import { TooltipTrigger } from './popups';
 
@@ -53,18 +58,18 @@ const PanelMain = fp.flow(
   }) => {
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
-    const [creating, setCreating] = useState(false);
+    const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
     const app = findApp(userApps, UIAppType.CROMWELL);
-    const loading = userApps === undefined;
+    const loadingApps = userApps === undefined;
 
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
     const onCreate = () => {
-      if (!creating) {
-        setCreating(true);
+      if (!creatingCromwellApp) {
+        setCreatingCromwellApp(true);
         appsApi().createApp(workspace.namespace, defaultCromwellConfig);
         onClose();
         setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
@@ -72,6 +77,9 @@ const PanelMain = fp.flow(
     };
 
     const { profile } = profileState;
+
+    const createEnabled =
+      !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
     return (
       <FlexColumn style={{ height: '100%' }}>
@@ -168,7 +176,7 @@ const PanelMain = fp.flow(
             id='cromwell-cloud-environment-create-button'
             aria-label='cromwell cloud environment create button'
             onClick={onCreate}
-            disabled={loading || !!app?.status || creating}
+            disabled={!createEnabled}
           >
             Start
           </Button>

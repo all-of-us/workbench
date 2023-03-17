@@ -27,7 +27,7 @@ const createCromwellListAppsResponseDefaults: UserAppEnvironment = {
   ...listAppsAppResponseSharedDefaults,
   appName: 'all-of-us-2-cromwell-1234',
   appType: AppType.CROMWELL,
-  creator: 'peterlavigne_local_001@fake-research-aou.org',
+  creator: 'fake@fake-research-aou.org',
   proxyUrls: {
     'cromwell-service':
       'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-cromwell-1234/cromwell-service',

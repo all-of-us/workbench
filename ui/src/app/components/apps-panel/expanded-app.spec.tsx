@@ -36,6 +36,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { RuntimesApiStub } from 'testing/stubs/runtimes-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
 import { defaultRStudioConfig, UIAppType } from './utils';
@@ -47,13 +48,6 @@ const workspace = {
 };
 const onClickRuntimeConf = jest.fn();
 const onClickDeleteRuntime = jest.fn();
-
-function minus<T>(a1: T[], a2: T[]): T[] {
-  return a1.filter((e) => !a2.includes(e));
-}
-const ALL_STATUSES = Object.keys(AppStatus)
-  .map((k) => AppStatus[k])
-  .concat([null, undefined]);
 
 const component = async (
   appType: UIAppType,
@@ -381,7 +375,7 @@ describe('ExpandedApp', () => {
   });
 
   describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
-    test.each(minus(ALL_STATUSES, [AppStatus.RUNNING]))(
+    test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
       'Status %s',
       async (appStatus) => {
         const wrapper = await component(UIAppType.RSTUDIO, {
@@ -419,7 +413,10 @@ describe('ExpandedApp', () => {
   });
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
-  const createDisabledStatuses = minus(ALL_STATUSES, createEnabledStatuses);
+  const createDisabledStatuses = minus(
+    ALL_GKE_APP_STATUSES,
+    createEnabledStatuses
+  );
 
   describe('should allow creating an RStudio app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
