@@ -73,6 +73,7 @@
   "server": {
     "apiBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/stable.fake-research-aou.org",
+    "assetsHostUrl": "https:\/\/api.stable.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",

@@ -73,6 +73,7 @@
   "server": {
     "apiBaseUrl": "https:\/\/api.staging.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/staging.fake-research-aou.org",
+    "assetsHostUrl": "https:\/\/api.staging.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
