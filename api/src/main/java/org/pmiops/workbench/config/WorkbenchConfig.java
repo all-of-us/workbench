@@ -234,10 +234,10 @@ public class WorkbenchConfig {
     // Base URL for the App Engine UI service (e.g. webapp / client).
     public String uiBaseUrl;
 
-    // Server that host assets (e.g. jupyter extensions). Asserts are hosted in backend servers
+    // Server that host API server assets (e.g. jupyter extensions). Assets are hosted in backend servers
     // except for local server.
-    // wWhen running server locally, get assets from test backend server.
-    public String assetsHostUrl;
+    // When running server locally, get assets from test backend server.
+    public String apiAssetsBaseUrl;
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;

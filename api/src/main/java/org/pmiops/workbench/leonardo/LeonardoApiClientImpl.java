@@ -120,7 +120,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
     WorkbenchConfig config = workbenchConfigProvider.get();
-    String assetsBaseUrl = config.server.assetsHostUrl + "/static";
+    String assetsBaseUrl = config.server.apiAssetsBaseUrl + "/static";
 
     Map<String, String> nbExtensions =
         new ImmutableMap.Builder<String, String>()
