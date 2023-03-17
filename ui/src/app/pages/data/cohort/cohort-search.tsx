@@ -133,7 +133,7 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
-  if (domain === Domain.CONCEPTSET) {
+  if (domain === Domain.CONCEPTSET || domain === Domain.CONCEPTQUICKADD) {
     item.type = selections[0]?.domainId;
   }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();

@@ -6,19 +6,18 @@ import { Criteria } from 'generated/fetch';
 
 import { AlertWarning } from 'app/components/alert';
 import { Button, Clickable } from 'app/components/buttons';
+import { ClrIcon } from 'app/components/icons';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { saveCriteria } from 'app/pages/data/cohort/cohort-search';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
-import { MatchParams } from 'app/utils/stores';
-import { ClrIcon } from 'app/components/icons';
 import colors from 'app/styles/colors';
+import { MatchParams } from 'app/utils/stores';
 
 const { useState } = React;
 
@@ -33,24 +32,39 @@ export const ConceptQuickAddModal = ({ onClose }) => {
     setError(false);
     setLoading(true);
     const conceptsRequest = {
-      conceptKeys: conceptIdInput.split(/[\n,]/)
+      conceptKeys: conceptIdInput
+        .split(/[\n,]/)
+        .map((conceptId) => conceptId.trim())
+        .filter((conceptId) => !!conceptId),
     };
     try {
-      const matchedConceptsResp = await cohortBuilderApi().findCriteriaByConceptIdsOrConceptCodes(
-        ns,
-        wsid,
-        conceptsRequest
-      );
+      const matchedConceptsResp =
+        await cohortBuilderApi().findCriteriaByConceptIdsOrConceptCodes(
+          ns,
+          wsid,
+          conceptsRequest
+        );
       setMatchedConcepts(matchedConceptsResp.items);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const addConceptsAsItem = () => {};
+  const getParamId = ({ code, conceptId, id, isStandard }: Criteria) => {
+    return `param${conceptId ? conceptId + code : id}${isStandard}`;
+  };
+
+  const addConceptsAsItem = () => {
+    saveCriteria(
+      matchedConcepts.map((crit) => ({
+        parameterId: getParamId(crit),
+        ...crit,
+      }))
+    );
+  };
 
   return (
     <Modal>
@@ -83,9 +97,7 @@ export const ConceptQuickAddModal = ({ onClose }) => {
           disabled={!conceptIdInput || loading}
           onClick={() => lookupConcepts()}
         >
-          {loading && (
-            <Spinner size={16} style={{ marginRight: '0.25rem' }} />
-          )}
+          {loading && <Spinner size={16} style={{ marginRight: '0.25rem' }} />}
           Lookup
         </Button>
         {!!matchedConcepts && (
@@ -99,7 +111,7 @@ export const ConceptQuickAddModal = ({ onClose }) => {
             </thead>
             <tbody>
               {matchedConcepts.map((concept, index) => (
-                <tr>
+                <tr key={index}>
                   <td>{concept.conceptId}</td>
                   <td>{concept.code}</td>
                   <td>{concept.name}</td>
