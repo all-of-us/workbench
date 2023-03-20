@@ -510,6 +510,8 @@ def build_copy_manifest_for_curation_section(input_section, ingest_bucket, dest_
   if source_uris.empty?
     raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
   end
+  source_uris.reject!(&:empty?)
+
   return source_uris.map do |source_path|
     _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section)
   end
