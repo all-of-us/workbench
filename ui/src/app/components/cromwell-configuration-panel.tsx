@@ -23,7 +23,12 @@ import {
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 
-import { canCreateApp, defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
+import {
+  canCreateApp,
+  defaultCromwellConfig,
+  findApp,
+  UIAppType,
+} from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 import { TooltipTrigger } from './popups';
 
