@@ -106,7 +106,7 @@ describe('CromwellConfigurationPanel', () => {
   it('start button should create cromwell and close panel', async () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.resolve([]));
+      .mockImplementationOnce(() => Promise.resolve([]));
     const wrapper = await component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -126,7 +126,7 @@ describe('CromwellConfigurationPanel', () => {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultCromwellConfig
     );
-    await expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
