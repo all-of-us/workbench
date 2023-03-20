@@ -156,12 +156,14 @@ export enum ResourceCard {
 }
 
 export enum SideBarLink {
-  ComputeConfiguration,
+  RuntimeConfiguration,
+  CromwellConfiguration,
   DataDictionary,
   HelpTips,
   WorkspaceMenu,
   EditAnnotations,
-  GenomicExtractionsHistory
+  GenomicExtractionsHistory,
+  UserApps
 }
 
 export const Institution = {

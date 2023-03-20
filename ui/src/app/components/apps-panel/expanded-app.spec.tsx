@@ -90,9 +90,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Pause',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Pause',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -114,9 +116,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Resume',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Resume',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -153,9 +157,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': `apps-panel-button-${buttonText}`,
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': `apps-panel-button-${buttonText}`,
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeTruthy();
@@ -170,9 +176,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
@@ -199,9 +207,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeTruthy();
@@ -220,9 +230,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Pause',
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': 'apps-panel-button-Pause',
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeFalsy();
@@ -244,9 +256,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Resume',
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': 'apps-panel-button-Resume',
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeFalsy();
@@ -282,9 +296,11 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const pauseButton = wrapper.find({
-          'data-test-id': `apps-panel-button-${buttonText}`,
-        });
+        const pauseButton = wrapper
+          .find({
+            'data-test-id': `apps-panel-button-${buttonText}`,
+          })
+          .first();
         expect(pauseButton.exists()).toBeTruthy();
         const { disabled } = pauseButton.props();
         expect(disabled).toBeTruthy();
@@ -305,9 +321,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': `${appType}-delete-button`,
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': `${appType}-delete-button`,
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
@@ -340,9 +358,11 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const deletion = wrapper.find({
-          'data-test-id': `${appType}-delete-button`,
-        });
+        const deletion = wrapper
+          .find({
+            'data-test-id': `${appType}-delete-button`,
+          })
+          .first();
         expect(deletion.exists()).toBeTruthy();
         const { disabled } = deletion.props();
         expect(disabled).toBeTruthy();
