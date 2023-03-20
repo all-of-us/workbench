@@ -478,4 +478,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   List<String> findMySQLStopWords();
 
   List<DbCriteria> findByConceptIdIn(List<String> conceptIds);
+
+  List<DbCriteria> findByCodeIn(List<String> conceptCodes);
 }

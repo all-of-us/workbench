@@ -64,14 +64,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.leonardo.*;
 import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
-import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
-import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
-import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
@@ -263,6 +257,7 @@ public class RuntimeControllerTest {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
+    config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
     config.firecloud.gceVmZone = "us-central-1";
 
@@ -1181,7 +1176,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .has(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
+                .has(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
         .isFalse();
   }
 
@@ -1205,7 +1200,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1230,7 +1225,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1255,9 +1250,9 @@ public class RuntimeControllerTest {
         new Gson()
             .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
             .getAsJsonObject();
-    assertThat(envVars.get(LeonardoApiClient.WORKSPACE_CDR_ENV_KEY).getAsString())
+    assertThat(envVars.get(LeonardoCustomEnvVarUtils.WORKSPACE_CDR_ENV_KEY).getAsString())
         .isEqualTo(cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-    assertThat(envVars.get(LeonardoApiClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
+    assertThat(envVars.get(LeonardoCustomEnvVarUtils.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
         .isEqualTo("gs://cdr-bucket/v99/wgs/cram/manifest.csv");
   }
 

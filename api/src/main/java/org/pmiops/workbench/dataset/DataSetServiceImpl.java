@@ -65,7 +65,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptSet;
@@ -1482,7 +1482,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "sql,\n"
                 + "    dialect=\"standard\",\n"
                 + "    use_bqstorage_api=(\""
-                + LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
+                + LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY
                 + "\" in os.environ),\n"
                 + "    progress_bar_type=\"tqdm_notebook\")\n\n"
                 + namespace

@@ -275,6 +275,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           }
           onClick={onClickDelete}
           data-test-id={`${appType}-delete-button`}
+          propagateDataTestId
         >
           <FontAwesomeIcon icon={faTrashCan} />
         </Clickable>

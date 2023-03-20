@@ -45,8 +45,97 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorReport'
 
+  /api/resources/v2/{resourceTypeName}/{resourceId}:
+    delete:
+      tags:
+        - Resources
+      summary: Delete a resource
+      operationId: deleteResourceV2
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of the resource
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of the resource
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully deleted resource
+          content: { }
+        400:
+          description: Cannot delete a resource with children. Delete the children first then try again.
+          content: { }
+        403:
+          description: You do not have permission to perform this action on the resource or permissions on the resource's parent
+          content: { }
+        404:
+          description: Resource type does not exist or you are not a member of any
+            policy on the resource
+          content: { }
+
+  /api/resources/v2/{resourceTypeName}/{resourceId}/children:
+    get:
+      tags:
+        - Resources
+      summary: List all the direct children of a resource
+      operationId: listResourceChildren
+      parameters:
+        - name: resourceTypeName
+          in: path
+          description: Type of resource to query
+          required: true
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          description: Id of resource to query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ids and types of child resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FullyQualifiedResourceId'
+        403:
+          description: You do not have permission to list the children of this resource
+          content: { }
+        404:
+          description: You do not have access to this resource or it does not exist
+          content: { }
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
 components:
   schemas:
+    FullyQualifiedResourceId:
+      required:
+        - resourceTypeName
+        - resourceId
+      type: object
+      properties:
+        resourceTypeName:
+          type: string
+          description: The type of the resource
+        resourceId:
+          type: string
+          description: The id of the resource
+      description: type and id of a resource
+
     ErrorReport:
       required:
         - causes

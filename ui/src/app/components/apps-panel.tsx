@@ -40,7 +40,11 @@ const styles = reactStyles({
 const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
   const { appType, onClick } = props;
   return (
-    <Clickable {...{ onClick }} data-test-id={`${appType}-unexpanded`}>
+    <Clickable
+      {...{ onClick }}
+      data-test-id={`${appType}-unexpanded`}
+      propagateDataTestId
+    >
       <FlexRow style={styles.availableApp}>
         <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
       </FlexRow>
@@ -104,7 +108,7 @@ export const AppsPanel = (props: {
   return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
-    <div>
+    <div data-test-id='apps-panel'>
       {showActiveSection && (
         <FlexColumn>
           <FlexRow>

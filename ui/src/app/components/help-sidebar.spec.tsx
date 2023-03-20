@@ -614,7 +614,10 @@ describe('HelpSidebar', () => {
     expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
     expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
 
-    wrapper.find({ 'data-test-id': `Cromwell-unexpanded` }).simulate('click');
+    wrapper
+      .find({ 'data-test-id': `Cromwell-unexpanded` })
+      .first()
+      .simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();

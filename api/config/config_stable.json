@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
+    "apiAssetsBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/stable.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
@@ -119,7 +120,6 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": false,
     "enableRStudioGKEApp": false,
     "enableDataExplorer": false

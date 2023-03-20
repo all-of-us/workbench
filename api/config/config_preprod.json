@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.preprod-workbench.researchallofus.org",
+    "apiAssetsBaseUrl": "https:\/\/api.preprod-workbench.researchallofus.org",
     "uiBaseUrl": "https:\/\/preprod-workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyA5Q0xqZdyaHUIUjZFqpim26wQFO0JqIRw",
     "projectId": "all-of-us-rw-preprod",
@@ -119,7 +120,6 @@
     "ccSupportWhenAdminLocking": true,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": false,
     "enableDataExplorer": false

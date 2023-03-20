@@ -36,6 +36,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { RuntimesApiStub } from 'testing/stubs/runtimes-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
 import { defaultRStudioConfig, UIAppType } from './utils';
@@ -47,13 +48,6 @@ const workspace = {
 };
 const onClickRuntimeConf = jest.fn();
 const onClickDeleteRuntime = jest.fn();
-
-function minus<T>(a1: T[], a2: T[]): T[] {
-  return a1.filter((e) => !a2.includes(e));
-}
-const ALL_STATUSES = Object.keys(AppStatus)
-  .map((k) => AppStatus[k])
-  .concat([null, undefined]);
 
 const component = async (
   appType: UIAppType,
@@ -96,9 +90,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Pause',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Pause',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -120,9 +116,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Resume',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Resume',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -159,9 +157,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': `apps-panel-button-${buttonText}`,
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': `apps-panel-button-${buttonText}`,
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeTruthy();
@@ -176,9 +176,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
@@ -205,9 +207,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeTruthy();
@@ -226,9 +230,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Pause',
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': 'apps-panel-button-Pause',
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeFalsy();
@@ -250,9 +256,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Resume',
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': 'apps-panel-button-Resume',
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeFalsy();
@@ -288,9 +296,11 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const pauseButton = wrapper.find({
-          'data-test-id': `apps-panel-button-${buttonText}`,
-        });
+        const pauseButton = wrapper
+          .find({
+            'data-test-id': `apps-panel-button-${buttonText}`,
+          })
+          .first();
         expect(pauseButton.exists()).toBeTruthy();
         const { disabled } = pauseButton.props();
         expect(disabled).toBeTruthy();
@@ -311,9 +321,11 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': `${appType}-delete-button`,
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': `${appType}-delete-button`,
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
@@ -346,9 +358,11 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const deletion = wrapper.find({
-          'data-test-id': `${appType}-delete-button`,
-        });
+        const deletion = wrapper
+          .find({
+            'data-test-id': `${appType}-delete-button`,
+          })
+          .first();
         expect(deletion.exists()).toBeTruthy();
         const { disabled } = deletion.props();
         expect(disabled).toBeTruthy();
@@ -381,7 +395,7 @@ describe('ExpandedApp', () => {
   });
 
   describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
-    test.each(minus(ALL_STATUSES, [AppStatus.RUNNING]))(
+    test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
       'Status %s',
       async (appStatus) => {
         const wrapper = await component(UIAppType.RSTUDIO, {
@@ -419,7 +433,10 @@ describe('ExpandedApp', () => {
   });
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
-  const createDisabledStatuses = minus(ALL_STATUSES, createEnabledStatuses);
+  const createDisabledStatuses = minus(
+    ALL_GKE_APP_STATUSES,
+    createEnabledStatuses
+  );
 
   describe('should allow creating an RStudio app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {

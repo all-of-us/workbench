@@ -33,8 +33,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * enforce granular permissions.
  */
 @Service
-public class AuthInterceptor extends HandlerInterceptorAdapter {
+public class AuthInterceptor implements AsyncHandlerInterceptor {
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
   private static final String authName = "aou_oauth";
 
@@ -106,6 +106,26 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+    if (!request
+            .getRequestURL()
+            .toString()
+            .startsWith(workbenchConfigProvider.get().server.apiBaseUrl)
+        && !InterceptorUtils.isCloudTaskRequest(apiOp)) {
+      // API backend server has two URL:
+      // 1: Default appspot hostname. Cron job and cloud task have to use this URL.
+      // 2: A Custom URL created by system admins. It is apiBaseUrl config.
+      // Cloud Armor can not protect 1, so we add check to enforce all non-cron job and non-cloud
+      // task use custom URL.
+      // For cron job, isAuthRequired=false above, so no need to check cron job here.
+      // For cloud task, isAuthRequired=true, so we need allow here if
+      // InterceptorUtils.isCloudTaskRequest(apiOp) here.
+      // See https://precisionmedicineinitiative.atlassian.net/browse/RW-9675 for more details.
+      log.warning(
+          String.format("Request URL %s is not allowed for this request", request.getRequestURL()));
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return false;
+    }
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
       log.warning("No bearer token found in request");

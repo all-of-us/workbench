@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 /**
  * Interceptor for endpoints with tag cloudTask. All such endpoints should have tagged as
@@ -17,9 +17,8 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
  */
 @Service
-public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
+public class CloudTaskInterceptor implements AsyncHandlerInterceptor {
   public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
-  private static final String CLOUD_TASK_TAG = "cloudTask";
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -34,13 +33,7 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
       return true;
     }
 
-    boolean requireCloudTaskHeader = false;
-    for (String tag : apiOp.tags()) {
-      if (CLOUD_TASK_TAG.equals(tag)) {
-        requireCloudTaskHeader = true;
-        break;
-      }
-    }
+    boolean requireCloudTaskHeader = InterceptorUtils.isCloudTaskRequest(apiOp);
 
     boolean hasQueueNameHeader =
         !Strings.isNullOrEmpty(request.getHeader(QUEUE_NAME_REQUEST_HEADER));

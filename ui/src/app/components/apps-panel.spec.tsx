@@ -64,7 +64,7 @@ const findAvailableApps = (wrapper: ReactWrapper, activeAppsExist: boolean) => {
 };
 
 const findUnexpandedApp = (wrapper: ReactWrapper, appName: string) =>
-  wrapper.find({ 'data-test-id': `${appName}-unexpanded` });
+  wrapper.find({ 'data-test-id': `${appName}-unexpanded` }).first();
 
 const findExpandedApp = (wrapper: ReactWrapper, appName: string) =>
   wrapper.find({ 'data-test-id': `${appName}-expanded` });
@@ -328,9 +328,11 @@ describe('AppsPanel', () => {
     expect(
       rstudioPanel.find({ 'data-test-id': `apps-panel-button-Resume` }).exists()
     ).toBeFalsy();
-    const pauseButton = rstudioPanel.find({
-      'data-test-id': `apps-panel-button-Pause`,
-    });
+    const pauseButton = rstudioPanel
+      .find({
+        'data-test-id': `apps-panel-button-Pause`,
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
 
     pauseButton.simulate('click');
@@ -354,9 +356,11 @@ describe('AppsPanel', () => {
     expect(
       rstudioPanel.find({ 'data-test-id': `apps-panel-button-Pause` }).exists()
     ).toBeFalsy();
-    const pauseButton = rstudioPanel.find({
-      'data-test-id': `apps-panel-button-Resume`,
-    });
+    const pauseButton = rstudioPanel
+      .find({
+        'data-test-id': `apps-panel-button-Resume`,
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
 
     pauseButton.simulate('click');
@@ -377,9 +381,11 @@ describe('AppsPanel', () => {
     appsStub.deleteApp = jest.fn(() => Promise.resolve({}));
 
     const deleteButton = () =>
-      findExpandedApp(wrapper, 'RStudio').find({
-        'data-test-id': `RStudio-delete-button`,
-      });
+      findExpandedApp(wrapper, 'RStudio')
+        .find({
+          'data-test-id': 'RStudio-delete-button',
+        })
+        .first();
     expect(deleteButton().prop('disabled')).toBeFalsy();
     deleteButton().simulate('click');
 
