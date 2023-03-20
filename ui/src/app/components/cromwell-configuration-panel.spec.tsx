@@ -108,12 +108,17 @@ describe('CromwellConfigurationPanel', () => {
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementationOnce(() => Promise.resolve([]));
     const wrapper = await component();
-    const spyCreateApp = jest.spyOn(appsApi(), 'createApp');
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
       .find('#cromwell-cloud-environment-create-button')
       .first();
-    startButton.simulate('click');
 
+    startButton.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,

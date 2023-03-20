@@ -147,7 +147,9 @@ const RStudioButtonRow = (props: {
   const onClickCreate = withErrorModal(
     {
       title: 'Error Creating RStudio Environment',
-      message: 'Please refresh the page.',
+      message:
+        'Please wait a few minutes and try to create your RStudio Environment again.',
+      onDismiss: () => setCreating(false),
     },
     async () => {
       setCreating(true);

@@ -15,6 +15,7 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import {
   DEFAULT_MACHINE_NAME,
   findMachineByName,
@@ -67,12 +68,26 @@ const PanelMain = fp.flow(
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
+    const onDismiss = () => {
+      onClose();
+      setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+    };
+
     const onCreate = () => {
       if (!creatingCromwellApp) {
         setCreatingCromwellApp(true);
-        appsApi().createApp(workspace.namespace, defaultCromwellConfig);
-        onClose();
-        setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+        fetchWithErrorModal(
+          () => appsApi().createApp(workspace.namespace, defaultCromwellConfig),
+          {
+            customErrorResponseFormatter: (error: ApiErrorResponse) =>
+              error?.originalResponse?.status === 409 && {
+                title: 'Error Creating Cromwell Environment',
+                message:
+                  'Please wait a few minutes and try to create your Cromwell Environment again.',
+                onDismiss,
+              },
+          }
+        ).then(() => onDismiss());
       }
     };
 
