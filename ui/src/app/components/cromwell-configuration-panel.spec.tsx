@@ -118,9 +118,7 @@ describe('CromwellConfigurationPanel', () => {
       .first();
 
     startButton.simulate('click');
-
     await waitOneTickAndUpdate(wrapper);
-
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
