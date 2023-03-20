@@ -11,7 +11,7 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     super(page, defaultXpath, SideBarLink.UserApps);
   }
 
-  async pollForStatus(xPath: string, status: string) {
+  async pollForStatus(xPath: string, status: string, timeout: number = 10 * 60e3): Promise<void> {
     const success = await waitForFn(
       async () => {
         await this.close();
@@ -20,7 +20,7 @@ export default class AppsPanel extends BaseEnvironmentPanel {
         return text.includes(`status: ${status}`);
       },
       10e3, // every 10 sec
-      10 * 60e3 // with a 10 min timeout
+      timeout
     );
     expect(success).toBeTruthy();
     console.log(`Polling complete, status = ${status}`);

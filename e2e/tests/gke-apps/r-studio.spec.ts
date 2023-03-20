@@ -3,8 +3,8 @@ import AppsPanel from 'app/sidebar/apps-panel';
 import Button from 'app/element/button';
 import { waitForFn } from 'utils/waits-utils';
 
-// 10 minutes
-jest.setTimeout(10 * 60 * 1000);
+// Cluster provisioning can take a while, so set a 20 min timeout
+jest.setTimeout(20 * 60 * 1000);
 
 describe('RStudio GKE App', () => {
   beforeEach(async () => {
@@ -50,7 +50,7 @@ describe('RStudio GKE App', () => {
     await appsPanel.pollForStatus(expandedRStudioXpath, 'PROVISIONING');
 
     // poll for "Running" by repeatedly closing and opening
-    await appsPanel.pollForStatus(expandedRStudioXpath, 'Running');
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', 15 * 60e3);
 
     const deleteXPath = `${expandedRStudioXpath}//*[@data-test-id="RStudio-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);

@@ -5,8 +5,8 @@ import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
 
-// 10 minutes
-jest.setTimeout(10 * 60 * 1000);
+// Cluster provisioning can take a while, so set a 20 min timeout
+jest.setTimeout(20 * 60 * 1000);
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
@@ -64,7 +64,7 @@ describe('Cromwell GKE App', () => {
     console.log('Cromwell status: PROVISIONING');
 
     // poll for "Running" by repeatedly closing and opening
-    await appsPanel.pollForStatus(expandedCromwellXpath, 'Running');
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
