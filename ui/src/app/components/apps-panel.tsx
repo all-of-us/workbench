@@ -46,7 +46,10 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
       propagateDataTestId
     >
       <FlexRow style={styles.availableApp}>
-        <AppLogo {...{ appType }} style={{ marginRight: '1em' }} />
+        <AppLogo
+          {...{ appType }}
+          style={{ marginRight: '1em', padding: '1rem' }}
+        />
       </FlexRow>
     </Clickable>
   );
