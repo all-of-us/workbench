@@ -250,7 +250,8 @@ spotless {
 
 test {
     useJUnitPlatform()
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    maxParallelForks = System.getenv('CIRCLECI') == 'true' ? 1 :
+      Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }
 
 // The plugin generates configuration names by concatenating SourceSet names
