@@ -250,6 +250,8 @@ spotless {
 
 test {
     useJUnitPlatform()
+    // Unit testing time is cut roughly in half by running them in parallel. We avoid this on
+    // Circle because they are already split apart using a different algorithm.
     maxParallelForks = System.getenv('CIRCLECI') == 'true' ? 1 :
       Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }
