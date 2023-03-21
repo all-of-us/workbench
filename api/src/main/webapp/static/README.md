@@ -37,7 +37,7 @@ To manually test updates to any notebook server assets (initialization script, U
 ## Debugging Script Issues
 
 - Run `./project.rb list-runtimes --project all-of-us-workbench-test` to find your runtime name
-- Run `./project.rb describe <runtime-name>` to print debug information about
+- Run `./project.rb describe-runtime --id <runtime-name>` to print debug information about
   the runtime. This will include command lines for listing out associated log files
 - Dig through the directories until you find the initialization script output
   log, as of 4/3/19 the file was named `dataproc-initialization-script-0_output`
