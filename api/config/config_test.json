@@ -119,7 +119,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableConceptSetsInCohortBuilder": false,
+    "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
     "enableDataExplorer": false
