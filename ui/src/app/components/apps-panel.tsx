@@ -1,17 +1,22 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
+import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
-import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { isVisible } from 'app/utils/runtime-utils';
-import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
+import {
+  runtimeStore,
+  serverConfigStore,
+  userAppsStore,
+  useStore,
+} from 'app/utils/stores';
+import { updateUserApps } from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
@@ -64,6 +69,8 @@ export const AppsPanel = (props: {
   const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
   const { config } = useStore(serverConfigStore);
+  // all GKE apps (not Jupyter)
+  const userApps = useStore(userAppsStore);
 
   // in display order
   const appsToDisplay = [
@@ -72,10 +79,8 @@ export const AppsPanel = (props: {
     ...(config.enableCromwellGKEApp ? [UIAppType.CROMWELL] : []),
   ];
 
-  // all GKE apps (not Jupyter)
-  const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
   useEffect(() => {
-    appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
+    updateUserApps(workspace.namespace);
   }, []);
 
   const appStates = appsToDisplay.map((appType) => {
