@@ -261,7 +261,7 @@ export interface UserAppsStore {
   userApps?: ListAppsResponse;
 }
 
-export const userAppsStore = atom<UserAppsStore>(null);
+export const userAppsStore = atom<UserAppsStore>({});
 
 /**
  * @name useStore
