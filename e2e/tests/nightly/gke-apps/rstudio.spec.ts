@@ -34,20 +34,37 @@ describe('RStudio GKE App', () => {
 
     const createXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Create"]`;
     const createButton = new Button(page, createXPath);
-    expect(await createButton.exists()).toBeTruthy();
+    expect(await new Button(page, createXPath).exists()).toBeTruthy();
 
     const pauseXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Pause"]`;
-    const pauseButton = new Button(page, pauseXPath);
-    expect(await pauseButton.exists()).toBeTruthy();
+    expect(await new Button(page, pauseXPath).exists()).toBeTruthy();
 
     const launchXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Launch"]`;
-    const launchButton = new Button(page, launchXPath);
-    expect(await launchButton.exists()).toBeTruthy();
+    expect(await new Button(page, launchXPath).exists()).toBeTruthy();
 
     await createButton.click();
 
     // poll for "PROVISIONING" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'PROVISIONING');
+
+    // poll for "Running" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', 15 * 60e3);
+
+    const pauseButton = new Button(page, pauseXPath);
+    await pauseButton.click();
+
+    // poll for "Pausing" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Pausing', 15 * 60e3);
+
+    // poll for "Paused" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Paused', 15 * 60e3);
+
+    const resumeXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Resume"]`;
+    const resumeButton = new Button(page, resumeXPath);
+    await resumeButton.click();
+
+    // poll for "Resuming" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Resuming', 15 * 60e3);
 
     // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', 15 * 60e3);

@@ -66,6 +66,51 @@ describe('Cromwell GKE App', () => {
     // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
+
+
+
+
+
+
+
+    const pauseXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Pause"]`;
+    const pauseButton = new Button(page, pauseXPath);
+    await pauseButton.click();
+
+    // poll for "Pausing" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Pausing', 15 * 60e3);
+
+    // poll for "Paused" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Paused', 15 * 60e3);
+
+    const resumeXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Resume"]`;
+    const resumeButton = new Button(page, resumeXPath);
+    await resumeButton.click();
+
+    // poll for "Resuming" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Resuming', 15 * 60e3);
+
+    // poll for "Running" by repeatedly closing and opening
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
