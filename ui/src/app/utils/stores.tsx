@@ -256,7 +256,7 @@ export function withParamsKey(...paramNames: (keyof MatchParams)[]) {
     };
 }
 
-export const userAppStore = atom<ListAppsResponse>(null);
+export const userAppsStore = atom<ListAppsResponse>(null);
 /**
  * @name useStore
  * @description React hook that will trigger a render when the corresponding store's value changes

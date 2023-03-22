@@ -2,7 +2,7 @@ import { AppStatus, CreateAppRequest, ListAppsResponse } from 'generated/fetch';
 
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
-import { userAppStore } from './stores';
+import { userAppsStore } from './stores';
 
 const appStatusesRequiringUpdates = [
   AppStatus.DELETING,
@@ -12,17 +12,17 @@ const appStatusesRequiringUpdates = [
 ];
 
 const doUserAppsRequireUpdates = () => {
-  const userApps: ListAppsResponse = userAppStore.get();
+  const userApps: ListAppsResponse = userAppsStore.get();
   return userApps
     .map((userApp) => userApp.status)
     .some((appStatus) => appStatusesRequiringUpdates.includes(appStatus));
 };
 
-const updateUserApps = (namespace) => {
+export const updateUserApps = (namespace) => {
   appsApi()
     .listAppsInWorkspace(namespace)
     .then((userApps) => {
-      userAppStore.set(userApps);
+      userAppsStore.set(userApps);
 
       if (doUserAppsRequireUpdates()) {
         setTimeout(() => {
