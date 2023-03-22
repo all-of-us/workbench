@@ -22,6 +22,7 @@ import {
   Machine,
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { createUserApp } from 'app/utils/user-apps-utils';
 
 import {
   canCreateApp,
@@ -77,7 +78,7 @@ const PanelMain = fp.flow(
       if (!creatingCromwellApp) {
         setCreatingCromwellApp(true);
         fetchWithErrorModal(
-          () => appsApi().createApp(workspace.namespace, defaultCromwellConfig),
+          () => createUserApp(workspace.namespace, defaultCromwellConfig),
           {
             customErrorResponseFormatter: (error: ApiErrorResponse) =>
               error?.originalResponse?.status === 409 && {
