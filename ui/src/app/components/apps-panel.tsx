@@ -70,7 +70,7 @@ export const AppsPanel = (props: {
   const { runtime } = useStore(runtimeStore);
   const { config } = useStore(serverConfigStore);
   // all GKE apps (not Jupyter)
-  const userApps = useStore(userAppsStore);
+  const { userApps } = useStore(userAppsStore);
 
   // in display order
   const appsToDisplay = [

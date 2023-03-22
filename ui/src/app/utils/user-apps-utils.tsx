@@ -1,4 +1,4 @@
-import { AppStatus, CreateAppRequest, ListAppsResponse } from 'generated/fetch';
+import { AppStatus, CreateAppRequest } from 'generated/fetch';
 
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
@@ -12,30 +12,39 @@ const appStatusesRequiringUpdates = [
 ];
 
 const doUserAppsRequireUpdates = () => {
-  const userApps: ListAppsResponse = userAppsStore.get();
+  const { userApps } = userAppsStore.get();
   return userApps
     .map((userApp) => userApp.status)
     .some((appStatus) => appStatusesRequiringUpdates.includes(appStatus));
 };
 
 export const updateUserApps = (namespace) => {
-  appsApi()
-    .listAppsInWorkspace(namespace)
-    .then((userApps) => {
-      userAppsStore.set(userApps);
+  const { updating } = userAppsStore.get();
 
-      if (doUserAppsRequireUpdates()) {
-        setTimeout(() => {
-          updateUserApps(namespace);
-        }, 10 * 1000);
-      }
-    });
+  // Prevents multiple update processes from running concurrently.
+  if (!updating) {
+    appsApi()
+      .listAppsInWorkspace(namespace)
+      .then((listAppsResponse) => {
+        userAppsStore.set({ userApps: listAppsResponse });
+        if (doUserAppsRequireUpdates()) {
+          userAppsStore.set({ updating: true });
+          setTimeout(() => {
+            updateUserApps(namespace);
+          }, 10 * 1000);
+        }
+      });
+  }
 };
 
 export const createUserApp = (nameSpace, config: CreateAppRequest) => {
   return appsApi()
     .createApp(nameSpace, config)
     .then(() => {
-      updateUserApps(nameSpace);
+      const { updating } = userAppsStore.get();
+      if (!updating) {
+        userAppsStore.set({ updating: true });
+        updateUserApps(nameSpace);
+      }
     });
 };
