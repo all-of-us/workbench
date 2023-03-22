@@ -22,7 +22,7 @@ import { currentWorkspaceStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { Subscription } from 'rxjs/Subscription';
 
-function initItem(id: string, type: string) {
+export function initItem(id: string, type: string) {
   return {
     id,
     type,

@@ -101,10 +101,10 @@ const styles = reactStyles({
   },
 });
 
-function initGroup(role: string, item: any) {
+export function initGroup(role: string, items: any) {
   return {
     id: generateId(role),
-    items: [item],
+    items,
     count: null,
     temporal: false,
     mention: TemporalMention.ANYMENTION,
@@ -152,7 +152,7 @@ export function saveCriteria(selections?: Array<Selection>) {
       }
     }
   } else {
-    searchRequest[role].push(initGroup(role, item));
+    searchRequest[role].push(initGroup(role, [item]));
   }
   searchRequestStore.next(searchRequest);
   currentCohortSearchContextStore.next(undefined);

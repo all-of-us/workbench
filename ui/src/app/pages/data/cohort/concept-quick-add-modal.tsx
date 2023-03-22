@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useParams } from 'react-router';
+import * as fp from 'lodash/fp';
 import { InputTextarea } from 'primereact/inputtextarea';
 
 import { Criteria } from 'generated/fetch';
@@ -13,124 +14,223 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
-import { saveCriteria } from 'app/pages/data/cohort/cohort-search';
+import { initGroup } from 'app/pages/data/cohort/cohort-search';
+import { initItem } from 'app/pages/data/cohort/search-group-list';
+import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
+import { domainToTitle, generateId } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { withCurrentCohortSearchContext } from 'app/utils';
+import { currentCohortSearchContextStore } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 
 const { useState } = React;
 
-export const ConceptQuickAddModal = ({ onClose }) => {
-  const { ns, wsid } = useParams<MatchParams>();
-  const [conceptIdInput, setConceptIdInput] = useState<string>();
-  const [matchedConcepts, setMatchedConcepts] = useState<Criteria[]>();
-  const [error, setError] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+const infoTooltip = (
+  <div style={{ marginLeft: '0.75rem' }}>
+    <ul style={{ listStylePosition: 'outside' }}>
+      <li>
+        Concepts can be found by entering a list of concept ids or concepts
+        codes
+      </li>
+      <li>
+        Ids or codes can be entered one-per-line or as a comma-separated list
+      </li>
+      <li>
+        If concepts for multiple domains are returned, a separate line item will
+        be added to the cohort for each domain
+      </li>
+    </ul>
+  </div>
+);
 
-  const lookupConcepts = async () => {
-    setError(false);
-    setLoading(true);
-    const conceptsRequest = {
-      conceptKeys: conceptIdInput
-        .split(/[\n,]/)
-        .map((conceptId) => conceptId.trim())
-        .filter((conceptId) => !!conceptId),
+export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
+  ({ cohortContext, onClose }) => {
+    const { ns, wsid } = useParams<MatchParams>();
+    const [conceptIdInput, setConceptIdInput] = useState<string>();
+    const [matchedConcepts, setMatchedConcepts] = useState<Criteria[]>();
+    const [error, setError] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const lookupConcepts = async () => {
+      setError(false);
+      setLoading(true);
+      const conceptsRequest = {
+        conceptKeys: conceptIdInput
+          .split(/[\n,]/)
+          .map((conceptId) => conceptId.trim())
+          .filter((conceptId) => !!conceptId),
+      };
+      try {
+        const matchedConceptsResp =
+          await cohortBuilderApi().findCriteriaByConceptIdsOrConceptCodes(
+            ns,
+            wsid,
+            conceptsRequest
+          );
+        setMatchedConcepts(matchedConceptsResp.items);
+      } catch (err) {
+        console.error(err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     };
-    try {
-      const matchedConceptsResp =
-        await cohortBuilderApi().findCriteriaByConceptIdsOrConceptCodes(
-          ns,
-          wsid,
-          conceptsRequest
+
+    const getParamId = ({ code, conceptId, id, isStandard }: Criteria) => {
+      return `param${conceptId ? conceptId + code : id}${isStandard}`;
+    };
+
+    const addConceptsAsItems = () => {
+      const { groupId, role } = cohortContext;
+      // Group concepts by domain
+      const conceptsByDomain = fp.groupBy('domainId', matchedConcepts);
+      const searchRequest = searchRequestStore.getValue();
+      // Add a separate line item for each domain
+      const items = Object.values(conceptsByDomain).map((domainConcepts) => ({
+        ...initItem(generateId('items'), domainConcepts[0].domainId),
+        searchParameters: domainConcepts.map((crit) => ({
+          parameterId: getParamId(crit),
+          ...crit,
+        })),
+      }));
+      if (groupId) {
+        const groupIndex = searchRequest[role].findIndex(
+          (grp) => grp.id === groupId
         );
-      setMatchedConcepts(matchedConceptsResp.items);
-    } catch (err) {
-      console.error(err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (groupIndex > -1) {
+          searchRequest[role][groupIndex].items = [
+            ...searchRequest[role][groupIndex].items,
+            ...items,
+          ];
+        }
+      } else {
+        searchRequest[role].push(initGroup(role, items));
+      }
+      searchRequestStore.next(searchRequest);
+      currentCohortSearchContextStore.next(undefined);
+    };
 
-  const getParamId = ({ code, conceptId, id, isStandard }: Criteria) => {
-    return `param${conceptId ? conceptId + code : id}${isStandard}`;
-  };
-
-  const addConceptsAsItem = () => {
-    saveCriteria(
-      matchedConcepts.map((crit) => ({
-        parameterId: getParamId(crit),
-        ...crit,
-      }))
-    );
-  };
-
-  return (
-    <Modal>
-      <ModalTitle data-test-id='add-concept-title'>
-        Concept ID Lookup
-        <Clickable style={{ float: 'right' }} onClick={() => onClose()}>
-          <ClrIcon shape='times' size='24' style={{ color: colors.accent }} />
-        </Clickable>
-      </ModalTitle>
-      <ModalBody>
-        {loading && (
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <Spinner style={{ alignContent: 'center' }} />
-          </div>
-        )}
-        {error && (
-          <AlertWarning>
-            Sorry, the request cannot be completed. Please try again or contact
-            Support in the left hand navigation.
-          </AlertWarning>
-        )}
-        <InputTextarea
-          rows={3}
-          value={conceptIdInput}
-          disabled={loading}
-          onChange={(e) => setConceptIdInput(e.target.value)}
-        />
-        <Button
-          type='secondary'
-          disabled={!conceptIdInput || loading}
-          onClick={() => lookupConcepts()}
+    return (
+      <Modal width={650}>
+        <ModalTitle
+          style={{ marginBottom: '0.5rem' }}
+          data-test-id='add-concept-title'
         >
-          {loading && <Spinner size={16} style={{ marginRight: '0.25rem' }} />}
-          Lookup
-        </Button>
-        {!!matchedConcepts && (
-          <table>
-            <thead>
-              <tr>
-                <th>Concept Id</th>
-                <th>Code</th>
-                <th>Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matchedConcepts.map((concept, index) => (
-                <tr key={index}>
-                  <td>{concept.conceptId}</td>
-                  <td>{concept.code}</td>
-                  <td>{concept.name}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </ModalBody>
-      <ModalFooter>
-        {!!matchedConcepts && (
-          <Button
-            style={{ marginLeft: '0.75rem' }}
-            onClick={() => addConceptsAsItem()}
+          Concept Lookup
+          <Clickable style={{ float: 'right' }} onClick={() => onClose()}>
+            <ClrIcon shape='times' size='24' style={{ color: colors.accent }} />
+          </Clickable>
+        </ModalTitle>
+        <ModalBody style={{ color: colors.primary }}>
+          {loading && (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Spinner style={{ alignContent: 'center' }} />
+            </div>
+          )}
+          {error && (
+            <AlertWarning>
+              Sorry, the request cannot be completed. Please try again or
+              contact Support in the left hand navigation.
+            </AlertWarning>
+          )}
+          <div
+            style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              marginBottom: '0.5rem',
+            }}
           >
-            Add
-          </Button>
-        )}
-      </ModalFooter>
-    </Modal>
-  );
-};
+            Concept IDs or Codes
+            <TooltipTrigger side='top' content={infoTooltip}>
+              <ClrIcon
+                style={{
+                  color: colorWithWhiteness(colors.accent, 0.1),
+                  marginLeft: '0.375rem',
+                }}
+                className='is-solid'
+                shape='info-standard'
+              />
+            </TooltipTrigger>
+          </div>
+          <InputTextarea
+            rows={3}
+            style={{ height: '4rem', width: '50%' }}
+            value={conceptIdInput}
+            disabled={loading}
+            onChange={(e) => setConceptIdInput(e.target.value)}
+          />
+          <div>
+            <Button
+              type='secondary'
+              style={{
+                border: `1px solid ${
+                  !conceptIdInput || loading ? colors.disabled : colors.accent
+                }`,
+                color:
+                  !conceptIdInput || loading ? colors.disabled : colors.accent,
+                height: '2.5rem',
+                marginTop: '0.75rem',
+                padding: '0 1rem',
+              }}
+              disabled={!conceptIdInput || loading}
+              onClick={() => lookupConcepts()}
+            >
+              {loading && (
+                <Spinner size={16} style={{ marginRight: '0.25rem' }} />
+              )}
+              Lookup
+            </Button>
+          </div>
+          {!!matchedConcepts && (
+            <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
+              {matchedConcepts.length > 0 && (
+                <div style={{ color: colors.select, fontWeight: 500 }}>
+                  <ClrIcon
+                    shape='check-circle'
+                    size='20'
+                    className='is-solid'
+                  />{' '}
+                  {matchedConcepts.length.toLocaleString()} Concept
+                  {matchedConcepts.length > 1 && 's'} found
+                </div>
+              )}
+              <table style={{ textAlign: 'left', width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '40%' }}>Name</th>
+                    <th style={{ width: '20%' }}>Concept Id</th>
+                    <th style={{ width: '20%' }}>Code</th>
+                    <th style={{ width: '20%' }}>Domain</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matchedConcepts.map((concept, index) => (
+                    <tr key={index}>
+                      <td>{concept.name}</td>
+                      <td>{concept.conceptId}</td>
+                      <td>{concept.code}</td>
+                      <td>{domainToTitle(concept.domainId)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          {!!matchedConcepts && (
+            <Button
+              style={{ marginLeft: '0.75rem' }}
+              onClick={() => addConceptsAsItems()}
+            >
+              Add
+            </Button>
+          )}
+        </ModalFooter>
+      </Modal>
+    );
+  }
+);
