@@ -125,11 +125,6 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
           </Clickable>
         </ModalTitle>
         <ModalBody style={{ color: colors.primary }}>
-          {loading && (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Spinner style={{ alignContent: 'center' }} />
-            </div>
-          )}
           {error && (
             <AlertWarning>
               Sorry, the request cannot be completed. Please try again or
@@ -184,39 +179,50 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
               Lookup
             </Button>
           </div>
-          {!!matchedConcepts && (
+          {!loading && !!matchedConcepts && (
             <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
-              {matchedConcepts.length > 0 && (
-                <div style={{ color: colors.select, fontWeight: 500 }}>
+              {matchedConcepts.length === 0 ? (
+                <div style={{ color: colors.warning, fontWeight: 500 }}>
                   <ClrIcon
-                    shape='check-circle'
+                    shape='exclamation-triangle'
                     size='20'
                     className='is-solid'
                   />{' '}
-                  {matchedConcepts.length.toLocaleString()} Concept
-                  {matchedConcepts.length > 1 && 's'} found
+                  No matching concepts found
                 </div>
+              ) : (
+                <>
+                  <div style={{ color: colors.select, fontWeight: 500 }}>
+                    <ClrIcon
+                      shape='check-circle'
+                      size='20'
+                      className='is-solid'
+                    />{' '}
+                    {matchedConcepts.length.toLocaleString()} Concept
+                    {matchedConcepts.length > 1 && 's'} found
+                  </div>
+                  <table style={{ textAlign: 'left', width: '100%' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '40%' }}>Name</th>
+                        <th style={{ width: '20%' }}>Concept Id</th>
+                        <th style={{ width: '20%' }}>Code</th>
+                        <th style={{ width: '20%' }}>Domain</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {matchedConcepts.map((concept, index) => (
+                        <tr key={index}>
+                          <td>{concept.name}</td>
+                          <td>{concept.conceptId}</td>
+                          <td>{concept.code}</td>
+                          <td>{domainToTitle(concept.domainId)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
               )}
-              <table style={{ textAlign: 'left', width: '100%' }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: '40%' }}>Name</th>
-                    <th style={{ width: '20%' }}>Concept Id</th>
-                    <th style={{ width: '20%' }}>Code</th>
-                    <th style={{ width: '20%' }}>Domain</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matchedConcepts.map((concept, index) => (
-                    <tr key={index}>
-                      <td>{concept.name}</td>
-                      <td>{concept.conceptId}</td>
-                      <td>{concept.code}</td>
-                      <td>{domainToTitle(concept.domainId)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           )}
         </ModalBody>
