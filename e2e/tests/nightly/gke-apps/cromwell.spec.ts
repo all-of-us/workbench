@@ -66,13 +66,6 @@ describe('Cromwell GKE App', () => {
     // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
-
-
-
-
-
-
-
     const pauseXPath = `${expandedCromwellXpath}//*[@data-test-id="apps-panel-button-Pause"]`;
     const pauseButton = new Button(page, pauseXPath);
     await pauseButton.click();
@@ -92,24 +85,6 @@ describe('Cromwell GKE App', () => {
 
     // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
