@@ -26,7 +26,7 @@ export const getUserApps = (namespace) => {
 
   // Prevents multiple update processes from running concurrently.
   if (!updating) {
-    userAppsStore.set({ updating: true });
+    userAppsStore.set({ ...userAppsStore.get(), updating: true });
     appsApi()
       .listAppsInWorkspace(namespace)
       .then((listAppsResponse) => {
