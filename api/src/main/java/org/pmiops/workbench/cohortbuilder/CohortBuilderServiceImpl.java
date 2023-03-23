@@ -163,14 +163,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -404,7 +406,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       SearchTerm searchTerm, Boolean standard, List<Domain> domains) {
     List<String> domainNames = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(searchTerm.getCodeTerm(), standard, domainNames)
+        cbCriteriaDao
+            .findDomainCountsByCode(searchTerm.getCodeTerm(), standard, domainNames)
             .stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
