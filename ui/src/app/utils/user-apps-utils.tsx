@@ -1,5 +1,6 @@
 import { AppStatus, CreateAppRequest } from 'generated/fetch';
 
+import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { userAppsStore } from './stores';
@@ -49,4 +50,16 @@ export const createUserApp = (nameSpace, config: CreateAppRequest) => {
         getUserApps(nameSpace);
       }
     });
+};
+
+export const pauseUserApp = (googleProject, appName, namespace) => {
+  leoAppsApi()
+    .stopApp(googleProject, appName)
+    .then(() => getUserApps(namespace));
+};
+
+export const resumeUserApp = (googleProject, appName, namespace) => {
+  leoAppsApi()
+    .startApp(googleProject, appName)
+    .then(() => getUserApps(namespace));
 };
