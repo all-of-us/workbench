@@ -28,6 +28,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
+  createUserApp,
   getUserApps,
   pauseUserApp,
   resumeUserApp,
@@ -163,7 +164,7 @@ const RStudioButtonRow = (props: {
     },
     async () => {
       setCreating(true);
-      await appsApi().createApp(workspaceNamespace, defaultRStudioConfig);
+      await createUserApp(workspaceNamespace, defaultRStudioConfig);
     }
   );
 
