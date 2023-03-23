@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
+import { AppStatusIcon } from 'app/components/app-status-icon';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
@@ -299,10 +300,14 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ) : (
         <FlexColumn>
           {/* TODO: keep status updated internally */}
-          <div style={{ textAlign: 'center' }}>
+          <FlexRow style={{ justifyContent: 'center' }}>
             status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
-            (refresh to update)
-          </div>
+            <AppStatusIcon
+              style={{ alignSelf: 'center', margin: '0 0.5em' }}
+              appStatus={initialUserAppInfo?.status}
+              userSuspended={false}
+            />
+          </FlexRow>
           {cond(
             [
               appType === UIAppType.CROMWELL,
