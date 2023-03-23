@@ -16,7 +16,7 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
-import { updateUserApps } from 'app/utils/user-apps-utils';
+import { getUserApps } from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
@@ -80,7 +80,7 @@ export const AppsPanel = (props: {
   ];
 
   useEffect(() => {
-    updateUserApps(workspace.namespace);
+    getUserApps(workspace.namespace);
   }, []);
 
   const appStates = appsToDisplay.map((appType) => {
