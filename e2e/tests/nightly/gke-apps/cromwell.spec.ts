@@ -4,6 +4,7 @@ import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
+import expect from 'expect';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
@@ -17,6 +18,19 @@ describe('Cromwell GKE App', () => {
 
   test('Create and delete a Cromwell GKE app', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
+
+    // attempt 1 at this PR - open a notebook AND run a cromwell
+
+    // const analysisPage = new WorkspaceAnalysisPage(page);
+    // await openTab(page, Tabs.Analysis, analysisPage);
+    // const notebook = await analysisPage.createNotebook(makeRandomName('cromshell'), Language.Python);
+    //
+    // // Verify kernel name.
+    // const kernelName = await notebook.getKernelName();
+    // expect(kernelName).toBe('Python 3');
+    //
+    // const codeOutput = await notebook.runCodeCell(1, { code: 'print ("hello world")' });
+    // expect(codeOutput).toContain('hello world');
 
     const appsPanel = new AppsPanel(page);
     await appsPanel.open();
@@ -62,6 +76,24 @@ describe('Cromwell GKE App', () => {
     ).getTextContent();
     expect(cromwellText).toContain('Status: PROVISIONING');
     console.log('Cromwell status: PROVISIONING');
+
+    // attempt 2 at this PR - open a notebook AND run a cromwell
+    // while we wait for Cromwell to start, open a notebook
+
+    // const analysisPage = new WorkspaceAnalysisPage(page);
+    // await openTab(page, Tabs.Analysis, analysisPage);
+    // const notebook = await analysisPage.createNotebook(makeRandomName('cromshell'), Language.Python);
+    //
+    // // Verify kernel name.
+    // const kernelName = await notebook.getKernelName();
+    // expect(kernelName).toBe('Python 3');
+    //
+    // const codeOutput = await notebook.runCodeCell(1, { code: 'print ("hello world")' });
+    // expect(codeOutput).toContain('hello world');
+    //
+    // // await page.waitForTimeout(30e3);
+    //
+    // await appsPanel.open();
 
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
