@@ -26,7 +26,6 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
@@ -62,6 +61,9 @@ import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+//import org.pmiops.workbench.leonardo.api.AppsApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
