@@ -233,7 +233,8 @@ public class UserController implements UserApiDelegate {
           "Could not retrieve billing accounts list from Google Cloud", e);
     }
 
-    return Optional.ofNullable(response.getBillingAccounts()).orElse(Collections.emptyList())
+    return Optional.ofNullable(response.getBillingAccounts())
+        .orElse(Collections.emptyList())
         .stream()
         .map(
             googleBillingAccount ->
