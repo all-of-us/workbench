@@ -3,7 +3,6 @@ import { AppStatus, CreateAppRequest } from 'generated/fetch';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { userAppsStore } from './stores';
-import * as userAppsUtils from './user-apps-utils';
 
 const appStatusesRequiringUpdates = [
   AppStatus.DELETING,
@@ -47,7 +46,7 @@ export const createUserApp = (nameSpace, config: CreateAppRequest) => {
     .then(() => {
       const { updating } = userAppsStore.get();
       if (!updating) {
-        userAppsUtils.getUserApps(nameSpace);
+        getUserApps(nameSpace);
       }
     });
 };
