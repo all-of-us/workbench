@@ -8,8 +8,10 @@
   libraries on the java11 runtime throws a:
     com.google.apphosting.api.ApiProxy$FeatureNotEnabledException
 
-  See: https://cloud.google.com/appengine/docs/standard/java-gen2/services/access
-  and: https://www.googlecloudcommunity.com/gc/Serverless/FeatureNotEnabledException-using-App-Engine-bundled-service/m-p/181253
+  See:
+    https://cloud.google.com/appengine/docs/standard/bundled-services-overview
+    https://cloud.google.com/appengine/docs/standard/java-gen2/services/access
+    https://www.googlecloudcommunity.com/gc/Serverless/FeatureNotEnabledException-using-App-Engine-bundled-service/m-p/181253
 
   The following flag enables these libraries in the java11 runtime, allowing us to migrate away
   from them in subsequent steps.
