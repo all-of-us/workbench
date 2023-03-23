@@ -41,15 +41,21 @@ export const getUserApps = (namespace) => {
   }
 };
 
-export const createUserApp = (nameSpace, config: CreateAppRequest) => {
+export const createUserApp = (namespace, config: CreateAppRequest) => {
   return appsApi()
-    .createApp(nameSpace, config)
+    .createApp(namespace, config)
     .then(() => {
       const { updating } = userAppsStore.get();
       if (!updating) {
-        getUserApps(nameSpace);
+        getUserApps(namespace);
       }
     });
+};
+
+export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) => {
+  return appsApi()
+    .deleteApp(namespace, appName, deleteDiskWithUserApp)
+    .then(() => getUserApps(namespace));
 };
 
 export const pauseUserApp = (googleProject, appName, namespace) => {

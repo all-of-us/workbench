@@ -17,7 +17,6 @@ import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
 import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -29,7 +28,7 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   createUserApp,
-  getUserApps,
+  deleteUserApp,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -250,15 +249,13 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () => {
+      : async () => {
           setDeletingApp(true);
-          appsApi()
-            .deleteApp(
-              workspace.namespace,
-              initialUserAppInfo.appName,
-              deleteDiskWithUserApp
-            )
-            .then(() => getUserApps(workspace.namespace));
+          await deleteUserApp(
+            workspace.namespace,
+            initialUserAppInfo.appName,
+            deleteDiskWithUserApp
+          );
         };
   return (
     <FlexColumn
