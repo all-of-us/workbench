@@ -31,11 +31,14 @@ const fakeCromwellConfig: CreateAppRequest = {
 describe('User Apps Helper functions', () => {
   let appsApiStub: AppsApiStub;
   beforeEach(async () => {
+    jest.useFakeTimers();
     appsApiStub = new AppsApiStub();
     registerApiClient(AppsApi, appsApiStub);
+    userAppsStore.set({ updating: false });
   });
 
   afterEach(async () => {
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -78,8 +81,6 @@ describe('User Apps Helper functions', () => {
     expect(spyListAppsAPI).toHaveBeenCalledTimes(1);
   });
 
-  // Waiting just over one polling interval
-  jest.setTimeout(11 * 1000);
   it('Update User Apps that requires a subsequent update', async () => {
     const spyListAppsAPI = jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
@@ -95,7 +96,7 @@ describe('User Apps Helper functions', () => {
       );
     await userAppsUtils.getUserApps('fakeNameSpace');
 
-    await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+    jest.advanceTimersByTime(20e3);
     expect(spyListAppsAPI).toHaveBeenCalledTimes(2);
   });
 });
