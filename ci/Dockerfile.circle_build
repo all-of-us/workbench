@@ -16,7 +16,7 @@
 # We use OpenJDK 8, Node, and some common browsers from CircleCI's base image
 # see: https://circleci.com/docs/2.0/circleci-images/#language-image-variants
 # and https://discuss.circleci.com/t/legacy-convenience-image-deprecation
-FROM cimg/openjdk:8.0-browsers
+FROM cimg/openjdk:11.0-browsers
 
 USER circleci
 
