@@ -278,7 +278,10 @@ public class RasLinkServiceTest {
     if (!dbAccessModule.isPresent()) {
       assertThat(timestamp).isNull();
     } else {
-      assertThat(dbAccessModule.get().getCompletionTime()).isEqualTo(timestamp);
+      // Timestamps from the database do not include nanoseconds, so this has to be truncated to
+      // milliseconds for a valid comparison.
+      Timestamp normalized = new Timestamp(timestamp.getTime());
+      assertThat(dbAccessModule.get().getCompletionTime()).isEqualTo(normalized);
     }
   }
 }

@@ -53,8 +53,8 @@ plugins {
 }
 
 
-if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-    throw new GradleException("This build must be run with Java 8. See developer-system-initialization.md")
+if (JavaVersion.current() != JavaVersion.VERSION_11) {
+    throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md")
 }
 
 // Artifact configurations derived from base configs. Configuration names
@@ -488,6 +488,7 @@ dependencies {
     generatedCompile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
     generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
     generatedCompile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+    generatedCompile "javax.xml.bind:jaxb-api:2.3.1"
 
     // Swagger3 codegen deps
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
