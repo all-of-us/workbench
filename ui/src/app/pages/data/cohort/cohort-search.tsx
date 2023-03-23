@@ -19,6 +19,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { AddConceptSetToCohortModal } from 'app/pages/data/cohort/addConceptSetToCohortModal';
+import { ConceptQuickAddModal } from 'app/pages/data/cohort/concept-quick-add-modal';
 import { Demographics } from 'app/pages/data/cohort/demographics';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import { Selection } from 'app/pages/data/cohort/selection-list';
@@ -100,10 +101,10 @@ const styles = reactStyles({
   },
 });
 
-function initGroup(role: string, item: any) {
+export function initGroup(role: string, items: any) {
   return {
     id: generateId(role),
-    items: [item],
+    items,
     count: null,
     temporal: false,
     mention: TemporalMention.ANYMENTION,
@@ -132,7 +133,7 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
-  if (domain === Domain.CONCEPTSET) {
+  if (domain === Domain.CONCEPTSET || domain === Domain.CONCEPTQUICKADD) {
     item.type = selections[0]?.domainId;
   }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
@@ -151,7 +152,7 @@ export function saveCriteria(selections?: Array<Selection>) {
       }
     }
   } else {
-    searchRequest[role].push(initGroup(role, item));
+    searchRequest[role].push(initGroup(role, [item]));
   }
   searchRequestStore.next(searchRequest);
   currentCohortSearchContextStore.next(undefined);
@@ -169,6 +170,7 @@ interface State {
   selectedIds: Array<string>;
   selections: Array<Selection>;
   showAddConceptSetModal: boolean;
+  showConceptQuickAddModal: boolean;
   showUnsavedModal: boolean;
   toastVisible: boolean;
   unsavedChanges: boolean;
@@ -189,6 +191,7 @@ export const CohortSearch = fp.flow(
         selectedIds: [],
         selections: [],
         showAddConceptSetModal: false,
+        showConceptQuickAddModal: false,
         showUnsavedModal: false,
         toastVisible: false,
         unsavedChanges: false,
@@ -215,6 +218,8 @@ export const CohortSearch = fp.flow(
         this.selectStructuralVariantData();
       } else if (domain === Domain.CONCEPTSET) {
         this.setState({ showAddConceptSetModal: true });
+      } else if (domain === Domain.CONCEPTQUICKADD) {
+        this.setState({ showConceptQuickAddModal: true });
       } else {
         this.setState({ initCriteriaSearch: true });
       }
@@ -465,16 +470,30 @@ export const CohortSearch = fp.flow(
         selectedIds,
         selections,
         showAddConceptSetModal,
+        showConceptQuickAddModal,
         showUnsavedModal,
         toastVisible,
       } = this.state;
       return (
         !!cohortContext && (
           <>
-            {showAddConceptSetModal ? (
-              <AddConceptSetToCohortModal
-                onClose={() => currentCohortSearchContextStore.next(undefined)}
-              />
+            {showAddConceptSetModal || showConceptQuickAddModal ? (
+              <>
+                {showAddConceptSetModal && (
+                  <AddConceptSetToCohortModal
+                    onClose={() =>
+                      currentCohortSearchContextStore.next(undefined)
+                    }
+                  />
+                )}
+                {showConceptQuickAddModal && (
+                  <ConceptQuickAddModal
+                    onClose={() =>
+                      currentCohortSearchContextStore.next(undefined)
+                    }
+                  />
+                )}
+              </>
             ) : (
               <FlexRowWrap style={styles.searchContainer}>
                 <style>{toastCSS}</style>

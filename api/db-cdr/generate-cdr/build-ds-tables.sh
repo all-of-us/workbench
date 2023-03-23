@@ -290,7 +290,7 @@ function do_COPE_and_PFHH(){
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
      (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
-  SELECT  a.person_id,
+  SELECT DISTINCT a.person_id,
           a.entry_datetime as survey_datetime,
           c.name as survey,
           d.concept_id as question_concept_id,
@@ -300,7 +300,7 @@ function do_COPE_and_PFHH(){
   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
   JOIN
       (
-          SELECT *
+          SELECT DISTINCT *
           FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
           WHERE ancestor_concept_id in
               (
@@ -321,7 +321,7 @@ function do_PFHH(){
   bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
   "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
      (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
-  SELECT  a.person_id,
+  SELECT DISTINCT a.person_id,
           a.entry_datetime as survey_datetime,
           'Personal and Family Health History' as survey,
           d.concept_id as question_concept_id,

@@ -4,6 +4,7 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
   CohortDefinition,
+  CriteriaSubType,
   CriteriaType,
   Domain,
   Modifier,
@@ -14,6 +15,7 @@ import {
 
 import { Button, Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
+import { Modal, ModalFooter, ModalTitle } from 'app/components/modals';
 import { RenameModal } from 'app/components/rename-modal';
 import { MODIFIERS_MAP } from 'app/pages/data/cohort/constant';
 import {
@@ -26,6 +28,7 @@ import {
   mapGroupItem,
   typeToTitle,
 } from 'app/pages/data/cohort/utils';
+import { ConceptAddModal } from 'app/pages/data/concept/concept-add-modal';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
@@ -34,6 +37,7 @@ import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -192,6 +196,8 @@ interface State {
   loading: boolean;
   paramListOpen: boolean;
   renaming: boolean;
+  showConceptSetModal: boolean;
+  showConceptSuccessModal: boolean;
   timeout: NodeJS.Timeout;
 }
 
@@ -206,6 +212,8 @@ export const SearchGroupItem = withCurrentWorkspace()(
         loading: true,
         paramListOpen: false,
         renaming: false,
+        showConceptSetModal: false,
+        showConceptSuccessModal: false,
         timeout: null,
       };
     }
@@ -435,11 +443,32 @@ export const SearchGroupItem = withCurrentWorkspace()(
       );
     }
 
+    get hideConceptOption() {
+      const {
+        item: { searchParameters, type },
+      } = this.props;
+      return (
+        !serverConfigStore.get().config.enableConceptSetsInCohortBuilder ||
+        this.preventItemEdit ||
+        type === Domain.PERSON.toString() ||
+        !searchParameters.some(
+          (param) => param.subtype !== CriteriaSubType.ANSWER.toString()
+        )
+      );
+    }
+
     render() {
       const {
-        item: { count, modifiers, name, searchParameters, status },
+        item: { count, modifiers, name, searchParameters, status, type },
       } = this.props;
-      const { error, loading, paramListOpen, renaming } = this.state;
+      const {
+        error,
+        loading,
+        paramListOpen,
+        renaming,
+        showConceptSetModal,
+        showConceptSuccessModal,
+      } = this.state;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
       const actionItems = [
         {
@@ -456,6 +485,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
           command: () => this.suppress(),
         },
         { label: 'Delete criteria', command: () => this.remove() },
+        {
+          label: 'Add criteria to concept set',
+          command: () => this.setState({ showConceptSetModal: true }),
+          style: this.hideConceptOption ? { display: 'none' } : {},
+        },
       ];
       return (
         <React.Fragment>
@@ -593,6 +627,37 @@ export const SearchGroupItem = withCurrentWorkspace()(
               onRename={(v) => this.rename(v)}
               resourceType={ResourceType.COHORTSEARCHITEM}
             />
+          )}
+          {showConceptSetModal && (
+            <ConceptAddModal
+              activeDomainTab={{
+                domain: type,
+                name: domainToTitle(type),
+                count: 0,
+              }}
+              selectedConcepts={searchParameters}
+              onSave={() =>
+                this.setState({
+                  showConceptSetModal: false,
+                  showConceptSuccessModal: true,
+                })
+              }
+              onClose={() => this.setState({ showConceptSetModal: false })}
+            />
+          )}
+          {showConceptSuccessModal && (
+            <Modal>
+              <ModalTitle>Concepts successfully saved</ModalTitle>
+              <ModalFooter>
+                <Button
+                  onClick={() =>
+                    this.setState({ showConceptSuccessModal: false })
+                  }
+                >
+                  OK
+                </Button>
+              </ModalFooter>
+            </Modal>
           )}
         </React.Fragment>
       );

@@ -1,6 +1,23 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
   <service>api</service>
   <runtime>java8</runtime>
+
+  <!--
+  The GAE java8 runtime restricts certain JVM APIs. The java11 runtime has fewer restrictions.
+  Google provides GAE-specific libraries to work around these restrictions, but using these
+  libraries on the java11 runtime throws a:
+    com.google.apphosting.api.ApiProxy$FeatureNotEnabledException
+
+  See:
+    https://cloud.google.com/appengine/docs/standard/bundled-services-overview
+    https://cloud.google.com/appengine/docs/standard/java-gen2/services/access
+    https://www.googlecloudcommunity.com/gc/Serverless/FeatureNotEnabledException-using-App-Engine-bundled-service/m-p/181253
+
+  The following flag enables these libraries in the java11 runtime, allowing us to migrate away
+  from them in subsequent steps.
+  -->
+  <app-engine-apis>true</app-engine-apis>
+
   <threadsafe>true</threadsafe>
   <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>

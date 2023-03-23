@@ -1,15 +1,9 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 import * as fp from 'lodash/fp';
-import { faCircle } from '@fortawesome/free-solid-svg-icons/faCircle';
-import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { RuntimeStatus } from 'generated/fetch';
 
-import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
@@ -20,32 +14,14 @@ import {
 } from 'app/utils/stores';
 
 import { FlexRow } from './flex';
-
-const styles = reactStyles({
-  asyncOperationStatusIcon: {
-    width: '.75rem',
-    height: '.75rem',
-    zIndex: 2,
-  },
-  runtimeStatusIconOutline: {
-    border: `1px solid ${colors.white}`,
-    borderRadius: '.375rem',
-  },
-  rotate: {
-    animation: 'rotation 2s infinite linear',
-  },
-});
-
-const errIcon = (
-  <FontAwesomeIcon
-    icon={faCircle}
-    style={{
-      ...styles.asyncOperationStatusIcon,
-      ...styles.runtimeStatusIconOutline,
-      color: colors.asyncOperationStatus.error,
-    }}
-  />
-);
+import {
+  ErrorIcon,
+  RunningIcon,
+  StoppedIcon,
+  StoppingIcon,
+  SuspendedIcon,
+  UpdatingIcon,
+} from './status-icon';
 
 export const RuntimeStatusIcon = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps')
@@ -83,68 +59,24 @@ export const RuntimeStatusIcon = fp.flow(
               loadingError instanceof ComputeSecuritySuspendedError ||
               userSuspended
             ) {
-              return (
-                <FontAwesomeIcon
-                  icon={faLock}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    color: colors.asyncOperationStatus.stopped,
-                  }}
-                />
-              );
+              return <SuspendedIcon />;
             }
-            return errIcon;
+            return <ErrorIcon />;
           }
           switch (status) {
             case RuntimeStatus.Creating:
             case RuntimeStatus.Starting:
             case RuntimeStatus.Updating:
-              return (
-                <FontAwesomeIcon
-                  icon={faSyncAlt}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.rotate,
-                    color: colors.asyncOperationStatus.starting,
-                  }}
-                />
-              );
+              return <UpdatingIcon />;
             case RuntimeStatus.Stopped:
-              return (
-                <FontAwesomeIcon
-                  icon={faCircle}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.runtimeStatusIconOutline,
-                    color: colors.asyncOperationStatus.stopped,
-                  }}
-                />
-              );
+              return <StoppedIcon />;
             case RuntimeStatus.Running:
-              return (
-                <FontAwesomeIcon
-                  icon={faCircle}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.runtimeStatusIconOutline,
-                    color: colors.asyncOperationStatus.running,
-                  }}
-                />
-              );
+              return <RunningIcon />;
             case RuntimeStatus.Stopping:
             case RuntimeStatus.Deleting:
-              return (
-                <FontAwesomeIcon
-                  icon={faSyncAlt}
-                  style={{
-                    ...styles.asyncOperationStatusIcon,
-                    ...styles.rotate,
-                    color: colors.asyncOperationStatus.stopping,
-                  }}
-                />
-              );
+              return <StoppingIcon />;
             case RuntimeStatus.Error:
-              return errIcon;
+              return <ErrorIcon />;
           }
         })()}
       </FlexRow>
