@@ -85,7 +85,7 @@ const useApiProxy = async page => {
     })
   })
   await page.setJavaScriptEnabled(false)
-  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.goto(config.urlRoot())
   await page.evaluate(
     url => { localStorage.allOfUsApiUrlOverride = url},
     process.env.API_PROXY_URL
@@ -98,7 +98,7 @@ export_({useApiProxy})
 
 const fakeSignIn = async page => {
   await page.evaluate(() => localStorage['test-access-token-override'] = 'fake-bearer-token')
-  await page.reload({waitUntil: 'networkidle0'})
+  await page.reload()
   await expect(page.waitForSelector('[data-test-id="signed-in"]')).resolves.toBeDefined()
 }
 export_({fakeSignIn})
