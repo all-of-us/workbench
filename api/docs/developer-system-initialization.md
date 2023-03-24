@@ -4,28 +4,30 @@ software in [System Requirements](developer-system-requirements.md).
 
 ## Gradle setup
 
-If your system's default `java` version is 8, you can skip this.
+If your system's default `java` version is 11, you can skip this.
 
 ```Shell
 java --version
-openjdk 11.0.11 2021-08-03
+openjdk 17.0.5 2022-10-18
+OpenJDK Runtime Environment GraalVM CE 22.3.0 (build 17.0.5+8-jvmci-22.3-b08)
+OpenJDK 64-Bit Server VM GraalVM CE 22.3.0 (build 17.0.5+8-jvmci-22.3-b08, mixed mode, sharing)
 ...
 ```
 
-Gradle requires Java 8 to build currently (RW-5609 will upgrade to 11).
+Our build requires Java 11.
 
-- Ensure Java 8 is installed on your system
-- Find Java 8 home directory, e.g. on mac run: `/usr/libexec/java_home -v 1.8`
+- Ensure Java 11 is installed on your system
+- Find Java 11 home directory, e.g. on mac run: `/usr/libexec/java_home -v 11`
 - Create a Gradle properties file to point to this directory:
   - Globally for your workstation: `~/.gradle/gradle.properties`
   - or, just in the Workbench repo: `api/gradle.properties`
   ```
   # gradle.properties
-  org.gradle.java.home={YOUR_PATH_TO_JDK8}
+  org.gradle.java.home={YOUR_PATH_TO_JDK11}
 
   # Example:
   $ cat api/gradle.properties
-  org.gradle.java.home=/usr/local/buildtools/java/jdk8
+  org.gradle.java.home=/usr/local/buildtools/java/jdk11
   ```
 
 ## Gcloud Setup
