@@ -7,7 +7,6 @@ import { environment } from 'environments/environment';
 import { userApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker, setLoggedInState } from 'app/utils/analytics';
 import { LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN } from 'app/utils/cookies';
-import { reportError } from 'app/utils/errors';
 import { navigateSignOut } from 'app/utils/navigation';
 import { authStore, serverConfigStore } from 'app/utils/stores';
 import { delay } from 'app/utils/subscribable';
@@ -91,8 +90,7 @@ export const signOut = async (continuePath: string = '/login') => {
   let signOutApiCallSucceeded = true;
   try {
     await userApi().signOut();
-  } catch (e) {
-    reportError(e);
+  } catch {
     signOutApiCallSucceeded = false;
   }
 
@@ -103,7 +101,6 @@ export const signOut = async (continuePath: string = '/login') => {
     // `revokeTokens` can fail if the token has already been revoked.
     // Recover from invalid_token errors to make sure the sign-out process completes successfully.
     if (e.error !== 'invalid_token') {
-      reportError(e);
       throw e;
     }
   }
@@ -154,8 +151,7 @@ export const useAuthentication = () => {
     // Unfortunately, this function triggers _after_ auth declares the user as unauthenticated. In that case, we
     // return early to allow signinSilent to trigger and re-run this function without disrupting the user.
     const expiredCallback = auth.events.addAccessTokenExpired(() => {
-      auth.signinSilent().catch((e) => {
-        reportError(e);
+      auth.signinSilent().catch(() => {
         signOutWithoutLooping();
       });
     });
@@ -187,7 +183,6 @@ export const useAuthentication = () => {
     setLoggedInState(authStore.get().isSignedIn);
 
     if (auth.error) {
-      reportError(auth.error);
       signOutWithoutLooping();
     }
 

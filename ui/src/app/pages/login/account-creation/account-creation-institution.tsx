@@ -33,7 +33,6 @@ import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { reportError } from 'app/utils/errors';
 import {
   checkInstitutionalEmail,
   getEmailValidationErrorMessage,
@@ -131,7 +130,6 @@ export class AccountCreationInstitution extends React.Component<
         loadingInstitutions: false,
         institutionLoadError: true,
       });
-      reportError(e);
     }
   }
 
