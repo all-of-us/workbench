@@ -96,6 +96,7 @@ public class AuthInterceptorTest {
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
     workbenchConfig.server.apiBaseUrl = "api-dot-all-of-us-workbench-test.appspot.com";
+    workbenchConfig.access.enableApiUrlCheck = true;
     when(mockRequest.getRequestURL())
         .thenReturn(new StringBuffer("api-dot-all-of-us-workbench-test.appspot.com"));
 
@@ -307,6 +308,17 @@ public class AuthInterceptorTest {
             CloudTaskRdrExportApi.class.getMethod(
                 "exportResearcherData", ArrayOfLong.class, Boolean.class));
 
+    when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
+
+    assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
+  }
+
+  @Test
+  public void preHandle_apiBaseUrlNotMatch_disableUrlCheck_allowed() throws Exception {
+    workbenchConfig.access.enableApiUrlCheck = false;
+
+    mockGetCallWithBearerToken();
+    mockUserInfoSuccess();
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
     assertThat(interceptor.preHandle(mockRequest, mockResponse, mockHandler)).isTrue();
