@@ -280,7 +280,6 @@ export class LeoRuntimeInitializer {
     if (!(e instanceof Response) || e.status >= 500) {
       this.serverErrorCount++;
     }
-    reportError(e);
   }
 
   private hasTooManyServerErrors(): boolean {

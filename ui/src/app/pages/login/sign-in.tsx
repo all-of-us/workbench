@@ -27,7 +27,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { convertAPIError, reportError } from 'app/utils/errors';
+import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -422,7 +422,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
         isPreviousStep: false,
       });
     } catch (error) {
-      reportError(error);
       const { message } = await convertAPIError(error);
       this.props.showProfileErrorModal(message);
       if (enableCaptcha) {
