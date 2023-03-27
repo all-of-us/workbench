@@ -238,7 +238,11 @@ interface State {
 }
 
 const CromwellBetaBadge = ({ style }) => (
-  <TooltipTrigger content='We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'>
+  <TooltipTrigger
+    content={
+      'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
+    }
+  >
     <div
       style={{
         ...styles.cromwellBetaBadge,
