@@ -107,7 +107,8 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-    if (!request
+    if (workbenchConfigProvider.get().access.enableApiUrlCheck
+        && !request
             .getRequestURL()
             .toString()
             .startsWith(workbenchConfigProvider.get().server.apiBaseUrl)

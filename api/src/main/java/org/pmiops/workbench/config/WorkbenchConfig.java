@@ -301,6 +301,10 @@ public class WorkbenchConfig {
     }
 
     public Renewal renewal;
+
+    // Whether to check API request URL. If enabled, requests to API server are required to match
+    // baseApiUrl.
+    public boolean enableApiUrlCheck;
   }
 
   public static class FeatureFlagsConfig {
