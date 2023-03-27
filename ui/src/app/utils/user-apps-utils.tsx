@@ -22,7 +22,7 @@ const doUserAppsRequireUpdates = () => {
   );
 };
 
-export const getUserApps = (namespace) => {
+export const maybeStartPollingForUserApps = (namespace) => {
   const { updating } = userAppsStore.get();
 
   // Prevents multiple update processes from running concurrently.
@@ -34,7 +34,7 @@ export const getUserApps = (namespace) => {
         userAppsStore.set({ userApps: listAppsResponse, updating: false });
         if (doUserAppsRequireUpdates()) {
           setTimeout(() => {
-            getUserApps(namespace);
+            maybeStartPollingForUserApps(namespace);
           }, 10 * 1000);
         }
       });
@@ -47,7 +47,7 @@ export const createUserApp = (namespace, config: CreateAppRequest) => {
     .then(() => {
       const { updating } = userAppsStore.get();
       if (!updating) {
-        getUserApps(namespace);
+        maybeStartPollingForUserApps(namespace);
       }
     });
 };
@@ -55,17 +55,17 @@ export const createUserApp = (namespace, config: CreateAppRequest) => {
 export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) => {
   return appsApi()
     .deleteApp(namespace, appName, deleteDiskWithUserApp)
-    .then(() => getUserApps(namespace));
+    .then(() => maybeStartPollingForUserApps(namespace));
 };
 
 export const pauseUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
     .stopApp(googleProject, appName)
-    .then(() => getUserApps(namespace));
+    .then(() => maybeStartPollingForUserApps(namespace));
 };
 
 export const resumeUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
     .startApp(googleProject, appName)
-    .then(() => getUserApps(namespace));
+    .then(() => maybeStartPollingForUserApps(namespace));
 };

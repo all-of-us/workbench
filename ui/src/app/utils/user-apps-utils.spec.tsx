@@ -64,7 +64,7 @@ describe('User Apps Helper functions', () => {
   it('Update User Apps with an existing update process', async () => {
     userAppsStore.set({ updating: true });
     const spyListAppsAPI = jest.spyOn(appsApi(), 'listAppsInWorkspace');
-    await userAppsUtils.getUserApps('fakeNameSpace');
+    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
     expect(spyListAppsAPI).toHaveBeenCalledTimes(0);
   });
 
@@ -77,7 +77,7 @@ describe('User Apps Helper functions', () => {
             { status: RuntimeStatus.Running, appType: AppType.CROMWELL },
           ])
       );
-    await userAppsUtils.getUserApps('fakeNameSpace');
+    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
     expect(spyListAppsAPI).toHaveBeenCalledTimes(1);
   });
 
@@ -94,7 +94,7 @@ describe('User Apps Helper functions', () => {
           { status: AppStatus.RUNNING, appType: AppType.CROMWELL },
         ])
       );
-    await userAppsUtils.getUserApps('fakeNameSpace');
+    await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');
 
     jest.advanceTimersByTime(20e3);
     expect(spyListAppsAPI).toHaveBeenCalledTimes(2);
