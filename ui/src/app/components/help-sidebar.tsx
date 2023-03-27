@@ -143,6 +143,13 @@ const styles = reactStyles({
     paddingLeft: 12,
     width: 160,
   },
+  cromwellBetaBadge: {
+    border: `3px solid #F0B1D0`,
+    borderRadius: '11px',
+    padding: '0 0.5rem',
+    backgroundColor: colors.white,
+    lineHeight: '1rem',
+  },
 });
 
 const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
@@ -229,6 +236,19 @@ interface State {
   runtimeErrors: Array<RuntimeError>;
   runtimeConfPanelInitialState: PanelContent | null;
 }
+
+const CromwellBetaBadge = ({ style }) => (
+  <TooltipTrigger content='We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'>
+    <div
+      style={{
+        ...styles.cromwellBetaBadge,
+        ...style,
+      }}
+    >
+      <b>Beta</b>
+    </div>
+  </TooltipTrigger>
+);
 
 export const HelpSidebar = fp.flow(
   withUserSuspended(),
@@ -505,16 +525,11 @@ export const HelpSidebar = fp.flow(
                 >
                   Cromwell Cloud Environment
                 </h3>
-                <div
+                <CromwellBetaBadge
                   style={{
-                    border: `2px ${colors.primary} solid`,
-                    borderRadius: '8px',
-                    padding: '0 0.5rem',
                     marginLeft: '0.5rem',
                   }}
-                >
-                  Beta
-                </div>
+                />
               </div>
             ),
             bodyWidthRem: '55',
