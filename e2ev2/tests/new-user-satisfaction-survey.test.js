@@ -17,7 +17,7 @@ browserTest('take the new user satisfaction survey via the relevant notification
   const page = browser.initialPage
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
-  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.goto(config.urlRoot())
 
   const surveyNotification = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-notification"]');
   await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]').then(b => b.click());
@@ -32,7 +32,7 @@ browserTest('take the new user satisfaction survey via an email link', async bro
   const page = browser.initialPage
   const surveyCode = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
   await tu.useApiProxy(page)
-  await page.goto(`${config.urlRoot()}?surveyCode=${surveyCode}`, {waitUntil: 'networkidle0'})
+  await page.goto(`${config.urlRoot()}?surveyCode=${surveyCode}`)
 
   await completeNewUserSatisfactionSurvey(page);
 }, 10e3);

@@ -7,7 +7,7 @@ const navigateToNewAnalysisPage = async (browser) => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
-  await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data', {waitUntil: 'networkidle0'})
+  await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data')
   const newAnalysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis (New)"]')
   await newAnalysisTab.click()
   return page
