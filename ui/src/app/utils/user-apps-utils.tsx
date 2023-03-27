@@ -45,10 +45,7 @@ export const createUserApp = (namespace, config: CreateAppRequest) => {
   return appsApi()
     .createApp(namespace, config)
     .then(() => {
-      const { updating } = userAppsStore.get();
-      if (!updating) {
-        maybeStartPollingForUserApps(namespace);
-      }
+      maybeStartPollingForUserApps(namespace);
     });
 };
 
