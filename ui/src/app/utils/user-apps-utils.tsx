@@ -24,21 +24,22 @@ const doUserAppsRequireUpdates = () => {
 
 export const maybeStartPollingForUserApps = (namespace) => {
   const { updating } = userAppsStore.get();
-
   // Prevents multiple update processes from running concurrently.
-  if (!updating) {
-    userAppsStore.set({ ...userAppsStore.get(), updating: true });
-    appsApi()
-      .listAppsInWorkspace(namespace)
-      .then((listAppsResponse) => {
-        userAppsStore.set({ userApps: listAppsResponse, updating: false });
-        if (doUserAppsRequireUpdates()) {
-          setTimeout(() => {
-            maybeStartPollingForUserApps(namespace);
-          }, 10 * 1000);
-        }
-      });
+  if (updating) {
+    return;
   }
+
+  userAppsStore.set({ ...userAppsStore.get(), updating: true });
+  appsApi()
+    .listAppsInWorkspace(namespace)
+    .then((listAppsResponse) => {
+      userAppsStore.set({ userApps: listAppsResponse, updating: false });
+      if (doUserAppsRequireUpdates()) {
+        setTimeout(() => {
+          maybeStartPollingForUserApps(namespace);
+        }, 10 * 1000);
+      }
+    });
 };
 
 export const createUserApp = (namespace, config: CreateAppRequest) => {
