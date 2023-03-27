@@ -24,19 +24,12 @@
 
   <env-variables>
     <env-var name="GAE_PROFILER_MODE" value="cpu,heap" />
+    <env-var name="CLOUD_SQL_INSTANCE_NAME" value="${CLOUD_SQL_INSTANCE_NAME}" />
+    <env-var name="DB_PASSWORD" value="${DB_PASSWORD}" />
   </env-variables>
 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-
-    <property name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
-    <property name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
-    <property name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
-    <property name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
-
-    <property name="cdr.datasource.url" value="${CDR_DB_CONNECTION_STRING}"/>
-    <property name="cdr.datasource.username" value="${CDR_DB_USER}"/>
-    <property name="cdr.datasource.password" value="${CDR_DB_PASSWORD}"/>
   </system-properties>
 
   <static-error-handlers>
