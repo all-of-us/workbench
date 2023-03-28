@@ -238,6 +238,9 @@ Common.register_command({
 def run_integration_tests(cmd_name, *args)
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
+    # These are required to start the application but not currently used.
+    ENV["DB_HOST"] = "placeholder"
+    ENV["DB_PASSWORD"] = "placeholder"
     common.run_inline %W{./gradlew integrationTest} + args
   end
 end
