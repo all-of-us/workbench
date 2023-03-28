@@ -43,14 +43,15 @@ public class WorkbenchDbConfig {
     // required.
     Optional<String> dbHost = getEnv("DB_HOST");
     p.setDriverClassName(
-      dbHost.isPresent() ? "com.mysql.jdbc.Driver" : "com.mysql.jdbc.GoogleDriver");
+        dbHost.isPresent() ? "com.mysql.jdbc.Driver" : "com.mysql.jdbc.GoogleDriver");
     String options = dbHost.isPresent() ? "useSSL=false" : "rewriteBatchedStatements=true";
-    p.setUrl(String.format("jdbc:%smysql://%s/%s?%s",
-      dbHost.isPresent() ? "" : "google:",
-      dbHost.orElseGet(() -> getEnvRequired("CLOUD_SQL_INSTANCE_NAME")),
-      "workbench", // database name is consistent across environments
-      options
-    ));
+    p.setUrl(
+        String.format(
+            "jdbc:%smysql://%s/%s?%s",
+            dbHost.isPresent() ? "" : "google:",
+            dbHost.orElseGet(() -> getEnvRequired("CLOUD_SQL_INSTANCE_NAME")),
+            "workbench", // database name is consistent across environments
+            options));
     p.setUsername("workbench"); // consistent across environments
     p.setPassword(getEnvRequired("DB_PASSWORD"));
     return p;
