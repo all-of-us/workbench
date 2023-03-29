@@ -51,7 +51,7 @@
     <exclude path="static/README.md"/>
   </static-files>
 
-  <instance-class>${GAE_INSTANCE_CLASS}</instance-class>
+  <instance-class>F4</instance-class>
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>
