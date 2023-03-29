@@ -31,19 +31,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.GceWithPdConfig;
-import org.pmiops.workbench.model.PersistentDiskRequest;
+import org.pmiops.workbench.leonardo.PersistentDiskUtils;
+import org.pmiops.workbench.leonardo.model.*;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeLocalizeRequest;
-import org.pmiops.workbench.model.RuntimeLocalizeResponse;
-import org.pmiops.workbench.model.RuntimeStatus;
-import org.pmiops.workbench.model.UpdateRuntimeRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -197,6 +188,24 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
+        // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
+        // Check with Leo again see if user have READY disk, if so, block this request or logging
+        List<Disk> diskList =
+            PersistentDiskUtils.findTheMostRecentActiveDisks(
+                leonardoNotebooksClient
+                    .listPersistentDiskByProjectCreatedByCreator(runtime.getGoogleProject(), false)
+                    .stream()
+                    .map(leonardoMapper::toApiListDisksResponse)
+                    .collect(Collectors.toList()));
+        List<Disk> runtimeDisks =
+            diskList.stream().filter(Disk::getIsGceRuntime).collect(Collectors.toList());
+        if (!runtimeDisks.isEmpty()) {
+          // Find active disks for runtime VM. Block user from creating new disk.
+          throw new BadRequestException(
+              String.format(
+                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
+                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+        }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }
       persistentDiskRequest.labels(

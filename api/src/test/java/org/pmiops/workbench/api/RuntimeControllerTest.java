@@ -2,10 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -23,12 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +59,7 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.*;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
@@ -226,6 +220,9 @@ public class RuntimeControllerTest {
   RuntimesApi serviceRuntimesApi;
 
   @MockBean ProxyApi proxyApi;
+
+  @MockBean
+  DisksApi disksApi;
   @MockBean WorkspaceDao workspaceDao;
   @MockBean WorkspaceService workspaceService;
 
@@ -253,7 +250,7 @@ public class RuntimeControllerTest {
   private LinkedTreeMap<String, Object> gceConfigObj;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception{
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
@@ -360,6 +357,8 @@ public class RuntimeControllerTest {
             .setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
+
+    when(disksApi.listDisksByProject(anyString(), anyString(), anyBoolean(), anyString(),anyString())).thenReturn(new ArrayList<>());
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(
