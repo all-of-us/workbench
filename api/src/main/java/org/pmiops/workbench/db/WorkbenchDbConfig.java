@@ -53,7 +53,7 @@ public class WorkbenchDbConfig {
             "workbench", // database name is consistent across environments
             options));
     p.setUsername("workbench"); // consistent across environments
-    p.setPassword(getEnvRequired("DB_PASSWORD"));
+    p.setPassword(getEnvRequired("WORKBENCH_DB_PASSWORD"));
     return p;
   }
 
