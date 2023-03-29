@@ -238,9 +238,6 @@ Common.register_command({
 def run_integration_tests(cmd_name, *args)
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    # These are required to start the application but not currently used.
-    ENV["CLOUD_SQL_INSTANCE_NAME"] = "all-of-us-workbench-test:us-central1:workbenchmaindb"
-    ENV["WORKBENCH_DB_PASSWORD"] = "placeholder"
     common.run_inline %W{./gradlew integrationTest} + args
   end
 end
