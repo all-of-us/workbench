@@ -1,6 +1,6 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
   <service>api</service>
-  <runtime>java8</runtime>
+  <runtime>java11</runtime>
 
   <!--
   The GAE java8 runtime restricts certain JVM APIs. The java11 runtime has fewer restrictions.
