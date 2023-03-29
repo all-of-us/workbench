@@ -184,7 +184,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
     # the application has finished starting.
-    common.run_inline "./gradlew --daemon appengineRun &"
+    common.run_inline "DB_HOST=127.0.0.1 ./gradlew --daemon appengineRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
@@ -239,7 +239,7 @@ def run_integration_tests(cmd_name, *args)
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
     # These are required to start the application but not currently used.
-    ENV["DB_HOST"] = "placeholder"
+    ENV["CLOUD_SQL_INSTANCE_NAME"] = "all-of-us-workbench-test:us-central1:workbenchmaindb"
     ENV["WORKBENCH_DB_PASSWORD"] = "placeholder"
     common.run_inline %W{./gradlew integrationTest} + args
   end
