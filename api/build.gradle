@@ -438,7 +438,6 @@ dependencies {
 
     compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
         exclude module: 'spring-boot-starter-tomcat'
-        exclude group: 'com.zaxxer', module: 'HikariCP'
         exclude group: 'org.slf4j', module: 'jul-to-slf4j'
     }
 

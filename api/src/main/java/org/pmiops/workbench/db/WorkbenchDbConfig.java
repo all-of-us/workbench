@@ -1,5 +1,7 @@
 package org.pmiops.workbench.db;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.Optional;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -7,7 +9,6 @@ import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -35,32 +36,28 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     basePackages = {"org.pmiops.workbench.db"})
 public class WorkbenchDbConfig {
 
-  @Primary
-  @Bean(name = "dataSourceProperties")
-  public DataSourceProperties dataSourceProperties() {
-    DataSourceProperties p = new DataSourceProperties();
-    // DB_HOST should be defined for local development, otherwise CLOUD_SQL_INSTANCE_NAME is
-    // required.
+  public static HikariConfig createConfig(String dbName) {
+    HikariConfig config = new HikariConfig();
     Optional<String> dbHost = getEnv("DB_HOST");
-    p.setDriverClassName(
-        dbHost.isPresent() ? "com.mysql.jdbc.Driver" : "com.mysql.jdbc.GoogleDriver");
-    String options = dbHost.isPresent() ? "useSSL=false" : "rewriteBatchedStatements=true";
-    p.setUrl(
-        String.format(
-            "jdbc:%smysql://%s/%s?%s",
-            dbHost.isPresent() ? "" : "google:",
-            dbHost.orElseGet(() -> getEnvRequired("CLOUD_SQL_INSTANCE_NAME")),
-            "workbench", // database name is consistent across environments
-            options));
-    p.setUsername("workbench"); // consistent across environments
-    p.setPassword(getEnvRequired("WORKBENCH_DB_PASSWORD"));
-    return p;
+    boolean connectViaAppEngine = !dbHost.isPresent();
+    config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+    config.setJdbcUrl(
+        String.format("jdbc:mysql://%s/%s", connectViaAppEngine ? "" : dbHost.get(), dbName));
+    config.setUsername("workbench"); // consistent across environments
+    config.setPassword(getEnvRequired("WORKBENCH_DB_PASSWORD"));
+    if (connectViaAppEngine) {
+      config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
+      config.addDataSourceProperty("cloudSqlInstance", getEnvRequired("CLOUD_SQL_INSTANCE_NAME"));
+    }
+    config.addDataSourceProperty("useSSL", false);
+    return config;
   }
 
   @Primary
   @Bean(name = "dataSource")
   public DataSource dataSource() {
-    return dataSourceProperties().initializeDataSourceBuilder().build();
+    // main database name is consistent across environments
+    return new HikariDataSource(createConfig("workbench"));
   }
 
   @Primary
@@ -92,11 +89,11 @@ public class WorkbenchDbConfig {
     return new PoolProperties();
   }
 
-  Optional<String> getEnv(String name) {
+  static Optional<String> getEnv(String name) {
     return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
   }
 
-  String getEnvRequired(String name) {
+  static String getEnvRequired(String name) {
     return getEnv(name).orElseThrow(() -> new IllegalStateException(name + " not defined"));
   }
 }

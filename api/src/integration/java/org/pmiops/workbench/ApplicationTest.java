@@ -4,9 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
+import org.pmiops.workbench.cdr.CdrDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Component;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Component;
 public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
+  @MockBean private DataSource dataSource;
+  @MockBean private CdrDataSource cdrDataSource;
 
   /**
    * Spring Boot provides a mechanism that will create a schema and load data into it. It loads SQL
