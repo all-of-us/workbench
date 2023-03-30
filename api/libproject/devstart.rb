@@ -240,7 +240,7 @@ def run_integration_tests(cmd_name, *args)
   ServiceAccountContext.new(TEST_PROJECT).run do
     # These are required to start the application but not currently used.
     ENV["DB_HOST"] = "placeholder"
-    ENV["DB_PASSWORD"] = "placeholder"
+    ENV["WORKBENCH_DB_PASSWORD"] = "placeholder"
     common.run_inline %W{./gradlew integrationTest} + args
   end
 end
@@ -1141,7 +1141,9 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password,
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
       # table of the workbench DB; then this shouldn't be needed anymore.
       db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
+      # TODO: wait one release and then remove
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
+      db_creds_file.puts "CLOUD_SQL_INSTANCE_NAME=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"

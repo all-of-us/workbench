@@ -25,7 +25,7 @@
   <env-variables>
     <env-var name="GAE_PROFILER_MODE" value="cpu,heap" />
     <env-var name="CLOUD_SQL_INSTANCE_NAME" value="${CLOUD_SQL_INSTANCE_NAME}" />
-    <env-var name="DB_PASSWORD" value="${DB_PASSWORD}" />
+    <env-var name="WORKBENCH_DB_PASSWORD" value="${WORKBENCH_DB_PASSWORD}" />
   </env-variables>
 
   <system-properties>
