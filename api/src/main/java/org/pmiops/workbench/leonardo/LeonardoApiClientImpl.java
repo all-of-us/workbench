@@ -21,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -29,9 +30,24 @@ import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
-import org.pmiops.workbench.leonardo.model.*;
+import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -458,6 +474,25 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     appTypeToLabelValue(appType)));
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
+      // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
+      // Check with Leo again see if user have READY disk, if so, block this request or logging
+      List<Disk> diskList =
+          PersistentDiskUtils.findTheMostRecentActiveDisks(
+              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
+                  .stream()
+                  .map(leonardoMapper::toApiListDisksResponse)
+                  .collect(Collectors.toList()));
+      List<Disk> appDisks =
+          diskList.stream()
+              .filter(d -> d.getAppType().equals(createAppRequest.getAppType()))
+              .collect(Collectors.toList());
+      if (!appDisks.isEmpty()) {
+        // Find active disks for APP VM. Block user from creating new disk.
+        throw new BadRequestException(
+            String.format(
+                "Can not create new APP with new PD if user has active APP PD. Existing disks: %s",
+                PersistentDiskUtils.prettyPrintDiskNames(appDisks)));
+      }
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 

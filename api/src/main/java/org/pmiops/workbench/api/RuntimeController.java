@@ -31,10 +31,12 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
+import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
@@ -197,6 +199,24 @@ public class RuntimeController implements RuntimeApiDelegate {
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
       if (persistentDiskRequest != null && Strings.isNullOrEmpty(persistentDiskRequest.getName())) {
+        // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
+        // Check with Leo again see if user have READY disk, if so, block this request or logging
+        List<Disk> diskList =
+            PersistentDiskUtils.findTheMostRecentActiveDisks(
+                leonardoNotebooksClient
+                    .listPersistentDiskByProjectCreatedByCreator(runtime.getGoogleProject(), false)
+                    .stream()
+                    .map(leonardoMapper::toApiListDisksResponse)
+                    .collect(Collectors.toList()));
+        List<Disk> runtimeDisks =
+            diskList.stream().filter(Disk::getIsGceRuntime).collect(Collectors.toList());
+        if (!runtimeDisks.isEmpty()) {
+          // Find active disks for runtime VM. Block user from creating new disk.
+          throw new BadRequestException(
+              String.format(
+                  "Can not create new runtime with new PD if user has active runtime PD. Existing disks: %s",
+                  PersistentDiskUtils.prettyPrintDiskNames(runtimeDisks)));
+        }
         persistentDiskRequest.name(userProvider.get().generatePDName());
       }
       persistentDiskRequest.labels(
