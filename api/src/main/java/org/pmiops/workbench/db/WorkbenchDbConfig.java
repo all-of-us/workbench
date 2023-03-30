@@ -36,16 +36,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     basePackages = {"org.pmiops.workbench.db"})
 public class WorkbenchDbConfig {
 
-  @Primary
-  @Bean(name = "dataSource")
-  public DataSource dataSource() {
+  public static HikariConfig createConfig(String dbName) {
     HikariConfig config = new HikariConfig();
     Optional<String> dbHost = getEnv("DB_HOST");
     boolean connectViaAppEngine = !dbHost.isPresent();
     config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    // database name is consistent across environments
     config.setJdbcUrl(
-        String.format("jdbc:mysql://%s/workbench", connectViaAppEngine ? "" : dbHost.get()));
+        String.format("jdbc:mysql://%s/%s", connectViaAppEngine ? "" : dbHost.get(), dbName));
     config.setUsername("workbench"); // consistent across environments
     config.setPassword(getEnvRequired("WORKBENCH_DB_PASSWORD"));
     if (connectViaAppEngine) {
@@ -53,7 +50,14 @@ public class WorkbenchDbConfig {
       config.addDataSourceProperty("cloudSqlInstance", getEnvRequired("CLOUD_SQL_INSTANCE_NAME"));
     }
     config.addDataSourceProperty("useSSL", false);
-    return new HikariDataSource(config);
+    return config;
+  }
+
+  @Primary
+  @Bean(name = "dataSource")
+  public DataSource dataSource() {
+    // main database name is consistent across environments
+    return new HikariDataSource(createConfig("workbench"));
   }
 
   @Primary
@@ -85,11 +89,11 @@ public class WorkbenchDbConfig {
     return new PoolProperties();
   }
 
-  Optional<String> getEnv(String name) {
+  static Optional<String> getEnv(String name) {
     return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
   }
 
-  String getEnvRequired(String name) {
+  static String getEnvRequired(String name) {
     return getEnv(name).orElseThrow(() -> new IllegalStateException(name + " not defined"));
   }
 }

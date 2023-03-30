@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr;
 
-import com.zaxxer.hikari.HikariConfig;
+import static org.pmiops.workbench.db.WorkbenchDbConfig.createConfig;
+
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariPool;
 import java.util.ArrayList;
@@ -56,15 +57,7 @@ public class CdrDataSource extends AbstractRoutingDataSource {
   }
 
   DataSource createCdrDs(String dbName) {
-    HikariConfig config = new HikariConfig();
-    config.setDriverClassName("com.mysql.cj.jdbc.Driver");
-    config.setJdbcUrl(String.format("jdbc:mysql:///%s", dbName));
-    config.setUsername("workbench"); // consistent across environments
-    config.setPassword(getEnvRequired("WORKBENCH_DB_PASSWORD"));
-    config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.mysql.SocketFactory");
-    config.addDataSourceProperty("cloudSqlInstance", getEnvRequired("CLOUD_SQL_INSTANCE_NAME"));
-    config.addDataSourceProperty("useSSL", false);
-    return new HikariDataSource(config);
+    return new HikariDataSource(createConfig(dbName));
   }
 
   void resetTargetDataSources() {
