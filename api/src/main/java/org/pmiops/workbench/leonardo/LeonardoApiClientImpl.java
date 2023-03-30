@@ -417,6 +417,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
+    System.out.println("~~~~~!!!");
+    try {
+      System.out.println(
+          disksApi.listDisksByProject(
+              googleProject,
+              null,
+              includeDeleted,
+              LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+              LEONARDO_CREATOR_ROLE));
+    } catch (ApiException e) {
+      throw new RuntimeException(e);
+    }
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(

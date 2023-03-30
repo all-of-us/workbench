@@ -1,6 +1,7 @@
 package org.pmiops.workbench.leonardo;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -8,6 +9,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,22 +27,14 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.CreateAppRequest;
-import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.model.KubernetesRuntimeConfig;
-import org.pmiops.workbench.model.PersistentDiskRequest;
-import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.leonardo.api.DisksApi;
+import org.pmiops.workbench.leonardo.model.*;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -88,6 +83,10 @@ public class LeonardoApiClientTest {
   @MockBean
   AppsApi userAppsApi;
 
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
+  @MockBean
+  DisksApi userDisksApi;
+
   @MockBean WorkspaceDao workspaceDao;
   @MockBean LeonardoApiClientFactory mockLeonardoApiClientFactory;
   @MockBean FireCloudService mockFireCloudService;
@@ -126,7 +125,7 @@ public class LeonardoApiClientTest {
   private Map<String, String> customEnvironmentVariables = new HashMap<>();
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.userApps.rStudioDescriptorPath = RSTUDIO_DESCRIPTOR_PATH;
     config.firecloud.leoBaseUrl = LEONARDO_BASE_URL;
@@ -185,6 +184,9 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.put(
         "WGS_CRAM_MANIFEST_PATH", CDR_BUCKET + "/" + CDR_STORAGE_BASE_PATH + "/" + WGS_PATH);
     customEnvironmentVariables.putAll(LeonardoCustomEnvVarUtils.FASTA_REFERENCE_ENV_VAR_MAP);
+
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(new ArrayList<>());
   }
 
   @Test
@@ -236,6 +238,29 @@ public class LeonardoApiClientTest {
 
     assertThat(createAppRequest.getDiskConfig().getName())
         .startsWith("all-of-us-pd-" + user.getUserId() + "-" + "rstudio");
+  }
+
+  @Test
+  public void testCreateAppFail_newPd_pdAlreadyExist() throws Exception {
+    stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
+    Map<String, String> diskLabels = new HashMap<>();
+    diskLabels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
+        LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
+    LeonardoListPersistentDiskResponse rstudioDisk =
+        new LeonardoListPersistentDiskResponse()
+            .name("123")
+            .googleProject(GOOGLE_PROJECT_ID)
+            .status(LeonardoDiskStatus.READY)
+            .labels(diskLabels);
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(ImmutableList.of(rstudioDisk));
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            leonardoApiClient.createApp(
+                createAppRequest.persistentDiskRequest(persistentDiskRequest), testWorkspace));
   }
 
   @Test

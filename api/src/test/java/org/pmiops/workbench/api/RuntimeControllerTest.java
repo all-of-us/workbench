@@ -61,20 +61,7 @@ import org.pmiops.workbench.leonardo.*;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
+import org.pmiops.workbench.leonardo.model.*;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
@@ -222,7 +209,9 @@ public class RuntimeControllerTest {
   @MockBean ProxyApi proxyApi;
 
   @MockBean
-  DisksApi disksApi;
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
+  DisksApi userDisksApi;
+
   @MockBean WorkspaceDao workspaceDao;
   @MockBean WorkspaceService workspaceService;
 
@@ -250,7 +239,7 @@ public class RuntimeControllerTest {
   private LinkedTreeMap<String, Object> gceConfigObj;
 
   @BeforeEach
-  public void setUp() throws Exception{
+  public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
@@ -358,7 +347,8 @@ public class RuntimeControllerTest {
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
 
-    when(disksApi.listDisksByProject(anyString(), anyString(), anyBoolean(), anyString(),anyString())).thenReturn(new ArrayList<>());
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(new ArrayList<>());
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(
@@ -970,6 +960,33 @@ public class RuntimeControllerTest {
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
     assertThat(createLeonardoGceWithPdConfig.getZone()).isEqualTo("us-central-1");
+  }
+
+  @Test
+  public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    LeonardoListPersistentDiskResponse gceDisk =
+        new LeonardoListPersistentDiskResponse()
+            .name("123")
+            .googleProject(GOOGLE_PROJECT_ID)
+            .status(LeonardoDiskStatus.READY);
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(ImmutableList.of(gceDisk));
+
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            runtimeController.createRuntime(
+                WORKSPACE_NS,
+                new Runtime()
+                    .gceWithPdConfig(
+                        new GceWithPdConfig()
+                            .machineType("standard")
+                            .persistentDisk(
+                                new PersistentDiskRequest().diskType(DiskType.SSD).size(500)))));
   }
 
   @Test

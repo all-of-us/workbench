@@ -54,7 +54,7 @@ plugins {
 
 
 if (JavaVersion.current() != JavaVersion.VERSION_11) {
-    throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md")
+    throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md. The java version used ${JavaVersion.current()}")
 }
 
 // Artifact configurations derived from base configs. Configuration names
