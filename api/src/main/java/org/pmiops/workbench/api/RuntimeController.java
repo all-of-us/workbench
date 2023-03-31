@@ -195,6 +195,8 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+
     GceWithPdConfig gceWithPdConfig = runtime.getGceWithPdConfig();
     if (gceWithPdConfig != null) {
       PersistentDiskRequest persistentDiskRequest = gceWithPdConfig.getPersistentDisk();
@@ -204,7 +206,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         List<Disk> diskList =
             PersistentDiskUtils.findTheMostRecentActiveDisks(
                 leonardoNotebooksClient
-                    .listPersistentDiskByProjectCreatedByCreator(runtime.getGoogleProject(), false)
+                    .listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
                     .stream()
                     .map(leonardoMapper::toApiListDisksResponse)
                     .collect(Collectors.toList()));
@@ -237,7 +239,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
-    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
