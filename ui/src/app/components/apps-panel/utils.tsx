@@ -180,7 +180,7 @@ export interface AppState {
   initializeAsExpanded: boolean;
 }
 
-export const getAppState = (
+const getAppState = (
   runtime: Runtime | null | undefined,
   userApps: UserAppEnvironment[],
   appType: UIAppType
