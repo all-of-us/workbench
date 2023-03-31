@@ -52,8 +52,6 @@ plugins {
     id 'org.springframework.boot' version '2.3.12.RELEASE'
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-
 if (JavaVersion.current() != JavaVersion.VERSION_11) {
     throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md. The java version used ${JavaVersion.current()}")
 }
