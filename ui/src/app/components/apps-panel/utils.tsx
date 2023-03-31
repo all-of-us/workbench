@@ -75,6 +75,20 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
 };
 
+const isVisible = (status: AppStatus): boolean =>
+  status && status !== AppStatus.DELETED;
+
+export const shouldShowApp = (app: UserAppEnvironment): boolean =>
+  isVisible(app?.status);
+
+export const shouldShowRuntime = (status: RuntimeStatus): boolean =>
+  status && status !== RuntimeStatus.Deleted;
+
+// TODO what about ERROR?
+export const canCreateApp = (app: UserAppEnvironment): boolean => {
+  return !isVisible(app?.status);
+};
+
 // matches Leonardo code
 // https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
 export const isDeletable = (status: AppStatus): boolean =>
@@ -158,20 +172,6 @@ export const toUserEnvironmentStatusByAppType = (
 
 export const showAppsPanel = (config: ConfigResponse) => {
   return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
-};
-
-const isVisible = (status: AppStatus): boolean =>
-  status && status !== AppStatus.DELETED;
-
-export const shouldShowApp = (app: UserAppEnvironment): boolean =>
-  isVisible(app?.status);
-
-export const shouldShowRuntime = (status: RuntimeStatus): boolean =>
-  status && status !== RuntimeStatus.Deleted;
-
-// TODO what about ERROR?
-export const canCreateApp = (app: UserAppEnvironment): boolean => {
-  return !isVisible(app?.status);
 };
 
 export interface AppState {
