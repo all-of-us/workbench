@@ -160,21 +160,25 @@ export const showAppsPanel = (config: ConfigResponse) => {
   return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
 };
 
-export const isVisible = (status: UserEnvironmentStatus): boolean =>
+export const isVisible = (status: UserEnvironmentStatus | string): boolean =>
   status && status !== UserEnvironmentStatus.DELETED;
 
 export const shouldShowApp = (app: UserAppEnvironment): boolean =>
-  isVisible(fromUserAppStatus(app?.status));
+  isVisible(fromUserAppStatusWithFallback(app?.status));
 
 // TODO what about ERROR?
 export const canCreateApp = (app: UserAppEnvironment): boolean =>
-  !isVisible(fromUserAppStatus(app?.status));
+  !isVisible(fromUserAppStatusWithFallback(app?.status));
 
+export interface AppState {
+  appType: UIAppType;
+  initializeAsExpanded: boolean;
+}
 export const getAppState = (
   runtime: Runtime | null | undefined,
   userApps: UserAppEnvironment[],
   appType: UIAppType
-) => {
+): AppState => {
   return {
     appType,
     initializeAsExpanded:
