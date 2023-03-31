@@ -80,10 +80,10 @@ export const defaultRStudioConfig: CreateAppRequest = {
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
 
-export const shouldShowApp = (app: UserAppEnvironment): boolean =>
+export const isAppActive = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);
 
-export const shouldShowRuntime = (status: RuntimeStatus): boolean =>
+export const isRuntimeActive = (status: RuntimeStatus): boolean =>
   status && status !== RuntimeStatus.Deleted;
 
 // TODO what about ERROR?
@@ -177,7 +177,7 @@ export const showAppsPanel = (config: ConfigResponse) => {
 
 export interface AppState {
   appType: UIAppType;
-  initializeAsExpanded: boolean;
+  active: boolean;
 }
 
 const getAppState = (
@@ -187,10 +187,10 @@ const getAppState = (
 ): AppState => {
   return {
     appType,
-    initializeAsExpanded:
+    active:
       appType === UIAppType.JUPYTER
-        ? shouldShowRuntime(runtime?.status)
-        : shouldShowApp(findApp(userApps, appType)),
+        ? isRuntimeActive(runtime?.status)
+        : isAppActive(findApp(userApps, appType)),
   };
 };
 
@@ -202,7 +202,7 @@ export const getAppsByDisplayGroup = (
   const getAppStateWithContext = fp.partial(getAppState, [runtime, userApps]);
   return fp.flow(
     fp.map(getAppStateWithContext),
-    fp.orderBy(['initializeAsExpanded'], ['asc']),
-    fp.partition((app: AppState) => app.initializeAsExpanded)
+    fp.orderBy(['active'], ['asc']),
+    fp.partition((app: AppState) => app.active)
   )(appsToDisplay);
 };
