@@ -9,7 +9,6 @@ import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,7 +83,6 @@ public class WorkbenchDbConfig {
    */
   @Bean("poolConfiguration")
   @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  @ConfigurationProperties(prefix = "spring.datasource")
   public PoolConfiguration poolConfig() {
     return new PoolProperties();
   }

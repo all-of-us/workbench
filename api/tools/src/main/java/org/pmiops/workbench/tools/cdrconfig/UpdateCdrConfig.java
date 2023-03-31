@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.tools.Action;
 import org.pmiops.workbench.tools.CommandLineToolConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Configuration
 @Import(CdrConfigVOMapperImpl.class)
-public class UpdateCdrConfig {
+public class UpdateCdrConfig extends Action {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrConfig.class.getName());
 

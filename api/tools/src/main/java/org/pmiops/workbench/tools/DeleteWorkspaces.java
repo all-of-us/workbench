@@ -52,7 +52,7 @@ import org.springframework.context.annotation.Scope;
   FireCloudConfig.class,
   CloudBillingClientImpl.class
 })
-public class DeleteWorkspaces {
+public class DeleteWorkspaces extends Action {
 
   private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
 

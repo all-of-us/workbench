@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Configuration;
  * authorized as the App Engine default service account for a given environment.
  */
 @Configuration
-public class ManageLeonardoRuntimes {
+public class ManageLeonardoRuntimes extends Action {
 
   enum OutputFormat {
     TABULAR,

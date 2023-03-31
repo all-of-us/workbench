@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({FireCloudServiceImpl.class, FireCloudConfig.class})
-public class FetchWorkspaceDetails {
+public class FetchWorkspaceDetails extends Action {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
 
