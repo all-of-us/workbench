@@ -1,3 +1,5 @@
+import * as fp from 'lodash/fp';
+
 import {
   AppStatus,
   AppType,
@@ -190,4 +192,17 @@ export const getAppState = (
         ? shouldShowRuntime(runtime?.status)
         : shouldShowApp(findApp(userApps, appType)),
   };
+};
+
+export const getAppsByDisplayGroup = (
+  runtime: Runtime,
+  userApps: UserAppEnvironment[],
+  appsToDisplay: UIAppType[]
+) => {
+  const getAppStateWithContext = fp.partial(getAppState, [runtime, userApps]);
+  return fp.flow(
+    fp.map(getAppStateWithContext),
+    fp.orderBy(['initializeAsExpanded'], ['asc']),
+    fp.partition((app: AppState) => app.initializeAsExpanded)
+  )(appsToDisplay);
 };

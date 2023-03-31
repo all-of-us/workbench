@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
 
 import { BillingStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
@@ -15,7 +14,7 @@ import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import { AppState, findApp, getAppState, UIAppType } from './apps-panel/utils';
+import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
 
 const styles = reactStyles({
   header: {
@@ -78,13 +77,11 @@ export const AppsPanel = (props: {
     appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
   }, []);
 
-  const getAppStateWithContext = fp.partial(getAppState, [runtime, userApps]);
-
-  const [activeApps, availableApps] = fp.flow(
-    fp.map(getAppStateWithContext),
-    fp.orderBy(['initializeAsExpanded'], ['asc']),
-    fp.partition((app: AppState) => app.initializeAsExpanded)
-  )(appsToDisplay);
+  const [activeApps, availableApps] = getAppsByDisplayGroup(
+    runtime,
+    userApps,
+    appsToDisplay
+  );
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
