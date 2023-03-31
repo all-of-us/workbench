@@ -108,7 +108,7 @@
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
     },
-    "enableApiUrlCheck": false
+    "enableApiUrlCheck": false:q
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
