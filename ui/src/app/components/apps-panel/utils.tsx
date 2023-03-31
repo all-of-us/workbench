@@ -136,6 +136,7 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
     [status === AppStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
     [status === AppStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
     [status === AppStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
+    [status === AppStatus.DELETED, () => UserEnvironmentStatus.DELETED],
     () => UserEnvironmentStatus.UNKNOWN
   );
 
@@ -167,13 +168,15 @@ export const shouldShowApp = (app: UserAppEnvironment): boolean =>
   isVisible(fromUserAppStatusWithFallback(app?.status));
 
 // TODO what about ERROR?
-export const canCreateApp = (app: UserAppEnvironment): boolean =>
-  !isVisible(fromUserAppStatusWithFallback(app?.status));
+export const canCreateApp = (app: UserAppEnvironment): boolean => {
+  return !isVisible(fromUserAppStatusWithFallback(app?.status));
+};
 
 export interface AppState {
   appType: UIAppType;
   initializeAsExpanded: boolean;
 }
+
 export const getAppState = (
   runtime: Runtime | null | undefined,
   userApps: UserAppEnvironment[],
