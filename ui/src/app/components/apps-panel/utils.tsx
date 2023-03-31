@@ -136,7 +136,6 @@ export const fromUserAppStatus = (status: AppStatus): UserEnvironmentStatus =>
     [status === AppStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
     [status === AppStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
     [status === AppStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
-    [status === AppStatus.DELETED, () => UserEnvironmentStatus.DELETED],
     () => UserEnvironmentStatus.UNKNOWN
   );
 
