@@ -7,15 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
-import org.pmiops.workbench.model.ConceptsRequest;
-import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
@@ -606,7 +603,8 @@ public class CBCriteriaDaoTest {
     conceptCodesCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11"));
     conceptCodesCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21"));
     conceptCodesCriteria.add(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31"));
-    conceptCodesCriteria.add(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41"));
+    conceptCodesCriteria.add(
+        addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41"));
 
     List<String> conceptCodes =
         conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList());
