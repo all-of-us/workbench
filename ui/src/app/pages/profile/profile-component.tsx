@@ -40,7 +40,7 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
-import { convertAPIError, reportError } from 'app/utils/errors';
+import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
@@ -141,7 +141,7 @@ export const ProfileComponent = fp.flow(
           await institutionApi().getPublicInstitutionDetails();
         this.setState({ institutions });
       } catch (e) {
-        reportError(e);
+        // continue regardless of error
       }
     }
 
@@ -226,7 +226,6 @@ export const ProfileComponent = fp.flow(
         await reload();
         return profile;
       } catch (error) {
-        reportError(error);
         const errorResponse = await convertAPIError(error);
         this.props.showProfileErrorModal(errorResponse.message);
         console.error(error);

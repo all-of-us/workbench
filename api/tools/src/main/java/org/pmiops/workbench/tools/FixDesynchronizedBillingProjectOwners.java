@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
  * be done transactionally).
  */
 @Configuration
-public class FixDesynchronizedBillingProjectOwners {
+public class FixDesynchronizedBillingProjectOwners extends Tool {
   public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
       ImmutableList.of(
           "accessLevel", "workspace.namespace", "workspace.name", "workspace.createdBy");
@@ -149,7 +149,8 @@ public class FixDesynchronizedBillingProjectOwners {
       Map<String, String> workspaceRoles =
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()))
-              .entrySet().stream()
+              .entrySet()
+              .stream()
               .filter(e -> e.getKey().endsWith("@" + researcherDomain))
               .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getAccessLevel()));
       Set<String> workspaceOwners =

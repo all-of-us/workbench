@@ -81,7 +81,7 @@ def start_local_db_service()
   bm = Benchmark.measure {
     common.run_inline %W{docker-compose up -d db}
 
-    root_pass = Workbench.read_vars_file("db/local-vars.env")["MYSQL_ROOT_PASSWORD"]
+    root_pass = "root-notasecret"
 
     common.status "waiting up to #{deadlineSec}s for mysql service to start..."
     start = Time.now
@@ -152,8 +152,6 @@ def setup_local_environment()
   ENV.update(Workbench.read_vars_file("db/local-vars.env"))
   ENV.update(must_get_env_value("local", :gae_vars))
   ENV.update({"WORKBENCH_ENV" => "local"})
-  ENV["DB_HOST"] = "127.0.0.1"
-  ENV["DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/workbench?useSSL=false"
 end
 
 def run_local_api_tests()
@@ -184,7 +182,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
     # the application has finished starting.
-    common.run_inline "./gradlew --daemon appengineRun &"
+    common.run_inline "DB_HOST=127.0.0.1 ./gradlew --daemon appengineRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
@@ -1138,7 +1136,9 @@ def write_db_creds_file(project, cdr_db_name, root_password, workbench_password,
       # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
       # table of the workbench DB; then this shouldn't be needed anymore.
       db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
+      # TODO: wait one release and then remove
       db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
+      db_creds_file.puts "CLOUD_SQL_INSTANCE_NAME=#{instance_name}"
       db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
       db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
       db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"

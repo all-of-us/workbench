@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Import;
   CloudTasksConfig.class,
   WorkbenchLocationConfigService.class,
 })
-public class BackfillEntitiesToRdr {
+public class BackfillEntitiesToRdr extends Tool {
   // I haven't read the entire commons cli code, but it looks like it is limited to the Number type,
   // we really want an Integer
   // https://github.com/apache/commons-cli/blob/98d06d37bc7058bbfb2704c9620669c66e279f4a/src/main/java/org/apache/commons/cli/PatternOptionBuilder.java#L98

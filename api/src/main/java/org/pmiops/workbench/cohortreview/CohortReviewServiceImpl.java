@@ -362,7 +362,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao
-        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId).stream()
+        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId)
+        .stream()
         .map(participantCohortAnnotationMapper::dbModelToClient)
         .collect(Collectors.toList());
   }

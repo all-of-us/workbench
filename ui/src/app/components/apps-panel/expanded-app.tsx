@@ -279,19 +279,24 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           // TODO: support Cromwell + other User Apps
           appType === UIAppType.JUPYTER && <RuntimeCost />
         }
-        <Clickable
-          disabled={!trashEnabled}
-          style={
-            trashEnabled
-              ? styles.enabledTrashButton
-              : styles.disabledTrashButton
-          }
-          onClick={onClickDelete}
-          data-test-id={`${appType}-delete-button`}
-          propagateDataTestId
+        <TooltipTrigger
+          disabled={trashEnabled}
+          content='Your application must be running in order to be deleted.'
         >
-          <FontAwesomeIcon icon={faTrashCan} />
-        </Clickable>
+          <Clickable
+            disabled={!trashEnabled}
+            style={
+              trashEnabled
+                ? styles.enabledTrashButton
+                : styles.disabledTrashButton
+            }
+            onClick={onClickDelete}
+            data-test-id={`${appType}-delete-button`}
+            propagateDataTestId
+          >
+            <FontAwesomeIcon icon={faTrashCan} />
+          </Clickable>
+        </TooltipTrigger>
       </FlexRow>
       {appType === UIAppType.JUPYTER ? (
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />

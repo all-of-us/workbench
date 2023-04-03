@@ -20,7 +20,7 @@ import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
-import { findApp, shouldShowApp, UIAppType } from './apps-panel/utils';
+import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
 
 const styles = reactStyles({
   header: {
@@ -83,59 +83,39 @@ export const AppsPanel = (props: {
     maybeStartPollingForUserApps(workspace.namespace);
   }, []);
 
-  const appStates = appsToDisplay.map((appType) => {
-    return {
-      appType,
-      initializeAsExpanded:
-        appType === UIAppType.JUPYTER
-          ? isVisible(runtime?.status)
-          : shouldShowApp(findApp(userApps, appType)),
-    };
-  });
+  const [activeApps, availableApps] = getAppsByDisplayGroup(
+    runtime,
+    userApps,
+    appsToDisplay
+  );
 
   // which app(s) have the user explicitly expanded by clicking?
   const [userExpandedApps, setUserExpandedApps] = useState([]);
   const addToExpandedApps = (appType: UIAppType) =>
     setUserExpandedApps([...userExpandedApps, appType]);
-
-  // show apps that have shouldExpand = true in the Active section
-  // all will be shown in expanded mode
-  const showInActiveSection = (appType: UIAppType): boolean =>
-    appsToDisplay.includes(appType) &&
-    appStates.find((s) => s.appType === appType)?.initializeAsExpanded;
-  const showActiveSection = appsToDisplay.some(showInActiveSection);
-
-  // show apps that have shouldExpand = false in the Available section
-  // by default they will be shown in Unexpanded mode
-  // BUT some of these may be userExpandedApps, which are shown in Expanded mode
-  const showInAvailableSection = (appType: UIAppType): boolean =>
-    appsToDisplay.includes(appType) &&
-    !appStates.find((s) => s.appType === appType)?.initializeAsExpanded;
-  const showAvailableSection = appsToDisplay.some(showInAvailableSection);
+  const showActiveSection = activeApps.length > 0;
 
   return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
     <div data-test-id='apps-panel'>
-      {showActiveSection && (
+      {activeApps.length > 0 && (
         <FlexColumn>
           <FlexRow>
             <h3 style={styles.header}>Active applications</h3>
             <CloseButton {...{ onClose }} style={styles.closeButton} />
           </FlexRow>
-          {appsToDisplay.map(
-            (appType) =>
-              showInActiveSection(appType) && (
-                <ExpandedApp
-                  {...{ ...props, appType }}
-                  key={appType}
-                  initialUserAppInfo={findApp(userApps, appType)}
-                />
-              )
-          )}
+          {activeApps.map((activeApp) => (
+            <ExpandedApp
+              {...{ ...props }}
+              appType={activeApp.appType}
+              key={activeApp.appType}
+              initialUserAppInfo={findApp(userApps, activeApp.appType)}
+            />
+          ))}
         </FlexColumn>
       )}
-      {showAvailableSection && (
+      {availableApps.length > 0 && (
         <FlexColumn>
           <FlexRow>
             <h3 style={styles.header}>
@@ -150,28 +130,27 @@ export const AppsPanel = (props: {
               )
             }
           </FlexRow>
-          {appsToDisplay.map(
-            (appType) =>
-              showInAvailableSection(appType) &&
-              (userExpandedApps.includes(appType) ? (
-                <ExpandedApp
-                  {...{ ...props, appType }}
-                  key={appType}
-                  initialUserAppInfo={findApp(userApps, appType)}
-                />
-              ) : (
-                <UnexpandedApp
-                  {...{ appType }}
-                  key={appType}
-                  onClick={() => {
-                    if (appType === UIAppType.CROMWELL) {
-                      setSidebarActiveIconStore.next('cromwellConfig');
-                    } else {
-                      addToExpandedApps(appType);
-                    }
-                  }}
-                />
-              ))
+          {availableApps.map((availableApp) =>
+            userExpandedApps.includes(availableApp.appType) ? (
+              <ExpandedApp
+                {...{ ...props }}
+                appType={availableApp.appType}
+                key={availableApp.appType}
+                initialUserAppInfo={findApp(userApps, availableApp.appType)}
+              />
+            ) : (
+              <UnexpandedApp
+                appType={availableApp.appType}
+                key={availableApp.appType}
+                onClick={() => {
+                  if (availableApp.appType === UIAppType.CROMWELL) {
+                    setSidebarActiveIconStore.next('cromwellConfig');
+                  } else {
+                    addToExpandedApps(availableApp.appType);
+                  }
+                }}
+              />
+            )
           )}
         </FlexColumn>
       )}

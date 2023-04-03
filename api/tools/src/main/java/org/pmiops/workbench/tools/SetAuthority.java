@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * See api/project.rb set-authority. Adds or removes authorities (permissions) from users in the db.
  */
 @Configuration
-public class SetAuthority {
+public class SetAuthority extends Tool {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());
   private static final String ALL_AUTHORITIES = "ALL";

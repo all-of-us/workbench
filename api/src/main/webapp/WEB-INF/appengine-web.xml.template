@@ -1,6 +1,6 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
   <service>api</service>
-  <runtime>java8</runtime>
+  <runtime>java11</runtime>
 
   <!--
   The GAE java8 runtime restricts certain JVM APIs. The java11 runtime has fewer restrictions.
@@ -24,19 +24,12 @@
 
   <env-variables>
     <env-var name="GAE_PROFILER_MODE" value="cpu,heap" />
+    <env-var name="CLOUD_SQL_INSTANCE_NAME" value="${CLOUD_SQL_INSTANCE_NAME}" />
+    <env-var name="WORKBENCH_DB_PASSWORD" value="${WORKBENCH_DB_PASSWORD}" />
   </env-variables>
 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-
-    <property name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
-    <property name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
-    <property name="spring.datasource.username" value="${WORKBENCH_DB_USER}"/>
-    <property name="spring.datasource.password" value="${WORKBENCH_DB_PASSWORD}"/>
-
-    <property name="cdr.datasource.url" value="${CDR_DB_CONNECTION_STRING}"/>
-    <property name="cdr.datasource.username" value="${CDR_DB_USER}"/>
-    <property name="cdr.datasource.password" value="${CDR_DB_PASSWORD}"/>
   </system-properties>
 
   <static-error-handlers>
@@ -58,7 +51,7 @@
     <exclude path="static/README.md"/>
   </static-files>
 
-  <instance-class>${GAE_INSTANCE_CLASS}</instance-class>
+  <instance-class>F4</instance-class>
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>

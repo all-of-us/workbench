@@ -69,7 +69,7 @@ public interface WorkspaceMapper {
     return toApiWorkspaceResponse(
         toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
         firecloudWorkspaceResponse.getAccessLevel());
-  };
+  }
 
   default List<WorkspaceResponse> toApiWorkspaceResponses(
       WorkspaceDao workspaceDao, List<FirecloudWorkspaceResponse> workspaces) {

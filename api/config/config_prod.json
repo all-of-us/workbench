@@ -107,7 +107,8 @@
       "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,

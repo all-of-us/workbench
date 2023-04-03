@@ -130,7 +130,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
-    return workspaceMapper.toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+    return workspaceMapper
+        .toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(WorkspaceServiceImpl::filterToNonPublished)
         .collect(Collectors.toList());
@@ -144,7 +145,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return workspaceMapper.toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
+    return workspaceMapper
+        .toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
         .filter(workspaceResponse -> workspaceResponse.getWorkspace().getPublished())
         .collect(Collectors.toList());

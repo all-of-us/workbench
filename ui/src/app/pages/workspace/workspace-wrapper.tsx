@@ -15,13 +15,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-import { reportError } from 'app/utils/errors';
-import {
-  ExceededActionCountError,
-  InitialRuntimeNotFoundError,
-  LeoRuntimeInitializationAbortedError,
-  LeoRuntimeInitializer,
-} from 'app/utils/leo-runtime-initializer';
+import { LeoRuntimeInitializer } from 'app/utils/leo-runtime-initializer';
 import {
   currentWorkspaceStore,
   nextWorkspaceWarmupStore,
@@ -146,22 +140,14 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
             maxCreateCount: 0,
             maxResumeCount: 0,
           });
-        } catch (e) {
+        } catch {
+          // Ignore InitialRuntimeNotFoundError.
           // Ignore ExceededActionCountError. This is thrown when the runtime doesn't exist, or
           // isn't started. Both of these scenarios are expected, since we don't want to do any lazy
           // initialization here.
           // Also ignore LeoRuntimeInitializationAbortedError - this is expected when navigating
           // away from a page during a poll.
-          if (
-            !(
-              e instanceof InitialRuntimeNotFoundError ||
-              e instanceof ExceededActionCountError ||
-              e instanceof LeoRuntimeInitializationAbortedError
-            )
-          ) {
-            // Ideally, we would have some top-level error messaging here.
-            reportError(e);
-          }
+          // Ideally, we would handle or log errors except the ones listed above.
         }
       };
       const getWorkspaceAndUpdateStores = async (namespace, id) => {
