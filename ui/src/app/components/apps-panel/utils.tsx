@@ -192,6 +192,10 @@ const getAppDisplayState = (
   };
 };
 
+// Returns an array of the following form:
+//     Outer Array
+//       First Item:  Array of AppDisplayStates with active=true
+//       Second Item:  Array of AppDisplayStates with active=false
 export const getAppsByDisplayGroup = (
   runtime: Runtime,
   userApps: UserAppEnvironment[],
