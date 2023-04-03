@@ -175,16 +175,16 @@ export const showAppsPanel = (config: ConfigResponse) => {
   return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
 };
 
-export interface AppState {
+export interface AppDisplayState {
   appType: UIAppType;
   active: boolean;
 }
 
-const getAppState = (
+const getAppDisplayState = (
   runtime: Runtime | null | undefined,
   userApps: UserAppEnvironment[],
   appType: UIAppType
-): AppState => {
+): AppDisplayState => {
   return {
     appType,
     active:
@@ -198,11 +198,14 @@ export const getAppsByDisplayGroup = (
   runtime: Runtime,
   userApps: UserAppEnvironment[],
   appsToDisplay: UIAppType[]
-) => {
-  const getAppStateWithContext = fp.partial(getAppState, [runtime, userApps]);
+): AppDisplayState[][] => {
+  const getAppDisplayStateWithContext = fp.partial(getAppDisplayState, [
+    runtime,
+    userApps,
+  ]);
   return fp.flow(
-    fp.map(getAppStateWithContext),
+    fp.map(getAppDisplayStateWithContext),
     fp.orderBy(['active'], ['asc']),
-    fp.partition((app: AppState) => app.active)
+    fp.partition((app: AppDisplayState) => app.active)
   )(appsToDisplay);
 };
