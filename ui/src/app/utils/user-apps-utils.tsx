@@ -42,13 +42,12 @@ export const maybeStartPollingForUserApps = (namespace) => {
     });
 };
 
-export const createUserApp = (namespace, config: CreateAppRequest) => {
-  return appsApi()
+export const createUserApp = (namespace, config: CreateAppRequest) =>
+  appsApi()
     .createApp(namespace, config)
     .then(() => {
       maybeStartPollingForUserApps(namespace);
     });
-};
 
 export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) => {
   return appsApi()
