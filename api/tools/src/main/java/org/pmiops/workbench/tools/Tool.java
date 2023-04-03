@@ -7,4 +7,4 @@ import org.springframework.context.annotation.Import;
 // This is a common ancestor that brings in the main database configuration.
 @Configuration
 @Import({WorkbenchDbConfig.class})
-public abstract class Action {}
+public abstract class Tool {}

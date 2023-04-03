@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Configuration;
  * Share Workspace with given users
  */
 @Configuration
-public class CreateWgsCohortExtractionBillingProjectWorkspace extends Action {
+public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
 
   private static Option configJsonOpt =
       Option.builder().longOpt("config-json").required().hasArg().build();

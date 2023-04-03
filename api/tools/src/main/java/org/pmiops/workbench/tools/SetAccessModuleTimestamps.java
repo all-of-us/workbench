@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Import;
   UserAccessModuleMapperImpl.class,
   UserServiceAuditorImpl.class,
 })
-public class SetAccessModuleTimestamps extends Action {
+public class SetAccessModuleTimestamps extends Tool {
 
   private static final Logger LOG = Logger.getLogger(SetAccessModuleTimestamps.class.getName());
 

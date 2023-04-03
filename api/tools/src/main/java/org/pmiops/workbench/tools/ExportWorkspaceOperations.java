@@ -10,7 +10,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 
-public class ExportWorkspaceOperations extends Action {
+public class ExportWorkspaceOperations extends Tool {
   private final String OUTFILE = "workspace_operations.txt";
 
   private static final Logger LOG = Logger.getLogger(ExportWorkspaceOperations.class.getName());

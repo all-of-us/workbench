@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
  * be done transactionally).
  */
 @Configuration
-public class FixDesynchronizedBillingProjectOwners extends Action {
+public class FixDesynchronizedBillingProjectOwners extends Tool {
   public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
       ImmutableList.of(
           "accessLevel", "workspace.namespace", "workspace.name", "workspace.createdBy");

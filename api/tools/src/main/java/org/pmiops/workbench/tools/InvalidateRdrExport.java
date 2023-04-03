@@ -45,7 +45,7 @@ import org.springframework.context.annotation.Bean;
  * <p>InvalidateFromRdrExport takes in the list of entity IDs (workspace or user database IDs) as an
  * argument and deletes them from rdr_export table.
  */
-public class InvalidateRdrExport extends Action {
+public class InvalidateRdrExport extends Tool {
   private static Option idListFilenameOpt =
       Option.builder()
           .longOpt("id-list-filename")
