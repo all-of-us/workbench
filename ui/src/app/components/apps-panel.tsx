@@ -9,7 +9,6 @@ import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabl
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { isVisible } from 'app/utils/runtime-utils';
 import {
   runtimeStore,
   serverConfigStore,
