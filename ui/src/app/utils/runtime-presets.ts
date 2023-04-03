@@ -1,6 +1,11 @@
 import * as fp from 'lodash/fp';
 
-import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import {
+  DiskType,
+  GceWithPdConfig,
+  Runtime,
+  RuntimeConfigurationType,
+} from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -55,6 +60,10 @@ export const applyPresetOverride = (runtime) => {
     return runtime;
   }
 
+  // don't override the PD name
+  const pdName = runtime.gceWithPdConfig?.persistentDisk?.name;
+  console.log('applyPresetOverride, pdName=', pdName);
+
   const runtimePresetKey = fp
     .keys(runtimePresets)
     .find(
@@ -67,7 +76,22 @@ export const applyPresetOverride = (runtime) => {
     const { gceConfig, gceWithPdConfig, dataprocConfig } =
       runtimePresets[runtimePresetKey].runtimeTemplate;
 
-    return { ...runtime, gceConfig, gceWithPdConfig, dataprocConfig };
+    const newTmp: GceWithPdConfig = {
+      ...gceWithPdConfig,
+      persistentDisk: {
+        ...gceWithPdConfig.persistentDisk,
+        name: pdName,
+      },
+    };
+
+    console.log('applyPresetOverride, newTmp=', newTmp);
+
+    return {
+      ...runtime,
+      gceConfig,
+      gceWithPdConfig: newTmp,
+      dataprocConfig,
+    };
   }
 
   return runtime;

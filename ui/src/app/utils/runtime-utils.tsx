@@ -657,6 +657,8 @@ export const maybeWithExistingDisk = (
     return runtime;
   }
 
+  console.log('maybeWithExistingDisk, name=', existingDisk.name);
+
   return {
     ...runtime,
     gceConfig: null,

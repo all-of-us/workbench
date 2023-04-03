@@ -46,15 +46,6 @@ export const RuntimeInitializerModal = ({
     defaultRuntime,
     gcePersistentDisk
   );
-  console.log('RuntimeInitializerModal, defaultRuntime =', defaultRuntime);
-  console.log(
-    'RuntimeInitializerModal, gcePersistentDisk =',
-    gcePersistentDisk
-  );
-  console.log(
-    'RuntimeInitializerModal, defaultAnalysisConfig =',
-    defaultAnalysisConfig
-  );
   return (
     <Modal width={600}>
       <ModalTitle>Create an Analysis Environment</ModalTitle>

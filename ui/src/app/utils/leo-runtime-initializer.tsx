@@ -4,7 +4,9 @@ import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
-import { runtimeStore } from 'app/utils/stores';
+import { diskStore, runtimeStore } from 'app/utils/stores';
+
+import { maybeWithExistingDisk } from './runtime-utils';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -202,7 +204,9 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
-    console.log('createRuntime');
+    const { gcePersistentDisk } = diskStore.get();
+    console.log('createRuntime, gcePersistentDisk=', gcePersistentDisk);
+
     if (!this.targetRuntime) {
       // Automatic lazy creation is not supported; the caller must specify a target.
       let defaultRuntime = {
@@ -213,9 +217,21 @@ export class LeoRuntimeInitializer {
           'createRuntime, currentRuntime exists, =',
           this.currentRuntime
         );
-        defaultRuntime = applyPresetOverride(this.currentRuntime);
+
+        defaultRuntime =
+          this.currentRuntime.status === RuntimeStatus.Deleted
+            ? applyPresetOverride(
+                // The attached disk information is lost for deleted runtimes. In any case,
+                // by default we want to offer that the user reattach their existing disk,
+                // if any and if the configuration allows it.
+                maybeWithExistingDisk(this.currentRuntime, gcePersistentDisk)
+              )
+            : applyPresetOverride(this.currentRuntime);
       }
-      console.log('createRuntime, pre-throwing exception');
+      console.log(
+        'createRuntime, pre-throwing exception, defaultRuntime=',
+        defaultRuntime
+      );
       throw new InitialRuntimeNotFoundError(defaultRuntime);
     }
 
