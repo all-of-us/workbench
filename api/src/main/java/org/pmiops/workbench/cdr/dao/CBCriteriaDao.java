@@ -477,7 +477,19 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   @Query(value = "SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD", nativeQuery = true)
   List<String> findMySQLStopWords();
 
-  List<DbCriteria> findByConceptIdIn(List<String> conceptIds);
+  @Query(
+      value =
+          "select * from cb_criteria "
+              + "where concept_id in (:conceptIds) and is_selectable = 1 and est_count > 0 "
+              + "and domain_id in (:domainIds)",
+      nativeQuery = true)
+  List<DbCriteria> findByConceptIdIn(List<String> conceptIds, List<String> domainIds);
 
-  List<DbCriteria> findByCodeIn(List<String> conceptCodes);
+  @Query(
+      value =
+          "select * from cb_criteria "
+              + "where code in (:codes) and is_selectable = 1 and est_count > 0 "
+              + "and domain_id in (:domainIds)",
+      nativeQuery = true)
+  List<DbCriteria> findByCodeIn(List<String> codes, List<String> domainIds);
 }

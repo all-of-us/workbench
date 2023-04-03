@@ -583,11 +583,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
+    List<String> searchDomains =
+        ImmutableList.of(
+            Domain.CONDITION.toString(),
+            Domain.PROCEDURE.toString(),
+            Domain.DRUG.toString(),
+            Domain.OBSERVATION.toString(),
+            Domain.VISIT.toString(),
+            Domain.DEVICE.toString(),
+            Domain.MEASUREMENT.toString(),
+            Domain.PHYSICAL_MEASUREMENT_CSS.toString());
     List<DbCriteria> dbCriteria;
-    dbCriteria = cbCriteriaDao.findByConceptIdIn(conceptKeys);
+    dbCriteria = cbCriteriaDao.findByConceptIdIn(conceptKeys, searchDomains);
 
     if (dbCriteria == null || dbCriteria.isEmpty()) {
-      dbCriteria = cbCriteriaDao.findByCodeIn(conceptKeys);
+      dbCriteria = cbCriteriaDao.findByCodeIn(conceptKeys, searchDomains);
     }
 
     return dbCriteria.stream()
