@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,6 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CohortDefinition;
 import org.pmiops.workbench.model.ConceptIdName;
-import org.pmiops.workbench.model.ConceptsRequest;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSearchRequest;
@@ -331,148 +329,6 @@ public class CohortBuilderControllerTest {
                 .getItems()
                 .get(0))
         .isEqualTo(createResponseCriteria(icd9Criteria));
-  }
-
-  @Test
-  public void findCriteriaByConceptIdsOrConceptCodesIdsOnly() {
-    List<Criteria> conceptIdsCriteria = new ArrayList<>();
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "1", "Dx1")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2", "Dx2")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3", "Rx3")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4", "Px4")));
-
-    List<String> conceptIds =
-        conceptIdsCriteria.stream()
-            .map(c -> String.valueOf(c.getConceptId()))
-            .collect(Collectors.toList());
-    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIds);
-    List<Criteria> criteria =
-        controller
-            .findCriteriaByConceptIdsOrConceptCodes(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-            .getBody()
-            .getItems();
-
-    assertThat(criteria.size()).isEqualTo(conceptIdsCriteria.size());
-    assertThat(criteria).containsExactlyElementsIn(conceptIdsCriteria);
-  }
-
-  @Test
-  public void findCriteriaByConceptIdsOrConceptCodesCodesOnly() {
-    List<Criteria> conceptCodesCriteria = new ArrayList<>();
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41")));
-
-    List<String> conceptCodes =
-        conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList());
-    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptCodes);
-    List<Criteria> criteria =
-        controller
-            .findCriteriaByConceptIdsOrConceptCodes(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-            .getBody()
-            .getItems();
-
-    assertThat(criteria.size()).isEqualTo(conceptCodesCriteria.size());
-    assertThat(criteria).containsExactlyElementsIn(conceptCodesCriteria);
-  }
-
-  @Test
-  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodesUseIds() {
-    // add concept_ids
-    List<Criteria> conceptIdsCriteria = new ArrayList<>();
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "1", "Dx1")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2", "Dx2")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3", "Rx3")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4", "Px4")));
-    // add concept_codes
-    List<Criteria> conceptCodesCriteria = new ArrayList<>();
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx21")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx31")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px41")));
-    // add existent concept_ids
-    List<String> conceptIdsAndCodes =
-        conceptIdsCriteria.stream()
-            .map(c -> String.valueOf(c.getConceptId()))
-            .collect(Collectors.toList());
-    // add existent concept_codes
-    conceptIdsAndCodes.addAll(
-        conceptIdsCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList()));
-
-    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIdsAndCodes);
-    List<Criteria> criteria =
-        controller
-            .findCriteriaByConceptIdsOrConceptCodes(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-            .getBody()
-            .getItems();
-
-    assertThat(criteria.size()).isEqualTo(conceptIdsCriteria.size());
-    assertThat(criteria).containsExactlyElementsIn(conceptIdsCriteria);
-  }
-
-  @Test
-  public void findCriteriaByConceptIdsOrConceptCodesIdsAndCodesUseCodes() {
-    // add null concept_ids
-    List<Criteria> conceptIdsCriteria = new ArrayList<>();
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx1")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx2")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx3")));
-    conceptIdsCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px4")));
-    // add concept_codes
-    List<Criteria> conceptCodesCriteria = new ArrayList<>();
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, null, "Dx21")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, null, "Rx31")));
-    conceptCodesCriteria.add(
-        createResponseCriteria(
-            addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, null, "Px41")));
-    // add non-existent concept_ids
-    List<String> conceptIdsAndCodes = Stream.of("1", "2", "3", "4").collect(Collectors.toList());
-    // add codes
-    conceptIdsAndCodes.addAll(
-        conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList()));
-
-    ConceptsRequest conceptsRequest = new ConceptsRequest().conceptKeys(conceptIdsAndCodes);
-    List<Criteria> criteria =
-        controller
-            .findCriteriaByConceptIdsOrConceptCodes(
-                WORKSPACE_NAMESPACE, WORKSPACE_ID, conceptsRequest)
-            .getBody()
-            .getItems();
-
-    assertThat(criteria.size()).isEqualTo(conceptCodesCriteria.size());
-    assertThat(criteria).containsExactlyElementsIn(conceptCodesCriteria);
   }
 
   @Test
@@ -1663,20 +1519,6 @@ public class CohortBuilderControllerTest {
     assertThat(response.get(0).getId()).isEqualTo(versionedSurvey.getId());
 
     jdbcTemplate.execute("drop table cb_survey_version");
-  }
-
-  @NotNull
-  private DbCriteria addDbCriteria(
-      Domain domain, CriteriaType criteriaType, String conceptId, String conceptCode) {
-    DbCriteria dbCriteria =
-        DbCriteria.builder()
-            .addDomainId(domain.toString())
-            .addType(criteriaType.toString())
-            .addConceptId(conceptId)
-            .addCode(conceptCode)
-            .build();
-    cbCriteriaDao.save(dbCriteria);
-    return dbCriteria;
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {

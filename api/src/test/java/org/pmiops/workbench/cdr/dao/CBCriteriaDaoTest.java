@@ -3,13 +3,19 @@ package org.pmiops.workbench.cdr.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
+import org.pmiops.workbench.model.ConceptsRequest;
+import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
@@ -563,5 +569,77 @@ public class CBCriteriaDaoTest {
     List<Long> pfhhSurveyAnswerIds =
         cbCriteriaDao.findPFHHSurveyAnswerIds(ImmutableList.of(43530446L));
     assertThat(Long.parseLong(pfhhSurveyAnswer.getValue())).isEqualTo(pfhhSurveyAnswerIds.get(0));
+  }
+
+  @Test
+  public void findByConceptIdIn() {
+    List<DbCriteria> conceptIdsCriteria = new ArrayList<>();
+    conceptIdsCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, "11", "Dx1"));
+    conceptIdsCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "21", "Dx2"));
+    conceptIdsCriteria.add(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "31", "Rx3"));
+    conceptIdsCriteria.add(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "41", "Px4"));
+
+    List<String> conceptIds =
+        conceptIdsCriteria.stream()
+            .map(c -> String.valueOf(c.getConceptId()))
+            .collect(Collectors.toList());
+    List<DbCriteria> criteria =
+        cbCriteriaDao.findByConceptIdIn(
+            conceptIds,
+            ImmutableList.of(
+                "CONDITION",
+                "PROCEDURE",
+                "DRUG",
+                "OBSERVATION",
+                "VISIT",
+                "DEVICE",
+                "MEASUREMENT",
+                "PHYSICAL_MEASUREMENT_CSS"));
+
+    assertThat(criteria.size()).isEqualTo(conceptIdsCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptIdsCriteria);
+  }
+
+  @Test
+  public void findByCodeIn() {
+    List<DbCriteria> conceptCodesCriteria = new ArrayList<>();
+    conceptCodesCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.ICD9CM, null, "Dx11"));
+    conceptCodesCriteria.add(addDbCriteria(Domain.CONDITION, CriteriaType.SNOMED, "2000", "Dx21"));
+    conceptCodesCriteria.add(addDbCriteria(Domain.DRUG, CriteriaType.RXNORM, "3000", "Rx31"));
+    conceptCodesCriteria.add(addDbCriteria(Domain.PROCEDURE, CriteriaType.ICD10PCS, "4000", "Px41"));
+
+    List<String> conceptCodes =
+        conceptCodesCriteria.stream().map(c -> c.getCode()).collect(Collectors.toList());
+    List<DbCriteria> criteria =
+        cbCriteriaDao.findByCodeIn(
+            conceptCodes,
+            ImmutableList.of(
+                "CONDITION",
+                "PROCEDURE",
+                "DRUG",
+                "OBSERVATION",
+                "VISIT",
+                "DEVICE",
+                "MEASUREMENT",
+                "PHYSICAL_MEASUREMENT_CSS"));
+
+    assertThat(criteria.size()).isEqualTo(conceptCodesCriteria.size());
+    assertThat(criteria).containsExactlyElementsIn(conceptCodesCriteria);
+  }
+
+  @NotNull
+  private DbCriteria addDbCriteria(
+      Domain domain, CriteriaType criteriaType, String conceptId, String conceptCode) {
+    DbCriteria dbCriteria =
+        DbCriteria.builder()
+            .addDomainId(domain.toString())
+            .addType(criteriaType.toString())
+            .addConceptId(conceptId)
+            .addCode(conceptCode)
+            .addSelectable(true)
+            .addCount(1L)
+            .build();
+    cbCriteriaDao.save(dbCriteria);
+    return dbCriteria;
   }
 }
