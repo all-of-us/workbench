@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({FirecloudApiClientFactory.class})
-public class FetchFireCloudUserProfile {
+public class FetchFireCloudUserProfile extends Tool {
   private static final Logger log = Logger.getLogger(FetchFireCloudUserProfile.class.getName());
 
   @Bean

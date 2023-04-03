@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
  * service account has write permission to it if it exists.
  */
 @Configuration
-public class CreateTerraMethodSnapshot {
+public class CreateTerraMethodSnapshot extends Tool {
 
   private static Option configJsonOpt =
       Option.builder().longOpt("config-json").required().hasArg().build();
