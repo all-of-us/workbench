@@ -1,15 +1,19 @@
+import * as fp from 'lodash/fp';
+
 import {
   AppStatus,
   AppType,
   ConfigResponse,
   CreateAppRequest,
   DiskType,
+  Runtime,
   RuntimeStatus,
   UserAppEnvironment,
 } from 'generated/fetch';
 
 import { cond, switchCase } from 'app/utils';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import * as runtimeUitils from 'app/utils/runtime-utils';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
@@ -74,10 +78,10 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
 };
 
-export const isVisible = (status: AppStatus): boolean =>
+const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
 
-export const shouldShowApp = (app: UserAppEnvironment): boolean =>
+export const isAppActive = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);
 
 // TODO what about ERROR?
@@ -167,4 +171,40 @@ export const toUserEnvironmentStatusByAppType = (
 
 export const showAppsPanel = (config: ConfigResponse) => {
   return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
+};
+
+export interface AppDisplayState {
+  appType: UIAppType;
+  active: boolean;
+}
+
+const getAppDisplayState = (
+  runtime: Runtime | null | undefined,
+  userApps: UserAppEnvironment[],
+  appType: UIAppType
+): AppDisplayState => {
+  return {
+    appType,
+    active:
+      appType === UIAppType.JUPYTER
+        ? runtimeUitils.isVisible(runtime?.status)
+        : isAppActive(findApp(userApps, appType)),
+  };
+};
+
+export const getAppsByDisplayGroup = (
+  runtime: Runtime,
+  userApps: UserAppEnvironment[],
+  appsToDisplay: UIAppType[]
+): AppDisplayState[][] => {
+  const getAppDisplayStateWithContext = fp.partial(getAppDisplayState, [
+    runtime,
+    userApps,
+  ]);
+  return fp.flow(
+    fp.map(getAppDisplayStateWithContext),
+    // Partition function will result in an array of grouped elements based
+    // on their app.active value.  True values come first.
+    fp.partition((app: AppDisplayState) => app.active)
+  )(appsToDisplay);
 };
