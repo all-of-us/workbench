@@ -202,14 +202,20 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
+    console.log('createRuntime');
     if (!this.targetRuntime) {
       // Automatic lazy creation is not supported; the caller must specify a target.
       let defaultRuntime = {
         ...runtimePresets.generalAnalysis.runtimeTemplate,
       };
       if (this.currentRuntime) {
+        console.log(
+          'createRuntime, currentRuntime exists, =',
+          this.currentRuntime
+        );
         defaultRuntime = applyPresetOverride(this.currentRuntime);
       }
+      console.log('createRuntime, pre-throwing exception');
       throw new InitialRuntimeNotFoundError(defaultRuntime);
     }
 

@@ -213,6 +213,7 @@ export const InteractiveNotebook = fp.flow(
           // user's input to the runtime initializer modal. We invoke this
           // callback with the targetRuntime configuration, or null if the user
           // has decided to cancel or change their configuration.
+          console.log('caught exception, defaultRuntime', e.defaultRuntime);
           const runtimeToCreate = await new Promise((resolve) => {
             this.setState({
               runtimeInitializerDefault: e.defaultRuntime,
