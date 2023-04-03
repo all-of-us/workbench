@@ -117,7 +117,7 @@ describe('AppsPanel', () => {
     }
   );
 
-  test.each([RuntimeStatus.Deleted, null])(
+  test.each([RuntimeStatus.Deleted, RuntimeStatus.Error, null])(
     'should not render ActiveApps and AvailableApps when the runtime status is %s',
     async (status) => {
       runtimeStub.runtime.status = status;

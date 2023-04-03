@@ -13,6 +13,7 @@ import {
 
 import { cond, switchCase } from 'app/utils';
 import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import * as runtimeUitils from 'app/utils/runtime-utils';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
@@ -82,9 +83,6 @@ const isVisible = (status: AppStatus): boolean =>
 
 export const isAppActive = (app: UserAppEnvironment): boolean =>
   isVisible(app?.status);
-
-export const isRuntimeActive = (status: RuntimeStatus): boolean =>
-  status && status !== RuntimeStatus.Deleted;
 
 // TODO what about ERROR?
 export const canCreateApp = (app: UserAppEnvironment): boolean =>
@@ -189,7 +187,7 @@ const getAppDisplayState = (
     appType,
     active:
       appType === UIAppType.JUPYTER
-        ? isRuntimeActive(runtime?.status)
+        ? runtimeUitils.isVisible(runtime?.status)
         : isAppActive(findApp(userApps, appType)),
   };
 };
