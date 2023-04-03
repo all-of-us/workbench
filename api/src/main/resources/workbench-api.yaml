@@ -6352,7 +6352,9 @@ definitions:
         description: The tool docker image to install. May be Dockerhub or GCR. If not
           set, a default Jupyter image will be installed.
       gceConfig:
-        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
+        description: >
+          DEPRECATED.  Creating GCE runtimes without Persistent Disks is no longer supported.
+          To be removed after there are no extant runtimes like this.
         "$ref": "#/definitions/GceConfig"
       gceWithPdConfig:
         description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
@@ -6521,7 +6523,9 @@ definitions:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
   GceConfig:
-    description: Configuration for Google Compute Engine instances.
+    description: >
+      DEPRECATED.  Creating GCE runtimes without Persistent Disks is no longer supported.
+      To be removed after there are no extant runtimes like this.
     properties:
       diskSize:
         type: integer
