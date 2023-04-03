@@ -192,10 +192,6 @@ const getAppDisplayState = (
   };
 };
 
-// Returns an array of the following form:
-//     Outer Array
-//       First Item:  Array of AppDisplayStates with active=true
-//       Second Item:  Array of AppDisplayStates with active=false
 export const getAppsByDisplayGroup = (
   runtime: Runtime,
   userApps: UserAppEnvironment[],
@@ -207,7 +203,8 @@ export const getAppsByDisplayGroup = (
   ]);
   return fp.flow(
     fp.map(getAppDisplayStateWithContext),
-    fp.orderBy(['active'], ['asc']),
+    // Partition function will result in an array of grouped elements based
+    // on their app.active value.  True values come first.
     fp.partition((app: AppDisplayState) => app.active)
   )(appsToDisplay);
 };
