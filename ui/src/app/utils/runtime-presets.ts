@@ -1,11 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import {
-  DiskType,
-  GceWithPdConfig,
-  Runtime,
-  RuntimeConfigurationType,
-} from 'generated/fetch';
+import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -60,9 +55,6 @@ export const applyPresetOverride = (runtime) => {
     return runtime;
   }
 
-  // don't override the PD name
-  const pdName = runtime.gceWithPdConfig?.persistentDisk?.name;
-
   const runtimePresetKey = fp
     .keys(runtimePresets)
     .find(
@@ -74,19 +66,34 @@ export const applyPresetOverride = (runtime) => {
   if (runtimePresetKey) {
     const { gceConfig, gceWithPdConfig, dataprocConfig } =
       runtimePresets[runtimePresetKey].runtimeTemplate;
-
-    const newTmp: GceWithPdConfig = {
-      ...gceWithPdConfig,
-      persistentDisk: {
-        ...gceWithPdConfig.persistentDisk,
-        name: pdName,
-      },
-    };
+    //
+    // // don't override the PD name, if one exists
+    // const restoreOriginalPdName = (): GceWithPdConfig =>
+    //   gceWithPdConfig &&
+    //   runtime.gceWithPdConfig && {
+    //     ...gceWithPdConfig,
+    //     persistentDisk: {
+    //       ...gceWithPdConfig.persistentDisk,
+    //       name: runtime.gceWithPdConfig.persistentDisk?.name,
+    //     },
+    //   };
+    //
+    //
+    // fp.set(
+    //     ['persistentDisk', 'name'],
+    //     runtime.gceWithPdConfig.persistentDisk?.name,
+    //     gceWithPdConfig
+    // );
 
     return {
       ...runtime,
       gceConfig,
-      gceWithPdConfig: newTmp,
+      // restore original PD name, so it will get associatd with a new runtime
+      gceWithPdConfig: fp.set(
+        ['persistentDisk', 'name'],
+        runtime.gceWithPdConfig?.persistentDisk?.name,
+        gceWithPdConfig
+      ),
       dataprocConfig,
     };
   }
