@@ -66,34 +66,18 @@ export const applyPresetOverride = (runtime) => {
   if (runtimePresetKey) {
     const { gceConfig, gceWithPdConfig, dataprocConfig } =
       runtimePresets[runtimePresetKey].runtimeTemplate;
-    //
-    // // don't override the PD name, if one exists
-    // const restoreOriginalPdName = (): GceWithPdConfig =>
-    //   gceWithPdConfig &&
-    //   runtime.gceWithPdConfig && {
-    //     ...gceWithPdConfig,
-    //     persistentDisk: {
-    //       ...gceWithPdConfig.persistentDisk,
-    //       name: runtime.gceWithPdConfig.persistentDisk?.name,
-    //     },
-    //   };
-    //
-    //
-    // fp.set(
-    //     ['persistentDisk', 'name'],
-    //     runtime.gceWithPdConfig.persistentDisk?.name,
-    //     gceWithPdConfig
-    // );
 
     return {
       ...runtime,
       gceConfig,
-      // restore original PD name, so it will get associatd with a new runtime
-      gceWithPdConfig: fp.set(
-        ['persistentDisk', 'name'],
-        runtime.gceWithPdConfig?.persistentDisk?.name,
-        gceWithPdConfig
-      ),
+      // restore the original PD name, which will cause a creation request to attach it to the new runtime
+      gceWithPdConfig:
+        gceWithPdConfig &&
+        fp.set(
+          ['persistentDisk', 'name'],
+          runtime.gceWithPdConfig?.persistentDisk?.name,
+          gceWithPdConfig
+        ),
       dataprocConfig,
     };
   }
