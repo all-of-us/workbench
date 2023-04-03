@@ -205,7 +205,6 @@ export class LeoRuntimeInitializer {
 
   private async createRuntime(): Promise<void> {
     const { gcePersistentDisk } = diskStore.get();
-    console.log('createRuntime, gcePersistentDisk=', gcePersistentDisk);
 
     if (!this.targetRuntime) {
       // Automatic lazy creation is not supported; the caller must specify a target.
@@ -213,11 +212,6 @@ export class LeoRuntimeInitializer {
         ...runtimePresets.generalAnalysis.runtimeTemplate,
       };
       if (this.currentRuntime) {
-        console.log(
-          'createRuntime, currentRuntime exists, =',
-          this.currentRuntime
-        );
-
         defaultRuntime =
           this.currentRuntime.status === RuntimeStatus.Deleted
             ? applyPresetOverride(
@@ -228,10 +222,6 @@ export class LeoRuntimeInitializer {
               )
             : applyPresetOverride(this.currentRuntime);
       }
-      console.log(
-        'createRuntime, pre-throwing exception, defaultRuntime=',
-        defaultRuntime
-      );
       throw new InitialRuntimeNotFoundError(defaultRuntime);
     }
 

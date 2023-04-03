@@ -62,7 +62,6 @@ export const applyPresetOverride = (runtime) => {
 
   // don't override the PD name
   const pdName = runtime.gceWithPdConfig?.persistentDisk?.name;
-  console.log('applyPresetOverride, pdName=', pdName);
 
   const runtimePresetKey = fp
     .keys(runtimePresets)
@@ -83,8 +82,6 @@ export const applyPresetOverride = (runtime) => {
         name: pdName,
       },
     };
-
-    console.log('applyPresetOverride, newTmp=', newTmp);
 
     return {
       ...runtime,
