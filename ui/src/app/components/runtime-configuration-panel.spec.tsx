@@ -429,6 +429,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: {
         ...defaultDataprocConfig(),
         masterMachineType: 'n1-standard-16',
@@ -689,6 +690,7 @@ describe('RuntimeConfigurationPanel', () => {
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
         gceConfig: null,
+        gceWithPdConfig: null,
         dataprocConfig: {
           ...defaultDataprocConfig(),
           masterMachineType: customMasterMachineType,
@@ -899,6 +901,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
     });
@@ -914,6 +917,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
     });
@@ -930,6 +934,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -948,6 +953,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -963,6 +969,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1023,6 +1030,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1041,6 +1049,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1059,6 +1068,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1075,6 +1085,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1106,6 +1117,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       status: RuntimeStatus.Creating,
     });
@@ -1128,6 +1140,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 1000,
@@ -1244,6 +1257,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 1000,
@@ -1786,6 +1800,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1828,6 +1843,7 @@ describe('RuntimeConfigurationPanel', () => {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
+      gceWithPdConfig: null,
     });
 
     const wrapper = await component();
@@ -1843,6 +1859,7 @@ describe('RuntimeConfigurationPanel', () => {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
+      gceWithPdConfig: null,
     });
 
     const wrapper = await component();

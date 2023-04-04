@@ -20,10 +20,7 @@ export const runtimePresets: {
     runtimeTemplate: {
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
-      // With https://precisionmedicineinitiative.atlassian.net/browse/RW-9167, general analysis
-      // should have persistent disk
       // TODO: Support specifying toolDockerImage here.
-
       gceWithPdConfig: {
         persistentDisk: {
           diskType: DiskType.Standard,
@@ -70,7 +67,19 @@ export const applyPresetOverride = (runtime) => {
     const { gceConfig, gceWithPdConfig, dataprocConfig } =
       runtimePresets[runtimePresetKey].runtimeTemplate;
 
-    return { ...runtime, gceConfig, gceWithPdConfig, dataprocConfig };
+    return {
+      ...runtime,
+      gceConfig,
+      // restore the original PD name, which will cause a creation request to attach it to the new runtime
+      gceWithPdConfig:
+        gceWithPdConfig &&
+        fp.set(
+          ['persistentDisk', 'name'],
+          runtime.gceWithPdConfig?.persistentDisk?.name,
+          gceWithPdConfig
+        ),
+      dataprocConfig,
+    };
   }
 
   return runtime;
