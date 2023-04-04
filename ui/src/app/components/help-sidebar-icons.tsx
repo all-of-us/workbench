@@ -16,6 +16,8 @@ import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
+  AppStatus,
+  AppType,
   CdrVersionTiersResponse,
   ConfigResponse,
   Criteria,
@@ -27,7 +29,12 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
+import {
+  runtimeStore,
+  serverConfigStore,
+  userAppsStore,
+  useStore,
+} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -35,6 +42,7 @@ import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
+import { AppStatusIcon } from './app-status-icon';
 import { appAssets, showAppsPanel, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
@@ -112,6 +120,40 @@ export interface IconConfig {
   tooltip: string;
   hasContent: boolean;
 }
+
+const displayAppStatusIcon = (
+  icon: IconConfig,
+  workspaceNamespace: string,
+  userSuspended: boolean,
+  config: ConfigResponse,
+  status: AppStatus,
+  appType: UIAppType
+) => {
+  const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
+
+  const containerStyle: CSSProperties = {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  };
+  const iconStyle: CSSProperties = { width: '36px', position: 'absolute' };
+
+  return (
+    <FlexRow style={containerStyle}>
+      <img
+        src={appTypeAssets?.icon}
+        alt={icon?.label}
+        style={iconStyle}
+        data-test-id={'help-sidebar-icon-' + icon?.id}
+      />
+      <AppStatusIcon
+        {...{ workspaceNamespace, userSuspended }}
+        appStatus={status}
+        style={styles.statusIconContainer}
+      />
+    </FlexRow>
+  );
+};
 
 const displayRuntimeStatusIcon = (
   icon: IconConfig,
@@ -325,6 +367,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     icon,
   } = props;
   const { config } = useStore(serverConfigStore);
+  const { userApps } = useStore(userAppsStore);
   return switchCase(
     icon.id,
     [
@@ -370,27 +413,15 @@ const DisplayIcon = (props: DisplayIconProps) => {
     ],
     [
       'cromwellConfig',
-      () => {
-        const cromwellAssets = appAssets.find(
-          (aa) => aa.appType === UIAppType.CROMWELL
-        );
-        return (
-          <FlexRow
-            style={{
-              height: '100%',
-              alignItems: 'center',
-              justifyContent: 'space-around',
-            }}
-          >
-            <img
-              data-test-id={'help-sidebar-icon-' + icon.id}
-              src={cromwellAssets.icon}
-              alt={icon.label}
-              style={{ ...icon.style, position: 'absolute' }}
-            />
-          </FlexRow>
-        );
-      },
+      () =>
+        displayAppStatusIcon(
+          icon,
+          workspace.namespace,
+          userSuspended,
+          config,
+          userApps?.find((app) => app.appType === AppType.CROMWELL)?.status,
+          UIAppType.CROMWELL
+        ),
     ],
     [
       'terminal',
