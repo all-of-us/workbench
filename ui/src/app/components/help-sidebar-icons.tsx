@@ -127,19 +127,19 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-export interface StatusIconProps {
+interface SidebarIconProps {
   iconPath: string;
   iconConfig: IconConfig;
   config: ConfigResponse;
   children: React.ReactNode;
 }
 
-export const StatusIcon = ({
+const SidebarIcon = ({
   iconPath,
   iconConfig,
   config,
   children,
-}: StatusIconProps) => {
+}: SidebarIconProps) => {
   const iconStyle: CSSProperties = showAppsPanel(config)
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
@@ -167,13 +167,13 @@ const displayAppStatusIcon = (
 ) => {
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
-    <StatusIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
+    <SidebarIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
       <AppStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         appStatus={status}
         style={styles.statusIconContainer}
       />
-    </StatusIcon>
+    </SidebarIcon>
   );
 };
 
@@ -193,12 +193,12 @@ const displayRuntimeStatusIcon = (
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <StatusIcon {...{ config, iconConfig, iconPath }}>
+    <SidebarIcon {...{ config, iconConfig, iconPath }}>
       <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />
-    </StatusIcon>
+    </SidebarIcon>
   );
 };
 
