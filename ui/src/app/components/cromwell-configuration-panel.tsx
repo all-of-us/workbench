@@ -20,7 +20,7 @@ import {
   CROMWELL_DOC,
   HOW_TO_RUN_CROMWELL,
   WORKFLOW_AND_WDL,
-} from 'app/utils/aou_links';
+} from 'app/utils/aou_external_links';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import {
   DEFAULT_MACHINE_NAME,
