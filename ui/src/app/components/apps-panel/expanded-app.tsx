@@ -303,7 +303,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
       ) : (
         <FlexColumn>
           <FlexRow style={{ justifyContent: 'center' }}>
-            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
+            Status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
             <AppStatusIcon
               style={{ alignSelf: 'center', margin: '0 0.5em' }}
               appStatus={initialUserAppInfo?.status}
