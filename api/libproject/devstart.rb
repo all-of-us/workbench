@@ -2629,6 +2629,7 @@ def set_access_module_timestamps(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   with_cloud_proxy_and_db(gcc) do
+    ENV["DB_HOST"] = nil
     common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
