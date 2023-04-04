@@ -39,6 +39,7 @@ import {
   registerCompoundRuntimeOperation,
   runtimeStore,
   serverConfigStore,
+  userAppsStore,
 } from 'app/utils/stores';
 import { SWRConfig } from 'swr';
 
@@ -625,9 +626,10 @@ describe('HelpSidebar', () => {
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
-    appsStub.listAppsResponse = [
-      createListAppsCromwellResponse({ status: AppStatus.RUNNING }),
-    ];
+    userAppsStore.set({
+      userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
+      updating: false,
+    });
 
     const wrapper = await component();
     wrapper

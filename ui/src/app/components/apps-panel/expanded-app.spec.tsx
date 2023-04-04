@@ -330,7 +330,9 @@ describe('ExpandedApp', () => {
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
 
-      const deleteSpy = jest.spyOn(appsApi(), 'deleteApp');
+      const deleteSpy = jest
+        .spyOn(appsApi(), 'deleteApp')
+        .mockImplementation(() => Promise.resolve({}));
       const { onClick } = deletion.props();
       await onClick();
 

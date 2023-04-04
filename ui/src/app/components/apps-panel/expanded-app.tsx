@@ -10,16 +10,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
+import { AppStatusIcon } from 'app/components/app-status-icon';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
-import {
-  leoAppsApi,
-  leoProxyApi,
-} from 'app/services/notebooks-swagger-fetch-clients';
-import { appsApi } from 'app/services/swagger-fetch-clients';
+import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -29,6 +26,12 @@ import {
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
+import {
+  createUserApp,
+  deleteUserApp,
+  pauseUserApp,
+  resumeUserApp,
+} from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './app-logo';
 import { AppsPanelButton } from './apps-panel-button';
@@ -107,14 +110,21 @@ const JupyterButtonRow = (props: {
   );
 };
 
-const PauseUserAppButton = (props: { userApp: UserAppEnvironment }) => {
+const PauseUserAppButton = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
   const { googleProject, appName, status } = props.userApp || {};
 
   return (
     <PauseResumeButton
       externalStatus={fromUserAppStatus(status)}
-      onPause={() => leoAppsApi().stopApp(googleProject, appName)}
-      onResume={() => leoAppsApi().startApp(googleProject, appName)}
+      onPause={() =>
+        pauseUserApp(googleProject, appName, props.workspaceNamespace)
+      }
+      onResume={() =>
+        resumeUserApp(googleProject, appName, props.workspaceNamespace)
+      }
     />
   );
 };
@@ -124,7 +134,7 @@ const CromwellButtonRow = (props: {
   userApp: UserAppEnvironment;
   workspaceNamespace: string;
 }) => {
-  const { userApp } = props;
+  const { userApp, workspaceNamespace } = props;
 
   return (
     <FlexRow>
@@ -132,7 +142,7 @@ const CromwellButtonRow = (props: {
         onClick={() => setSidebarActiveIconStore.next('cromwellConfig')}
         data-test-id='Cromwell-settings-button'
       />
-      <PauseUserAppButton {...{ userApp }} />
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
     </FlexRow>
   );
 };
@@ -153,7 +163,7 @@ const RStudioButtonRow = (props: {
     },
     async () => {
       setCreating(true);
-      await appsApi().createApp(workspaceNamespace, defaultRStudioConfig);
+      await createUserApp(workspaceNamespace, defaultRStudioConfig);
     }
   );
 
@@ -190,7 +200,7 @@ const RStudioButtonRow = (props: {
           />
         </div>
       </TooltipTrigger>
-      <PauseUserAppButton {...{ userApp }} />
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
         content='Environment must be running to launch RStudio'
@@ -239,9 +249,9 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   const onClickDelete =
     appType === UIAppType.JUPYTER
       ? onClickDeleteRuntime
-      : () => {
+      : async () => {
           setDeletingApp(true);
-          appsApi().deleteApp(
+          await deleteUserApp(
             workspace.namespace,
             initialUserAppInfo.appName,
             deleteDiskWithUserApp
@@ -292,11 +302,14 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
         <FlexColumn>
-          {/* TODO: keep status updated internally */}
-          <div style={{ textAlign: 'center' }}>
-            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
-            (refresh to update)
-          </div>
+          <FlexRow style={{ justifyContent: 'center' }}>
+            Status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
+            <AppStatusIcon
+              style={{ alignSelf: 'center', margin: '0 0.5em' }}
+              appStatus={initialUserAppInfo?.status}
+              userSuspended={false}
+            />
+          </FlexRow>
           {cond(
             [
               appType === UIAppType.CROMWELL,

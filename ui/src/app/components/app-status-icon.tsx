@@ -21,7 +21,7 @@ export const AppStatusIcon = (props: {
   const { appStatus, style, userSuspended } = props;
 
   return (
-    <FlexRow {...{ style }} data-test-id='runtime-status-icon-container'>
+    <FlexRow {...{ style }} data-test-id='app-status-icon-container'>
       {(() => {
         if (userSuspended) {
           return <SuspendedIcon />;
