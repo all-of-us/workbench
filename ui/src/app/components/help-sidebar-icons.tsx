@@ -19,7 +19,6 @@ import {
   AppStatus,
   AppType,
   CdrVersionTiersResponse,
-  ConfigResponse,
   Criteria,
   GenomicExtractionJob,
   TerraJobStatus,
@@ -130,16 +129,11 @@ export interface IconConfig {
 interface SidebarIconProps {
   iconPath: string;
   iconConfig: IconConfig;
-  config: ConfigResponse;
   children: React.ReactNode;
 }
 
-const SidebarIcon = ({
-  iconPath,
-  iconConfig,
-  config,
-  children,
-}: SidebarIconProps) => {
+const SidebarIcon = ({ iconPath, iconConfig, children }: SidebarIconProps) => {
+  const { config } = useStore(serverConfigStore);
   const iconStyle: CSSProperties = showAppsPanel(config)
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
@@ -161,21 +155,14 @@ const AppSidebarIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
-  config: ConfigResponse;
   status: AppStatus;
   appType: UIAppType;
 }) => {
-  const {
-    iconConfig,
-    workspaceNamespace,
-    userSuspended,
-    config,
-    status,
-    appType,
-  } = props;
+  const { iconConfig, workspaceNamespace, userSuspended, status, appType } =
+    props;
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
-    <SidebarIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
+    <SidebarIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
       <AppStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         appStatus={status}
@@ -189,9 +176,9 @@ const RuntimeSidebarIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
-  config: ConfigResponse;
 }) => {
-  const { iconConfig, workspaceNamespace, userSuspended, config } = props;
+  const { iconConfig, workspaceNamespace, userSuspended } = props;
+  const { config } = useStore(serverConfigStore);
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
@@ -382,7 +369,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     userSuspended,
     icon,
   } = props;
-  const { config } = useStore(serverConfigStore);
+
   const { userApps } = useStore(userAppsStore);
   return switchCase(
     icon.id,
@@ -423,7 +410,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
         <RuntimeSidebarIcon
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
-          {...{ config, userSuspended }}
+          {...{ userSuspended }}
         />
       ),
     ],
@@ -437,7 +424,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
             userApps?.find((app) => app.appType === AppType.CROMWELL)?.status
           }
           appType={UIAppType.CROMWELL}
-          {...{ config, userSuspended }}
+          {...{ userSuspended }}
         />
       ),
     ],
