@@ -86,6 +86,12 @@ const styles = reactStyles({
   },
 });
 
+const containerStyle: CSSProperties = {
+  height: '100%',
+  alignItems: 'center',
+  justifyContent: 'space-around',
+};
+
 const iconStyles = reactStyles({
   active: {
     ...styles.icon,
@@ -121,8 +127,38 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
+export interface StatusIconProps {
+  iconPath: string;
+  iconConfig: IconConfig;
+  config: ConfigResponse;
+  children: React.ReactNode;
+}
+
+export const StatusIcon = ({
+  iconPath,
+  iconConfig,
+  config,
+  children,
+}: StatusIconProps) => {
+  const iconStyle: CSSProperties = showAppsPanel(config)
+    ? { width: '36px', position: 'absolute' }
+    : { width: '22px', position: 'absolute' };
+
+  return (
+    <FlexRow style={containerStyle}>
+      <img
+        src={iconPath}
+        alt={iconConfig.label}
+        style={iconStyle}
+        data-test-id={'help-sidebar-icon-' + iconConfig.id}
+      />
+      {children}
+    </FlexRow>
+  );
+};
+
 const displayAppStatusIcon = (
-  icon: IconConfig,
+  iconConfig: IconConfig,
   workspaceNamespace: string,
   userSuspended: boolean,
   config: ConfigResponse,
@@ -130,33 +166,19 @@ const displayAppStatusIcon = (
   appType: UIAppType
 ) => {
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
-
-  const containerStyle: CSSProperties = {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  };
-  const iconStyle: CSSProperties = { width: '36px', position: 'absolute' };
-
   return (
-    <FlexRow style={containerStyle}>
-      <img
-        src={appTypeAssets?.icon}
-        alt={icon?.label}
-        style={iconStyle}
-        data-test-id={'help-sidebar-icon-' + icon?.id}
-      />
+    <StatusIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
       <AppStatusIcon
         {...{ workspaceNamespace, userSuspended }}
         appStatus={status}
         style={styles.statusIconContainer}
       />
-    </FlexRow>
+    </StatusIcon>
   );
 };
 
 const displayRuntimeStatusIcon = (
-  icon: IconConfig,
+  iconConfig: IconConfig,
   workspaceNamespace: string,
   userSuspended: boolean,
   config: ConfigResponse
@@ -165,33 +187,18 @@ const displayRuntimeStatusIcon = (
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
-  const containerStyle: CSSProperties = {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  };
-  const iconStyle: CSSProperties = showAppsPanel(config)
-    ? { width: '36px', position: 'absolute' }
-    : { width: '22px', position: 'absolute' };
-
-  const iconSrc = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
+  const iconPath = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
 
   // We always want to show the thunderstorm or Jupyter icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <FlexRow style={containerStyle}>
-      <img
-        src={iconSrc}
-        alt={icon.label}
-        style={iconStyle}
-        data-test-id={'help-sidebar-icon-' + icon.id}
-      />
+    <StatusIcon {...{ config, iconConfig, iconPath }}>
       <RuntimeStatusIcon
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />
-    </FlexRow>
+    </StatusIcon>
   );
 };
 
