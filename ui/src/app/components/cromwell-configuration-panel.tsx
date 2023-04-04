@@ -15,6 +15,12 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import {
+  COST_TO_RUN_CROMWELL,
+  CROMWELL_DOC,
+  HOW_TO_RUN_CROMWELL,
+  WORKFLOW_AND_WDL,
+} from 'app/utils/aou_links';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import {
   DEFAULT_MACHINE_NAME,
@@ -38,15 +44,15 @@ const { useState } = React;
 const cromwellSupportArticles = [
   {
     text: 'How to run Cromwell in All of Us workbench?',
-    link: 'https://support.researchallofus.org/hc/en-us/articles/14428263737620',
+    link: HOW_TO_RUN_CROMWELL,
   },
   {
     text: 'Cromwell documentation',
-    link: 'https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/',
+    link: CROMWELL_DOC,
   },
   {
     text: 'Workflow and WDL',
-    link: 'https://support.terra.bio/hc/en-us/articles/360037117492-Overview-Getting-started-with-WDL',
+    link: WORKFLOW_AND_WDL,
   },
 ];
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
@@ -127,9 +133,7 @@ const PanelMain = fp.flow(
             additional cost for interactions with the workflow.
             <a
               style={{ marginLeft: '0.25rem' }}
-              href={
-                'https://support.researchallofus.org/hc/en-us/articles/14428263737620'
-              }
+              href={COST_TO_RUN_CROMWELL}
               target={'_blank'}
             >
               Learn more{' '}
@@ -151,7 +155,7 @@ const PanelMain = fp.flow(
               Cloud compute profile
             </div>
             <TooltipTrigger
-              content='The cloud compute profile for Cromwell is beta is non-configurable.'
+              content='The cloud compute profile for Cromwell beta is non-configurable.'
               side={'right'}
             >
               <div style={styles.disabledCloudProfile}>
