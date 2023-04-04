@@ -1,7 +1,6 @@
 package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.access.AccessModuleServiceImpl.deriveExpirationTimestamp;
 
@@ -25,7 +24,6 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -183,15 +181,6 @@ public class AccessModuleServiceTest {
             BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             Optional.empty());
-  }
-
-  @Test
-  public void testBypassFail_moduleNotBypassable() {
-    assertThrows(
-        ForbiddenException.class,
-        () ->
-            accessModuleService.updateBypassTime(
-                user.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, true));
   }
 
   @Test

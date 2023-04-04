@@ -45,7 +45,7 @@ public class DbAccessModule {
 
   @Column(name = "bypassable", nullable = false)
   public boolean getBypassable() {
-    return bypassable;
+    return true;
   }
 
   public DbAccessModule setBypassable(boolean bypassable) {

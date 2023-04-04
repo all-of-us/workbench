@@ -49,14 +49,14 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
   },
   {
     name: AccessModule.PROFILECONFIRMATION,
-    bypassable: false,
+    bypassable: true,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
     name: AccessModule.PUBLICATIONCONFIRMATION,
-    bypassable: false,
+    bypassable: true,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,

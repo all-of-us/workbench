@@ -19,9 +19,6 @@ public interface AccessModuleNameMapper {
   @ValueMapping(source = "RAS_LOGIN_GOV", target = "RAS_LINK_LOGIN_GOV")
   AccessModule storageAccessModuleToClient(DbAccessModuleName source);
 
-  // these modules cannot be bypassed
-  @ValueMapping(source = "PROFILE_CONFIRMATION", target = MappingConstants.NULL)
-  @ValueMapping(source = "PUBLICATION_CONFIRMATION", target = MappingConstants.NULL)
   BypassTimeTargetProperty bypassAuditPropertyFromStorage(DbAccessModuleName source);
 
   // only compliance training modules have associated badges

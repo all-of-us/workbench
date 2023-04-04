@@ -255,11 +255,17 @@ export const ProfileComponent = fp.flow(
         },
       } = currentProfile;
 
-      const profileExpiration = fp.flow(
-        fp.find({ moduleName: AccessModule.PROFILECONFIRMATION }),
-        fp.get('expirationEpochMillis')
-      )(profile.accessModules.modules);
-      const hasExpired = profileExpiration && profileExpiration < Date.now();
+      const profileConfirmationAccessModule = fp.find(
+        { moduleName: AccessModule.PROFILECONFIRMATION },
+        profile.accessModules.modules
+      );
+      const hasExpired =
+        profileConfirmationAccessModule.expirationEpochMillis &&
+        profileConfirmationAccessModule.expirationEpochMillis < Date.now();
+      const bypassed = !!profileConfirmationAccessModule.bypassEpochMillis;
+      const showRenewalBox =
+        (hasExpired && !bypassed) ||
+        wasReferredFromRenewal(this.props.location.search);
 
       // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
       // forking their website regex, just ensure a scheme ahead of validation.
@@ -374,9 +380,11 @@ export const ProfileComponent = fp.flow(
             <div style={{ ...styles.h1, marginBottom: '1.05rem' }}>Profile</div>
             <FlexRow style={{ justifyContent: 'spaceBetween' }}>
               <div>
-                {(hasExpired ||
-                  wasReferredFromRenewal(this.props.location.search)) && (
-                  <div style={styles.renewalBox}>
+                {showRenewalBox && (
+                  <div
+                    style={styles.renewalBox}
+                    data-test-id='profile-confirmation-renewal-box'
+                  >
                     <ExclamationTriangle
                       size={25}
                       color={colors.warning}

@@ -6040,6 +6040,12 @@ definitions:
       twoFactorAuthBypassTime:
         type: integer
         format: int64
+      profileConfirmationBypassTime:
+        type: integer
+        format: int64
+      publicationConfirmationBypassTime:
+        type: integer
+        format: int64
       eraCommonsBypassTime:
         type: integer
         format: int64

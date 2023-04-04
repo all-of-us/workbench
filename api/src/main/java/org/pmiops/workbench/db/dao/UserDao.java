@@ -135,6 +135,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getTwoFactorAuthBypassTime();
 
+    Timestamp getProfileConfirmationBypassTime();
+
+    Timestamp getPublicationConfirmationBypassTime();
+
     Timestamp getRasLinkLoginGovBypassTime();
 
     String getAccessTierShortNames();
@@ -163,6 +167,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "uamrt.compliance_training_bypass_time AS complianceTrainingBypassTime, "
               + "uamct.ct_compliance_training_bypass_time AS ctComplianceTrainingBypassTime, "
               + "uame.era_commons_bypass_time AS eraCommonsBypassTime, "
+              + "uamprofile.profile_confirmation_bypass_time AS profileConfirmationBypassTime, "
+              + "uampublication.publication_confirmation_bypass_time AS publicationConfirmationBypassTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
               + "uamr.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
               + "t.access_tier_short_names AS accessTierShortNames "
@@ -192,6 +198,20 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'TWO_FACTOR_AUTH' "
               + ") as uamt ON u.user_id = uamt.user_id "
+              + "LEFT JOIN ( "
+              + "  SELECT uam.user_id, "
+              + "    uam.bypass_time AS profile_confirmation_bypass_time "
+              + "  FROM user_access_module uam "
+              + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
+              + "  WHERE am.name = 'PROFILE_CONFIRMATION' "
+              + ") as uamprofile ON u.user_id = uamprofile.user_id "
+              + "LEFT JOIN ( "
+              + "  SELECT uam.user_id, "
+              + "    uam.bypass_time AS publication_confirmation_bypass_time "
+              + "  FROM user_access_module uam "
+              + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
+              + "  WHERE am.name = 'PUBLICATION_CONFIRMATION' "
+              + ") as uampublication ON u.user_id = uampublication.user_id "
               + "LEFT JOIN ( "
               + "  SELECT uam.user_id, "
               + "    uam.bypass_time AS compliance_training_bypass_time "
