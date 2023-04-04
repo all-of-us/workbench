@@ -23,7 +23,7 @@ import {
   UpdatingIcon,
 } from './status-icon';
 
-export const RuntimeStatusIcon = fp.flow(
+export const RuntimeStatusIndicator = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps')
 )(
   (props: {

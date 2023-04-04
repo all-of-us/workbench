@@ -42,11 +42,11 @@ import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
-import { AppStatusIcon } from './app-status-icon';
+import { AppStatusIndicator } from './app-status-indicator';
 import { appAssets, showAppsPanel, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
-import { RuntimeStatusIcon } from './runtime-status-icon';
+import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
@@ -168,7 +168,7 @@ const displayAppStatusIcon = (
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
     <StatusIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
-      <AppStatusIcon
+      <AppStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         appStatus={status}
         style={styles.statusIconContainer}
@@ -194,7 +194,7 @@ const displayRuntimeStatusIcon = (
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
     <StatusIcon {...{ config, iconConfig, iconPath }}>
-      <RuntimeStatusIcon
+      <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />

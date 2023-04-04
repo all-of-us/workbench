@@ -13,7 +13,7 @@ import {
   UpdatingIcon,
 } from './status-icon';
 
-export const AppStatusIcon = (props: {
+export const AppStatusIndicator = (props: {
   style: CSSProperties;
   userSuspended: boolean;
   appStatus: AppStatus;

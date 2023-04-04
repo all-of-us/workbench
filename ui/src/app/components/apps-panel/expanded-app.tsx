@@ -10,12 +10,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
-import { AppStatusIcon } from 'app/components/app-status-icon';
+import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { RuntimeStatusIcon } from 'app/components/runtime-status-icon';
+import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
@@ -270,7 +270,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           />
         </div>
         {appType === UIAppType.JUPYTER && (
-          <RuntimeStatusIcon
+          <RuntimeStatusIndicator
             style={{ alignSelf: 'center', marginRight: '0.5em' }}
             workspaceNamespace={workspace.namespace}
           />
@@ -304,7 +304,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <FlexColumn>
           <FlexRow style={{ justifyContent: 'center' }}>
             Status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
-            <AppStatusIcon
+            <AppStatusIndicator
               style={{ alignSelf: 'center', margin: '0 0.5em' }}
               appStatus={initialUserAppInfo?.status}
               userSuspended={false}
