@@ -42,6 +42,32 @@ public class LeonardoCustomEnvVarUtils {
   private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
   private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
 
+  /* CDR V7, Q12023 */
+  private static final String WGS_VDS_STORAGE_PATH_KEY = "WGS_VDS_PATH";
+  // Exome
+  private static final String WGS_EXOME_MULTI_HAIL_PATH_KEY = "WGS_EXOME_MULTI_HAIL_PATH";
+  private static final String WGS_EXOME_SPLIT_HAIL_PATH_KEY = "WGS_EXOME_SPLIT_HAIL_PATH";
+  private static final String WGS_EXOME_VCF_PATH_KEY = "WGS_EXOME_VCF_PATH";
+  //ACAF Threshold
+  private static final String WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH_KEY =
+      "WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH";
+  private static final String WGS_ACAF_THRESHOLD_SPLIT_HAIL_PATH_KEY =
+      "WGS_ACAF_THRESHOLD_SPLIT_HAIL_PATH";
+  private static final String WGS_ACAF_THRESHOLD_VCF_PATH_KEY = "WGS_ACAF_THRESHOLD_VCF_PATH";
+
+  // Clinvar
+  private static final String WGS_CLINVAR_MULTI_HAIL_PATH_KEY = "WGS_CLINVAR_MULTI_HAIL_PATH";
+  private static final String WGS_CLINVAR_SPLIT_HAIL_PATH_KEY = "WGS_CLINVAR_SPLIT_HAIL_PATH";
+  private static final String WGS_CLINVAR_VCF_PATH_KEY = "WGS_CLINVAR_VCF_PATH";
+
+  // Long reads
+  private static final String LONG_READS_MANIFEST_PATH_KEY = "LONG_READS_MANIFEST_PATH";
+  private static final String WGS_LONGREADS_HAIL_GRCH38_PATH_KEY = "WGS_LONGREADS_HAIL_GRCH38_PATH";
+  private static final String WGS_LONGREADS_HAIL_T2T_PATH_KEY = "WGS_LONGREADS_HAIL_T2T_PATH";
+  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH_KEY = "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH";
+  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY = "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH";
+
+
   @VisibleForTesting
   public static final Map<String, String> FASTA_REFERENCE_ENV_VAR_MAP =
       new ImmutableMap.Builder<String, String>()
@@ -90,6 +116,47 @@ public class LeonardoCustomEnvVarUtils {
               .put(
                   MICROARRAY_IDAT_MANIFEST_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getMicroarrayIdatManifestPath()))
+              .put(WGS_VDS_STORAGE_PATH_KEY, Optional.ofNullable(cdrVersion.getWgsVdsPath()))
+              .put(
+                  WGS_EXOME_MULTI_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsExomeMultiHailPath()))
+              .put(
+                  WGS_EXOME_SPLIT_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsExomeSplitHailPath()))
+              .put(WGS_EXOME_VCF_PATH_KEY, Optional.ofNullable(cdrVersion.getWgsExomeVcfPath()))
+              .put(
+                  WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsAcafThresholdSplitHailPath()))
+              .put(
+                  WGS_ACAF_THRESHOLD_SPLIT_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsAcafThresholdSplitHailPath()))
+              .put(
+                  WGS_ACAF_THRESHOLD_VCF_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsAcafThresholdVcfPath()))
+              .put(
+                  WGS_CLINVAR_MULTI_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsClinvarSplitHailPath()))
+              .put(
+                  WGS_CLINVAR_SPLIT_HAIL_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsClinvarSplitHailPath()))
+              .put(
+                  WGS_CLINVAR_VCF_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsClinvarVcfPath()))
+              .put(
+                  LONG_READS_MANIFEST_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsLongReadsManifestPath()))
+              .put(
+                  WGS_LONGREADS_HAIL_GRCH38_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsLongReadsHailGRCh38()))
+              .put(
+                  WGS_LONGREADS_HAIL_T2T_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsLongReadsHailT2T()))
+              .put(
+                  WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsLongReadsJointVcfGRCh38()))
+              .put(
+                  WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY,
+                  Optional.ofNullable(cdrVersion.getWgsLongReadsJointVcfT2T()))
               .build();
       vars.putAll(
           partialStoragePaths.entrySet().stream()

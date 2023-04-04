@@ -33,12 +33,22 @@ public class CdrVersionVO {
   public String microarrayVcfSingleSampleStoragePath;
   public String microarrayVcfManifestPath;
   public String microarrayIdatManifestPath;
+  // 2023Q1 CDR Release
   public String wgsVdsPath;
-  public String wgsExomeNonSplitHailPath;
+  public String wgsExomeMultiHailPath;
   public String wgsExomeSplitHailPath;
   public String wgsExomeVcfPath;
-  public String wgsCommonVariantsNonSplitHailPath;
-  public String wgsCommonVariantsSplitHailPath;
-  public String wgsCommonVariantsVcfPath;
-  public String longReadsStoragePath;
+
+  public String wgsAcafThresholdMultiHailPath;
+  public String wgsAcafThresholdSplitHailPath;
+  public String wgsAcafThresholdVcfPath;
+
+  public String wgsClinvarMultiHailPath;
+  public String wgsClinvarSplitHailPath;
+  public String wgsClinvarVcfPath;
+  public String wgsLongReadsManifestPath;
+  public String wgsLongReadsHailGRCh38;
+  public String wgsLongReadsHailT2T;
+  public String wgsLongReadsJointVcfGRCh38;
+  public String wgsLongReadsJointVcfT2T;
 }

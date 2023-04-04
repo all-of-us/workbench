@@ -4,16 +4,23 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="tarekahmed" id="db.changelog-211-q12023-cdr-env-vars">
+  <changeSet author="tarekahmed" id="db.changelog-211-2023q1-cdr-env-vars">
     <addColumn tableName="cdr_version">
       <column name="wgs_vds_path" type="varchar(100)"/>
       <column name="wgs_exome_multi_hail_path" type="varchar(100)"/>
       <column name="wgs_exome_split_hail_path" type="varchar(100)"/>
       <column name="wgs_exome_vcf_path" type="varchar(100)"/>
-      <column name="wgs_cv_non_split_hail_path" type="varchar(100)"/>
-      <column name="wgs_cv_split_hail_path" type="varchar(100)"/>
-      <column name="wgs_cv_vcf_path" type="varchar(100)"/>
-      <column name="long_reads_storage_path" type="varchar(100)"/>
+      <column name="wgs_acaf_threshold_multi_hail_path" type="varchar(100)"/>
+      <column name="wgs_acaf_threshold_split_hail_path" type="varchar(100)"/>
+      <column name="wgs_acaf_threshold_vcf_path" type="varchar(100)"/>
+      <column name="wgs_clinvar_multi_hail_path" type="varchar(100)"/>
+      <column name="wgs_clinvar_split_hail_path" type="varchar(100)"/>
+      <column name="wgs_clinvar_vcf_path" type="varchar(100)"/>
+      <column name="wgs_long_reads_manifest_path" type="varchar(100)"/>
+      <column name="wgs_longread_hail_grch38" type="varchar(100)"/>
+      <column name="wgs_longread_hail_t2t" type="varchar(100)"/>
+      <column name="wgs_longread_joint_vcf_grch38" type="varchar(100)"/>
+      <column name="wgs_longread_joint_vcf_t2t" type="varchar(100)"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
