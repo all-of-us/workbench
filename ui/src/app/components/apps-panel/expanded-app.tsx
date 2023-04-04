@@ -302,9 +302,8 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <JupyterButtonRow {...{ workspace, onClickRuntimeConf }} />
       ) : (
         <FlexColumn>
-          {/* TODO: keep status updated internally */}
           <FlexRow style={{ justifyContent: 'center' }}>
-            status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
+            Status: {fromUserAppStatusWithFallback(initialUserAppInfo?.status)}{' '}
             <AppStatusIcon
               style={{ alignSelf: 'center', margin: '0 0.5em' }}
               appStatus={initialUserAppInfo?.status}
