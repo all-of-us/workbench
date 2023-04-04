@@ -157,14 +157,22 @@ const SidebarIcon = ({
   );
 };
 
-const displayAppStatusIcon = (
-  iconConfig: IconConfig,
-  workspaceNamespace: string,
-  userSuspended: boolean,
-  config: ConfigResponse,
-  status: AppStatus,
-  appType: UIAppType
-) => {
+const AppSidebarIcon = (props: {
+  iconConfig: IconConfig;
+  workspaceNamespace: string;
+  userSuspended: boolean;
+  config: ConfigResponse;
+  status: AppStatus;
+  appType: UIAppType;
+}) => {
+  const {
+    iconConfig,
+    workspaceNamespace,
+    userSuspended,
+    config,
+    status,
+    appType,
+  } = props;
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
     <SidebarIcon {...{ config, iconConfig }} iconPath={appTypeAssets?.icon}>
@@ -177,12 +185,13 @@ const displayAppStatusIcon = (
   );
 };
 
-const displayRuntimeStatusIcon = (
-  iconConfig: IconConfig,
-  workspaceNamespace: string,
-  userSuspended: boolean,
-  config: ConfigResponse
-) => {
+const RuntimeSidebarIcon = (props: {
+  iconConfig: IconConfig;
+  workspaceNamespace: string;
+  userSuspended: boolean;
+  config: ConfigResponse;
+}) => {
+  const { iconConfig, workspaceNamespace, userSuspended, config } = props;
   const jupyterAssets = appAssets.find(
     (aa) => aa.appType === UIAppType.JUPYTER
   );
@@ -410,25 +419,27 @@ const DisplayIcon = (props: DisplayIconProps) => {
     ],
     [
       'runtimeConfig',
-      () =>
-        displayRuntimeStatusIcon(
-          icon,
-          workspace.namespace,
-          userSuspended,
-          config
-        ),
+      () => (
+        <RuntimeSidebarIcon
+          iconConfig={icon}
+          workspaceNamespace={workspace.namespace}
+          {...{ config, userSuspended }}
+        />
+      ),
     ],
     [
       'cromwellConfig',
-      () =>
-        displayAppStatusIcon(
-          icon,
-          workspace.namespace,
-          userSuspended,
-          config,
-          userApps?.find((app) => app.appType === AppType.CROMWELL)?.status,
-          UIAppType.CROMWELL
-        ),
+      () => (
+        <AppSidebarIcon
+          iconConfig={icon}
+          workspaceNamespace={workspace.namespace}
+          status={
+            userApps?.find((app) => app.appType === AppType.CROMWELL)?.status
+          }
+          appType={UIAppType.CROMWELL}
+          {...{ config, userSuspended }}
+        />
+      ),
     ],
     [
       'terminal',
