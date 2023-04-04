@@ -126,13 +126,17 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-interface SidebarIconProps {
+interface CompoundIconProps {
   iconPath: string;
   iconConfig: IconConfig;
   children: React.ReactNode;
 }
 
-const SidebarIcon = ({ iconPath, iconConfig, children }: SidebarIconProps) => {
+const CompoundIcon = ({
+  iconPath,
+  iconConfig,
+  children,
+}: CompoundIconProps) => {
   const { config } = useStore(serverConfigStore);
   const iconStyle: CSSProperties = showAppsPanel(config)
     ? { width: '36px', position: 'absolute' }
@@ -151,7 +155,7 @@ const SidebarIcon = ({ iconPath, iconConfig, children }: SidebarIconProps) => {
   );
 };
 
-const AppSidebarIcon = (props: {
+const AppIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
@@ -162,17 +166,17 @@ const AppSidebarIcon = (props: {
     props;
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
-    <SidebarIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
+    <CompoundIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
       <AppStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         appStatus={status}
         style={styles.statusIconContainer}
       />
-    </SidebarIcon>
+    </CompoundIcon>
   );
 };
 
-const RuntimeSidebarIcon = (props: {
+const RuntimeIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
@@ -189,12 +193,12 @@ const RuntimeSidebarIcon = (props: {
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <SidebarIcon {...{ config, iconConfig, iconPath }}>
+    <CompoundIcon {...{ config, iconConfig, iconPath }}>
       <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />
-    </SidebarIcon>
+    </CompoundIcon>
   );
 };
 
@@ -407,7 +411,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     [
       'runtimeConfig',
       () => (
-        <RuntimeSidebarIcon
+        <RuntimeIcon
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
           {...{ userSuspended }}
@@ -417,7 +421,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     [
       'cromwellConfig',
       () => (
-        <AppSidebarIcon
+        <AppIcon
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
           status={
