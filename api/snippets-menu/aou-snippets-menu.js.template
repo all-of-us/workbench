@@ -17,7 +17,8 @@ define([
     const rMenus = [
       {{R_DATASET_MENU_JSON}},
       {{R_GCS_MENU_JSON}},
-      {{R_SQL_MENU_JSON}}
+      {{R_SQL_MENU_JSON}},
+      {{R_CROMWELL_JSON}}
     ];
 
     const handleKernel = (kernelName) => {
