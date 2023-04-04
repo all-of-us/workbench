@@ -1674,6 +1674,8 @@ public class CohortBuilderControllerTest {
             .addType(criteriaType.toString())
             .addConceptId(conceptId)
             .addCode(conceptCode)
+            .addSelectable(true)
+            .addCount(1L)
             .build();
     cbCriteriaDao.save(dbCriteria);
     return dbCriteria;
