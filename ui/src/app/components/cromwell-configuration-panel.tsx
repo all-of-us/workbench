@@ -16,10 +16,9 @@ import {
   withUserProfile,
 } from 'app/utils';
 import {
-  COST_TO_RUN_CROMWELL,
-  CROMWELL_DOC,
-  HOW_TO_RUN_CROMWELL,
-  WORKFLOW_AND_WDL,
+  CROMWELL_INFORMATION_LINK,
+  CROMWELL_INTRO_LINK,
+  WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import {
@@ -44,15 +43,15 @@ const { useState } = React;
 const cromwellSupportArticles = [
   {
     text: 'How to run Cromwell in All of Us workbench?',
-    link: HOW_TO_RUN_CROMWELL,
+    link: CROMWELL_INFORMATION_LINK,
   },
   {
     text: 'Cromwell documentation',
-    link: CROMWELL_DOC,
+    link: CROMWELL_INTRO_LINK,
   },
   {
     text: 'Workflow and WDL',
-    link: WORKFLOW_AND_WDL,
+    link: WORKFLOW_AND_WDL_LINK,
   },
 ];
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
@@ -133,7 +132,7 @@ const PanelMain = fp.flow(
             additional cost for interactions with the workflow.
             <a
               style={{ marginLeft: '0.25rem' }}
-              href={COST_TO_RUN_CROMWELL}
+              href={CROMWELL_INFORMATION_LINK}
               target={'_blank'}
             >
               Learn more{' '}
