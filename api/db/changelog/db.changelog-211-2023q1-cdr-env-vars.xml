@@ -7,7 +7,7 @@
   <changeSet author="tarekahmed" id="db.changelog-211-q12023-cdr-env-vars">
     <addColumn tableName="cdr_version">
       <column name="wgs_vds_path" type="varchar(100)"/>
-      <column name="wgs_exome_non_split_hail_path" type="varchar(100)"/>
+      <column name="wgs_exome_multi_hail_path" type="varchar(100)"/>
       <column name="wgs_exome_split_hail_path" type="varchar(100)"/>
       <column name="wgs_exome_vcf_path" type="varchar(100)"/>
       <column name="wgs_cv_non_split_hail_path" type="varchar(100)"/>
