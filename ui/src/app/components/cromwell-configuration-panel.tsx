@@ -36,11 +36,18 @@ import { TooltipTrigger } from './popups';
 const { useState } = React;
 
 const cromwellSupportArticles = [
-  { text: 'How to run Cromwell in All of Us workbench?', link: '#' },
-  { text: 'Cromwell documentation', link: '#' },
-  { text: 'Workflow and WDL', link: '#' },
-  { text: 'Running and Autopause', link: '#' },
-  { text: 'Storage options', link: '#' },
+  {
+    text: 'How to run Cromwell in All of Us workbench?',
+    link: 'https://support.researchallofus.org/hc/en-us/articles/14428263737620',
+  },
+  {
+    text: 'Cromwell documentation',
+    link: 'https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/',
+  },
+  {
+    text: 'Workflow and WDL',
+    link: 'https://support.terra.bio/hc/en-us/articles/360037117492-Overview-Getting-started-with-WDL',
+  },
 ];
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
 
@@ -118,9 +125,15 @@ const PanelMain = fp.flow(
           <WarningMessage>
             This cost is only for running the Cromwell Engine, there will be
             additional cost for interactions with the workflow.
-            <TooltipTrigger content='Coming soon'>
-              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
-            </TooltipTrigger>
+            <a
+              style={{ marginLeft: '0.25rem' }}
+              href={
+                'https://support.researchallofus.org/hc/en-us/articles/14428263737620'
+              }
+              target={'_blank'}
+            >
+              Learn more{' '}
+            </a>
             <i
               className='pi pi-external-link'
               style={{
@@ -133,45 +146,27 @@ const PanelMain = fp.flow(
           </WarningMessage>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
-          <div style={{ fontWeight: 'bold' }}>Cromwell version: 76</div>
           <FlexRow style={{ alignItems: 'center' }}>
             <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
               Cloud compute profile
             </div>
-            <div
-              style={{
-                marginRight: '0.5rem',
-                backgroundColor: '#ededed',
-                color: '#7b828e',
-                padding: '1rem 2rem 1rem 0.5rem',
-                borderRadius: '0.5rem',
-              }}
+            <TooltipTrigger
+              content='The cloud compute profile for Cromwell is beta is non-configurable.'
+              side={'right'}
             >
-              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
-            </div>
-            <TooltipTrigger content='Coming soon'>
-              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
+              <div style={styles.disabledCloudProfile}>
+                {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
+              </div>
             </TooltipTrigger>
-            <i
-              className='pi pi-external-link'
-              style={{
-                marginLeft: '0.25rem',
-                fontSize: '0.75rem',
-                color: '#6fb4ff',
-                cursor: 'pointer',
-              }}
-            />
           </FlexRow>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
           <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
           {cromwellSupportArticles.map((article, index) => (
             <div key={index} style={{ display: 'block' }}>
-              <TooltipTrigger content='Coming soon'>
-                <a>
-                  {index + 1}. {article.text}
-                </a>
-              </TooltipTrigger>
+              <a href={article.link} target='_blank'>
+                {index + 1}. {article.text}
+              </a>
             </div>
           ))}
         </div>
