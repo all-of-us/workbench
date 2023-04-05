@@ -12,7 +12,8 @@ function do_survey(){
 #########################################
 # insert survey data into cb_review_survey #
 #########################################
-echo "Inserting survey data into cb_review_survey"
+# Insert all survey data except COPE and PFHH
+echo "Inserting survey data into cb_review_survey - except COPE and PFHH"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
@@ -30,14 +31,75 @@ JOIN
         WHERE ancestor_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$Q_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     and parent_id = 0
+                    and concept_id not in (1333342, 1740639)
             )
     ) b on a.observation_source_concept_id = b.descendant_concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+
+# Insert COPE survey data
+echo "Inserting COPE survey data into cb_review_survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
+   (person_id, data_id, start_datetime, survey, question, answer)
+SELECT  DISTINCT a.person_id,
+        a.observation_id as data_id,
+        case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
+        c.name as survey,
+        d.concept_name as question,
+        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
+FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+JOIN
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+        WHERE ancestor_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$Q_DATASET.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                    AND parent_id = 0
+                    AND concept_id IN (1333342)
+            )
+            AND descendant_concept_id NOT IN (1310132, 1310137)
+    ) b on a.observation_source_concept_id = b.descendant_concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c ON b.ancestor_concept_id = c.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+
+# Insert PFHH survey data
+echo "Inserting PFHH survey data into cb_review_survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
+   (person_id, data_id, start_datetime, survey, question, answer)
+SELECT  DISTINCT a.person_id,
+        a.observation_id as data_id,
+        case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
+        c.name as survey,
+        d.concept_name as question,
+        case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
+FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+JOIN
+    (
+        SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
+                JOIN (
+                        SELECT CAST(id AS STRING) AS id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE concept_id IN (1740639)
+                        AND domain_id = 'SURVEY'
+                    ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+                WHERE domain_id = 'SURVEY'
+                AND type = 'PPI'
+                AND subtype = 'ANSWER'
+    ) b on a.value_source_concept_id = b.answer_concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
+
 }
 
 function do_drug(){
