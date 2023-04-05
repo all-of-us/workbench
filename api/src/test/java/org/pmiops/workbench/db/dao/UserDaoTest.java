@@ -196,6 +196,10 @@ public class UserDaoTest {
         accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     final DbAccessModule rasConfirmModule =
         accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
+    final DbAccessModule profileConfirmationModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.PROFILE_CONFIRMATION).get();
+    final DbAccessModule publicationConfirmationModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.PUBLICATION_CONFIRMATION).get();
     Instant now = Instant.now();
     Timestamp twoFactorAuthBypassTime = Timestamp.from(now.minusSeconds(10));
     Timestamp twoFactorAuthCompleteTime = Timestamp.from(now.minusSeconds(20));
@@ -208,6 +212,8 @@ public class UserDaoTest {
     Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
     Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(100));
     Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(110));
+    Timestamp profileConfirmationBypassTime = Timestamp.from(now.minusSeconds(120));
+    Timestamp publicationConfirmationBypassTime = Timestamp.from(now.minusSeconds(130));
     Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
@@ -216,6 +222,9 @@ public class UserDaoTest {
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
     addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
     addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
+    addUserAccessModule(user, profileConfirmationModule, profileConfirmationBypassTime, null);
+    addUserAccessModule(
+        user, publicationConfirmationModule, publicationConfirmationBypassTime, null);
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     assertThat(rows.get(0).getEraCommonsBypassTime()).isEqualTo(eRABypassTime);
@@ -224,6 +233,10 @@ public class UserDaoTest {
     assertThat(rows.get(0).getDuccBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
     assertThat(rows.get(0).getRasLinkLoginGovBypassTime()).isEqualTo(rasBypassTime);
+    assertThat(rows.get(0).getProfileConfirmationBypassTime())
+        .isEqualTo(profileConfirmationBypassTime);
+    assertThat(rows.get(0).getPublicationConfirmationBypassTime())
+        .isEqualTo(publicationConfirmationBypassTime);
 
     final DbAdminTableUser row = rows.get(0);
     Class<DbAdminTableUser> dbAdminUserClass = DbAdminTableUser.class;

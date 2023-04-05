@@ -38,15 +38,8 @@ public class AccessModuleNameMapperTest {
 
   @Test
   public void testStorageToBypassPropertyMapping() {
-    // these can't be bypassed, so they don't have a mapping
-    List<DbAccessModuleName> unbypassable =
-        ImmutableList.of(
-            DbAccessModuleName.PROFILE_CONFIRMATION, DbAccessModuleName.PUBLICATION_CONFIRMATION);
-    unbypassable.forEach(name -> assertThat(mapper.bypassAuditPropertyFromStorage(name)).isNull());
-
     assertThat(
             Arrays.stream(DbAccessModuleName.values())
-                .filter(name -> !unbypassable.contains(name))
                 .allMatch(name -> mapper.bypassAuditPropertyFromStorage(name) != null))
         .isTrue();
   }

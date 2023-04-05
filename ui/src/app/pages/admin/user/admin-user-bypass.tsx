@@ -45,6 +45,12 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
+    ...(user.profileConfirmationBypassTime
+      ? [AccessModule.PROFILECONFIRMATION]
+      : []),
+    ...(user.publicationConfirmationBypassTime
+      ? [AccessModule.PUBLICATIONCONFIRMATION]
+      : []),
   ];
 };
 
@@ -232,6 +238,34 @@ export class AdminUserBypass extends React.Component<Props, State> {
                 }}
               />
             )}
+            <Toggle
+              name='Profile Confirmation'
+              checked={selectedModules.includes(
+                AccessModule.PROFILECONFIRMATION
+              )}
+              data-test-id='profile-confirmation-toggle'
+              onToggle={() => {
+                this.setState({
+                  selectedModules: fp.xor(selectedModules, [
+                    AccessModule.PROFILECONFIRMATION,
+                  ]),
+                });
+              }}
+            />
+            <Toggle
+              name='Publication Confirmation'
+              checked={selectedModules.includes(
+                AccessModule.PUBLICATIONCONFIRMATION
+              )}
+              data-test-id='publication-confirmation-toggle'
+              onToggle={() => {
+                this.setState({
+                  selectedModules: fp.xor(selectedModules, [
+                    AccessModule.PUBLICATIONCONFIRMATION,
+                  ]),
+                });
+              }}
+            />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button
                 type='secondary'

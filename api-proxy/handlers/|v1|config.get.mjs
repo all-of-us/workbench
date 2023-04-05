@@ -71,14 +71,14 @@ const body = JSON.stringify(
     {
       name: 'PROFILE_CONFIRMATION',
       expirable: true,
-      bypassable: false,
+      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'PUBLICATION_CONFIRMATION',
       expirable: true,
-      bypassable: false,
+      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
