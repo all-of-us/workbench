@@ -60,7 +60,7 @@ JOIN
         WHERE ancestor_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$Q_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     AND parent_id = 0
                     AND concept_id IN (1333342)
