@@ -254,18 +254,18 @@ commands:
       - halt-test-check:
           dir_names: "api"
       - restore_cache:
-          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v7-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
-          key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+          key: v7-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - steps: << parameters.additional_steps >>
       - save_cache:
           paths:
             - ~/.gradle/wrapper
-          key: v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+          key: v7-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+          key: v7-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - store_test_results:
           path: ~/workbench/api/build/test-results
       - store_artifacts:
@@ -603,13 +603,13 @@ jobs:
       - restore_cache:
           name: "Restore api gradle wrapper cache"
           keys:
-            - v6-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
-            - v6-gradle-wrapper-
+            - v7-gradle-wrapper-{{ .Branch }}-{{ checksum "~/workbench/api/gradle/wrapper/gradle-wrapper.properties" }}
+            - v7-gradle-wrapper-
       - restore_cache:
           name: "Restore api gradle cache"
           keys:
-            - v6-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
-            - v6-gradle-cache-
+            - v7-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
+            - v7-gradle-cache-
       - restore_cache:
           name: "Restore e2e yarn cache"
           keys:
