@@ -30,9 +30,8 @@ describe('Notebook Snippets Tests', () => {
       [
         'All of Us Dataset Builder R snippets',
         'All of Us R and Cloud Storage snippets',
-        'All of Us R and SQL snippets'
-        // nope, this one does not exist
-        // 'All of Us Cromwell Setup R snippets'
+        'All of Us R and SQL snippets',
+        'All of Us Cromwell Setup snippets'
       ]
     ]
   ])('Create notebook and access %s snippets', async (language, expectedKernelName, expectedSnippetCategories) => {
