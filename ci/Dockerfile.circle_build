@@ -1,13 +1,12 @@
 # To build and deploy, from this directory:
-# $ docker build -f Dockerfile.circle_build -t allofustest/workbench:buildimage-X.Y.Z .
+# $ docker build . -f Dockerfile.circle_build -t us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z .
 # Test out the new image with:
-# $ docker run -it allofustest/workbench:buildimage-X.Y.Z /bin/bash
-# Update all mentions of allofustest/workbench:buildimage-X.Y.Z in
-# .circleci/circle.yml by incrementing the numbers. Using the new values, run:
-# $ docker login  # interactive prompts
-# $ docker push allofustest/workbench:buildimage-X.Y.Z
-# For permission to push, request to be added to the DockerHub repository.
-# Include your changes to circle.yml in the PR that uses the build image.
+# $ docker run -it us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z /bin/bash
+# Update all mentions of us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z in
+# .circleci/config.yml by incrementing the numbers. Using the new values, run:
+# $ gcloud auth configure-docker  # interactive prompts
+# $ docker push us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-X.Y.Z
+# Include your changes to config.yml in the PR that uses the build image.
 
 # This image should be kept synchronized with deploy/Dockerfile.
 
@@ -41,7 +40,7 @@ RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-ENV GRADLE_VERSION 6.7.1
+ENV GRADLE_VERSION 7.6.1
 
 RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
   && sudo unzip /tmp/gradle.zip -d /opt/gradle

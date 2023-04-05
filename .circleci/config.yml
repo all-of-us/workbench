@@ -16,7 +16,7 @@ parameters:
     default: "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com"
   workbench-image:
     type: string
-    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.25"
+    default: "us.gcr.io/broad-dsp-gcr-public/workbench:buildimage-0.0.26"
   db-image:
     type: string
     default: "cimg/mysql:5.7"
