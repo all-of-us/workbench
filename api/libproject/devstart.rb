@@ -930,8 +930,8 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   op.parse.validate
   gcc.validate()
 
-  with_cloud_proxy_and_db(gcc) do
-    common = Common.new
+  common = Common.new
+  CloudSqlProxyContext.new(gcc.project).run do
     Dir.chdir('db-cdr') do
       common.run_inline %W{./generate-cdr/import-cdr-indices-build-to-cloudsql.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
@@ -1319,11 +1319,10 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   op.parse.validate
   gcc.validate()
 
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        ./gradlew fetchFireCloudUserProfile
-       -PappArgs=["#{op.opts.user}"]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{
+      ./gradlew fetchFireCloudUserProfile
+     -PappArgs=["#{op.opts.user}"]}
 end
 
 Common.register_command({
@@ -1358,11 +1357,10 @@ def fetch_workspace_details(cmd_name, *args)
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        ./gradlew fetchWorkspaceDetails
-       -PappArgs=[#{flags.join(',')}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{
+      ./gradlew fetchWorkspaceDetails
+     -PappArgs=[#{flags.join(',')}]}
 end
 
 Common.register_command({
@@ -1516,11 +1514,10 @@ def load_institutions(cmd_name, *args)
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        ./gradlew loadInstitutions
-       -PappArgs=[#{gradle_args.join(',')}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{
+      ./gradlew loadInstitutions
+     -PappArgs=[#{gradle_args.join(',')}]}
 end
 
 LOAD_INSTITUTIONS_CMD = "load-institutions"
@@ -1573,11 +1570,10 @@ def delete_workspaces(cmd_name, *args)
   # Gradle args need to be single-quote wrapped.
   flags.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        ./gradlew deleteWorkspaces
-       -PappArgs=[#{flags.join(',')}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{
+      ./gradlew deleteWorkspaces
+     -PappArgs=[#{flags.join(',')}]}
 end
 
 DELETE_WORKSPACES_CMD = "delete-workspaces"
@@ -1642,11 +1638,10 @@ def invalidate_rdr_export(cmd_name, *args)
   # Gradle args need to be single-quote wrapped.
   flags.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{
-        ./gradlew invalidateRdrExport
-       -PappArgs=[#{flags.join(',')}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{
+      ./gradlew invalidateRdrExport
+     -PappArgs=[#{flags.join(',')}]}
 end
 
 INVALIDATE_RDR_EXPORT = "invalidate-rdr-export";
@@ -1755,12 +1750,10 @@ def set_authority(cmd_name, *args)
     )
   end
 
-  with_cloud_proxy_and_db(gcc) do
-    common = Common.new
-    common.run_inline %W{
-      ./gradlew setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  Common.new.run_inline %W{
+    ./gradlew setAuthority
+   -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
 end
 
 Common.register_command({
@@ -1822,12 +1815,11 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    ServiceAccountContext.new(gcc.project).run do
-      common.run_inline %W{
-         ./gradlew createWgsCohortExtractionBillingProjectWorkspace
-         -PappArgs=[#{flags.join(',')}]}
-    end
+  ENV.update(read_db_vars(gcc))
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+       ./gradlew createWgsCohortExtractionBillingProjectWorkspace
+       -PappArgs=[#{flags.join(',')}]}
   end
 end
 
@@ -2077,10 +2069,9 @@ def update_cdr_config(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  with_cloud_proxy_and_db(gcc) do
-    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
-  end
+  ENV.update(read_db_vars(gcc))
+  cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+  update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 end
 
 Common.register_command({
@@ -2303,10 +2294,11 @@ def create_or_update_workbench_db()
 end
 
 def create_or_update_workbench_db_cmd(cmd_name, args)
-  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
-    # with_cloud_proxy_and_db_env loads env vars into scope which parameterize this call
-    create_or_update_workbench_db
-  end
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+  ENV.update(read_db_vars(gcc))
+  create_or_update_workbench_db
 end
 
 Common.register_command({
@@ -2386,35 +2378,14 @@ def load_config(project, dry_run = false)
   run_inline_or_log(dry_run, %W{./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_json}})
 end
 
-def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
-  ENV.update(read_db_vars(gcc))
-  ENV.update(must_get_env_value(gcc.project, :gae_vars))
-  ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
-  CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
-    yield(gcc)
-  end
-end
-
 def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   common = Common.new
   if gcc.project == 'local'
     start_local_db_service()
     yield gcc
   else
-    common.status("Creating cloud proxy for environment #{gcc.project}")
-    with_cloud_proxy_and_db(gcc, service_account, key_file) do |gcc|
-      yield gcc
-    end
-  end
-end
-
-def with_cloud_proxy_and_db_env(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-  with_cloud_proxy_and_db(gcc) do |ctx|
-    yield ctx
+    ENV.update(read_db_vars(gcc))
+    yield gcc
   end
 end
 
@@ -2432,7 +2403,7 @@ def deploy(cmd_name, args)
     ->(opts, v) { opts.version = v},
     "Version to deploy (e.g. your-username-test)"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.version}
+  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
   op.add_option(
     "--key-file [keyfile]",
     ->(opts, v) { opts.key_file = v},
@@ -2454,7 +2425,7 @@ def deploy(cmd_name, args)
     ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
-  op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("promote option required") if opts.promote.nil?}
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -2462,22 +2433,21 @@ def deploy(cmd_name, args)
 
   common = Common.new
   common.status "Running database migrations..."
-  with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
-    migrate_database(op.opts.dry_run)
-    load_config(ctx.project, op.opts.dry_run)
-    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+  ENV.update(read_db_vars(gcc))
+  migrate_database(op.opts.dry_run)
+  load_config(ctx.project, op.opts.dry_run)
+  cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+  update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
-    # Keep the cloud proxy context open for the service account credentials.
-    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
-    deploy_args = %W{
-      --project #{gcc.project}
-      --version #{op.opts.version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-    } + dry_flag
-    deploy_api(cmd_name, deploy_args)
-  end
+  # Keep the cloud proxy context open for the service account credentials.
+  dry_flag = op.opts.dry_run ? %W{--dry-run} : []
+  deploy_args = %W{
+    --project #{gcc.project}
+    --version #{op.opts.version}
+    #{op.opts.promote ? "--promote" : "--no-promote"}
+    --quiet
+  } + dry_flag
+  deploy_api(cmd_name, deploy_args)
 end
 
 Common.register_command({
@@ -2488,7 +2458,11 @@ Common.register_command({
 
 
 def run_cloud_migrations(cmd_name, args)
-  with_cloud_proxy_and_db_env(cmd_name, args) { migrate_database }
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+  ENV.update(read_db_vars(gcc))
+  migrate_database
 end
 
 Common.register_command({
@@ -2498,9 +2472,11 @@ Common.register_command({
 })
 
 def update_cloud_config(cmd_name, args)
-  with_cloud_proxy_and_db_env(cmd_name, args) do |ctx|
-    load_config(ctx.project)
-  end
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+  ENV.update(read_db_vars(gcc))
+  load_config(ctx.project)
 end
 
 Common.register_command({
@@ -2543,61 +2519,9 @@ def create_project_resources(gcc)
   common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
-def setup_project_data(gcc, cdr_db_name)
-  root_password = random_password()
-  workbench_password = random_password()
-  readonly_password = random_password()
-
-  common = Common.new
-  # This changes database connection information; don't call this while the server is running!
-  common.status "Writing DB credentials file..."
-  write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password, readonly_password)
-  common.status "Setting root password..."
-  run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
-                     "--instance #{INSTANCE_NAME} --password #{root_password}",
-                     root_password)
-  # Don't delete the credentials created here; they will be stored in GCS and reused during
-  # deployment, etc.
-  with_cloud_proxy_and_db(gcc) do
-    common.status "Setting up databases and users..."
-    create_or_update_workbench_db
-
-    common.status "Running schema migrations..."
-    migrate_database
-
-  end
-end
-
 def random_password()
   return rand(36**20).to_s(36)
 end
-
-# TODO: add a goal which updates passwords but nothing else
-# TODO: add a goal which updates CDR DBs but nothing else
-
-def setup_cloud_project(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-    "--cdr-db-name [CDR_DB]",
-    ->(opts, v) { opts.cdr_db_name = v},
-    "Name of the default CDR db to use; required. (example: cdr20180206) This will subsequently " +
-    "be created by cloudsql-import."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.cdr_db_name}
-  gcc = GcloudContextV2.new(op)
-
-  op.parse.validate
-  gcc.validate
-
-  create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name)
-end
-
-Common.register_command({
-  :invocation => "setup-cloud-project",
-  :description => "Initializes resources within a cloud project that has already been created",
-  :fn => ->(*args) { setup_cloud_project("setup-cloud-project", *args) }
-})
 
 def set_access_module_timestamps(cmd_name, *args)
   common = Common.new
@@ -2628,10 +2552,8 @@ def set_access_module_timestamps(cmd_name, *args)
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
 
-  with_cloud_proxy_and_db(gcc) do
-    ENV["DB_HOST"] = nil
-    common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
 end
 
 SET_ACCESS_MODULE_TIMESTAMPS_CMD = "set-access-module-timestamps"
@@ -2658,9 +2580,8 @@ def export_workspace_operations(cmd_name, *args)
   gcc.validate()
 
   common = Common.new
-  with_cloud_proxy_and_db(gcc) do
-    common.run_inline %W{./gradlew exportWorkspaceOperations}
-  end
+  ENV.update(read_db_vars(gcc))
+  common.run_inline %W{./gradlew exportWorkspaceOperations}
 end
 
 EXPORT_WORKSPACE_OPERATIONS_CMD = "export-workspace-operations"
