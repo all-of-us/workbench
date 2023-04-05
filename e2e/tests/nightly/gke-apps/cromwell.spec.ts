@@ -72,15 +72,17 @@ describe('Cromwell GKE App', () => {
 
     await appsPanel.pollForStatus(expandedCromwellXpath, 'DELETING');
 
-    // poll for deleted (unexpanded)
+    // poll for deleted (unexpanded) by repeatedly closing and opening
 
     const isDeleted = await waitForFn(
       async () => {
+        await appsPanel.close();
+        await appsPanel.open();
         const unexpanded = new Button(page, unexpandedCromwellXPath);
         return await unexpanded.exists();
       },
       10e3, // every 10 sec
-      2 * 60e3 // with a 2 min timeout
+      60e3 // with a 1 min timeout
     );
     expect(isDeleted).toBeTruthy();
   });
