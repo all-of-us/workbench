@@ -31,7 +31,7 @@ JOIN
         WHERE ancestor_concept_id in
             (
                 SELECT concept_id
-                FROM \`$BQ_PROJECT.$Q_DATASET.cb_criteria\`
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     and parent_id = 0
                     and concept_id not in (1333342, 1740639)
