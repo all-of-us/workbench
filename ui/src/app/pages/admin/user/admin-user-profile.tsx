@@ -377,7 +377,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   const { updatedProfile } = props;
 
   const tableData: TableRow[] = fp.flatMap((moduleName) => {
-    const { adminPageTitle, bypassable, isEnabledInEnvironment } =
+    const { adminPageTitle, isEnabledInEnvironment } =
       getAccessModuleConfig(moduleName);
 
     return isEnabledInEnvironment
@@ -399,7 +399,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
                 moduleName={moduleName}
               />
             ),
-            bypassToggle: bypassable && (
+            bypassToggle: (
               <ToggleForModule moduleName={moduleName} {...props} />
             ),
           },

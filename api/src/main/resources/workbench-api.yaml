@@ -4717,15 +4717,12 @@ definitions:
     required:
       - name
       - expirable
-      - bypassable
       - requiredForRTAccess
       - requiredForCTAccess
     properties:
       name:
         "$ref": "#/definitions/AccessModule"
       expirable:
-        type: boolean
-      bypassable:
         type: boolean
       requiredForRTAccess:
         type: boolean

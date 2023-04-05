@@ -22,7 +22,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
@@ -66,7 +65,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   @Override
   public void updateAllBypassTimes(long userId) {
     dbAccessModulesProvider.get().stream()
-        .filter(DbAccessModule::getBypassable)
         .forEach(module -> updateBypassTime(userId, module.getName(), true));
   }
 
@@ -83,9 +81,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       long userId, DbAccessModuleName accessModuleName, boolean isBypassed) {
     DbAccessModule accessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
-    if (!accessModule.getBypassable()) {
-      throw new ForbiddenException("Bypass: " + accessModuleName.toString() + " is not allowed.");
-    }
 
     final DbUser user = userDao.findUserByUserId(userId);
     DbUserAccessModule userAccessModuleToUpdate =
@@ -170,7 +165,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModule = retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
-    boolean isBypassed = dbAccessModule.getBypassable() && userAccessModule.getBypassTime() != null;
+    boolean isBypassed = userAccessModule.getBypassTime() != null;
     boolean isCompleted = userAccessModule.getCompletionTime() != null;
 
     // we have an additional check before considering DUCC "complete"
@@ -185,14 +180,6 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
     // A module is completed when it is bypassed OR (completed but not expired).
     return isBypassed || (isCompleted && !isExpired);
-  }
-
-  @Override
-  public boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName) {
-    DbAccessModule dbAccessModule =
-        getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
-    return dbAccessModule.getBypassable()
-        && retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule).getBypassTime() != null;
   }
 
   /**
