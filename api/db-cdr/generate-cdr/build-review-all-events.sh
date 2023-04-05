@@ -79,7 +79,7 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 SELECT  DISTINCT a.person_id,
         a.observation_id as data_id,
         case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
-        c.name as survey,
+        'Personal and Family Health History' as survey,
         d.concept_name as question,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
