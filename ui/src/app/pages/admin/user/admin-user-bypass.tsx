@@ -72,7 +72,7 @@ const moduleToToggleProps: Record<
     'data-test-id': 'ducc-toggle',
   },
   [AccessModule.ERACOMMONS]: {
-    name: 'eRA Commons',
+    name: 'eRA Commons Linking',
     'data-test-id': 'era-commons-toggle',
   },
   [AccessModule.TWOFACTORAUTH]: {
@@ -80,7 +80,7 @@ const moduleToToggleProps: Record<
     'data-test-id': 'two-factor-auth-toggle',
   },
   [AccessModule.RASLINKLOGINGOV]: {
-    name: 'RAS Link Login.gov',
+    name: 'RAS Login.gov Link',
     'data-test-id': 'ras-link-login-gov-toggle',
   },
   [AccessModule.PROFILECONFIRMATION]: {
