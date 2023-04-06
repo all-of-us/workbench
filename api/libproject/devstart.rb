@@ -1124,39 +1124,6 @@ Common.register_command({
   :fn => ->(*args) { run_cloud_data_migrations("run-cloud-data-migrations", args) }
 })
 
-def write_db_creds_file(project, cdr_db_name, root_password, workbench_password, readonly_password)
-  instance_name = "#{project}:us-central1:workbenchmaindb"
-  db_creds_file = Tempfile.new("#{project}-vars.env")
-  if db_creds_file
-    begin
-      db_creds_file.puts "DB_CONNECTION_STRING=jdbc:google:mysql://#{instance_name}/workbench?rewriteBatchedStatements=true"
-      db_creds_file.puts "DB_DRIVER=com.mysql.jdbc.GoogleDriver"
-      db_creds_file.puts "DB_HOST=127.0.0.1"
-      db_creds_file.puts "DB_NAME=workbench"
-      # TODO: make our CDR migration scripts update *all* CDR versions listed in the cdr_version
-      # table of the workbench DB; then this shouldn't be needed anymore.
-      db_creds_file.puts "CDR_DB_NAME=#{cdr_db_name}"
-      # TODO: wait one release and then remove
-      db_creds_file.puts "CLOUD_SQL_INSTANCE=#{instance_name}"
-      db_creds_file.puts "CLOUD_SQL_INSTANCE_NAME=#{instance_name}"
-      db_creds_file.puts "LIQUIBASE_DB_USER=liquibase"
-      db_creds_file.puts "LIQUIBASE_DB_PASSWORD=#{workbench_password}"
-      db_creds_file.puts "MYSQL_ROOT_PASSWORD=#{root_password}"
-      db_creds_file.puts "WORKBENCH_DB_USER=workbench"
-      db_creds_file.puts "WORKBENCH_DB_PASSWORD=#{workbench_password}"
-      db_creds_file.puts "DEV_READONLY_DB_USER=dev-readonly"
-      db_creds_file.puts "DEV_READONLY_DB_PASSWORD=#{readonly_password}"
-      db_creds_file.close
-
-      copy_file_to_gcs(db_creds_file.path, "#{project}-credentials", "vars.env")
-    ensure
-      db_creds_file.unlink
-    end
-  else
-    raise("Error creating file.")
-  end
-end
-
 def create_auth_domain(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
