@@ -85,12 +85,6 @@ const styles = reactStyles({
   },
 });
 
-const containerStyle: CSSProperties = {
-  height: '100%',
-  alignItems: 'center',
-  justifyContent: 'space-around',
-};
-
 const iconStyles = reactStyles({
   active: {
     ...styles.icon,
@@ -141,6 +135,12 @@ const CompoundIcon = ({
   const iconStyle: CSSProperties = showAppsPanel(config)
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
+
+  const containerStyle: CSSProperties = {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  };
 
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
