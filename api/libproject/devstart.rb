@@ -2261,6 +2261,7 @@ def create_or_update_workbench_db()
 end
 
 def create_or_update_workbench_db_cmd(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate()
@@ -2425,6 +2426,7 @@ Common.register_command({
 
 
 def run_cloud_migrations(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate()
@@ -2439,6 +2441,7 @@ Common.register_command({
 })
 
 def update_cloud_config(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate()
