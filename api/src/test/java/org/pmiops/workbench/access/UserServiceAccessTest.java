@@ -468,11 +468,10 @@ public class UserServiceAccessTest {
         dbUser.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.RT_COMPLIANCE_TRAINING, true);
-
-    // these 2 are not bypassable
-    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, now);
-    accessModuleService.updateCompletionTime(
-        dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, now);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, true);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, true);
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 

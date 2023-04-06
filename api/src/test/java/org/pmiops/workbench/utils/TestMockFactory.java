@@ -63,52 +63,34 @@ public class TestMockFactory {
    * Populate the list of expected Access Modules with appropriate properties. See
    * http://broad.io/aou-access-modules-2021.
    *
-   * <p>TWO_FACTOR_AUTH and ERA_COMMONS: bypassable and not subject to AAR (expirable)
+   * <p>TWO_FACTOR_AUTH and ERA_COMMONS: not subject to AAR (expirable)
    *
-   * <p>DATA_USER_CODE_OF_CONDUCT and RT_COMPLIANCE_TRAINING: bypassable and expirable
-   *
-   * <p>PROFILE_CONFIRMATION and PUBLICATION_CONFIRMATION: expirable and not bypassable
+   * <p>DATA_USER_CODE_OF_CONDUCT, RT_COMPLIANCE_TRAINING, PROFILE_CONFIRMATION and
+   * PUBLICATION_CONFIRMATION: expirable
    *
    * <p>When considering new modules, the simplest option for implementation purposes is to make
-   * them bypassable and non-expirable. So we should default to this, unless required for product
-   * reasons.
+   * them non-expirable. So we should default to this, unless required for product reasons.
    *
-   * <p>RAS_LOGIN_GOV is bypassable and non-expirable for this reason.
+   * <p>RAS_LOGIN_GOV is non-expirable for this reason.
    */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
-          new DbAccessModule()
-              .setName(DbAccessModuleName.TWO_FACTOR_AUTH)
-              .setExpirable(false)
-              .setBypassable(true),
-          new DbAccessModule()
-              .setName(DbAccessModuleName.ERA_COMMONS)
-              .setExpirable(false)
-              .setBypassable(true),
-          new DbAccessModule()
-              .setName(DbAccessModuleName.RAS_LOGIN_GOV)
-              .setExpirable(false)
-              .setBypassable(true),
+          new DbAccessModule().setName(DbAccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
+          new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
+          new DbAccessModule().setName(DbAccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
           new DbAccessModule()
               .setName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
-              .setExpirable(true)
-              .setBypassable(true),
+              .setExpirable(true),
           new DbAccessModule()
               .setName(DbAccessModuleName.RT_COMPLIANCE_TRAINING)
-              .setExpirable(true)
-              .setBypassable(true),
+              .setExpirable(true),
           new DbAccessModule()
               .setName(DbAccessModuleName.CT_COMPLIANCE_TRAINING)
-              .setExpirable(true)
-              .setBypassable(true),
-          new DbAccessModule()
-              .setName(DbAccessModuleName.PROFILE_CONFIRMATION)
-              .setExpirable(true)
-              .setBypassable(false),
+              .setExpirable(true),
+          new DbAccessModule().setName(DbAccessModuleName.PROFILE_CONFIRMATION).setExpirable(true),
           new DbAccessModule()
               .setName(DbAccessModuleName.PUBLICATION_CONFIRMATION)
-              .setExpirable(true)
-              .setBypassable(false));
+              .setExpirable(true));
 
   // TODO there's something off about how "workspaceName" here works.  Investigate.
   // For best results, use a lowercase-only workspaceName.

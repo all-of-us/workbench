@@ -36,56 +36,48 @@ const body = JSON.stringify(
     {
       name: 'ERA_COMMONS',
       expirable: false,
-      bypassable: true,
       requiredForRTAccess: false,
       requiredForCTAccess: false
     },
     {
       name: 'TWO_FACTOR_AUTH',
       expirable: false,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'RAS_LINK_LOGIN_GOV',
       expirable: false,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'COMPLIANCE_TRAINING',
       expirable: true,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'DATA_USER_CODE_OF_CONDUCT',
       expirable: true,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'PROFILE_CONFIRMATION',
       expirable: true,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'PUBLICATION_CONFIRMATION',
       expirable: true,
-      bypassable: true,
       requiredForRTAccess: true,
       requiredForCTAccess: true
     },
     {
       name: 'CT_COMPLIANCE_TRAINING',
       expirable: true,
-      bypassable: true,
       requiredForRTAccess: false,
       requiredForCTAccess: true
     }

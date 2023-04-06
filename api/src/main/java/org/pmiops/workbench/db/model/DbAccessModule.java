@@ -18,7 +18,6 @@ import javax.persistence.Transient;
 public class DbAccessModule {
   private long accessModuleId;
   private boolean expirable;
-  private boolean bypassable;
   private DbAccessModuleName name;
 
   @Id
@@ -40,16 +39,6 @@ public class DbAccessModule {
 
   public DbAccessModule setExpirable(boolean expirable) {
     this.expirable = expirable;
-    return this;
-  }
-
-  @Column(name = "bypassable", nullable = false)
-  public boolean getBypassable() {
-    return true;
-  }
-
-  public DbAccessModule setBypassable(boolean bypassable) {
-    this.bypassable = bypassable;
     return this;
   }
 
