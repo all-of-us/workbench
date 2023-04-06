@@ -157,7 +157,7 @@ const CompoundIcon = ({
   );
 };
 
-export const AppIcon = (props: {
+export const UserAppIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
@@ -421,7 +421,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     [
       'cromwellConfig',
       () => (
-        <AppIcon
+        <UserAppIcon
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
           status={

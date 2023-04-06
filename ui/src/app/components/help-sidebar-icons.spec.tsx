@@ -10,7 +10,7 @@ import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterIcon from 'assets/images/Jupyter-icon.png';
 
 import { UIAppType } from './apps-panel/utils';
-import { AppIcon } from './help-sidebar-icons';
+import { UserAppIcon } from './help-sidebar-icons';
 
 const getIconConfig = (iconId, label): IconConfig => {
   return {
@@ -38,14 +38,14 @@ describe('CompoundIcons', () => {
     serverConfigStore.set({ config: defaultConfig });
   });
 
-  it('AppIcon renders for Cromwell', () => {
+  it('UserAppIcon renders for Cromwell', () => {
     const icon = cromwellIcon;
     const iconId = 'cromwellConfig';
     const label = 'Cromwell Icon';
     const iconConfig = getIconConfig(iconId, label);
 
     const wrapper = mount(
-      <AppIcon
+      <UserAppIcon
         iconConfig={iconConfig}
         workspaceNamespace=''
         userSuspended={false}
