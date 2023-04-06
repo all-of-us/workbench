@@ -16,26 +16,29 @@ import {
   UpdatingIcon,
 } from './status-icon';
 
-describe('CompoundIcons', () => {
+describe('Runtime Status Indicator', () => {
   test.each([
     [RuntimeStatus.Creating, UpdatingIcon],
     [RuntimeStatus.Stopped, StoppedIcon],
     [RuntimeStatus.Running, RunningIcon],
     [RuntimeStatus.Stopping, StoppingIcon],
     [RuntimeStatus.Error, ErrorIcon],
-  ])('RuntimeIcon renders when appsPanel is %s', (status, icon) => {
-    const runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = status;
-    runtimeStore.set({
-      workspaceNamespace: '',
-      runtime: runtimeStub.runtime,
-      runtimeLoaded: true,
-    });
-    const wrapper = mount(<RuntimeStatusIndicator />);
-    expect(wrapper.exists()).toBeTruthy();
-    const statusIcon = wrapper.find(icon);
-    expect(statusIcon.exists()).toBeTruthy();
-  });
+  ])(
+    'RuntimeStatus indicator renders correct indicator when runtime is in %s state',
+    (status, icon) => {
+      const runtimeStub = new RuntimeApiStub();
+      runtimeStub.runtime.status = status;
+      runtimeStore.set({
+        workspaceNamespace: '',
+        runtime: runtimeStub.runtime,
+        runtimeLoaded: true,
+      });
+      const wrapper = mount(<RuntimeStatusIndicator />);
+      expect(wrapper.exists()).toBeTruthy();
+      const statusIcon = wrapper.find(icon);
+      expect(statusIcon.exists()).toBeTruthy();
+    }
+  );
 
   it('Verify that a runtime with an undefined status does not have a status icon', () => {
     const runtimeStub = new RuntimeApiStub();
