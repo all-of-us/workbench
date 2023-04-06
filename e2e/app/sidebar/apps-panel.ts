@@ -12,17 +12,16 @@ export default class AppsPanel extends BaseEnvironmentPanel {
   }
 
   async pollForStatus(xPath: string, status: string, timeout: number = 10 * 60e3): Promise<void> {
+    const interval = 10e3; // every 10 sec
     const success = await waitForFn(
       async () => {
-        await this.close();
-        await this.open();
         const text = await BaseElement.asBaseElement(page, await page.waitForXPath(xPath)).getTextContent();
-        return text.includes(`status: ${status}`);
+        return text.includes(`Status: ${status}`);
       },
-      10e3, // every 10 sec
+      interval,
       timeout
     );
+    console.log(success ? `Polling complete, status = ${status}` : `Polling timed out after ${interval / 1e3} seconds`);
     expect(success).toBeTruthy();
-    console.log(`Polling complete, status = ${status}`);
   }
 }

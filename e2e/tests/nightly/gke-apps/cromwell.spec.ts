@@ -60,10 +60,9 @@ describe('Cromwell GKE App', () => {
       page,
       await page.waitForXPath(expandedCromwellXpath)
     ).getTextContent();
-    expect(cromwellText).toContain('status: PROVISIONING');
+    expect(cromwellText).toContain('Status: PROVISIONING');
     console.log('Cromwell status: PROVISIONING');
 
-    // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
@@ -71,7 +70,6 @@ describe('Cromwell GKE App', () => {
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
 
-    // poll for "DELETING" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedCromwellXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening

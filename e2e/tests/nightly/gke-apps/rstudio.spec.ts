@@ -46,10 +46,8 @@ describe('RStudio GKE App', () => {
 
     await createButton.click();
 
-    // poll for "PROVISIONING" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'PROVISIONING');
 
-    // poll for "Running" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', 15 * 60e3);
 
     const deleteXPath = `${expandedRStudioXpath}//*[@data-test-id="RStudio-delete-button"]`;
@@ -57,7 +55,6 @@ describe('RStudio GKE App', () => {
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
 
-    // poll for "DELETING" by repeatedly closing and opening
     await appsPanel.pollForStatus(expandedRStudioXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening
