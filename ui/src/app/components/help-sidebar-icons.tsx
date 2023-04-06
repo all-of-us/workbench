@@ -155,7 +155,7 @@ const CompoundIcon = ({
   );
 };
 
-const AppIcon = (props: {
+export const AppIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
@@ -176,7 +176,7 @@ const AppIcon = (props: {
   );
 };
 
-const RuntimeIcon = (props: {
+export const RuntimeIcon = (props: {
   iconConfig: IconConfig;
   workspaceNamespace: string;
   userSuspended: boolean;
