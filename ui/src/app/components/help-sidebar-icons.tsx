@@ -142,6 +142,8 @@ const CompoundIcon = ({
     ? { width: '36px', position: 'absolute' }
     : { width: '22px', position: 'absolute' };
 
+  // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
+  // overlay icon in the bottom right of the tab showing the runtime status.
   return (
     <FlexRow style={containerStyle}>
       <img
@@ -190,8 +192,6 @@ export const RuntimeIcon = (props: {
   const iconPath = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
 
   // We always want to show the thunderstorm or Jupyter icon.
-  // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
-  // overlay icon in the bottom right of the tab showing the runtime status.
   return (
     <CompoundIcon {...{ config, iconConfig, iconPath }}>
       <RuntimeStatusIndicator
