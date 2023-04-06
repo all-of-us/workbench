@@ -37,23 +37,20 @@ describe('AdminUserBypassSpec', () => {
     const wrapper = component();
     wrapper.find(Button).simulate('click');
 
-    [
-      'rt-compliance-training-toggle',
-      'ct-compliance-training-toggle',
-      'ducc-toggle',
-      'era-commons-toggle',
-      'two-factor-auth-toggle',
-      'ras-link-login-gov-toggle',
-      'profile-confirmation-toggle',
-      'publication-confirmation-toggle',
-    ].forEach((dataTestId) => {
-      if (!wrapper.find(`[data-test-id="${dataTestId}"]`).exists()) {
-        console.log('dataTestId: ' + dataTestId);
-      }
-      expect(
-        wrapper.find(`[data-test-id="${dataTestId}"]`).exists()
-      ).toBeTruthy();
-    });
+    expect(
+      [
+        'rt-compliance-training-toggle',
+        'ct-compliance-training-toggle',
+        'ducc-toggle',
+        'era-commons-toggle',
+        'two-factor-auth-toggle',
+        'ras-link-login-gov-toggle',
+        'profile-confirmation-toggle',
+        'publication-confirmation-toggle',
+      ]
+        .filter((id) => !wrapper.find(`[data-test-id="${id}"]`).exists())
+        .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
+    ).toBe(0); // count of not found data-test-ids
   });
 
   it('should only show bypass toggles for access modules used in this environment', () => {
@@ -69,32 +66,26 @@ describe('AdminUserBypassSpec', () => {
     const wrapper = component();
     wrapper.find(Button).simulate('click');
 
-    [
-      'ducc-toggle',
-      'two-factor-auth-toggle',
-      'profile-confirmation-toggle',
-      'publication-confirmation-toggle',
-    ].forEach((dataTestId) => {
-      if (!wrapper.find(`[data-test-id="${dataTestId}"]`).exists()) {
-        console.log('dataTestId: ' + dataTestId);
-      }
-      expect(
-        wrapper.find(`[data-test-id="${dataTestId}"]`).exists()
-      ).toBeTruthy();
-    });
+    expect(
+      [
+        'ducc-toggle',
+        'two-factor-auth-toggle',
+        'profile-confirmation-toggle',
+        'publication-confirmation-toggle',
+      ]
+        .filter((id) => !wrapper.find(`[data-test-id="${id}"]`).exists())
+        .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
+    ).toBe(0); // count of not found data-test-ids
 
-    [
-      'rt-compliance-training-toggle',
-      'ct-compliance-training-toggle',
-      'era-commons-toggle',
-      'ras-link-login-gov-toggle',
-    ].forEach((dataTestId) => {
-      if (!wrapper.find(`[data-test-id="${dataTestId}"]`).exists()) {
-        console.log('dataTestId: ' + dataTestId);
-      }
-      expect(
-        wrapper.find(`[data-test-id="${dataTestId}"]`).exists()
-      ).toBeFalsy();
-    });
+    expect(
+      [
+        'rt-compliance-training-toggle',
+        'ct-compliance-training-toggle',
+        'era-commons-toggle',
+        'ras-link-login-gov-toggle',
+      ]
+        .filter((id) => wrapper.find(`[data-test-id="${id}"]`).exists())
+        .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length
+    ).toBe(0); // count of found data-test-ids
   });
 });
