@@ -63,6 +63,7 @@ def read_db_vars(gcc)
     Common.new.error "Failed to read #{cdr_vars_path}"
     exit 1
   end
+  vars["GOOGLE_APPLICATION_CREDENTIALS"] = "sa-key.json"
   return vars.merge({
     'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
     'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
