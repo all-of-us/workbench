@@ -183,7 +183,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
     # the application has finished starting.
-    common.run_inline "DB_HOST=127.0.0.1 ./gradlew --daemon appengineRun &"
+    common.run_inline "./gradlew --daemon appengineRun &"
 
     # incrementalHotSwap must be run without the Gradle daemon or stdout and stderr will not appear
     # in the output.
@@ -2286,7 +2286,6 @@ def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    ENV["DB_HOST"] = nil
     run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
   end
 end
