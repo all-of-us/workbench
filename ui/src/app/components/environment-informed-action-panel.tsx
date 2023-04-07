@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { formatUsd } from 'app/utils/numbers';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
@@ -16,6 +17,7 @@ const CostInfo = ({
   analysisConfig,
   currentUser,
   workspace,
+  isGKEApp,
 }) => {
   const remainingCredits =
     creatorFreeCreditsRemaining === null ? (
@@ -36,7 +38,7 @@ const CostInfo = ({
             : {}),
         }}
       >
-        <EnvironmentCostEstimator {...{ analysisConfig }} />
+        <EnvironmentCostEstimator {...{ analysisConfig }} isGKEApp={isGKEApp} />
       </div>
       {isUsingFreeTierBillingAccount(workspace) &&
         currentUser === workspace.creator && (
@@ -80,6 +82,7 @@ export const EnvironmentInformedActionPanel = ({
       currentUser={profile.username}
       workspace={workspace}
       creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+      isGKEApp={appType !== UIAppType.JUPYTER}
     />
   </FlexRow>
 );
