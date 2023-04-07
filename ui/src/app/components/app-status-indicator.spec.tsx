@@ -23,7 +23,9 @@ describe('App Status Indicator', () => {
   ])(
     'App Status indicator renders correct indicator when a user app is in %s state',
     (appStatus, icon) => {
-      const wrapper = mount(<AppStatusIndicator {...{ appStatus }} />);
+      const wrapper = mount(
+        <AppStatusIndicator {...{ appStatus }} userSuspended={false} />
+      );
       expect(wrapper.exists()).toBeTruthy();
       const statusIcon = wrapper.find(icon);
       expect(statusIcon.exists()).toBeTruthy();
@@ -32,11 +34,7 @@ describe('App Status Indicator', () => {
 
   it('Verify that a user app with an undefined status does not have a status indicator', () => {
     const wrapper = mount(
-      <AppStatusIndicator
-        style={undefined}
-        userSuspended={false}
-        appStatus={undefined}
-      />
+      <AppStatusIndicator userSuspended={false} appStatus={undefined} />
     );
     expect(wrapper.exists()).toBeTruthy();
     const iconContainer = wrapper.find(
@@ -48,11 +46,7 @@ describe('App Status Indicator', () => {
 
   it('Verify that a user app where the user is suspended displays the correct indicator', () => {
     const wrapper = mount(
-      <AppStatusIndicator
-        userSuspended
-        style={undefined}
-        appStatus={undefined}
-      />
+      <AppStatusIndicator userSuspended appStatus={undefined} />
     );
     expect(wrapper.exists()).toBeTruthy();
     const statusIcon = wrapper.find(SuspendedIcon);

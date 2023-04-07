@@ -27,7 +27,7 @@ export const RuntimeStatusIndicator = fp.flow(
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps')
 )(
   (props: {
-    style: CSSProperties;
+    style?: CSSProperties;
     compoundRuntimeOps: CompoundRuntimeOpStore;
     workspaceNamespace: string;
     userSuspended: boolean;
