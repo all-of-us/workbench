@@ -7,6 +7,8 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.cdr.CdrDataSource;
+import org.pmiops.workbench.cdr.DbParams;
+import org.pmiops.workbench.db.Params;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +24,12 @@ import org.springframework.stereotype.Component;
 public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
+
+  @MockBean(name = "params")
+  private Params params;
+
   @MockBean private DataSource dataSource;
+  @MockBean private DbParams cdrParams;
   @MockBean private CdrDataSource cdrDataSource;
 
   /**
