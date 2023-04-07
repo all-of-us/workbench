@@ -27,7 +27,7 @@ describe('Runtime Status Indicator', () => {
     [RuntimeStatus.Stopping, StoppingIcon],
     [RuntimeStatus.Error, ErrorIcon],
   ])(
-    'RuntimeStatus indicator renders correct indicator when runtime is in %s state',
+    'Runtime Status indicator renders correct indicator when runtime is in %s state',
     (status, icon) => {
       const runtimeStub = new RuntimeApiStub();
       runtimeStub.runtime.status = status;
@@ -43,7 +43,7 @@ describe('Runtime Status Indicator', () => {
     }
   );
 
-  it('Verify that a runtime with an undefined status does not have a status icon', () => {
+  it('Verify that a runtime with an undefined status does not have a status indicator', () => {
     const runtimeStub = new RuntimeApiStub();
     runtimeStub.runtime.status = undefined;
     runtimeStore.set({
