@@ -54,7 +54,10 @@ export const ConfirmUpdatePanel = ({
                 ...styles.costComparison,
               }}
             >
-              <EnvironmentCostEstimator analysisConfig={newAnalysisConfig} />
+              <EnvironmentCostEstimator
+                analysisConfig={newAnalysisConfig}
+                isGKEApp={false}
+              />
             </div>
           </div>
           <div>
@@ -69,6 +72,7 @@ export const ConfirmUpdatePanel = ({
             >
               <EnvironmentCostEstimator
                 analysisConfig={existingAnalysisConfig}
+                isGKEApp={false}
                 costTextColor='grey'
               />
             </div>

@@ -99,8 +99,8 @@ describe('RuntimeConfigurationPanel', () => {
 
   const runningCost = (wrapper) =>
     costEstimator(wrapper).find('[data-test-id="running-cost"]');
-  const storageCost = (wrapper) =>
-    costEstimator(wrapper).find('[data-test-id="storage-cost"]');
+  const pausedCost = (wrapper) =>
+    costEstimator(wrapper).find('[data-test-id="paused-cost"]');
 
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();
@@ -1224,22 +1224,22 @@ describe('RuntimeConfigurationPanel', () => {
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
     expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
     await pickDetachableDiskSize(wrapper, 300);
     expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
 
     await pickPreset(wrapper, { displayName: 'General Analysis' });
     expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
     expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
 
     // Bump up all the worker values to increase the price on everything.
     await pickNumWorkers(wrapper, 4);
@@ -1248,7 +1248,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
     expect(runningCost(wrapper).text()).toEqual('$2.88 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.14 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.14 per hour');
   });
 
   it('should update the cost estimator when master machine changes', async () => {
@@ -1274,7 +1274,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     expect(runningCost(wrapper).text()).toEqual('$0.77 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.07 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.07 per hour');
 
     // Change the Master disk size or master size to 150
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
@@ -1282,12 +1282,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
     expect(runningCost(wrapper).text()).toEqual('$0.87 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.13 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.13 per hour');
   });
 
   it('should allow runtime deletion', async () => {
