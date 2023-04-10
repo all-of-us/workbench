@@ -335,6 +335,27 @@ describe('ExpandedApp', () => {
         .mockImplementation(() => Promise.resolve({}));
       const { onClick } = deletion.props();
       await onClick();
+      await waitOneTickAndUpdate(wrapper);
+      if (appType === UIAppType.CROMWELL) {
+        /* For Cromwell, on delete we show user a modal asking them to confirm manually that there are
+            no cromwell Jobs running. Only after user confirming YES we close the modal and start the delete process */
+        let cromwell_delete_modal = wrapper.find({
+          'data-test-id': 'delete-cromwell-modal',
+        });
+
+        expect(cromwell_delete_modal).toBeTruthy();
+        const button_delete_cromwell = cromwell_delete_modal.find({
+          'data-test-id': 'delete-cromwell-btn',
+        });
+
+        button_delete_cromwell.simulate('click');
+
+        // Clicking button YES i.e confirming deletion of cromwell should close the modal
+        cromwell_delete_modal = wrapper.find({
+          'data-test-id': 'delete-cromwell-modal',
+        });
+        expect(cromwell_delete_modal.length).toBe(0);
+      }
 
       expect(deleteSpy).toHaveBeenCalledWith(
         workspace.namespace,

@@ -10,13 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
-import { AppStatusIndicator } from 'app/components/app-status-indicator';
+import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
-import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
+import {
+  leoProxyApi,
+} from 'app/services/notebooks-swagger-fetch-clients';
+import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -26,12 +28,6 @@ import {
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
-import {
-  createUserApp,
-  deleteUserApp,
-  pauseUserApp,
-  resumeUserApp,
-} from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './app-logo';
 import { AppsPanelButton } from './apps-panel-button';
@@ -47,6 +43,9 @@ import {
   fromUserAppStatusWithFallback,
   UIAppType,
 } from './utils';
+import {RuntimeStatusIndicator} from "app/components/runtime-status-indicator";
+import {AppStatusIndicator} from "app/components/app-status-indicator";
+import {createUserApp, pauseUserApp, resumeUserApp} from "app/utils/user-apps-utils";
 
 const styles = reactStyles({
   expandedAppContainer: {
@@ -237,6 +236,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     onClickDeleteRuntime,
   } = props;
   const [deletingApp, setDeletingApp] = useState(false);
+  const [showCromwellDeleteModal, setShowCromwellDeleteModal] = useState(false);
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
@@ -246,17 +246,25 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   // TODO allow configuration
   const deleteDiskWithUserApp = true;
 
-  const onClickDelete =
-    appType === UIAppType.JUPYTER
-      ? onClickDeleteRuntime
-      : async () => {
-          setDeletingApp(true);
-          await deleteUserApp(
-            workspace.namespace,
-            initialUserAppInfo.appName,
-            deleteDiskWithUserApp
-          );
-        };
+  const deleteGkeApp = () => {
+    setDeletingApp(true);
+    appsApi().deleteApp(
+      workspace.namespace,
+      initialUserAppInfo.appName,
+      deleteDiskWithUserApp
+    );
+  };
+
+  const displayCromwellDeleteModal = () => {
+    setShowCromwellDeleteModal(true);
+  };
+
+  const onClickDelete = cond(
+    [appType === UIAppType.JUPYTER, () => onClickDeleteRuntime],
+    [appType === UIAppType.CROMWELL, () => displayCromwellDeleteModal],
+    () => deleteGkeApp
+  );
+
   return (
     <FlexColumn
       style={styles.expandedAppContainer}
@@ -332,6 +340,15 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             () => null
           )}
         </FlexColumn>
+      )}
+      {showCromwellDeleteModal && (
+        <DeleteCromwellConfirmationModal
+          clickYes={() => {
+            setShowCromwellDeleteModal(false);
+            deleteGkeApp();
+          }}
+          clickNo={() => setShowCromwellDeleteModal(false)}
+        />
       )}
     </FlexColumn>
   );
