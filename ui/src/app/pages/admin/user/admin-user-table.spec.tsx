@@ -8,6 +8,7 @@ import { AuthDomainApi, Profile, UserAdminApi } from 'generated/fetch';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
+import defaultServerConfig from 'testing/default-server-config';
 import { AuthDomainApiStub } from 'testing/stubs/auth-domain-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
@@ -28,6 +29,7 @@ describe('AdminUserTable', () => {
   beforeEach(() => {
     serverConfigStore.set({
       config: {
+        ...defaultServerConfig,
         gsuiteDomain: 'fake-research-aou.org',
         projectId: 'aaa',
         publicApiKeyForErrorReports: 'aaa',

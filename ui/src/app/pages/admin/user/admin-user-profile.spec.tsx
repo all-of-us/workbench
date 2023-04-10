@@ -46,7 +46,8 @@ import {
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
-import { accessModulesForTable, AdminUserProfile } from './admin-user-profile';
+import { orderedAccessModules } from './admin-user-common';
+import { AdminUserProfile } from './admin-user-profile';
 
 const load = jest.fn();
 const reload = jest.fn();
@@ -521,10 +522,10 @@ describe('AdminUserProfile', () => {
     expect(table.exists()).toBeTruthy();
 
     const tableRows = table.find('tbody tr[role="row"]');
-    expect(tableRows.length).toEqual(accessModulesForTable.length);
+    expect(tableRows.length).toEqual(orderedAccessModules.length);
 
-    // confirm that the accessModulesForTable are listed in order with expected title text
-    expectModuleTitlesInOrder(accessModulesForTable, tableRows);
+    // confirm that the orderedAccessModules are listed in order with expected title text
+    expectModuleTitlesInOrder(orderedAccessModules, tableRows);
   });
 
   test.each([
@@ -602,12 +603,12 @@ describe('AdminUserProfile', () => {
       const tableRows = wrapper
         .find('[data-test-id="access-module-table"]')
         .find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(accessModulesForTable.length);
+      expect(tableRows.length).toEqual(orderedAccessModules.length);
 
-      // the previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+      // the previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const { adminPageTitle } = getAccessModuleConfig(moduleName);
-      const moduleRow = tableRows.at(accessModulesForTable.indexOf(moduleName));
+      const moduleRow = tableRows.at(orderedAccessModules.indexOf(moduleName));
       // sanity check - this is actually the right row for this module
       expect(
         findNodesContainingText(moduleRow, adminPageTitle).exists()
@@ -635,7 +636,7 @@ describe('AdminUserProfile', () => {
       AccessModule.COMPLIANCETRAINING,
       AccessModule.CTCOMPLIANCETRAINING,
     ];
-    const expectedModules = accessModulesForTable.filter(
+    const expectedModules = orderedAccessModules.filter(
       (moduleName) => !excludedModules.includes(moduleName)
     );
 
@@ -723,12 +724,12 @@ describe('AdminUserProfile', () => {
       ).toBeTruthy();
 
       const tableRows = moduleTable.find('tbody tr[role="row"]');
-      expect(tableRows.length).toEqual(accessModulesForTable.length);
+      expect(tableRows.length).toEqual(orderedAccessModules.length);
 
-      // a previous test confirmed that the accessModulesForTable are in the expected order, so we can ref by index
+      // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const eraRow = tableRows.at(
-        accessModulesForTable.indexOf(AccessModule.ERACOMMONS)
+        orderedAccessModules.indexOf(AccessModule.ERACOMMONS)
       );
       const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
 
