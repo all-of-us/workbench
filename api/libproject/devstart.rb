@@ -2406,6 +2406,9 @@ def deploy(cmd_name, args)
   ENV.update(read_db_vars(gcc))
   # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
   migrate_database(gcc, op.opts.account, op.opts.dry_run)
+  if (op.opts.key_file)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
+  end
   load_config(gcc.project, op.opts.dry_run)
   cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
   update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
