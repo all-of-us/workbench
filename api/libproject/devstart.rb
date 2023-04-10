@@ -2282,10 +2282,10 @@ Common.register_command({
   :fn => ->(*args) { create_or_update_workbench_db_cmd("create-or-update-workbench-db", args) }
 })
 
-def migrate_database(gcpProject, dry_run = false)
+def migrate_database(gcc, serviceAccount = nil, dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
-  CloudSqlProxyContext.new(gcpProject).run do
+  CloudSqlProxyContext.new(gcc.project, serviceAccount, gcc.creds_file).run do
     Dir.chdir("db") do
       run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
     end
@@ -2404,7 +2404,7 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   ENV.update(read_db_vars(gcc))
-  migrate_database(gcc.project, op.opts.dry_run)
+  migrate_database(gcc, op.opts.account, op.opts.dry_run)
   load_config(gcc.project, op.opts.dry_run)
   cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
   update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
@@ -2433,7 +2433,7 @@ def run_cloud_migrations(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  migrate_database(gcc.project)
+  migrate_database(gcc)
 end
 
 Common.register_command({

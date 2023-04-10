@@ -64,7 +64,8 @@ public class AccessModuleServiceImpl implements AccessModuleService {
 
   @Override
   public void updateAllBypassTimes(long userId) {
-    dbAccessModulesProvider.get().stream()
+    dbAccessModulesProvider
+        .get()
         .forEach(module -> updateBypassTime(userId, module.getName(), true));
   }
 
