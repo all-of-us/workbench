@@ -396,7 +396,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-                  dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
+              dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, null);
           return userDao.save(user);
@@ -408,7 +408,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-                  dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
+              dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, willExpire);
@@ -425,7 +425,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-                  dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
+              dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, null);
           return userDao.save(user);
@@ -437,7 +437,7 @@ public class UserServiceAccessTest {
     testUnregistration(
         user -> {
           accessModuleService.updateBypassTime(
-                  dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
+              dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, willExpire);
