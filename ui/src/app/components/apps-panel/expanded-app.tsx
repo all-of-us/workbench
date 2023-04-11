@@ -18,7 +18,6 @@ import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
-import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -30,6 +29,7 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   createUserApp,
+  deleteUserApp,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -248,9 +248,9 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   // TODO allow configuration
   const deleteDiskWithUserApp = true;
 
-  const deleteGkeApp = () => {
+  const deleteGkeApp = async () => {
     setDeletingApp(true);
-    appsApi().deleteApp(
+    await deleteUserApp(
       workspace.namespace,
       initialUserAppInfo.appName,
       deleteDiskWithUserApp
