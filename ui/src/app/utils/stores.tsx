@@ -259,7 +259,7 @@ export function withParamsKey(...paramNames: (keyof MatchParams)[]) {
 export interface UserAppsStore {
   updating?: boolean;
   userApps?: ListAppsResponse;
-  timeoutID?: any;
+  timeoutID?: ReturnType<typeof setTimeout>;
 }
 
 export const userAppsStore = atom<UserAppsStore>({});
