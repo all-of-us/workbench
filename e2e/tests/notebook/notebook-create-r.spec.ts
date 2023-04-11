@@ -20,9 +20,7 @@ describe('Create R kernel notebook', () => {
   const workspaceName = 'e2eCreateRKernelNotebookTest';
   const rNotebookName = makeRandomName('R');
 
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-  test.skip('Run R code', async () => {
+  test('Run R code', async () => {
     await loadWorkspace(page, workspaceName);
 
     const dataPage = new WorkspaceDataPage(page);
@@ -58,10 +56,7 @@ describe('Create R kernel notebook', () => {
     expect(cell3Output).toMatch(/success$/);
   });
 
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-
-  test.skip('Duplicate rename delete notebook', async () => {
+  test('Duplicate rename delete notebook', async () => {
     await loadWorkspace(page, workspaceName);
 
     const analysisPage = new WorkspaceAnalysisPage(page);
@@ -69,11 +64,11 @@ describe('Create R kernel notebook', () => {
 
     // Start clone notebook.
     const cloneNotebookName = `Duplicate of ${rNotebookName}`;
-    await analysisPage.duplicateNotebook(rNotebookName);
+    await analysisPage.duplicateNotebookViaTable(rNotebookName);
 
     // Rename notebook clone.
     const newNotebookName = makeRandomName('r-cloneNotebook');
-    const modalTextContents = await analysisPage.renameResource(
+    const modalTextContents = await analysisPage.renameResourceFromTable(
       cloneNotebookName,
       newNotebookName,
       ResourceCard.Notebook
@@ -82,21 +77,21 @@ describe('Create R kernel notebook', () => {
 
     // Notebook card with new name is found.
     const dataResourceCard = new DataResourceCard(page);
-    let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(true);
+    let notebookExist = await dataResourceCard.resourceExistsInTable(newNotebookName);
+    expect(notebookExist).toBe(true);
 
     // Notebook card with old name is not found.
-    cardExists = await dataResourceCard.cardExists(cloneNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(false);
+    notebookExist = await dataResourceCard.resourceExistsInTable(cloneNotebookName);
+    expect(notebookExist).toBe(false);
 
     // Delete newly renamed notebook.
-    await analysisPage.deleteResource(newNotebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResourceFromTable(newNotebookName, ResourceCard.Notebook);
     // Verify delete was successful.
-    cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(false);
+    notebookExist = await dataResourceCard.resourceExistsInTable(newNotebookName);
+    expect(notebookExist).toBe(false);
 
     // Delete R notebook
-    await analysisPage.deleteResource(rNotebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResourceFromTable(rNotebookName, ResourceCard.Notebook);
     await analysisPage.waitForLoad();
   });
 

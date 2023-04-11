@@ -18,9 +18,7 @@ describe('Notebook Upload File Test', () => {
   const pyFileName = 'nbstripoutput-filter.py';
   const pyFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${pyFileName}`);
 
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-  test.skip('Upload file and run Python code', async () => {
+  test('Upload file and run Python code', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
@@ -34,7 +32,7 @@ describe('Notebook Upload File Test', () => {
     // Save, exit notebook page then delete notebook.
     await notebook.save();
     const analysisPage = await notebook.goAnalysisPage();
-    await analysisPage.deleteResource(pyNotebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResourceFromTable(pyNotebookName, ResourceCard.Notebook);
     await analysisPage.waitForLoad();
   });
 });
