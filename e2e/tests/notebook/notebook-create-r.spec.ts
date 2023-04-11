@@ -77,19 +77,18 @@ describe('Create R kernel notebook', () => {
 
     // Notebook card with new name is found.
     const dataResourceCard = new DataResourceCard(page);
-    let cardExists = await dataResourceCard.resourceExistsInTable(newNotebookName);
-    //let cardExists = await dataResourceCard.cardExists(newNotebookName, ResourceCard.Notebook);
-    expect(cardExists).toBe(true);
+    let notebookExist = await dataResourceCard.resourceExistsInTable(newNotebookName);
+    expect(notebookExist).toBe(true);
 
     // Notebook card with old name is not found.
-    cardExists = await dataResourceCard.resourceExistsInTable(cloneNotebookName);
-    expect(cardExists).toBe(false);
+    notebookExist = await dataResourceCard.resourceExistsInTable(cloneNotebookName);
+    expect(notebookExist).toBe(false);
 
     // Delete newly renamed notebook.
     await analysisPage.deleteResourceFromTable(newNotebookName, ResourceCard.Notebook);
     // Verify delete was successful.
-    cardExists = await dataResourceCard.resourceExistsInTable(newNotebookName);
-    expect(cardExists).toBe(false);
+    notebookExist = await dataResourceCard.resourceExistsInTable(newNotebookName);
+    expect(notebookExist).toBe(false);
 
     // Delete R notebook
     await analysisPage.deleteResourceFromTable(rNotebookName, ResourceCard.Notebook);
