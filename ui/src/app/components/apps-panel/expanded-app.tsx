@@ -10,14 +10,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
+import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import {
-  leoProxyApi,
-} from 'app/services/notebooks-swagger-fetch-clients';
+import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
+import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
@@ -28,6 +28,11 @@ import {
   useRuntimeStatus,
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
+import {
+  createUserApp,
+  pauseUserApp,
+  resumeUserApp,
+} from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './app-logo';
 import { AppsPanelButton } from './apps-panel-button';
@@ -43,9 +48,6 @@ import {
   fromUserAppStatusWithFallback,
   UIAppType,
 } from './utils';
-import {RuntimeStatusIndicator} from "app/components/runtime-status-indicator";
-import {AppStatusIndicator} from "app/components/app-status-indicator";
-import {createUserApp, pauseUserApp, resumeUserApp} from "app/utils/user-apps-utils";
 
 const styles = reactStyles({
   expandedAppContainer: {
