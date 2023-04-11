@@ -18,7 +18,7 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { AddConceptSetToCohortModal } from 'app/pages/data/cohort/addConceptSetToCohortModal';
+import { AddConceptSetToCohortModal } from 'app/pages/data/cohort/add-concept-set-to-cohort-modal';
 import { ConceptQuickAddModal } from 'app/pages/data/cohort/concept-quick-add-modal';
 import { Demographics } from 'app/pages/data/cohort/demographics';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
