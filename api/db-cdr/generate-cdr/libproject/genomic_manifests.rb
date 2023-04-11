@@ -342,6 +342,7 @@ end
 def _build_copy_manifest_row(
   source_path, ingest_base_path, destination, input_section,
   rid = nil, preprod_source_cdr_base_path = nil, preprod_source_ingest_base_path = nil)
+  common = Common.new
   source_name = File.basename(source_path)
   dest_name = source_name
   replace = input_section["filenameReplace"]
@@ -349,7 +350,7 @@ def _build_copy_manifest_row(
     dest_name = _apply_filename_replacement(
       source_name, input_section["filenameMatch"], replace, rid)
     if source_name == dest_name
-      raise ArgumentError.new("filename replacement failed for '#{source_name}'")
+      common.warning "filename replacement failed for '#{source_name}'"
     end
   end
 
@@ -500,15 +501,24 @@ def _get_pooled_path(pathInfix, display_version_id, is_delta_release)
 end
 
 def build_copy_manifest_for_curation_section(input_section, ingest_bucket, dest_bucket, display_version_id)
-  path_prefix = "#{display_version_id}/#{input_section['destination']}"
-  ingest_base_path = File.join(ingest_bucket, path_prefix)
-  destination = File.join(dest_bucket, path_prefix)
+  # If an absolute path is provided, then use it.
+  if input_section['destination'].start_with?("gs://")
+    destination = input_section['destination']
+    path_prefix = destination.split(dest_bucket)[1]
+    ingest_base_path = File.join(ingest_bucket, path_prefix)
+  else
+    path_prefix = "#{display_version_id}/#{input_section['destination']}"
+    ingest_base_path = File.join(ingest_bucket, path_prefix)
+    destination = File.join(dest_bucket, path_prefix)
+  end
 
   # -d allows the input manifest to specify subdirectories to copy in-place
   source_uris = Common.new.capture_stdout(["gsutil", "ls", "-d", input_section["sourcePattern"]]).split("\n")
   if source_uris.empty?
     raise ArgumentError.new("sourcePattern '#{input_section["sourcePattern"]}' did not match any files")
   end
+  source_uris.reject!(&:empty?)
+
   return source_uris.map do |source_path|
     _build_copy_manifest_row(source_path, ingest_base_path, destination, input_section)
   end

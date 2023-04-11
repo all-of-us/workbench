@@ -4,13 +4,13 @@ import PrimereactInputNumber from 'app/element/primereact-input-number';
 import { LinkText, SideBarLink } from 'app/text-labels';
 import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import BaseSidebar from './base-sidebar';
 import { logger } from 'libs/logger';
 import RadioButton from 'app/element/radiobutton';
 import { config } from 'resources/workbench-config';
 import Checkbox from 'app/element/checkbox';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { exists } from 'utils/element-utils';
+import BaseEnvironmentPanel from './base-environment-panel';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 
@@ -38,10 +38,9 @@ export enum RuntimePreset {
   HailGenomicsAnalysis = 'Hail Genomics Analysis'
 }
 
-export default class RuntimePanel extends BaseSidebar {
-  constructor(page: Page, xpath: string = defaultXpath) {
-    super(page);
-    super.setXpath(`${super.getXpath()}${xpath}`);
+export default class RuntimePanel extends BaseEnvironmentPanel {
+  constructor(page: Page) {
+    super(page, defaultXpath, SideBarLink.RuntimeConfiguration);
   }
 
   async pickCpus(cpus: number): Promise<void> {
@@ -219,22 +218,6 @@ export default class RuntimePanel extends BaseSidebar {
     const xpath = this.buildStatusIconDataTestId(StartStopIconState.Stopped);
     const icon = new Button(this.page, xpath);
     await icon.click();
-  }
-
-  async open(): Promise<void> {
-    const isOpen = await this.isVisible();
-    if (isOpen) {
-      return;
-    }
-    await this.clickIcon(SideBarLink.ComputeConfiguration);
-    await this.getDeleteIcon();
-    const timeoutForDeletion = 3 * 60 * 1000;
-    await this.waitUntilVisible(timeoutForDeletion);
-    // Wait for visible texts
-    await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
-    // Wait for visible button
-    await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, { visible: true });
-    logger.info(`Opened "${await this.getTitle()}" runtime sidebar`);
   }
 
   /**

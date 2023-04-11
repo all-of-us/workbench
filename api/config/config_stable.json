@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
+    "apiAssetsBaseUrl": "https:\/\/api.stable.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/stable.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
@@ -103,10 +104,11 @@
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 365,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -119,9 +121,9 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": false,
-    "enableRStudioGKEApp": false
+    "enableRStudioGKEApp": false,
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

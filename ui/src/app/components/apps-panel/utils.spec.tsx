@@ -34,9 +34,7 @@ describe('AppsPanel utils', () => {
     [AppStatus.STOPPING, UserEnvironmentStatus.PAUSING],
     [AppStatus.STOPPED, UserEnvironmentStatus.PAUSED],
     [AppStatus.STARTING, UserEnvironmentStatus.RESUMING],
-
     // no other AppStatuses are mapped currently
-
     [AppStatus.DELETED, UserEnvironmentStatus.UNKNOWN],
     [AppStatus.DELETING, UserEnvironmentStatus.UNKNOWN],
     [AppStatus.ERROR, UserEnvironmentStatus.UNKNOWN],
@@ -57,9 +55,7 @@ describe('AppsPanel utils', () => {
     [AppStatus.STOPPING, UserEnvironmentStatus.PAUSING],
     [AppStatus.STOPPED, UserEnvironmentStatus.PAUSED],
     [AppStatus.STARTING, UserEnvironmentStatus.RESUMING],
-
     // no other AppStatuses are mapped currently
-
     [AppStatus.DELETED, AppStatus.DELETED.toString()],
     [AppStatus.DELETING, AppStatus.DELETING.toString()],
     [AppStatus.ERROR, AppStatus.ERROR.toString()],

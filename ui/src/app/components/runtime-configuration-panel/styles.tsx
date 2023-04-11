@@ -142,4 +142,11 @@ export const styles = reactStyles({
   diskLabel: {
     fontWeight: 500,
   },
+  disabledCloudProfile: {
+    marginRight: '0.5rem',
+    backgroundColor: '#ededed',
+    color: '#7b828e',
+    padding: '1rem 2rem 1rem 0.5rem',
+    borderRadius: '0.5rem',
+  },
 });

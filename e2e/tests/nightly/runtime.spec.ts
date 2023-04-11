@@ -10,7 +10,8 @@ describe('Updating runtime status', () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create, pause, resume, delete', async () => {
+  //TODO: Refactor to contract test(s) https://precisionmedicineinitiative.atlassian.net/browse/RW-9658
+  test.skip('Create, pause, resume, delete', async () => {
     await createWorkspace(page, { cdrVersionName: config.OLD_CDR_VERSION_NAME });
 
     const runtimePanel = new RuntimePanel(page);

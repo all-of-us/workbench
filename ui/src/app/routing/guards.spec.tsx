@@ -43,23 +43,14 @@ const allCompleteExpiringSoon: AccessModuleStatus[] = Object.keys(
   expirationEpochMillis: nowPlusDays(1),
 }));
 
-const allBypassedPPComplete: AccessModuleStatus[] = Object.keys(
-  AccessModule
-).map((key) => {
-  const moduleName = AccessModule[key];
-  return [
-    AccessModule.PROFILECONFIRMATION,
-    AccessModule.PUBLICATIONCONFIRMATION,
-  ].includes(moduleName)
-    ? {
-        moduleName: AccessModule[key],
-        completionEpochMillis: Date.now(),
-      }
-    : {
-        moduleName: AccessModule[key],
-        bypassEpochMillis: Date.now(),
-      };
-});
+const allBypassed: AccessModuleStatus[] = Object.keys(AccessModule).map(
+  (key) => {
+    return {
+      moduleName: AccessModule[key],
+      bypassEpochMillis: Date.now(),
+    };
+  }
+);
 
 // 2FA is missing (initial, not renewable)
 const allCompleteMissingOneInitial: AccessModuleStatus[] =
@@ -102,27 +93,6 @@ const allCompleteCtTrainingExpired: AccessModuleStatus[] =
       expirationEpochMillis: nowPlusDays(-1),
     });
 
-// RW-8203
-// artificial state for test users - all complete but Profile/Publications are missing
-const allCompleteMissingPP: AccessModuleStatus[] =
-  allCompleteNotExpiring.filter(
-    ({ moduleName }) =>
-      ![
-        AccessModule.PROFILECONFIRMATION,
-        AccessModule.PUBLICATIONCONFIRMATION,
-      ].includes(moduleName)
-  );
-
-// RW-8203
-// artificial state for test users - all bypassed but Profile/Publications are missing
-const allBypassedMissingPP: AccessModuleStatus[] = allBypassedPPComplete.filter(
-  ({ moduleName }) =>
-    ![
-      AccessModule.PROFILECONFIRMATION,
-      AccessModule.PUBLICATIONCONFIRMATION,
-    ].includes(moduleName)
-);
-
 describe('redirectTo', () => {
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
@@ -152,25 +122,13 @@ describe('redirectTo', () => {
       },
     ],
     [
-      'all bypassed except Profile and Publications are missing',
-      // Access Renewal is the only page which allows progress on these modules
-      ACCESS_RENEWAL_PATH,
-      {
-        ...ProfileStubVariables.PROFILE_STUB,
-        accessTierShortNames: [],
-        accessModules: {
-          modules: allBypassedMissingPP,
-        },
-      },
-    ],
-    [
-      'all bypassed except Profile and Publications are complete',
+      'all bypassed',
       undefined,
       {
         ...ProfileStubVariables.PROFILE_STUB,
         accessTierShortNames: [AccessTierShortNames.Registered],
         accessModules: {
-          modules: allBypassedPPComplete,
+          modules: allBypassed,
         },
       },
     ],
@@ -241,19 +199,6 @@ describe('redirectTo', () => {
         accessTierShortNames: [],
         accessModules: {
           modules: allCompleteMissingOneEach,
-        },
-      },
-    ],
-    // RW-8203
-    [
-      'all complete but Profile + Publication Confirmations are missing',
-      // Access Renewal is the only page which allows progress on these modules
-      ACCESS_RENEWAL_PATH,
-      {
-        ...ProfileStubVariables.PROFILE_STUB,
-        accessTierShortNames: [],
-        accessModules: {
-          modules: allCompleteMissingPP,
         },
       },
     ],

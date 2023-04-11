@@ -1,6 +1,70 @@
-import { AppsApi, EmptyResponse, ListAppsResponse } from 'generated/fetch';
+import {
+  AppsApi,
+  AppStatus,
+  AppType,
+  EmptyResponse,
+  ListAppsResponse,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+
+const listAppsAppResponseSharedDefaults = {
+  googleProject: 'terra-vpc-sc-dev-42c21469',
+  createdDate: '2023-03-13T18:16:49.481854Z',
+  status: AppStatus.RUNNING,
+  autopauseThreshold: null,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: 'n1-standard-4',
+    autoscalingEnabled: false,
+  },
+  dateAccessed: '2023-03-13T18:16:49.481854Z',
+  errors: [],
+};
+
+const createCromwellListAppsResponseDefaults: UserAppEnvironment = {
+  ...listAppsAppResponseSharedDefaults,
+  appName: 'all-of-us-2-cromwell-1234',
+  appType: AppType.CROMWELL,
+  creator: 'fake@fake-research-aou.org',
+  proxyUrls: {
+    'cromwell-service':
+      'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-cromwell-1234/cromwell-service',
+  },
+  diskName: 'all-of-us-pd-2-cromwell-1234',
+  labels: {
+    'created-by': 'fake@fake-research-aou.org',
+    'aou-app-type': 'cromwell',
+  },
+};
+
+const createRStudioListAppsResponseDefaults: UserAppEnvironment = {
+  ...listAppsAppResponseSharedDefaults,
+  appName: 'all-of-us-2-rstudio-1234',
+  appType: AppType.RSTUDIO,
+  proxyUrls: {
+    rstudio:
+      'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-rstudio-1234/rstudio',
+  },
+  diskName: 'all-of-us-pd-2-rstudio-1234',
+  labels: {
+    'created-by': 'fake@fake-research-aou.org',
+    'aou-app-type': 'rstudio',
+  },
+};
+
+export const createListAppsCromwellResponse = (
+  overrides: Partial<UserAppEnvironment> = {}
+): UserAppEnvironment => {
+  return { ...createCromwellListAppsResponseDefaults, ...overrides };
+};
+
+export const createListAppsRStudioResponse = (
+  overrides: Partial<UserAppEnvironment> = {}
+): UserAppEnvironment => {
+  return { ...createRStudioListAppsResponseDefaults, ...overrides };
+};
 
 export class AppsApiStub extends AppsApi {
   public listAppsResponse: ListAppsResponse;

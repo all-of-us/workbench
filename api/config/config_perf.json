@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
+    "apiAssetsBaseUrl": "https:\/\/api-dot-all-of-us-rw-perf.appspot.com",
     "uiBaseUrl": "https:\/\/all-of-us-rw-perf.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyB44pugxPbfevF_fb7GichIv9D9ee5-nNk",
     "projectId": "all-of-us-rw-perf",
@@ -103,10 +104,11 @@
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 3650,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -119,9 +121,9 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": false
+    "enableRStudioGKEApp": false,
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

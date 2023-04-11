@@ -163,14 +163,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -404,7 +406,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       SearchTerm searchTerm, Boolean standard, List<Domain> domains) {
     List<String> domainNames = domains.stream().map(Domain::toString).collect(Collectors.toList());
     List<DbCardCount> cardCounts =
-        cbCriteriaDao.findDomainCountsByCode(searchTerm.getCodeTerm(), standard, domainNames)
+        cbCriteriaDao
+            .findDomainCountsByCode(searchTerm.getCodeTerm(), standard, domainNames)
             .stream()
             .filter(cardCount -> cardCount.getCount() > 0)
             .collect(Collectors.toList());
@@ -576,6 +579,30 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds) {
     return cbCriteriaDao.findPFHHSurveyAnswerIds(conceptIds);
+  }
+
+  @Override
+  public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
+    List<String> searchDomains =
+        ImmutableList.of(
+            Domain.CONDITION.toString(),
+            Domain.PROCEDURE.toString(),
+            Domain.DRUG.toString(),
+            Domain.OBSERVATION.toString(),
+            Domain.VISIT.toString(),
+            Domain.DEVICE.toString(),
+            Domain.MEASUREMENT.toString(),
+            Domain.PHYSICAL_MEASUREMENT_CSS.toString());
+    List<DbCriteria> dbCriteria;
+    dbCriteria = cbCriteriaDao.findByConceptIdIn(conceptKeys, searchDomains);
+
+    if (dbCriteria == null || dbCriteria.isEmpty()) {
+      dbCriteria = cbCriteriaDao.findByCodeIn(conceptKeys, searchDomains);
+    }
+
+    return dbCriteria.stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(

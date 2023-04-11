@@ -17,6 +17,7 @@ import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.tools.CommandLineToolConfig;
+import org.pmiops.workbench.tools.Tool;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   InstitutionTierConfigMapperImpl.class,
 })
 @EnableTransactionManagement
-public class LoadInstitutions {
+public class LoadInstitutions extends Tool {
 
   private static final Logger log = Logger.getLogger(LoadInstitutions.class.getName());
   private static final ObjectMapper mapper = new ObjectMapper();

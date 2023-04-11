@@ -3845,6 +3845,29 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - cohortBuilder
+      consumes:
+        - application/json
+      description: Return criteria for matching concept_ids, if no match then return criteria for matching concept_codes
+      operationId: findCriteriaByConceptIdsOrConceptCodes
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: ConceptsRequest body
+          schema:
+            "$ref": "#/definitions/ConceptsRequest"
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListResponse"
   "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/autocomplete":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -4257,6 +4280,8 @@ definitions:
     - STRUCTURAL_VARIANT_DATA
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
+    - CONCEPT_SET
+    - CONCEPT_QUICK_ADD
   Surveys:
     type: string
     description: a survey for concepts
@@ -4667,12 +4692,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable adding ConceptSets to CohortBuilder.
-      enableControlledTierTrainingRenewal:
-        type: boolean
-        default: true
-        description: >
-          Whether users are directed to complete Controlled Tier Training renewal.
-          If false, hide or add text indicating that it is not currently available.
       enableCromwellGKEApp:
         type: boolean
         default: false
@@ -4681,6 +4700,10 @@ definitions:
         type: boolean
         default: false
         description: Whether users are able to use the RStudio GKE app.
+      enableDataExplorer:
+        type: boolean
+        default: false
+        description: Whether to enable visual data explorer.
 
   RuntimeImage:
     type: object
@@ -4694,15 +4717,12 @@ definitions:
     required:
       - name
       - expirable
-      - bypassable
       - requiredForRTAccess
       - requiredForCTAccess
     properties:
       name:
         "$ref": "#/definitions/AccessModule"
       expirable:
-        type: boolean
-      bypassable:
         type: boolean
       requiredForRTAccess:
         type: boolean
@@ -6017,6 +6037,12 @@ definitions:
       twoFactorAuthBypassTime:
         type: integer
         format: int64
+      profileConfirmationBypassTime:
+        type: integer
+        format: int64
+      publicationConfirmationBypassTime:
+        type: integer
+        format: int64
       eraCommonsBypassTime:
         type: integer
         format: int64
@@ -6382,6 +6408,9 @@ definitions:
         description: The user-supplied name for the user app. Read only.
       appType:
         "$ref": "#/definitions/AppType"
+      creator:
+        type: string
+        description: The creator of the app
       createdDate:
         type: string
         description: The date and time the user app was created, in ISO-8601 format. Read only.
@@ -7000,6 +7029,17 @@ definitions:
         description: Prefix of the research VM(s) that generated egress, including
           the user ID, e.g. all-of-us-260.
         type: string
+      vm_name:
+        description: The VM name that caused the egress.
+        type: string
+      src_gke_cluster:
+        description: The GKE cluster that caused the egress.
+        type: string
+      gke_egress_mib:
+        description: The amount of egress by the GKE cluster during the
+          window, in mebibytes (MiB).
+        type: number
+        format: double
   ListEgressEventsRequest:
     type: object
     properties:
@@ -8495,6 +8535,16 @@ definitions:
         - - type: A Crit Type
             searchParameters:
             - value: A value
+  ConceptsRequest:
+    description: "The ConceptsRequest represents a list of conceptIds or conceptCodes that are used to 
+      lookup concepts. In general conceptId is numeric while concept code is alphanumeric. Lookup is done 
+      matching on concept_ids first and then if no concepts are found lookup uses concept_codes."
+    type: object
+    properties:
+      conceptKeys:
+        type: array
+        items:
+          type: string
   CriteriaRequest:
     description: 'The CriteriaRequest represents any domain specific conceptIds grouped by
       Source/standard flags. This request has been created specifically for use within edit

@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,22 +66,25 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
+import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
+import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
@@ -232,6 +236,11 @@ public class RuntimeControllerTest {
   RuntimesApi serviceRuntimesApi;
 
   @MockBean ProxyApi proxyApi;
+
+  @MockBean
+  @Qualifier(LeonardoConfig.USER_DISKS_API)
+  DisksApi userDisksApi;
+
   @MockBean WorkspaceDao workspaceDao;
   @MockBean WorkspaceService workspaceService;
 
@@ -259,10 +268,11 @@ public class RuntimeControllerTest {
   private LinkedTreeMap<String, Object> gceConfigObj;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.leoBaseUrl = LEONARDO_URL;
     config.server.apiBaseUrl = API_BASE_URL;
+    config.server.apiAssetsBaseUrl = API_BASE_URL;
     config.access.enableComplianceTraining = true;
     config.firecloud.gceVmZone = "us-central-1";
 
@@ -365,6 +375,9 @@ public class RuntimeControllerTest {
             .setCdrVersion(cdrVersion);
     doReturn(testWorkspace).when(workspaceService).lookupWorkspaceByNamespace(WORKSPACE_NS);
     doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
+
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(new ArrayList<>());
   }
 
   private static FirecloudWorkspaceDetails createFcWorkspace(
@@ -979,6 +992,33 @@ public class RuntimeControllerTest {
   }
 
   @Test
+  public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new NotFoundException());
+    LeonardoListPersistentDiskResponse gceDisk =
+        new LeonardoListPersistentDiskResponse()
+            .name("123")
+            .googleProject(GOOGLE_PROJECT_ID)
+            .status(LeonardoDiskStatus.READY);
+    when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
+        .thenReturn(ImmutableList.of(gceDisk));
+
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            runtimeController.createRuntime(
+                WORKSPACE_NS,
+                new Runtime()
+                    .gceWithPdConfig(
+                        new GceWithPdConfig()
+                            .machineType("standard")
+                            .persistentDisk(
+                                new PersistentDiskRequest().diskType(DiskType.SSD).size(500)))));
+  }
+
+  @Test
   public void testCreateRuntime_nullRuntime() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
@@ -1181,7 +1221,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .has(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
+                .has(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY))
         .isFalse();
   }
 
@@ -1205,7 +1245,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1230,7 +1270,7 @@ public class RuntimeControllerTest {
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
                 .getAsJsonObject()
-                .getAsJsonPrimitive(LeonardoApiClient.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
+                .getAsJsonPrimitive(LeonardoCustomEnvVarUtils.BIGQUERY_STORAGE_API_ENABLED_ENV_KEY)
                 .isString())
         .isTrue();
   }
@@ -1255,9 +1295,9 @@ public class RuntimeControllerTest {
         new Gson()
             .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
             .getAsJsonObject();
-    assertThat(envVars.get(LeonardoApiClient.WORKSPACE_CDR_ENV_KEY).getAsString())
+    assertThat(envVars.get(LeonardoCustomEnvVarUtils.WORKSPACE_CDR_ENV_KEY).getAsString())
         .isEqualTo(cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-    assertThat(envVars.get(LeonardoApiClientImpl.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
+    assertThat(envVars.get(LeonardoCustomEnvVarUtils.WGS_CRAM_MANIFEST_PATH_KEY).getAsString())
         .isEqualTo("gs://cdr-bucket/v99/wgs/cram/manifest.csv");
   }
 

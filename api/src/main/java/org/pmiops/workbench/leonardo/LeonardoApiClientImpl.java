@@ -3,39 +3,34 @@ package org.pmiops.workbench.leonardo;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
@@ -52,12 +47,12 @@ import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
+import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.UserAppEnvironment;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
@@ -70,25 +65,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
-
-  private static final String WORKSPACE_NAMESPACE_KEY = "WORKSPACE_NAMESPACE";
-  private static final String WORKSPACE_BUCKET_KEY = "WORKSPACE_BUCKET";
-  private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
-  private static final String LEONARDO_BASE_URL = "LEONARDO_BASE_URL";
-
-  private static final String CDR_STORAGE_PATH_KEY = "CDR_STORAGE_PATH";
-  private static final String WGS_VCF_MERGED_STORAGE_PATH_KEY = "WGS_VCF_MERGED_STORAGE_PATH";
-  private static final String WGS_HAIL_STORAGE_PATH_KEY = "WGS_HAIL_STORAGE_PATH";
-
-  @VisibleForTesting
-  public static final String WGS_CRAM_MANIFEST_PATH_KEY = "WGS_CRAM_MANIFEST_PATH";
-
-  private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
-  private static final String MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY =
-      "MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH";
-  private static final String MICROARRAY_VCF_MANIFEST_PATH_KEY = "MICROARRAY_VCF_MANIFEST_PATH";
-  private static final String MICROARRAY_IDAT_MANIFEST_PATH_KEY = "MICROARRAY_IDAT_MANIFEST_PATH";
-
   // The Leonardo user role who creates Leonardo APP or disks.
   private static final String LEONARDO_CREATOR_ROLE = "creator";
 
@@ -99,6 +75,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           LeonardoRuntimeStatus.RUNNING,
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
+
+  private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
+      ImmutableSet.of(
+          LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
 
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
@@ -111,6 +91,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
   private final Provider<AppsApi> appsApiProvider;
+  private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
@@ -128,7 +109,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
-      Provider<AppsApi> appsApiProvider,
+      @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
@@ -143,6 +125,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
     this.appsApiProvider = appsApiProvider;
+    this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
@@ -153,7 +136,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
       String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
     WorkbenchConfig config = workbenchConfigProvider.get();
-    String assetsBaseUrl = config.server.apiBaseUrl + "/static";
+    String assetsBaseUrl = config.server.apiAssetsBaseUrl + "/static";
 
     Map<String, String> nbExtensions =
         new ImmutableMap.Builder<String, String>()
@@ -219,61 +202,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
   }
 
-  private String joinStoragePaths(String... paths) {
-    final CharMatcher slashMatch = CharMatcher.is('/');
-    return Arrays.stream(paths)
-        .map(slashMatch::trimLeadingFrom)
-        .map(slashMatch::trimTrailingFrom)
-        .filter(p -> !p.isEmpty())
-        .collect(Collectors.joining("/"));
-  }
-
-  private Map<String, String> buildCdrEnvVars(DbCdrVersion cdrVersion) {
-    Map<String, String> vars = new HashMap<>();
-    vars.put(
-        WORKSPACE_CDR_ENV_KEY,
-        cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset());
-
-    String datasetsBucket = cdrVersion.getAccessTier().getDatasetsBucket();
-    String bucketInfix = cdrVersion.getStorageBasePath();
-    if (!Strings.isNullOrEmpty(datasetsBucket) && !Strings.isNullOrEmpty(bucketInfix)) {
-      String basePath = joinStoragePaths(datasetsBucket, bucketInfix);
-      Map<String, Optional<String>> partialStoragePaths =
-          ImmutableMap.<String, Optional<String>>builder()
-              .put(CDR_STORAGE_PATH_KEY, Optional.of("/"))
-              .put(
-                  WGS_VCF_MERGED_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsVcfMergedStoragePath()))
-              .put(
-                  WGS_HAIL_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsHailStoragePath()))
-              .put(
-                  WGS_CRAM_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsCramManifestPath()))
-              .put(
-                  MICROARRAY_HAIL_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayHailStoragePath()))
-              .put(
-                  MICROARRAY_VCF_SINGLE_SAMPLE_STORAGE_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayVcfSingleSampleStoragePath()))
-              .put(
-                  MICROARRAY_VCF_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayVcfManifestPath()))
-              .put(
-                  MICROARRAY_IDAT_MANIFEST_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getMicroarrayIdatManifestPath()))
-              .build();
-      vars.putAll(
-          partialStoragePaths.entrySet().stream()
-              .filter(entry -> entry.getValue().filter(p -> !p.isEmpty()).isPresent())
-              .collect(
-                  Collectors.toMap(
-                      Entry::getKey, entry -> joinStoragePaths(basePath, entry.getValue().get()))));
-    }
-
-    return vars;
-  }
-
   @Override
   public void createRuntime(
       Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
@@ -282,7 +210,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     DbUser user = userProvider.get();
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
 
-    Map<String, String> customEnvironmentVariables = getBaseEnvironmentVariables(workspace);
+    Map<String, String> customEnvironmentVariables =
+        LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+            workspace, fireCloudService, workbenchConfigProvider.get());
 
     // See RW-7107
     customEnvironmentVariables.put("PYSPARK_PYTHON", "/usr/local/bin/python3");
@@ -544,6 +474,25 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     appTypeToLabelValue(appType)));
     // If no disk name in field name from request, that means creating new disk.
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
+      // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
+      // Check with Leo again see if user have READY disk, if so, block this request or logging
+      List<Disk> diskList =
+          PersistentDiskUtils.findTheMostRecentActiveDisks(
+              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
+                  .stream()
+                  .map(leonardoMapper::toApiListDisksResponse)
+                  .collect(Collectors.toList()));
+      List<Disk> appDisks =
+          diskList.stream()
+              .filter(d -> d.getAppType().equals(createAppRequest.getAppType()))
+              .collect(Collectors.toList());
+      if (!appDisks.isEmpty()) {
+        // Find active disks for APP VM. Block user from creating new disk.
+        throw new BadRequestException(
+            String.format(
+                "Can not create new APP with new PD if user has active APP PD. Existing disks: %s",
+                PersistentDiskUtils.prettyPrintDiskNames(appDisks)));
+      }
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 
@@ -552,7 +501,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
-        .customEnvironmentVariables(getBaseEnvironmentVariables(dbWorkspace))
+        .customEnvironmentVariables(
+            LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+                dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
         .labels(appLabels);
 
     if (appType.equals(AppType.RSTUDIO)) {
@@ -582,6 +533,18 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<UserAppEnvironment> listAppsInProjectCreatedByCreator(String googleProjectId) {
     AppsApi appsApi = appsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, LEONARDO_CREATOR_ROLE);
+  }
+
+  @Override
+  public List<UserAppEnvironment> listAppsInProjectAsService(String googleProjectId) {
+    AppsApi appsApi = serviceAppsApiProvider.get();
+    return getUserAppEnvironments(googleProjectId, appsApi, null);
+  }
+
+  @NotNull
+  private List<UserAppEnvironment> getUserAppEnvironments(
+      String googleProjectId, AppsApi appsApi, String leonardoAppRole) {
     List<LeonardoListAppResponse> listAppResponses =
         leonardoRetryHandler.run(
             (context) ->
@@ -590,7 +553,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* labels= */ null,
                     /* includeDeleted= */ false,
                     /* includeLabels= */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
-                    LEONARDO_CREATOR_ROLE));
+                    leonardoAppRole));
 
     return listAppResponses.stream().map(leonardoMapper::toApiApp).collect(Collectors.toList());
   }
@@ -619,31 +582,71 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return true;
   }
 
-  /** The general environment variables that can be used in all Apps. */
-  private Map<String, String> getBaseEnvironmentVariables(DbWorkspace workspace) {
-    Map<String, String> customEnvironmentVariables = new HashMap<>();
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
-        fireCloudService
-            .getWorkspace(workspace)
-            .orElseThrow(() -> new NotFoundException("workspace not found"));
-    customEnvironmentVariables.put(WORKSPACE_NAMESPACE_KEY, workspace.getWorkspaceNamespace());
-    // This variable is already made available by Leonardo, but it's only exported in certain
-    // notebooks contexts; this ensures it is always exported. See RW-7096.
-    customEnvironmentVariables.put(
-        WORKSPACE_BUCKET_KEY, "gs://" + fcWorkspaceResponse.getWorkspace().getBucketName());
-    // In Terra V2 workspaces, all compute users have the bigquery.readSessionUser role per CA-1179.
-    // In all workspaces, OWNERs have storage read session permission via the project viewer role.
-    // If this variable is exported (with any value), codegen will use the BQ storage API, which is
-    // ~200x faster for loading large dataframes from Bigquery.
-    // After CA-952 is complete, this should always be exported.
-    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
-        || workspace.isTerraV2Workspace()) {
-      customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
-    }
-    customEnvironmentVariables.put(
-        LEONARDO_BASE_URL, workbenchConfigProvider.get().firecloud.leoBaseUrl);
-    customEnvironmentVariables.putAll(buildCdrEnvVars(workspace.getCdrVersion()));
+  @Override
+  public int stopAllUserAppsAsService(String userEmail) {
+    AppsApi appsApiAsService = serviceAppsApiProvider.get();
+    List<LeonardoListAppResponse> apps =
+        leonardoRetryHandler.run(
+            (context) ->
+                appsApiAsService.listApp(
+                    /* labels =*/ LeonardoLabelHelper.LEONARDO_LABEL_CREATED_BY + "=" + userEmail,
+                    /* includeDeleted = */ false,
+                    /* includeLabels = */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
+                    /* role = */ null));
 
-    return customEnvironmentVariables;
+    // Only the app creator has start/stop permissions, therefore we impersonate here.
+    // If/when IA-2996 is resolved, switch this back to the service.
+    AppsApi appsApiAsImpersonatedUser = new AppsApi();
+    try {
+      appsApiAsImpersonatedUser.setApiClient(
+          leonardoApiClientFactory.newImpersonatedApiClient(userEmail));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+
+    List<Boolean> results =
+        apps.stream()
+            .filter(r -> STOPPABLE_APP_STATUSES.contains(r.getStatus()))
+            .filter(
+                r -> {
+                  if (!userEmail.equals(r.getAuditInfo().getCreator())) {
+                    log.severe(
+                        String.format(
+                            "listApp query by label returned an app not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
+                            r.getCloudContext().getCloudResource(),
+                            r.getAppName(),
+                            r.getAuditInfo().getCreator(),
+                            userEmail));
+                    return false;
+                  }
+                  return true;
+                })
+            .parallel()
+            .map(
+                r -> {
+                  try {
+                    leonardoRetryHandler.runAndThrowChecked(
+                        (context) -> {
+                          appsApiAsImpersonatedUser.stopApp(
+                              r.getCloudContext().getCloudResource(), r.getAppName());
+                          return null;
+                        });
+                  } catch (ApiException e) {
+                    log.log(
+                        Level.WARNING,
+                        String.format(
+                            "failed to stop runtime '%s/%s'",
+                            r.getCloudContext().getCloudResource(), r.getAppName()),
+                        e);
+                    return false;
+                  }
+                  return true;
+                })
+            .collect(Collectors.toList());
+    if (results.contains(false)) {
+      throw new ServerErrorException("failed to stop all user runtimes, see logs for details");
+    }
+
+    return results.size();
   }
 }

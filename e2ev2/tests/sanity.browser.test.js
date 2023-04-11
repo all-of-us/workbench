@@ -5,7 +5,7 @@ const browserTest = tu.browserTest(__filename)
 
 browserTest('page loads', async browser => {
   const page = browser.initialPage
-  await page.goto('https://example.com', {waitUntil: 'networkidle0'})
+  await page.goto('https://example.com')
   const h1 = await page.waitForSelector('h1')
   expect(await h1.evaluate(n => n.innerText)).toBe('Example Domain')
 })
@@ -14,7 +14,7 @@ browserTest('view cookie policy page', async browser => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
     .then(async () => {
-      await page.goto(config.urlRoot()+'/login', {waitUntil: 'networkidle0'})
+      await page.goto(config.urlRoot()+'/login')
       const cpLink = await page.waitForSelector('a[href="/cookie-policy"]')
       expect(cpLink).toBeDefined()
       // click and wait need to happen simultaneously to avoid a race
@@ -37,7 +37,7 @@ for (const p of ['/workspaces', '/profile']) {
   browserTest(`navigation to ${p} redirects to sign-in page`, async browser => {
     const page = browser.initialPage
     await tu.useApiProxy(page)
-    await page.goto(config.urlRoot()+p, {waitUntil: 'networkidle0'})
+    await page.goto(config.urlRoot()+p)
     const button = await page.waitForSelector('[role="button"]')
     expect(await button.evaluate(n => n.textContent)).toBe('Sign In')
   })

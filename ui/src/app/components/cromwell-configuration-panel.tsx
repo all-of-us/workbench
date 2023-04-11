@@ -16,24 +16,43 @@ import {
   withUserProfile,
 } from 'app/utils';
 import {
+  CROMWELL_INFORMATION_LINK,
+  CROMWELL_INTRO_LINK,
+  WORKFLOW_AND_WDL_LINK,
+} from 'app/utils/aou_external_links';
+import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
+import {
   DEFAULT_MACHINE_NAME,
   findMachineByName,
   Machine,
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { createUserApp } from 'app/utils/user-apps-utils';
 
-import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
+import {
+  canCreateApp,
+  defaultCromwellConfig,
+  findApp,
+  UIAppType,
+} from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 import { TooltipTrigger } from './popups';
 
 const { useState } = React;
 
 const cromwellSupportArticles = [
-  { text: 'How to run Cromwell in All of Us workbench?', link: '#' },
-  { text: 'Cromwell documentation', link: '#' },
-  { text: 'Workflow and WDL', link: '#' },
-  { text: 'Running and Autopause', link: '#' },
-  { text: 'Storage options', link: '#' },
+  {
+    text: 'How to run Cromwell in All of Us workbench?',
+    link: CROMWELL_INFORMATION_LINK,
+  },
+  {
+    text: 'Cromwell documentation',
+    link: CROMWELL_INTRO_LINK,
+  },
+  {
+    text: 'Workflow and WDL',
+    link: WORKFLOW_AND_WDL_LINK,
+  },
 ];
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
 
@@ -53,25 +72,42 @@ const PanelMain = fp.flow(
   }) => {
     // all apps besides Jupyter
     const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
-    const [creating, setCreating] = useState(false);
+    const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
     const app = findApp(userApps, UIAppType.CROMWELL);
-    const loading = userApps === undefined;
+    const loadingApps = userApps === undefined;
 
     useEffect(() => {
       appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
     }, []);
 
+    const onDismiss = () => {
+      onClose();
+      setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+    };
+
     const onCreate = () => {
-      if (!creating) {
-        setCreating(true);
-        appsApi().createApp(workspace.namespace, defaultCromwellConfig);
-        onClose();
-        setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+      if (!creatingCromwellApp) {
+        setCreatingCromwellApp(true);
+        fetchWithErrorModal(
+          () => createUserApp(workspace.namespace, defaultCromwellConfig),
+          {
+            customErrorResponseFormatter: (error: ApiErrorResponse) =>
+              error?.originalResponse?.status === 409 && {
+                title: 'Error Creating Cromwell Environment',
+                message:
+                  'Please wait a few minutes and try to create your Cromwell Environment again.',
+                onDismiss,
+              },
+          }
+        ).then(() => onDismiss());
       }
     };
 
     const { profile } = profileState;
+
+    const createEnabled =
+      !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
     return (
       <FlexColumn style={{ height: '100%' }}>
@@ -94,9 +130,13 @@ const PanelMain = fp.flow(
           <WarningMessage>
             This cost is only for running the Cromwell Engine, there will be
             additional cost for interactions with the workflow.
-            <TooltipTrigger content='Coming soon'>
-              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
-            </TooltipTrigger>
+            <a
+              style={{ marginLeft: '0.25rem' }}
+              href={CROMWELL_INFORMATION_LINK}
+              target={'_blank'}
+            >
+              Learn more{' '}
+            </a>
             <i
               className='pi pi-external-link'
               style={{
@@ -109,45 +149,27 @@ const PanelMain = fp.flow(
           </WarningMessage>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
-          <div style={{ fontWeight: 'bold' }}>Cromwell version: 76</div>
           <FlexRow style={{ alignItems: 'center' }}>
             <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
               Cloud compute profile
             </div>
-            <div
-              style={{
-                marginRight: '0.5rem',
-                backgroundColor: '#ededed',
-                color: '#7b828e',
-                padding: '1rem 2rem 1rem 0.5rem',
-                borderRadius: '0.5rem',
-              }}
+            <TooltipTrigger
+              content='The cloud compute profile for Cromwell beta is non-configurable.'
+              side={'right'}
             >
-              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
-            </div>
-            <TooltipTrigger content='Coming soon'>
-              <a style={{ marginLeft: '0.25rem' }}>Learn more </a>
+              <div style={styles.disabledCloudProfile}>
+                {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
+              </div>
             </TooltipTrigger>
-            <i
-              className='pi pi-external-link'
-              style={{
-                marginLeft: '0.25rem',
-                fontSize: '0.75rem',
-                color: '#6fb4ff',
-                cursor: 'pointer',
-              }}
-            />
           </FlexRow>
         </div>
         <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
           <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
           {cromwellSupportArticles.map((article, index) => (
             <div key={index} style={{ display: 'block' }}>
-              <TooltipTrigger content='Coming soon'>
-                <a>
-                  {index + 1}. {article.text}
-                </a>
-              </TooltipTrigger>
+              <a href={article.link} target='_blank'>
+                {index + 1}. {article.text}
+              </a>
             </div>
           ))}
         </div>
@@ -168,7 +190,7 @@ const PanelMain = fp.flow(
             id='cromwell-cloud-environment-create-button'
             aria-label='cromwell cloud environment create button'
             onClick={onCreate}
-            disabled={loading || !!app?.status || creating}
+            disabled={!createEnabled}
           >
             Start
           </Button>

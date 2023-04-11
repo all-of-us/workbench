@@ -71,7 +71,8 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
-    "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
+    "apiBaseUrl": "http:\/\/localhost:8081",
+    "apiAssetsBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
     "uiBaseUrl": "http:\/\/localhost:4200",
     "publicApiKeyForErrorReports": "",
     "projectId": "all-of-us-workbench-test",
@@ -103,10 +104,11 @@
     "currentDuccVersions": [3, 4, 5],
     "renewal": {
       "expiryDays": 365,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -119,9 +121,9 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": true,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": true
+    "enableRStudioGKEApp": true,
+    "enableDataExplorer": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

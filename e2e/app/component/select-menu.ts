@@ -60,7 +60,9 @@ export default class SelectMenu extends BaseMenu {
   async getAllOptionTexts(): Promise<string[]> {
     const selector = `${this.getXpath()}//*[@role="option"]/text()`;
     await this.open();
-    return this.getMenuItemTexts(selector);
+    const options = this.getMenuItemTexts(selector);
+    await this.toggle();
+    return options;
   }
 
   /**
@@ -75,7 +77,7 @@ export default class SelectMenu extends BaseMenu {
         return;
       }
       if (maxAttempts <= 0) {
-        return;
+        throw Error('maxAttempts reached in select-menu.open().click()');
       }
       maxAttempts--;
       await this.page.waitForTimeout(1000).then(click); // one second pause before try again

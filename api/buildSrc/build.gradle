@@ -9,8 +9,8 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "$project.ext.JACKSON_VERSION"
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "$project.ext.JACKSON_VERSION"
+    api gradleApi()
+    api localGroovy()
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "$project.ext.JACKSON_VERSION"
+    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "$project.ext.JACKSON_VERSION"
 }

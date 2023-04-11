@@ -90,7 +90,7 @@ export const signOut = async (continuePath: string = '/login') => {
   let signOutApiCallSucceeded = true;
   try {
     await userApi().signOut();
-  } catch (e) {
+  } catch {
     signOutApiCallSucceeded = false;
   }
 
@@ -151,7 +151,9 @@ export const useAuthentication = () => {
     // Unfortunately, this function triggers _after_ auth declares the user as unauthenticated. In that case, we
     // return early to allow signinSilent to trigger and re-run this function without disrupting the user.
     const expiredCallback = auth.events.addAccessTokenExpired(() => {
-      auth.signinSilent().catch(signOutWithoutLooping);
+      auth.signinSilent().catch(() => {
+        signOutWithoutLooping();
+      });
     });
     if (!auth.isLoading && auth.user?.expired && !auth.error) {
       return expiredCallback;

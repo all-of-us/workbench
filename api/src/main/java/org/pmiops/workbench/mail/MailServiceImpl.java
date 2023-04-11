@@ -1,5 +1,8 @@
 package org.pmiops.workbench.mail;
 
+import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -48,6 +51,7 @@ import org.pmiops.workbench.mandrill.model.RecipientType;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class MailServiceImpl implements MailService {
@@ -77,10 +81,10 @@ public class MailServiceImpl implements MailService {
   private static final String INSTRUCTIONS_RESOURCE = "emails/instructions/content.html";
   private static final String NEW_USER_SATISFACTION_SURVEY_RESOURCE =
       "emails/new_user_satisfaction_survey/content.html";
-  private static final String REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE =
-      "emails/rt_access_expired/content.html";
-  private static final String REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE =
-      "emails/rt_access_threshold/content.html";
+  private static final String TIER_ACCESS_EXPIRED_RESOURCE =
+      "emails/tier_access_expired/content.html";
+  private static final String TIER_ACCESS_THRESHOLD_RESOURCE =
+      "emails/tier_access_threshold/content.html";
   private static final String SETUP_BILLING_ACCOUNT_RESOURCE =
       "emails/setup_gcp_billing_account/content.html";
   private static final String UNUSED_DISK_RESOURCE = "emails/unused_disk/content.html";
@@ -209,12 +213,16 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void alertUserRegisteredTierWarningThreshold(
-      final DbUser user, long daysRemaining, Instant expirationTime) throws MessagingException {
+  public void alertUserAccessTierWarningThreshold(
+      final DbUser user, long daysRemaining, Instant expirationTime, String tierShortName)
+      throws MessagingException {
+
+    String capitalizedAccessTierShortName = StringUtils.capitalize(tierShortName);
 
     final String logMsg =
         String.format(
-            "Registered Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            "%s Tier access expiration will occur for user %s (%s) in %d days (on %s).",
+            capitalizedAccessTierShortName,
             user.getUsername(),
             user.getContactEmail(),
             daysRemaining,
@@ -223,42 +231,50 @@ public class MailServiceImpl implements MailService {
 
     final String htmlMessage =
         buildHtml(
-            REGISTERED_TIER_ACCESS_THRESHOLD_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
+            TIER_ACCESS_THRESHOLD_RESOURCE,
+            accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Your access to All of Us Registered Tier Data will expire "
+        "Your access to All of Us "
+            + capitalizedAccessTierShortName
+            + " Tier Data will expire "
             + (daysRemaining == 1 ? "tomorrow" : String.format("in %d days", daysRemaining)),
         String.format(
-            "User %s (%s) will lose registered tier access in %d days",
-            user.getUsername(), user.getContactEmail(), daysRemaining),
+            "User %s (%s) will lose " + tierShortName + " tier access in %d days",
+            user.getUsername(),
+            user.getContactEmail(),
+            daysRemaining),
         htmlMessage);
   }
 
   @Override
-  public void alertUserRegisteredTierExpiration(final DbUser user, Instant expirationTime)
-      throws MessagingException {
+  public void alertUserAccessTierExpiration(
+      final DbUser user, Instant expirationTime, String tierShortName) throws MessagingException {
+    String capitalizedAccessTierShortName = StringUtils.capitalize(tierShortName);
 
     final String logMsg =
         String.format(
-            "Registered Tier access expired for user %s (%s) on %s.",
-            user.getUsername(), user.getContactEmail(), formatCentralTime(expirationTime));
+            capitalizedAccessTierShortName + " Tier access expired for user %s (%s) on %s.",
+            user.getUsername(),
+            user.getContactEmail(),
+            formatCentralTime(expirationTime));
     log.info(logMsg);
 
     final String htmlMessage =
         buildHtml(
-            REGISTERED_TIER_ACCESS_EXPIRED_RESOURCE,
-            registeredTierAccessSubstitutionMap(expirationTime, user.getUsername()));
+            TIER_ACCESS_EXPIRED_RESOURCE,
+            accessTierSubstitutionMap(expirationTime, user, tierShortName));
 
     sendWithRetries(
         Collections.singletonList(user.getContactEmail()),
         Collections.emptyList(),
-        "Your access to All of Us Registered Tier Data has expired",
+        "Your access to All of Us " + capitalizedAccessTierShortName + " Tier Data has expired",
         String.format(
-            "Registered Tier access expired for user %s (%s)",
-            user.getUsername(), user.getContactEmail()),
+            capitalizedAccessTierShortName + " Tier access expired for user %s (%s)",
+            user.getUsername(),
+            user.getContactEmail()),
         htmlMessage);
   }
 
@@ -501,15 +517,20 @@ public class MailServiceImpl implements MailService {
         .build();
   }
 
-  private ImmutableMap<EmailSubstitutionField, String> registeredTierAccessSubstitutionMap(
-      Instant expirationTime, String username) {
+  private ImmutableMap<EmailSubstitutionField, String> accessTierSubstitutionMap(
+      Instant expirationTime, DbUser user, String tierShortName) {
 
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.ALL_OF_US, getAllOfUsItalicsText())
         .put(EmailSubstitutionField.EXPIRATION_DATE, formatCentralTime(expirationTime))
-        .put(EmailSubstitutionField.USERNAME, username)
+        .put(EmailSubstitutionField.USERNAME, user.getUsername())
         .put(EmailSubstitutionField.URL, getUiUrlAsHref())
+        .put(EmailSubstitutionField.TIER, StringUtils.capitalize(tierShortName))
+        .put(
+            EmailSubstitutionField.FIRST_NAME,
+            HtmlEscapers.htmlEscaper().escape(user.getGivenName()))
+        .put(EmailSubstitutionField.BADGE_URL, getBadgeImage(tierShortName))
         .build();
   }
 
@@ -700,6 +721,22 @@ public class MailServiceImpl implements MailService {
     return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
   }
 
+  private String getBadgeImage(String tierShortName) {
+    String imageURL;
+    switch (tierShortName) {
+      case REGISTERED_TIER_SHORT_NAME:
+        imageURL = "registered-tier-badge.png";
+        break;
+      case CONTROLLED_TIER_SHORT_NAME:
+        imageURL = "controlled-tier-badge.png";
+        break;
+      default:
+        imageURL = null;
+    }
+
+    return cloudStorageClientProvider.get().getImageUrl(imageURL);
+  }
+
   private String formatPercentage(double threshold) {
     return NumberFormat.getPercentInstance().format(threshold);
   }
@@ -717,8 +754,8 @@ public class MailServiceImpl implements MailService {
   }
 
   private String formatCentralTime(Instant date) {
-    // e.g. April 5, 2021 at 1:23PM Central Time
-    return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'Central Time'")
+    // e.g. April 5, 2021 at 1:23PM CT
+    return DateTimeFormatter.ofPattern("MMMM d, yyyy 'at' h:mm a 'CT'")
         .withLocale(Locale.US)
         .withZone(ZoneId.of("America/Chicago"))
         .format(date);

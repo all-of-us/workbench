@@ -12,12 +12,11 @@ browserTest('create a workspace', async browser => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
-  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.goto(config.urlRoot())
 
-  const createWorkspaceLink = await page.waitForSelector('[aria-label="Create Workspace"]')
   // Workspace creation isn't really available until billing accounts have been fetched.
   const [baEventPromise] = await tu.promiseWindowEvent(page, 'billing-accounts-loaded')
-  await Promise.all([baEventPromise, createWorkspaceLink.click()])
+  await Promise.all([baEventPromise, tu.jsClick(page, '[aria-label="Create Workspace"]')])
 
   await expect(page.waitForSelector('title').then(eh => eh.evaluate(n => n.innerText)))
     .resolves.toContain('Create Workspace |')
@@ -51,7 +50,7 @@ browserTest('create a workspace', async browser => {
   const workspacePageTitleLink =
     await page.waitForSelector('a[href="/workspaces"] + span + div > a')
   await expect(workspacePageTitleLink.evaluate(e => e.innerText)).resolves.toBe(wsName)
-  await page.click('[aria-label="Open Actions Menu"]')
+  await page.waitForSelector('[aria-label="Open Actions Menu"]').then(eh => eh.click())
   // side menu pops up
   await page.click('[aria-label="Delete"]')
   // modal confirmation pops up

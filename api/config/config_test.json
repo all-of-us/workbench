@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
+    "apiAssetsBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
     "uiBaseUrl": "https:\/\/all-of-us-workbench-test.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
     "projectId": "all-of-us-workbench-test",
@@ -103,10 +104,11 @@
     "currentDuccVersions": [3, 4, 5],
     "renewal": {
       "expiryDays": 3650,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -118,10 +120,10 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
-    "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
+    "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": true
+    "enableRStudioGKEApp": true,
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

@@ -10,6 +10,23 @@ import { NavigationProps } from 'app/utils/navigation';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { ajaxContext, Environments } from 'terraui/out/Environments';
 
+// Indexes of hidden columns
+const workspace = 2;
+const deleteCloudEnvironment = 11;
+const pdStatus = 5;
+const pdDelete = 10;
+
+const hiddenTableColumns = [
+  {
+    tableName: 'cloud environments',
+    columnIndexesToHide: [workspace, deleteCloudEnvironment],
+  },
+  {
+    tableName: 'persistent disks',
+    columnIndexesToHide: [workspace, pdStatus, pdDelete],
+  },
+];
+
 const ajax = (signal) => {
   const jsonLeoFetch = (path) =>
     fetch(environment.leoApiUrl + path, {
@@ -34,6 +51,32 @@ const ajax = (signal) => {
   };
 };
 
+const css =
+  hiddenTableColumns.map(({ tableName, columnIndexesToHide }) =>
+    columnIndexesToHide
+      .map(
+        (columnIndex) =>
+          `div[aria-label="` +
+          tableName +
+          `"] div[role="columnheader"]:nth-child(` +
+          columnIndex +
+          `),
+       div[aria-label="` +
+          tableName +
+          `"] .table-cell:nth-child(` +
+          columnIndex +
+          `)`
+      )
+      .join(',\n')
+  ) +
+  ` {
+         display: none !important
+        }
+      
+       div[style*="z-index: 2"]:has(>div>svg) {
+          display: none !important
+        }`;
+
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
     NavigationProps,
@@ -52,6 +95,7 @@ export const RuntimesList = fp.flow(
     render() {
       return (
         <>
+          <style>{css}</style>
           {/* @ts-ignore // only a few of the properties of the Ajax object are bound */}
           <ajaxContext.Provider value={ajax}>
             <Environments

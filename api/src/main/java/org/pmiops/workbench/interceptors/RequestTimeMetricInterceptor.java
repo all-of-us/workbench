@@ -13,11 +13,11 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
-public class RequestTimeMetricInterceptor extends HandlerInterceptorAdapter {
+public class RequestTimeMetricInterceptor implements AsyncHandlerInterceptor {
 
   private final LogsBasedMetricService logsBasedMetricService;
   private Clock clock;

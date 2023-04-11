@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.workbench.researchallofus.org",
+    "apiAssetsBaseUrl": "https:\/\/api.workbench.researchallofus.org",
     "uiBaseUrl": "https:\/\/workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
     "projectId": "all-of-us-rw-prod",
@@ -103,10 +104,11 @@
     "currentDuccVersions": [3, 4],
     "renewal": {
       "expiryDays": 365,
-      "expiryDaysWarningThresholds": [1, 3, 7, 15, 30],
+      "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -119,9 +121,9 @@
     "ccSupportWhenAdminLocking": true,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": false,
-    "enableRStudioGKEApp": false
+    "enableRStudioGKEApp": false,
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

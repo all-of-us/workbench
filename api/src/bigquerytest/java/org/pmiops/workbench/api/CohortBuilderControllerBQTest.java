@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import javax.inject.Provider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -75,10 +77,12 @@ import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -115,6 +119,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       user.setUsername("bob@gmail.com");
       return user;
     }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
+      workbenchConfig.featureFlags.enableConceptSetsInCohortBuilder = true;
+      return workbenchConfig;
+    }
   }
 
   private CohortBuilderController controller;
@@ -142,6 +154,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private DbCriteria drugNode1;
   private DbCriteria drugNode2;
@@ -189,7 +202,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     when(firecloudService.isUserMemberOfGroupWithCache(anyString(), anyString())).thenReturn(true);
 
     controller =
-        new CohortBuilderController(cohortBuilderService, chartService, workspaceAuthService);
+        new CohortBuilderController(
+            cohortBuilderService, chartService, workbenchConfigProvider, workspaceAuthService);
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);

@@ -11,7 +11,7 @@ import {
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  */
-export function reportError(err: Error | string) {
+export function reportError(err: string) {
   console.error('Reporting error to Stackdriver: ', err);
   const reporterStore = stackdriverErrorReporterStore.get();
   if (reporterStore?.reporter) {

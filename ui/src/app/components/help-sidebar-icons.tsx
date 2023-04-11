@@ -16,8 +16,9 @@ import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
+  AppStatus,
+  AppType,
   CdrVersionTiersResponse,
-  ConfigResponse,
   Criteria,
   GenomicExtractionJob,
   TerraJobStatus,
@@ -27,7 +28,12 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { DEFAULT, reactStyles, switchCase } from 'app/utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
-import { runtimeStore, serverConfigStore, useStore } from 'app/utils/stores';
+import {
+  runtimeStore,
+  serverConfigStore,
+  userAppsStore,
+  useStore,
+} from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { supportUrls } from 'app/utils/zendesk';
@@ -35,10 +41,11 @@ import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
+import { AppStatusIndicator } from './app-status-indicator';
 import { appAssets, showAppsPanel, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
-import { RuntimeStatusIcon } from './runtime-status-icon';
+import { RuntimeStatusIndicator } from './runtime-status-indicator';
 
 const styles = reactStyles({
   asyncOperationStatusIcon: {
@@ -113,43 +120,85 @@ export interface IconConfig {
   hasContent: boolean;
 }
 
-const displayRuntimeStatusIcon = (
-  icon: IconConfig,
-  workspaceNamespace: string,
-  userSuspended: boolean,
-  config: ConfigResponse
-) => {
-  const jupyterAssets = appAssets.find(
-    (aa) => aa.appType === UIAppType.JUPYTER
-  );
+interface CompoundIconProps {
+  iconPath: string;
+  iconConfig: IconConfig;
+  children: React.ReactNode;
+}
+
+const CompoundIcon = ({
+  iconPath,
+  iconConfig,
+  children,
+}: CompoundIconProps) => {
+  const { config } = useStore(serverConfigStore);
+  const iconStyle: CSSProperties = showAppsPanel(config)
+    ? { width: '36px', position: 'absolute' }
+    : { width: '22px', position: 'absolute' };
 
   const containerStyle: CSSProperties = {
     height: '100%',
     alignItems: 'center',
     justifyContent: 'space-around',
   };
-  const iconStyle: CSSProperties = showAppsPanel(config)
-    ? { width: '36px', position: 'absolute' }
-    : { width: '22px', position: 'absolute' };
 
-  const iconSrc = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
-
-  // We always want to show the thunderstorm or Jupyter icon.
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
     <FlexRow style={containerStyle}>
       <img
-        src={iconSrc}
-        alt={icon.label}
+        src={iconPath}
+        alt={iconConfig.label}
         style={iconStyle}
-        data-test-id={'help-sidebar-icon-' + icon.id}
+        data-test-id={'help-sidebar-icon-' + iconConfig.id}
       />
-      <RuntimeStatusIcon
+      {children}
+    </FlexRow>
+  );
+};
+
+export const UserAppIcon = (props: {
+  iconConfig: IconConfig;
+  workspaceNamespace: string;
+  userSuspended: boolean;
+  status: AppStatus;
+  appType: UIAppType;
+}) => {
+  const { iconConfig, workspaceNamespace, userSuspended, status, appType } =
+    props;
+  const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
+  return (
+    <CompoundIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
+      <AppStatusIndicator
+        {...{ workspaceNamespace, userSuspended }}
+        appStatus={status}
+        style={styles.statusIconContainer}
+      />
+    </CompoundIcon>
+  );
+};
+
+export const RuntimeIcon = (props: {
+  iconConfig: IconConfig;
+  workspaceNamespace: string;
+  userSuspended: boolean;
+}) => {
+  const { iconConfig, workspaceNamespace, userSuspended } = props;
+  const { config } = useStore(serverConfigStore);
+  const jupyterAssets = appAssets.find(
+    (aa) => aa.appType === UIAppType.JUPYTER
+  );
+
+  const iconPath = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
+
+  // We always want to show the thunderstorm or Jupyter icon.
+  return (
+    <CompoundIcon {...{ config, iconConfig, iconPath }}>
+      <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
       />
-    </FlexRow>
+    </CompoundIcon>
   );
 };
 
@@ -324,7 +373,8 @@ const DisplayIcon = (props: DisplayIconProps) => {
     userSuspended,
     icon,
   } = props;
-  const { config } = useStore(serverConfigStore);
+
+  const { userApps } = useStore(userAppsStore);
   return switchCase(
     icon.id,
     [
@@ -360,37 +410,27 @@ const DisplayIcon = (props: DisplayIconProps) => {
     ],
     [
       'runtimeConfig',
-      () =>
-        displayRuntimeStatusIcon(
-          icon,
-          workspace.namespace,
-          userSuspended,
-          config
-        ),
+      () => (
+        <RuntimeIcon
+          iconConfig={icon}
+          workspaceNamespace={workspace.namespace}
+          {...{ userSuspended }}
+        />
+      ),
     ],
     [
       'cromwellConfig',
-      () => {
-        const cromwellAssets = appAssets.find(
-          (aa) => aa.appType === UIAppType.CROMWELL
-        );
-        return (
-          <FlexRow
-            style={{
-              height: '100%',
-              alignItems: 'center',
-              justifyContent: 'space-around',
-            }}
-          >
-            <img
-              data-test-id={'help-sidebar-icon-' + icon.id}
-              src={cromwellAssets.icon}
-              alt={icon.label}
-              style={{ ...icon.style, position: 'absolute' }}
-            />
-          </FlexRow>
-        );
-      },
+      () => (
+        <UserAppIcon
+          iconConfig={icon}
+          workspaceNamespace={workspace.namespace}
+          status={
+            userApps?.find((app) => app.appType === AppType.CROMWELL)?.status
+          }
+          appType={UIAppType.CROMWELL}
+          {...{ userSuspended }}
+        />
+      ),
     ],
     [
       'terminal',

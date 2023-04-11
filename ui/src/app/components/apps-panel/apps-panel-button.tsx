@@ -56,7 +56,12 @@ interface Props {
 export const AppsPanelButton = (props: Props) => {
   const { disabled, onClick, icon, buttonText } = props;
   return (
-    <Clickable {...{ disabled, onClick }} style={{ padding: '0.5em' }}>
+    <Clickable
+      {...{ disabled, onClick }}
+      style={{ padding: '0.5em' }}
+      data-test-id={`apps-panel-button-${buttonText}`}
+      propagateDataTestId
+    >
       <FlexColumn
         style={disabled ? buttonStyles.disabledButton : buttonStyles.button}
       >

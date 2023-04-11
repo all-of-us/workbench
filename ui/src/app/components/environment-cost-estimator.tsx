@@ -17,6 +17,7 @@ import { AnalysisConfig } from 'app/utils/runtime-utils';
 
 interface Props {
   analysisConfig: AnalysisConfig;
+  isGKEApp: boolean;
   costTextColor?: string;
   style?: CSSProperties;
 }
@@ -42,16 +43,33 @@ const styles = reactStyles({
   },
 });
 
+// To simplify calculations and the UI, we assume the workspace has only one GKE app running.
+const GKE_APP_HOURLY_USD_COST_PER_WORKSPACE = 0.2;
+
 export const EnvironmentCostEstimator = ({
   analysisConfig,
+  isGKEApp,
   costTextColor = colors.accent,
   style = {},
 }: Props) => {
   const { detachedDisk, diskConfig } = analysisConfig;
-  const runningCost = machineRunningCost(analysisConfig);
+  const runningCost =
+    machineRunningCost(analysisConfig) +
+    (isGKEApp ? GKE_APP_HOURLY_USD_COST_PER_WORKSPACE : 0);
   const runningCostBreakdown = machineRunningCostBreakdown(analysisConfig);
-  const storageCost = machineStorageCost(analysisConfig);
-  const storageCostBreakdown = machineStorageCostBreakdown(analysisConfig);
+  const pausedCost =
+    machineStorageCost(analysisConfig) +
+    (isGKEApp ? GKE_APP_HOURLY_USD_COST_PER_WORKSPACE : 0);
+  const pausedCostBreakdown = machineStorageCostBreakdown(analysisConfig);
+
+  if (isGKEApp) {
+    const gkeBaseCost = `${formatUsd(
+      GKE_APP_HOURLY_USD_COST_PER_WORKSPACE
+    )}/hr base environment cost`;
+    runningCostBreakdown.push(gkeBaseCost);
+    pausedCostBreakdown.push(gkeBaseCost);
+  }
+
   const costStyle = {
     ...styles.cost,
     color: costTextColor,
@@ -91,14 +109,14 @@ export const EnvironmentCostEstimator = ({
           content={
             <div>
               <div>Cost Breakdown</div>
-              {storageCostBreakdown.map((lineItem, i) => (
+              {pausedCostBreakdown.map((lineItem, i) => (
                 <div key={i}>{lineItem}</div>
               ))}
             </div>
           }
         >
-          <div style={costStyle} data-test-id='storage-cost'>
-            <div style={styles.costValue}>{formatUsd(storageCost)}</div>
+          <div style={costStyle} data-test-id='paused-cost'>
+            <div style={styles.costValue}>{formatUsd(pausedCost)}</div>
             <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
         </TooltipTrigger>

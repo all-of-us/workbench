@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  AppStatus,
   DisksApi,
   ProfileApi,
   WorkspaceAccessLevel,
@@ -21,7 +22,10 @@ import {
   mountWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsCromwellResponse,
+} from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -30,6 +34,7 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
@@ -103,17 +108,80 @@ describe('CromwellConfigurationPanel', () => {
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementationOnce(() => Promise.resolve([]));
     const wrapper = await component();
-    const spyCreateApp = jest.spyOn(appsApi(), 'createApp');
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
       .find('#cromwell-cloud-environment-create-button')
       .first();
-    startButton.simulate('click');
 
+    startButton.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultCromwellConfig
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
+  const createDisabledStatuses = minus(
+    ALL_GKE_APP_STATUSES,
+    createEnabledStatuses
+  );
+
+  describe('should allow creating a Cromwell app for certain app statuses', () => {
+    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
+      jest
+        .spyOn(appsApi(), 'listAppsInWorkspace')
+        .mockImplementationOnce(() =>
+          Promise.resolve([
+            createListAppsCromwellResponse({ status: appStatus }),
+          ])
+        );
+      const wrapper = await component();
+      expect(
+        wrapper
+          .find('#cromwell-cloud-environment-create-button')
+          .first()
+          .prop('disabled')
+      ).toBeFalsy();
+    });
+  });
+
+  describe('should allow creating a Cromwell app for certain app statuses', () => {
+    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
+      jest
+        .spyOn(appsApi(), 'listAppsInWorkspace')
+        .mockImplementationOnce(() =>
+          Promise.resolve([
+            createListAppsCromwellResponse({ status: appStatus }),
+          ])
+        );
+      const wrapper = await component();
+      expect(
+        wrapper
+          .find('#cromwell-cloud-environment-create-button')
+          .first()
+          .prop('disabled')
+      ).toBeTruthy();
+    });
+  });
+
+  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+    const wrapper = await component();
+
+    const costEstimator = (w) => w.find('[data-test-id="cost-estimator"]');
+    const runningCost = (w) =>
+      costEstimator(w).find('[data-test-id="running-cost"]');
+    const pausedCost = (w) =>
+      costEstimator(w).find('[data-test-id="paused-cost"]');
+
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
+    expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.20 per hour');
   });
 });

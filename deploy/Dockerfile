@@ -1,7 +1,7 @@
 # Image used for deployment. The Circle image is not used here as it does not
 # have an ARM build (M1 chip requires emulation).
 # Keep synchronized with ci/Dockerfile.circle_build
-FROM openjdk:8-buster
+FROM openjdk:11
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -yq \
@@ -38,7 +38,7 @@ RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /tmp/clou
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-ENV GRADLE_VERSION 6.7.1
+ENV GRADLE_VERSION 7.6.1
 
 RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
   && unzip /tmp/gradle.zip -d /opt/gradle
