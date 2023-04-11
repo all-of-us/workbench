@@ -2036,7 +2036,9 @@ def update_cdr_config(cmd_name, *args)
 
   ENV.update(read_db_vars(gcc))
   cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-  update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+  ServiceAccountContext.new(gcc.project).run do
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+  end
 end
 
 Common.register_command({
