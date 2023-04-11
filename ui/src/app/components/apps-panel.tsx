@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { BillingStatus, Workspace } from 'generated/fetch';
 
@@ -15,7 +15,6 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
-import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
 import { AppLogo } from './apps-panel/app-logo';
 import { ExpandedApp } from './apps-panel/expanded-app';
@@ -65,7 +64,7 @@ export const AppsPanel = (props: {
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
-  const { onClose, workspace } = props;
+  const { onClose } = props;
   const { runtime } = useStore(runtimeStore);
   const { config } = useStore(serverConfigStore);
   // all GKE apps (not Jupyter)
@@ -77,10 +76,6 @@ export const AppsPanel = (props: {
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
     ...(config.enableCromwellGKEApp ? [UIAppType.CROMWELL] : []),
   ];
-
-  useEffect(() => {
-    maybeStartPollingForUserApps(workspace.namespace);
-  }, []);
 
   const [activeApps, availableApps] = getAppsByDisplayGroup(
     runtime,

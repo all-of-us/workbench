@@ -29,6 +29,7 @@ import {
   userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 const styles = reactStyles({
@@ -118,6 +119,12 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
         }
       };
     }, []);
+
+    useEffect(() => {
+      if (workspace) {
+        maybeStartPollingForUserApps(workspace.namespace);
+      }
+    }, [workspace]);
 
     const routeData = useStore(routeDataStore);
     const [navigate] = useNavigation();
