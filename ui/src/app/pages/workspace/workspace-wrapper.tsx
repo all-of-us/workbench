@@ -26,6 +26,7 @@ import {
   MatchParams,
   routeDataStore,
   runtimeStore,
+  userAppsStore,
   useStore,
 } from 'app/utils/stores';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
@@ -108,7 +109,16 @@ const NewCtNotification = (props: NotificationProps) => {
 
 export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
   ({ workspace, hideSpinner }) => {
-    useEffect(() => hideSpinner(), []);
+    useEffect(() => {
+      hideSpinner();
+      return () => {
+        const { timeoutID } = userAppsStore.get();
+        if (timeoutID) {
+          clearTimeout(timeoutID);
+        }
+      };
+    }, []);
+
     const routeData = useStore(routeDataStore);
     const [navigate] = useNavigation();
 
