@@ -9,38 +9,42 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
 
-const styles = reactStyles({
-  toast: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '13rem',
-  },
-  commandBox: {
-    fontSize: 'medium',
-    borderStyle: 'solid',
-    padding: '0.5rem 1rem 0.5rem 1rem ',
-  },
-  commandRow: {
-    paddingTop: '1rem',
-    paddingBottom: '1rem',
-    justifyContent: 'center',
-    fontWeight: 'bold',
-  },
-  copyIcon: {
-    marginLeft: 20,
-    marginRight: 10,
-    marginTop: 8,
-  },
-});
+// const styles = reactStyles({
+//   toast: {
+//     position: 'absolute',
+//     top: 0,
+//     right: 0,
+//     width: '13rem',
+//   },
+//   commandBox: {
+//     fontSize: 'medium',
+//     borderStyle: 'solid',
+//     padding: '0.5rem 1rem 0.5rem 1rem ',
+//   },
+//   commandRow: {
+//     paddingTop: '1rem',
+//     paddingBottom: '1rem',
+//     justifyContent: 'center',
+//     fontWeight: 'bold',
+//   },
+//   copyIcon: {
+//     marginLeft: 20,
+//     marginRight: 10,
+//     marginTop: 8,
+//   },
+// });
 
 export const DeleteCromwellConfirmationModal = (props: {
   clickYes;
   clickNo;
 }) => {
-  let toast: any;
+  {
+    /* The command to list jobs is not supported in cromshell-alpha. Ticket to address this
+           https://precisionmedicineinitiative.atlassian.net/browse/RW-9847?search_id=32e4287f-9e8d-4327-9017-d5120d8fabe8,*/
+  }
+
+  /* let toast: any;
   let toastTimer: NodeJS.Timer;
 
   const cromshell_job_check_command = 'cromshell-beta list -u';
@@ -56,7 +60,8 @@ export const DeleteCromwellConfirmationModal = (props: {
     if (!!toastTimer) {
       clearTimeout(toastTimer);
     }
-  };
+  };*/
+
   return (
     <Modal data-test-id='delete-cromwell-modal' width={500}>
       <ModalTitle> Delete Cromwell: check for running jobs </ModalTitle>
@@ -69,9 +74,8 @@ export const DeleteCromwellConfirmationModal = (props: {
           </div>
         </WarningMessage>
         <div style={{ paddingTop: '1rem' }}>
-          {/* the command to list Jobs is not available for cromshell-alpha*/}
-          {/* Ticket https://precisionmedicineinitiative.atlassian.net/browse/RW-9847?search_id=32e4287f-9e8d-4327-9017-d5120d8fabe8
-          will install cromshell-beta*/}
+          {/* The command to list jobs is not supported in cromshell-alpha. Ticket to address this
+           https://precisionmedicineinitiative.atlassian.net/browse/RW-9847?search_id=32e4287f-9e8d-4327-9017-d5120d8fabe8,*/}
           {/*  Use the following command in Jupyter/Terminal to check if you have any*/}
           {/*  jobs running{' '}*/}
           {/*  <FlexRow style={styles.commandRow}>*/}
