@@ -480,16 +480,18 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
   @Query(
       value =
           "select * from cb_criteria "
-              + "where concept_id in (:conceptIds) and is_selectable = 1 and est_count > 0 "
-              + "and domain_id in (:domainIds)",
+              + "where concept_id in (:conceptIds) and domain_id in (:domainIds) "
+              + "and is_standard = 1 and full_text like '%rank1%' "
+              + "and is_selectable = 1 and est_count > 0 ",
       nativeQuery = true)
   List<DbCriteria> findByConceptIdIn(List<String> conceptIds, List<String> domainIds);
 
   @Query(
       value =
           "select * from cb_criteria "
-              + "where code in (:codes) and is_selectable = 1 and est_count > 0 "
-              + "and domain_id in (:domainIds)",
+              + "where code in (:codes) and domain_id in (:domainIds) "
+              + "and is_standard = 1 and full_text like '%rank1%' "
+              + "and is_selectable = 1 and est_count > 0 ",
       nativeQuery = true)
   List<DbCriteria> findByCodeIn(List<String> codes, List<String> domainIds);
 }
