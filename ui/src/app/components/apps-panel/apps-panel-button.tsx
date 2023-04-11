@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
+import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
@@ -52,28 +53,36 @@ interface Props {
   icon: IconProp;
   buttonText: string;
   disabled?: boolean;
+  disabledTooltip?: string;
 }
 export const AppsPanelButton = (props: Props) => {
-  const { disabled, onClick, icon, buttonText } = props;
+  const { disabled, onClick, icon, buttonText, disabledTooltip } = props;
+
+  const showTooltip = disabled && disabledTooltip;
+
   return (
-    <Clickable
-      {...{ disabled, onClick }}
-      style={{ padding: '0.5em' }}
-      data-test-id={`apps-panel-button-${buttonText}`}
-      propagateDataTestId
-    >
-      <FlexColumn
-        style={disabled ? buttonStyles.disabledButton : buttonStyles.button}
+    <TooltipTrigger content={disabledTooltip} disabled={!showTooltip}>
+      <Clickable
+        {...{ disabled, onClick }}
+        style={{ padding: '0.5em' }}
+        data-test-id={`apps-panel-button-${buttonText}`}
+        propagateDataTestId
       >
-        <FontAwesomeIcon {...{ icon }} style={buttonStyles.buttonIcon} />
-        <div
-          style={
-            disabled ? buttonStyles.disabledButtonText : buttonStyles.buttonText
-          }
+        <FlexColumn
+          style={disabled ? buttonStyles.disabledButton : buttonStyles.button}
         >
-          {buttonText}
-        </div>
-      </FlexColumn>
-    </Clickable>
+          <FontAwesomeIcon {...{ icon }} style={buttonStyles.buttonIcon} />
+          <div
+            style={
+              disabled
+                ? buttonStyles.disabledButtonText
+                : buttonStyles.buttonText
+            }
+          >
+            {buttonText}
+          </div>
+        </FlexColumn>
+      </Clickable>
+    </TooltipTrigger>
   );
 };

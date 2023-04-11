@@ -10,7 +10,6 @@ import {
 } from 'generated/fetch';
 
 import {
-  leoAppsApi,
   leoProxyApi,
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
@@ -220,59 +219,10 @@ describe('ExpandedApp', () => {
 
   const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO];
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
-    it('should allow clicking Pause when the app status is RUNNING', async () => {
-      const appName = 'my-app';
-
-      const wrapper = await component(appType, {
-        appName,
-        googleProject,
-        status: AppStatus.RUNNING,
-      });
-      expect(wrapper.exists()).toBeTruthy();
-
-      const pauseButton = wrapper
-        .find({
-          'data-test-id': 'apps-panel-button-Pause',
-        })
-        .first();
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
-      expect(disabled).toBeFalsy();
-
-      const pauseSpy = jest.spyOn(leoAppsApi(), 'stopApp');
-      const { onClick } = pauseButton.props();
-      await onClick();
-
-      expect(pauseSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
-    });
-
-    it('should allow clicking Resume when the app status is STOPPED', async () => {
-      const appName = 'my-app';
-
-      const wrapper = await component(appType, {
-        appName,
-        googleProject,
-        status: AppStatus.STOPPED,
-      });
-      expect(wrapper.exists()).toBeTruthy();
-
-      const pauseButton = wrapper
-        .find({
-          'data-test-id': 'apps-panel-button-Resume',
-        })
-        .first();
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
-      expect(disabled).toBeFalsy();
-
-      const resumeSpy = jest.spyOn(leoAppsApi(), 'startApp');
-      const { onClick } = pauseButton.props();
-      await onClick();
-
-      expect(resumeSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
-    });
-
     test.each([
+      [AppStatus.RUNNING, 'Pause'],
+      [AppStatus.STOPPED, 'Resume'],
+
       [AppStatus.STARTING, 'Resuming'],
       [AppStatus.STOPPING, 'Pausing'],
 
