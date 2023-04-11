@@ -46,6 +46,7 @@ public class CdrVersionVO {
   public String wgsClinvarMultiHailPath;
   public String wgsClinvarSplitHailPath;
   public String wgsClinvarVcfPath;
+
   public String wgsLongReadsManifestPath;
   public String wgsLongReadsHailGRCh38;
   public String wgsLongReadsHailT2T;

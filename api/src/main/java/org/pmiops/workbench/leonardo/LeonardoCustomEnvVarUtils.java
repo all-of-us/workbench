@@ -48,7 +48,7 @@ public class LeonardoCustomEnvVarUtils {
   private static final String WGS_EXOME_MULTI_HAIL_PATH_KEY = "WGS_EXOME_MULTI_HAIL_PATH";
   private static final String WGS_EXOME_SPLIT_HAIL_PATH_KEY = "WGS_EXOME_SPLIT_HAIL_PATH";
   private static final String WGS_EXOME_VCF_PATH_KEY = "WGS_EXOME_VCF_PATH";
-  //ACAF Threshold
+  // ACAF Threshold
   private static final String WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH_KEY =
       "WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH";
   private static final String WGS_ACAF_THRESHOLD_SPLIT_HAIL_PATH_KEY =
@@ -64,9 +64,10 @@ public class LeonardoCustomEnvVarUtils {
   private static final String LONG_READS_MANIFEST_PATH_KEY = "LONG_READS_MANIFEST_PATH";
   private static final String WGS_LONGREADS_HAIL_GRCH38_PATH_KEY = "WGS_LONGREADS_HAIL_GRCH38_PATH";
   private static final String WGS_LONGREADS_HAIL_T2T_PATH_KEY = "WGS_LONGREADS_HAIL_T2T_PATH";
-  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH_KEY = "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH";
-  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY = "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH";
-
+  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH_KEY =
+      "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_GRCH38_PATH";
+  private static final String WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH_KEY =
+      "WGS_LONGREADS_JOINT_SNP_INDEL_VCF_T2T_PATH";
 
   @VisibleForTesting
   public static final Map<String, String> FASTA_REFERENCE_ENV_VAR_MAP =
@@ -139,9 +140,7 @@ public class LeonardoCustomEnvVarUtils {
               .put(
                   WGS_CLINVAR_SPLIT_HAIL_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsClinvarSplitHailPath()))
-              .put(
-                  WGS_CLINVAR_VCF_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsClinvarVcfPath()))
+              .put(WGS_CLINVAR_VCF_PATH_KEY, Optional.ofNullable(cdrVersion.getWgsClinvarVcfPath()))
               .put(
                   LONG_READS_MANIFEST_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsLongReadsManifestPath()))

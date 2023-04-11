@@ -59,6 +59,7 @@ public class DbCdrVersion {
   private String wgsLongReadsHailT2T;
   private String wgsLongReadsJointVcfGRCh38;
   private String wgsLongReadsJointVcfT2T;
+
   @Id
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
@@ -371,7 +372,6 @@ public class DbCdrVersion {
     return this;
   }
 
-
   @Column(name = "wgs_acaf_threshold_multi_hail_path")
   public String getWgsAcafThresholdMultiHailPath() {
     return wgsAcafThresholdMultiHailPath;
@@ -464,7 +464,6 @@ public class DbCdrVersion {
   }
 
   @Column(name = "wgs_longread_joint_vcf_t2t")
-
   public String getWgsLongReadsJointVcfT2T() {
     return wgsLongReadsJointVcfT2T;
   }
@@ -472,8 +471,6 @@ public class DbCdrVersion {
   public void setWgsLongReadsJointVcfT2T(String wgsLongReadsJointVcfT2T) {
     this.wgsLongReadsJointVcfT2T = wgsLongReadsJointVcfT2T;
   }
-
-
 
   @Override
   public int hashCode() {
