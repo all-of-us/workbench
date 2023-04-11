@@ -670,6 +670,7 @@ jobs:
                 dir_names: "ui"
       # Concurrent puppeteer tests would interfere with each other.
       - queue/until_front_of_line:
+          consider-branch: false # when true, fails if CIRCLE_BRANCH isn't defined, such as on main
           job-regex: ^puppeteer-test$
           time: '30' # minutes
       - attach_workspace:
