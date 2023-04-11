@@ -9,9 +9,10 @@ import { ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { PopupTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { orderedAccessModules } from 'app/pages/admin/user/admin-user-common';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { serverConfigStore } from 'app/utils/stores';
+import { getAccessModuleConfig } from 'app/utils/access-utils';
 
 interface Props {
   // The user to render the bypass panel for.
@@ -52,6 +53,44 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
       ? [AccessModule.PUBLICATIONCONFIRMATION]
       : []),
   ];
+};
+
+const moduleToToggleProps: Record<
+  AccessModule,
+  { name: string; 'data-test-id': string }
+> = {
+  [AccessModule.COMPLIANCETRAINING]: {
+    name: 'RT Compliance Training',
+    'data-test-id': 'rt-compliance-training-toggle',
+  },
+  [AccessModule.CTCOMPLIANCETRAINING]: {
+    name: 'CT Compliance Training',
+    'data-test-id': 'ct-compliance-training-toggle',
+  },
+  [AccessModule.DATAUSERCODEOFCONDUCT]: {
+    name: 'Data User Code of Conduct',
+    'data-test-id': 'ducc-toggle',
+  },
+  [AccessModule.ERACOMMONS]: {
+    name: 'eRA Commons Linking',
+    'data-test-id': 'era-commons-toggle',
+  },
+  [AccessModule.TWOFACTORAUTH]: {
+    name: 'Two Factor Auth',
+    'data-test-id': 'two-factor-auth-toggle',
+  },
+  [AccessModule.RASLINKLOGINGOV]: {
+    name: 'RAS Login.gov Link',
+    'data-test-id': 'ras-link-login-gov-toggle',
+  },
+  [AccessModule.PROFILECONFIRMATION]: {
+    name: 'Profile Confirmation',
+    'data-test-id': 'profile-confirmation-toggle',
+  },
+  [AccessModule.PUBLICATIONCONFIRMATION]: {
+    name: 'Publication Confirmation',
+    'data-test-id': 'publication-confirmation-toggle',
+  },
 };
 
 export class AdminUserBypass extends React.Component<Props, State> {
@@ -136,11 +175,16 @@ export class AdminUserBypass extends React.Component<Props, State> {
 
   render() {
     const { selectedModules, isPopupOpen, isSaving } = this.state;
-    const {
-      enableComplianceTraining,
-      enableEraCommons,
-      enableRasLoginGovLinking,
-    } = serverConfigStore.get().config;
+
+    const bypassToggleProps = orderedAccessModules
+      .filter((module) => getAccessModuleConfig(module).isEnabledInEnvironment)
+      .map((module) => {
+        return {
+          ...moduleToToggleProps[module],
+          module: module,
+        };
+      });
+
     return (
       <PopupTrigger
         ref={this.popupRef}
@@ -152,120 +196,19 @@ export class AdminUserBypass extends React.Component<Props, State> {
         onOpen={() => this.setState({ isPopupOpen: true })}
         content={
           <FlexColumn style={{ padding: '1.5rem' }}>
-            {enableComplianceTraining && (
+            {bypassToggleProps.map((m) => (
               <Toggle
-                name='RT Compliance Training'
-                checked={selectedModules.includes(
-                  AccessModule.COMPLIANCETRAINING
-                )}
-                data-test-id='rt-compliance-training-toggle'
+                key={m.name}
+                name={m.name}
+                checked={selectedModules.includes(m.module)}
+                data-test-id={m['data-test-id']}
                 onToggle={() => {
                   this.setState({
-                    selectedModules: fp.xor(selectedModules, [
-                      AccessModule.COMPLIANCETRAINING,
-                    ]),
+                    selectedModules: fp.xor(selectedModules, [m.module]),
                   });
                 }}
               />
-            )}
-            {enableComplianceTraining && (
-              <Toggle
-                name='CT Compliance Training'
-                checked={selectedModules.includes(
-                  AccessModule.CTCOMPLIANCETRAINING
-                )}
-                data-test-id='ct-compliance-training-toggle'
-                onToggle={() => {
-                  this.setState({
-                    selectedModules: fp.xor(selectedModules, [
-                      AccessModule.CTCOMPLIANCETRAINING,
-                    ]),
-                  });
-                }}
-              />
-            )}
-            {enableEraCommons && (
-              <Toggle
-                name='eRA Commons Linking'
-                checked={selectedModules.includes(AccessModule.ERACOMMONS)}
-                data-test-id='era-commons-toggle'
-                onToggle={() => {
-                  this.setState({
-                    selectedModules: fp.xor(selectedModules, [
-                      AccessModule.ERACOMMONS,
-                    ]),
-                  });
-                }}
-              />
-            )}
-            <Toggle
-              name='Two Factor Auth'
-              checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}
-              data-test-id='two-factor-auth-toggle'
-              onToggle={() => {
-                this.setState({
-                  selectedModules: fp.xor(selectedModules, [
-                    AccessModule.TWOFACTORAUTH,
-                  ]),
-                });
-              }}
-            />
-            <Toggle
-              name='Data User Code of Conduct'
-              checked={selectedModules.includes(
-                AccessModule.DATAUSERCODEOFCONDUCT
-              )}
-              data-test-id='ducc-toggle'
-              onToggle={() => {
-                this.setState({
-                  selectedModules: fp.xor(selectedModules, [
-                    AccessModule.DATAUSERCODEOFCONDUCT,
-                  ]),
-                });
-              }}
-            />
-            {enableRasLoginGovLinking && (
-              <Toggle
-                name='RAS Login.gov Link'
-                checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
-                data-test-id='ras-link-login-gov-toggle'
-                onToggle={() => {
-                  this.setState({
-                    selectedModules: fp.xor(selectedModules, [
-                      AccessModule.RASLINKLOGINGOV,
-                    ]),
-                  });
-                }}
-              />
-            )}
-            <Toggle
-              name='Profile Confirmation'
-              checked={selectedModules.includes(
-                AccessModule.PROFILECONFIRMATION
-              )}
-              data-test-id='profile-confirmation-toggle'
-              onToggle={() => {
-                this.setState({
-                  selectedModules: fp.xor(selectedModules, [
-                    AccessModule.PROFILECONFIRMATION,
-                  ]),
-                });
-              }}
-            />
-            <Toggle
-              name='Publication Confirmation'
-              checked={selectedModules.includes(
-                AccessModule.PUBLICATIONCONFIRMATION
-              )}
-              data-test-id='publication-confirmation-toggle'
-              onToggle={() => {
-                this.setState({
-                  selectedModules: fp.xor(selectedModules, [
-                    AccessModule.PUBLICATIONCONFIRMATION,
-                  ]),
-                });
-              }}
-            />
+            ))}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button
                 type='secondary'

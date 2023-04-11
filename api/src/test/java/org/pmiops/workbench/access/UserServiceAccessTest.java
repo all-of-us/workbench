@@ -279,7 +279,7 @@ public class UserServiceAccessTest {
         });
   }
 
-  // ERA Commons can be bypassed and is not subject to annual renewal.
+  // ERA Commons is not subject to annual renewal.
 
   @Test
   public void test_updateUserWithRetries_era_unbypassed_noncompliant() {
@@ -291,7 +291,7 @@ public class UserServiceAccessTest {
         });
   }
 
-  // Two Factor Auth (2FA) can be bypassed and is not subject to annual renewal.
+  // Two Factor Auth (2FA) is not subject to annual renewal.
 
   @Test
   public void test_updateUserWithRetries_2fa_unbypassed_noncompliant() {
@@ -303,7 +303,7 @@ public class UserServiceAccessTest {
         });
   }
 
-  // Compliance training can be bypassed, and is subject to annual renewal.
+  // Compliance training is subject to annual renewal.
 
   @Test
   public void test_updateUserWithRetries_training_unbypassed_aar_noncompliant() {
@@ -331,7 +331,7 @@ public class UserServiceAccessTest {
         });
   }
 
-  // DUCC can be bypassed, and is subject to annual renewal.
+  // DUCC is subject to annual renewal.
   // A missing DUCC version or a version other than the latest is also noncompliant.
 
   @Test
@@ -389,12 +389,14 @@ public class UserServiceAccessTest {
         });
   }
 
-  // Publications confirmation is subject to annual renewal and cannot be bypassed.
+  // Publications confirmation is subject to annual renewal.
 
   @Test
-  public void test_updateUserWithRetries_publications_not_confirmed() {
+  public void test_updateUserWithRetries_publications_unbypassed_publications_not_confirmed() {
     testUnregistration(
         user -> {
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, null);
           return userDao.save(user);
@@ -402,9 +404,11 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_publications_expired() {
+  public void test_updateUserWithRetries_publications_unbypassed_publications_expired() {
     testUnregistration(
         user -> {
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, false);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PUBLICATION_CONFIRMATION, willExpire);
@@ -414,12 +418,14 @@ public class UserServiceAccessTest {
         });
   }
 
-  // Profile confirmation is subject to annual renewal and cannot be bypassed.
+  // Profile confirmation is subject to annual renewal.
 
   @Test
-  public void test_updateUserWithRetries_profile_not_confirmed() {
+  public void test_updateUserWithRetries_profile_unbypassed_profile_not_confirmed() {
     testUnregistration(
         user -> {
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, null);
           return userDao.save(user);
@@ -427,9 +433,11 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_profile_expired() {
+  public void test_updateUserWithRetries_profile_unbypassed_profile_expired() {
     testUnregistration(
         user -> {
+          accessModuleService.updateBypassTime(
+              dbUser.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, false);
           final Timestamp willExpire = Timestamp.from(START_INSTANT);
           accessModuleService.updateCompletionTime(
               dbUser, DbAccessModuleName.PROFILE_CONFIRMATION, willExpire);
@@ -1339,11 +1347,10 @@ public class UserServiceAccessTest {
     accessModuleService.updateBypassTime(
         user.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
     accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
-
-    accessModuleService.updateCompletionTime(
-        user, DbAccessModuleName.PUBLICATION_CONFIRMATION, timestamp);
-    accessModuleService.updateCompletionTime(
-        user, DbAccessModuleName.PROFILE_CONFIRMATION, timestamp);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, true);
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.PROFILE_CONFIRMATION, true);
 
     createAffiliation(user);
     return user;

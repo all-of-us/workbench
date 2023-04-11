@@ -183,7 +183,7 @@ def run_api_incremental()
     common.status "Starting API server..."
     # appengineStart must be run with the Gradle daemon or it will stop outputting logs as soon as
     # the application has finished starting.
-    common.run_inline "./gradlew --daemon appengineRun "
+    common.run_inline "./gradlew --daemon appengineRun"
 
   rescue Interrupt
     # Do nothing
@@ -2279,11 +2279,13 @@ Common.register_command({
   :fn => ->(*args) { create_or_update_workbench_db_cmd("create-or-update-workbench-db", args) }
 })
 
-def migrate_database(dry_run = false)
+def migrate_database(gcc, serviceAccount = nil, dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
-  Dir.chdir("db") do
-    run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
+  CloudSqlProxyContext.new(gcc.project, serviceAccount, gcc.creds_file).run do
+    Dir.chdir("db") do
+      run_inline_or_log(dry_run, %W{../gradlew update -PrunList=main})
+    end
   end
 end
 
@@ -2399,8 +2401,12 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   ENV.update(read_db_vars(gcc))
-  migrate_database(op.opts.dry_run)
-  load_config(ctx.project, op.opts.dry_run)
+  # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
+  migrate_database(gcc, op.opts.account, op.opts.dry_run)
+  if (op.opts.key_file)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
+  end
+  load_config(gcc.project, op.opts.dry_run)
   cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
   update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
@@ -2428,7 +2434,7 @@ def run_cloud_migrations(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  migrate_database
+  migrate_database(gcc)
 end
 
 Common.register_command({
@@ -2443,7 +2449,7 @@ def update_cloud_config(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  load_config(ctx.project)
+  load_config(gcc.project)
 end
 
 Common.register_command({

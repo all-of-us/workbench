@@ -170,4 +170,18 @@ describe('CromwellConfigurationPanel', () => {
       ).toBeTruthy();
     });
   });
+
+  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+    const wrapper = await component();
+
+    const costEstimator = (w) => w.find('[data-test-id="cost-estimator"]');
+    const runningCost = (w) =>
+      costEstimator(w).find('[data-test-id="running-cost"]');
+    const pausedCost = (w) =>
+      costEstimator(w).find('[data-test-id="paused-cost"]');
+
+    expect(costEstimator(wrapper).exists()).toBeTruthy();
+    expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.20 per hour');
+  });
 });

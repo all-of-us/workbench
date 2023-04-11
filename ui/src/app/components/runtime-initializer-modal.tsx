@@ -60,6 +60,7 @@ export const RuntimeInitializerModal = ({
         </WarningMessage>
         <EnvironmentCostEstimator
           analysisConfig={defaultAnalysisConfig}
+          isGKEApp={false}
           style={{ ...styles.bodyElement, justifyContent: 'space-evenly' }}
         />
         <Clickable

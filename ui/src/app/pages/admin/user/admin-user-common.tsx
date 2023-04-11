@@ -643,3 +643,15 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
     </TooltipTrigger>
   );
 };
+
+// list the access modules in the desired order
+export const orderedAccessModules = [
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.ERACOMMONS,
+  AccessModule.COMPLIANCETRAINING,
+  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PUBLICATIONCONFIRMATION,
+];
