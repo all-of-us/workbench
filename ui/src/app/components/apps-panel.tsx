@@ -64,7 +64,7 @@ export const AppsPanel = (props: {
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
 }) => {
-  const { onClose } = props;
+  const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);
   const { config } = useStore(serverConfigStore);
   // all GKE apps (not Jupyter)
@@ -89,7 +89,7 @@ export const AppsPanel = (props: {
     setUserExpandedApps([...userExpandedApps, appType]);
   const showActiveSection = activeApps.length > 0;
 
-  return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
+  return workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
     <div data-test-id='apps-panel'>
