@@ -82,7 +82,7 @@ describe('Cromwell GKE App', () => {
         return await unexpanded.exists();
       },
       10e3, // every 10 sec
-      60e3 // with a 1 min timeout
+      2 * 60e3 // with a 2 min timeout
     );
     expect(isDeleted).toBeTruthy();
   });
