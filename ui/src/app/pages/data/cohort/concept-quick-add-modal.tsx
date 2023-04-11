@@ -8,6 +8,7 @@ import { Criteria } from 'generated/fetch';
 import { AlertWarning } from 'app/components/alert';
 import { Button, Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
+import { CheckBox } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -51,6 +52,7 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
     const { ns, wsid } = useParams<MatchParams>();
     const [conceptIdInput, setConceptIdInput] = useState<string>();
     const [matchedConcepts, setMatchedConcepts] = useState<Criteria[]>();
+    const [selectedConcepts, setSelectedConcepts] = useState<number[]>();
     const [error, setError] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -70,6 +72,9 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
             wsid,
             conceptsRequest
           );
+        setSelectedConcepts(
+          matchedConceptsResp.items.map((concept, index) => index)
+        );
         setMatchedConcepts(matchedConceptsResp.items);
       } catch (err) {
         console.error(err);
@@ -85,8 +90,12 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
 
     const addConceptsAsItems = () => {
       const { groupId, role } = cohortContext;
+      // Save only selected concepts
+      const filteredConcepts = matchedConcepts.filter((concept, index) =>
+        selectedConcepts.includes(index)
+      );
       // Group concepts by domain
-      const conceptsByDomain = fp.groupBy('domainId', matchedConcepts);
+      const conceptsByDomain = fp.groupBy('domainId', filteredConcepts);
       const searchRequest = searchRequestStore.getValue();
       // Add a separate line item for each domain
       const items = Object.values(conceptsByDomain).map((domainConcepts) => ({
@@ -111,6 +120,20 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
       }
       searchRequestStore.next(searchRequest);
       currentCohortSearchContextStore.next(undefined);
+    };
+
+    const onSelectAllChange = (checked: boolean) => {
+      setSelectedConcepts(
+        checked ? matchedConcepts.map((concept, index) => index) : []
+      );
+    };
+
+    const onCheckboxChange = (index: number, checked: boolean) => {
+      setSelectedConcepts((prevState) =>
+        checked
+          ? [...prevState, index]
+          : prevState.filter((selection) => selection !== index)
+      );
     };
 
     return (
@@ -204,6 +227,15 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
                   <table style={{ textAlign: 'left', width: '100%' }}>
                     <thead>
                       <tr>
+                        <th>
+                          <CheckBox
+                            checked={
+                              selectedConcepts.length === matchedConcepts.length
+                            }
+                            onChange={(v) => onSelectAllChange(v)}
+                            manageOwnState={false}
+                          />
+                        </th>
                         <th style={{ width: '40%' }}>Name</th>
                         <th style={{ width: '20%' }}>Concept Id</th>
                         <th style={{ width: '20%' }}>Code</th>
@@ -213,6 +245,13 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
                     <tbody>
                       {matchedConcepts.map((concept, index) => (
                         <tr key={index}>
+                          <td>
+                            <CheckBox
+                              checked={selectedConcepts.includes(index)}
+                              onChange={(v) => onCheckboxChange(index, v)}
+                              manageOwnState={false}
+                            />
+                          </td>
                           <td>{concept.name}</td>
                           <td>{concept.conceptId}</td>
                           <td>{concept.code}</td>
@@ -231,6 +270,7 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
             <Button
               style={{ marginLeft: '0.75rem' }}
               onClick={() => addConceptsAsItems()}
+              disabled={selectedConcepts.length === 0}
             >
               Add
             </Button>
