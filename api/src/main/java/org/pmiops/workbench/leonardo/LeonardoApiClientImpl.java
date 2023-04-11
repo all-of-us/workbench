@@ -484,6 +484,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   .collect(Collectors.toList()));
       List<Disk> appDisks =
           diskList.stream()
+              .filter(d -> d.getAppType() != null)
               .filter(d -> d.getAppType().equals(createAppRequest.getAppType()))
               .collect(Collectors.toList());
       if (!appDisks.isEmpty()) {
