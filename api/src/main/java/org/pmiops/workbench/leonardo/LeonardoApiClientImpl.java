@@ -478,8 +478,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       // Check with Leo again see if user have READY disk, if so, block this request or logging
 
       // Filter out the disks returned by 'listPersistentDiskByProjectCreatedByCreator'
-      // that may have a null 'appType', as these disks are associated with Jupyter and not any
-      // other app
+      // that may have a null 'appType', as these disks are associated with Jupyter
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
               listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
