@@ -5,6 +5,7 @@ interface ZendeskUrls {
   billing: string;
   policy: string;
   createBillingAccount: string;
+  cromwell: string;
   egressFaq: string;
   dataDictionary: string;
   videos: string;
@@ -60,6 +61,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       ...commonUrls,
       billing: section('360039539411'),
       createBillingAccount: article('360039539411'),
+      cromwell: article('14428263737620'),
       dataDictionary: article('360033200232'),
       egressFaq: article('4407354684052'),
       videos: category('5942794068756'),
@@ -76,6 +78,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       ...commonUrls,
       billing: section('360060301171'),
       createBillingAccount: article('360060301171'),
+      cromwell: article('14428263737620'),
       dataDictionary: article('360058949792'),
       egressFaq: article('404'),
       videos: category('360006379271'),
@@ -92,6 +95,7 @@ export const supportUrls: ZendeskUrls = ((env) => {
       ...commonUrls,
       billing: section('360044792211'),
       createBillingAccount: article('360044792211'),
+      cromwell: article('14428263737620'),
       dataDictionary: article('360044793611'),
       egressFaq: article('404'),
       videos: category('360003453651'),

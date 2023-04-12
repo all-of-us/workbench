@@ -16,7 +16,6 @@ import {
   withUserProfile,
 } from 'app/utils';
 import {
-  CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
@@ -28,6 +27,7 @@ import {
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { createUserApp } from 'app/utils/user-apps-utils';
+import { supportUrls } from 'app/utils/zendesk';
 
 import {
   canCreateApp,
@@ -43,7 +43,7 @@ const { useState } = React;
 const cromwellSupportArticles = [
   {
     text: 'How to run Cromwell in All of Us workbench?',
-    link: CROMWELL_INFORMATION_LINK,
+    link: supportUrls.cromwell,
   },
   {
     text: 'Cromwell documentation',
@@ -132,7 +132,7 @@ const PanelMain = fp.flow(
             additional cost for interactions with the workflow.
             <a
               style={{ marginLeft: '0.25rem' }}
-              href={CROMWELL_INFORMATION_LINK}
+              href={supportUrls.cromwell}
               target={'_blank'}
             >
               Learn more{' '}
