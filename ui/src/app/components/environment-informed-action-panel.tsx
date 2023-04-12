@@ -76,7 +76,9 @@ export const EnvironmentInformedActionPanel = ({
   environmentChanged = false,
 }) => (
   <FlexRow style={styles.environmentInformedActionPanelWrapper}>
-    <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
+    {appType === UIAppType.JUPYTER && (
+      <StartStopEnvironmentButton {...{ status, onPause, onResume, appType }} />
+    )}
     <CostInfo
       {...{ analysisConfig, environmentChanged }}
       currentUser={profile.username}

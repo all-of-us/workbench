@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 
@@ -12,9 +12,17 @@ interface Props {
   externalStatus: UserEnvironmentStatus;
   onPause: Function;
   onResume: Function;
+  disabled?: boolean;
+  disabledTooltip?: string;
 }
 export const PauseResumeButton = (props: Props) => {
-  const { externalStatus, onPause, onResume } = props;
+  const {
+    externalStatus,
+    onPause,
+    onResume,
+    disabled: disabledByProp,
+    disabledTooltip,
+  } = props;
 
   const [envStatus, setEnvStatus] =
     useState<UserEnvironmentStatus>(externalStatus);
@@ -45,7 +53,7 @@ export const PauseResumeButton = (props: Props) => {
       ]
     );
 
-  const [icon, buttonText, disabled] = cond(
+  const [icon, buttonText, disabledByStatus] = cond(
     [
       envStatus === UserEnvironmentStatus.PAUSING,
       () => [faSyncAlt, UserEnvironmentStatus.PAUSING, true],
@@ -66,5 +74,11 @@ export const PauseResumeButton = (props: Props) => {
     () => [faPause, 'Pause', true]
   );
 
-  return <AppsPanelButton {...{ icon, buttonText, disabled, onClick }} />;
+  const disabled = disabledByProp || disabledByStatus;
+
+  return (
+    <AppsPanelButton
+      {...{ icon, buttonText, disabled, onClick, disabledTooltip }}
+    />
+  );
 };
