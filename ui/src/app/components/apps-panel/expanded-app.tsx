@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
+import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { withErrorModal } from 'app/components/modals';
@@ -237,6 +238,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     onClickDeleteRuntime,
   } = props;
   const [deletingApp, setDeletingApp] = useState(false);
+  const [showCromwellDeleteModal, setShowCromwellDeleteModal] = useState(false);
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
@@ -246,17 +248,25 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
   // TODO allow configuration
   const deleteDiskWithUserApp = true;
 
-  const onClickDelete =
-    appType === UIAppType.JUPYTER
-      ? onClickDeleteRuntime
-      : async () => {
-          setDeletingApp(true);
-          await deleteUserApp(
-            workspace.namespace,
-            initialUserAppInfo.appName,
-            deleteDiskWithUserApp
-          );
-        };
+  const deleteGkeApp = async () => {
+    setDeletingApp(true);
+    await deleteUserApp(
+      workspace.namespace,
+      initialUserAppInfo.appName,
+      deleteDiskWithUserApp
+    );
+  };
+
+  const displayCromwellDeleteModal = () => {
+    setShowCromwellDeleteModal(true);
+  };
+
+  const onClickDelete = cond(
+    [appType === UIAppType.JUPYTER, () => onClickDeleteRuntime],
+    [appType === UIAppType.CROMWELL, () => displayCromwellDeleteModal],
+    () => deleteGkeApp
+  );
+
   return (
     <FlexColumn
       style={styles.expandedAppContainer}
@@ -332,6 +342,15 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
             () => null
           )}
         </FlexColumn>
+      )}
+      {showCromwellDeleteModal && (
+        <DeleteCromwellConfirmationModal
+          clickYes={() => {
+            setShowCromwellDeleteModal(false);
+            deleteGkeApp();
+          }}
+          clickNo={() => setShowCromwellDeleteModal(false)}
+        />
       )}
     </FlexColumn>
   );

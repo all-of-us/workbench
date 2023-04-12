@@ -4,6 +4,7 @@ import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
+import WarningDeleteCromwellModal from 'app/modal/warning-delete-cromwell-modal';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
@@ -69,6 +70,10 @@ describe('Cromwell GKE App', () => {
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
+
+    const warningDeleteCromwellModal = new WarningDeleteCromwellModal(page);
+    expect(warningDeleteCromwellModal.isLoaded());
+    await warningDeleteCromwellModal.clickYesDeleteButton();
 
     await appsPanel.pollForStatus(expandedCromwellXpath, 'DELETING');
 
