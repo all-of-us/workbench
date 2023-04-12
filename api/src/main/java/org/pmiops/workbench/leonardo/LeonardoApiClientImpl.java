@@ -476,15 +476,20 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     if (Strings.isNullOrEmpty(diskRequest.getName())) {
       // If persistentDiskRequest.getName() is empty, UI wants API to create a new disk.
       // Check with Leo again see if user have READY disk, if so, block this request or logging
+
+      // Filter out the disks returned by 'listPersistentDiskByProjectCreatedByCreator'
+      // that may have a null 'appType', as these disks are associated with Jupyter and not any
+      // other app
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
               listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
                   .stream()
                   .map(leonardoMapper::toApiListDisksResponse)
+                  .filter(disk -> disk.getAppType() != null)
                   .collect(Collectors.toList()));
+
       List<Disk> appDisks =
           diskList.stream()
-              .filter(d -> d.getAppType() != null)
               .filter(d -> d.getAppType().equals(createAppRequest.getAppType()))
               .collect(Collectors.toList());
       if (!appDisks.isEmpty()) {
