@@ -35,9 +35,11 @@ export const maybeStartPollingForUserApps = (namespace) => {
     .then((listAppsResponse) => {
       userAppsStore.set({ userApps: listAppsResponse, updating: false });
       if (doUserAppsRequireUpdates()) {
-        setTimeout(() => {
+        const timeoutID = setTimeout(() => {
           maybeStartPollingForUserApps(namespace);
         }, 10 * 1000);
+
+        userAppsStore.set({ ...userAppsStore.get(), timeoutID });
       }
     });
 };

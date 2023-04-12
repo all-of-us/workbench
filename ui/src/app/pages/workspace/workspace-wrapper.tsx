@@ -26,8 +26,10 @@ import {
   MatchParams,
   routeDataStore,
   runtimeStore,
+  userAppsStore,
   useStore,
 } from 'app/utils/stores';
+import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 const styles = reactStyles({
@@ -108,7 +110,22 @@ const NewCtNotification = (props: NotificationProps) => {
 
 export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
   ({ workspace, hideSpinner }) => {
-    useEffect(() => hideSpinner(), []);
+    useEffect(() => {
+      hideSpinner();
+      return () => {
+        const { timeoutID } = userAppsStore.get();
+        if (timeoutID) {
+          clearTimeout(timeoutID);
+        }
+      };
+    }, []);
+
+    useEffect(() => {
+      if (workspace) {
+        maybeStartPollingForUserApps(workspace.namespace);
+      }
+    }, [workspace]);
+
     const routeData = useStore(routeDataStore);
     const [navigate] = useNavigation();
 

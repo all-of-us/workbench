@@ -94,7 +94,7 @@ export const AppsPanel = (props: {
     setUserExpandedApps([...userExpandedApps, appType]);
   const showActiveSection = activeApps.length > 0;
 
-  return props.workspace.billingStatus === BillingStatus.INACTIVE ? (
+  return workspace.billingStatus === BillingStatus.INACTIVE ? (
     <DisabledPanel />
   ) : (
     <div data-test-id='apps-panel'>
