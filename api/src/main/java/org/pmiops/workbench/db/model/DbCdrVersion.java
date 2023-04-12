@@ -41,6 +41,24 @@ public class DbCdrVersion {
   private String microarrayVcfSingleSampleStoragePath;
   private String microarrayVcfManifestPath;
   private String microarrayIdatManifestPath;
+  // 2023Q1 CDR Release
+  private String wgsVdsPath;
+  private String wgsExomeMultiHailPath;
+  private String wgsExomeSplitHailPath;
+  private String wgsExomeVcfPath;
+
+  private String wgsAcafThresholdMultiHailPath;
+  private String wgsAcafThresholdSplitHailPath;
+  private String wgsAcafThresholdVcfPath;
+
+  private String wgsClinvarMultiHailPath;
+  private String wgsClinvarSplitHailPath;
+  private String wgsClinvarVcfPath;
+  private String wgsLongReadsManifestPath;
+  private String wgsLongReadsHailGRCh38;
+  private String wgsLongReadsHailT2T;
+  private String wgsLongReadsJointVcfGRCh38;
+  private String wgsLongReadsJointVcfT2T;
 
   @Id
   @Column(name = "cdr_version_id")
@@ -314,6 +332,146 @@ public class DbCdrVersion {
     return this;
   }
 
+  @Column(name = "wgs_vds_path")
+  public String getWgsVdsPath() {
+    return wgsVdsPath;
+  }
+
+  public DbCdrVersion setWgsVdsPath(String wgsVdsPath) {
+    this.wgsVdsPath = wgsVdsPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_multi_hail_path")
+  public String getWgsExomeMultiHailPath() {
+    return wgsExomeMultiHailPath;
+  }
+
+  public DbCdrVersion setWgsExomeMultiHailPath(String wgsExomeMultiHailPath) {
+    this.wgsExomeMultiHailPath = wgsExomeMultiHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_split_hail_path")
+  public String getWgsExomeSplitHailPath() {
+    return wgsExomeSplitHailPath;
+  }
+
+  public DbCdrVersion setWgsExomeSplitHailPath(String wgsExomeSplitHailPath) {
+    this.wgsExomeSplitHailPath = wgsExomeSplitHailPath;
+    return this;
+  }
+
+  @Column(name = "wgs_exome_vcf_path")
+  public String getWgsExomeVcfPath() {
+    return wgsExomeVcfPath;
+  }
+
+  public DbCdrVersion setWgsExomeVcfPath(String wgsExomeVcfPath) {
+    this.wgsExomeVcfPath = wgsExomeVcfPath;
+    return this;
+  }
+
+  @Column(name = "wgs_acaf_threshold_multi_hail_path")
+  public String getWgsAcafThresholdMultiHailPath() {
+    return wgsAcafThresholdMultiHailPath;
+  }
+
+  public void setWgsAcafThresholdMultiHailPath(String wgsAcafThresholdMultiHailPath) {
+    this.wgsAcafThresholdMultiHailPath = wgsAcafThresholdMultiHailPath;
+  }
+
+  @Column(name = "wgs_acaf_threshold_split_hail_path")
+  public String getWgsAcafThresholdSplitHailPath() {
+    return wgsAcafThresholdSplitHailPath;
+  }
+
+  public void setWgsAcafThresholdSplitHailPath(String wgsAcafThresholdSplitHailPath) {
+    this.wgsAcafThresholdSplitHailPath = wgsAcafThresholdSplitHailPath;
+  }
+
+  @Column(name = "wgs_acaf_threshold_vcf_path")
+  public String getWgsAcafThresholdVcfPath() {
+    return wgsAcafThresholdVcfPath;
+  }
+
+  public void setWgsAcafThresholdVcfPath(String wgsAcafThresholdVcfPath) {
+    this.wgsAcafThresholdVcfPath = wgsAcafThresholdVcfPath;
+  }
+
+  @Column(name = "wgs_clinvar_multi_hail_path")
+  public String getWgsClinvarMultiHailPath() {
+    return wgsClinvarMultiHailPath;
+  }
+
+  public void setWgsClinvarMultiHailPath(String wgsClinvarMultiHailPath) {
+    this.wgsClinvarMultiHailPath = wgsClinvarMultiHailPath;
+  }
+
+  @Column(name = "wgs_clinvar_split_hail_path")
+  public String getWgsClinvarSplitHailPath() {
+    return wgsClinvarSplitHailPath;
+  }
+
+  public void setWgsClinvarSplitHailPath(String wgsClinvarSplitHailPath) {
+    this.wgsClinvarSplitHailPath = wgsClinvarSplitHailPath;
+  }
+
+  @Column(name = "wgs_clinvar_vcf_path")
+  public String getWgsClinvarVcfPath() {
+    return wgsClinvarVcfPath;
+  }
+
+  public void setWgsClinvarVcfPath(String wgsClinvarVcfPath) {
+    this.wgsClinvarVcfPath = wgsClinvarVcfPath;
+  }
+
+  @Column(name = "wgs_long_reads_manifest_path")
+  public String getWgsLongReadsManifestPath() {
+    return wgsLongReadsManifestPath;
+  }
+
+  public DbCdrVersion setWgsLongReadsManifestPath(String longReadsStoragePath) {
+    this.wgsLongReadsManifestPath = longReadsStoragePath;
+    return this;
+  }
+
+  @Column(name = "wgs_longread_hail_grch38")
+  public String getWgsLongReadsHailGRCh38() {
+    return wgsLongReadsHailGRCh38;
+  }
+
+  public void setWgsLongReadsHailGRCh38(String wgsLongReadsHailGRCh38) {
+    this.wgsLongReadsHailGRCh38 = wgsLongReadsHailGRCh38;
+  }
+
+  @Column(name = "wgs_longread_hail_t2t")
+  public String getWgsLongReadsHailT2T() {
+    return wgsLongReadsHailT2T;
+  }
+
+  public void setWgsLongReadsHailT2T(String wgsLongReadsHailT2T) {
+    this.wgsLongReadsHailT2T = wgsLongReadsHailT2T;
+  }
+
+  @Column(name = "wgs_longread_joint_vcf_grch38")
+  public String getWgsLongReadsJointVcfGRCh38() {
+    return wgsLongReadsJointVcfGRCh38;
+  }
+
+  public void setWgsLongReadsJointVcfGRCh38(String wgsLongReadsJointVcfGRCh38) {
+    this.wgsLongReadsJointVcfGRCh38 = wgsLongReadsJointVcfGRCh38;
+  }
+
+  @Column(name = "wgs_longread_joint_vcf_t2t")
+  public String getWgsLongReadsJointVcfT2T() {
+    return wgsLongReadsJointVcfT2T;
+  }
+
+  public void setWgsLongReadsJointVcfT2T(String wgsLongReadsJointVcfT2T) {
+    this.wgsLongReadsJointVcfT2T = wgsLongReadsJointVcfT2T;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(
@@ -341,7 +499,8 @@ public class DbCdrVersion {
         microarrayHailStoragePath,
         microarrayVcfSingleSampleStoragePath,
         microarrayVcfManifestPath,
-        microarrayIdatManifestPath);
+        microarrayIdatManifestPath,
+        wgsVdsPath);
   }
 
   @Override
@@ -378,6 +537,7 @@ public class DbCdrVersion {
         && Objects.equals(
             microarrayVcfSingleSampleStoragePath, that.microarrayVcfSingleSampleStoragePath)
         && Objects.equals(microarrayVcfManifestPath, that.microarrayVcfManifestPath)
-        && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath);
+        && Objects.equals(microarrayIdatManifestPath, that.microarrayIdatManifestPath)
+        && Objects.equals(wgsVdsPath, that.wgsVdsPath);
   }
 }

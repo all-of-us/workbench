@@ -135,7 +135,7 @@
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
-      "storageBasePath": "5",
+      "storageBasePath": "v7",
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
