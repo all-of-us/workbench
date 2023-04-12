@@ -100,6 +100,12 @@ public class Params {
   }
 
   public static Optional<String> getEnv(String name) {
-    return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
+    return Optional.ofNullable(System.getenv(name))
+        .map(String::trim)
+        .filter(s -> !s.equals(""))
+        // kluge to work around the issue of translating empty env vars to the env var name
+        // Actual use case: empty CDR_CLOUD_SQL_INSTANCE_NAME might resolve to the *literal*
+        // string "${CDR_CLOUD_SQL_INSTANCE_NAME}" instead of expanding it
+        .filter(s -> !s.contains(name));
   }
 }
