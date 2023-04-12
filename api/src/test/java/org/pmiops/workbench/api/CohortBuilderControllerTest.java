@@ -1676,6 +1676,8 @@ public class CohortBuilderControllerTest {
             .addCode(conceptCode)
             .addSelectable(true)
             .addCount(1L)
+            .addStandard(true)
+            .addFullText(conceptId + "|[" + domain + "_rank1]")
             .build();
     cbCriteriaDao.save(dbCriteria);
     return dbCriteria;
