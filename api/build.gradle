@@ -456,7 +456,7 @@ dependencies {
     implementation "org.springframework:spring-beans:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-context:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation("org.springframework:spring-core:$project.ext.SPRING_FRAMEWORK_VERSION") {
-      exclude group: 'org.springframework', module: 'spring-jcl'
+        exclude group: 'org.springframework', module: 'spring-jcl'
     }
     implementation "org.springframework:spring-expression:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-jcl:$project.ext.SPRING_FRAMEWORK_VERSION"
@@ -466,6 +466,8 @@ dependencies {
     implementation "org.springframework:spring-tx:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-web:$project.ext.SPRING_FRAMEWORK_VERSION"
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
+    implementation "au.com.dius.pact.provider:junit5:4.1.7"
+    implementation "au.com.dius.pact.provider:junit5spring:4.1.7"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
