@@ -489,13 +489,11 @@ export const WorkspaceEdit = fp.flow(
         // We cannot send over the correct billing account info since the current user
         // does not have permissions to set it.
 
-        reportError({
-          name: 'Out of date billing account name',
-          message:
-            `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+        reportError(
+          `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
             `Stored value is ${this.props.workspace.billingAccountName}. ` +
-            `True value is ${billingInfo.billingAccountName}`,
-        });
+            `True value is ${billingInfo.billingAccountName}`
+        );
       }
       return billingAccounts;
     }
@@ -1218,10 +1216,8 @@ export const WorkspaceEdit = fp.flow(
         };
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(
-            new Error(
-              `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-                ` accessLevel: ${accessLevel}`
-            )
+            `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
+              ` accessLevel: ${accessLevel}`
           );
           // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
           // this situation. This forces a workspace fetch on navigation, which is desired as ACLs

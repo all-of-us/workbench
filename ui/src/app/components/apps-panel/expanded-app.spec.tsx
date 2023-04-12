@@ -10,25 +10,35 @@ import {
 } from 'generated/fetch';
 
 import {
-  leoAppsApi,
+  leoProxyApi,
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { runtimeStore, serverConfigStore } from 'app/utils/stores';
-import { AppsApi as LeoAppsApi, RuntimesApi } from 'notebooks-generated/fetch';
+import {
+  notificationStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
+import {
+  AppsApi as LeoAppsApi,
+  ProxyApi,
+  RuntimesApi,
+} from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
+import { LeoProxyApiStub } from 'testing/stubs/leo-proxy-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { RuntimesApiStub } from 'testing/stubs/runtimes-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
+import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
-import { UIAppType } from './utils';
+import { defaultRStudioConfig, UIAppType } from './utils';
 
 const googleProject = 'project-for-test';
 const workspace = {
@@ -57,12 +67,14 @@ const component = async (
 describe('ExpandedApp', () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
+  const leoProxyApiStub = new LeoProxyApiStub();
   runtimeStub.runtime.googleProject = googleProject;
   beforeEach(() => {
     serverConfigStore.set({ config: defaultServerConfig });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     leoRegisterApiClient(LeoAppsApi, new LeoAppsApiStub());
+    leoRegisterApiClient(ProxyApi, leoProxyApiStub);
     leoRegisterApiClient(RuntimesApi, new RuntimesApiStub());
     runtimeStore.set({
       workspaceNamespace: workspace.namespace,
@@ -77,9 +89,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Pause',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Pause',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -101,9 +115,11 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
 
-    const pauseButton = wrapper.find({
-      'data-test-id': 'apps-panel-button-Resume',
-    });
+    const pauseButton = wrapper
+      .find({
+        'data-test-id': 'apps-panel-button-Resume',
+      })
+      .first();
     expect(pauseButton.exists()).toBeTruthy();
     const { disabled } = pauseButton.props();
     expect(disabled).toBeFalsy();
@@ -140,9 +156,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const pauseButton = wrapper.find({
-        'data-test-id': `apps-panel-button-${buttonText}`,
-      });
+      const pauseButton = wrapper
+        .find({
+          'data-test-id': `apps-panel-button-${buttonText}`,
+        })
+        .first();
       expect(pauseButton.exists()).toBeTruthy();
       const { disabled } = pauseButton.props();
       expect(disabled).toBeTruthy();
@@ -157,9 +175,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
@@ -186,9 +206,11 @@ describe('ExpandedApp', () => {
       const wrapper = await component(UIAppType.JUPYTER, undefined);
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': 'Jupyter-delete-button',
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': 'Jupyter-delete-button',
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeTruthy();
@@ -197,55 +219,10 @@ describe('ExpandedApp', () => {
 
   const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO];
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
-    it('should allow clicking Pause when the app status is RUNNING', async () => {
-      const appName = 'my-app';
-
-      const wrapper = await component(appType, {
-        appName,
-        googleProject,
-        status: AppStatus.RUNNING,
-      });
-      expect(wrapper.exists()).toBeTruthy();
-
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Pause',
-      });
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
-      expect(disabled).toBeFalsy();
-
-      const pauseSpy = jest.spyOn(leoAppsApi(), 'stopApp');
-      const { onClick } = pauseButton.props();
-      await onClick();
-
-      expect(pauseSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
-    });
-
-    it('should allow clicking Resume when the app status is STOPPED', async () => {
-      const appName = 'my-app';
-
-      const wrapper = await component(appType, {
-        appName,
-        googleProject,
-        status: AppStatus.STOPPED,
-      });
-      expect(wrapper.exists()).toBeTruthy();
-
-      const pauseButton = wrapper.find({
-        'data-test-id': 'apps-panel-button-Resume',
-      });
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
-      expect(disabled).toBeFalsy();
-
-      const resumeSpy = jest.spyOn(leoAppsApi(), 'startApp');
-      const { onClick } = pauseButton.props();
-      await onClick();
-
-      expect(resumeSpy).toHaveBeenCalledWith(workspace.googleProject, appName);
-    });
-
     test.each([
+      [AppStatus.RUNNING, 'Pause'],
+      [AppStatus.STOPPED, 'Resume'],
+
       [AppStatus.STARTING, 'Resuming'],
       [AppStatus.STOPPING, 'Pausing'],
 
@@ -269,9 +246,11 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const pauseButton = wrapper.find({
-          'data-test-id': `apps-panel-button-${buttonText}`,
-        });
+        const pauseButton = wrapper
+          .find({
+            'data-test-id': `apps-panel-button-${buttonText}`,
+          })
+          .first();
         expect(pauseButton.exists()).toBeTruthy();
         const { disabled } = pauseButton.props();
         expect(disabled).toBeTruthy();
@@ -292,16 +271,41 @@ describe('ExpandedApp', () => {
       });
       expect(wrapper.exists()).toBeTruthy();
 
-      const deletion = wrapper.find({
-        'data-test-id': `${appType}-delete-button`,
-      });
+      const deletion = wrapper
+        .find({
+          'data-test-id': `${appType}-delete-button`,
+        })
+        .first();
       expect(deletion.exists()).toBeTruthy();
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
 
-      const deleteSpy = jest.spyOn(appsApi(), 'deleteApp');
+      const deleteSpy = jest
+        .spyOn(appsApi(), 'deleteApp')
+        .mockImplementation(() => Promise.resolve({}));
       const { onClick } = deletion.props();
       await onClick();
+      await waitOneTickAndUpdate(wrapper);
+      if (appType === UIAppType.CROMWELL) {
+        /* For Cromwell, on delete we show user a modal asking them to confirm manually that there are
+            no cromwell Jobs running. Only after user confirming YES we close the modal and start the delete process */
+        let cromwell_delete_modal = wrapper.find({
+          'data-test-id': 'delete-cromwell-modal',
+        });
+
+        expect(cromwell_delete_modal).toBeTruthy();
+        const button_delete_cromwell = cromwell_delete_modal.find({
+          'data-test-id': 'delete-cromwell-btn',
+        });
+
+        button_delete_cromwell.simulate('click');
+
+        // Clicking button YES i.e confirming deletion of cromwell should close the modal
+        cromwell_delete_modal = wrapper.find({
+          'data-test-id': 'delete-cromwell-modal',
+        });
+        expect(cromwell_delete_modal.length).toBe(0);
+      }
 
       expect(deleteSpy).toHaveBeenCalledWith(
         workspace.namespace,
@@ -327,13 +331,148 @@ describe('ExpandedApp', () => {
         });
         expect(wrapper.exists()).toBeTruthy();
 
-        const deletion = wrapper.find({
-          'data-test-id': `${appType}-delete-button`,
-        });
+        const deletion = wrapper
+          .find({
+            'data-test-id': `${appType}-delete-button`,
+          })
+          .first();
         expect(deletion.exists()).toBeTruthy();
         const { disabled } = deletion.props();
         expect(disabled).toBeTruthy();
       }
+    );
+  });
+
+  it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
+    const appName = 'my-app';
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName,
+      googleProject,
+      status: AppStatus.RUNNING,
+    });
+
+    const launchButton = wrapper.find({
+      'data-test-id': 'RStudio-launch-button',
+    });
+    expect(launchButton.exists()).toBeTruthy();
+    expect(launchButton.prop('disabled')).toBeFalsy();
+
+    const setCookieSpy = jest.spyOn(leoProxyApi(), 'setCookie');
+    launchButton.simulate('click');
+
+    expect(setCookieSpy).toHaveBeenCalledWith(
+      workspace.googleProject,
+      appName,
+      { credentials: 'include' }
+    );
+  });
+
+  describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
+    test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
+      'Status %s',
+      async (appStatus) => {
+        const wrapper = await component(UIAppType.RSTUDIO, {
+          appName: 'my-app',
+          googleProject,
+          status: appStatus,
+        });
+
+        const launchButton = wrapper.find({
+          'data-test-id': 'RStudio-launch-button',
+        });
+        expect(launchButton.prop('disabled')).toBeTruthy();
+      }
+    );
+  });
+
+  it('should show an error if launching RStudio fails', async () => {
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName: 'my-app',
+      googleProject,
+      status: AppStatus.RUNNING,
+    });
+
+    leoProxyApiStub.setCookie = () => Promise.reject();
+    wrapper
+      .find({
+        'data-test-id': 'RStudio-launch-button',
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Opening RStudio Environment'
+    );
+  });
+
+  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
+  const createDisabledStatuses = minus(
+    ALL_GKE_APP_STATUSES,
+    createEnabledStatuses
+  );
+
+  describe('should allow creating an RStudio app for certain app statuses', () => {
+    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
+      const wrapper = await component(UIAppType.RSTUDIO, {
+        appName: 'my-app',
+        googleProject,
+        status: appStatus,
+      });
+      appsStub.createApp = jest.fn(() => Promise.resolve({}));
+
+      const createButton = () =>
+        wrapper.find({
+          'data-test-id': `RStudio-create-button`,
+        });
+      expect(createButton().exists()).toBeTruthy();
+      expect(createButton().prop('disabled')).toBeFalsy();
+      expect(createButton().prop('buttonText')).toEqual('Create');
+
+      createButton().simulate('click');
+      await waitOneTickAndUpdate(wrapper);
+
+      expect(appsStub.createApp).toHaveBeenCalledWith(
+        workspace.namespace,
+        defaultRStudioConfig
+      );
+      expect(createButton().prop('buttonText')).toEqual('Creating');
+      expect(createButton().prop('disabled')).toBeTruthy();
+    });
+  });
+
+  describe('should disable the RStudio create button for all other app statuses', () => {
+    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
+      const wrapper = await component(UIAppType.RSTUDIO, {
+        appName: 'my-app',
+        googleProject,
+        status: appStatus,
+      });
+
+      const createButton = wrapper.find({
+        'data-test-id': `RStudio-create-button`,
+      });
+      expect(createButton.exists()).toBeTruthy();
+      expect(createButton.prop('disabled')).toBeTruthy();
+    });
+  });
+
+  it('should show an error if the initial request to create RStudio fails', async () => {
+    const wrapper = await component(UIAppType.RSTUDIO, {
+      appName: 'my-app',
+      googleProject,
+      status: null,
+    });
+    appsStub.createApp = jest.fn(() => Promise.reject());
+
+    wrapper
+      .find({
+        'data-test-id': `RStudio-create-button`,
+      })
+      .simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(notificationStore.get().title).toEqual(
+      'Error Creating RStudio Environment'
     );
   });
 });

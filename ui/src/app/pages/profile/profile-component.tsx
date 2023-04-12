@@ -40,7 +40,7 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
-import { convertAPIError, reportError } from 'app/utils/errors';
+import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
@@ -141,7 +141,7 @@ export const ProfileComponent = fp.flow(
           await institutionApi().getPublicInstitutionDetails();
         this.setState({ institutions });
       } catch (e) {
-        reportError(e);
+        // continue regardless of error
       }
     }
 
@@ -226,7 +226,6 @@ export const ProfileComponent = fp.flow(
         await reload();
         return profile;
       } catch (error) {
-        reportError(error);
         const errorResponse = await convertAPIError(error);
         this.props.showProfileErrorModal(errorResponse.message);
         console.error(error);
@@ -256,11 +255,17 @@ export const ProfileComponent = fp.flow(
         },
       } = currentProfile;
 
-      const profileExpiration = fp.flow(
-        fp.find({ moduleName: AccessModule.PROFILECONFIRMATION }),
-        fp.get('expirationEpochMillis')
-      )(profile.accessModules.modules);
-      const hasExpired = profileExpiration && profileExpiration < Date.now();
+      const profileConfirmationAccessModule = fp.find(
+        { moduleName: AccessModule.PROFILECONFIRMATION },
+        profile.accessModules.modules
+      );
+      const hasExpired =
+        profileConfirmationAccessModule.expirationEpochMillis &&
+        profileConfirmationAccessModule.expirationEpochMillis < Date.now();
+      const bypassed = !!profileConfirmationAccessModule.bypassEpochMillis;
+      const showRenewalBox =
+        (hasExpired && !bypassed) ||
+        wasReferredFromRenewal(this.props.location.search);
 
       // validatejs requires a scheme, which we don't necessarily need in the profile; rather than
       // forking their website regex, just ensure a scheme ahead of validation.
@@ -375,9 +380,11 @@ export const ProfileComponent = fp.flow(
             <div style={{ ...styles.h1, marginBottom: '1.05rem' }}>Profile</div>
             <FlexRow style={{ justifyContent: 'spaceBetween' }}>
               <div>
-                {(hasExpired ||
-                  wasReferredFromRenewal(this.props.location.search)) && (
-                  <div style={styles.renewalBox}>
+                {showRenewalBox && (
+                  <div
+                    style={styles.renewalBox}
+                    data-test-id='profile-confirmation-renewal-box'
+                  >
                     <ExclamationTriangle
                       size={25}
                       color={colors.warning}

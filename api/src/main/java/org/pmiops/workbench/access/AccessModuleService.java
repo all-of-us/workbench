@@ -40,9 +40,6 @@ public interface AccessModuleService {
    */
   boolean isModuleCompliant(DbUser dbUser, DbAccessModuleName accessModuleName);
 
-  /** Returns true if the access module is bypassable and bypassed */
-  boolean isModuleBypassed(DbUser dbUser, DbAccessModuleName accessModuleName);
-
   boolean isSignedDuccVersionCurrent(Integer signedVersion);
 
   boolean hasUserSignedACurrentDucc(DbUser targetUser);

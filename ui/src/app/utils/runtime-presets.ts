@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
 
-import { Runtime, RuntimeConfigurationType } from 'generated/fetch';
+import { DiskType, Runtime, RuntimeConfigurationType } from 'generated/fetch';
 
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
@@ -21,9 +21,14 @@ export const runtimePresets: {
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
-      gceConfig: {
+      gceWithPdConfig: {
+        persistentDisk: {
+          diskType: DiskType.Standard,
+          size: MIN_DISK_SIZE_GB,
+          labels: {},
+          name: null,
+        },
         machineType: DEFAULT_MACHINE_NAME,
-        diskSize: MIN_DISK_SIZE_GB,
         gpuConfig: null,
       },
     },
@@ -50,22 +55,32 @@ export const applyPresetOverride = (runtime) => {
     return runtime;
   }
 
-  const newRuntime = { ...runtime };
-
   const runtimePresetKey = fp
     .keys(runtimePresets)
     .find(
       (key) =>
         runtimePresets[key].runtimeTemplate.configurationType ===
-        newRuntime.configurationType
+        runtime.configurationType
     );
 
   if (runtimePresetKey) {
-    newRuntime.gceConfig =
-      runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
-    newRuntime.dataprocConfig =
-      runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+    const { gceConfig, gceWithPdConfig, dataprocConfig } =
+      runtimePresets[runtimePresetKey].runtimeTemplate;
+
+    return {
+      ...runtime,
+      gceConfig,
+      // restore the original PD name, which will cause a creation request to attach it to the new runtime
+      gceWithPdConfig:
+        gceWithPdConfig &&
+        fp.set(
+          ['persistentDisk', 'name'],
+          runtime.gceWithPdConfig?.persistentDisk?.name,
+          gceWithPdConfig
+        ),
+      dataprocConfig,
+    };
   }
 
-  return newRuntime;
+  return runtime;
 };

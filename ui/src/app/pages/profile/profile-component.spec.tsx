@@ -2,7 +2,12 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { InstitutionApi, Profile, ProfileApi } from 'generated/fetch';
+import {
+  AccessModule,
+  InstitutionApi,
+  Profile,
+  ProfileApi,
+} from 'generated/fetch';
 
 import { TextInput } from 'app/components/inputs';
 import { ProfileComponent } from 'app/pages/profile/profile-component';
@@ -16,6 +21,8 @@ import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
+
+const tenMinutesMs = 10 * 60 * 1000;
 
 describe('ProfilePageComponent', () => {
   function getSaveProfileButton(wrapper: ReactWrapper): ReactWrapper {
@@ -169,6 +176,43 @@ describe('ProfilePageComponent', () => {
     const wrapper = component();
     expect(
       wrapper.find('[data-test-id="signed-ducc-panel"]').exists()
+    ).toBeFalsy();
+  });
+
+  it('should show the profile confirmation renewal box if the access module has expired', async () => {
+    updateProfile({
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.PROFILECONFIRMATION,
+            expirationEpochMillis: Date.now() - tenMinutesMs,
+          },
+        ],
+      },
+    });
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="profile-confirmation-renewal-box"]').exists()
+    ).toBeTruthy();
+  });
+
+  it('should not show the profile confirmation renewal box if the access module was bypassed', async () => {
+    updateProfile({
+      accessModules: {
+        modules: [
+          {
+            moduleName: AccessModule.PROFILECONFIRMATION,
+            expirationEpochMillis: Date.now() - tenMinutesMs,
+            bypassEpochMillis: 1,
+          },
+        ],
+      },
+    });
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="profile-confirmation-renewal-box"]').exists()
     ).toBeFalsy();
   });
 });

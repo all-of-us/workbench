@@ -29,6 +29,7 @@ import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { runtimePresets } from './runtime-presets';
 
 import SpyInstance = jest.SpyInstance;
+import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -214,14 +215,16 @@ describe('RuntimeInitializer', () => {
 
   it('should error and suggest preset values if a preset was selected for deleted runtime', async () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'researchallofus.org' } });
+    // Persistent disk is the only storage option for preset value General analysis
     mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
-        gceConfig: {
-          diskSize: 777,
-          machineType: 'n1-standard-16',
-          gpuConfig: null,
+        gceWithPdConfig: {
+          machineType: DEFAULT_MACHINE_NAME,
+          persistentDisk: {
+            size: 120,
+          },
         },
         status: RuntimeStatus.Deleted,
       };
@@ -235,13 +238,14 @@ describe('RuntimeInitializer', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
       expect(e.defaultRuntime).toMatchObject({
-        gceConfig: {
-          diskSize:
-            runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
+        gceWithPdConfig: {
+          persistentDisk: {
+            size: runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+              .persistentDisk.size,
+          },
           machineType:
-            runtimePresets.generalAnalysis.runtimeTemplate.gceConfig
+            runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
               .machineType,
-          gpuConfig: null,
         },
       });
     }

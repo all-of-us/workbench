@@ -614,7 +614,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // Local Variables
     const { profile, reload } = useStore(profileStore);
     const {
-      config: { unsafeAllowSelfBypass, enableControlledTierTrainingRenewal },
+      config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
     const query = useQuery();
@@ -643,8 +643,6 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       !isRenewalCompleteForModule(
         getAccessModuleStatusByName(profile, ctModule)
       );
-    const showCtRenewalBanner =
-      enableControlledTierTrainingRenewal && ctNeedsRenewal;
     const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (
@@ -731,7 +729,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     return (
       <FlexColumn style={styles.pageWrapper}>
         <OuterHeader {...{ pageMode }} />
-        {showCtRenewalBanner && <ControlledTierRenewalBanner />}
+        {ctNeedsRenewal && <ControlledTierRenewalBanner />}
         {showCompletionBanner && <CompletionBanner />}
         {unsafeAllowSelfBypass && clickableModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />

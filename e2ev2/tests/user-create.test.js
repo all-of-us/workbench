@@ -17,7 +17,7 @@ browserTest('create user', async browser => {
     () => page.waitForSelector(ackCheckboxSel).then(eh => eh.evaluate(e => e.disabled))
 
   await tu.useApiProxy(page)
-  await page.goto(config.urlRoot(), {waitUntil: 'networkidle0'})
+  await page.goto(config.urlRoot())
   await tu.jsClick(page, '[role="button"][aria-label="Create Account"]')
 
   // Agreement Page

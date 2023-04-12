@@ -18,6 +18,8 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
+import { AddConceptSetToCohortModal } from 'app/pages/data/cohort/add-concept-set-to-cohort-modal';
+import { ConceptQuickAddModal } from 'app/pages/data/cohort/concept-quick-add-modal';
 import { Demographics } from 'app/pages/data/cohort/demographics';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import { Selection } from 'app/pages/data/cohort/selection-list';
@@ -99,10 +101,10 @@ const styles = reactStyles({
   },
 });
 
-function initGroup(role: string, item: any) {
+export function initGroup(role: string, items: any) {
   return {
     id: generateId(role),
-    items: [item],
+    items,
     count: null,
     temporal: false,
     mention: TemporalMention.ANYMENTION,
@@ -131,6 +133,9 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
+  if (domain === Domain.CONCEPTSET || domain === Domain.CONCEPTQUICKADD) {
+    item.type = selections[0]?.domainId;
+  }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
   if (groupId) {
     const groupIndex = searchRequest[role].findIndex(
@@ -147,7 +152,7 @@ export function saveCriteria(selections?: Array<Selection>) {
       }
     }
   } else {
-    searchRequest[role].push(initGroup(role, item));
+    searchRequest[role].push(initGroup(role, [item]));
   }
   searchRequestStore.next(searchRequest);
   currentCohortSearchContextStore.next(undefined);
@@ -161,10 +166,13 @@ interface Props extends RouteComponentProps<MatchParams> {
 }
 
 interface State {
-  toastVisible: boolean;
+  initCriteriaSearch: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
+  showAddConceptSetModal: boolean;
+  showConceptQuickAddModal: boolean;
   showUnsavedModal: boolean;
+  toastVisible: boolean;
   unsavedChanges: boolean;
 }
 
@@ -179,10 +187,13 @@ export const CohortSearch = fp.flow(
     constructor(props: Props) {
       super(props);
       this.state = {
-        toastVisible: false,
+        initCriteriaSearch: false,
         selectedIds: [],
         selections: [],
+        showAddConceptSetModal: false,
+        showConceptQuickAddModal: false,
         showUnsavedModal: false,
+        toastVisible: false,
         unsavedChanges: false,
       };
     }
@@ -205,6 +216,12 @@ export const CohortSearch = fp.flow(
         this.selectArrayData();
       } else if (domain === Domain.STRUCTURALVARIANTDATA) {
         this.selectStructuralVariantData();
+      } else if (domain === Domain.CONCEPTSET) {
+        this.setState({ showAddConceptSetModal: true });
+      } else if (domain === Domain.CONCEPTQUICKADD) {
+        this.setState({ showConceptQuickAddModal: true });
+      } else {
+        this.setState({ initCriteriaSearch: true });
       }
 
       currentCohortCriteriaStore.next(selections);
@@ -448,92 +465,124 @@ export const CohortSearch = fp.flow(
         cohortContext,
         cohortContext: { domain, type },
       } = this.props;
-      const { toastVisible, selectedIds, selections, showUnsavedModal } =
-        this.state;
+      const {
+        initCriteriaSearch,
+        selectedIds,
+        selections,
+        showAddConceptSetModal,
+        showConceptQuickAddModal,
+        showUnsavedModal,
+        toastVisible,
+      } = this.state;
       return (
         !!cohortContext && (
-          <FlexRowWrap style={styles.searchContainer}>
-            <style>{toastCSS}</style>
-            <Toast
-              ref={(el) => (this.toast = el)}
-              style={
-                !toastVisible
-                  ? { ...styles.toast, display: 'none' }
-                  : styles.toast
-              }
-            />
-            <div id='cohort-search-container' style={styles.searchContent}>
-              {domain === Domain.PERSON && (
-                <div style={styles.titleBar}>
-                  <Clickable
-                    data-test-id='cohort-search-back-arrow'
-                    style={styles.backArrow}
-                    onClick={() => this.checkUnsavedChanges()}
-                  >
-                    <img
-                      src={arrowIcon}
-                      style={styles.arrowIcon}
-                      alt='Go back'
-                    />
-                  </Clickable>
-                  <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
-                </div>
-              )}
-              <div
-                style={
-                  domain === Domain.PERSON && type !== CriteriaType.AGE
-                    ? { marginBottom: '5.25rem' }
-                    : { height: 'calc(100% - 5.25rem)' }
-                }
-              >
-                {domain === Domain.PERSON ? (
-                  <div data-test-id='demographics'>
-                    <Demographics
-                      criteriaType={type}
-                      select={this.addSelection}
-                      selectedIds={selectedIds}
-                      selections={selections}
-                    />
-                  </div>
-                ) : (
-                  <CriteriaSearch
-                    backFn={() => this.checkUnsavedChanges()}
-                    cohortContext={cohortContext}
-                    conceptSearchTerms={cohortContext.searchTerms}
+          <>
+            {showAddConceptSetModal || showConceptQuickAddModal ? (
+              <>
+                {showAddConceptSetModal && (
+                  <AddConceptSetToCohortModal
+                    onClose={() =>
+                      currentCohortSearchContextStore.next(undefined)
+                    }
                   />
                 )}
-              </div>
-            </div>
-            <Button
-              type='primary'
-              style={styles.finishButton}
-              disabled={!!selectedIds && selectedIds.length === 0}
-              onClick={() => setSidebarActiveIconStore.next('criteria')}
-            >
-              Finish & Review
-            </Button>
-            {showUnsavedModal && (
-              <Modal>
-                <ModalTitle>Warning! </ModalTitle>
-                <ModalBody data-test-id='cohort-search-unsaved-message'>
-                  Your cohort has not been saved. If you’d like to save your
-                  cohort criteria, please click CANCEL and save your changes in
-                  the right sidebar.
-                </ModalBody>
-                <ModalFooter>
-                  <Button
-                    type='link'
-                    onClick={() => this.setState({ showUnsavedModal: false })}
+                {showConceptQuickAddModal && (
+                  <ConceptQuickAddModal
+                    onClose={() =>
+                      currentCohortSearchContextStore.next(undefined)
+                    }
+                  />
+                )}
+              </>
+            ) : (
+              <FlexRowWrap style={styles.searchContainer}>
+                <style>{toastCSS}</style>
+                <Toast
+                  ref={(el) => (this.toast = el)}
+                  style={
+                    !toastVisible
+                      ? { ...styles.toast, display: 'none' }
+                      : styles.toast
+                  }
+                />
+                <div id='cohort-search-container' style={styles.searchContent}>
+                  {domain === Domain.PERSON && (
+                    <div style={styles.titleBar}>
+                      <Clickable
+                        data-test-id='cohort-search-back-arrow'
+                        style={styles.backArrow}
+                        onClick={() => this.checkUnsavedChanges()}
+                      >
+                        <img
+                          src={arrowIcon}
+                          style={styles.arrowIcon}
+                          alt='Go back'
+                        />
+                      </Clickable>
+                      <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
+                    </div>
+                  )}
+                  <div
+                    style={
+                      domain === Domain.PERSON && type !== CriteriaType.AGE
+                        ? { marginBottom: '5.25rem' }
+                        : { height: 'calc(100% - 5.25rem)' }
+                    }
                   >
-                    Cancel
-                  </Button>
-                  <Button type='primary' onClick={() => this.closeSearch()}>
-                    Discard Changes
-                  </Button>
-                </ModalFooter>
-              </Modal>
+                    {domain === Domain.PERSON ? (
+                      <div data-test-id='demographics'>
+                        <Demographics
+                          criteriaType={type}
+                          select={this.addSelection}
+                          selectedIds={selectedIds}
+                          selections={selections}
+                        />
+                      </div>
+                    ) : (
+                      initCriteriaSearch && (
+                        <CriteriaSearch
+                          backFn={() => this.checkUnsavedChanges()}
+                          cohortContext={cohortContext}
+                          conceptSearchTerms={cohortContext.searchTerms}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+                <Button
+                  type='primary'
+                  style={styles.finishButton}
+                  disabled={!!selectedIds && selectedIds.length === 0}
+                  onClick={() => setSidebarActiveIconStore.next('criteria')}
+                >
+                  Finish & Review
+                </Button>
+                {showUnsavedModal && (
+                  <Modal>
+                    <ModalTitle>Warning! </ModalTitle>
+                    <ModalBody data-test-id='cohort-search-unsaved-message'>
+                      Your cohort has not been saved. If you’d like to save your
+                      cohort criteria, please click CANCEL and save your changes
+                      in the right sidebar.
+                    </ModalBody>
+                    <ModalFooter>
+                      <Button
+                        type='link'
+                        onClick={() =>
+                          this.setState({ showUnsavedModal: false })
+                        }
+                      >
+                        Cancel
+                      </Button>
+                      <Button type='primary' onClick={() => this.closeSearch()}>
+                        Discard Changes
+                      </Button>
+                    </ModalFooter>
+                  </Modal>
+                )}
+              </FlexRowWrap>
             )}
-          </FlexRowWrap>
+          </>
         )
       );
     }

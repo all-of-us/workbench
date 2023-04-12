@@ -1,7 +1,6 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
-import { ResourceCard } from 'app/text-labels';
 import { waitForFn } from 'utils/waits-utils';
 import DataResourceCard from 'app/component/card/data-resource-card';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
@@ -45,9 +44,7 @@ describe('Python Kernel Notebook Test', () => {
   const workspaceName = 'e2eCreatePythonKernelNotebookTest';
   const pyNotebookName = makeRandomName('Py3');
 
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-  test.skip('Run Python code and download notebook', async () => {
+  test('Run Python code and download notebook', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(page);
@@ -88,8 +85,8 @@ describe('Python Kernel Notebook Test', () => {
 
     // Find notebook card.
     const resourceCard = new DataResourceCard(page);
-    const notebookCard = await resourceCard.findCard({ name: pyNotebookName, cardType: ResourceCard.Notebook });
-    await notebookCard.clickName();
+    const notebookCard = await resourceCard.findNameCellLinkFromTable({ name: pyNotebookName });
+    await notebookCard.click();
 
     // Open notebook in Edit mode
     const notebookPreviewPage = new NotebookPreviewPage(page);

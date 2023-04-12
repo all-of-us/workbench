@@ -235,12 +235,7 @@ describe('DataAccessRequirements', () => {
     const newModules = fp.map(
       (moduleStatus) => ({
         ...moduleStatus,
-        bypassEpochMillis:
-          // profile and publication are not bypassable.
-          moduleStatus.moduleName === AccessModule.PROFILECONFIRMATION ||
-          moduleStatus.moduleName === AccessModule.PUBLICATIONCONFIRMATION
-            ? null
-            : bypassFn(),
+        bypassEpochMillis: bypassFn(),
       }),
       oldProfile.accessModules.modules
     );
@@ -1708,51 +1703,11 @@ describe('DataAccessRequirements', () => {
     expectNoCtRenewalBanner(wrapper);
   });
 
-  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=false', async () => {
+  it('should show the correct state when RT=complete and CT=expired', async () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
         unsafeAllowSelfBypass: true,
-        enableControlledTierTrainingRenewal: false,
-      },
-    });
-
-    expireAllRTModules();
-    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
-
-    updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
-      oneYearFromNow()
-    );
-    updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
-      oneYearFromNow()
-    );
-    updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
-      oneYearFromNow()
-    );
-    updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
-      oneYearFromNow()
-    );
-
-    setCompletionTimes(() => Date.now());
-
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
-    await waitOneTickAndUpdate(wrapper);
-
-    expectNoCompletionBanner(wrapper);
-    expectNoCtRenewalBanner(wrapper);
-  });
-
-  it('should show the correct state when RT=complete, CT=expired, enableControlledTierTrainingRenewal=true', async () => {
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        unsafeAllowSelfBypass: true,
-        enableControlledTierTrainingRenewal: true,
       },
     });
 
@@ -1914,49 +1869,12 @@ describe('DataAccessRequirements', () => {
   it('should show the correct state when modules are bypassed', async () => {
     expireAllRTModules();
 
-    // won't bypass Profile and Publication confirmation because those are unbypassable
     setBypassTimes(() => Date.now());
 
     const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
 
-    // Incomplete
-    expect(findNodesByExactText(wrapper, 'Review').length).toBe(1);
-    expect(findNodesByExactText(wrapper, 'Confirm').length).toBe(1);
-
-    // Bypassed
-    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
-    expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(2);
-
-    expectNoCompletionBanner(wrapper);
-  });
-
-  it('should show the correct state when all RT modules are complete or bypassed', async () => {
-    expireAllRTModules();
-
-    setCompletionTimes(() => Date.now());
-
-    // won't bypass Profile and Publication confirmation because those are unbypassable
-    setBypassTimes(() => Date.now());
-
-    updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
-      oneYearFromNow()
-    );
-    updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
-      oneYearFromNow()
-    );
-
-    const wrapper = component(DARPageMode.ANNUAL_RENEWAL);
-
-    // Training and DUCC are bypassed
-    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(2);
-
-    // Publications and Profile are complete
-    expect(findNodesByExactText(wrapper, 'Confirmed').length).toBe(2);
-    expect(
-      findNodesContainingText(wrapper, `${EXPIRY_DAYS - 1} days`).length
-    ).toBe(2);
+    expect(findNodesByExactText(wrapper, 'Bypassed').length).toBe(4);
+    expect(findNodesContainingText(wrapper, '(bypassed)').length).toBe(4);
 
     expectCompletionBanner(wrapper);
   });

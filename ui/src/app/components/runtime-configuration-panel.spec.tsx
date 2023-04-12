@@ -99,8 +99,8 @@ describe('RuntimeConfigurationPanel', () => {
 
   const runningCost = (wrapper) =>
     costEstimator(wrapper).find('[data-test-id="running-cost"]');
-  const storageCost = (wrapper) =>
-    costEstimator(wrapper).find('[data-test-id="storage-cost"]');
+  const pausedCost = (wrapper) =>
+    costEstimator(wrapper).find('[data-test-id="paused-cost"]');
 
   const detachableDiskRuntime = (): Runtime => {
     const { size, diskType, name } = existingDisk();
@@ -373,9 +373,10 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual(
+    expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
       'n1-standard-4'
     );
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
   });
 
   it('should show customize after create', async () => {
@@ -402,17 +403,19 @@ describe('RuntimeConfigurationPanel', () => {
         machineType: 'n1-standard-16',
         diskSize: 1000,
       },
-      dataprocConfig: null,
     });
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expectEqualFields(
-      runtimeApiStub.runtime.gceConfig,
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig,
-      ['machineType', 'diskSize']
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+    expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
+    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.size).toBe(
+      runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+        .persistentDisk.size
     );
   });
 
@@ -426,6 +429,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: {
         ...defaultDataprocConfig(),
         masterMachineType: 'n1-standard-16',
@@ -518,7 +522,7 @@ describe('RuntimeConfigurationPanel', () => {
     ).toBeTruthy();
   });
 
-  it('should allow creation with GCE config', async () => {
+  it('should allow creation with GCE with PD config', async () => {
     setCurrentRuntime(null);
 
     const wrapper = await component();
@@ -527,7 +531,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 52);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -535,10 +539,15 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.UserOverride
     );
-    expect(runtimeApiStub.runtime.gceConfig).toEqual({
+    expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
       machineType: 'n1-highmem-8',
-      diskSize: MIN_DISK_SIZE_GB + 10,
       gpuConfig: null,
+      persistentDisk: {
+        diskType: 'pd-standard',
+        labels: {},
+        name: 'stub-disk',
+        size: MIN_DISK_SIZE_GB + 10,
+      },
     });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
@@ -589,10 +598,12 @@ describe('RuntimeConfigurationPanel', () => {
 
     // Ensure set the form to something non-standard to start
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
+    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB + 10);
+
     await pickPreset(wrapper, runtimePresets.generalAnalysis);
+    await enableDetachable(wrapper, true);
 
     await mustClickButton(wrapper, 'Create');
 
@@ -600,9 +611,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.configurationType).toEqual(
       RuntimeConfigurationType.GeneralAnalysis
     );
-    expect(runtimeApiStub.runtime.gceConfig).toEqual(
-      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig
-    );
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
+      diskType: 'pd-standard',
+      labels: {},
+      name: 'stub-disk',
+      size: MIN_DISK_SIZE_GB,
+    });
     expect(runtimeApiStub.runtime.dataprocConfig).toBeFalsy();
   });
 
@@ -631,34 +645,35 @@ describe('RuntimeConfigurationPanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is GeneralAnalysis',
     async () => {
+      const customMachineType = 'n1-standard-16';
+      const customDiskSize = 1000;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
         gceConfig: {
           ...defaultGceConfig(),
-          machineType: 'n1-standard-16',
-          diskSize: 1000,
+          machineType: customMachineType,
+          diskSize: customDiskSize,
         },
         dataprocConfig: null,
       });
 
-      const wrapper = await component();
-      await mustClickButton(wrapper, 'Customize');
+      // show that the preset values do not match the existing runtime
 
-      expect(getMainCpu(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-        ).cpu
-      );
+      const { machineType, persistentDisk } =
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig;
+
+      expect(customMachineType).not.toEqual(machineType);
+      expect(customDiskSize).not.toEqual(persistentDisk.size);
+
+      const wrapper = await component();
+
+      expect(getMainCpu(wrapper)).toEqual(findMachineByName(machineType).cpu);
       expect(getMainRam(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
-        ).memory
+        findMachineByName(machineType).memory
       );
-      expect(getMainDiskSize(wrapper)).toEqual(
-        runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize
-      );
+      expect(getDetachableDiskSize(wrapper)).toEqual(persistentDisk.size);
     }
   );
 
@@ -666,47 +681,51 @@ describe('RuntimeConfigurationPanel', () => {
     'should set runtime preset values in customize panel instead of getRuntime values ' +
       'if configurationType is HailGenomicsAnalysis',
     async () => {
+      const customMasterMachineType = 'n1-standard-16';
+      const customMasterDiskSize = 999;
+      const customWorkerDiskSize = 444;
+      const customNumberOfWorkers = 5;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
         gceConfig: null,
+        gceWithPdConfig: null,
         dataprocConfig: {
           ...defaultDataprocConfig(),
-          masterMachineType: 'n1-standard-16',
-          masterDiskSize: 999,
-          workerDiskSize: 444,
-          numberOfWorkers: 5,
+          masterMachineType: customMasterMachineType,
+          masterDiskSize: customMasterDiskSize,
+          workerDiskSize: customWorkerDiskSize,
+          numberOfWorkers: customNumberOfWorkers,
         },
       });
+
+      // show that the preset values do not match the existing runtime
+
+      const {
+        masterMachineType,
+        masterDiskSize,
+        workerDiskSize,
+        numberOfWorkers,
+      } = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+
+      expect(customMasterMachineType).not.toEqual(masterMachineType);
+      expect(customMasterDiskSize).not.toEqual(masterDiskSize);
+      expect(customWorkerDiskSize).not.toEqual(workerDiskSize);
+      expect(customNumberOfWorkers).not.toEqual(numberOfWorkers);
 
       const wrapper = await component();
       await mustClickButton(wrapper, 'Customize');
 
       expect(getMainCpu(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-            .masterMachineType
-        ).cpu
+        findMachineByName(masterMachineType).cpu
       );
       expect(getMainRam(wrapper)).toEqual(
-        findMachineByName(
-          runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-            .masterMachineType
-        ).memory
+        findMachineByName(masterMachineType).memory
       );
-      expect(getMainDiskSize(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .masterDiskSize
-      );
-      expect(getWorkerDiskSize(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .workerDiskSize
-      );
-      expect(getNumWorkers(wrapper)).toEqual(
-        runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
-          .numberOfWorkers
-      );
+      expect(getMainDiskSize(wrapper)).toEqual(masterDiskSize);
+      expect(getWorkerDiskSize(wrapper)).toEqual(workerDiskSize);
+      expect(getNumWorkers(wrapper)).toEqual(numberOfWorkers);
     }
   );
 
@@ -741,7 +760,7 @@ describe('RuntimeConfigurationPanel', () => {
     // the Hail preset selection.
     await pickMainCpu(wrapper, 2);
     await pickMainRam(wrapper, 7.5);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
     await pickWorkerCpu(wrapper, 8);
@@ -794,7 +813,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerCpu(wrapper, 2);
     await pickComputeType(wrapper, ComputeType.Standard);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
@@ -827,6 +846,7 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should disable the Next button if there are no changes and runtime is running', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
     const wrapper = await component();
 
     expect(
@@ -864,7 +884,27 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getMainRam(wrapper)).toBe(7.5);
   });
 
-  it('should warn user about reboot if there are updates that require one - increase disk size', async () => {
+  it('should warn user about re-creation if there are updates that require one - increase disk size', async () => {
+    const wrapper = await component();
+
+    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) + 10);
+    await mustClickButton(wrapper, 'Next');
+
+    // After https://precisionmedicineinitiative.atlassian.net/browse/RW-9167 Re-attachable persistent disk is default
+    // Increase disk size for RPD does not show any error message
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
+  });
+
+  it('should warn user about re-boot if there are updates that require one - increase disk size', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+      configurationType: RuntimeConfigurationType.UserOverride,
+    });
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
@@ -877,6 +917,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
     });
@@ -893,6 +934,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -908,6 +950,13 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should warn user about reboot if there are updates that require one - CPU', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
     const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
@@ -917,6 +966,13 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should warn user about reboot if there are updates that require one - Memory', async () => {
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: defaultDataprocConfig(),
+    });
+
     const wrapper = await component();
 
     // 15 GB -> 26 GB
@@ -926,21 +982,43 @@ describe('RuntimeConfigurationPanel', () => {
     expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
-  it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
+  it('should warn user about re-creation if there are updates that require one - CPU', async () => {
     const wrapper = await component();
 
-    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
     await mustClickButton(wrapper, 'Next');
 
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
+  });
+
+  it('should warn user about re-creation if there are updates that require one - Memory', async () => {
+    const wrapper = await component();
+
+    // 15 GB -> 26 GB
+    await pickMainRam(wrapper, 26);
+    await mustClickButton(wrapper, 'Next');
+
+    expect(
+      wrapper.find(WarningMessage).text().includes('re-creation')
+    ).toBeTruthy();
+  });
+
+  it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
+    const wrapper = await component();
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await mustClickButton(wrapper, 'Next');
     expect(
       wrapper.find(WarningMessage).text().includes('deletion')
     ).toBeTruthy();
   });
 
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
     const wrapper = await component();
 
-    await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 10);
+    await pickDetachableDiskSize(wrapper, getDetachableDiskSize(wrapper) - 10);
     await mustClickButton(wrapper, 'Next');
 
     expect(
@@ -952,6 +1030,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -970,6 +1049,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -988,6 +1068,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1004,6 +1085,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1035,6 +1117,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       status: RuntimeStatus.Creating,
     });
@@ -1052,16 +1135,48 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
-    const wrapper = await component();
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.UserOverride,
+      gceConfig: null,
+      gceWithPdConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
+      },
+    });
 
+    const wrapper = await component();
     const updateSpy = jest.spyOn(runtimeApi(), 'updateRuntime');
     const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 20);
 
     await mustClickButton(wrapper, 'Next');
-    await mustClickButton(wrapper, 'Update');
 
+    await mustClickButton(wrapper, 'Update');
+    expect(updateSpy).toHaveBeenCalled();
+    expect(deleteSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('should send an updateDisk API call if disk changes do not require a delete', async () => {
+    setCurrentRuntime(detachableDiskRuntime());
+    setCurrentDisk(existingDisk());
+    const wrapper = await component();
+
+    const updateSpy = jest.spyOn(disksApi(), 'updateDisk');
+    const deleteSpy = jest.spyOn(runtimeApi(), 'deleteRuntime');
+
+    await pickDetachableDiskSize(wrapper, 1010);
+
+    await mustClickButton(wrapper, 'Next');
+
+    await mustClickButton(wrapper, 'Update');
     expect(updateSpy).toHaveBeenCalled();
     expect(deleteSpy).toHaveBeenCalledTimes(0);
   });
@@ -1109,22 +1224,22 @@ describe('RuntimeConfigurationPanel', () => {
 
     // Default GCE machine, n1-standard-4, makes the running cost 20 cents an hour and the storage cost less than 1 cent an hour.
     expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     // Change the machine to n1-standard-8 and bump the storage to 300GB.
     await pickMainCpu(wrapper, 8);
     await pickMainRam(wrapper, 30);
-    await pickMainDiskSize(wrapper, 300);
+    await pickDetachableDiskSize(wrapper, 300);
     expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
 
     await pickPreset(wrapper, { displayName: 'General Analysis' });
     expect(runningCost(wrapper).text()).toEqual('$0.20 per hour');
-    expect(storageCost(wrapper).text()).toEqual('< $0.01 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('< $0.01 per hour');
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
     expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
 
     // Bump up all the worker values to increase the price on everything.
     await pickNumWorkers(wrapper, 4);
@@ -1133,7 +1248,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
     expect(runningCost(wrapper).text()).toEqual('$2.88 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.14 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.14 per hour');
   });
 
   it('should update the cost estimator when master machine changes', async () => {
@@ -1142,6 +1257,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
         masterDiskSize: 1000,
@@ -1158,7 +1274,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     expect(runningCost(wrapper).text()).toEqual('$0.77 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.07 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.07 per hour');
 
     // Change the Master disk size or master size to 150
     await pickMainDiskSize(wrapper, DATAPROC_MIN_DISK_SIZE_GB);
@@ -1166,12 +1282,12 @@ describe('RuntimeConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
 
     expect(runningCost(wrapper).text()).toEqual('$0.73 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.02 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.02 per hour');
     // Switch to n1-highmem-4, double disk size.
     await pickMainRam(wrapper, 26);
     await pickMainDiskSize(wrapper, 2000);
     expect(runningCost(wrapper).text()).toEqual('$0.87 per hour');
-    expect(storageCost(wrapper).text()).toEqual('$0.13 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.13 per hour');
   });
 
   it('should allow runtime deletion', async () => {
@@ -1232,7 +1348,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () =>
       wrapper.find({ 'aria-label': 'Create' }).first();
-
+    await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickMainDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
@@ -1256,13 +1372,13 @@ describe('RuntimeConfigurationPanel', () => {
     const wrapper = await component();
     const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
 
-    await pickMainDiskSize(wrapper, 49);
+    await pickDetachableDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, 4900);
+    await pickDetachableDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await pickComputeType(wrapper, ComputeType.Dataproc);
     await pickWorkerDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -1530,7 +1646,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentDisk(disk);
 
     const wrapper = await component();
-    enableDetachable(wrapper, false);
+    pickComputeType(wrapper, ComputeType.Dataproc);
 
     await mustClickButton(wrapper, 'Next');
 
@@ -1541,8 +1657,8 @@ describe('RuntimeConfigurationPanel', () => {
     // Default option should be NOT to delete.
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
-
     runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
@@ -1641,7 +1757,7 @@ describe('RuntimeConfigurationPanel', () => {
     expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
-  it('should allow creating gce with GPU', async () => {
+  it('should allow creating gcePD with GPU', async () => {
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
@@ -1650,14 +1766,17 @@ describe('RuntimeConfigurationPanel', () => {
     await pickGpuType(wrapper, 'NVIDIA Tesla T4');
     await pickGpuNum(wrapper, 2);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.gpuType).toEqual(
-      'nvidia-tesla-t4'
+    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
+    expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
+      'stub-disk'
     );
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig.numOfGpus).toEqual(2);
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig.numOfGpus).toEqual(
+      2
+    );
   });
 
   it('should allow creating gce without GPU', async () => {
@@ -1669,10 +1788,10 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Customize');
     await pickComputeType(wrapper, ComputeType.Standard);
     await pickMainCpu(wrapper, 8);
-    await pickMainDiskSize(wrapper, MIN_DISK_SIZE_GB);
+    await pickDetachableDiskSize(wrapper, MIN_DISK_SIZE_GB);
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.gpuConfig).toEqual(null);
+    expect(runtimeApiStub.runtime.gceWithPdConfig.gpuConfig).toEqual(null);
   });
 
   it('should disable worker count updates for stopped dataproc cluster', async () => {
@@ -1681,6 +1800,7 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
+      gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
 
@@ -1723,6 +1843,7 @@ describe('RuntimeConfigurationPanel', () => {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
+      gceWithPdConfig: null,
     });
 
     const wrapper = await component();
@@ -1738,6 +1859,7 @@ describe('RuntimeConfigurationPanel', () => {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
+      gceWithPdConfig: null,
     });
 
     const wrapper = await component();
@@ -1747,5 +1869,27 @@ describe('RuntimeConfigurationPanel', () => {
 
     wrapper.update();
     expect(wrapper.text()).toContain('MapReduce History Server');
+  });
+  it('Should disable standard storage option for existing GCE runtime and have reattachable selected', async () => {
+    // set GCE Runtime as current runtime
+    setCurrentRuntime(runtimeApiStub.runtime);
+    const wrapper = await component();
+
+    const warningMessages = wrapper.find(WarningMessage);
+    expect(warningMessages.length).toBe(2);
+    expect(
+      warningMessages
+        .first()
+        .text()
+        .includes('support reattachable persistent disks')
+    ).toBeTruthy();
+    expect(warningMessages.at(1).text().includes('deletion')).toBeTruthy();
+
+    expect(
+      wrapper
+        .find('[data-test-id="detachable-disk-radio"]')
+        .first()
+        .prop('checked')
+    ).toBeTruthy();
   });
 });

@@ -72,6 +72,7 @@
   },
   "server": {
     "apiBaseUrl": "https:\/\/api.staging.fake-research-aou.org",
+    "apiAssetsBaseUrl": "https:\/\/api.staging.fake-research-aou.org",
     "uiBaseUrl": "https:\/\/staging.fake-research-aou.org",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
     "projectId": "all-of-us-rw-staging",
@@ -106,7 +107,8 @@
       "expiryDaysWarningThresholds": [1, 7, 15],
       "lookbackPeriod": 330,
       "trainingLookbackPeriod": 30
-    }
+    },
+    "enableApiUrlCheck": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -119,9 +121,8 @@
     "ccSupportWhenAdminLocking": false,
     "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": false,
-    "enableControlledTierTrainingRenewal": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": true,
+    "enableRStudioGKEApp": false,
     "enableDataExplorer": false
   },
   "actionAudit": {

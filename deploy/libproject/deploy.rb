@@ -275,6 +275,7 @@ def deploy(cmd_name, args)
       --project #{op.opts.project}
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
+      --creds-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
   } + (op.opts.dry_run ? %W{--dry-run} : [])

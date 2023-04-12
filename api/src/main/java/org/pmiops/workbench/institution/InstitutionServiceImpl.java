@@ -364,7 +364,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   @Override
   public List<DbUser> getAffiliatedUsers(String shortName) {
     return verifiedInstitutionalAffiliationDao
-        .findAllByInstitution(getDbInstitutionOrThrow(shortName)).stream()
+        .findAllByInstitution(getDbInstitutionOrThrow(shortName))
+        .stream()
         .map(DbVerifiedInstitutionalAffiliation::getUser)
         .collect(Collectors.toList());
   }

@@ -4,10 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { NotificationBanner } from 'app/components/notification-banner';
 import { AoU } from 'app/components/text-wrappers';
 import { reactStyles } from 'app/utils';
-import {
-  DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE,
-  DEMOGRAPHIC_SURVEY_V2_PATH,
-} from 'app/utils/constants';
+import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -21,32 +18,18 @@ export const TakeDemographicSurveyV2BannerMaybe = () => {
   const { profile } = useStore(profileStore);
   const location = useLocation();
 
-  // Delete this const once we reach the deadline DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE
-  const notificationText = (
-    <span>
-      Please take 5 minutes to complete the updated Researcher Demographic
-      Survey before {DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE}. Your response
-      will help <AoU /> grow our platform and community.
-    </span>
-  );
-
-  const notificationTextAfterDeadline = (
+  const notificationBannerText = (
     <span>
       Please take 5 minutes to complete the updated Researcher Demographic
       Survey. Your response will help <AoU /> grow our platform and community.
     </span>
   );
 
-  const deadlineReached =
-    +new Date(DEMOGRAPHIC_SURVEY_V2_NOTIFICATION_END_DATE) < +new Date();
-
   return (
     !profile.demographicSurveyV2 && (
       <NotificationBanner
         dataTestId={'take-survey-notification'}
-        text={
-          deadlineReached ? notificationTextAfterDeadline : notificationText
-        }
+        text={notificationBannerText}
         useLocationLink={true}
         buttonStyle={styles.bannerButton}
         buttonText='Take Survey'

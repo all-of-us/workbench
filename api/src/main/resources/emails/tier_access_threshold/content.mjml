@@ -2,7 +2,7 @@
   <mj-head>
     <mj-attributes>
       <mj-section padding="0 0 10px 0" />
-      <mj-text font-size=24 line-height=1.5 font-family="'Montserrat', sans-serif"/>
+      <mj-text font-size="16px" line-height=1.5 font-family="'Montserrat', sans-serif"/>
     </mj-attributes>
     <mj-font name="Montserrat"
        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" />

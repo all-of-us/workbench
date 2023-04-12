@@ -35,15 +35,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   }
 
   /**
-   * Rename Notebook, Concept Set, Dataset or Cohorts thru the snowman menu located inside the Dataset Resource card.
-   * @param {string} resourceName
-   * @param {string} newResourceName
-   */
-  async renameResource(resourceName: string, newResourceName: string, resourceType: ResourceCard): Promise<string[]> {
-    return new DataResourceCard(this.page).rename(resourceName, newResourceName, resourceType);
-  }
-
-  /**
    * Rename Notebook, Concept Set, Dataset, Cohorts or Cohort Review via the snowman menu from the Resource table.
    * @param {string} resourceName
    * @param {string} newResourceName

@@ -3,8 +3,8 @@ version: "3.4"
 services:
   db:
     image: mariadb:10.2
-    env_file:
-      - db/local-vars.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=root-notasecret
     volumes:
       - db:/var/lib/mysql
     ports:

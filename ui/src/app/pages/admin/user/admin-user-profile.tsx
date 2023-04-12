@@ -61,6 +61,7 @@ import {
   InstitutionalRoleOtherTextInput,
   InstitutionDropdown,
   isBypassed,
+  orderedAccessModules,
   profileNeedsUpdate,
   TierBadgesMaybe,
   updateAccountProperties,
@@ -301,19 +302,6 @@ const EditableFields = ({
   );
 };
 
-// list the access modules in the desired order
-// exported for testing
-export const accessModulesForTable = [
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-];
-
 interface AccessModuleTableProps {
   oldProfile: Profile;
   updatedProfile: Profile;
@@ -377,7 +365,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
   const { updatedProfile } = props;
 
   const tableData: TableRow[] = fp.flatMap((moduleName) => {
-    const { adminPageTitle, bypassable, isEnabledInEnvironment } =
+    const { adminPageTitle, isEnabledInEnvironment } =
       getAccessModuleConfig(moduleName);
 
     return isEnabledInEnvironment
@@ -399,13 +387,13 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
                 moduleName={moduleName}
               />
             ),
-            bypassToggle: bypassable && (
+            bypassToggle: (
               <ToggleForModule moduleName={moduleName} {...props} />
             ),
           },
         ]
       : [];
-  }, accessModulesForTable);
+  }, orderedAccessModules);
 
   return (
     <DataTable

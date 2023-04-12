@@ -18,9 +18,7 @@ describe('Export Dataset to Notebook Test', () => {
    * Test:
    * - Export dataset to a notebook. Run the notebook code and verify run results.
    */
-  /*Skipping the test below as they will be moved to the new version of e2e test.
-   * Story tracking this effort: https://precisionmedicineinitiative.atlassian.net/browse/RW-8763*/
-  test.skip('Export to R kernel notebook in Build Dataset page', async () => {
+  test('Export to R kernel notebook in Build Dataset page', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
     await findOrCreateDataset(page, { openEditPage: true });
 
@@ -83,6 +81,6 @@ describe('Export Dataset to Notebook Test', () => {
     // Delete Notebook.
     const analysisPage = new WorkspaceAnalysisPage(page);
     await openTab(page, Tabs.Analysis, analysisPage);
-    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+    await analysisPage.deleteResourceFromTable(notebookName, ResourceCard.Notebook);
   });
 });

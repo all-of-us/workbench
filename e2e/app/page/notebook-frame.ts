@@ -7,7 +7,11 @@ export default abstract class NotebookFrame extends AuthenticatedPage {
   }
 
   async getIFrame(timeout?: number): Promise<Frame> {
-    const frame = await this.page.waitForSelector('iframe[src*="notebooks"]', { visible: true, timeout });
-    return frame.contentFrame();
+    const handle = await this.page.waitForSelector('iframe[src*="notebooks"]', { visible: true, timeout });
+    const frame = await handle.contentFrame();
+    if (frame === null) {
+      throw new Error('contentFrame() returned null - this seems to be a frequent issue when running in debug mode');
+    }
+    return frame;
   }
 }

@@ -411,6 +411,7 @@ interface PopupTriggerProps {
   side?: string;
 }
 
+// to test PopupTrigger using Enzyme simulate a click on the child element
 export class PopupTrigger extends React.Component<PopupTriggerProps> {
   static readonly defaultProps = {
     closeOnClick: false,

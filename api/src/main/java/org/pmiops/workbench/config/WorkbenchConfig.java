@@ -233,6 +233,12 @@ public class WorkbenchConfig {
     public String apiBaseUrl;
     // Base URL for the App Engine UI service (e.g. webapp / client).
     public String uiBaseUrl;
+
+    // Server that host API server assets (e.g. jupyter extensions). Assets are hosted in backend
+    // servers
+    // except for local server.
+    // When running server locally, get assets from test backend server.
+    public String apiAssetsBaseUrl;
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;
@@ -295,6 +301,10 @@ public class WorkbenchConfig {
     }
 
     public Renewal renewal;
+
+    // Whether to check API request URL. If enabled, requests to API server are required to match
+    // baseApiUrl.
+    public boolean enableApiUrlCheck;
   }
 
   public static class FeatureFlagsConfig {
@@ -321,9 +331,6 @@ public class WorkbenchConfig {
     public boolean enableUpdatedDemographicSurvey;
     // If true, enable enableConceptSetsInCohortBuilder
     public boolean enableConceptSetsInCohortBuilder;
-    // Whether users are directed to complete Controlled Tier Training renewal.
-    // If false, hide or add text indicating that it is not currently available.
-    public boolean enableControlledTierTrainingRenewal;
     // If true, enable using the Cromwell GKE app
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app
