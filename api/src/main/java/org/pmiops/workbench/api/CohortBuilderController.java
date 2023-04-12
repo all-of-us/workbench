@@ -350,7 +350,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     if (workbenchConfigProvider.get().featureFlags.enableConceptSetsInCohortBuilder) {
-      System.out.println("enableConceptSetsInCohortBuilder = true");
       return ResponseEntity.ok(
           new CriteriaListResponse()
               .items(
