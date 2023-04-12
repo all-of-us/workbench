@@ -139,16 +139,6 @@
       "wgsVcfMergedStoragePath": "wgs/vcf/merged",
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
-      "wgsVdsPath": "wgs/vds/gvs_export.vds",
-      "wgsExomeMultiHailPath": "wgs/without_ext_aian_prod/vds/exome/multiMT/delta_basis_without_ext_aian_prod_gq0_3regions_exome.mt",
-      "wgsExomeVcfPath": "v7/wgs/without_ext_aian_prod/vds/exome/vcf",
-      "wgsAcafThresholdVcfPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/vcf",
-      "wgsClinvarVcfPath": "wgs/without_ext_aian_prod/vds/clinvar/vcf",
-      "wgsLongReadsManifestPath": "longreads/manifest.csv",
-      "wgsLongReadsHailGRCh38": "longreads/hail.mt/GRCh38",
-      "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
-      "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
-      "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T",
       "accessTier": "controlled"
     },
     {
