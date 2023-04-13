@@ -63,10 +63,6 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-interface Props {
-  onClose: () => void;
-}
-
 describe('RuntimeConfigurationPanel', () => {
   const defaultProps: RuntimeConfigurationPanelProps = {
     onClose: jest.fn(),
