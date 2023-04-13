@@ -26,6 +26,7 @@ import {
   Machine,
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { createUserApp } from 'app/utils/user-apps-utils';
 
 import {
@@ -204,7 +205,7 @@ export const CromwellConfigurationPanel = ({
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
 }) => {
-  const analysisConfig = {
+  const analysisConfig: Partial<AnalysisConfig> = {
     machine: findMachineByName(
       defaultCromwellConfig.kubernetesRuntimeConfig.machineType
     ),
@@ -212,6 +213,7 @@ export const CromwellConfigurationPanel = ({
       size: defaultCromwellConfig.persistentDiskRequest.size,
       detachable: true,
       detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
+      existingDiskName: null,
     },
     numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
   };
