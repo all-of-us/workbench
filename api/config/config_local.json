@@ -119,7 +119,6 @@
     "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,

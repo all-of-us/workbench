@@ -319,16 +319,10 @@ public class WorkbenchConfig {
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
-    // If true, the backend and UI will support gpu for standard vm
-    public boolean enableGpu;
-    // If true, the backend and UI will support persistent disk as the default notebook storage
-    public boolean enablePersistentDisk;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable demographicSurveyV2 in the UI
-    public boolean enableUpdatedDemographicSurvey;
     // If true, enable enableConceptSetsInCohortBuilder
     public boolean enableConceptSetsInCohortBuilder;
     // If true, enable using the Cromwell GKE app
