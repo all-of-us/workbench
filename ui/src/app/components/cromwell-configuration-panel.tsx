@@ -70,15 +70,17 @@ const PanelMain = fp.flow(
     creatorFreeCreditsRemaining,
     onClose,
   }) => {
-    // all apps besides Jupyter
-    const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
+    const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
+      useState<UserAppEnvironment[]>();
     const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
-    const app = findApp(userApps, UIAppType.CROMWELL);
-    const loadingApps = userApps === undefined;
+    const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
+    const loadingApps = gkeAppsInWorkspace === undefined;
 
     useEffect(() => {
-      appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
+      appsApi()
+        .listAppsInWorkspace(workspace.namespace)
+        .then(setGkeAppsInWorkspace);
     }, []);
 
     const onDismiss = () => {
