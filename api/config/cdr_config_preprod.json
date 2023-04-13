@@ -225,21 +225,15 @@
       "wgsHailStoragePath": "wgs/hail.mt",
       "microarrayHailStoragePath": "microarray/hail.mt",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/delta",
-       "wgsVdsPath": "wgs/vds/gvs_export.vds",
-       "wgsExomeMultiHailPath": "wgs/without_ext_aian_prod/vds/exome/multiMT/delta_basis_without_ext_aian_prod_gq0_3regions_exome.mt",
-       "wgsExomeSplitHailPath": "wgs/without_ext_aian_prod/vds/exome/splitMT/delta_basis_without_ext_aian_prod_gq0_3regions.exome.split.mt",
-       "wgsExomeVcfPath": "v7/wgs/without_ext_aian_prod/vds/exome/vcf",
-       "wgsAcafThresholdMultiHailPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/multiMT/delta_basis_without_ext_aian_prod_gq0_3regions_acaf_threshold.mt",
-       "wgsAcafThresholdSplitHailPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/splitMT/delta_basis_without_ext_aian_prod_gq0_3regions.acaf_threshold.split.mt",
-       "wgsAcafThresholdVcfPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/vcf",
-       "wgsClinvarMultiHailPath": "wgs/without_ext_aian_prod/vds/clinvar/multiMT/delta_basis_without_ext_aian_prod_gq0_3regions_clinvar.mt",
-       "wgsClinvarSplitHailPath": "wgs/without_ext_aian_prod/vds/clinvar/splitMT/delta_basis_without_ext_aian_prod_gq0_3regions.clinvar.split.mt",
-       "wgsClinvarVcfPath": "wgs/without_ext_aian_prod/vds/clinvar/vcf",
-       "wgsLongReadsManifestPath": "longreads/manifest.csv",
-       "wgsLongReadsHailGRCh38": "longreads/hail.mt/GRCh38",
-       "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
-       "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
-       "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T"
+      "wgsVdsPath": "wgs/vds/gvs_export.vds",
+      "wgsExomeVcfPath": "v7/wgs/without_ext_aian_prod/vds/exome/vcf",
+      "wgsAcafThresholdVcfPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/vcf",
+      "wgsClinvarVcfPath": "wgs/without_ext_aian_prod/vds/clinvar/vcf",
+      "wgsLongReadsManifestPath": "longreads/manifest.csv",
+      "wgsLongReadsHailGRCh38": "longreads/hail.mt/GRCh38",
+      "wgsLongReadsHailT2T": "longreads/hail.mt/T2T",
+      "wgsLongReadsJointVcfGRCh38": "longreads/joint_vcf/GRCh38",
+      "wgsLongReadsJointVcfT2T": "longreads/joint_vcf/T2T"
     }
   ]
 }
