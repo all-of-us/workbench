@@ -221,7 +221,7 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "controlled",
-      "storageBasePath": "7",
+      "storageBasePath": "v7",
       "wgsHailStoragePath": "wgs/hail.mt",
       "microarrayHailStoragePath": "microarray/hail.mt",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/delta",
