@@ -2451,7 +2451,9 @@ def update_cloud_config(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  load_config(gcc.project)
+  ServiceAccountContext.new(gcc.project).run do
+    load_config(gcc.project)
+  end
 end
 
 Common.register_command({
