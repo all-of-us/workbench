@@ -9,11 +9,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import {
-  withCdrVersions,
-  withCurrentWorkspace,
-  withUserProfile,
-} from 'app/utils';
+import { withCdrVersions, withUserProfile } from 'app/utils';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
@@ -28,6 +24,7 @@ import {
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { createUserApp } from 'app/utils/user-apps-utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import {
   canCreateApp,
@@ -60,7 +57,6 @@ const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
 const PanelMain = fp.flow(
   withCdrVersions(),
-  withCurrentWorkspace(),
   withUserProfile()
 )(
   ({
@@ -203,11 +199,13 @@ const PanelMain = fp.flow(
 export interface CromwellConfigurationPanelProps {
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
+  workspace: WorkspaceData;
 }
 
 export const CromwellConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
+  workspace,
 }: CromwellConfigurationPanelProps) => {
   const analysisConfig: Partial<AnalysisConfig> = {
     machine: findMachineByName(
@@ -235,6 +233,7 @@ export const CromwellConfigurationPanel = ({
           analysisConfig,
           onClose,
           creatorFreeCreditsRemaining,
+          workspace,
         }}
       />
     </FlexColumn>

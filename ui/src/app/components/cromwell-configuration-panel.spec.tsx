@@ -5,7 +5,6 @@ import {
   DisksApi,
   ProfileApi,
   WorkspaceAccessLevel,
-  WorkspacesApi,
 } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
@@ -14,7 +13,6 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
@@ -33,7 +31,6 @@ import {
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
@@ -45,13 +42,19 @@ import {
 describe('CromwellConfigurationPanel', () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
+
   const DEFAULT_PROPS: CromwellConfigurationPanelProps = {
     onClose,
     creatorFreeCreditsRemaining: null,
+    workspace: {
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    },
   };
 
   let disksApiStub: DisksApiStub;
-  let workspacesApiStub: WorkspacesApiStub;
 
   const component = async (
     propOverrides?: Partial<CromwellConfigurationPanelProps>
@@ -65,16 +68,6 @@ describe('CromwellConfigurationPanel', () => {
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
     registerApiClient(DisksApi, disksApiStub);
-
-    workspacesApiStub = new WorkspacesApiStub();
-    registerApiClient(WorkspacesApi, workspacesApiStub);
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    });
-
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
       profile: await profileApi().getMe(),
