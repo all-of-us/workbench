@@ -202,7 +202,6 @@ const PanelMain = fp.flow(
 
 export const CromwellConfigurationPanel = ({
   onClose = () => {},
-  initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
 }) => {
   const analysisConfig: Partial<AnalysisConfig> = {
@@ -230,7 +229,6 @@ export const CromwellConfigurationPanel = ({
         {...{
           analysisConfig,
           onClose,
-          initialPanelContent,
           creatorFreeCreditsRemaining,
         }}
       />
