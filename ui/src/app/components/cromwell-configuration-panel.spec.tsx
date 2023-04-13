@@ -1,19 +1,10 @@
 import * as React from 'react';
 
-import {
-  AppStatus,
-  DisksApi,
-  ProfileApi,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+import { AppStatus, DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import {
-  appsApi,
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -26,7 +17,7 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   workspaceStubs,
   WorkspaceStubVariables,
@@ -52,6 +43,12 @@ describe('CromwellConfigurationPanel', () => {
       billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     },
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
   };
 
   let disksApiStub: DisksApiStub;
@@ -68,13 +65,6 @@ describe('CromwellConfigurationPanel', () => {
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
     registerApiClient(DisksApi, disksApiStub);
-    registerApiClient(ProfileApi, new ProfileApiStub());
-    profileStore.set({
-      profile: await profileApi().getMe(),
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    });
 
     serverConfigStore.set({
       config: {

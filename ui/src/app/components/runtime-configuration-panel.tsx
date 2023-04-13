@@ -38,7 +38,6 @@ import {
   switchCase,
   withCdrVersions,
   withCurrentWorkspace,
-  withUserProfile,
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
@@ -72,6 +71,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {
   diskStore,
+  ProfileStore,
   runtimeStore,
   serverConfigStore,
   useStore,
@@ -175,8 +175,7 @@ export const PresetSelector = ({
 
 const PanelMain = fp.flow(
   withCdrVersions(),
-  withCurrentWorkspace(),
-  withUserProfile()
+  withCurrentWorkspace()
 )(
   ({
     cdrVersionTiersResponse,
@@ -988,12 +987,14 @@ export interface RuntimeConfigurationPanelProps {
   onClose?: () => void;
   initialPanelContent?: PanelContent;
   creatorFreeCreditsRemaining?: number;
+  profileState: ProfileStore;
 }
 
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
+  profileState,
 }: RuntimeConfigurationPanelProps) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
@@ -1003,7 +1004,12 @@ export const RuntimeConfigurationPanel = ({
   // TODO: can we remove this indirection?
   return (
     <PanelMain
-      {...{ onClose, initialPanelContent, creatorFreeCreditsRemaining }}
+      {...{
+        onClose,
+        initialPanelContent,
+        creatorFreeCreditsRemaining,
+        profileState,
+      }}
     />
   );
 };

@@ -6,7 +6,8 @@ import { BillingStatus } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { cond, withCurrentWorkspace } from 'app/utils';
+import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
+import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
@@ -22,13 +23,20 @@ export interface ConfigurationPanelProps {
   runtimeConfPanelInitialState?: RuntimeConfigurationPanelProps['initialPanelContent'];
 }
 
-export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
+export const ConfigurationPanel = fp.flow(
+  withCurrentWorkspace(),
+  withUserProfile()
+)(
   ({
     onClose,
     workspace,
     type,
     runtimeConfPanelInitialState = null,
-  }: ConfigurationPanelProps & { workspace: WorkspaceData }) => {
+    profileState,
+  }: ConfigurationPanelProps & {
+    workspace: WorkspaceData;
+    profileState: ProfileStore;
+  }) => {
     const { namespace, id } = workspace;
     const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
       useState(null);
@@ -66,6 +74,7 @@ export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
                 <RuntimeConfigurationPanel
                   {...{ onClose, creatorFreeCreditsRemaining }}
                   initialPanelContent={runtimeConfPanelInitialState}
+                  profileState={profileState}
                 />
               </div>
             ),
@@ -74,7 +83,12 @@ export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
             type === UIAppType.CROMWELL,
             () => (
               <CromwellConfigurationPanel
-                {...{ onClose, creatorFreeCreditsRemaining, workspace }}
+                {...{
+                  onClose,
+                  creatorFreeCreditsRemaining,
+                  workspace,
+                  profileState,
+                }}
               />
             ),
           ],

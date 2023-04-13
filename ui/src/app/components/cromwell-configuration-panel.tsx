@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import * as fp from 'lodash/fp';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
@@ -9,7 +8,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { withUserProfile } from 'app/utils';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
@@ -23,6 +21,7 @@ import {
 } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
+import { ProfileStore } from 'app/utils/stores';
 import { createUserApp } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -55,154 +54,154 @@ const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
 
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
-const PanelMain = fp.flow(withUserProfile())(
-  ({
-    analysisConfig,
-    workspace,
-    profileState,
-    creatorFreeCreditsRemaining,
-    onClose,
-  }) => {
-    const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
-      useState<UserAppEnvironment[]>();
-    const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
+const PanelMain = ({
+  analysisConfig,
+  workspace,
+  profileState,
+  creatorFreeCreditsRemaining,
+  onClose,
+}) => {
+  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
+    useState<UserAppEnvironment[]>();
+  const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
-    const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
-    const loadingApps = gkeAppsInWorkspace === undefined;
+  const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
+  const loadingApps = gkeAppsInWorkspace === undefined;
 
-    useEffect(() => {
-      appsApi()
-        .listAppsInWorkspace(workspace.namespace)
-        .then(setGkeAppsInWorkspace);
-    }, []);
+  useEffect(() => {
+    appsApi()
+      .listAppsInWorkspace(workspace.namespace)
+      .then(setGkeAppsInWorkspace);
+  }, []);
 
-    const onDismiss = () => {
-      onClose();
-      setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
-    };
+  const onDismiss = () => {
+    onClose();
+    setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+  };
 
-    const onCreate = () => {
-      setCreatingCromwellApp(true);
-      fetchWithErrorModal(
-        () => createUserApp(workspace.namespace, defaultCromwellConfig),
-        {
-          customErrorResponseFormatter: (error: ApiErrorResponse) =>
-            error?.originalResponse?.status === 409 && {
-              title: 'Error Creating Cromwell Environment',
-              message:
-                'Please wait a few minutes and try to create your Cromwell Environment again.',
-              onDismiss,
-            },
-        }
-      ).then(() => onDismiss());
-    };
+  const onCreate = () => {
+    setCreatingCromwellApp(true);
+    fetchWithErrorModal(
+      () => createUserApp(workspace.namespace, defaultCromwellConfig),
+      {
+        customErrorResponseFormatter: (error: ApiErrorResponse) =>
+          error?.originalResponse?.status === 409 && {
+            title: 'Error Creating Cromwell Environment',
+            message:
+              'Please wait a few minutes and try to create your Cromwell Environment again.',
+            onDismiss,
+          },
+      }
+    ).then(() => onDismiss());
+  };
 
-    const { profile } = profileState;
+  const { profile } = profileState;
 
-    const createEnabled =
-      !loadingApps && !creatingCromwellApp && canCreateApp(app);
+  const createEnabled =
+    !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
-    return (
-      <FlexColumn style={{ height: '100%' }}>
-        <div
-          data-test-id='cromwell-create-panel'
-          style={{ ...styles.controlSection, marginTop: '1rem' }}
-        >
-          <EnvironmentInformedActionPanel
-            {...{
-              creatorFreeCreditsRemaining,
-              profile,
-              workspace,
-              analysisConfig,
-            }}
-            status={app?.status}
-            onPause={Promise.resolve()}
-            onResume={Promise.resolve()}
-            appType={AppType.CROMWELL}
-          />
-          <WarningMessage>
-            This cost is only for running the Cromwell Engine, there will be
-            additional cost for interactions with the workflow.
-            <a
-              style={{ marginLeft: '0.25rem' }}
-              href={CROMWELL_INFORMATION_LINK}
-              target={'_blank'}
-            >
-              Learn more{' '}
-            </a>
-            <i
-              className='pi pi-external-link'
-              style={{
-                marginLeft: '0.25rem',
-                fontSize: '0.75rem',
-                color: '#6fb4ff',
-                cursor: 'pointer',
-              }}
-            />
-          </WarningMessage>
-        </div>
-        <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
-          <FlexRow style={{ alignItems: 'center' }}>
-            <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-              Cloud compute profile
-            </div>
-            <TooltipTrigger
-              content='The cloud compute profile for Cromwell beta is non-configurable.'
-              side={'right'}
-            >
-              <div style={styles.disabledCloudProfile}>
-                {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
-              </div>
-            </TooltipTrigger>
-          </FlexRow>
-        </div>
-        <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
-          <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
-          {cromwellSupportArticles.map((article, index) => (
-            <div key={index} style={{ display: 'block' }}>
-              <a href={article.link} target='_blank'>
-                {index + 1}. {article.text}
-              </a>
-            </div>
-          ))}
-        </div>
-        <FlexRow
-          style={{
-            marginTop: '1rem',
-            alignItems: 'center',
+  return (
+    <FlexColumn style={{ height: '100%' }}>
+      <div
+        data-test-id='cromwell-create-panel'
+        style={{ ...styles.controlSection, marginTop: '1rem' }}
+      >
+        <EnvironmentInformedActionPanel
+          {...{
+            creatorFreeCreditsRemaining,
+            profile,
+            workspace,
+            analysisConfig,
           }}
-        >
-          <div style={{ margin: '0rem 1rem 1rem 0rem ' }}>
-            <div style={{ fontWeight: 'bold' }}>Next Steps:</div>
-            <div>
-              You can interact with the workflow by using the Cromshell in
-              Jupyter Terminal or Jupyter notebook
-            </div>
-          </div>
-          <Button
-            id='cromwell-cloud-environment-create-button'
-            aria-label='cromwell cloud environment create button'
-            onClick={onCreate}
-            disabled={!createEnabled}
+          status={app?.status}
+          onPause={Promise.resolve()}
+          onResume={Promise.resolve()}
+          appType={AppType.CROMWELL}
+        />
+        <WarningMessage>
+          This cost is only for running the Cromwell Engine, there will be
+          additional cost for interactions with the workflow.
+          <a
+            style={{ marginLeft: '0.25rem' }}
+            href={CROMWELL_INFORMATION_LINK}
+            target={'_blank'}
           >
-            Start
-          </Button>
+            Learn more{' '}
+          </a>
+          <i
+            className='pi pi-external-link'
+            style={{
+              marginLeft: '0.25rem',
+              fontSize: '0.75rem',
+              color: '#6fb4ff',
+              cursor: 'pointer',
+            }}
+          />
+        </WarningMessage>
+      </div>
+      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+        <FlexRow style={{ alignItems: 'center' }}>
+          <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
+            Cloud compute profile
+          </div>
+          <TooltipTrigger
+            content='The cloud compute profile for Cromwell beta is non-configurable.'
+            side={'right'}
+          >
+            <div style={styles.disabledCloudProfile}>
+              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
+            </div>
+          </TooltipTrigger>
         </FlexRow>
-      </FlexColumn>
-    );
-  }
-);
+      </div>
+      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+        <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
+        {cromwellSupportArticles.map((article, index) => (
+          <div key={index} style={{ display: 'block' }}>
+            <a href={article.link} target='_blank'>
+              {index + 1}. {article.text}
+            </a>
+          </div>
+        ))}
+      </div>
+      <FlexRow
+        style={{
+          marginTop: '1rem',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ margin: '0rem 1rem 1rem 0rem ' }}>
+          <div style={{ fontWeight: 'bold' }}>Next Steps:</div>
+          <div>
+            You can interact with the workflow by using the Cromshell in Jupyter
+            Terminal or Jupyter notebook
+          </div>
+        </div>
+        <Button
+          id='cromwell-cloud-environment-create-button'
+          aria-label='cromwell cloud environment create button'
+          onClick={onCreate}
+          disabled={!createEnabled}
+        >
+          Start
+        </Button>
+      </FlexRow>
+    </FlexColumn>
+  );
+};
 
 export interface CromwellConfigurationPanelProps {
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
+  profileState: ProfileStore;
 }
 
 export const CromwellConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
+  profileState,
 }: CromwellConfigurationPanelProps) => {
   const analysisConfig: Partial<AnalysisConfig> = {
     machine: findMachineByName(
@@ -231,6 +230,7 @@ export const CromwellConfigurationPanel = ({
           onClose,
           creatorFreeCreditsRemaining,
           workspace,
+          profileState,
         }}
       />
     </FlexColumn>
