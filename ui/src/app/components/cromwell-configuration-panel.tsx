@@ -86,11 +86,16 @@ export const CromwellConfigurationPanel = ({
   const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
   const loadingApps = gkeAppsInWorkspace === undefined;
 
+  const { profile } = profileState;
+
   useEffect(() => {
     appsApi()
       .listAppsInWorkspace(workspace.namespace)
       .then(setGkeAppsInWorkspace);
   }, []);
+
+  const createEnabled =
+    !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
   const onDismiss = () => {
     onClose();
@@ -112,11 +117,6 @@ export const CromwellConfigurationPanel = ({
       }
     ).then(() => onDismiss());
   };
-
-  const { profile } = profileState;
-
-  const createEnabled =
-    !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
   return (
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
