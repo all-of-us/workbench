@@ -8,7 +8,6 @@ import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { Spinner } from 'app/components/spinners';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 import {
   withCdrVersions,
@@ -205,34 +204,17 @@ export const CromwellConfigurationPanel = ({
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
 }) => {
-  const [analysisConfig, setAnalysisConfig] = useState({});
-
-  useEffect(
-    () =>
-      setAnalysisConfig({
-        machine: findMachineByName(
-          defaultCromwellConfig.kubernetesRuntimeConfig.machineType
-        ),
-        diskConfig: {
-          size: defaultCromwellConfig.persistentDiskRequest.size,
-          detachable: true,
-          detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
-        },
-        numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
-      }),
-    []
-  );
-
-  const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
-  if (!analysisConfigLoaded) {
-    return (
-      <Spinner
-        id='cromwell-configuration-panel-spinner'
-        aria-label='spinner showing that cromwell configuration panel is loading'
-        style={{ width: '100%', marginTop: '7.5rem' }}
-      />
-    );
-  }
+  const analysisConfig = {
+    machine: findMachineByName(
+      defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+    ),
+    diskConfig: {
+      size: defaultCromwellConfig.persistentDiskRequest.size,
+      detachable: true,
+      detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
+    },
+    numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
+  };
 
   return (
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>

@@ -95,14 +95,6 @@ describe('CromwellConfigurationPanel', () => {
     jest.useRealTimers();
   });
 
-  it('should show configuration panel while not loading', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists('#cromwell-configuration-panel')).toEqual(true);
-    expect(wrapper.exists('cromwell-configuration-panel-spinner')).toEqual(
-      false
-    );
-  });
-
   it('start button should create cromwell and close panel', async () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
