@@ -238,9 +238,9 @@ export const CromwellConfigurationPanel = ({
     <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
       <div>
         A cloud environment consists of an application configuration, cloud
-        compute and persistent disk(s). This is the server version of Cromwell
-        only. You will need to create a Jupyter terminal environment in order to
-        interact with the workflow.
+        compute and persistent disk(s). Cromwell is a workflow execution engine.
+        You will need to create a Jupyter terminal environment in order to
+        interact with Cromwell.
       </div>
       <PanelMain
         {...{
