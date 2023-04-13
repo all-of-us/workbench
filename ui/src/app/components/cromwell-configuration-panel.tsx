@@ -9,7 +9,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { withCdrVersions, withUserProfile } from 'app/utils';
+import { withUserProfile } from 'app/utils';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
@@ -55,10 +55,7 @@ const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
 
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
-const PanelMain = fp.flow(
-  withCdrVersions(),
-  withUserProfile()
-)(
+const PanelMain = fp.flow(withUserProfile())(
   ({
     analysisConfig,
     workspace,
