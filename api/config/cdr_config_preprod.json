@@ -226,7 +226,7 @@
       "microarrayHailStoragePath": "microarray/hail.mt",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample/delta",
       "wgsVdsPath": "wgs/vds/gvs_export.vds",
-      "wgsExomeVcfPath": "v7/wgs/without_ext_aian_prod/vds/exome/vcf",
+      "wgsExomeVcfPath": "wgs/without_ext_aian_prod/vds/exome/vcf",
       "wgsAcafThresholdVcfPath": "wgs/without_ext_aian_prod/vds/acaf_threshold/vcf",
       "wgsClinvarVcfPath": "wgs/without_ext_aian_prod/vds/clinvar/vcf",
       "wgsLongReadsManifestPath": "longreads/manifest.csv",
