@@ -46,11 +46,25 @@ const cromwellSupportArticles = [
     link: WORKFLOW_AND_WDL_LINK,
   },
 ];
+
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
   defaultCromwellConfig.kubernetesRuntimeConfig.machineType
 );
 
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
+
+const analysisConfig: Partial<AnalysisConfig> = {
+  machine: findMachineByName(
+    defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+  ),
+  diskConfig: {
+    size: defaultCromwellConfig.persistentDiskRequest.size,
+    detachable: true,
+    detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
+    existingDiskName: null,
+  },
+  numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
+};
 
 export interface CromwellConfigurationPanelProps {
   onClose: () => void;
@@ -71,19 +85,6 @@ export const CromwellConfigurationPanel = ({
 
   const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
   const loadingApps = gkeAppsInWorkspace === undefined;
-
-  const analysisConfig: Partial<AnalysisConfig> = {
-    machine: findMachineByName(
-      defaultCromwellConfig.kubernetesRuntimeConfig.machineType
-    ),
-    diskConfig: {
-      size: defaultCromwellConfig.persistentDiskRequest.size,
-      detachable: true,
-      detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
-      existingDiskName: null,
-    },
-    numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
-  };
 
   useEffect(() => {
     appsApi()
