@@ -37,19 +37,25 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
-import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
+import {
+  CromwellConfigurationPanel,
+  CromwellConfigurationPanelProps,
+} from './cromwell-configuration-panel';
 
 describe('CromwellConfigurationPanel', () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
-  const DEFAULT_PROPS = {
+  const DEFAULT_PROPS: CromwellConfigurationPanelProps = {
     onClose,
+    creatorFreeCreditsRemaining: null,
   };
 
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
 
-  const component = async (propOverrides?: object) => {
+  const component = async (
+    propOverrides?: Partial<CromwellConfigurationPanelProps>
+  ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
     const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);

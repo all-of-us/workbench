@@ -200,10 +200,15 @@ const PanelMain = fp.flow(
   }
 );
 
+export interface CromwellConfigurationPanelProps {
+  onClose: () => void;
+  creatorFreeCreditsRemaining: number | null;
+}
+
 export const CromwellConfigurationPanel = ({
-  onClose = () => {},
-  creatorFreeCreditsRemaining = null,
-}) => {
+  onClose,
+  creatorFreeCreditsRemaining,
+}: CromwellConfigurationPanelProps) => {
   const analysisConfig: Partial<AnalysisConfig> = {
     machine: findMachineByName(
       defaultCromwellConfig.kubernetesRuntimeConfig.machineType
