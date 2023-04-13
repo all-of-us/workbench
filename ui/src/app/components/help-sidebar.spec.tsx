@@ -699,9 +699,7 @@ describe('HelpSidebar', () => {
     });
     const wrapper = await component();
 
-    expect(wrapper.text()).not.toContain(
-      'RStudio Cloud Environment (Config coming soon)'
-    );
+    expect(wrapper.text()).not.toContain('RStudio Cloud Environment');
 
     const cromwellIcon = wrapper.find({
       'data-test-id': 'help-sidebar-icon-rstudioConfig',
@@ -711,8 +709,6 @@ describe('HelpSidebar', () => {
     cromwellIcon.simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.text()).toContain(
-      'RStudio Cloud Environment (Config coming soon)'
-    );
+    expect(wrapper.text()).toContain('RStudio Cloud Environment');
   });
 });
