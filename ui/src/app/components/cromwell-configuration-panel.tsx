@@ -89,21 +89,19 @@ const PanelMain = fp.flow(
     };
 
     const onCreate = () => {
-      if (!creatingCromwellApp) {
-        setCreatingCromwellApp(true);
-        fetchWithErrorModal(
-          () => createUserApp(workspace.namespace, defaultCromwellConfig),
-          {
-            customErrorResponseFormatter: (error: ApiErrorResponse) =>
-              error?.originalResponse?.status === 409 && {
-                title: 'Error Creating Cromwell Environment',
-                message:
-                  'Please wait a few minutes and try to create your Cromwell Environment again.',
-                onDismiss,
-              },
-          }
-        ).then(() => onDismiss());
-      }
+      setCreatingCromwellApp(true);
+      fetchWithErrorModal(
+        () => createUserApp(workspace.namespace, defaultCromwellConfig),
+        {
+          customErrorResponseFormatter: (error: ApiErrorResponse) =>
+            error?.originalResponse?.status === 409 && {
+              title: 'Error Creating Cromwell Environment',
+              message:
+                'Please wait a few minutes and try to create your Cromwell Environment again.',
+              onDismiss,
+            },
+        }
+      ).then(() => onDismiss());
     };
 
     const { profile } = profileState;
