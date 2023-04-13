@@ -14,11 +14,7 @@ import {
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
-import {
-  DEFAULT_MACHINE_NAME,
-  findMachineByName,
-  Machine,
-} from 'app/utils/machines';
+import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
@@ -50,7 +46,9 @@ const cromwellSupportArticles = [
     link: WORKFLOW_AND_WDL_LINK,
   },
 ];
-const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
+const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
+  defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+);
 
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
