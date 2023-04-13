@@ -7,6 +7,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { clearCompoundRuntimeOperations } from 'app/utils/stores';
@@ -19,19 +20,18 @@ import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-import { ConfigurationPanel } from './configuration-panel';
-
-interface Props {
-  onClose: () => void;
-}
+import {
+  ConfigurationPanel,
+  ConfigurationPanelProps,
+} from './configuration-panel';
 
 describe('ConfigurationPanel', () => {
-  let props: Props;
+  let defaultProps: ConfigurationPanelProps;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
 
   const component = async (propOverrides?: object) => {
-    const allProps = { ...props, ...propOverrides };
+    const allProps = { ...defaultProps, ...propOverrides };
     const c = mountWithRouter(<ConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
@@ -42,8 +42,9 @@ describe('ConfigurationPanel', () => {
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
     onClose = jest.fn();
-    props = {
+    defaultProps = {
       onClose,
+      type: UIAppType.JUPYTER,
     };
 
     jest.useFakeTimers();

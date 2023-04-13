@@ -984,11 +984,17 @@ const PanelMain = fp.flow(
   }
 );
 
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorFreeCreditsRemaining?: number;
+}
+
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
-}) => {
+}: RuntimeConfigurationPanelProps) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
