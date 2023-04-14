@@ -76,8 +76,6 @@ describe('RuntimeConfigurationPanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
-  let enableGpu: boolean;
-  let enablePersistentDisk: boolean;
   let freeTierBillingAccountId: string;
 
   const component = async (
@@ -144,8 +142,6 @@ describe('RuntimeConfigurationPanel', () => {
   beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
-    enableGpu = serverConfigStore.get().config.enableGpu;
-    enablePersistentDisk = serverConfigStore.get().config.enablePersistentDisk;
     freeTierBillingAccountId =
       serverConfigStore.get().config.freeTierBillingAccountId;
 
@@ -250,17 +246,9 @@ describe('RuntimeConfigurationPanel', () => {
   const pickMainRam = (wrapper, ram) =>
     pickDropdownOption(wrapper, '#runtime-ram', ram);
 
-  const getMainDiskSize = (wrapper) =>
-    getInputValue(
-      wrapper,
-      enablePersistentDisk ? '#standard-disk' : '#runtime-disk'
-    );
+  const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#standard-disk');
   const pickMainDiskSize = (wrapper, diskSize) =>
-    enterNumberInput(
-      wrapper,
-      enablePersistentDisk ? '#standard-disk' : '#runtime-disk',
-      diskSize
-    );
+    enterNumberInput(wrapper, '#standard-disk', diskSize);
 
   const enableDetachable = (wrapper, detachable = true) =>
     wrapper
@@ -1774,9 +1762,6 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should allow creating gce without GPU', async () => {
-    if (!enableGpu) {
-      return;
-    }
     setCurrentRuntime(null);
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
