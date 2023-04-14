@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 import { BillingStatus } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
+import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
@@ -94,7 +95,14 @@ export const ConfigurationPanel = fp.flow(
           ],
           // UIAppType.RStudio
           () => (
-            <p>The RStudio configuration panel is currently in development.</p>
+            <RStudioConfigurationPanel
+              {...{
+                onClose,
+                creatorFreeCreditsRemaining,
+                workspace,
+                profileState,
+              }}
+            />
           )
         )}
       </div>
