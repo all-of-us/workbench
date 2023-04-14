@@ -4642,14 +4642,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
-      enableGpu:
-        type: boolean
-        default: false
-        description: Whether to enable GPU for standard vm
-      enablePersistentDisk:
-        type: boolean
-        default: false
-        description: Whether to persistent disk as the notebook storage
       rasHost:
         type: string
         description: The RAS base host name.
@@ -4680,10 +4672,6 @@ definitions:
         type: array
         items:
           type: integer
-      enableUpdatedDemographicSurvey:
-        type: boolean
-        default: false
-        description: Whether to enable demographic survey v2 in the UI.
       enableCaptcha:
         type: boolean
         default: true
