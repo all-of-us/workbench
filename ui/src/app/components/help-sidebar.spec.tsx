@@ -649,4 +649,70 @@ describe('HelpSidebar', () => {
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
     expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
   });
+
+  it('should not show the Cromwell icon if Cromwell is disabled', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableCromwellGKEApp: false },
+    });
+    const wrapper = await component();
+
+    expect(
+      wrapper
+        .find({ 'data-test-id': 'help-sidebar-icon-cromwellConfig' })
+        .exists()
+    ).toBeFalsy();
+  });
+
+  it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+    });
+    const wrapper = await component();
+
+    const cromwellIcon = wrapper.find({
+      'data-test-id': 'help-sidebar-icon-cromwellConfig',
+    });
+    expect(cromwellIcon.exists()).toBeTruthy();
+
+    cromwellIcon.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+  });
+
+  it('should not show the RStudio icon if RStudio is disabled', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableRStudioGKEApp: false },
+    });
+    const wrapper = await component();
+
+    expect(
+      wrapper
+        .find({ 'data-test-id': 'help-sidebar-icon-rstudioConfig' })
+        .exists()
+    ).toBeFalsy();
+  });
+
+  it('should open the RStudio config panel after clicking the RStudio icon', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableRStudioGKEApp: true },
+    });
+    const wrapper = await component();
+
+    expect(wrapper.text()).not.toContain(
+      'RStudio Cloud Environment (Config coming soon)'
+    );
+
+    const cromwellIcon = wrapper.find({
+      'data-test-id': 'help-sidebar-icon-rstudioConfig',
+    });
+    expect(cromwellIcon.exists()).toBeTruthy();
+
+    cromwellIcon.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.text()).toContain(
+      'RStudio Cloud Environment (Config coming soon)'
+    );
+  });
 });

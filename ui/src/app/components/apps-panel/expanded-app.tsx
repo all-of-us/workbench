@@ -14,6 +14,7 @@ import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { cromwellConfigIconId } from 'app/components/help-sidebar-icons';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
@@ -142,7 +143,7 @@ const CromwellButtonRow = (props: {
   return (
     <FlexRow>
       <SettingsButton
-        onClick={() => setSidebarActiveIconStore.next('cromwellConfig')}
+        onClick={() => setSidebarActiveIconStore.next(cromwellConfigIconId)}
         data-test-id='Cromwell-settings-button'
       />
       <PauseUserAppButton {...{ userApp, workspaceNamespace }} />

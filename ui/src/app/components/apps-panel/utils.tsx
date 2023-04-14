@@ -108,7 +108,7 @@ export const toAppType = (type: UIAppType): AppType =>
   );
 
 export const findApp = (
-  apps: UserAppEnvironment[],
+  apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType
 ): UserAppEnvironment =>
   apps?.find((app) => app.appType === toAppType(appType));

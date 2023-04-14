@@ -21,8 +21,10 @@ import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-de
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
 import {
+  cromwellConfigIconId,
   HelpSidebarIcons,
   IconConfig,
+  rstudioConfigIconId,
   showConceptIcon,
   showCriteriaIcon,
   SidebarIconId,
@@ -155,7 +157,8 @@ const styles = reactStyles({
 const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
   'apps',
   'runtimeConfig',
-  'cromwellConfig',
+  cromwellConfigIconId,
+  rstudioConfigIconId,
   'terminal',
 ] as SidebarIconId[];
 
@@ -451,6 +454,13 @@ export const HelpSidebar = fp.flow(
     } {
       const { pageKey, workspace, cohortContext } = this.props;
 
+      const sharedGKEAppConfigSidebarContent = {
+        headerPadding: '1.125rem',
+        bodyWidthRem: '55',
+        bodyPadding: '0 1.875rem',
+        showFooter: false,
+      };
+
       switch (activeIcon) {
         case 'help':
           return {
@@ -516,9 +526,9 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: false,
           };
-        case 'cromwellConfig':
+        case cromwellConfigIconId:
           return {
-            headerPadding: '1.125rem',
+            ...sharedGKEAppConfigSidebarContent,
             renderHeader: () => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3
@@ -536,8 +546,6 @@ export const HelpSidebar = fp.flow(
                 />
               </div>
             ),
-            bodyWidthRem: '55',
-            bodyPadding: '0 1.875rem',
             renderBody: () => (
               <ConfigurationPanel
                 type='cromwell'
@@ -545,7 +553,23 @@ export const HelpSidebar = fp.flow(
                 runtimeConfPanelInitialState={null}
               />
             ),
-            showFooter: false,
+          };
+        case rstudioConfigIconId:
+          return {
+            ...sharedGKEAppConfigSidebarContent,
+            renderHeader: () => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  RStudio Cloud Environment (Config coming soon)
+                </h3>
+              </div>
+            ),
+            renderBody: () => null,
           };
         case 'notebooksHelp':
           return {
