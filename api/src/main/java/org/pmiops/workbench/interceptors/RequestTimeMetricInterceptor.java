@@ -30,7 +30,7 @@ public class RequestTimeMetricInterceptor implements AsyncHandlerInterceptor {
   @Override
   public boolean preHandle(
       HttpServletRequest request, HttpServletResponse response, Object handler) {
-    if (shouldSkip(request, handler)) {
+    if (true || shouldSkip(request, handler)) {
       return true;
     }
     request.setAttribute(RequestAttribute.START_INSTANT.toString(), clock.instant());
@@ -56,7 +56,7 @@ public class RequestTimeMetricInterceptor implements AsyncHandlerInterceptor {
       HttpServletResponse response,
       Object handler,
       ModelAndView modelAndView) {
-    if (shouldSkip(request, handler)) {
+    if (true || shouldSkip(request, handler)) {
       return;
     }
 

@@ -1,6 +1,10 @@
 package org.pmiops.workbench;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +14,37 @@ import org.pmiops.workbench.cdr.CdrDataSource;
 import org.pmiops.workbench.cdr.DbParams;
 import org.pmiops.workbench.db.Params;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Component;
+import org.springframework.test.web.servlet.MockMvc;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
+import com.google.common.io.Resources;
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * This test that all application injection is done properly. It loads all JPA repositories,
  * Services, Controllers, Components and Configurations.
  */
 @SpringBootTest
+@AutoConfigureMockMvc
+// @Import(ApplicationTest.Configuration.class)
 public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
+@Autowired private MockMvc mockMvc;
 
   @MockBean(name = "params")
   private Params params;
@@ -32,15 +53,25 @@ public class ApplicationTest {
   @MockBean private DbParams cdrParams;
   @MockBean private CdrDataSource cdrDataSource;
 
-  /**
-   * Spring Boot provides a mechanism that will create a schema and load data into it. It loads SQL
-   * from the standard root classpath locations: src/integration/resources/schema.sql and
-   * src/integration/resources/data.sql, respectively. In addition, Spring Boot processes the
-   * schema-${platform}.sql and data-${platform}.sql files (if present), where platform is the value
-   * of spring.datasource.platform. This allows you to switch to database-specific scripts if
-   * necessary. For example, you might choose to set it to the vendor name of the database (hsqldb,
-   * h2, oracle, mysql, postgresql, and so on).
-   */
+  @TestConfiguration
+  static class Configuration {
+    @Bean
+//     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Primary
+    WorkbenchConfig getApplicationTestWorkbenchConfig() throws IOException {
+      WorkbenchConfig c = loadConfig();
+      return c;
+    }
+
+    private static WorkbenchConfig loadConfig() throws IOException {
+      String testConfig =
+          Resources.toString(Resources.getResource("config_test.json"), Charset.defaultCharset());
+      WorkbenchConfig workbenchConfig = new Gson().fromJson(testConfig, WorkbenchConfig.class);
+      workbenchConfig.firecloud.debugEndpoints = true;
+      return workbenchConfig;
+    }
+  }
+
   @Test
   public void contextLoads() {
     List<Object> beans = new ArrayList<>();
@@ -51,5 +82,11 @@ public class ApplicationTest {
     for (Object object : beans) {
       assertThat(object).isNotNull();
     }
+  }
+
+  @Test
+  public void shouldReturnDefaultMessage() throws Exception {
+    this.mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk())
+          .andExpect(content().string("AllOfUs Workbench API"));
   }
 }
