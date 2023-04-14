@@ -5,7 +5,6 @@ import { ReactWrapper } from 'enzyme';
 
 import {
   DisksApi,
-  ProfileApi,
   RuntimeConfigurationType,
   RuntimeStatus,
   WorkspaceAccessLevel,
@@ -16,12 +15,14 @@ import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
-import { RuntimeConfigurationPanel } from 'app/components/runtime-configuration-panel';
+import {
+  RuntimeConfigurationPanel,
+  RuntimeConfigurationPanelProps,
+} from 'app/components/runtime-configuration-panel';
 import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
 import { Spinner } from 'app/components/spinners';
 import {
   disksApi,
-  profileApi,
   registerApiClient,
   runtimeApi,
 } from 'app/services/swagger-fetch-clients';
@@ -38,7 +39,6 @@ import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
   diskStore,
-  profileStore,
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
@@ -54,7 +54,7 @@ import {
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   defaultDataprocConfig,
   defaultGceConfig,
@@ -63,22 +63,27 @@ import {
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-interface Props {
-  onClose: () => void;
-}
-
 describe('RuntimeConfigurationPanel', () => {
-  let props: Props;
+  const defaultProps: RuntimeConfigurationPanelProps = {
+    onClose: jest.fn(),
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
+  };
   let runtimeApiStub: RuntimeApiStub;
   let disksApiStub: DisksApiStub;
   let workspacesApiStub: WorkspacesApiStub;
-  let onClose: () => void;
   let enableGpu: boolean;
   let enablePersistentDisk: boolean;
   let freeTierBillingAccountId: string;
 
-  const component = async (propOverrides?: object) => {
-    const allProps = { ...props, ...propOverrides };
+  const component = async (
+    propOverrides?: Partial<RuntimeConfigurationPanelProps>
+  ) => {
+    const allProps = { ...defaultProps, ...propOverrides };
     const c = mountWithRouter(<RuntimeConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
@@ -152,19 +157,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
-
-    registerApiClient(ProfileApi, new ProfileApiStub());
-    profileStore.set({
-      profile: await profileApi().getMe(),
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    });
-
-    onClose = jest.fn();
-    props = {
-      onClose,
-    };
 
     cdrVersionStore.set(cdrVersionTiersResponse);
 
@@ -1291,7 +1283,8 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should allow runtime deletion', async () => {
-    const wrapper = await component();
+    const onClose = jest.fn();
+    const wrapper = await component({ onClose: onClose });
 
     wrapper
       .find(LinkButton)
@@ -1308,7 +1301,8 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should allow cancelling runtime deletion', async () => {
-    const wrapper = await component();
+    const onClose = jest.fn();
+    const wrapper = await component({ onClose: onClose });
 
     wrapper
       .find(LinkButton)

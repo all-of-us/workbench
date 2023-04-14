@@ -15,6 +15,7 @@ import {
 } from 'generated/fetch';
 
 import { AppsPanel } from 'app/components/apps-panel';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
@@ -505,6 +506,7 @@ export const HelpSidebar = fp.flow(
               <ConfigurationPanel
                 {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
+                type={UIAppType.JUPYTER}
               />
             ),
             showFooter: false,
@@ -548,9 +550,8 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
-                type='cromwell'
+                type={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
-                runtimeConfPanelInitialState={null}
               />
             ),
           };
@@ -569,7 +570,12 @@ export const HelpSidebar = fp.flow(
                 </h3>
               </div>
             ),
-            renderBody: () => null,
+            renderBody: () => (
+              <ConfigurationPanel
+                type={UIAppType.RSTUDIO}
+                onClose={() => this.setActiveIcon(null)}
+              />
+            ),
           };
         case 'notebooksHelp':
           return {

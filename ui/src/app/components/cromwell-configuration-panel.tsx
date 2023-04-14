@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import * as fp from 'lodash/fp';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
@@ -8,26 +7,19 @@ import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { Spinner } from 'app/components/spinners';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import {
-  withCdrVersions,
-  withCurrentWorkspace,
-  withUserProfile,
-} from 'app/utils';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
-import {
-  DEFAULT_MACHINE_NAME,
-  findMachineByName,
-  Machine,
-} from 'app/utils/machines';
+import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
+import { ProfileStore } from 'app/utils/stores';
 import { createUserApp } from 'app/utils/user-apps-utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import {
   canCreateApp,
@@ -54,62 +46,86 @@ const cromwellSupportArticles = [
     link: WORKFLOW_AND_WDL_LINK,
   },
 ];
-const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(DEFAULT_MACHINE_NAME);
+
+const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
+  defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+);
 
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
-const PanelMain = fp.flow(
-  withCdrVersions(),
-  withCurrentWorkspace(),
-  withUserProfile()
-)(
-  ({
-    analysisConfig,
-    workspace,
-    profileState,
-    creatorFreeCreditsRemaining,
-    onClose,
-  }) => {
-    // all apps besides Jupyter
-    const [userApps, setUserApps] = useState<UserAppEnvironment[]>();
-    const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
+const analysisConfig: Partial<AnalysisConfig> = {
+  machine: findMachineByName(
+    defaultCromwellConfig.kubernetesRuntimeConfig.machineType
+  ),
+  diskConfig: {
+    size: defaultCromwellConfig.persistentDiskRequest.size,
+    detachable: true,
+    detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
+    existingDiskName: null,
+  },
+  numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
+};
 
-    const app = findApp(userApps, UIAppType.CROMWELL);
-    const loadingApps = userApps === undefined;
+export interface CromwellConfigurationPanelProps {
+  onClose: () => void;
+  creatorFreeCreditsRemaining: number | null;
+  workspace: WorkspaceData;
+  profileState: ProfileStore;
+}
 
-    useEffect(() => {
-      appsApi().listAppsInWorkspace(workspace.namespace).then(setUserApps);
-    }, []);
+export const CromwellConfigurationPanel = ({
+  onClose,
+  creatorFreeCreditsRemaining,
+  workspace,
+  profileState,
+}: CromwellConfigurationPanelProps) => {
+  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
+    useState<UserAppEnvironment[]>();
+  const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
-    const onDismiss = () => {
-      onClose();
-      setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
-    };
+  const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
+  const loadingApps = gkeAppsInWorkspace === undefined;
 
-    const onCreate = () => {
-      if (!creatingCromwellApp) {
-        setCreatingCromwellApp(true);
-        fetchWithErrorModal(
-          () => createUserApp(workspace.namespace, defaultCromwellConfig),
-          {
-            customErrorResponseFormatter: (error: ApiErrorResponse) =>
-              error?.originalResponse?.status === 409 && {
-                title: 'Error Creating Cromwell Environment',
-                message:
-                  'Please wait a few minutes and try to create your Cromwell Environment again.',
-                onDismiss,
-              },
-          }
-        ).then(() => onDismiss());
+  const { profile } = profileState;
+
+  useEffect(() => {
+    appsApi()
+      .listAppsInWorkspace(workspace.namespace)
+      .then(setGkeAppsInWorkspace);
+  }, []);
+
+  const createEnabled =
+    !loadingApps && !creatingCromwellApp && canCreateApp(app);
+
+  const onDismiss = () => {
+    onClose();
+    setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
+  };
+
+  const onCreate = () => {
+    setCreatingCromwellApp(true);
+    fetchWithErrorModal(
+      () => createUserApp(workspace.namespace, defaultCromwellConfig),
+      {
+        customErrorResponseFormatter: (error: ApiErrorResponse) =>
+          error?.originalResponse?.status === 409 && {
+            title: 'Error Creating Cromwell Environment',
+            message:
+              'Please wait a few minutes and try to create your Cromwell Environment again.',
+            onDismiss,
+          },
       }
-    };
+    ).then(() => onDismiss());
+  };
 
-    const { profile } = profileState;
-
-    const createEnabled =
-      !loadingApps && !creatingCromwellApp && canCreateApp(app);
-
-    return (
+  return (
+    <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
+      <div>
+        A cloud environment consists of an application configuration, cloud
+        compute and persistent disk(s). Cromwell is a workflow execution engine.
+        You will need to create a Jupyter terminal environment in order to
+        interact with Cromwell.
+      </div>
       <FlexColumn style={{ height: '100%' }}>
         <div
           data-test-id='cromwell-create-panel'
@@ -196,60 +212,6 @@ const PanelMain = fp.flow(
           </Button>
         </FlexRow>
       </FlexColumn>
-    );
-  }
-);
-
-export const CromwellConfigurationPanel = ({
-  onClose = () => {},
-  initialPanelContent = null,
-  creatorFreeCreditsRemaining = null,
-}) => {
-  const [analysisConfig, setAnalysisConfig] = useState({});
-
-  useEffect(
-    () =>
-      setAnalysisConfig({
-        machine: findMachineByName(
-          defaultCromwellConfig.kubernetesRuntimeConfig.machineType
-        ),
-        diskConfig: {
-          size: defaultCromwellConfig.persistentDiskRequest.size,
-          detachable: true,
-          detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
-        },
-        numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
-      }),
-    []
-  );
-
-  const analysisConfigLoaded = Object.keys(analysisConfig).length > 0;
-  if (!analysisConfigLoaded) {
-    return (
-      <Spinner
-        id='cromwell-configuration-panel-spinner'
-        aria-label='spinner showing that cromwell configuration panel is loading'
-        style={{ width: '100%', marginTop: '7.5rem' }}
-      />
-    );
-  }
-
-  return (
-    <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
-      <div>
-        A cloud environment consists of an application configuration, cloud
-        compute and persistent disk(s). Cromwell is a workflow execution engine.
-        You will need to create a Jupyter terminal environment in order to
-        interact with Cromwell.
-      </div>
-      <PanelMain
-        {...{
-          analysisConfig,
-          onClose,
-          initialPanelContent,
-          creatorFreeCreditsRemaining,
-        }}
-      />
     </FlexColumn>
   );
 };
