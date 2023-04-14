@@ -1,10 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-
-import 'setimmediate';
-import '@testing-library/jest-dom';
-
 import * as React from 'react';
 import { ReactWrapper } from 'enzyme';
 
@@ -14,6 +10,7 @@ import {
 } from 'generated/fetch';
 
 import { PactV3 } from '@pact-foundation/pact';
+import { Spinner } from 'app/components/spinners';
 import { WorkspaceList } from 'app/pages/workspace/workspace-list';
 import {
   clearApiClients,
@@ -25,14 +22,13 @@ import portableFetch from 'portable-fetch';
 
 import {
   mountWithRouter,
-  waitForFakeTimersAndUpdate,
+  waitForSelectorMissing,
 } from 'testing/react-test-helpers';
 import {
   ProfileApiStub,
   ProfileStubVariables,
 } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceResponseStubs } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 // Create a 'pact' between the two applications in the integration we are testing
 const provider = new PactV3({
@@ -42,14 +38,11 @@ const provider = new PactV3({
 });
 
 describe('WorkspaceList', () => {
-  const now = new Date('2000-01-01 03:00:00');
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
   const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
-
-  let workspacesApiStub: WorkspacesApiStub;
 
   const props = {
     hideSpinner: () => {},
@@ -78,13 +71,12 @@ describe('WorkspaceList', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     clearApiClients();
   });
   it('displays the correct number of workspaces', async () => {
     provider
-      .given('I have a list of dogs')
-      .uponReceiving('a request for all dogs with the builder pattern')
+      .given('User has workspaces')
+      .uponReceiving('a request for workspaces associated with a user')
       .withRequest({
         method: 'GET',
         path: '/v1/workspaces',
@@ -93,7 +85,7 @@ describe('WorkspaceList', () => {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
         body: {
-          items: buildWorkspaceResponseStubs(['Gunicorn']),
+          items: buildWorkspaceResponseStubs(['A', 'B', 'C']),
         },
       });
 
@@ -113,12 +105,12 @@ describe('WorkspaceList', () => {
         })()
       );
       const wrapper = component();
-      await new Promise((r) => setTimeout(r, 25));
-      // await waitOneTickAndUpdate(wrapper);
-      // await waitOnTimersAndUpdate(wrapper);
-      await waitForFakeTimersAndUpdate(wrapper);
-      expect(getCardNames(wrapper)).toEqual(['defaultWorkspaceGunicorn']);
-      expect(true).toBeTruthy();
+      await waitForSelectorMissing(Spinner, wrapper);
+      expect(getCardNames(wrapper)).toEqual([
+        'defaultWorkspaceA',
+        'defaultWorkspaceB',
+        'defaultWorkspaceC',
+      ]);
     });
   });
 });

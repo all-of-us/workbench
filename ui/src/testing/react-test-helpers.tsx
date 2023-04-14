@@ -2,7 +2,12 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+import {
+  EnzymeSelector,
+  mount,
+  MountRendererProps,
+  ReactWrapper,
+} from 'enzyme';
 
 import { setImmediate } from 'timers';
 
@@ -125,3 +130,20 @@ export const expectButtonDisabled = (buttonWrapper: ReactWrapper) =>
 // When simulate is used with an input element of type checkbox, it will negate its current state.
 export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
   checkBoxWrapper.simulate('change');
+
+export const waitForSelectorMissing = async (
+  selector: EnzymeSelector,
+  wrapper: ReactWrapper
+) => {
+  await new Promise((resolve) => {
+    const maybeResolve = () => {
+      const hasSelector = wrapper.update().find(selector).length > 0;
+      if (!hasSelector) {
+        resolve(0);
+      } else {
+        setTimeout(maybeResolve, 10);
+      }
+    };
+    maybeResolve();
+  });
+};
