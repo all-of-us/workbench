@@ -2,12 +2,7 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
-import {
-  EnzymeSelector,
-  mount,
-  MountRendererProps,
-  ReactWrapper,
-} from 'enzyme';
+import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
 import { setImmediate } from 'timers';
 
@@ -132,7 +127,7 @@ export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
   checkBoxWrapper.simulate('change');
 
 export const waitForSelectorMissing = async (
-  selector: EnzymeSelector,
+  selector: any,
   wrapper: ReactWrapper
 ) => {
   await new Promise((resolve) => {
