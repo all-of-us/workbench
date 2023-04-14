@@ -146,12 +146,18 @@ const styles = reactStyles({
     paddingLeft: 12,
     width: 160,
   },
-  cromwellBetaBadge: {
-    border: `3px solid #F0B1D0`,
+  betaBadge: {
+    border: `3px solid`,
     borderRadius: '11px',
     padding: '0 0.5rem',
     backgroundColor: colors.white,
     lineHeight: '1rem',
+  },
+  cromwellBetaBadge: {
+    borderColor: `#F0B1D0`,
+  },
+  rstudioBetaBadge: {
+    borderColor: `#72abdc`,
   },
 });
 
@@ -241,15 +247,11 @@ interface State {
   runtimeConfPanelInitialState: PanelContent | null;
 }
 
-const CromwellBetaBadge = ({ style }) => (
-  <TooltipTrigger
-    content={
-      'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
-    }
-  >
+const BetaBadge = ({ tooltipContent, style }) => (
+  <TooltipTrigger content={tooltipContent}>
     <div
       style={{
-        ...styles.cromwellBetaBadge,
+        ...styles.betaBadge,
         ...style,
       }}
     >
@@ -541,9 +543,13 @@ export const HelpSidebar = fp.flow(
                 >
                   Cromwell Cloud Environment
                 </h3>
-                <CromwellBetaBadge
+                <BetaBadge
+                  tooltipContent={
+                    'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
+                  }
                   style={{
                     marginLeft: '0.5rem',
+                    ...styles.cromwellBetaBadge,
                   }}
                 />
               </div>
@@ -566,8 +572,17 @@ export const HelpSidebar = fp.flow(
                     lineHeight: 1.75,
                   }}
                 >
-                  RStudio Cloud Environment (Config coming soon)
+                  RStudio Cloud Environment
                 </h3>
+                <BetaBadge
+                  tooltipContent={
+                    'We are regularly improving the RStudio experience. If you have feedback, reach out to support@researchallofus.org'
+                  }
+                  style={{
+                    marginLeft: '0.5rem',
+                    ...styles.rstudioBetaBadge,
+                  }}
+                />
               </div>
             ),
             renderBody: () => (

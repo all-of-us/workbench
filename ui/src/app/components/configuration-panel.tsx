@@ -93,7 +93,9 @@ export const ConfigurationPanel = fp.flow(
             ),
           ],
           // UIAppType.RStudio
-          () => null
+          () => (
+            <p>The RStudio configuration panel is currently in development.</p>
+          )
         )}
       </div>
     );
