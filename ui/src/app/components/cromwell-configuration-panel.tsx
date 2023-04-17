@@ -126,10 +126,7 @@ export const CromwellConfigurationPanel = ({
         You will need to create a Jupyter terminal environment in order to
         interact with Cromwell.
       </div>
-      <div
-        data-test-id='cromwell-create-panel'
-        style={{ ...styles.controlSection, marginTop: '1rem' }}
-      >
+      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
         <EnvironmentInformedActionPanel
           {...{
             creatorFreeCreditsRemaining,
