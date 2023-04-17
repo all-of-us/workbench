@@ -1,6 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
+    "rawlsBaseUrl": "https:\/\/rawls.dsde-prod.broadinstitute.org",
     "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
     "terraUiBaseUrl": "https:\/\/app.terra.bio",
     "notebookRuntimeMaxAgeDays": 14,

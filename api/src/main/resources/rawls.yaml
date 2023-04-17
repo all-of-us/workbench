@@ -1,0 +1,4811 @@
+A subset of the Terra Rawls API spec that we use to generate Java client libraries. The
+# original API spec can be found here:
+# https://github.com/broadinstitute/rawls/blob/develop/core/src/main/resources/swagger/rawls.yaml
+
+openapi: 3.0.1
+info:
+  title: Rawls
+  description: Rawls API
+  termsOfService: http://www.github.com/broadinstitute/rawls
+  license:
+    name: BSD
+    url: http://opensource.org/licenses/BSD-3-Clause
+  version: 1.0.0
+servers:
+  - url: /
+tags:
+  - name: billing_v2
+  - name: methodconfigs
+  - name: notifications
+  - name: servicePerimeters
+  - name: status
+  - name: submissions
+  - name: users
+  - name: version
+  - name: workflows
+  - name: workspaces
+
+paths:
+  /version:
+    get:
+      tags:
+        - version
+      summary: get version information of this application
+      description: get version information of this application
+      operationId: version
+      responses:
+        200:
+          description: Version information of this application
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ApplicationVersion'
+  /status:
+    get:
+      security: []
+      tags:
+        - status
+      summary: status check for underlying systems
+      description: status check for underlying systems
+      operationId: systemStatus
+      responses:
+        200:
+          description: All systems OK
+          content: {}
+        500:
+          description: Problem with one or more systems. See response for details.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+  /api/billing/v2:
+    get:
+      tags:
+        - billing_v2
+      summary: list billing projects for a user
+      description: list billing projects for a user
+      operationId: listUserBillingProjectsV2
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                description: list of billing projects for this user
+                items:
+                  $ref: '#/components/schemas/RawlsBillingProjectResponse'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    post:
+      tags:
+        - billing_v2
+      summary: create billing project in rawls
+      description: create new billing project in rawls; the client must provide either Azure managed app coordinates or a Google billing account ID. Providing both will result in an error.
+      operationId: createBillingProjectFullV2
+      requestBody:
+        description: create project request
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateRawlsV2BillingProjectFullRequest'
+        required: true
+      responses:
+        201:
+          description: Successfully Created Billing Project in Rawls
+        400:
+          description: both you and firecloud billing user must be a user of the billing account
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: project already exists in rawls
+          content: {}
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+            - https://www.googleapis.com/auth/cloud-billing
+      x-codegen-request-body-name: createProjectRequest
+  /api/billing/v2/{projectId}:
+    get:
+      tags:
+        - billing_v2
+      summary: get billing project
+      description: get billing project
+      operationId: getBillingProject
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RawlsBillingProjectResponse'
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - billing_v2
+      summary: delete billing project
+      description: delete billing project
+      operationId: deleteBillingProjectV2
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        204:
+          description: OK
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/billing/v2/{projectId}/billingAccount:
+    put:
+      tags:
+        - billing_v2
+      summary: update billing account on billing project
+      description: update billing account on billing project
+      operationId: updateBillingProjectBillingAccount
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      requestBody:
+        description: update billing account request
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UpdateRawlsBillingAccountRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RawlsBillingProjectResponse'
+        400:
+          description: Billing account not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - billing_v2
+      summary: removes the billing account from the billing project
+      description: removes the billing account from the billing project
+      operationId: removeBillingProjectBillingAccount
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RawlsBillingProjectResponse'
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/billing/v2/{projectId}/members:
+    get:
+      tags:
+        - billing_v2
+      summary: list members of billing project
+      description: list members of billing project. owners can view all members, users will only be able to view owners
+      operationId: listBillingProjectMembersV2
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RawlsBillingProjectMember'
+        403:
+          description: You must be a project member to view the members of a project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    patch:
+      tags:
+        - billing_v2
+      summary: batch update members of billing project
+      description: batch update members of billing project. only owners may perform this action.
+      operationId: batchUpdateBillingProjectMembersV2
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+        - name: inviteUsersNotFound
+          in: query
+          description: true to invite unregistered users, false to ignore
+          required: true
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: billing project access updates
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/BatchProjectAccessUpdate'
+      responses:
+        204:
+          description: No Content
+        403:
+          description: You must be a project owner to alter the members of a project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: You have specified a member that does not exist in the system. Use the inviteUsersNotFound query param to invite them
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/billing/v2/{projectId}/spendReport:
+    get:
+      tags:
+        - billing_v2
+      summary: get spend report for the billing project
+      description: get spend report for the billing project
+      operationId: getSpendReport
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+        - name: startDate
+          in: query
+          description: start date of report (YYYY-MM-DD). Data included in report will start at 12 AM UTC on this date.
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: end date of report (YYYY-MM-DD). Data included in report will end at 11:59 PM UTC on this date.
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: aggregationKey
+          in: query
+          description: Key(s) indicating how to aggregate spend data in results. Will return only summary data (spendDetails is empty) if aggregationKey is not present. Aggregation can be sub-aggregated one level by appending a second aggregation key separated by a '~' as follows 'Aggregation~SubAggregation'. Aggregation key options are [Workspace, Category, Daily]
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SpendReport'
+        400:
+          description: invalid spend report parameters
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: You must be a project owner to view the spend report of a project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: The specified billing project could not be found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/billing/v2/{projectId}/spendReportConfiguration:
+    get:
+      tags:
+        - billing_v2
+      summary: get the spend report configuration for the billing project
+      description: get the spend report configuration for the billing project
+      operationId: getSpendReportConfiguration
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        200:
+          description: Successfully retrieved spend report configuration
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SpendReportConfiguration'
+        204:
+          description: The specified billing project exists but does not have spend reporting configured
+        403:
+          description: You must be a billing project owner to view the spend report configuration of the billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: The specified billing project could not be found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    put:
+      tags:
+        - billing_v2
+      summary: set the spend configuration for the billing project
+      description: set the spend configuration for the billing project
+      operationId: setSpendReportConfiguration
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      requestBody:
+        description: billing project spend configuration information
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SpendReportConfiguration'
+      responses:
+        204:
+          description: Successfully updated spend configuration
+        400:
+          description: Either the billing project does not have an active billing account, the specified dataset does not exist, or the specified table does not exist
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: You must be a billing project owner to alter the spend configuration of the billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: The specified billing project could not be found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - billing_v2
+      summary: clear the spend configuration for the billing project
+      description: clear the spend configuration for the billing project
+      operationId: clearSpendReportConfiguration
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+      responses:
+        204:
+          description: Successfully cleared spend configuration
+        403:
+          description: You must be a billing project owner to alter the spend configuration of the billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/billing/v2/{projectId}/members/{workbenchRole}/{email}:
+    put:
+      tags:
+        - billing_v2
+      summary: add user or group to billing project the caller owns
+      description: add user or group to billing project the caller owns
+      operationId: addUserToBillingProjectV2
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+        - $ref: '#/components/parameters/workbenchRolePathParam'
+        - name: email
+          in: path
+          description: email of user or group to add
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully Added User/Group To Billing Project
+        403:
+          description: You must be a project owner to add a user to a billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - billing_v2
+      summary: remove user or group from billing project the caller owns
+      description: remove user or group from billing project the caller owns
+      operationId: removeUserFromBillingProjectV2
+      parameters:
+        - $ref: '#/components/parameters/billingProjectIdPathParam'
+        - $ref: '#/components/parameters/workbenchRolePathParam'
+        - name: email
+          in: path
+          description: email of user or group to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully Removed User From Billing Project
+        403:
+          description: You must be a project owner to add a user to a billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions:
+    get:
+      tags:
+        - submissions
+      summary: List all submissions
+      description: List all submissions run in this workspace
+      operationId: listSubmissions
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubmissionListResponse'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    post:
+      tags:
+        - submissions
+      summary: Create submission
+      description: Submit a new job
+      operationId: createSubmission
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Description of a submission.
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SubmissionReport'
+        400:
+          description: Expression evaluation failed or entities are not of type required
+            by method config
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace, Method Configuration or Entity not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+        502:
+          description: Trouble talking to Agora
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: submission
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissionsCount:
+    get:
+      tags:
+        - submissions
+      summary: Count submissions by status
+      description: Counts all submissions run in this workspace, grouped by status.
+        Returns a map of status:count.
+      operationId: countSubmissions
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: object
+                description: Map[String,Int]
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/validate:
+    post:
+      tags:
+        - submissions
+      summary: Validate submission
+      description: Validate expression syntax for a submission
+      operationId: validateSubmission
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Description of a submission.
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SubmissionRequest'
+        required: true
+      responses:
+        200:
+          description: Validation Response
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/SubmissionValidationReport'
+        400:
+          description: Expression evaluation failed or entities are not of type required
+            by method config
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace, Method Configuration, Data Reference, or Entity not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+        502:
+          description: Trouble talking to Agora
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: submission
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}:
+    get:
+      tags:
+        - submissions
+      summary: Monitor submission status
+      description: Monitor submission status
+      operationId: getSubmissionStatus
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/Submission'
+        404:
+          description: Workspace or submission not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    patch:
+      tags:
+        - submissions
+      summary: Update user comment for a submission
+      description: Update user comment for a submission
+      operationId: updateSubmissionUserComment
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+      requestBody:
+        description: User comment to be updated
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/UserCommentUpdateOperation'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+        404:
+          description: Workspace or submission not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - submissions
+      summary: Abort submission
+      description: Abort a currently running submission
+      operationId: abortSubmission
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+      responses:
+        204:
+          description: Submission successfully aborted
+          content: {}
+        404:
+          description: Workspace or submission not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+        502:
+          description: Unable to abort all workflows in this submission
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/configuration:
+    get:
+      tags:
+        - submissions
+      summary: Get the method configuration for submission
+      description: Get the method configuration that was used to launch this submission
+      operationId: getSubmissionConfiguration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodConfiguration'
+        404:
+          description: Workspace or submission not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/retry:
+    post:
+      tags:
+        - submissions
+      summary: Retry certain workflows in previous submission
+      description: Retry aborted or failed workflows from the previous submission and omit the remaining workflows
+      operationId: retrySubmission
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+      requestBody:
+        description: Status of workflows to retry
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/SubmissionRetry'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RetriedSubmissionReport'
+        400:
+          description: Expression evaluation failed or entities are not of type required
+            by method config
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace or submission not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+        502:
+          description: Trouble talking to Agora
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/workflows/{workflowId}/cost:
+    get:
+      tags:
+        - submissions
+      summary: Get workflow cost
+      description: Retrieve workflow cost, if available
+      operationId: getWorkflowCost
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+        - $ref: '#/components/parameters/workflowIdPathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkflowCost'
+        404:
+          description: Workspace, Submission or Workflow not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/workflows/{workflowId}/outputs:
+    get:
+      tags:
+        - submissions
+      summary: Get workflow outputs
+      description: Retrieve outputs for a workflow
+      operationId: getWorkflowOutputs
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+        - $ref: '#/components/parameters/workflowIdPathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkflowOutputs'
+        404:
+          description: Workspace, Submission or Workflow not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+        502:
+          description: Unable to retrieve outputs or logs from Cromwell
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}/workflows/{workflowId}:
+    get:
+      tags:
+        - submissions
+      summary: Get call-level metadata for workflow
+      description: Get call-level metadata for workflow
+      operationId: workflowMetadata
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/submissionIdPathParam'
+        - $ref: '#/components/parameters/workflowIdPathParam'
+        - name: includeKey
+          in: query
+          description: |
+            When specified key(s) to include from the metadata. Matches any key starting with the value. May not be used with excludeKey. This applies to all keys in the response, including within nested blocks.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: excludeKey
+          in: query
+          description: |
+            When specified key(s) to exclude from the metadata. Matches any key starting with the value. May not be used with includeKey. This applies to all keys in the response, including within nested blocks.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: expandSubWorkflows
+          in: query
+          description: |
+            When true, metadata for sub workflows will be fetched and inserted automatically in the metadata response.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Successful Request
+          content: {}
+        404:
+          description: Workspace, Submission or Workflow not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/submissions/queueStatus:
+    get:
+      tags:
+        - submissions
+      summary: workflow queue status
+      description: List workflow counts by queueing state
+      operationId: workflowQueueStatus
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkflowQueueStatusResponse'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs:
+    get:
+      tags:
+        - methodconfigs
+      summary: List method configurations in a workspace
+      description: |
+        List method configurations in a workspace. By default, only Agora method configs are returned. To return configs for all repos, specify `allRepos` to be `true`.
+        #### Expanded discussion on the methodRepoMethod field
+        This endpoint returns method references to Agora in the format
+        ```
+        "methodRepoMethod": {
+          "methodNamespace": "namespace",
+          "methodName": "name",
+          "methodVersion": 1,
+          "sourceRepo": "agora",
+          "methodUri": "agora://namespace/name/1"
+        }
+        ```
+        and for Dockstore in the format
+        ```
+        "methodRepoMethod": {
+          "methodPath": "path",
+          "methodVersion": "version",
+          "sourceRepo": "agora",
+          "methodUri": "dockstore://path/version"
+        }
+        ```
+        If you are only working with Agora methods, the fields `"sourceRepo"` and `"methodUri"` can be considered informational and do not need to be round-tripped (see the corresponding `POST /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs` for more details).
+      operationId: list_method_configurations
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - name: allRepos
+          in: query
+          description: Configs for all repos, not just Agora
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MethodConfiguration'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    post:
+      tags:
+        - methodconfigs
+      summary: Create Method configuration in a workspace
+      description: |
+        Create method configurations.
+        #### Expanded discussion on the methodRepoMethod field
+        To create a method config for an Agora method, `"sourceRepo": "agora"` is optional; the following is sufficient:
+        ```
+        "methodRepoMethod": {
+          "methodNamespace": "namespace",
+          "methodName": "name",
+          "methodVersion": 1
+        }
+        ```
+        To create a method config for a Dockstore method, `"sourceRepo": "dockstore"` is required:
+        ```
+        "methodRepoMethod": {
+          "sourceRepo": "dockstore",
+          "methodPath": "path",
+          "methodVersion": "version"
+        }
+        ```
+        You may also use the URI on its own to create a config referencing any supported repo (currently Agora and Dockstore):
+        ```
+        "methodRepoMethod": {
+          "methodUri": "agora://namespace/name/1"
+        }
+        ```
+        ```
+        "methodRepoMethod": {
+          "methodUri": "dockstore://path/version"
+        }
+        ```
+        The system is specified to check for a URI first before falling back to the legacy fields. Unsupported repos will return a 400 Bad Request.
+      operationId: create_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Method Configuration contents
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfiguration'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          headers:
+            Location:
+              description: The path to the newly created method configuration
+              schema:
+                type: string
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ValidatedMethodConfiguration'
+        403:
+          description: Invalid attribute namespace(s) in outputs
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: MethodConfiguration already exists
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: methodConfigJson
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs/{configNamespace}/{configName}/validate:
+    get:
+      tags:
+        - methodconfigs
+      summary: get syntax validation information for a method configuration
+      description: Validate a method configuration
+      operationId: validate_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ValidatedMethodConfiguration'
+        404:
+          description: Workspace, Method Configuration, or Data Reference not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs/{configNamespace}/{configName}:
+    get:
+      tags:
+        - methodconfigs
+      summary: get method configuration in a workspace
+      description: Get a method configuration
+      operationId: get_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodConfiguration'
+        404:
+          description: Workspace or Method Configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    put:
+      tags:
+        - methodconfigs
+      summary: Add or overwrite method configuration in a workspace
+      description: |
+        Add or overwrite a method configuration in a workspace.
+        The method configuration name and namespace in the URI must match the values in the JSON.
+      operationId: overwrite_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      requestBody:
+        description: New Method Configuration contents
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfiguration'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ValidatedMethodConfiguration'
+        400:
+          description: Method configuration name and namespace in URI do not match
+            those in JSON body
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: Invalid attribute namespace(s) in outputs
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: newMethodConfigJson
+    post:
+      tags:
+        - methodconfigs
+      summary: Update method configuration in a workspace
+      description: |
+        Update method configuration.
+        Updates and moves the method configuration at the URI to the location in the request body.
+        The location in the URI may be the same as the location in the request body.
+        If the location in the request body matches the location in the URI, it is overwritten.
+        If the location in the request body is different to the location in the URI, and there is a method config already at that location, 409 is returned.
+      operationId: update_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      requestBody:
+        description: New Method Configuration contents
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfiguration'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ValidatedMethodConfiguration'
+        403:
+          description: Invalid attribute namespace(s) in outputs
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace or method configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Method config with the new name already exists in workspace
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: newMethodConfigJson
+    delete:
+      tags:
+        - methodconfigs
+      summary: delete method configuration in a workspace
+      description: Delete a method configuration
+      operationId: delete_method_configuration
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      responses:
+        204:
+          description: Successful Request
+          content: {}
+        404:
+          description: Workspace or Method Configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs/{configNamespace}/{configName}/rename:
+    post:
+      tags:
+        - methodconfigs
+      summary: rename method configuration in a workspace
+      description: |
+        Rename method configuration.
+        The workspace name and namespace in the HTTP body must match those in the URI.
+        409 may be returned if there's already a method configuration at the target location.
+      operationId: rename_method_config
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - $ref: '#/components/parameters/configNamespacePathParam'
+        - $ref: '#/components/parameters/configNamePathParam'
+      requestBody:
+        description: New Method Configuration Name
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfigurationName'
+        required: true
+      responses:
+        204:
+          description: Successful Request
+          content: {}
+        400:
+          description: Workspace details in payload don't match the URI
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace or Method Configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Method config with the new name already exists in workspace
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: newMethodConfigurationName
+  /api/methodconfigs/copy:
+    post:
+      tags:
+        - methodconfigs
+      summary: Copy method configuration in a workspace from another workspace
+      description: Copy method configuration from another workspace
+      operationId: copy_method_configuration
+      requestBody:
+        description: Source and destination method configuration names
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodConfigurationNamePair'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          headers:
+            Location:
+              description: The path to the copied method configuration
+              schema:
+                type: string
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodConfiguration'
+        403:
+          description: Invalid attribute namespace(s) in outputs
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Source workspace or method configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Destination method configuration by that name already exists
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: methodConfigurationNamePair
+  /api/methodconfigs/copyFromMethodRepo:
+    post:
+      tags:
+        - methodconfigs
+      summary: Copy method configuration from the method repository
+      description: Copy a method configuration from method repo to a workspace
+      operationId: copy_repo_configuration
+      requestBody:
+        description: Import from Method Repository
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodRepoConfigurationImport'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          headers:
+            Location:
+              description: The path to the newly created method configuration
+              schema:
+                type: string
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodConfiguration'
+        403:
+          description: Invalid attribute namespace(s) in outputs
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Source method configuration not found in method repo
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Destination method configuration by that name already exists
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        422:
+          description: Error parsing source method configuration
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: methodRepoImport
+  /api/methodconfigs/copyToMethodRepo:
+    post:
+      tags:
+        - methodconfigs
+      summary: Copy method configuration from workspace to the method repository
+      description: Copy method configuration from workspace to method repo
+      operationId: copy_configuration_to_repo
+      requestBody:
+        description: Export to Method Repository
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodRepoConfigurationExport'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/AgoraEntity'
+        404:
+          description: Source method configuration not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: methodRepoExport
+  /api/methodconfigs/template:
+    post:
+      tags:
+        - methodconfigs
+      summary: Create a template for a method configuration from a method in the method
+        repository
+      description: Create a template for a method configuration from a method in the
+        method repository
+      operationId: method_config_template
+      requestBody:
+        description: name of method to use for template
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodRepoMethod'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodConfiguration'
+        400:
+          description: Method WDL can't be parsed
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: No such method
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: methodName
+  /api/methodconfigs/inputsOutputs:
+    post:
+      tags:
+        - methodconfigs
+      summary: Get information about a method's inputs and outputs
+      description: Get information about a method's inputs and outputs
+      operationId: method_inputs_outputs
+      requestBody:
+        description: name of method to use for template
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/MethodRepoMethod'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/MethodInputsOutputs'
+        400:
+          description: Method WDL can't be parsed
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: No such method
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      x-codegen-request-body-name: methodName
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/checkBucketReadAccess:
+    get:
+      tags:
+        - workspaces
+      summary: Read workspace bucket
+      description: Read a workspace bucket
+      operationId: readBucket
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content: {}
+        403:
+          description: Insufficient permissions to access workspace bucket
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/checkIamActionWithLock/{samActionName}:
+    get:
+      tags:
+        - workspaces
+      summary: Check IAM action with lock
+      description: Check to see if the user has the given action on a workspace in
+        Sam. Takes into account if the workspace is locked too.
+      operationId: checkIamActionWithLock
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - name: samActionName
+          in: path
+          description: Sam action
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: User can perform the given action on the workspace
+          content: {}
+        403:
+          description: User may not perform the given action on the workspace (including
+            if it doesn't exist)
+          content: {}
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/fileTransfers:
+    get:
+      tags:
+        - workspaces
+      summary: List incoming file transfers that are pending for this workspace
+      description: List incoming file transfers that are pending for this workspace
+      operationId: listPendingFileTransfers
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PendingCloneWorkspaceFileTransfer'
+        404:
+          description: Workspace Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/lock:
+    put:
+      tags:
+        - workspaces
+      summary: Lock workspace
+      description: Lock a workspace
+      operationId: lockWorkspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        204:
+          description: Successful Request
+          content: {}
+        403:
+          description: Insufficient permissions to lock workspace (must be owner)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Workspace cannot be locked due to running submissions
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/unlock:
+    put:
+      tags:
+        - workspaces
+      summary: Unlock workspace
+      description: Unlock a workspace
+      operationId: unlockWorkspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        204:
+          description: Successful Request
+          content: {}
+        403:
+          description: Insufficient permissions to lock workspace (must be owner)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/acl:
+    get:
+      tags:
+        - workspaces
+      summary: Get workspace ACL
+      description: Get access control list for a workspace
+      operationId: getACL
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceACL'
+        403:
+          description: Insufficient permissions to get workspace ACLs (must be owner)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    patch:
+      tags:
+        - workspaces
+      summary: Update workspace ACL
+      description: Edit access control list for a workspace
+      operationId: updateACL
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - name: inviteUsersNotFound
+          in: query
+          description: true to invite unregistered users, false to ignore
+          required: true
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: Series of ACL updates for workspace
+        content:
+          'application/json':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkspaceACLUpdate'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceACLUpdateResponseList'
+        400:
+          description: Attempting to change access controls you can't (your own, or
+            public-access group)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: Insufficient permissions to edit workspace ACLs (must be owner)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace, user or group not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: aclUpdates
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/bucketOptions:
+    get:
+      tags:
+        - workspaces
+      summary: Get metadata about the workspace bucket
+      description: Returns metadata about the workspace bucket.
+      operationId: getWorkspaceBucketOptions
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceBucketOptions'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/catalog:
+    get:
+      tags:
+        - workspaces
+      summary: Get catalog permissions
+      description: Returns workspace catalog permissions for users and groups with
+        the permission for the workspace
+      operationId: getCatalog
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceCatalog'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    patch:
+      tags:
+        - workspaces
+      summary: Update catalog permission
+      description: Edit catalog permissions for a workspace
+      operationId: updateCatalog
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Series of Catalog updates for workspace
+        content:
+          'application/json':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkspaceCatalog'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceCatalogUpdateResponseList'
+        404:
+          description: Workspace, user or group not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: catalogUpdates
+  /api/workspaces:
+    get:
+      tags:
+        - workspaces
+      summary: List workspaces
+      description: |
+        List all workspaces to which you have access, optionally filtered to only the specified fields. See the get-workspace API at GET /api/workspaces/{workspaceNamespace}/{workspaceName} to retrieve additional information about a given workspace.
+      operationId: listWorkspaces
+      parameters:
+        - name: fields
+          in: query
+          description: |
+            When specified, include only these keys in the response payload and exclude other keys. Accepts a comma-delimited list of values. To include a nested key, specify the key's path using a dot delimiter; for example, to include {"workspace": {"attributes": {}}}, specify "workspace.attributes". Legal values are any first-level key in the response, any first-level key inside the {"workspace": {}} object, and any first-level key inside the {"workspace": {"attributes": {}}} object. If omitted, will return the full response payload.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceListResponse'
+        400:
+          description: Unrecognized query parameters
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    post:
+      tags:
+        - workspaces
+      summary: Create new workspace
+      description: Create a new workspace
+      operationId: createWorkspace
+      requestBody:
+        description: Workspace contents
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/WorkspaceRequest'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          headers:
+            Location:
+              description: The path to the newly created workspace
+              schema:
+                type: string
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetails'
+        400:
+          description: Workspace namespace is not ready
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: User does not have access to create workspace in namespace
+            or user does not have permission to set attributes in the namespace
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Workspace by that name already exists
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: workspaceJson
+  /api/workspaces/id/{workspaceId}:
+    get:
+      tags:
+        - workspaces
+      summary: Get workspace details by id
+      description: |
+        Get a single workspace's details, optionally filtered to only the specified fields. See additional GET methods in this section to retrieve additional details about the workspace. For instance, this API only returns the workspace's owners; use the GET .../acl method to retrieve the full list of all users at all permission levels.
+      operationId: getWorkspaceById
+      parameters:
+        - name: workspaceId
+          in: path
+          description: Workspace Id
+          required: true
+          schema:
+            type: string
+        - name: fields
+          in: query
+          description: |
+            When specified, include only these keys in the response payload and exclude other keys. Accepts a comma-delimited list of values. To include a nested key, specify the key's path using a dot delimiter; for example, to include {"workspace": {"attributes": {}}}, specify "workspace.attributes". Legal values are any first-level key in the response, any first-level key inside the {"workspace": {}} object, and any first-level key inside the {"workspace": {"attributes": {}}} object. If omitted, will return the full response payload.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+        400:
+          description: Unrecognized query parameters
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}:
+    get:
+      tags:
+        - workspaces
+      summary: Get workspace details
+      description: |
+        Get a single workspace's details, optionally filtered to only the specified fields. See additional GET methods in this section to retrieve additional details about the workspace. For instance, this API only returns the workspace's owners; use the GET .../acl method to retrieve the full list of all users at all permission levels.
+      operationId: listWorkspaceDetails
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+        - name: fields
+          in: query
+          description: |
+            When specified, include only these keys in the response payload and exclude other keys. Accepts a comma-delimited list of values. To include a nested key, specify the key's path using a dot delimiter; for example, to include {"workspace": {"attributes": {}}}, specify "workspace.attributes". Legal values are any first-level key in the response, any first-level key inside the {"workspace": {}} object, and any first-level key inside the {"workspace": {"attributes": {}}} object. If omitted, will return the full response payload.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+        400:
+          description: Unrecognized query parameters
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    delete:
+      tags:
+        - workspaces
+      summary: Delete workspace
+      description: Delete a workspace
+      operationId: delete_workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        202:
+          description: Delete request accepted. Workspace bucket will be deleted within
+            24 hours.
+          content: {}
+        403:
+          description: Insufficient permissions to delete workspace (must be owner)
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+    patch:
+      tags:
+        - workspaces
+      summary: Update attributes of a workspace
+      description: Update workspace attributes
+      operationId: update_workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Update operations
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/AttributeUpdateOperationArray'
+        required: true
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetails'
+        400:
+          description: Attribute does not exist or is of an unexpected type
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: Insufficient permissions to edit workspace attributes
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: entityUpdateJson
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/clone:
+    post:
+      tags:
+        - workspaces
+      summary: Clone workspace
+      description: Clone a workspace
+      operationId: clone
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      requestBody:
+        description: Request for new workspace
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/WorkspaceRequestClone'
+        required: true
+      responses:
+        201:
+          description: Successful Request
+          headers:
+            Location:
+              description: The path to the newly cloned workspace
+              schema:
+                type: string
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetails'
+        400:
+          description: Workspace namespace is not ready
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: User does not have access to create workspace in namespace
+            or user does not have permission to set attributes in the namespace
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Source workspace not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: Destination workspace already exists
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        422:
+          description: Destination workspace must match source's authorization domain,
+            if the dest has one
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      x-codegen-request-body-name: workspaceRequest
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/bucketUsage:
+    get:
+      tags:
+        - workspaces
+      summary: Get bucket usage
+      description: Get the storage bucket usage
+      operationId: getBucketUsage
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BucketUsageResponse'
+  /api/workspaces/tags:
+    get:
+      tags:
+        - workspaces
+      summary: Get tags
+      description: Get all tags for workspaces that a user has access to (for autocomplete)
+      operationId: getTags
+      parameters:
+        - name: q
+          in: query
+          description: Query string
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of tags to return
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                description: list of all tags used by workspaces that the user
+                  has access to and their associated frequencies
+                items:
+                  $ref: '#/components/schemas/WorkspaceTag'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/enableRequesterPaysForLinkedServiceAccounts:
+    put:
+      tags:
+        - workspaces
+      summary: Enable Requester Pays for linked service accounts
+      description: |
+        Enable Requester Pays for the user's linked service accounts in a workspace. Grants the serviceusage.services.use permission in the project associated to the workspace to each service account linked in the account linking service (Bond).
+      operationId: enableRequesterPaysForLinkedServiceAccounts
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        204:
+          description: Successful Request
+          content: {}
+        403:
+          description: Insufficient permissions to enable Requester Pays for workspace.
+            Writer and higher permissions required on workspace.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: Workspace Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/disableRequesterPaysForLinkedServiceAccounts:
+    put:
+      tags:
+        - workspaces
+      summary: Disable Requester Pays for linked service accounts
+      description: Disable Requester Pays for the user's linked service accounts in
+        a workspace
+      operationId: disableRequesterPaysForLinkedServiceAccounts
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        204:
+          description: |
+            In all cases whether or not the workspace exists or user has access. If there were linked service accounts they were removed from the workspace but this api does not indicate that anything was done (for security reasons).
+          content: {}
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/workflows/{workflowId}/genomics/{operationId}:
+    get:
+      tags:
+        - workflows
+      summary: retrieve operations info from Google Genomics API
+      description: retrieve operations info from Google Genomics API
+      operationId: genomics_operations_get
+      parameters:
+        - $ref: '#/components/parameters/workflowIdPathParam'
+        - name: operationId
+          in: path
+          description: operations job id; for PAPIv1 in the form of "operations/{id}",
+            for PAPIv2 "projects/{project}/operations/{id}"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: operations info
+          content: {}
+        404:
+          description: workflow or jobId not found or no access
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/user/role/admin:
+    get:
+      tags:
+        - users
+      summary: Query to see if you're an admin
+      description: gets the admin status of a user
+      operationId: isAdmin
+      responses:
+        200:
+          description: User is an admin
+          content: {}
+        404:
+          description: User is not an admin
+          content: {}
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/user/role/curator:
+    get:
+      tags:
+        - users
+      summary: Query to see if you're a library curator
+      description: gets the curator status of a user
+      operationId: isCurator
+      responses:
+        200:
+          description: User is a curator
+          content: {}
+        404:
+          description: User is not a curator
+          content: {}
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/user/billing:
+    get:
+      tags:
+        - billing
+        - users
+      summary: list billing projects for a user
+      description: List billing projects for a user. Deprecated, use v2 version.
+      deprecated: true
+      operationId: listUserBillingProjects
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                description: list of billing projects for this user
+                items:
+                  $ref: '#/components/schemas/RawlsBillingProjectMembership'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/user/billing/{projectName}:
+    get:
+      tags:
+        - billing
+        - users
+      summary: billing project status
+      description: Billing project status. Deprecated, use v2 API.
+      deprecated: true
+      operationId: billingProjectStatus
+      parameters:
+        - name: projectName
+          in: path
+          description: Name of the billing project
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/RawlsBillingProjectStatus'
+        404:
+          description: Project Not Found
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+    delete:
+      tags:
+        - billing
+        - users
+      summary: delete billing project
+      description: Delete billing project. Deprecated, use v2 version.
+      deprecated: true
+      operationId: deleteBillingProject
+      parameters:
+        - name: projectName
+          in: path
+          description: Name of the billing project
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Successfully delete billing project
+        400:
+          description: Project cannot be deleted because it contains workspaces.
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        403:
+          description: You must be a project owner to delete billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+  /api/user/billingAccounts:
+    get:
+      tags:
+        - billing
+        - users
+      summary: list billing accounts for a user
+      description: list billing accounts for a user
+      operationId: listUserBillingAccounts
+      parameters:
+        - name: firecloudHasAccess
+          in: query
+          description: |
+            Whether the Firecloud service has been given access to the billing accounts. Optional.
+          required: false
+          example: true
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: Successful Request
+          content:
+            'application/json':
+              schema:
+                type: array
+                description: list of billing accounts for this user
+                items:
+                  $ref: '#/components/schemas/BillingAccount'
+        403:
+          description: Forbidden. You probably missed a scope; more details in the
+            ErrorReport's message field
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          $ref: '#/components/responses/RawlsInternalError'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+            - https://www.googleapis.com/auth/cloud-billing
+  /api/notifications/workspace/{workspaceNamespace}/{workspaceName}:
+    get:
+      tags:
+        - notifications
+      summary: Gets the notifications available for a workspace
+      operationId: workspaceNotifications
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationType'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/accessInstructions:
+    get:
+      tags:
+        - workspaces
+      summary: Get access instructions for the workspace
+      operationId: getWorkspaceAccessInstructions
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagedGroupAccessInstructions'
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/sendChangeNotification:
+    post:
+      tags:
+        - workspaces
+      summary: Send Notification of data added to Workspace
+      operationId: sendChangeNotification
+      parameters:
+        - $ref: '#/components/parameters/workspaceNamespacePathParam'
+        - $ref: '#/components/parameters/workspaceNamePathParam'
+      responses:
+        200:
+          description: Success
+          content: {}
+  /api/notifications/general:
+    get:
+      tags:
+        - notifications
+      summary: Gets the general notifications available
+      operationId: generalNotifications
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationType'
+components:
+  schemas:
+    BillingAccount:
+      required:
+        - accountName
+        - displayName
+        - firecloudHasAccess
+      type: object
+      properties:
+        accountName:
+          type: string
+          description: name of billing account
+        firecloudHasAccess:
+          type: boolean
+          description: whether the Firecloud service has been given access to this
+            billing account
+        displayName:
+          type: string
+          description: display name of billing account
+      description: Details for a single billing account
+    DataRepoSnapshot:
+      description: A raw data repo snapshot reference from workspace manager.
+      type: object
+      required: [ instanceName, snapshot ]
+      properties:
+        instanceName:
+          description: The name of the Data Repo instance
+          type: string
+        snapshot:
+          description: The ID of the Data Repo snapshot
+          type: string
+    NamedDataRepoSnapshot:
+      type: object
+      required: [ snapshotId, name ]
+      properties:
+        snapshotId:
+          type: string
+          description: The ID of the snapshot in Terra Data Repo
+        name:
+          type: string
+          description: The name of the snapshot
+        description:
+          type: string
+          description: A description for the snapshot
+          default: ""
+      description: A Data Repo snapshot
+    UpdateDataReferenceRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    ResourceMetadata:
+      type: object
+      required: [ workspaceId, resourceId, name, description, resourceType, stewardshipType, cloudPlatform, cloningIntructions ]
+      properties:
+        workspaceId:
+          type: string
+        resourceId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        resourceType:
+          type: string
+        stewardshipType:
+          type: string
+        cloudPlatform:
+          type: string
+        cloningInstructions:
+          type: string
+    DataRepoSnapshotAttributes:
+      type: object
+      required: [ instanceName, snapshot ]
+      properties:
+        instanceName:
+          type: string
+        snapshot:
+          description: The snapshot id
+          type: string
+    DataRepoSnapshotResource:
+      type: object
+      required: [ metadata, attributes ]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ResourceMetadata'
+        attributes:
+          $ref: '#/components/schemas/DataRepoSnapshotAttributes'
+    SnapshotListResponse:
+      type: object
+      required: [ gcpDataRepoSnapshots ]
+      properties:
+        gcpDataRepoSnapshots:
+          type: array
+          description: A list of DataRepoSnapshotResources from Workspace Manager
+          items:
+            $ref: '#/components/schemas/DataRepoSnapshotResource'
+      description: List of snapshot resources
+    ErrorReport:
+      required:
+        - causes
+        - message
+        - source
+        - stackTrace
+      type: object
+      properties:
+        source:
+          type: string
+          description: service causing error
+        message:
+          type: string
+          description: what went wrong
+        exceptionClass:
+          type: string
+          description: class of exception thrown
+        statusCode:
+          type: integer
+          description: HTTP status code
+        causes:
+          type: array
+          description: errors triggering this one
+          items:
+            $ref: '#/components/schemas/ErrorReport'
+        stackTrace:
+          type: array
+          description: stack trace
+          items:
+            $ref: '#/components/schemas/StackTraceElement'
+      description: ""
+    EntityCopyResponse:
+      required:
+        - entitiesCopied
+        - hardConflicts
+        - softConflicts
+      type: object
+      properties:
+        entitiesCopied:
+          type: array
+          description: the entities that were successfully copied into the workspace
+          items:
+            $ref: '#/components/schemas/AttributeEntityReference'
+        hardConflicts:
+          type: array
+          description: these entities already exist in your workspace
+          items:
+            $ref: '#/components/schemas/EntityHardConflict'
+        softConflicts:
+          type: array
+          description: the conflicts within your entity subtrees. note that this will
+            be empty if there are hard conflicts
+          items:
+            $ref: '#/components/schemas/EntitySoftConflict'
+      description: ""
+    EntityHardConflict:
+      required:
+        - entityName
+        - entityType
+      type: object
+      properties:
+        entityType:
+          type: string
+          description: the type of the entity
+        entityName:
+          type: string
+          description: the name of the entity
+      description: ""
+    EntitySoftConflict:
+      required:
+        - conflicts
+        - entityName
+        - entityType
+      type: object
+      properties:
+        entityType:
+          type: string
+          description: the type of the entity
+        entityName:
+          type: string
+          description: the name of the entity
+        conflicts:
+          type: array
+          description: the next entity in the path to the conflict
+          items:
+            $ref: '#/components/schemas/EntitySoftConflict'
+      description: ""
+    StackTraceElement:
+      required:
+        - className
+        - fileName
+        - lineNumber
+        - methodName
+      type: object
+      properties:
+        className:
+          type: string
+          description: class name
+        methodName:
+          type: string
+          description: method name
+        fileName:
+          type: string
+          description: source file name
+        lineNumber:
+          type: integer
+          description: line number
+      description: ""
+    Submission:
+      type: object
+      properties:
+        submissionId:
+          type: string
+          description: SubmissionRequest unique identifier
+        submissionDate:
+          type: string
+          description: SubmissionRequest date
+          format: date-time
+        submitter:
+          type: string
+          description: user that created the submission
+        methodConfigurationNamespace:
+          type: string
+          description: Method configuration namespace
+        methodConfigurationName:
+          type: string
+          description: Method configuration name
+        submissionEntity:
+          $ref: '#/components/schemas/AttributeEntityReference'
+        workflows:
+          type: array
+          description: Status of Workflow(s)
+          items:
+            $ref: '#/components/schemas/Workflow'
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        cost:
+          type: number
+          description: The compute cost of this submission
+          format: float
+        useCallCache:
+          type: boolean
+          description: Whether or not to read from cache for this submission
+        deleteIntermediateOutputFiles:
+          type: boolean
+          description: Whether or not to delete intermediate output files when the
+            workflow completes. See [Cromwell docs](https://cromwell.readthedocs.io/en/stable/wf_options/Google#google-pipelines-api-workflow-options)
+            for more information.
+        submissionRoot:
+          type: string
+          description: The GCS root for the submission.
+        workflowFailureMode:
+          type: string
+          description: What happens after a task fails. Choose from ContinueWhilePossible
+            and NoNewCalls. Defaults to NoNewCalls if not specified. See Cromwell
+            docs for more information.
+          default: NoNewCalls
+          enum:
+            - NoNewCalls
+            - ContinueWhilePossible
+        externalEntityInfo:
+          $ref: '#/components/schemas/ExternalEntityInfo'
+        userComment:
+          type: string
+          description: Comment for the submission
+      description: ""
+    ExternalEntityInfo:
+      type: object
+      properties:
+        dataStoreId:
+          type: string
+          description: external datastore id for the collection of data
+        rootEntityType:
+          type: string
+          description: type of data within the external datastore
+    SubmissionListResponse:
+      type: object
+      properties:
+        submissionId:
+          type: string
+          description: Submission unique identifier
+        submissionDate:
+          type: string
+          description: Submission date
+          format: date-time
+        submitter:
+          type: string
+          description: user that created the submission
+        methodConfigurationNamespace:
+          type: string
+          description: Method configuration namespace
+        methodConfigurationName:
+          type: string
+          description: Method configuration name
+        submissionEntity:
+          $ref: '#/components/schemas/AttributeEntityReference'
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        workflowStatuses:
+          type: object
+          properties: {}
+          description: a count of the workflow statuses in the submission as a Map[String,Int]
+        workflowFailureMode:
+          type: string
+          description: What happens after a task fails. Choose from ContinueWhilePossible
+            and NoNewCalls. Defaults to NoNewCalls if not specified. See Cromwell
+            docs for more information.
+          default: NoNewCalls
+          enum:
+            - NoNewCalls
+            - ContinueWhilePossible
+        externalEntityInfo:
+          $ref: '#/components/schemas/ExternalEntityInfo'
+        submissionRoot:
+          type: string
+          description: The GCS root for the submission.
+        userComment:
+          type: string
+          description: Comment for the submission
+      description: An abbreviated Submission, without workflow information, good for
+        listings
+    ActiveSubmission:
+      type: object
+      properties:
+        workspaceNamespace:
+          type: string
+          description: workspaceNamespace of the submission
+        workspaceName:
+          type: string
+          description: workspaceName of the submission
+        submission:
+          $ref: '#/components/schemas/Submission'
+      description: a submission that's still a going concern
+    SubmissionStatus:
+      type: string
+      description: submission status
+      enum:
+        - Accepted
+        - Evaluating
+        - Submitting
+        - Submitted
+        - Aborting
+        - Aborted
+        - Done
+    Workflow:
+      type: object
+      properties:
+        workflowId:
+          type: string
+          description: Workflow unique identifier
+        status:
+          $ref: '#/components/schemas/WorkflowStatus'
+        statusLastChangedDate:
+          type: string
+          description: Status last-changed date
+          format: date-time
+        workflowEntity:
+          $ref: '#/components/schemas/AttributeEntityReference'
+        inputResolutions:
+          type: array
+          description: The evaluation of each input
+          items:
+            $ref: '#/components/schemas/SubmissionValidationValue'
+        messages:
+          type: array
+          description: List of messages about this workflow
+          items:
+            type: string
+        cost:
+          type: number
+          description: The run cost of this workflow
+          format: float
+      description: ""
+    SubmissionRetry:
+      type: object
+      properties:
+        retryType:
+          $ref: '#/components/schemas/RetryStatus'
+      required:
+        - retryType
+    RetryStatus:
+      type: string
+      description: what workflows to retry
+      enum:
+        - Failed
+        - Aborted
+        - FailedAndAborted
+    WorkflowStatus:
+      type: string
+      description: workflow status
+      enum:
+        - Queued
+        - Launching
+        - Submitted
+        - Running
+        - Failed
+        - Succeeded
+        - Aborting
+        - Aborted
+        - Unknown
+    SubmissionRequest:
+      required:
+        - methodConfigurationName
+        - methodConfigurationNamespace
+      type: object
+      properties:
+        methodConfigurationNamespace:
+          type: string
+          description: Namespace of the method configuration to execute.
+        methodConfigurationName:
+          type: string
+          description: Name of the method configuration to execute.
+        entityType:
+          type: string
+          description: Type of root entity for expression. Optional if the method
+            configuration has no root entity.
+        entityName:
+          type: string
+          description: Name of root entity for expression. Optional if the method
+            configuration has no root entity.
+        expression:
+          type: string
+          description: Expression that resolves to one or more entities matching the
+            entity type in the method configuration. Optional if the method configuration
+            has no root entity.
+        useCallCache:
+          type: boolean
+          description: Whether or not to read from cache for this submission
+        useReferenceDisks:
+          type: boolean
+          description: Whether or not to use pre-built disks for common genome references
+        deleteIntermediateOutputFiles:
+          type: boolean
+          description: Whether or not to delete intermediate output files when the
+            workflow completes. See [Cromwell docs](https://cromwell.readthedocs.io/en/stable/wf_options/Google#google-pipelines-api-workflow-options)
+            for more information.
+        memoryRetryMultiplier:
+          type: number
+          description: If a task fails due to running out of memory and the `stderr` of the task contains one of error keys that is set in Cromwell config along with `maxRetries` in its runtime attributes,
+            then it will be retried with its memory multiplied by this amount.  See [Cromwell docs](https://cromwell.readthedocs.io/en/develop/cromwell_features/RetryWithMoreMemory/#retry-with-more-memory)
+            for more information.
+          default: 1.0
+        workflowFailureMode:
+          type: string
+          description: What happens after a task fails. Choose from ContinueWhilePossible
+            and NoNewCalls. Defaults to NoNewCalls if not specified. See Cromwell
+            docs for more information.
+          default: NoNewCalls
+          enum:
+            - NoNewCalls
+            - ContinueWhilePossible
+        userComment:
+          type: string
+          description: Comment for the submission (max length 1000 characters)
+        ignoreEmptyOutputs:
+          type: boolean
+          default: false
+          description: Whether or not to create output columns if they would be empty and optional.  Defaults to false (columns are created).
+      description: If the referenced method configuration takes no root entity, do
+        not define `entityType`, `entityName` and `expression`.
+    SubmissionValidationInput:
+      required:
+        - expression
+        - wdlName
+      type: object
+      properties:
+        wdlName:
+          type: string
+          description: name of input
+        expression:
+          type: string
+          description: expression for input
+      description: method configuration input parameter, its name and the associated
+        expression from the method config
+    SubmissionValidationHeader:
+      required:
+        - entityType
+        - inputExpressions
+      type: object
+      properties:
+        entityType:
+          type: string
+          description: type of entity
+        inputExpressions:
+          type: array
+          description: input descriptions
+          items:
+            $ref: '#/components/schemas/SubmissionValidationInput'
+      description: common values for all the entities -- the entity type and the input
+        descriptions
+    SubmissionValidationValue:
+      required:
+        - inputName
+      type: object
+      properties:
+        value:
+          type: string
+          description: the value of the input expression for the specified entity
+        error:
+          type: string
+          description: parsing error(s)
+        inputName:
+          type: string
+          description: name of input
+      description: result of an expression parse for one of the inputs
+    SubmissionValidationEntityInputs:
+      required:
+        - entityName
+        - inputResolutions
+      type: object
+      properties:
+        entityName:
+          type: string
+          description: name of entity. May be empty if this submission doesn't run
+            on an entity
+        inputResolutions:
+          type: array
+          description: input resolution
+          items:
+            $ref: '#/components/schemas/SubmissionValidationValue'
+      description: the results of parsing each of the inputs for one entity
+    SubmissionValidationReport:
+      required:
+        - header
+        - invalidEntities
+        - request
+        - validEntities
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/SubmissionValidationHeader'
+        validEntities:
+          type: array
+          description: runnable entities
+          items:
+            $ref: '#/components/schemas/SubmissionValidationEntityInputs'
+        invalidEntities:
+          type: array
+          description: non-runnable entities
+          items:
+            $ref: '#/components/schemas/SubmissionValidationEntityInputs'
+        request:
+          $ref: '#/components/schemas/SubmissionRequest'
+      description: the results of parsing each input for each entity
+    TaskOutput:
+      type: object
+      properties:
+        logs:
+          type: array
+          description: logs for this task
+          items:
+            $ref: '#/components/schemas/ExecutionServiceCallLogs'
+        outputs:
+          type: object
+          properties: {}
+          description: Map[String,String]
+      description: Outputs from a single task in a workflow
+    ExecutionServiceCallLogs:
+      type: object
+      properties:
+        stdout:
+          type: string
+          description: Google bucket location for standard output
+        stderr:
+          type: string
+          description: Google bucket location for standard error
+        backendLogs:
+          type: object
+          properties: {}
+          description: Map[String,String]
+      description: Execution service logs per call
+    RetriedSubmissionReport:
+      required:
+        - originalSubmissionId
+        - status
+        - submissionDate
+        - submissionId
+        - submitter
+        - workflows
+        - retryType
+      type: object
+      properties:
+        originalSubmissionId:
+          type: string
+          description: unique identifier for the submission to retry
+        submissionId:
+          type: string
+          description: unique identifier for submission created from this retry operation
+        submissionDate:
+          type: string
+          description: SubmissionRequest date
+          format: date-time
+        submitter:
+          type: string
+          description: user that created the submission
+        status:
+          type: string
+          description: status
+        workflows:
+          type: array
+          description: workflows initiated by this submission
+          items:
+            $ref: '#/components/schemas/Workflow'
+      description: information on a retried submission
+    SubmissionReport:
+      required:
+        - header
+        - request
+        - status
+        - submissionDate
+        - submissionId
+        - submitter
+        - workflows
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/SubmissionRequest'
+        submissionId:
+          type: string
+          description: SubmissionRequest unique identifier
+        submissionDate:
+          type: string
+          description: SubmissionRequest date
+          format: date-time
+        submitter:
+          type: string
+          description: user that created the submission
+        status:
+          type: string
+          description: status
+        header:
+          $ref: '#/components/schemas/SubmissionValidationHeader'
+        workflows:
+          type: array
+          description: workflows initiated by this submission
+          items:
+            $ref: '#/components/schemas/SubmissionValidationEntityInputs'
+      description: information on a submission
+    UserCommentUpdateOperation:
+      required:
+        - userComment
+      type: object
+      properties:
+        userComment:
+          type: string
+          description: The updated value for user comment (max length 1000 characters)
+      description: Update user comment for submission
+    WorkflowCost:
+      type: object
+      properties:
+        cost:
+          type: number
+          description: Workflow cost
+        workflowId:
+          type: string
+          description: The id of this workflow
+      description: The cost of a workflow, if available
+    WorkflowOutputs:
+      type: object
+      properties:
+        tasks:
+          type: array
+          description: Map from tasks to output/log pairs
+          items:
+            $ref: '#/components/schemas/TaskOutput'
+        workflowId:
+          type: string
+          description: The id of this workflow
+      description: Outputs and logs from all tasks in a workflow
+    WorkflowQueueStatusResponse:
+      required:
+        - estimatedQueueTimeMS
+        - workflowCountsByStatus
+        - workflowsBeforeNextUserWorkflow
+      type: object
+      properties:
+        estimatedQueueTimeMS:
+          type: integer
+          description: estimated milliseconds until the current queue is submitted
+        workflowsBeforeNextUserWorkflow:
+          type: integer
+          description: the number of workflows in the queue ahead of the user's first
+            workflow
+        workflowCountsByStatus:
+          type: object
+          properties: {}
+          description: Map[String,Int]
+      description: Information about the status of workflows and the workflow queue
+    WorkflowQueueStatusByUserResponse:
+      required:
+        - maxActiveWorkflowsPerUser
+        - maxActiveWorkflowsTotal
+        - statuses
+        - users
+      type: object
+      properties:
+        statuses:
+          type: object
+          properties: {}
+          description: Map[String, Int]
+        users:
+          type: object
+          properties: {}
+          description: Map[String, Map[String, Int]]
+        maxActiveWorkflowsTotal:
+          type: integer
+          description: maximum number of active workflows allowed in total
+        maxActiveWorkflowsPerUser:
+          type: integer
+          description: maximum number of active workflows allower per user
+      description: Information about the status of workflows and the workflow queue,
+        broken out by user
+    WorkspaceName:
+      required:
+        - name
+        - namespace
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: The namespace (billing project) the workspace belongs to
+        name:
+          type: string
+          description: The name of the workspace
+      description: ""
+    EntityName:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the entity
+      description: ""
+    EntityTypeRename:
+      required:
+        - newName
+      type: object
+      properties:
+        newName:
+          type: string
+          description: the new entity type name
+    EntityCopyDefinition:
+      required:
+        - destinationWorkspace
+        - entityNames
+        - entityType
+        - sourceWorkspace
+      type: object
+      properties:
+        sourceWorkspace:
+          $ref: '#/components/schemas/WorkspaceName'
+        destinationWorkspace:
+          $ref: '#/components/schemas/WorkspaceName'
+        entityType:
+          type: string
+          description: Type of top level entities to copy
+        entityNames:
+          type: array
+          description: Names of entities to copy
+          items:
+            type: string
+      description: ""
+    Entity:
+      required:
+        - attributes
+        - entityType
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the entity
+        entityType:
+          type: string
+          description: The type of the entity
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Map[String,Attribute]
+      description: ""
+    AttributeEntityReference:
+      required:
+        - entityName
+        - entityType
+      type: object
+      properties:
+        entityType:
+          type: string
+          description: The type of the entity
+        entityName:
+          type: string
+          description: The name of the entity
+      description: ""
+    EntityTypeMetadata:
+      required:
+        - attributeNames
+        - count
+      type: object
+      properties:
+        count:
+          type: integer
+          description: The number of entities of this type
+        idName:
+          type: string
+          description: The name if the id field for the entity
+        attributeNames:
+          type: array
+          description: A list of all attribute names used
+          items:
+            type: string
+      description: ""
+    AttributeUpdateOperationArray:
+      type: array
+      description: ""
+      example: |
+        [
+          {
+            "op": "AddUpdateAttribute",
+            "attributeName": "name of attribute to add/update",
+            "addUpdateAttribute": "value to add/update"
+          },
+          {
+            "op": "RemoveAttribute",
+            "attributeName": "name of attribute to remove"
+          },
+          {
+            "op": "AddListMember",
+            "attributeListName": "name of list attribute",
+            "newMember": "value to add to list"
+          },
+          {
+            "op": "RemoveListMember",
+            "attributeListName": "name of list attribute",
+            "removeMember": "value to remove from list"
+          },
+          {
+            "op": "CreateAttributeEntityReferenceList",
+            "attributeListName": "name of entity-reference list attribute to create"
+          },
+          {
+            "op": "CreateAttributeValueList",
+            "attributeName": "name of value-list attribute to create"
+          }
+        ]
+      items:
+        $ref: '#/components/schemas/AttributeUpdateOperation'
+    AttributeUpdateOperation:
+      required:
+        - op
+      type: object
+      properties:
+        op:
+          type: string
+          description: The operation to perform on the attribute
+          enum:
+            - AddUpdateAttribute
+            - RemoveAttribute
+            - AddListMember
+            - RemoveListMember
+            - CreateAttributeEntityReferenceList
+            - CreateAttributeValueList
+      discriminator:
+        propertyName: op
+    AddUpdateAttribute:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeName:
+              type: string
+              description: Name of attribute to add/update
+            addUpdateAttribute:
+              type: string
+              description: Value to add/update. Accepts strings, numbers, booleans.
+    RemoveAttribute:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeName:
+              type: string
+              description: The name of attribute to remove
+    AddListMember:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeListName:
+              type: string
+              description: The name of the attribute list
+            newMember:
+              type: string
+              description: The attribute to add to the list
+    RemoveListMember:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeListName:
+              type: string
+              description: The name of the attribute list
+            removeMember:
+              type: string
+              description: The attribute to remove from the list
+    CreateAttributeEntityReferenceList:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeListName:
+              type: string
+              description: The name of the empty attribute entity-reference list to
+                create. This is a non-destructive operation.
+    CreateAttributeValueList:
+      allOf:
+        - $ref: '#/components/schemas/AttributeUpdateOperation'
+        - type: object
+          properties:
+            attributeName:
+              type: string
+              description: The name of the empty attribute value-list to create. This
+                is a non-destructive operation.
+    EntityUpdateDefinition:
+      required:
+        - entityType
+        - name
+        - operations
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the entity
+        entityType:
+          type: string
+          description: The type of the entity
+        operations:
+          $ref: '#/components/schemas/AttributeUpdateOperationArray'
+      description: ""
+    AttributeRename:
+      required:
+        - newAttributeName
+      type: object
+      properties:
+        newAttributeName:
+          type: string
+          description: The new name for the attribute
+      description: New attribute name
+    MethodConfiguration:
+      required:
+        - inputs
+        - methodRepoMethod
+        - name
+        - namespace
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: This method configuration's namespace
+        name:
+          type: string
+          description: The name of the method configuration
+        rootEntityType:
+          type: string
+          description: The root entity type that the method will be running on. Optional
+            if this method config doesn't run on an entity (i.e. uses only workspace
+            attributes and literal inputs).
+        inputs:
+          type: object
+          properties: {}
+        outputs:
+          type: object
+          properties: {}
+        methodRepoMethod:
+          $ref: '#/components/schemas/MethodRepoMethod'
+        methodConfigVersion:
+          type: integer
+          description: Version number, incremented on edit
+        deleted:
+          type: boolean
+          description: Is this config marked as deleted?
+        dataReferenceName:
+          type: string
+          description: the name of the data reference within this workspace to be used to derive input values
+      description: ""
+    ValidatedMethodConfiguration:
+      required:
+        - extraInputs
+        - invalidInputs
+        - invalidOutputs
+        - methodConfiguration
+        - missingInputs
+        - validInputs
+        - validOutputs
+      type: object
+      properties:
+        validInputs:
+          type: array
+          items:
+            type: string
+        invalidInputs:
+          type: object
+          properties: {}
+        missingInputs:
+          type: array
+          items:
+            type: string
+        extraInputs:
+          type: array
+          items:
+            type: string
+        validOutputs:
+          type: array
+          items:
+            type: string
+        invalidOutputs:
+          type: object
+          properties: {}
+        methodConfiguration:
+          $ref: '#/components/schemas/MethodConfiguration'
+      description: Information about the validity of a method configuration's expressions
+        relative to the method itself
+    MethodRepoConfigurationImport:
+      required:
+        - destination
+        - methodRepoName
+        - methodRepoNamespace
+        - methodRepoSnapshotId
+      type: object
+      properties:
+        methodRepoNamespace:
+          type: string
+          description: Method Repository Namespace
+        methodRepoName:
+          type: string
+          description: Method Repository Name
+        methodRepoSnapshotId:
+          type: integer
+          description: Method Repository Snapshot ID
+        destination:
+          $ref: '#/components/schemas/MethodConfigurationName'
+      description: ""
+    MethodRepoConfigurationExport:
+      required:
+        - methodRepoName
+        - methodRepoNamespace
+        - source
+      type: object
+      properties:
+        methodRepoNamespace:
+          type: string
+          description: Method Repository Namespace
+        methodRepoName:
+          type: string
+          description: Method Repository Name
+        source:
+          $ref: '#/components/schemas/MethodConfigurationName'
+      description: ""
+    MethodConfigurationNamePair:
+      required:
+        - destination
+        - source
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/MethodConfigurationName'
+        destination:
+          $ref: '#/components/schemas/MethodConfigurationName'
+      description: ""
+    MethodConfigurationName:
+      required:
+        - name
+        - namespace
+        - workspaceName
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the method configuration
+        namespace:
+          type: string
+          description: This method configuration's owning namespace
+        workspaceName:
+          $ref: '#/components/schemas/WorkspaceName'
+      description: ""
+    MethodRepoMethod:
+      required:
+        - methodName
+        - methodNamespace
+        - methodVersion
+      type: object
+      properties:
+        methodNamespace:
+          type: string
+          description: The namespace of the method in Agora
+        methodName:
+          type: string
+          description: The name of the method in Agora
+        methodVersion:
+          type: integer
+          description: The integer method version in Agora (or a string method version
+            for Dockstore)
+        methodPath:
+          type: string
+          description: The path of the method in Dockstore
+        sourceRepo:
+          type: string
+          description: The method's repository, currently one of "agora" or "dockstore"
+        methodUri:
+          type: string
+          description: URI that specifies the method's repository and captures all
+            the information necessary to identify the method within its repository
+            (e.g. agora://namespace/name/1, dockstore://path/version)
+      description: ""
+    WorkspaceACL:
+      required:
+        - acl
+      type: object
+      properties:
+        acl:
+          type: object
+          properties: {}
+          description: Map[String,WorkspaceAccessEntry]
+      description: ""
+    WorkspaceACLUpdate:
+      required:
+        - accessLevel
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: email address of the user or group whose permissions will be
+            changed
+        accessLevel:
+          type: string
+          description: The access level to grant to this user or group (OWNER, READER,
+            WRITER, NO ACCESS)
+        canShare:
+          type: boolean
+          description: Set to true if you want this user to be able to share the workspace
+            with other users, only meaningful for readers and writers, default false
+        canCompute:
+          type: boolean
+          description: Set to true if you want this user to be able to launch compute
+            in this workspace, may not be true for readers, default false for reader,
+            true otherwise
+      description: ""
+    WorkspaceACLUpdateResponseList:
+      required:
+        - invitesSent
+        - invitesUpdated
+        - usersNotFound
+        - usersUpdated
+      type: object
+      properties:
+        usersUpdated:
+          type: array
+          description: the users or groups who were updated
+          items:
+            $ref: '#/components/schemas/WorkspaceACLUpdate'
+        invitesSent:
+          type: array
+          description: the list of invites that were sent
+          items:
+            $ref: '#/components/schemas/WorkspaceACLUpdate'
+        invitesUpdated:
+          type: array
+          description: the list of invites that were updated
+          items:
+            $ref: '#/components/schemas/WorkspaceACLUpdate'
+        usersNotFound:
+          type: array
+          description: the users or groups who were not found
+          items:
+            $ref: '#/components/schemas/WorkspaceACLUpdate'
+      description: ""
+    ManagedGroupAccessInstructions:
+      required:
+        - groupName
+        - instructions
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: The name of the Group with instructions
+        instructions:
+          type: string
+          description: The instructions for applying to the Group
+      description: ""
+    WorkspaceCatalog:
+      required:
+        - catalog
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: email of the user or group whose permissions will be changed
+        catalog:
+          type: boolean
+          description: Set to true if you want this user to be able to perform library
+            related operations on the workspace
+      description: ""
+    WorkspaceCatalogResponse:
+      required:
+        - catalog
+        - subjectId
+      type: object
+      properties:
+        subjectId:
+          type: string
+          description: subject Id of the user or group whose permissions will be changed
+        catalog:
+          type: boolean
+          description: Set to true if you want this user to be able to perform library
+            related operations on the workspace
+      description: ""
+    WorkspaceCatalogUpdateResponseList:
+      required:
+        - emailsNotFound
+        - usersUpdated
+      type: object
+      properties:
+        usersUpdated:
+          type: array
+          description: the users or groups who were updated
+          items:
+            $ref: '#/components/schemas/WorkspaceCatalogResponse'
+        emailsNotFound:
+          type: array
+          description: the emails of users or groups who were not found
+          items:
+            type: string
+      description: ""
+    WorkspaceAccessEntry:
+      required:
+        - accessLevel
+        - canCompute
+        - canShare
+        - pending
+      type: object
+      properties:
+        accessLevel:
+          type: string
+          description: The access level granted to this user or group (OWNER, READER,
+            WRITER, NO ACCESS)
+        pending:
+          type: boolean
+          description: The status of the users access
+        canShare:
+          type: boolean
+          description: True if the user can share the workspace with others, false
+            otherwise
+        canCompute:
+          type: boolean
+          description: True if the user can launch compute in this workspace, false
+            otherwise
+      description: ""
+    WorkspaceDetails:
+      required:
+        - bucketName
+        - createdBy
+        - createdDate
+        - isLocked
+        - lastModified
+        - name
+        - namespace
+        - workspaceId
+        - googleProject
+        - workspaceVersion
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties: {}
+          description: Map[String, Attribute]
+        authorizationDomain:
+          type: array
+          description: The list of groups in the Authorization Domain (empty if no
+            AD is set)
+          items:
+            $ref: '#/components/schemas/ManagedGroupRef'
+        bucketName:
+          type: string
+          description: The name of the bucket associated with the workspace
+        createdBy:
+          type: string
+          description: The user who created the workspace
+        createdDate:
+          type: string
+          description: The date the workspace was created in yyyy-MM-ddTHH:mm:ss.SSSZZ
+            format
+          format: date-time
+        isLocked:
+          type: boolean
+          description: Can the Workspace currently be modified?
+        lastModified:
+          type: string
+          description: The date the workspace was last modified in yyyy-MM-ddTHH:mm:ss.SSSZZ
+            format
+          format: date-time
+        name:
+          type: string
+          description: The name of the workspace
+        namespace:
+          type: string
+          description: The namespace the workspace belongs to
+        workflowCollectionName:
+          type: string
+          description: The name of the workflow collection associated with the workspace
+        workspaceId:
+          type: string
+          description: A UUID associated with the workspace
+        googleProject:
+          type: string
+          description: Google Project ID of the google project used by the workspace for compute and storage
+        googleProjectNumber:
+          type: string
+          description: A different google project identifier for the same project identified by the googleProject; required by google for certain actions
+        workspaceVersion:
+          type: string
+          description: internal use
+        billingAccount:
+          type: string
+          description: The current billing account being charged for activity within this workspace. For desired billing account, look to the billing account specified on this workspace's billing project
+        errorMessage:
+          type: string
+          description: The last error message for the workspace.
+        billingAccountErrorMessage:
+          type: string
+          deprecated: true
+          description: Error message received during most recent attempt to update the current billing account on workspace's Google project. Empty if update was successful.
+        completedCloneWorkspaceFileTransfer:
+          type: string
+          description: The date all files were successfully transferred to the workspace bucket if applicable
+            in yyyy-MM-ddTHH:mm:ss.SSSZZ format
+          format: date-time
+        cloudPlatform:
+          type: string
+          description: The cloud platform of the workspace
+          enum:
+            - GCP
+            - AZURE
+      description: ""
+    WorkspaceSubmissionStats:
+      required:
+        - runningSubmissionsCount
+      type: object
+      properties:
+        lastSuccessDate:
+          type: string
+          description: The date of the last successful submission
+          format: date-time
+        lastFailureDate:
+          type: string
+          description: The date of the last failed submission
+          format: date-time
+        runningSubmissionsCount:
+          type: integer
+          description: Count of all the running submissions
+      description: Statistics about submissions in a workspace
+    WorkspaceRequest:
+      required:
+        - attributes
+        - name
+        - namespace
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: The namespace (billing project) the workspace belongs to
+        name:
+          type: string
+          description: The name of the workspace
+        authorizationDomain:
+          type: array
+          description: The list of groups in the Authorization Domain (empty if no
+            AD is set)
+          items:
+            $ref: '#/components/schemas/ManagedGroupRef'
+        attributes:
+          type: object
+          properties: {}
+        noWorkspaceOwner:
+          type: boolean
+          description: Optional, false if not specified. If true, the workspace is created with a Billing Project owner but no workspace owner. Requires being a Billing Project owner.
+          default: false
+        bucketLocation:
+          type: string
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not provided, the bucket will be created in the 'US' multi-region.
+      description: ""
+    WorkspaceRequestClone:
+      required:
+        - attributes
+        - name
+        - namespace
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: The namespace (billing project) the workspace belongs to
+        name:
+          type: string
+          description: The name of the workspace
+        authorizationDomain:
+          type: array
+          description: The list of groups in the Authorization Domain (empty if no
+            AD is set)
+          items:
+            $ref: '#/components/schemas/ManagedGroupRef'
+        attributes:
+          type: object
+          properties: {}
+        copyFilesWithPrefix:
+          type: string
+          description: Used for clone operations only; the prefix for files to copy between source and destination workspace buckets
+        noWorkspaceOwner:
+          type: boolean
+          description: Optional, false if not specified. If true, the workspace is created with a Billing Project owner but no workspace owner. Requires being a Billing Project owner.
+          default: false
+        bucketLocation:
+          type: string
+          description: Region (NOT multi-region) in which bucket attached to the workspace should be created. If not provided, the bucket will be created in the 'US' multi-region.
+      description: ""
+    BucketUsageResponse:
+      required:
+        - usageInBytes
+      type: object
+      properties:
+        usageInBytes:
+          type: integer
+          description: The current storage bucket usage in bytes
+        lastUpdated:
+          type: string
+          format: timestamp
+          description: timestamp (UTC) marking the date that the bucket usage was last updated (YYYY-MM-DDThh:mm:ss.fffZ)
+      description: ""
+    PendingCloneWorkspaceFileTransfer:
+      type: object
+      properties:
+        destWorkspaceId:
+          type: string
+          description: "The ID of the workspace that the files will be copied to"
+        sourceWorkspaceBucketName:
+          type: string
+          description: "The name of the bucket that the files will be copied from"
+        destWorkspaceBucketName:
+          type: string
+          description: "The name of the bucket that the files will be copied to"
+        copyFilesWithPrefix:
+          type: string
+          description: "The file prefix indicating which files to copy to the destination workspace"
+        destWorkspaceGoogleProjectId:
+          type: string
+          description: "The Google project that the destination workspace belongs to"
+    Attribute:
+      type: object
+      properties:
+        value:
+          type: string
+          description: ""
+      description: ""
+    RawlsGroupRef:
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: ""
+      description: a reference to a group
+    RawlsGroupShort:
+      type: object
+      properties:
+        groupName:
+          type: string
+          description: ""
+        groupEmail:
+          type: string
+          description: ""
+      description: group information without memberships
+    ExecutionEvent:
+      required:
+        - description
+        - startTime
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description of the event
+        startTime:
+          type: string
+          description: When the event started
+          format: date-time
+        endTime:
+          type: string
+          description: When the event finished
+          format: date-time
+      description: ""
+    WorkspaceResponse:
+      type: object
+      properties:
+        accessLevel:
+          $ref: '#/components/schemas/WorkspaceAccessLevel'
+        bucketOptions:
+          $ref: '#/components/schemas/WorkspaceBucketOptions'
+        canCompute:
+          type: boolean
+        canShare:
+          type: boolean
+        catalog:
+          type: boolean
+        owners:
+          type: array
+          description: |
+            Owners of this workspace. This API only lists owners; use the get-workspace-ACL API to get the full list of all users at all permission levels.
+          items:
+            type: string
+        workspace:
+          $ref: '#/components/schemas/WorkspaceDetails'
+        workspaceSubmissionStats:
+          $ref: '#/components/schemas/WorkspaceSubmissionStats'
+      description: ""
+    WorkspaceListResponse:
+      type: object
+      properties:
+        accessLevel:
+          $ref: '#/components/schemas/WorkspaceAccessLevel'
+        public:
+          type: boolean
+        workspace:
+          $ref: '#/components/schemas/WorkspaceDetails'
+        workspaceSubmissionStats:
+          $ref: '#/components/schemas/WorkspaceSubmissionStats'
+      description: ""
+    WorkspaceBucketOptions:
+      required:
+        - requesterPays
+      type: object
+      properties:
+        requesterPays:
+          type: boolean
+          description: Whether the bucket is requester pays
+      description: Extra information about a GCS bucket attached to a workspace
+    WorkspaceAccessLevel:
+      type: string
+      description: The level of access a user or group has on a Workspace. NoAccess,
+        Read, Write, Owner, ProjectOwner
+      enum:
+        - PROJECT_OWNER
+        - OWNER
+        - WRITER
+        - READER
+        - NO ACCESS
+    CallMetadata:
+      type: object
+      properties:
+        inputs:
+          type: object
+          properties: {}
+          description: map from input names onto resolved values
+        executionStatus:
+          type: string
+          description: status of call
+        executionEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutionEvent'
+        backendStatus:
+          type: string
+          description: status of the backend
+        backendLogs:
+          type: object
+          properties: {}
+          description: map of log files from backend
+        outputs:
+          type: object
+          properties: {}
+          description: map from output names to local files
+        start:
+          type: string
+          description: starting time of call
+          format: date-time
+        end:
+          type: string
+          description: ending time of call
+          format: date-time
+        jobId:
+          type: string
+          description: unique ID of job
+        returnCode:
+          type: integer
+          description: result code
+        backend:
+          type: string
+          description: type of backend executing the call
+        stdout:
+          type: string
+          description: location of stdout
+        stderr:
+          type: string
+          description: location of stderr
+        shardIndex:
+          type: integer
+          description: call index within a scatter block, as reported by execution
+            service
+      description: Stuff you need to know about calls
+    AgoraEntity:
+      type: object
+      properties:
+        namespace:
+          type: string
+        name:
+          type: string
+        snapshotId:
+          type: string
+        synopsis:
+          type: string
+        documentation:
+          type: string
+        owner:
+          type: string
+        createDate:
+          type: string
+        payload:
+          type: string
+        url:
+          type: string
+        entityType:
+          type: string
+      description: response from Method Repo
+    MethodInput:
+      type: object
+      properties:
+        name:
+          type: string
+        inputType:
+          type: string
+        optional:
+          type: boolean
+      description: description of a method input
+    MethodOutput:
+      type: object
+      properties:
+        name:
+          type: string
+        outputType:
+          type: string
+      description: description of a method output
+    MethodInputsOutputs:
+      type: object
+      properties:
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/MethodInput'
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/MethodOutput'
+      description: description of a method's inputs and outputs
+    SyncReportItem:
+      type: object
+      properties:
+        operation:
+          type: string
+        email:
+          type: string
+        errorReport:
+          $ref: '#/components/schemas/ErrorReport'
+      description: results of an attempt to synchronize a member
+    SyncReport:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncReportItem'
+      description: report of members added or removed
+    ApplicationVersion:
+      type: object
+      properties:
+        gitHash:
+          type: string
+        buildNumber:
+          type: string
+        version:
+          type: string
+      description: version of the application
+    ExecutionEngineVersion:
+      type: object
+      properties:
+        cromwell:
+          type: string
+      description: version of the execution engine
+    EntityQuery:
+      required:
+        - page
+        - pageSize
+        - sortDirection
+        - sortField
+      type: object
+      properties:
+        page:
+          type: number
+          description: page number, 1-indexed positive integer
+        pageSize:
+          type: number
+          description: count of items per page, positive integer
+        sortField:
+          type: string
+          description: field to sort by
+        sortDirection:
+          type: string
+          description: asc or desc
+        filterTerms:
+          type: string
+          description: terms to filter results by
+        filterOperator:
+          type: string
+          description: operator ("and" or "or") to use when filtering for multiple terms in filterTerms
+      description: ""
+    EntityQueryResultMetadata:
+      required:
+        - filteredCount
+        - filteredPageCount
+        - unfilteredCount
+      type: object
+      properties:
+        unfilteredCount:
+          type: number
+          description: count of results before filtering
+        filteredCount:
+          type: number
+          description: count of results after filtering
+        filteredPageCount:
+          type: number
+          description: count of pages after filtering; honors pageSize parameter
+      description: ""
+    EntityQueryResponse:
+      required:
+        - parameters
+        - resultMetadata
+        - results
+      type: object
+      properties:
+        parameters:
+          $ref: '#/components/schemas/EntityQuery'
+        resultMetadata:
+          $ref: '#/components/schemas/EntityQueryResultMetadata'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+      description: ""
+    CreateRawlsBillingProjectFullRequest:
+      required:
+        - billingAccount
+        - projectName
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project to create
+        billingAccount:
+          type: string
+          description: the id of the billing account to use, must start with 'billingAccounts/'
+        highSecurityNetwork:
+          type: boolean
+          description: Optional, false if not specified. If true, spin up all compute
+            in a VPC network.
+        enableFlowLogs:
+          type: boolean
+          description: Optional, false if not specified. If true, enable flow logs
+            within the high security network. Requires highSecurityNetwork = true.
+        privateIpGoogleAccess:
+          type: boolean
+          description: Optional, false if not specified. If true, it configures the
+            VPC network to only allow access to GCP APIs that are protected by the
+            project's service perimeter and routes all allowed API traffic through
+            a narrow IP range. Requires highSecurityNetwork = true.
+        servicePerimeter:
+          type: string
+          description: The fully qualified name of the GCP service perimeter to put
+            this project into in the form accessPolicies/[POLICY NUMBER]/servicePerimeters/[NAME].
+            Caller must have the add_project action for this service perimeter in
+            Sam.
+      description: ""
+    CreateRawlsV2BillingProjectFullRequest:
+      required:
+        - projectName
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project to create
+        billingAccount:
+          type: string
+          description: the id of the Google billing account to use, must start with 'billingAccounts/'
+        servicePerimeter:
+          type: string
+          description: The fully qualified name of the GCP service perimeter to put
+            this project into in the form accessPolicies/[POLICY NUMBER]/servicePerimeters/[NAME].
+            Caller must have the add_project action for this service perimeter in
+            Sam.
+        managedAppCoordinates:
+          $ref: '#/components/schemas/AzureManagedAppCoordinates'
+        members:
+          description: The list of members to add to the billing project
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectAccessUpdate'
+        inviteUsersNotFound:
+          description: If true, invite the users to Terra if they are not registered in the system. They will be given access to the project when they register.
+          type: boolean
+      description: ""
+    ProjectRole:
+      description: the role on the billing project
+      type: string
+      enum:
+        - owner
+        - user
+    ProjectAccessUpdate:
+      required:
+        - email
+        - role
+      type: object
+      properties:
+        email:
+          description: the email of the member to modify access for
+          type: string
+        role:
+          description: the role to modify for the specified member
+          $ref: '#/components/schemas/ProjectRole'
+    BatchProjectAccessUpdate:
+      required:
+        - membersToAdd
+        - membersToRemove
+      type: object
+      properties:
+        membersToAdd:
+          description: The list of members to add to the billing project
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectAccessUpdate'
+        membersToRemove:
+          description: The list of members to remove from the billing project
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectAccessUpdate'
+    SpendReport:
+      required:
+        - spendDetails
+        - spendSummary
+      type: object
+      properties:
+        spendDetails:
+          description: details of spend data, categorized by given key
+          type: array
+          items:
+            $ref: '#/components/schemas/SpendReportingAggregation'
+        spendSummary:
+          $ref: '#/components/schemas/SpendReportingForDateRange'
+    SpendReportingAggregation:
+      required:
+        - aggregationKey
+        - spendData
+      type: object
+      properties:
+        aggregationKey:
+          type: string
+          enum:
+            - Daily
+            - Workspace
+            - Category
+          description: Key indicating how spendData has been aggregated. Ex. 'workspace' if all data in spendData is for a particular workspace
+        spendData:
+          type: array
+          items:
+            $ref: '#/components/schemas/SpendReportingForDateRange'
+    SpendReportingForDateRange:
+      required:
+        - cost
+        - credits
+        - currency
+        - startTime
+        - endTime
+      type: object
+      properties:
+        cost:
+          type: string
+          description: total cost for date range
+        credits:
+          type: string
+          description: credits towards reported cost. cost - credits = amount billed to users
+        currency:
+          type: string
+          description: currency that cost and credits uses
+        startTime:
+          type: string
+          format: timestamp
+          description: timestamp (UTC) marking the start of reported spend range (YYYY-MM-DDThh:mm:ss.fffZ)
+        endTime:
+          type: string
+          format: timestamp
+          description: timestamp (UTC) marking the end of reported spend range (YYYY-MM-DDThh:mm:ss.fffZ)
+        googleProjectId:
+          type: string
+          description: if present, Google project of workspace where cost was generated
+        workspace:
+          $ref: '#/components/schemas/WorkspaceName'
+        category:
+          type: string
+          enum:
+            - Storage
+            - Compute
+            - Other
+          description: if present, Terra spend category that cost falls into
+        subAggregation:
+          $ref: '#/components/schemas/SpendReportingAggregation'
+    SpendReportConfiguration:
+      required:
+        - datasetGoogleProject
+        - datasetName
+      type: object
+      properties:
+        datasetGoogleProject:
+          type: string
+          description: the name of the Google Project where the BigQuery dataset resides
+        datasetName:
+          type: string
+          description: the name of the BigQuery dataset containing project spend data
+      description: ""
+    RawlsBillingProjectMembership:
+      required:
+        - projectName
+        - role
+        - status
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project to create
+        role:
+          $ref: '#/components/schemas/ProjectRole'
+          description: the role of the current user in the project
+        status:
+          type: string
+          enum:
+            - Creating
+            - Ready
+            - Error
+            - AddingToPerimeter
+        message:
+          type: string
+          description: informational message about the project
+      description: an element of a list of projects and related role for a user
+    RawlsBillingProjectStatus:
+      required:
+        - creationStatus
+        - projectName
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the billing project
+        creationStatus:
+          type: string
+          enum:
+            - Creating
+            - Ready
+            - Error
+            - AddingToPerimeter
+      description: a billing project status
+    RawlsBillingProjectMember:
+      required:
+        - email
+        - role
+      type: object
+      properties:
+        email:
+          type: string
+          description: the email of the user
+        role:
+          $ref: '#/components/schemas/ProjectRole'
+          description: the role of the user in the project
+      description: an element of a list of project users and their role
+    RawlsBillingProjectResponse:
+      required:
+        - projectName
+        - invalidBillingAccount
+        - roles
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project
+        billingAccount:
+          type: string
+          description: the billing account to use in google projects
+        servicePerimeter:
+          type: string
+          description: the name of the service permeters for google project
+        invalidBillingAccount:
+          type: boolean
+          description: whether or not the billing account is usable by Terra
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectRole'
+          description: the roles the caller has on the project
+        status:
+          type: string
+          enum:
+            - Creating
+            - Ready
+            - Error
+            - Deleting
+            - DeletionFailed
+            - AddingToPerimeter
+            - CreatingLandingZone
+          description: the status of allocating the billing project's resources.
+        message:
+          type: string
+          description: informational message about the project
+        azureManagedAppCoordinates:
+          $ref: '#/components/schemas/AzureManagedAppCoordinates'
+        cloudPlatform:
+          type: string
+          enum:
+            - GCP
+            - AZURE
+            - UNKNOWN
+        landingZoneId:
+          type: string
+          format: uuid
+          description: the UUID of the landing zone associated with the project (cloudPlatform AZURE only)
+    AzureManagedAppCoordinates:
+      required:
+        - tenantId
+        - subscriptionId
+        - managedResourceGroupId
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          description: UUID of the Azure tenant for this managed application deployment
+        subscriptionId:
+          type: string
+          format: uuid
+          description: UUID of the Azure subscription for this managed application deployment.
+        managedResourceGroupId:
+          type: string
+          description: ID of the Azure managed resource group for this managed application deployment.
+    UpdateRawlsBillingAccountRequest:
+      required:
+        - billingAccount
+      type: object
+      properties:
+        billingAccount:
+          type: string
+          description: The name of the billing account to use
+    WorkspaceBillingAccount:
+      required:
+        - workspaceName
+      type: object
+      properties:
+        workspaceName:
+          type: string
+          description: the name of the workspace
+        currentBillingAccountOnGoogleProject:
+          type: string
+          description: the billing project associated with the workspace
+    RawlsBillingProjectTransfer:
+      required:
+        - bucket
+        - newOwnerEmail
+        - newOwnerToken
+        - project
+      type: object
+      properties:
+        project:
+          type: string
+          description: the name of the new google project
+        bucket:
+          type: string
+          description: generated Cromwell auth bucket, minus the gs:// prefix
+        newOwnerEmail:
+          type: string
+          description: Email of the new billing project owner
+        newOwnerToken:
+          type: string
+          description: OAuth2AccessToken of the new billing project owner
+      description: admin request to transfer a pre-created billing project to a new
+        owner
+    WorkspaceTag:
+      required:
+        - count
+        - tag
+      type: object
+      properties:
+        tag:
+          type: string
+          description: tag string
+        count:
+          type: number
+          description: number of usages of the tag across FireCloud
+      description: tag with count
+    ManagedGroupRef:
+      required:
+        - membersGroupName
+      type: object
+      properties:
+        membersGroupName:
+          type: string
+      description: a reference to a group that can be managed by users
+    NotificationType:
+      required:
+        - description
+        - notificationKey
+      type: object
+      properties:
+        notificationKey:
+          type: string
+        description:
+          type: string
+      description: key and description of a notification
+    SystemStatus:
+      required:
+        - ok
+        - systems
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: whether any system(s) need attention
+          example: false
+        systems:
+          type: object
+          properties: {}
+          description: Map[String, SubsystemStatus]
+          example:
+            Agora:
+              ok: true
+            Cromwell:
+              ok: true
+            Database:
+              ok: true
+            GoogleBilling:
+              ok: false
+              messages:
+                - Google Billing is misbehaving!
+            GoogleBuckets:
+              ok: true
+            GoogleGenomics:
+              ok: true
+            GoogleGroups:
+              ok: true
+            GooglePubSub:
+              ok: true
+      description: status of each system Rawls depends on
+    SubsystemStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: whether this system needs attention
+        messages:
+          type: array
+          items:
+            type: string
+      description: status of a subsystem Rawls depends on
+    WorkspaceMigrationMetadata:
+      description: Represents the status of a workspace migration
+      type: object
+      required:
+        - id
+        - created
+        - updated
+      properties:
+        id:
+          type: integer
+          description: migration attempt number for this workspace
+        created:
+          type: string
+          format: date-time
+          description: when the migration was scheduled
+        started:
+          type: string
+          format: date-time
+          description: when the system started the migration
+        updated:
+          type: string
+          format: date-time
+          description: when the system last updated the migration
+        finished:
+          type: string
+          format: date-time
+          description: when the system finished executing the migration
+        outcome:
+          $ref: '#/components/schemas/WorkspaceMigrationOutcome'
+    WorkspaceMigrationOutcome:
+      description: Represents the result of a workspace migration attempt
+      oneOf:
+        - $ref: '#/components/schemas/WorkspaceMigrationSuccess'
+        - $ref: '#/components/schemas/WorkspaceMigrationFailure'
+      properties:
+        failure:
+          description: Supplementary failure information
+          type: string
+    WorkspaceMigrationSuccess:
+      type: string
+      enum:
+        - success
+    WorkspaceMigrationFailure:
+      type: object
+      required:
+        - failure
+      properties:
+        failure:
+          description: Supplementary failure information
+          type: string
+    BatchMigrateRequestBody:
+      description: List of workspace names to migrate
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkspaceName'
+  parameters:
+    billingProjectIdPathParam:
+      name: projectId
+      in: path
+      description: Billing Project ID
+      required: true
+      schema:
+        type: string
+    billingProjectQueryParam:
+      name: billingProject
+      in: query
+      description: Billing project to use for queries to the data reference
+      schema:
+        type: string
+    configNamespacePathParam:
+      name: configNamespace
+      in: path
+      description: Method Configuration Namespace
+      required: true
+      schema:
+        type: string
+    configNamePathParam:
+      name: configName
+      in: path
+      description: Method Configuration Name
+      required: true
+      schema:
+        type: string
+    dataReferenceQueryParam:
+      name: dataReference
+      in: query
+      description: Data reference name to query for entity metadata
+      schema:
+        type: string
+    entityNamePathParam:
+      name: entityName
+      in: path
+      description: Entity Name
+      required: true
+      schema:
+        type: string
+    entityTypePathParam:
+      name: entityType
+      in: path
+      description: Entity Type
+      required: true
+      schema:
+        type: string
+    AttributeNamePathParam:
+      name: attributeName
+      in: path
+      description: Attribute Name
+      required: true
+      schema:
+        type: string
+    snapshotIdPathParam:
+      name: snapshotId
+      in: path
+      description: The snapshot's referenceId
+      required: true
+      schema:
+        type: string
+    referenceNamePathParam:
+      name: referenceName
+      in: path
+      description: The snapshot reference's name
+      required: true
+      schema:
+        type: string
+    submissionIdPathParam:
+      name: submissionId
+      in: path
+      description: Submission Id
+      required: true
+      schema:
+        type: string
+    workbenchRolePathParam:
+      name: workbenchRole
+      in: path
+      description: role of user for project
+      required: true
+      schema:
+        type: string
+        enum:
+          - user
+          - owner
+    workflowIdPathParam:
+      name: workflowId
+      in: path
+      description: Workflow Id
+      required: true
+      schema:
+        type: string
+    workspaceNamespacePathParam:
+      name: workspaceNamespace
+      in: path
+      description: The workspace namespace
+      required: true
+      schema:
+        type: string
+    workspaceNamePathParam:
+      name: workspaceName
+      in: path
+      description: The workspace name
+      required: true
+      schema:
+        type: string
+  responses:
+    RawlsInternalError:
+      description: Rawls Internal Error
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/ErrorReport'
+  securitySchemes:
+    googleoauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+            https://www.googleapis.com/auth/cloud-billing: cloud billing authorization
+    oidc:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /oauth2/authorize
+          tokenUrl: /oauth2/token
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
+security:
+  - googleoauth: [openid, email, profile]
+  - oidc: [openid, email, profile]

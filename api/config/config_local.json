@@ -1,6 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
+    "rawlsBaseUrl": "https:\/\/rawls.dsde-dev.broadinstitute.org",
     "samBaseUrl": "https:\/\/sam.dsde-dev.broadinstitute.org",
     "terraUiBaseUrl": "https:\/\/bvdp-saturn-dev.appspot.com",
     "notebookRuntimeMaxAgeDays": 7,
