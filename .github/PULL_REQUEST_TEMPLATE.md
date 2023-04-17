@@ -1,5 +1,9 @@
 **Description**
 
+<!--
+Reminder: If you decide to merge with any failing checks, add an explanatory comment before doing so.
+-->
+
 ---
 **PR checklist**
 
