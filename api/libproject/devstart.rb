@@ -928,6 +928,10 @@ def import_cdr_indices_build_to_cloudsql(cmd_name, *args)
   op.parse.validate
   gcc.validate()
 
+  ENV.update(read_db_vars(gcc))
+  ENV.update(must_get_env_value(gcc.project, :gae_vars))
+  ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
+
   common = Common.new
   CloudSqlProxyContext.new(gcc.project).run do
     Dir.chdir('db-cdr') do
