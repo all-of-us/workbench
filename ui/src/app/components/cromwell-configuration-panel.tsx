@@ -119,14 +119,17 @@ export const CromwellConfigurationPanel = ({
   };
 
   return (
-    <FlexColumn id='cromwell-configuration-panel' style={{ height: '100%' }}>
+    <FlexColumn
+      id='cromwell-configuration-panel'
+      style={{ height: '100%', rowGap: '1rem' }}
+    >
       <div>
         A cloud environment consists of an application configuration, cloud
         compute and persistent disk(s). Cromwell is a workflow execution engine.
         You will need to create a Jupyter terminal environment in order to
         interact with Cromwell.
       </div>
-      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+      <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
             creatorFreeCreditsRemaining,
@@ -160,7 +163,7 @@ export const CromwellConfigurationPanel = ({
           />
         </WarningMessage>
       </div>
-      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+      <div style={{ ...styles.controlSection }}>
         <FlexRow style={{ alignItems: 'center' }}>
           <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
             Cloud compute profile
@@ -175,7 +178,7 @@ export const CromwellConfigurationPanel = ({
           </TooltipTrigger>
         </FlexRow>
       </div>
-      <div style={{ ...styles.controlSection, marginTop: '1rem' }}>
+      <div style={{ ...styles.controlSection }}>
         <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
         {cromwellSupportArticles.map((article, index) => (
           <div key={index} style={{ display: 'block' }}>
@@ -187,7 +190,6 @@ export const CromwellConfigurationPanel = ({
       </div>
       <FlexRow
         style={{
-          marginTop: '1rem',
           alignItems: 'center',
         }}
       >
