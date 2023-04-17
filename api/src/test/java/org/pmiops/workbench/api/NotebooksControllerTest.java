@@ -29,8 +29,8 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
@@ -599,7 +599,7 @@ public class NotebooksControllerTest {
     final String testWorkspaceName = "test-ws";
     final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
-    FirecloudWorkspaceDetails fcWorkspace =
+    RawlsWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
@@ -657,14 +657,14 @@ public class NotebooksControllerTest {
   }
 
   private void stubGetWorkspace(
-      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+      RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     doReturn(fcResponse)
         .when(mockFireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<FirecloudWorkspaceResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
+    List<RawlsWorkspaceResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces();
   }

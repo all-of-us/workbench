@@ -33,8 +33,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -144,9 +144,9 @@ public class TestMockFactory {
                 .approved(false));
   }
 
-  public static FirecloudWorkspaceDetails createFirecloudWorkspace(
+  public static RawlsWorkspaceDetails createFirecloudWorkspace(
       String ns, String name, String creator) {
-    return new FirecloudWorkspaceDetails()
+    return new RawlsWorkspaceDetails()
         .namespace(ns)
         .workspaceId(ns)
         .name(name)
@@ -167,10 +167,10 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              FirecloudWorkspaceDetails fcWorkspace =
+              RawlsWorkspaceDetails fcWorkspace =
                   createFirecloudWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
-              FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+              RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
               fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
 
@@ -233,7 +233,7 @@ public class TestMockFactory {
     dbWorkspace.setWorkspaceId(workspaceDbId);
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setWorkspaceNamespace(workspace.getNamespace());
-    // a.k.a. FirecloudWorkspaceDetails.name
+    // a.k.a. RawlsWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
     dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());

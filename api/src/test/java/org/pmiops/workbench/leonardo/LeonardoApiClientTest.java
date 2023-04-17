@@ -29,8 +29,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
@@ -298,14 +298,14 @@ public class LeonardoApiClientTest {
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceDetails fcWorkspaceDetail =
-        new FirecloudWorkspaceDetails()
+    RawlsWorkspaceDetails fcWorkspaceDetail =
+        new RawlsWorkspaceDetails()
             .namespace(WORKSPACE_NS)
             .name(WORKSPACE_NS)
             .createdBy(LOGGED_IN_USER_EMAIL)
             .googleProject(GOOGLE_PROJECT_ID)
             .bucketName(WORKSPACE_BUCKET);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspaceDetail);
     fcResponse.setAccessLevel(accessLevel.toString());
     when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));

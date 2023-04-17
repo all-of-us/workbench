@@ -17,8 +17,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceOperation;
 import org.pmiops.workbench.model.WorkspaceOperationStatus;
@@ -182,9 +182,9 @@ public class WorkspaceOperationMapperTest {
   }
 
   private void mockFirecloudGetWorkspace(String namespace, String firecloudName) {
-    FirecloudWorkspaceResponse mockResponse =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().namespace(namespace).name(firecloudName));
+    RawlsWorkspaceResponse mockResponse =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(firecloudName));
     when(mockFirecloudService.getWorkspace(namespace, firecloudName)).thenReturn(mockResponse);
   }
 }

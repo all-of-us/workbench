@@ -42,8 +42,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
@@ -158,8 +158,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     validateWorkspaceTierAccess(dbWorkspace);
 
-    FirecloudWorkspaceResponse fcResponse;
-    FirecloudWorkspaceDetails fcWorkspace;
+    RawlsWorkspaceResponse fcResponse;
+    RawlsWorkspaceDetails fcWorkspace;
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.

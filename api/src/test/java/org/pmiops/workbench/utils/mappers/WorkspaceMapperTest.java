@@ -23,8 +23,8 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -63,7 +63,7 @@ public class WorkspaceMapperTest {
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
 
   private DbWorkspace sourceDbWorkspace;
-  private FirecloudWorkspaceDetails sourceFirecloudWorkspace;
+  private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
 
@@ -84,7 +84,7 @@ public class WorkspaceMapperTest {
   @BeforeEach
   public void setUp() {
     sourceFirecloudWorkspace =
-        new FirecloudWorkspaceDetails()
+        new RawlsWorkspaceDetails()
             .workspaceId(Long.toString(CREATOR_USER_ID))
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
@@ -176,7 +176,7 @@ public class WorkspaceMapperTest {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             sourceDbWorkspace,
-            new FirecloudWorkspaceResponse()
+            new RawlsWorkspaceResponse()
                 .workspace(sourceFirecloudWorkspace)
                 .accessLevel("PROJECT_OWNER"));
 

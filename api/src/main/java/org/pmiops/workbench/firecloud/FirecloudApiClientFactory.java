@@ -97,4 +97,20 @@ public class FirecloudApiClientFactory {
         .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
     return apiClient;
   }
+
+  /**
+   * Creates a Rawls API client, unauthenticated. Most clients should use an authenticated,
+   * request scoped bean instead of calling this directly.
+   */
+  public org.pmiops.workbench.rawls.ApiClient newRawlsApiClient() {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
+    org.pmiops.workbench.rawls.ApiClient apiClient = new org.pmiops.workbench.rawls.ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
+    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    apiClient
+        .getHttpClient()
+        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    return apiClient;
+  }
 }

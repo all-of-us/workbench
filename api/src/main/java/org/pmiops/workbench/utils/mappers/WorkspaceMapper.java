@@ -12,8 +12,8 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -42,7 +42,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   @Mapping(target = "googleProject", source = "dbWorkspace.googleProject")
-  Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspaceDetails fcWorkspace);
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
   @Mapping(target = "creator", source = "creator.username")
@@ -50,7 +50,7 @@ public interface WorkspaceMapper {
   @Mapping(
       target = "googleBucketName",
       ignore =
-          true) // available via toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspaceDetails
+          true) // available via toApiWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceDetails
   // fcWorkspace)
   @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "namespace", source = "workspaceNamespace")
@@ -65,17 +65,17 @@ public interface WorkspaceMapper {
   WorkspaceResponse toApiWorkspaceResponse(Workspace workspace, String accessLevel);
 
   default WorkspaceResponse toApiWorkspaceResponse(
-      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse firecloudWorkspaceResponse) {
+      DbWorkspace dbWorkspace, RawlsWorkspaceResponse firecloudWorkspaceResponse) {
     return toApiWorkspaceResponse(
         toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
         firecloudWorkspaceResponse.getAccessLevel());
   }
 
   default List<WorkspaceResponse> toApiWorkspaceResponses(
-      WorkspaceDao workspaceDao, List<FirecloudWorkspaceResponse> workspaces) {
+      WorkspaceDao workspaceDao, List<RawlsWorkspaceResponse> workspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
-    Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid =
+    Map<String, RawlsWorkspaceResponse> fcWorkspacesByUuid =
         workspaces.stream()
             .collect(
                 Collectors.toMap(

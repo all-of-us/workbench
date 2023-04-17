@@ -57,8 +57,8 @@ import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationServ
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
@@ -1573,11 +1573,11 @@ public class ConceptSetsControllerTest {
   }
 
   private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(USER_EMAIL);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(workspaceAccessLevel.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);

@@ -11,7 +11,7 @@ import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.iam.SamRetryHandler;
 import org.pmiops.workbench.sam.api.ResourcesApi;
@@ -63,7 +63,7 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException {
+  public List<RawlsWorkspaceResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException {
     WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
     return firecloudRetryHandler.run(
         (context) -> workspacesApi.listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));

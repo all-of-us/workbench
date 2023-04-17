@@ -21,8 +21,8 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMember;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -94,7 +94,7 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
     int ownersRemoved = 0;
     int ownersAdded = 0;
 
-    List<FirecloudWorkspaceResponse> workspaces =
+    List<RawlsWorkspaceResponse> workspaces =
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS);
     log.info(String.format("found %d workspaces", workspaces.size()));
 
@@ -113,8 +113,8 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    for (FirecloudWorkspaceResponse resp : workspaces) {
-      FirecloudWorkspaceDetails w = resp.getWorkspace();
+    for (RawlsWorkspaceResponse resp : workspaces) {
+      RawlsWorkspaceDetails w = resp.getWorkspace();
       if (!billingProjectIds.isEmpty() && !billingProjectIds.contains(w.getNamespace())) {
         continue;
       }

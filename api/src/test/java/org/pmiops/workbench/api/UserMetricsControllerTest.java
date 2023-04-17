@@ -40,8 +40,8 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
@@ -188,17 +188,17 @@ public class UserMetricsControllerTest {
                 .setUserId(dbUser.getUserId())
                 .setWorkspaceId(dbWorkspace2.getWorkspaceId()));
 
-    final FirecloudWorkspaceDetails fcWorkspace1 = new FirecloudWorkspaceDetails();
+    final RawlsWorkspaceDetails fcWorkspace1 = new RawlsWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
-    final FirecloudWorkspaceDetails fcWorkspace2 = new FirecloudWorkspaceDetails();
+    final RawlsWorkspaceDetails fcWorkspace2 = new RawlsWorkspaceDetails();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
-    final FirecloudWorkspaceResponse workspaceResponse1 = new FirecloudWorkspaceResponse();
+    final RawlsWorkspaceResponse workspaceResponse1 = new RawlsWorkspaceResponse();
     workspaceResponse1.setAccessLevel("OWNER");
     workspaceResponse1.setWorkspace(fcWorkspace1);
 
-    final FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
+    final RawlsWorkspaceResponse workspaceResponse2 = new RawlsWorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
     workspaceResponse2.setWorkspace(fcWorkspace2);
 
@@ -254,7 +254,7 @@ public class UserMetricsControllerTest {
   }
 
   private void mockResponsesForWorkspace(
-      DbWorkspace dbWorkspace, FirecloudWorkspaceResponse response) {
+      DbWorkspace dbWorkspace, RawlsWorkspaceResponse response) {
 
     when(mockFireCloudService.getWorkspace(dbWorkspace)).thenReturn(Optional.of(response));
 

@@ -25,8 +25,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.boot.CommandLineRunner;
@@ -148,11 +148,11 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
               + ", "
               + workspaceId.getWorkspaceName()
               + ")");
-      FirecloudWorkspaceDetails workspace =
+      RawlsWorkspaceDetails workspace =
           apiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       log.info("Updating Workspace ACL");
-      List<FirecloudWorkspaceACLUpdate> acls =
+      List<RawlsWorkspaceACLUpdate> acls =
           Stream.concat(
                   Arrays.stream(opts.getOptionValue(ownersOpt.getLongOpt()).split(",")),
                   Arrays.stream(new String[] {workspace.getCreatedBy()}))

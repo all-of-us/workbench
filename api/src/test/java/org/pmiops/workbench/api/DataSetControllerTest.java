@@ -98,8 +98,8 @@ import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -501,12 +501,12 @@ public class DataSetControllerTest {
   }
 
   private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(DataSetControllerTest.USER_EMAIL);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(workspaceAccessLevel.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
@@ -1044,7 +1044,7 @@ public class DataSetControllerTest {
 
     // Project Owner ?
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+        .thenReturn(new RawlsWorkspaceResponse().accessLevel("PROJECT_OWNER"));
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
   }
@@ -1133,7 +1133,7 @@ public class DataSetControllerTest {
     otherWorkspace = workspacesController.createWorkspace(otherWorkspace).getBody();
 
     when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+        .thenReturn(new RawlsWorkspaceResponse().accessLevel("OWNER"));
 
     Workspace finalOtherWorkspace = otherWorkspace;
     assertThrows(

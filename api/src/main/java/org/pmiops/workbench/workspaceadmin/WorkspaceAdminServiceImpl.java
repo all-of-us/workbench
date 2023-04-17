@@ -39,8 +39,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -236,7 +236,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .cloudStorage(adminWorkspaceCloudStorageCounts)
             .runtimes(workbenchListRuntimeResponses);
 
-    final FirecloudWorkspaceDetails firecloudWorkspace =
+    final RawlsWorkspaceDetails firecloudWorkspace =
         fireCloudService
             .getWorkspaceAsService(workspaceNamespace, workspaceFirecloudName)
             .getWorkspace();
@@ -394,7 +394,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final String registeredTierGroupEmail = dbAccessTier.getAuthDomainGroupEmail();
 
-    final FirecloudWorkspaceACLUpdate aclUpdate =
+    final RawlsWorkspaceACLUpdate aclUpdate =
         FirecloudTransforms.buildAclUpdate(registeredTierGroupEmail, accessLevel);
 
     fireCloudService.updateWorkspaceACL(

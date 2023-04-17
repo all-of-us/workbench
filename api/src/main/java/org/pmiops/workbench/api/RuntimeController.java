@@ -27,7 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -311,7 +311,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    final FirecloudWorkspaceDetails firecloudWorkspace;
+    final RawlsWorkspaceDetails firecloudWorkspace;
     try {
       firecloudWorkspace =
           fireCloudService
@@ -385,7 +385,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private String aouConfigDataUri(
-      FirecloudWorkspaceDetails fcWorkspace,
+      RawlsWorkspaceDetails fcWorkspace,
       DbCdrVersion cdrVersion,
       String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();

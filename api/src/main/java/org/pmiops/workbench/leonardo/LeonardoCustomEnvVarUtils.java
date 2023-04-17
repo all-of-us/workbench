@@ -14,7 +14,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 /** Utility class for holding Leonardo APP environment variables constant and methods. */
@@ -173,7 +173,7 @@ public class LeonardoCustomEnvVarUtils {
   public static Map<String, String> getBaseEnvironmentVariables(
       DbWorkspace workspace, FireCloudService fireCloudService, WorkbenchConfig workbenchConfig) {
     Map<String, String> customEnvironmentVariables = new HashMap<>();
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
+    RawlsWorkspaceResponse fcWorkspaceResponse =
         fireCloudService
             .getWorkspace(workspace)
             .orElseThrow(() -> new NotFoundException("workspace not found"));

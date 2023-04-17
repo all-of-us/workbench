@@ -52,8 +52,8 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
@@ -139,7 +139,7 @@ public class WorkspaceServiceTest {
 
   private static DbUser currentUser;
 
-  private final List<FirecloudWorkspaceResponse> firecloudWorkspaceResponses = new ArrayList<>();
+  private final List<RawlsWorkspaceResponse> firecloudWorkspaceResponses = new ArrayList<>();
   private final List<DbWorkspace> dbWorkspaces = new ArrayList<>();
   private static final Instant NOW = Instant.parse("1985-11-05T22:04:00.00Z");
   private static final long USER_ID = 1L;
@@ -199,17 +199,17 @@ public class WorkspaceServiceTest {
     workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_ID;
   }
 
-  private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
+  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
       String workspaceId,
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceDetails mockWorkspace = mock(FirecloudWorkspaceDetails.class);
+    RawlsWorkspaceDetails mockWorkspace = mock(RawlsWorkspaceDetails.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
 
-    FirecloudWorkspaceResponse mockWorkspaceResponse = mock(FirecloudWorkspaceResponse.class);
+    RawlsWorkspaceResponse mockWorkspaceResponse = mock(RawlsWorkspaceResponse.class);
     doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
     doReturn(accessLevel.toString()).when(mockWorkspaceResponse).getAccessLevel();
     return mockWorkspaceResponse;
@@ -238,8 +238,8 @@ public class WorkspaceServiceTest {
       WorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
-    FirecloudWorkspaceResponse mockWorkspaceResponse =
-        mockFirecloudWorkspaceResponse(workspaceId, workspaceName, workspaceNamespace, accessLevel);
+    RawlsWorkspaceResponse mockWorkspaceResponse =
+        mockRawlsWorkspaceResponse(workspaceId, workspaceName, workspaceNamespace, accessLevel);
 
     DbWorkspace dbWorkspace =
         workspaceDao.save(
@@ -255,7 +255,7 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace addMockedWorkspace(DbWorkspace dbWorkspace) {
 
-    mockFirecloudWorkspaceResponse(
+    mockRawlsWorkspaceResponse(
         dbWorkspace.getWorkspaceId(),
         dbWorkspace.getName(),
         dbWorkspace.getWorkspaceNamespace(),
@@ -266,13 +266,13 @@ public class WorkspaceServiceTest {
     return dbWorkspace;
   }
 
-  private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
+  private RawlsWorkspaceResponse mockRawlsWorkspaceResponse(
       long workspaceId,
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceResponse mockWorkspaceResponse =
-        mockFirecloudWorkspaceResponse(
+    RawlsWorkspaceResponse mockWorkspaceResponse =
+        mockRawlsWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
     firecloudWorkspaceResponses.add(mockWorkspaceResponse);
     doReturn(mockWorkspaceResponse)

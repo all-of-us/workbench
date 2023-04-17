@@ -16,8 +16,8 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -112,9 +112,9 @@ public class WorkspaceAuthService {
   }
 
   private void updateAcl(
-      DbWorkspace workspace, List<FirecloudWorkspaceACLUpdate> updateACLRequestList) {
+      DbWorkspace workspace, List<RawlsWorkspaceACLUpdate> updateACLRequestList) {
 
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
+    RawlsWorkspaceACLUpdateResponseList fireCloudResponse =
         fireCloudService.updateWorkspaceACL(
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
 
@@ -122,7 +122,7 @@ public class WorkspaceAuthService {
       throw new BadRequestException(
           "users not found: "
               + fireCloudResponse.getUsersNotFound().stream()
-                  .map(FirecloudWorkspaceACLUpdate::getEmail)
+                  .map(RawlsWorkspaceACLUpdate::getEmail)
                   .collect(Collectors.joining(", ")));
     }
   }

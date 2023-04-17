@@ -40,8 +40,8 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -134,10 +134,10 @@ public class NotebooksServiceTest {
       WorkspaceAccessLevel access) {
     when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
         .thenReturn(
-            new FirecloudWorkspaceResponse()
+            new RawlsWorkspaceResponse()
                 .accessLevel(access.toString())
                 .workspace(
-                    new FirecloudWorkspaceDetails()
+                    new RawlsWorkspaceDetails()
                         .namespace(workspaceNamespace)
                         .name(workspaceName)
                         .bucketName(bucketName)));
@@ -146,17 +146,17 @@ public class NotebooksServiceTest {
   private void stubNotebookToJson() {
     when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
+            new RawlsWorkspaceResponse()
+                .workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 
   @Test
   public void testAdminGetReadOnlyHtml() {
-    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
     firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
-    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
     when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
         .thenReturn(firecloudWorkspaceResponse);

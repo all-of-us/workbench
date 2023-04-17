@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -24,9 +24,9 @@ public final class FirecloudTransforms {
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
 
-  public static FirecloudWorkspaceACLUpdate buildAclUpdate(
+  public static RawlsWorkspaceACLUpdate buildAclUpdate(
       String email, WorkspaceAccessLevel updatedAccess) {
-    FirecloudWorkspaceACLUpdate update = new FirecloudWorkspaceACLUpdate().email(email);
+    RawlsWorkspaceACLUpdate update = new RawlsWorkspaceACLUpdate().email(email);
     if (updatedAccess == WorkspaceAccessLevel.OWNER) {
       return update
           .canShare(true)

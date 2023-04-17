@@ -58,7 +58,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
@@ -671,7 +671,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   private void stubMockFirecloudGetWorkspace() {
-    FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse workspaceResponse = new RawlsWorkspaceResponse();
     workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }

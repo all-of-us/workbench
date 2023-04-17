@@ -122,10 +122,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -457,7 +457,7 @@ public class WorkspacesControllerTest {
 
   private void stubFcUpdateWorkspaceACL() {
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
-        .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
+        .thenReturn(new RawlsWorkspaceACLUpdateResponseList());
   }
 
   private void stubFcGetWorkspaceACL() {
@@ -480,14 +480,14 @@ public class WorkspacesControllerTest {
   }
 
   private void stubGetWorkspace(
-      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+      RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     doReturn(fcResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<FirecloudWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    List<RawlsWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
   }
@@ -497,9 +497,9 @@ public class WorkspacesControllerTest {
    * details. The mocked workspace object is returned so the caller can make further modifications
    * if needed.
    */
-  private FirecloudWorkspaceDetails stubCloneWorkspace(
+  private RawlsWorkspaceDetails stubCloneWorkspace(
       String toNamespace, String toFirecloudName, String creator) {
-    FirecloudWorkspaceDetails fcResponse = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails fcResponse = new RawlsWorkspaceDetails();
     fcResponse.setNamespace(toNamespace);
     fcResponse.setName(toFirecloudName);
     fcResponse.setCreatedBy(creator);
@@ -574,7 +574,7 @@ public class WorkspacesControllerTest {
     return cohort;
   }
 
-  private List<FirecloudWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
+  private List<RawlsWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
       List<UserRole> collaborators) {
     return collaborators.stream()
         .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
@@ -587,7 +587,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(mockWorkspaceAuditor).fireCreateAction(any(Workspace.class), anyLong());
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -1289,7 +1289,7 @@ public class WorkspacesControllerTest {
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspaceDetails clonedFirecloudWorkspace =
+    final RawlsWorkspaceDetails clonedFirecloudWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
@@ -1647,7 +1647,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
 
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspaceDetails clonedWorkspace =
+    final RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -1823,7 +1823,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
 
-    FirecloudWorkspaceDetails clonedWorkspace =
+    RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -1928,7 +1928,7 @@ public class WorkspacesControllerTest {
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL();
-    FirecloudWorkspaceDetails clonedWorkspace =
+    RawlsWorkspaceDetails clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
@@ -2249,7 +2249,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
 
     assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
-    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<RawlsWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(collaborators);
 
     verify(fireCloudService)
@@ -2340,7 +2340,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<RawlsWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService).updateWorkspaceACL(any(), any(), eq(updateACLRequestList));
     verify(mockIamService, never()).revokeWorkflowRunnerRoleForUsers(anyString(), anyList());
@@ -2584,7 +2584,7 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     assertThat(shareResp.getWorkspaceEtag()).isEqualTo(workspace2.getEtag());
 
-    List<FirecloudWorkspaceACLUpdate> updateACLRequestList =
+    List<RawlsWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(shareWorkspaceRequest.getItems());
     verify(fireCloudService)
         .updateWorkspaceACL(
@@ -2592,7 +2592,7 @@ public class WorkspacesControllerTest {
             any(),
             eq(
                 updateACLRequestList.stream()
-                    .sorted(Comparator.comparing(FirecloudWorkspaceACLUpdate::getEmail))
+                    .sorted(Comparator.comparing(RawlsWorkspaceACLUpdate::getEmail))
                     .collect(Collectors.toList())));
   }
 
@@ -2689,7 +2689,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2709,7 +2709,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2728,7 +2728,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2747,7 +2747,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));

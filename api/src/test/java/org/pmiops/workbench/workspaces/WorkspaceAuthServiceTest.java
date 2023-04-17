@@ -32,11 +32,11 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -275,9 +275,9 @@ public class WorkspaceAuthServiceTest {
   }
 
   private void stubFcGetWorkspace(String namespace, String fcName, String accessLevel) {
-    final FirecloudWorkspaceResponse toReturn =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().namespace(namespace).name(fcName))
+    final RawlsWorkspaceResponse toReturn =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))
             .accessLevel(accessLevel);
     when(mockFireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
   }
@@ -304,11 +304,11 @@ public class WorkspaceAuthServiceTest {
 
   private void stubUpdateAcl(String namespace, String fcName) {
     when(mockFireCloudService.updateWorkspaceACL(eq(namespace), eq(fcName), any()))
-        .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
+        .thenReturn(new RawlsWorkspaceACLUpdateResponseList());
   }
 
   @NotNull
-  private static List<FirecloudWorkspaceACLUpdate> buildAclUpdates(
+  private static List<RawlsWorkspaceACLUpdate> buildAclUpdates(
       Map<String, WorkspaceAccessLevel> aclUpdates) {
     return aclUpdates.entrySet().stream()
         .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))

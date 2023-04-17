@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentResourceRequest;
@@ -99,7 +99,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    final FirecloudWorkspaceResponse fcWorkspace =
+    final RawlsWorkspaceResponse fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
 
     final String notebookPath;
@@ -161,7 +161,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
+    final Map<Long, RawlsWorkspaceResponse> idToFirecloudWorkspace =
         idToDbWorkspace.entrySet().stream()
             .map(
                 entry ->
@@ -259,7 +259,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private WorkspaceResource toWorkspaceResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
-      Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
+      Map<Long, RawlsWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource) {
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
     return toWorkspaceResource(
@@ -270,7 +270,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private WorkspaceResource toWorkspaceResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
-      FirecloudWorkspaceResponse fcWorkspaceResponse,
+      RawlsWorkspaceResponse fcWorkspaceResponse,
       DbWorkspace dbWorkspace) {
     return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
         dbUserRecentlyModifiedResource,
