@@ -54,9 +54,7 @@ const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
 const { cpu, memory } = DEFAULT_MACHINE_TYPE;
 
 const analysisConfig: Partial<AnalysisConfig> = {
-  machine: findMachineByName(
-    defaultCromwellConfig.kubernetesRuntimeConfig.machineType
-  ),
+  machine: DEFAULT_MACHINE_TYPE,
   diskConfig: {
     size: defaultCromwellConfig.persistentDiskRequest.size,
     detachable: true,
