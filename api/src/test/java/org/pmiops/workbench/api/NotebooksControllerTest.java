@@ -28,9 +28,9 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
@@ -85,7 +85,7 @@ public class NotebooksControllerTest {
 
   private static DbUser currentUser;
 
-  private FirecloudWorkspaceACL fcWorkspaceAcl;
+  private RawlsWorkspaceACL fcWorkspaceAcl;
 
   @MockBean private NotebooksService mockNotebookService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
@@ -377,7 +377,7 @@ public class NotebooksControllerTest {
   public void testGetNotebookLockingMetadata_knownUser() {
     final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
 
-    FirecloudWorkspaceACL workspaceACL =
+    RawlsWorkspaceACL workspaceACL =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -593,7 +593,7 @@ public class NotebooksControllerTest {
   private void assertNotebookLockingMetadata(
       Map<String, String> gcsMetadata,
       NotebookLockingMetadataResponse expectedResponse,
-      FirecloudWorkspaceACL acl) {
+      RawlsWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
@@ -636,7 +636,7 @@ public class NotebooksControllerTest {
     return user;
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL() {
+  private RawlsWorkspaceACL createWorkspaceACL() {
     return createWorkspaceACL(
         new JSONObject()
             .put(
@@ -647,12 +647,12 @@ public class NotebooksControllerTest {
                     .put("canShare", true)));
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
+  private RawlsWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
-        .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
+        .fromJson(new JSONObject().put("acl", acl).toString(), RawlsWorkspaceACL.class);
   }
 
-  private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
+  private void stubFcGetWorkspaceACL(RawlsWorkspaceACL acl) {
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 

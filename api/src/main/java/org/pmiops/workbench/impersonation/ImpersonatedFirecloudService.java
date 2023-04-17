@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
 /**
  * * An impersonation-enabled version of {@link org.pmiops.workbench.firecloud.FireCloudService}

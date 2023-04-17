@@ -11,7 +11,7 @@ import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.iam.SamRetryHandler;
 import org.pmiops.workbench.sam.api.ResourcesApi;

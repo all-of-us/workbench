@@ -34,8 +34,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -199,14 +199,14 @@ public class OfflineRuntimeControllerTest {
     when(mockFireCloudService.getWorkspaceAclAsService(
             w.getWorkspaceNamespace(), w.getFirecloudName()))
         .thenReturn(
-            new FirecloudWorkspaceACL()
+            new RawlsWorkspaceACL()
                 .acl(
                     users.stream()
                         .collect(
                             Collectors.toMap(
                                 DbUser::getUsername,
                                 u ->
-                                    new FirecloudWorkspaceAccessEntry()
+                                    new RawlsWorkspaceAccessEntry()
                                         .accessLevel(WorkspaceAccessLevel.OWNER.toString())))));
   }
 

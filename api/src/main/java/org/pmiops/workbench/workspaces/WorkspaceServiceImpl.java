@@ -41,9 +41,10 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
@@ -247,11 +248,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
+    Map<String, RawlsWorkspaceAccessEntry> emailToRole =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
+    for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
       // Filter out groups
       DbUser user = userDao.findUserByUsername(entry.getKey());
       if (user == null) {

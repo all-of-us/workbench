@@ -14,7 +14,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,7 @@ public class FetchWorkspaceDetails extends Tool {
       sb.append(String.join("\n", Collections.nCopies(10, "***")));
 
       for (DbWorkspace workspace : workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
-        Map<String, FirecloudWorkspaceAccessEntry> acl =
+        Map<String, RawlsWorkspaceAccessEntry> acl =
             FirecloudTransforms.extractAclResponse(
                 workspacesApi.getWorkspaceAcl(
                     workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
@@ -80,7 +80,7 @@ public class FetchWorkspaceDetails extends Tool {
         sb.append("Creator: " + workspace.getCreator().getUsername() + "\n");
         sb.append("GCS bucket path: gs://" + bucketName + "\n");
         sb.append("Collaborators:\n");
-        for (Map.Entry<String, FirecloudWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
+        for (Map.Entry<String, RawlsWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
           sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");
         }
 

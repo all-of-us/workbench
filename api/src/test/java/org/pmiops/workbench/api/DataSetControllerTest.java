@@ -96,10 +96,10 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -513,10 +513,10 @@ public class DataSetControllerTest {
   }
 
   private void stubGetWorkspaceAcl(String ns, String name, WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(accessLevel.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(accessLevel.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))

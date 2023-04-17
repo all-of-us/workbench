@@ -121,11 +121,11 @@ import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -439,7 +439,7 @@ public class WorkspacesControllerTest {
     return userDao.save(user);
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL() {
+  private RawlsWorkspaceACL createWorkspaceACL() {
     return createWorkspaceACL(
         new JSONObject()
             .put(
@@ -450,9 +450,9 @@ public class WorkspacesControllerTest {
                     .put("canShare", true)));
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
+  private RawlsWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
-        .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
+        .fromJson(new JSONObject().put("acl", acl).toString(), RawlsWorkspaceACL.class);
   }
 
   private void stubFcUpdateWorkspaceACL() {
@@ -464,7 +464,7 @@ public class WorkspacesControllerTest {
     stubFcGetWorkspaceACL(createWorkspaceACL());
   }
 
-  private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
+  private void stubFcGetWorkspaceACL(RawlsWorkspaceACL acl) {
     when(fireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
@@ -2184,7 +2184,7 @@ public class WorkspacesControllerTest {
                 new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
-    FirecloudWorkspaceACL workspaceAclsFromCloned =
+    RawlsWorkspaceACL workspaceAclsFromCloned =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2194,7 +2194,7 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
-    FirecloudWorkspaceACL workspaceAclsFromOriginal =
+    RawlsWorkspaceACL workspaceAclsFromOriginal =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2539,7 +2539,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // Mock firecloud ACLs
-    FirecloudWorkspaceACL workspaceACLs =
+    RawlsWorkspaceACL workspaceACLs =
         createWorkspaceACL(
             new JSONObject()
                 .put(

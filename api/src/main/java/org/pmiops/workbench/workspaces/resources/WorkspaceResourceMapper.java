@@ -19,7 +19,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;

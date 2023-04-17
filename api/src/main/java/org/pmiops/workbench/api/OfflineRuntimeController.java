@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
@@ -296,7 +296,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     // Lookup the owners and disk creators.
-    FirecloudWorkspaceACL acl =
+    RawlsWorkspaceACL acl =
         fireCloudService.getWorkspaceAclAsService(
             workspace.get().getWorkspaceNamespace(), workspace.get().getFirecloudName());
     List<String> notifyUsernames =

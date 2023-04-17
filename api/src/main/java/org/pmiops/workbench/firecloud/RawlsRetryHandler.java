@@ -60,6 +60,6 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
   @Override
   protected WorkbenchException convertException(ApiException exception) {
     return maybeConvertMessageForTos(exception.getCode())
-        .orElseGet(() -> ExceptionUtils.convertFirecloudException(exception));
+        .orElseGet(() -> ExceptionUtils.convertRawlsException(exception));
   }
 }

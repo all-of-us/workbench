@@ -40,7 +40,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.jira.JiraContent;

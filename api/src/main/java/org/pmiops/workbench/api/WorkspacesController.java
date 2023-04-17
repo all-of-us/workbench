@@ -37,8 +37,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -586,10 +586,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // committed to the database in an earlier call
     Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
-      Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
+      Map<String, RawlsWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-      for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+      for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));

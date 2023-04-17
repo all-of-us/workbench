@@ -18,9 +18,10 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -105,7 +106,7 @@ public class WorkspaceAuthService {
     return workspace;
   }
 
-  public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+  public Map<String, RawlsWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
     return FirecloudTransforms.extractAclResponse(
         fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName));
@@ -139,12 +140,12 @@ public class WorkspaceAuthService {
       String billingProjectName,
       Set<String> usersToSynchronize,
       Map<String, WorkspaceAccessLevel> updatedAclsMap,
-      Map<String, FirecloudWorkspaceAccessEntry> existingAclsMap) {
+      Map<String, RawlsWorkspaceAccessEntry> existingAclsMap) {
 
     for (String email : usersToSynchronize) {
       String fromAccess =
           existingAclsMap
-              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel("NO ACCESS"))
+              .getOrDefault(email, new RawlsWorkspaceAccessEntry().accessLevel("NO ACCESS"))
               .getAccessLevel();
       WorkspaceAccessLevel toAccess =
           updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);

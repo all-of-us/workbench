@@ -31,12 +31,12 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -286,14 +286,14 @@ public class WorkspaceAuthServiceTest {
       String namespace, String fcName, Map<String, WorkspaceAccessLevel> acl) {
     when(mockFireCloudService.getWorkspaceAclAsService(namespace, fcName))
         .thenReturn(
-            new FirecloudWorkspaceACL()
+            new RawlsWorkspaceACL()
                 .acl(
                     acl.entrySet().stream()
                         .collect(
                             Collectors.toMap(
                                 Entry::getKey,
                                 e ->
-                                    new FirecloudWorkspaceAccessEntry()
+                                    new RawlsWorkspaceAccessEntry()
                                         .accessLevel(e.getValue().toString())))));
   }
 

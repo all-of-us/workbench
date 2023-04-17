@@ -60,8 +60,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
-
-  private final Provider<BillingApi> billingApiProvider;
   private final Provider<BillingV2Api> serviceAccountBillingV2ApiProvider;
   private final Provider<BillingV2Api> endUserBillingV2ApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;

@@ -82,10 +82,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
@@ -2726,10 +2726,10 @@ public class CohortReviewControllerTest {
 
   private void stubGetWorkspaceAcl(
       String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
