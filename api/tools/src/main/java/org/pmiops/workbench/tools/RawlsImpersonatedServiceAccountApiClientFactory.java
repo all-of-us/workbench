@@ -5,13 +5,13 @@ import com.google.protobuf.Duration;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.rawls.ApiClient;
 
-public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory {
+public class RawlsImpersonatedServiceAccountApiClientFactory extends RawlsApiClientFactory {
 
-  public ImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
-      throws IOException {
-    super(newApiClient(targetServiceAccount, fcBaseUrl));
+  public RawlsImpersonatedServiceAccountApiClientFactory(
+      String targetServiceAccount, String rawlsBaseUrl) throws IOException {
+    super(newApiClient(targetServiceAccount, rawlsBaseUrl));
   }
 
   public static String getAccessToken(String targetServiceAccount) throws IOException {

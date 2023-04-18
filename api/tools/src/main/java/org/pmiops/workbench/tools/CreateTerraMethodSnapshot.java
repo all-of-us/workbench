@@ -112,7 +112,7 @@ public class CreateTerraMethodSnapshot extends Tool {
 
       WorkbenchConfig workbenchConfig =
           CreateWgsCohortExtractionBillingProjectWorkspace.workbenchConfig(configJsonFilepath);
-      ApiClientFactory apiClientFactory =
+      FirecloudApiClientFactory firecloudApiClientFactory =
           CreateWgsCohortExtractionBillingProjectWorkspace
               .wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
@@ -127,7 +127,7 @@ public class CreateTerraMethodSnapshot extends Tool {
                   + sourceGitPathFolder);
 
       List<FirecloudMethodResponse> existingMethods =
-          apiClientFactory
+          firecloudApiClientFactory
               .methodRepositoryApi()
               .listMethodRepositoryMethods(
                   methodNamespace, methodName, null, null, null, null, null, null, null);
@@ -156,7 +156,8 @@ public class CreateTerraMethodSnapshot extends Tool {
       if (existingMethods.isEmpty()) {
         log.info("No existing methods found with given namespace/name; creating new method.");
         try {
-          methodResponse = apiClientFactory.methodRepositoryApi().createMethod(newMethodQuery);
+          methodResponse =
+              firecloudApiClientFactory.methodRepositoryApi().createMethod(newMethodQuery);
         } catch (ApiException e) {
           log.warning(e.getResponseBody());
           throw e;
@@ -171,7 +172,7 @@ public class CreateTerraMethodSnapshot extends Tool {
 
         try {
           methodResponse =
-              apiClientFactory
+              firecloudApiClientFactory
                   .methodRepositoryApi()
                   .createMethodSnapshot(
                       newMethodQuery,
@@ -186,7 +187,7 @@ public class CreateTerraMethodSnapshot extends Tool {
       }
 
       FirecloudMethodIO methodIO =
-          apiClientFactory
+          firecloudApiClientFactory
               .methodRepositoryApi()
               .getMethodIO(
                   new FirecloudMethodID()

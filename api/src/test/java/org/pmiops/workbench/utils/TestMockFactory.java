@@ -46,7 +46,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SexAtBirthV2;
 import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.YesNoPreferNot;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;

@@ -292,8 +292,7 @@ public class WorkspacesControllerTest {
   @Autowired WorkspacesController workspacesController;
   @Autowired ObjectNameLengthService objectNameLengthService;
 
-  @Autowired
-  FirecloudMapper firecloudMapper;
+  @Autowired FirecloudMapper firecloudMapper;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 

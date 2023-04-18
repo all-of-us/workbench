@@ -138,7 +138,9 @@ public class WorkspaceAuthServiceTest {
   @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
   @MethodSource("enforcedAccessLevels_valid")
   public void test_enforceWorkspaceAccessLevel_valid(
-      RawlsWorkspaceAccessLevel accessLevel, WorkspaceAccessLevel expected, WorkspaceAccessLevel required) {
+      RawlsWorkspaceAccessLevel accessLevel,
+      WorkspaceAccessLevel expected,
+      WorkspaceAccessLevel required) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubFcGetWorkspace(namespace, fcName, accessLevel);
@@ -265,7 +267,8 @@ public class WorkspaceAuthServiceTest {
     return toReturn;
   }
 
-  private void stubFcGetWorkspace(String namespace, String fcName, RawlsWorkspaceAccessLevel accessLevel) {
+  private void stubFcGetWorkspace(
+      String namespace, String fcName, RawlsWorkspaceAccessLevel accessLevel) {
     final RawlsWorkspaceResponse toReturn =
         new RawlsWorkspaceResponse()
             .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))

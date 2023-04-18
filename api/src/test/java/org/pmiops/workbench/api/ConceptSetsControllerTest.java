@@ -70,7 +70,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -1573,7 +1572,8 @@ public class ConceptSetsControllerTest {
     stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
   }
 
-  private void stubGetWorkspace(String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+  private void stubGetWorkspace(
+      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);

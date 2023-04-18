@@ -250,8 +250,7 @@ public class RuntimeControllerTest {
   @Autowired AccessTierDao accessTierDao;
   @Autowired RuntimeController runtimeController;
   @Autowired LeonardoMapper leonardoMapper;
-  @Autowired
-  FirecloudMapper firecloudMapper;
+  @Autowired FirecloudMapper firecloudMapper;
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;

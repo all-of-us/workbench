@@ -23,12 +23,12 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.api.BillingV2Api;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,16 +72,23 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
     return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
   }
 
-  public static ImpersonatedServiceAccountApiClientFactory
+  public static FcImpersonatedServiceAccountApiClientFactory
       wgsCohortExtractionServiceAccountApiClientFactory(WorkbenchConfig config) throws IOException {
-    return new ImpersonatedServiceAccountApiClientFactory(
+    return new FcImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
+  }
+
+  public static RawlsImpersonatedServiceAccountApiClientFactory
+      wgsCohortExtractionRawlsServiceAccountApiClientFactory(WorkbenchConfig config)
+          throws IOException {
+    return new RawlsImpersonatedServiceAccountApiClientFactory(
+        config.wgsCohortExtraction.serviceAccount, config.firecloud.rawlsBaseUrl);
   }
 
   private String getExtractionPetSa(String googleProject, WorkbenchConfig workbenchConfig)
       throws IOException, InterruptedException {
     String accessToken =
-        ImpersonatedServiceAccountApiClientFactory.getAccessToken(
+        FcImpersonatedServiceAccountApiClientFactory.getAccessToken(
             workbenchConfig.wgsCohortExtraction.serviceAccount);
     log.info("Extraction SA Access Token: " + accessToken);
 
@@ -123,22 +130,24 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());
 
       WorkbenchConfig workbenchConfig = workbenchConfig(configJsonFilepath);
-      ApiClientFactory apiClientFactory =
+      FirecloudApiClientFactory firecloudApiClientFactory =
           wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
+      RawlsApiClientFactory rawlsApiClientFactory =
+          wgsCohortExtractionRawlsServiceAccountApiClientFactory(workbenchConfig);
 
       log.info("Creating billing project");
-      FirecloudCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
-          new FirecloudCreateRawlsV2BillingProjectFullRequest()
+      RawlsCreateRawlsV2BillingProjectFullRequest billingProjectRequest =
+          new RawlsCreateRawlsV2BillingProjectFullRequest()
               .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
-      BillingV2Api billingV2Api = apiClientFactory.billingV2Api();
+      BillingV2Api billingV2Api = rawlsApiClientFactory.billingV2Api();
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);
       DbWorkspace.FirecloudWorkspaceId workspaceId =
           new DbWorkspace.FirecloudWorkspaceId(
               billingProjectName, FireCloudService.toFirecloudName(workspaceName));
 
-      FirecloudWorkspaceIngest workspaceIngest =
-          new FirecloudWorkspaceIngest()
+      RawlsWorkspaceRequest workspaceIngest =
+          new RawlsWorkspaceRequest()
               .namespace(workspaceId.getWorkspaceNamespace())
               .name(workspaceId.getWorkspaceName());
 
@@ -149,7 +158,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
               + workspaceId.getWorkspaceName()
               + ")");
       RawlsWorkspaceDetails workspace =
-          apiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
+          rawlsApiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       log.info("Updating Workspace ACL");
       List<RawlsWorkspaceACLUpdate> acls =
@@ -158,11 +167,12 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
                   Arrays.stream(new String[] {workspace.getCreatedBy()}))
               .map(email -> FirecloudTransforms.buildAclUpdate(email, WorkspaceAccessLevel.OWNER))
               .collect(Collectors.toList());
-      apiClientFactory
+      rawlsApiClientFactory
           .workspacesApi()
-          .updateWorkspaceACL(acls, workspace.getNamespace(), workspace.getName(), false);
+          .updateACL(acls, workspace.getNamespace(), workspace.getName(), false);
 
-      String proxyGroup = apiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());
+      String proxyGroup =
+          firecloudApiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());
 
       log.info(
           "Add the following values to WorkbenchConfig.wgsCohortExtraction"

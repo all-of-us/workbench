@@ -13,7 +13,7 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -30,10 +30,10 @@ public class FetchWorkspaceDetails extends Tool {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
 
-  private static Option fcBaseUrlOpt =
+  private static Option rawlsBaseUrlOpt =
       Option.builder()
-          .longOpt("fc-base-url")
-          .desc("Firecloud API base URL")
+          .longOpt("rawls-base-url")
+          .desc("Rawls API base URL")
           .required()
           .hasArg()
           .build();
@@ -47,7 +47,7 @@ public class FetchWorkspaceDetails extends Tool {
           .build();
 
   private static Options options =
-      new Options().addOption(fcBaseUrlOpt).addOption(workspaceProjectIdOpt);
+      new Options().addOption(rawlsBaseUrlOpt).addOption(workspaceProjectIdOpt);
 
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao, FireCloudService fireCloudService) {
@@ -57,7 +57,8 @@ public class FetchWorkspaceDetails extends Tool {
       String workspaceNamespace = opts.getOptionValue(workspaceProjectIdOpt.getLongOpt());
 
       WorkspacesApi workspacesApi =
-          (new ServiceAccountAPIClientFactory(opts.getOptionValue(fcBaseUrlOpt.getLongOpt())))
+          (new RawlsServiceAccountAPIClientFactory(
+                  opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt())))
               .workspacesApi();
 
       StringBuilder sb = new StringBuilder();
@@ -66,7 +67,7 @@ public class FetchWorkspaceDetails extends Tool {
       for (DbWorkspace workspace : workspaceDao.findAllByWorkspaceNamespace(workspaceNamespace)) {
         Map<String, RawlsWorkspaceAccessEntry> acl =
             FirecloudTransforms.extractAclResponse(
-                workspacesApi.getWorkspaceAcl(
+                workspacesApi.getACL(
                     workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
         String bucketName =

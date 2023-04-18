@@ -164,8 +164,7 @@ public class CohortsControllerTest {
   @Autowired DataSetService dataSetService;
   @Autowired UserDao userDao;
 
-  @Autowired
-  FirecloudMapper firecloudMapper;
+  @Autowired FirecloudMapper firecloudMapper;
 
   @TestConfiguration
   @Import({
