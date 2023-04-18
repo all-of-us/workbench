@@ -121,11 +121,6 @@ import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudMonitoringService;
@@ -180,6 +175,11 @@ import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -479,8 +479,7 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(TestMockFactory.createFirecloudWorkspace(ns, firecloudName, creator), access);
   }
 
-  private void stubGetWorkspace(
-      RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
+  private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());

@@ -14,8 +14,8 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
 /** Utility class for holding Leonardo APP environment variables constant and methods. */
 public class LeonardoCustomEnvVarUtils {

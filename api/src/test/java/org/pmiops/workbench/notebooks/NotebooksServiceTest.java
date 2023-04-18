@@ -40,14 +40,14 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -146,8 +146,7 @@ public class NotebooksServiceTest {
   private void stubNotebookToJson() {
     when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
-            new RawlsWorkspaceResponse()
-                .workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
+            new RawlsWorkspaceResponse().workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }

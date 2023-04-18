@@ -16,11 +16,10 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,7 @@ public class WorkspaceAuthService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
       throws IllegalArgumentException {
     String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel().toString();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }

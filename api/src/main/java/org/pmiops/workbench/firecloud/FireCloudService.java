@@ -73,9 +73,7 @@ public interface FireCloudService {
     return strippedName;
   }
 
-  /**
-   * Creates a new FC workspace.
-   */
+  /** Creates a new FC workspace. */
   RawlsWorkspaceDetails createWorkspace(
       String workspaceNamespace, String workspaceName, String authDomainName);
 
@@ -93,14 +91,12 @@ public interface FireCloudService {
    * makes the changes specified. Choose the access level "NO ACCESS" to remove access.
    *
    * @param workspaceNamespace the Namespace (Terra Billing Project) of the Workspace to modify
-   * @param firecloudName      the Terra Name of the Workspace to modify
+   * @param firecloudName the Terra Name of the Workspace to modify
    * @param aclUpdates
    * @return
    */
   RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
-      String workspaceNamespace,
-      String firecloudName,
-      List<RawlsWorkspaceACLUpdate> aclUpdates);
+      String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates);
 
   RawlsWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
 

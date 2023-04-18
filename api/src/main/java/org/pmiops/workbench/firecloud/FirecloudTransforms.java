@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 /** Static utilities relating to transforming Firecloud API responses. */
 public final class FirecloudTransforms {

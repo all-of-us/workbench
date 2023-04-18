@@ -2,9 +2,10 @@ package org.pmiops.workbench.utils.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
+import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 
 @Mapper(componentModel = "spring")
 public interface FirecloudMapper {
@@ -14,11 +15,10 @@ public interface FirecloudMapper {
   }
 
   @Named("fcToApiWorkspaceAccessLevel")
-  default WorkspaceAccessLevel fcToApiWorkspaceAccessLevel(String accessLevel) {
-    if (WorkspaceAuthService.PROJECT_OWNER_ACCESS_LEVEL.equals(accessLevel)) {
-      return WorkspaceAccessLevel.OWNER;
-    } else {
-      return WorkspaceAccessLevel.fromValue(accessLevel);
-    }
-  }
+  @ValueMapping(source = "PROJECT_OWNER", target = "OWNER")
+  WorkspaceAccessLevel fcToApiWorkspaceAccessLevel(RawlsWorkspaceAccessLevel accessLevel);
+
+  @Named("apiToFcWorkspaceAccessLevel")
+  @ValueMapping(source = "OWNER", target = "PROJECT_OWNER")
+  RawlsWorkspaceAccessLevel apiToFcWorkspaceAccessLevel(WorkspaceAccessLevel accessLevel);
 }

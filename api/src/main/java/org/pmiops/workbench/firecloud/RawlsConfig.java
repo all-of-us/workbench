@@ -13,12 +13,11 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.rawls.ApiClient;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.api.MethodconfigsApi;
 import org.pmiops.workbench.rawls.api.StatusApi;
-import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.SubmissionsApi;
-import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +39,8 @@ public class RawlsConfig {
   // Some groups of FireCloud APIs will use one, while some will use the other.
   //
   public static final String END_USER_API_CLIENT = "rawlsEndUserApiClient";
-  public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT = "rawlsEndUserLenientTimeoutApiClient";
+  public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
+      "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
   public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT =
       "rawlsWgsCohortExtractionServiceAccountApiClient";

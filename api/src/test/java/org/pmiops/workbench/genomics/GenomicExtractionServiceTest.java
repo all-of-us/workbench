@@ -61,14 +61,14 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -177,8 +177,7 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionScatterTasksPerSample = 4;
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
 
-    RawlsWorkspaceDetails fcWorkspace =
-        new RawlsWorkspaceDetails().bucketName("user-bucket");
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails().bucketName("user-bucket");
     RawlsWorkspaceResponse fcWorkspaceResponse =
         new RawlsWorkspaceResponse().workspace(fcWorkspace);
     doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());

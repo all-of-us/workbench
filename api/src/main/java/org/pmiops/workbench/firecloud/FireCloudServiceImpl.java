@@ -20,20 +20,20 @@ import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.rawls.api.BillingApi;
-import org.pmiops.workbench.rawls.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
 import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.rawls.api.BillingApi;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.rawls.model.RawlsManagedGroupRef;
 import org.pmiops.workbench.rawls.model.RawlsUpdateRawlsBillingAccountRequest;
@@ -348,19 +348,15 @@ public class FireCloudServiceImpl implements FireCloudService {
                 ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation);
     return rawlsRetryHandler.run(
-        (context) ->
-            workspacesApi.clone(cloneRequest, fromWorkspaceNamespace, fromFirecloudName));
+        (context) -> workspacesApi.clone(cloneRequest, fromWorkspaceNamespace, fromFirecloudName));
   }
 
   @Override
   public RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
-      String workspaceNamespace,
-      String firecloudName,
-      List<RawlsWorkspaceACLUpdate> aclUpdates) {
+      String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     return rawlsRetryHandler.run(
-        (context) ->
-            workspacesApi.updateACL(aclUpdates, workspaceNamespace, firecloudName, false));
+        (context) -> workspacesApi.updateACL(aclUpdates, workspaceNamespace, firecloudName, false));
   }
 
   @Override

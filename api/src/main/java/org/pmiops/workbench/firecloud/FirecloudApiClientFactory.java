@@ -99,8 +99,29 @@ public class FirecloudApiClientFactory {
   }
 
   /**
-   * Creates a Rawls API client, unauthenticated. Most clients should use an authenticated,
-   * request scoped bean instead of calling this directly.
+   * Creates a Rawls API client authenticated as the given user via impersonation. This should be
+   * used as a last resort, and only when the following conditions hold:
+   *
+   * <ol>
+   *   <li>The API client is used outside the context of an end user request (exception: admin
+   *       requests)
+   *   <li>RW service account credentials lack sufficient permission to make the desired call
+   * </ol>
+   *
+   * Note that impersonated API calls are subject to the same constraints as end user calls,
+   * including access tier membership.
+   */
+  public org.pmiops.workbench.rawls.ApiClient newImpersonatedRawlsApiClient(String userEmail)
+      throws IOException {
+    OAuth2Credentials delegatedCreds = getDelegatedUserCredentials(userEmail);
+    org.pmiops.workbench.rawls.ApiClient client = newRawlsApiClient();
+    client.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
+    return client;
+  }
+
+  /**
+   * Creates a Rawls API client, unauthenticated. Most clients should use an authenticated, request
+   * scoped bean instead of calling this directly.
    */
   public org.pmiops.workbench.rawls.ApiClient newRawlsApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();

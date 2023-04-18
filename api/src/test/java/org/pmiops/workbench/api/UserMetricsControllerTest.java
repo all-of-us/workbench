@@ -40,8 +40,6 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource.DbUserRecentlyModifiedResourceType;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
@@ -50,6 +48,8 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -253,8 +253,7 @@ public class UserMetricsControllerTest {
         .thenReturn(Optional.of(dbConceptSet));
   }
 
-  private void mockResponsesForWorkspace(
-      DbWorkspace dbWorkspace, RawlsWorkspaceResponse response) {
+  private void mockResponsesForWorkspace(DbWorkspace dbWorkspace, RawlsWorkspaceResponse response) {
 
     when(mockFireCloudService.getWorkspace(dbWorkspace)).thenReturn(Optional.of(response));
 

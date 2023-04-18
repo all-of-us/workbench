@@ -28,9 +28,7 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
@@ -44,6 +42,9 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -607,7 +608,7 @@ public class NotebooksControllerTest {
     stubFcGetWorkspaceACL(acl);
 
     when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
-        .thenReturn(acl.getAcl());
+        .thenReturn(FirecloudTransforms.extractAclResponse(acl));
 
     final String testNotebookPath = NotebookUtils.withNotebookPath(testNotebook);
     doReturn(gcsMetadata)
@@ -656,8 +657,7 @@ public class NotebooksControllerTest {
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
-  private void stubGetWorkspace(
-      RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
+  private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());

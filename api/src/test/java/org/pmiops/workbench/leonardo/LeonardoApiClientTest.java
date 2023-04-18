@@ -29,8 +29,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
@@ -48,8 +46,12 @@ import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,7 @@ public class LeonardoApiClientTest {
     FakeClockConfiguration.class,
     CommonMappers.class,
     LeonardoMapperImpl.class,
+    FirecloudMapperImpl.class,
     LeonardoApiClientImpl.class,
     LeonardoRetryHandler.class,
     LeonardoApiClientImpl.class,
@@ -108,6 +111,7 @@ public class LeonardoApiClientTest {
   @Autowired UserDao userDao;
   @Autowired LeonardoMapper leonardoMapper;
   @Autowired LeonardoApiClient leonardoApiClient;
+  @Autowired FirecloudMapper firecloudMapper;
 
   @Captor private ArgumentCaptor<LeonardoCreateAppRequest> createAppRequestArgumentCaptor;
 
@@ -307,7 +311,7 @@ public class LeonardoApiClientTest {
             .bucketName(WORKSPACE_BUCKET);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspaceDetail);
-    fcResponse.setAccessLevel(accessLevel.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(accessLevel));
     when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
     when(mockFireCloudService.getWorkspace(
             fcWorkspaceDetail.getNamespace(), fcWorkspaceDetail.getName()))

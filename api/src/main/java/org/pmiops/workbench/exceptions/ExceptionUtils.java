@@ -50,7 +50,8 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertRawlsException(org.pmiops.workbench.rawls.ApiException e) {
+  public static WorkbenchException convertRawlsException(
+      org.pmiops.workbench.rawls.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

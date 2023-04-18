@@ -7,12 +7,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.rawls.ApiException;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
-import org.pmiops.workbench.rawls.ApiException;
 
 @Service
 public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {

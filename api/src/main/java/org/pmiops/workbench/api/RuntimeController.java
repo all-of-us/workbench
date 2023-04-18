@@ -27,7 +27,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -47,6 +46,7 @@ import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.model.StorageLink;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -385,9 +385,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private String aouConfigDataUri(
-      RawlsWorkspaceDetails fcWorkspace,
-      DbCdrVersion cdrVersion,
-      String cdrBillingCloudProject) {
+      RawlsWorkspaceDetails fcWorkspace, DbCdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
     String host = null;
