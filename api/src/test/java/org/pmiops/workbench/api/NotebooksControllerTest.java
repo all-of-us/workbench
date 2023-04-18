@@ -44,9 +44,12 @@ import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +74,7 @@ public class NotebooksControllerTest {
   @TestConfiguration
   @Import({
     AccessTierServiceImpl.class,
+    FirecloudMapperImpl.class,
     FakeClockConfiguration.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksController.class,
@@ -95,6 +99,8 @@ public class NotebooksControllerTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private NotebooksController notebooksController;
+
+  @Autowired private FirecloudMapper firecloudMapper;
 
   @BeforeEach
   public void setUp() {
@@ -658,13 +664,13 @@ public class NotebooksControllerTest {
   }
 
   private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     doReturn(fcResponse)
         .when(mockFireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<RawlsWorkspaceResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
+    List<RawlsWorkspaceListResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces();
   }

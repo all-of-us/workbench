@@ -51,6 +51,8 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +90,12 @@ public class NotebooksServiceTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private UserDao userDao;
+  @Autowired private FirecloudMapper firecloudMapper;
 
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class})
+  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class, FirecloudMapperImpl.class})
   static class Configuration {
 
     @Bean
@@ -135,7 +138,7 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
         .thenReturn(
             new RawlsWorkspaceResponse()
-                .accessLevel(access.toString())
+                .accessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access))
                 .workspace(
                     new RawlsWorkspaceDetails()
                         .namespace(workspaceNamespace)

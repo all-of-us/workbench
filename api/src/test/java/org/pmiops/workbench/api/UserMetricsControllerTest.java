@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
@@ -195,11 +196,11 @@ public class UserMetricsControllerTest {
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
     final RawlsWorkspaceResponse workspaceResponse1 = new RawlsWorkspaceResponse();
-    workspaceResponse1.setAccessLevel("OWNER");
+    workspaceResponse1.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     workspaceResponse1.setWorkspace(fcWorkspace1);
 
     final RawlsWorkspaceResponse workspaceResponse2 = new RawlsWorkspaceResponse();
-    workspaceResponse2.setAccessLevel("READER");
+    workspaceResponse2.setAccessLevel(RawlsWorkspaceAccessLevel.READER);
     workspaceResponse2.setWorkspace(fcWorkspace2);
 
     mockResponsesForWorkspace(dbWorkspace1, workspaceResponse1);

@@ -178,12 +178,15 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
@@ -288,6 +291,9 @@ public class WorkspacesControllerTest {
   @Autowired WorkspaceService workspaceService;
   @Autowired WorkspacesController workspacesController;
   @Autowired ObjectNameLengthService objectNameLengthService;
+
+  @Autowired
+  FirecloudMapper firecloudMapper;
 
   @SpyBean @Autowired WorkspaceDao workspaceDao;
 
@@ -480,13 +486,13 @@ public class WorkspacesControllerTest {
   }
 
   private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     doReturn(fcResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<RawlsWorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    List<RawlsWorkspaceListResponse> workspaceResponses = fireCloudService.getWorkspaces();
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
   }
@@ -590,7 +596,7 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
@@ -2692,7 +2698,7 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
@@ -2712,7 +2718,7 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
@@ -2731,7 +2737,7 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
@@ -2750,7 +2756,7 @@ public class WorkspacesControllerTest {
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.READER);
     doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);

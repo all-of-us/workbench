@@ -31,6 +31,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +179,7 @@ public class WorkspaceMapperTest {
             sourceDbWorkspace,
             new RawlsWorkspaceResponse()
                 .workspace(sourceFirecloudWorkspace)
-                .accessLevel("PROJECT_OWNER"));
+                .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER));
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 

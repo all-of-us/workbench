@@ -91,6 +91,7 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
@@ -162,6 +163,9 @@ public class CohortsControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserDao userDao;
+
+  @Autowired
+  FirecloudMapper firecloudMapper;
 
   @TestConfiguration
   @Import({
@@ -354,7 +358,7 @@ public class CohortsControllerTest {
     fcWorkspace.setCreatedBy(creator);
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
     stubGetWorkspaceAcl(ns, name, creator, access);
   }

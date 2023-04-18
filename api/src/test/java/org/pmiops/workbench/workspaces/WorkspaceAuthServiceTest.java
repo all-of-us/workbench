@@ -37,6 +37,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -109,21 +110,11 @@ public class WorkspaceAuthServiceTest {
   @ParameterizedTest(name = "getWorkspaceAccessLevel({0})")
   @MethodSource("accessLevels")
   public void test_getWorkspaceAccessLevel_valid(
-      String accessLevel, WorkspaceAccessLevel expected) {
+      RawlsWorkspaceAccessLevel accessLevel, WorkspaceAccessLevel expected) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubFcGetWorkspace(namespace, fcName, accessLevel);
     assertThat(workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName)).isEqualTo(expected);
-  }
-
-  @Test
-  public void test_getWorkspaceAccessLevel_invalid() {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-    stubFcGetWorkspace(namespace, fcName, "some garbage");
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName));
   }
 
   private static Stream<Arguments> enforcedAccessLevels_valid() {
@@ -147,7 +138,7 @@ public class WorkspaceAuthServiceTest {
   @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
   @MethodSource("enforcedAccessLevels_valid")
   public void test_enforceWorkspaceAccessLevel_valid(
-      String accessLevel, WorkspaceAccessLevel expected, WorkspaceAccessLevel required) {
+      RawlsWorkspaceAccessLevel accessLevel, WorkspaceAccessLevel expected, WorkspaceAccessLevel required) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubFcGetWorkspace(namespace, fcName, accessLevel);
@@ -159,7 +150,7 @@ public class WorkspaceAuthServiceTest {
       name = "enforceWorkspaceAccessLevel({0} user access, {1} required, expected exception {2})")
   @MethodSource("enforcedAccessLevels_invalid")
   public void test_enforceWorkspaceAccessLevel_invalid(
-      String accessLevel,
+      RawlsWorkspaceAccessLevel accessLevel,
       WorkspaceAccessLevel required,
       Class<? extends Throwable> expectedException) {
     final String namespace = "wsns";
@@ -274,7 +265,7 @@ public class WorkspaceAuthServiceTest {
     return toReturn;
   }
 
-  private void stubFcGetWorkspace(String namespace, String fcName, String accessLevel) {
+  private void stubFcGetWorkspace(String namespace, String fcName, RawlsWorkspaceAccessLevel accessLevel) {
     final RawlsWorkspaceResponse toReturn =
         new RawlsWorkspaceResponse()
             .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))

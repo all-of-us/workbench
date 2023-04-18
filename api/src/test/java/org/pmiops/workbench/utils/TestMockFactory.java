@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.SexualOrientationV2;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.YesNoPreferNot;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
@@ -172,7 +173,7 @@ public class TestMockFactory {
 
               RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
-              fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+              fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
 
               doReturn(fcResponse)
                   .when(fireCloudService)
