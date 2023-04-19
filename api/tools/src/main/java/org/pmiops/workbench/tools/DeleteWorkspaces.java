@@ -33,6 +33,8 @@ import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,6 +52,7 @@ import org.springframework.context.annotation.Scope;
 @Import({
   FirecloudApiClientFactory.class,
   FireCloudServiceImpl.class,
+  FirecloudMapperImpl.class,
   FireCloudConfig.class,
   CloudBillingClientImpl.class
 })
@@ -79,6 +82,7 @@ public class DeleteWorkspaces extends Tool {
       AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
+      FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       Provider<DbUser> dbUserProvider,
       CloudBillingClient cloudBillingClient,
@@ -91,6 +95,7 @@ public class DeleteWorkspaces extends Tool {
         null,
         null,
         null,
+        firecloudMapper,
         fireCloudService,
         null,
         cloudBillingClient,

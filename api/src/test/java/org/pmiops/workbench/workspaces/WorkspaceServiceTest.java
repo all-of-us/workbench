@@ -55,10 +55,11 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.iam.IamService;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -139,7 +140,7 @@ public class WorkspaceServiceTest {
 
   private static DbUser currentUser;
 
-  private final List<RawlsWorkspaceResponse> firecloudWorkspaceResponses = new ArrayList<>();
+  private final List<RawlsWorkspaceListResponse> firecloudWorkspaceResponses = new ArrayList<>();
   private final List<DbWorkspace> dbWorkspaces = new ArrayList<>();
   private static final Instant NOW = Instant.parse("1985-11-05T22:04:00.00Z");
   private static final long USER_ID = 1L;
@@ -161,31 +162,31 @@ public class WorkspaceServiceTest {
         workspaceIdIncrementer.getAndIncrement(),
         "reader",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.READER,
+        RawlsWorkspaceAccessLevel.READER,
         WorkspaceActiveStatus.ACTIVE);
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "writer",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.WRITER,
+        RawlsWorkspaceAccessLevel.WRITER,
         WorkspaceActiveStatus.ACTIVE);
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "owner",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.OWNER,
+        RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "extra",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.OWNER,
+        RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
     addMockedWorkspace(
         workspaceIdIncrementer.getAndIncrement(),
         "another_extra",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.OWNER,
+        RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
 
     doReturn(firecloudWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
@@ -203,7 +204,7 @@ public class WorkspaceServiceTest {
       String workspaceId,
       String workspaceName,
       String workspaceNamespace,
-      WorkspaceAccessLevel accessLevel) {
+      RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceDetails mockWorkspace = mock(RawlsWorkspaceDetails.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
@@ -211,7 +212,23 @@ public class WorkspaceServiceTest {
 
     RawlsWorkspaceResponse mockWorkspaceResponse = mock(RawlsWorkspaceResponse.class);
     doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
-    doReturn(accessLevel.toString()).when(mockWorkspaceResponse).getAccessLevel();
+    doReturn(accessLevel).when(mockWorkspaceResponse).getAccessLevel();
+    return mockWorkspaceResponse;
+  }
+
+  private RawlsWorkspaceListResponse mockRawlsWorkspaceListResponse(
+      String workspaceId,
+      String workspaceName,
+      String workspaceNamespace,
+      RawlsWorkspaceAccessLevel accessLevel) {
+    RawlsWorkspaceDetails mockWorkspace = mock(RawlsWorkspaceDetails.class);
+    doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
+    doReturn(workspaceName).when(mockWorkspace).getName();
+    doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
+
+    RawlsWorkspaceListResponse mockWorkspaceResponse = mock(RawlsWorkspaceListResponse.class);
+    doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
+    doReturn(accessLevel).when(mockWorkspaceResponse).getAccessLevel();
     return mockWorkspaceResponse;
   }
 
@@ -235,12 +252,17 @@ public class WorkspaceServiceTest {
       long workspaceId,
       String workspaceName,
       String workspaceNamespace,
-      WorkspaceAccessLevel accessLevel,
+      RawlsWorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
     RawlsWorkspaceResponse mockWorkspaceResponse =
         mockRawlsWorkspaceResponse(workspaceId, workspaceName, workspaceNamespace, accessLevel);
 
+    RawlsWorkspaceListResponse mockWorkspaceListResponse =
+        mockRawlsWorkspaceListResponse(
+            Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
+
+    firecloudWorkspaceResponses.add(mockWorkspaceListResponse);
     DbWorkspace dbWorkspace =
         workspaceDao.save(
             buildDbWorkspace(
@@ -259,7 +281,7 @@ public class WorkspaceServiceTest {
         dbWorkspace.getWorkspaceId(),
         dbWorkspace.getName(),
         dbWorkspace.getWorkspaceNamespace(),
-        WorkspaceAccessLevel.OWNER);
+        RawlsWorkspaceAccessLevel.OWNER);
 
     workspaceDao.save(dbWorkspace);
     dbWorkspaces.add(dbWorkspace);
@@ -270,11 +292,10 @@ public class WorkspaceServiceTest {
       long workspaceId,
       String workspaceName,
       String workspaceNamespace,
-      WorkspaceAccessLevel accessLevel) {
+      RawlsWorkspaceAccessLevel accessLevel) {
     RawlsWorkspaceResponse mockWorkspaceResponse =
         mockRawlsWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    firecloudWorkspaceResponses.add(mockWorkspaceResponse);
     doReturn(mockWorkspaceResponse)
         .when(mockFireCloudService)
         .getWorkspace(workspaceNamespace, workspaceName);
@@ -294,7 +315,7 @@ public class WorkspaceServiceTest {
         workspaceIdIncrementer.getAndIncrement(),
         "deleted",
         DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.OWNER,
+        RawlsWorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.DELETED);
     assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
   }
@@ -425,7 +446,7 @@ public class WorkspaceServiceTest {
             ownedId,
             "owned",
             "owned_namespace",
-            WorkspaceAccessLevel.OWNER,
+            RawlsWorkspaceAccessLevel.OWNER,
             WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(ownedWorkspace);
 
@@ -434,7 +455,7 @@ public class WorkspaceServiceTest {
             workspaceIdIncrementer.getAndIncrement(),
             "shared",
             "shared_namespace",
-            WorkspaceAccessLevel.NO_ACCESS,
+            RawlsWorkspaceAccessLevel.NO_ACCESS,
             WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(sharedWorkspace);
 

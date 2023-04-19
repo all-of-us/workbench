@@ -1,12 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Duration;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
@@ -15,9 +10,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
-import org.pmiops.workbench.rawls.api.MethodconfigsApi;
-import org.pmiops.workbench.rawls.api.StatusApi;
-import org.pmiops.workbench.rawls.api.SubmissionsApi;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +34,6 @@ public class RawlsConfig {
   public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
       "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
-  public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT =
-      "rawlsWgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
   public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
@@ -83,56 +73,6 @@ public class RawlsConfig {
       throw new ServerErrorException(e);
     }
     return apiClient;
-  }
-
-  public static final String WGS_EXTRACTION_SA_CREDENTIALS = "WGS_EXTRACTION_SA_CREDENTIALS";
-
-  @Bean(name = WGS_EXTRACTION_SA_CREDENTIALS)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public GoogleCredentials wgsExtractionAccessToken(
-      WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
-    return GoogleCredentials.create(
-        new AccessToken(
-            iamCredentialsClient
-                .generateAccessToken(
-                    "projects/-/serviceAccounts/"
-                        + workbenchConfig.wgsCohortExtraction.serviceAccount,
-                    Collections.emptyList(),
-                    ImmutableList.<String>builder()
-                        .addAll(FirecloudApiClientFactory.SCOPES)
-                        .add("https://www.googleapis.com/auth/devstorage.read_write")
-                        .build(),
-                    Duration.newBuilder().setSeconds(60 * 10).build())
-                .getAccessToken(),
-            null));
-  }
-
-  @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient wgsExtractionServiceAccountApiClient(
-      FirecloudApiClientFactory factory,
-      @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
-    ApiClient apiClient = factory.newRawlsApiClient();
-    apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
-    return apiClient;
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public SubmissionsApi submissionsApi(
-      @Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    SubmissionsApi api = new SubmissionsApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public MethodconfigsApi methodConfigurationsApi(
-      @Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    MethodconfigsApi api = new MethodconfigsApi();
-    api.setApiClient(apiClient);
-    return api;
   }
 
   @Bean(name = END_USER_WORKSPACE_API)
@@ -179,13 +119,5 @@ public class RawlsConfig {
     BillingV2Api api = new BillingV2Api();
     api.setApiClient(apiClient);
     return api;
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public StatusApi statusApi(FirecloudApiClientFactory factory) {
-    StatusApi statusApi = new StatusApi();
-    statusApi.setApiClient(factory.newRawlsApiClient());
-    return statusApi;
   }
 }
