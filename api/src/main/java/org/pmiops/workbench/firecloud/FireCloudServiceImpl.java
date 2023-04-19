@@ -7,6 +7,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -324,7 +325,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             .name(workspaceName)
             .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
             .authorizationDomain(
-                ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)));
+                ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
+            .attributes(new HashMap<>());
 
     return rawlsRetryHandler.run((context) -> workspacesApi.createWorkspace(workspaceRequest));
   }
@@ -346,7 +348,8 @@ public class FireCloudServiceImpl implements FireCloudService {
             .copyFilesWithPrefix(NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY + "/")
             .authorizationDomain(
                 ImmutableList.of(new RawlsManagedGroupRef().membersGroupName(authDomainName)))
-            .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation);
+            .bucketLocation(configProvider.get().firecloud.workspaceBucketLocation)
+            .attributes(new HashMap<>());
     return rawlsRetryHandler.run(
         (context) -> workspacesApi.clone(cloneRequest, fromWorkspaceNamespace, fromFirecloudName));
   }
