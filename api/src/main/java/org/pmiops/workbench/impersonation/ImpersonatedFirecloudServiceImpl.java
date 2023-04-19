@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
+import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
 import org.pmiops.workbench.firecloud.RawlsRetryHandler;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.iam.SamApiClientFactory;
@@ -34,6 +35,7 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   // https://github.com/broadinstitute/sam/blob/30931bde56a6ffcea2040086503ade37378dfffc/src/main/resources/reference.conf#L782
   private static final String SAM_KUBERNETES_RESOURCE_NAME = "kubernetes-app";
   private final FirecloudApiClientFactory firecloudApiClientFactory;
+  private final RawlsApiClientFactory rawlsApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;
   private final FirecloudRetryHandler firecloudRetryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
@@ -42,11 +44,13 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   @Autowired
   public ImpersonatedFirecloudServiceImpl(
       FirecloudApiClientFactory firecloudApiClientFactory,
+      RawlsApiClientFactory rawlsApiClientFactory,
       SamApiClientFactory samApiClientFactory,
       FirecloudRetryHandler firecloudRetryHandler,
       RawlsRetryHandler rawlsRetryHandler,
       SamRetryHandler samRetryHandler) {
     this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.rawlsApiClientFactory = rawlsApiClientFactory;
     this.samApiClientFactory = samApiClientFactory;
     this.firecloudRetryHandler = firecloudRetryHandler;
     this.rawlsRetryHandler = rawlsRetryHandler;
@@ -112,7 +116,7 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
 
   private WorkspacesApi getImpersonatedWorkspacesApi(@Nonnull DbUser dbUser) throws IOException {
     return new WorkspacesApi(
-        firecloudApiClientFactory.newImpersonatedRawlsApiClient(dbUser.getUsername()));
+        rawlsApiClientFactory.newImpersonatedRawlsApiClient(dbUser.getUsername()));
   }
 
   private ResourcesApi getImpersonatedResourceApi(@Nonnull DbUser dbUser) throws IOException {

@@ -26,6 +26,7 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
 import org.pmiops.workbench.firecloud.RawlsConfig;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.google.CloudBillingClient;
@@ -51,6 +52,7 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 @Import({
   FirecloudApiClientFactory.class,
+  RawlsApiClientFactory.class,
   FireCloudServiceImpl.class,
   FirecloudMapperImpl.class,
   FireCloudConfig.class,
@@ -122,7 +124,7 @@ public class DeleteWorkspaces extends Tool {
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(FirecloudApiClientFactory factory) {
+  WorkspacesApi workspaceApi(RawlsApiClientFactory factory) {
     if (currentImpersonatedUser == null) {
       return null;
     }
@@ -151,7 +153,7 @@ public class DeleteWorkspaces extends Tool {
     return apiClient;
   }
 
-  private static ApiClient buildRawlsServiceAccountApiClient(FirecloudApiClientFactory factory) {
+  private static ApiClient buildRawlsServiceAccountApiClient(RawlsApiClientFactory factory) {
     ApiClient apiClient = factory.newRawlsApiClient();
     try {
       apiClient.setAccessToken(

@@ -20,7 +20,7 @@ import org.springframework.web.context.annotation.RequestScope;
 public class RawlsConfig {
   public static final List<String> BILLING_SCOPES =
       ImmutableList.<String>builder()
-          .addAll(FirecloudApiClientFactory.SCOPES)
+          .addAll(RawlsApiClientFactory.SCOPES)
           .add("https://www.googleapis.com/auth/cloud-billing")
           .build();
 
@@ -43,7 +43,7 @@ public class RawlsConfig {
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient endUserApiClient(
-      UserAuthentication userAuthentication, FirecloudApiClientFactory factory) {
+      UserAuthentication userAuthentication, RawlsApiClientFactory factory) {
     ApiClient apiClient = factory.newRawlsApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
@@ -53,7 +53,7 @@ public class RawlsConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient endUserLenientTimeoutApiClient(
       UserAuthentication userAuthentication,
-      FirecloudApiClientFactory factory,
+      RawlsApiClientFactory factory,
       WorkbenchConfig config) {
     ApiClient apiClient = factory.newRawlsApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
@@ -65,7 +65,7 @@ public class RawlsConfig {
 
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(FirecloudApiClientFactory factory) {
+  public ApiClient allOfUsApiClient(RawlsApiClientFactory factory) {
     ApiClient apiClient = factory.newRawlsApiClient();
     try {
       apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));

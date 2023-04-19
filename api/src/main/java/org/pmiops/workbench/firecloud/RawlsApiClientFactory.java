@@ -11,11 +11,12 @@ import javax.inject.Provider;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.rawls.ApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class FirecloudApiClientFactory {
+public class RawlsApiClientFactory {
   public static final String X_APP_ID_HEADER = "X-App-ID";
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
@@ -31,7 +32,7 @@ public class FirecloudApiClientFactory {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public FirecloudApiClientFactory(
+  public RawlsApiClientFactory(
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -62,8 +63,8 @@ public class FirecloudApiClientFactory {
   }
 
   /**
-   * Creates a Firecloud API client authenticated as the given user via impersonation. This should
-   * be used as a last resort, and only when the following conditions hold:
+   * Creates a Rawls API client authenticated as the given user via impersonation. This should be
+   * used as a last resort, and only when the following conditions hold:
    *
    * <ol>
    *   <li>The API client is used outside the context of an end user request (exception: admin
@@ -72,21 +73,20 @@ public class FirecloudApiClientFactory {
    * </ol>
    *
    * Note that impersonated API calls are subject to the same constraints as end user calls,
-   * including access tier membership and Terra ToS enforcement (all Terra requests will fail for
-   * accounts that have not completed the latest ToS).
+   * including access tier membership.
    */
-  public ApiClient newImpersonatedApiClient(String userEmail) throws IOException {
+  public ApiClient newImpersonatedRawlsApiClient(String userEmail) throws IOException {
     OAuth2Credentials delegatedCreds = getDelegatedUserCredentials(userEmail);
-    ApiClient client = newApiClient();
+    ApiClient client = newRawlsApiClient();
     client.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
     return client;
   }
 
   /**
-   * Creates a Firecloud API client, unauthenticated. Most clients should use an authenticated,
-   * request scoped bean instead of calling this directly.
+   * Creates a Rawls API client, unauthenticated. Most clients should use an authenticated, request
+   * scoped bean instead of calling this directly.
    */
-  public ApiClient newApiClient() {
+  public ApiClient newRawlsApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
