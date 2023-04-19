@@ -24,16 +24,16 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
-import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -227,10 +227,10 @@ public class FireCloudServiceImplTest {
 
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
-    ArgumentCaptor<FirecloudCreateRawlsV2BillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsV2BillingProjectFullRequest.class);
+    ArgumentCaptor<RawlsCreateRawlsV2BillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(RawlsCreateRawlsV2BillingProjectFullRequest.class);
     verify(billingV2Api).createBillingProjectFullV2(captor.capture());
-    FirecloudCreateRawlsV2BillingProjectFullRequest request = captor.getValue();
+    RawlsCreateRawlsV2BillingProjectFullRequest request = captor.getValue();
 
     // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
     // as BillingProjectBufferService.
