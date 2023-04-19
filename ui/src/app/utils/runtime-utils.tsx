@@ -40,7 +40,6 @@ import {
   markCompoundRuntimeOperationCompleted,
   registerCompoundRuntimeOperation,
   runtimeStore,
-  serverConfigStore,
   useStore,
 } from 'app/utils/stores';
 
@@ -929,9 +928,8 @@ export const maybeInitializeRuntime = async (
 // useDisk hook is a simple hook to populate the disk store.
 // This is only used by other disk hooks
 export const useDisk = (currentWorkspaceNamespace: string) => {
-  const enablePD = serverConfigStore.get().config.enablePersistentDisk;
   useEffect(() => {
-    if (!enablePD || !currentWorkspaceNamespace) {
+    if (!currentWorkspaceNamespace) {
       return;
     }
     const getDisk = withAsyncErrorHandling(

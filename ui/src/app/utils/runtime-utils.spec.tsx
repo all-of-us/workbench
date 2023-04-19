@@ -41,13 +41,11 @@ const TestComponent = () => {
 
 describe('runtime-utils', () => {
   let runtimeApiStub: RuntimeApiStub;
-  let enablePd: boolean;
 
   beforeEach(() => {
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
     serverConfigStore.set({ config: { ...defaultServerConfig } });
-    enablePd = serverConfigStore.get().config.enablePersistentDisk;
 
     // For a component using the runtime store to function properly, there must
     // be an active workspace context provided - in the real application this is
@@ -58,12 +56,10 @@ describe('runtime-utils', () => {
       runtime: undefined,
       runtimeLoaded: true,
     });
-    if (enablePd) {
-      diskStore.set({
-        workspaceNamespace: WORKSPACE_NS,
-        gcePersistentDisk: undefined,
-      });
-    }
+    diskStore.set({
+      workspaceNamespace: WORKSPACE_NS,
+      gcePersistentDisk: undefined,
+    });
     jest.useFakeTimers();
   });
 
