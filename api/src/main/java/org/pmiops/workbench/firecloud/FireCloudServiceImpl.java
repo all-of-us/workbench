@@ -20,8 +20,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.api.BillingApi;
-import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -29,14 +27,11 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsV2BillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudProfile;
-import org.pmiops.workbench.firecloud.model.FirecloudUpdateRawlsBillingAccountRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
@@ -45,6 +40,9 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceRequestClone;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
+import org.pmiops.workbench.rawls.model.RawlsUpdateRawlsBillingAccountRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryException;
@@ -61,7 +59,6 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private final Provider<WorkbenchConfig> configProvider;
 
-  private final Provider<BillingApi> billingApiProvider;
   private final Provider<BillingV2Api> serviceAccountBillingV2ApiProvider;
   private final Provider<BillingV2Api> endUserBillingV2ApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
@@ -84,6 +81,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final FirecloudApiClientFactory firecloudApiClientFactory;
 
   private final FirecloudRetryHandler retryHandler;
+  private final RawlsRetryHandler rawlsRetryHandler;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -113,10 +111,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   public FireCloudServiceImpl(
       Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
-      Provider<BillingApi> billingApiProvider,
-      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_BILLING_V2_API)
+      @Qualifier(RawlsConfig.SERVICE_ACCOUNT_BILLING_V2_API)
           Provider<BillingV2Api> serviceAccountBillingV2ApiProvider,
-      @Qualifier(FireCloudConfig.END_USER_STATIC_BILLING_V2_API)
+      @Qualifier(RawlsConfig.END_USER_STATIC_BILLING_V2_API)
           Provider<BillingV2Api> endUserBillingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
@@ -134,10 +131,10 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
       FirecloudApiClientFactory firecloudApiClientFactory,
-      FirecloudRetryHandler retryHandler) {
+      FirecloudRetryHandler retryHandler,
+      RawlsRetryHandler rawlsRetryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
-    this.billingApiProvider = billingApiProvider;
     this.serviceAccountBillingV2ApiProvider = serviceAccountBillingV2ApiProvider;
     this.endUserBillingV2ApiProvider = endUserBillingV2ApiProvider;
     this.groupsApiProvider = groupsApiProvider;
@@ -151,6 +148,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.retryHandler = retryHandler;
+    this.rawlsRetryHandler = rawlsRetryHandler;
   }
 
   @Override
@@ -226,13 +224,13 @@ public class FireCloudServiceImpl implements FireCloudService {
               billingProjectName, WORKSPACE_DELIMITER));
     }
 
-    FirecloudCreateRawlsV2BillingProjectFullRequest request =
-        new FirecloudCreateRawlsV2BillingProjectFullRequest()
+    RawlsCreateRawlsV2BillingProjectFullRequest request =
+        new RawlsCreateRawlsV2BillingProjectFullRequest()
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(billingProjectName)
             .servicePerimeter(servicePerimeter);
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
           billingV2Api.createBillingProjectFullV2(request);
           return null;
@@ -243,27 +241,21 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void deleteBillingProject(String billingProjectName) {
     BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
-          billingV2Api.deleteBillingProject(billingProjectName);
+          billingV2Api.deleteBillingProjectV2(billingProjectName);
           return null;
         });
   }
 
   @Override
-  public FirecloudBillingProjectStatus getBillingProjectStatus(String billingProjectName) {
-    return retryHandler.run(
-        (context) -> billingApiProvider.get().billingProjectStatus(billingProjectName));
-  }
-
-  @Override
   public void updateBillingAccount(String billingProjectName, String billingAccount) {
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
           endUserBillingV2ApiProvider
               .get()
               .updateBillingProjectBillingAccount(
-                  new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
+                  new RawlsUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
                   billingProjectName);
           return null;
         });
@@ -271,12 +263,12 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void updateBillingAccountAsService(String billingProjectName, String billingAccount) {
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
           serviceAccountBillingV2ApiProvider
               .get()
               .updateBillingProjectBillingAccount(
-                  new FirecloudUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
+                  new RawlsUpdateRawlsBillingAccountRequest().billingAccount(billingAccount),
                   billingProjectName);
           return null;
         });
@@ -284,11 +276,11 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private void addRoleToBillingProject(String email, String projectName, String role) {
     Preconditions.checkArgument(email.contains("@"));
+    BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
 
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
-          billingApi.addUserToBillingProject(projectName, role, email);
+          billingV2Api.addUserToBillingProjectV2(projectName, role, email);
           return null;
         });
   }
@@ -303,22 +295,17 @@ public class FireCloudServiceImpl implements FireCloudService {
       String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken) {
     Preconditions.checkArgument(ownerEmailToRemove.contains("@"));
 
-    final BillingApi scopedBillingApi;
+    final BillingV2Api billingV2Api;
 
     if (callerAccessToken.isPresent()) {
-      // use a private instance of BillingApi instead of the provider
-      // b/c we don't want to modify its ApiClient globally
-      final ApiClient apiClient = firecloudApiClientFactory.newApiClient();
-      apiClient.setAccessToken(callerAccessToken.get());
-      scopedBillingApi = new BillingApi();
-      scopedBillingApi.setApiClient(apiClient);
+      billingV2Api = endUserBillingV2ApiProvider.get();
     } else {
-      scopedBillingApi = billingApiProvider.get();
+      billingV2Api = serviceAccountBillingV2ApiProvider.get();
     }
 
-    retryHandler.run(
+    rawlsRetryHandler.run(
         (context) -> {
-          scopedBillingApi.removeUserFromBillingProject(
+          billingV2Api.removeUserFromBillingProjectV2(
               projectName, OWNER_FC_ROLE, ownerEmailToRemove);
           return null;
         });

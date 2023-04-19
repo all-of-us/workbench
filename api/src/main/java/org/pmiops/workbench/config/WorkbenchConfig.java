@@ -129,6 +129,7 @@ public class WorkbenchConfig {
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
+    public String rawlsBaseUrl;
     public String samBaseUrl;
     public String terraUiBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;

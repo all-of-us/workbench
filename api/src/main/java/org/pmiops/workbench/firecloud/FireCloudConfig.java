@@ -13,8 +13,6 @@ import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.api.BillingApi;
-import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -53,8 +51,6 @@ public class FireCloudConfig {
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
   public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
-  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
-  public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -180,36 +176,6 @@ public class FireCloudConfig {
   public StaticNotebooksApi endUserStaticNotebooksApi(
       @Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     StaticNotebooksApi api = new StaticNotebooksApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingApi billingApi(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    // Billing calls are made by the AllOfUs service account, rather than using the end user's
-    // credentials.
-    BillingApi api = new BillingApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = SERVICE_ACCOUNT_BILLING_V2_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingV2Api serviceAccountBillingV2Api(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    // Billing calls are made by the AllOfUs service account, rather than using the end user's
-    // credentials.
-    BillingV2Api api = new BillingV2Api();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = END_USER_STATIC_BILLING_V2_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingV2Api endUserBillingV2Api(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    // Billing calls are made by the user
-    BillingV2Api api = new BillingV2Api();
     api.setApiClient(apiClient);
     return api;
   }
