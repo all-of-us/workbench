@@ -75,6 +75,7 @@ import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
@@ -672,7 +673,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private void stubMockFirecloudGetWorkspace() {
     RawlsWorkspaceResponse workspaceResponse = new RawlsWorkspaceResponse();
-    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
+    workspaceResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }
 

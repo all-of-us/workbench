@@ -488,7 +488,10 @@ public class WorkspacesControllerTest {
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
-    doReturn(fcResponse)
+    RawlsWorkspaceResponse fcGetResponse = new RawlsWorkspaceResponse();
+    fcGetResponse.setWorkspace(fcWorkspace);
+    fcGetResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
+    doReturn(fcGetResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
     List<RawlsWorkspaceListResponse> workspaceResponses = fireCloudService.getWorkspaces();

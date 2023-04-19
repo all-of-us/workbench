@@ -45,6 +45,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
@@ -663,14 +664,18 @@ public class NotebooksControllerTest {
   }
 
   private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     doReturn(fcResponse)
         .when(mockFireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
+
+    RawlsWorkspaceListResponse fcListResponse = new RawlsWorkspaceListResponse();
+    fcListResponse.setWorkspace(fcWorkspace);
+    fcListResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     List<RawlsWorkspaceListResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
-    workspaceResponses.add(fcResponse);
+    workspaceResponses.add(fcListResponse);
     doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces();
   }
 }
