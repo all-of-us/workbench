@@ -80,9 +80,9 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
@@ -266,7 +266,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 workbenchConfigProvider));
 
     RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
         .thenReturn(fcResponse)
         .thenReturn(fcResponse);

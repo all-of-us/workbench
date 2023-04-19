@@ -488,9 +488,11 @@ public class WorkspacesControllerTest {
     RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
+
     RawlsWorkspaceResponse fcGetResponse = new RawlsWorkspaceResponse();
     fcGetResponse.setWorkspace(fcWorkspace);
     fcGetResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
+
     doReturn(fcGetResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
@@ -594,7 +596,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(mockWorkspaceAuditor).fireCreateAction(any(Workspace.class), anyLong());
 
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2696,7 +2698,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2716,7 +2718,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2735,7 +2737,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));
@@ -2754,7 +2756,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspaceAdminService.setPublished(workspace.getNamespace(), workspace.getId(), true);
 
-    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    RawlsWorkspaceListResponse fcResponse = new RawlsWorkspaceListResponse();
     fcResponse.setWorkspace(
         TestMockFactory.createFirecloudWorkspace(
             workspace.getNamespace(), workspace.getName(), null));

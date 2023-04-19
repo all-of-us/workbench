@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.model.BillingStatus;
@@ -103,7 +102,7 @@ public class WorkspaceAuthServiceTest {
         Arguments.of("OWNER", WorkspaceAccessLevel.OWNER),
         Arguments.of("WRITER", WorkspaceAccessLevel.WRITER),
         Arguments.of("READER", WorkspaceAccessLevel.READER),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.NO_ACCESS),
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.NO_ACCESS),
         Arguments.of("PROJECT_OWNER", WorkspaceAccessLevel.OWNER));
   }
 
@@ -130,9 +129,8 @@ public class WorkspaceAuthServiceTest {
     return Stream.of(
         Arguments.of("WRITER", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
         Arguments.of("READER", WorkspaceAccessLevel.WRITER, ForbiddenException.class),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
-        Arguments.of("invalid status", WorkspaceAccessLevel.READER, ServerErrorException.class));
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class));
   }
 
   @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
