@@ -19,6 +19,5 @@ public interface FirecloudMapper {
   WorkspaceAccessLevel fcToApiWorkspaceAccessLevel(RawlsWorkspaceAccessLevel accessLevel);
 
   @Named("apiToFcWorkspaceAccessLevel")
-  @ValueMapping(source = "OWNER", target = "PROJECT_OWNER")
   RawlsWorkspaceAccessLevel apiToFcWorkspaceAccessLevel(WorkspaceAccessLevel accessLevel);
 }
