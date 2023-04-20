@@ -39,7 +39,7 @@ describe('Cromwell GKE App', () => {
 
     // now we can create a Cromwell app by clicking the button on this page
 
-    const createXPath = `${configPanel.getXpath()}//*[@id="cromwell-cloud-environment-create-button"]`;
+    const createXPath = `${configPanel.getXpath()}//*[@id="Cromwell-cloud-environment-create-button"]`;
     const createButton = new Button(page, createXPath);
     expect(await createButton.exists()).toBeTruthy();
     await createButton.click();

@@ -2,28 +2,19 @@ import * as React from 'react';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
-import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
-import { createUserApp } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import {
-  canCreateApp,
-  defaultRStudioConfig,
-  findApp,
-  UIAppType,
-} from './apps-panel/utils';
+import { defaultRStudioConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
-
-const { useState } = React;
 
 const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
   defaultRStudioConfig.kubernetesRuntimeConfig.machineType
@@ -59,33 +50,12 @@ export const BaseRStudioConfigurationPanel = ({
   profileState,
   gkeAppsInWorkspace,
 }: RStudioConfigurationPanelProps) => {
-  const [creatingRStudioApp, setCreatingRStudioApp] = useState(false);
-
   const app = findApp(gkeAppsInWorkspace, UIAppType.RSTUDIO);
-
   const { profile } = profileState;
-
-  const createEnabled = !creatingRStudioApp && canCreateApp(app);
 
   const onDismiss = () => {
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
-  };
-
-  const onCreate = () => {
-    setCreatingRStudioApp(true);
-    fetchWithErrorModal(
-      () => createUserApp(workspace.namespace, defaultRStudioConfig),
-      {
-        customErrorResponseFormatter: (error: ApiErrorResponse) =>
-          error?.originalResponse?.status === 409 && {
-            title: 'Error Creating RStudio Environment',
-            message:
-              'Please wait a few minutes and try to create your RStudio Environment again.',
-            onDismiss,
-          },
-      }
-    ).then(() => onDismiss());
   };
 
   return (
@@ -128,14 +98,12 @@ export const BaseRStudioConfigurationPanel = ({
           justifyContent: 'flex-end',
         }}
       >
-        <Button
-          id='rstudio-cloud-environment-create-button'
-          aria-label='rstudio cloud environment create button'
-          onClick={onCreate}
-          disabled={!createEnabled}
-        >
-          Start
-        </Button>
+        <CreateGKEAppButton
+          createAppRequest={defaultRStudioConfig}
+          existingApp={app}
+          workspaceNamespace={workspace.namespace}
+          onDismiss={onDismiss}
+        />
       </FlexRow>
     </FlexColumn>
   );

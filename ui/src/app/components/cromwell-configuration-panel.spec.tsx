@@ -95,7 +95,7 @@ describe('CromwellConfigurationPanel', () => {
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
-      .find('#cromwell-cloud-environment-create-button')
+      .find('#Cromwell-cloud-environment-create-button')
       .first();
 
     startButton.simulate('click');
@@ -123,7 +123,7 @@ describe('CromwellConfigurationPanel', () => {
       });
       expect(
         wrapper
-          .find('#cromwell-cloud-environment-create-button')
+          .find('#Cromwell-cloud-environment-create-button')
           .first()
           .prop('disabled')
       ).toBeFalsy();
@@ -139,7 +139,7 @@ describe('CromwellConfigurationPanel', () => {
       });
       expect(
         wrapper
-          .find('#cromwell-cloud-environment-create-button')
+          .find('#Cromwell-cloud-environment-create-button')
           .first()
           .prop('disabled')
       ).toBeTruthy();

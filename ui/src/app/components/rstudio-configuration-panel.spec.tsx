@@ -95,7 +95,7 @@ describe('RStudioConfigurationPanel', () => {
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
-      .find('#rstudio-cloud-environment-create-button')
+      .find('#RStudio-cloud-environment-create-button')
       .first();
 
     startButton.simulate('click');
@@ -123,7 +123,7 @@ describe('RStudioConfigurationPanel', () => {
       });
       expect(
         wrapper
-          .find('#rstudio-cloud-environment-create-button')
+          .find('#RStudio-cloud-environment-create-button')
           .first()
           .prop('disabled')
       ).toBeFalsy();
@@ -139,7 +139,7 @@ describe('RStudioConfigurationPanel', () => {
       });
       expect(
         wrapper
-          .find('#rstudio-cloud-environment-create-button')
+          .find('#RStudio-cloud-environment-create-button')
           .first()
           .prop('disabled')
       ).toBeTruthy();
