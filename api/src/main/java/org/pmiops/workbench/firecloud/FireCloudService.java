@@ -46,9 +46,6 @@ public interface FireCloudService {
 
   void deleteBillingProject(String billingProjectName);
 
-  /** Get Billing Project Status */
-  FirecloudBillingProjectStatus getBillingProjectStatus(String billingProjectName);
-
   /** Adds the specified user as an owner to the specified billing project. */
   void addOwnerToBillingProject(String ownerEmail, String billingProjectName);
 
