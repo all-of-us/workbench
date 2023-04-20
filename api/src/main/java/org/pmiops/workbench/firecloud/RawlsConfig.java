@@ -10,7 +10,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
-import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -74,32 +73,6 @@ public class RawlsConfig {
       throw new ServerErrorException(e);
     }
     return apiClient;
-  }
-
-  @Bean(name = END_USER_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi lenientTimeoutWorkspacesApi(
-      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi workspacesApiAcls(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
   }
 
   @Bean(name = SERVICE_ACCOUNT_BILLING_V2_API)

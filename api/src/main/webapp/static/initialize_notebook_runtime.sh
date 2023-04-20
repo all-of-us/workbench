@@ -138,3 +138,6 @@ backend {
 }
 EOF
 fi
+
+mkdir -p $HOME/bucket-folder
+gcsfuse --foreground --debug_fuse --debug_fs --debug_gcs --debug_http ${WORKSPACE_BUCKET#*//} $HOME/bucket-folder

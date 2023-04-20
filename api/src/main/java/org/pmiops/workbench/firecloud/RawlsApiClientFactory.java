@@ -89,7 +89,7 @@ public class RawlsApiClientFactory {
   public ApiClient newRawlsApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    apiClient.setBasePath(workbenchConfig.firecloud.rawlsBaseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     apiClient
