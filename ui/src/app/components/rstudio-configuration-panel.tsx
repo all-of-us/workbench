@@ -4,6 +4,7 @@ import { AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
@@ -21,7 +22,6 @@ import {
   UIAppType,
 } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
-import { TooltipTrigger } from './popups';
 
 const { useState } = React;
 
@@ -113,19 +113,14 @@ export const BaseRStudioConfigurationPanel = ({
         />
       </div>
       <div style={{ ...styles.controlSection }}>
-        <FlexRow style={{ alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-            Cloud compute profile
-          </div>
-          <TooltipTrigger
-            content='The cloud compute profile for RStudio beta is non-configurable.'
-            side={'right'}
-          >
-            <div style={styles.disabledCloudProfile}>
-              {`${cpu} CPUS, ${memory}GB RAM, ${defaultRStudioConfig.persistentDiskRequest.size}GB disk`}
-            </div>
-          </TooltipTrigger>
-        </FlexRow>
+        <DisabledCloudComputeProfile
+          cpu={cpu}
+          memory={memory}
+          persistentDiskRequestSize={
+            defaultRStudioConfig.persistentDiskRequest.size
+          }
+          appType={AppType.RSTUDIO}
+        />
       </div>
       <FlexRow
         style={{

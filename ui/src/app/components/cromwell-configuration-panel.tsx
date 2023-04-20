@@ -4,6 +4,7 @@ import { AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
@@ -27,7 +28,6 @@ import {
   UIAppType,
 } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
-import { TooltipTrigger } from './popups';
 
 const { useState } = React;
 
@@ -153,19 +153,14 @@ export const BaseCromwellConfigurationPanel = ({
         </WarningMessage>
       </div>
       <div style={{ ...styles.controlSection }}>
-        <FlexRow style={{ alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-            Cloud compute profile
-          </div>
-          <TooltipTrigger
-            content='The cloud compute profile for Cromwell beta is non-configurable.'
-            side={'right'}
-          >
-            <div style={styles.disabledCloudProfile}>
-              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
-            </div>
-          </TooltipTrigger>
-        </FlexRow>
+        <DisabledCloudComputeProfile
+          cpu={cpu}
+          memory={memory}
+          persistentDiskRequestSize={
+            defaultCromwellConfig.persistentDiskRequest.size
+          }
+          appType={AppType.CROMWELL}
+        />
       </div>
       <div style={{ ...styles.controlSection }}>
         <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
