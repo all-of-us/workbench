@@ -8,7 +8,7 @@ import { Button } from 'app/components/buttons';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { appTypeToString, createUserApp } from 'app/utils/user-apps-utils';
 
-interface CreateGKEAppButtonProps {
+export interface CreateGKEAppButtonProps {
   createAppRequest: CreateAppRequest;
   existingApp: UserAppEnvironment | null | undefined;
   workspaceNamespace: string;

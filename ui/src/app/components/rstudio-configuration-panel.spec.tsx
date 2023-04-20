@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppStatus, DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
+import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -11,10 +11,7 @@ import {
   mountWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import {
-  AppsApiStub,
-  createListAppsRStudioResponse,
-} from 'testing/stubs/apps-api-stub';
+import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
@@ -22,7 +19,6 @@ import {
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
-import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultRStudioConfig } from './apps-panel/utils';
 import {
@@ -106,44 +102,6 @@ describe('RStudioConfigurationPanel', () => {
       defaultRStudioConfig
     );
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
-  const createDisabledStatuses = minus(
-    ALL_GKE_APP_STATUSES,
-    createEnabledStatuses
-  );
-
-  describe('should allow creating an RStudio app for certain app statuses', () => {
-    test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
-      const wrapper = await component({
-        gkeAppsInWorkspace: [
-          createListAppsRStudioResponse({ status: appStatus }),
-        ],
-      });
-      expect(
-        wrapper
-          .find('#RStudio-cloud-environment-create-button')
-          .first()
-          .prop('disabled')
-      ).toBeFalsy();
-    });
-  });
-
-  describe('should allow creating an RStudio app for certain app statuses', () => {
-    test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
-      const wrapper = await component({
-        gkeAppsInWorkspace: [
-          createListAppsRStudioResponse({ status: appStatus }),
-        ],
-      });
-      expect(
-        wrapper
-          .find('#RStudio-cloud-environment-create-button')
-          .first()
-          .prop('disabled')
-      ).toBeTruthy();
-    });
   });
 
   it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
