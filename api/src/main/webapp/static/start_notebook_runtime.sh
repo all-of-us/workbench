@@ -12,5 +12,4 @@ set -x
 pushd /usr/local/share/wondershaper
 wondershaper -a "eth0" -u 16384 # kilobits; 16Mib/s (2MiB/s)
 
-
 popd
