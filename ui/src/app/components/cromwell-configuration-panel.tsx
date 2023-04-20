@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
@@ -7,7 +6,7 @@ import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { appsApi } from 'app/services/swagger-fetch-clients';
+import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
@@ -69,31 +68,23 @@ export interface CromwellConfigurationPanelProps {
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
+  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
 }
 
-export const CromwellConfigurationPanel = ({
+export const BaseCromwellConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
+  gkeAppsInWorkspace,
 }: CromwellConfigurationPanelProps) => {
-  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
-    useState<UserAppEnvironment[]>();
   const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
 
   const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
-  const loadingApps = gkeAppsInWorkspace === undefined;
 
   const { profile } = profileState;
 
-  useEffect(() => {
-    appsApi()
-      .listAppsInWorkspace(workspace.namespace)
-      .then(setGkeAppsInWorkspace);
-  }, []);
-
-  const createEnabled =
-    !loadingApps && !creatingCromwellApp && canCreateApp(app);
+  const createEnabled = !creatingCromwellApp && canCreateApp(app);
 
   const onDismiss = () => {
     onClose();
@@ -210,3 +201,7 @@ export const CromwellConfigurationPanel = ({
     </FlexColumn>
   );
 };
+
+export const CromwellConfigurationPanel = withWorkspaceGkeApps(
+  BaseCromwellConfigurationPanel
+);

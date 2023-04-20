@@ -26,7 +26,7 @@ import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultRStudioConfig } from './apps-panel/utils';
 import {
-  RStudioConfigurationPanel,
+  BaseRStudioConfigurationPanel,
   RStudioConfigurationPanelProps,
 } from './rstudio-configuration-panel';
 
@@ -49,6 +49,7 @@ describe('RStudioConfigurationPanel', () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     },
+    gkeAppsInWorkspace: [],
   };
 
   let disksApiStub: DisksApiStub;
@@ -57,7 +58,7 @@ describe('RStudioConfigurationPanel', () => {
     propOverrides?: Partial<RStudioConfigurationPanelProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<RStudioConfigurationPanel {...allProps} />);
+    const c = mountWithRouter(<BaseRStudioConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };
@@ -85,10 +86,9 @@ describe('RStudioConfigurationPanel', () => {
   });
 
   it('start button should create rstudio and close panel', async () => {
-    jest
-      .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementationOnce(() => Promise.resolve([]));
-    const wrapper = await component();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+    });
     await waitOneTickAndUpdate(wrapper);
 
     const spyCreateApp = jest
@@ -116,14 +116,11 @@ describe('RStudioConfigurationPanel', () => {
 
   describe('should allow creating an RStudio app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
-      jest
-        .spyOn(appsApi(), 'listAppsInWorkspace')
-        .mockImplementationOnce(() =>
-          Promise.resolve([
-            createListAppsRStudioResponse({ status: appStatus }),
-          ])
-        );
-      const wrapper = await component();
+      const wrapper = await component({
+        gkeAppsInWorkspace: [
+          createListAppsRStudioResponse({ status: appStatus }),
+        ],
+      });
       expect(
         wrapper
           .find('#rstudio-cloud-environment-create-button')
@@ -135,14 +132,11 @@ describe('RStudioConfigurationPanel', () => {
 
   describe('should allow creating an RStudio app for certain app statuses', () => {
     test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
-      jest
-        .spyOn(appsApi(), 'listAppsInWorkspace')
-        .mockImplementationOnce(() =>
-          Promise.resolve([
-            createListAppsRStudioResponse({ status: appStatus }),
-          ])
-        );
-      const wrapper = await component();
+      const wrapper = await component({
+        gkeAppsInWorkspace: [
+          createListAppsRStudioResponse({ status: appStatus }),
+        ],
+      });
       expect(
         wrapper
           .find('#rstudio-cloud-environment-create-button')

@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { appsApi } from 'app/services/swagger-fetch-clients';
+import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -50,31 +49,23 @@ export interface RStudioConfigurationPanelProps {
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
+  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
 }
 
-export const RStudioConfigurationPanel = ({
+export const BaseRStudioConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
+  gkeAppsInWorkspace,
 }: RStudioConfigurationPanelProps) => {
-  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
-    useState<UserAppEnvironment[]>();
   const [creatingRStudioApp, setCreatingRStudioApp] = useState(false);
 
   const app = findApp(gkeAppsInWorkspace, UIAppType.RSTUDIO);
-  const loadingApps = gkeAppsInWorkspace === undefined;
 
   const { profile } = profileState;
 
-  useEffect(() => {
-    appsApi()
-      .listAppsInWorkspace(workspace.namespace)
-      .then(setGkeAppsInWorkspace);
-  }, []);
-
-  const createEnabled =
-    !loadingApps && !creatingRStudioApp && canCreateApp(app);
+  const createEnabled = !creatingRStudioApp && canCreateApp(app);
 
   const onDismiss = () => {
     onClose();
@@ -154,3 +145,7 @@ export const RStudioConfigurationPanel = ({
     </FlexColumn>
   );
 };
+
+export const RStudioConfigurationPanel = withWorkspaceGkeApps(
+  BaseRStudioConfigurationPanel
+);

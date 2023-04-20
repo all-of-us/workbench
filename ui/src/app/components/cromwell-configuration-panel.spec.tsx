@@ -3,6 +3,10 @@ import * as React from 'react';
 import { AppStatus, DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
+import {
+  BaseCromwellConfigurationPanel,
+  CromwellConfigurationPanelProps,
+} from 'app/components/cromwell-configuration-panel';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -25,10 +29,6 @@ import {
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
-import {
-  CromwellConfigurationPanel,
-  CromwellConfigurationPanelProps,
-} from './cromwell-configuration-panel';
 
 describe('CromwellConfigurationPanel', () => {
   const onClose = jest.fn();
@@ -49,6 +49,7 @@ describe('CromwellConfigurationPanel', () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     },
+    gkeAppsInWorkspace: [],
   };
 
   let disksApiStub: DisksApiStub;
@@ -57,7 +58,7 @@ describe('CromwellConfigurationPanel', () => {
     propOverrides?: Partial<CromwellConfigurationPanelProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
+    const c = mountWithRouter(<BaseCromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };
@@ -85,10 +86,9 @@ describe('CromwellConfigurationPanel', () => {
   });
 
   it('start button should create cromwell and close panel', async () => {
-    jest
-      .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementationOnce(() => Promise.resolve([]));
-    const wrapper = await component();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+    });
     await waitOneTickAndUpdate(wrapper);
 
     const spyCreateApp = jest
@@ -116,14 +116,11 @@ describe('CromwellConfigurationPanel', () => {
 
   describe('should allow creating a Cromwell app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
-      jest
-        .spyOn(appsApi(), 'listAppsInWorkspace')
-        .mockImplementationOnce(() =>
-          Promise.resolve([
-            createListAppsCromwellResponse({ status: appStatus }),
-          ])
-        );
-      const wrapper = await component();
+      const wrapper = await component({
+        gkeAppsInWorkspace: [
+          createListAppsCromwellResponse({ status: appStatus }),
+        ],
+      });
       expect(
         wrapper
           .find('#cromwell-cloud-environment-create-button')
@@ -135,14 +132,11 @@ describe('CromwellConfigurationPanel', () => {
 
   describe('should allow creating a Cromwell app for certain app statuses', () => {
     test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
-      jest
-        .spyOn(appsApi(), 'listAppsInWorkspace')
-        .mockImplementationOnce(() =>
-          Promise.resolve([
-            createListAppsCromwellResponse({ status: appStatus }),
-          ])
-        );
-      const wrapper = await component();
+      const wrapper = await component({
+        gkeAppsInWorkspace: [
+          createListAppsCromwellResponse({ status: appStatus }),
+        ],
+      });
       expect(
         wrapper
           .find('#cromwell-cloud-environment-create-button')
