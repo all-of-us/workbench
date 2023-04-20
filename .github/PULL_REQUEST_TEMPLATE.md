@@ -12,5 +12,6 @@ Reminder: If you decide to merge with any failing checks, add an explanatory com
 - [ ] I have manually tested this change and my testing process is described above
 - [ ] This PR includes appropriate automated tests, and I have documented any behavior that cannot be tested with code
 - [ ] I have added explanatory comments where the logic is not obvious
+- [ ] If this change impacts deployment safety (e.g. removing/altering APIs which are in use) I have documented the impacts in the description
 - [ ] If this includes a new feature flag, I have created and linked new JIRA tickets to (a) turn on the feature flag and (b) remove it later
 - [ ] If this includes a UI change, I have taken screen recordings or screenshots of the new behavior and notified the PO and UX designer in [Slack](https://pmi-engteam.slack.com/archives/C02MWP2RN5P)
