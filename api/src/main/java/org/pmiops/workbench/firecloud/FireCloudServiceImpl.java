@@ -291,17 +291,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken) {
+  public void removeOwnerFromBillingProjectAsService(
+      String ownerEmailToRemove, String projectName) {
     Preconditions.checkArgument(ownerEmailToRemove.contains("@"));
 
-    final BillingV2Api billingV2Api;
-
-    if (callerAccessToken.isPresent()) {
-      billingV2Api = endUserBillingV2ApiProvider.get();
-    } else {
-      billingV2Api = serviceAccountBillingV2ApiProvider.get();
-    }
+    final BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
+    ;
 
     rawlsRetryHandler.run(
         (context) -> {
