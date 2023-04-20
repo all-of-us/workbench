@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
