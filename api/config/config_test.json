@@ -120,7 +120,8 @@
     "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
-    "enableDataExplorer": false
+    "enableDataExplorer": false,
+    "enableTanagra": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
