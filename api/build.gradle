@@ -166,6 +166,9 @@ swaggerSources {
     firecloud swagger3JavaClient("firecloud.yaml", "firecloud", [
             '--model-name-prefix', 'Firecloud'
     ])
+    rawls swagger3JavaClient("rawls.yaml", "rawls", [
+            '--model-name-prefix', 'Rawls'
+    ])
     notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
     jira swagger3JavaClient("jira.yaml", "jira")
     mandrill swagger2JavaClient("mandrill.yaml", "mandrill")

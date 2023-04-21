@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -46,9 +45,6 @@ public interface FireCloudService {
 
   void deleteBillingProject(String billingProjectName);
 
-  /** Get Billing Project Status */
-  FirecloudBillingProjectStatus getBillingProjectStatus(String billingProjectName);
-
   /** Adds the specified user as an owner to the specified billing project. */
   void addOwnerToBillingProject(String ownerEmail, String billingProjectName);
 
@@ -60,8 +56,7 @@ public interface FireCloudService {
    * <p>The call is made by the SA by default. An optional callerAccessToken can be passed in to use
    * that as the caller instead.
    */
-  void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
+  void removeOwnerFromBillingProjectAsService(String ownerEmailToRemove, String projectName);
 
   int NUM_RANDOM_CHARS = 20;
   String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
