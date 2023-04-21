@@ -16,3 +16,4 @@ Reminder: If you decide to merge with any failing checks, add an explanatory com
 - [ ] If this change impacts deployment safety (e.g. removing/altering APIs which are in use) I have documented the impacts in the description
 - [ ] If this includes a new feature flag, I have created and linked new JIRA tickets to (a) turn on the feature flag and (b) remove it later
 - [ ] If this includes a UI change, I have taken screen recordings or screenshots of the new behavior and notified the PO and UX designer in [Slack](https://pmi-engteam.slack.com/archives/C02MWP2RN5P)
+- [ ] If this includes an API change, I have run the relevant E2E tests locally because API changes are not covered by our PR checks
