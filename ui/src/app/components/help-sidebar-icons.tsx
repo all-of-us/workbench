@@ -16,8 +16,6 @@ import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
-  AppStatus,
-  AppType,
   CdrVersionTiersResponse,
   Criteria,
   GenomicExtractionJob,
@@ -42,7 +40,12 @@ import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
 import { AppStatusIndicator } from './app-status-indicator';
-import { appAssets, showAppsPanel, UIAppType } from './apps-panel/utils';
+import {
+  appAssets,
+  findApp,
+  showAppsPanel,
+  UIAppType,
+} from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';
@@ -96,6 +99,9 @@ const iconStyles = reactStyles({
   },
 });
 
+export const rstudioConfigIconId = 'rstudioConfig';
+export const cromwellConfigIconId = 'cromwellConfig';
+
 export type SidebarIconId =
   | 'criteria'
   | 'concept'
@@ -105,7 +111,8 @@ export type SidebarIconId =
   | 'annotations'
   | 'apps'
   | 'runtimeConfig'
-  | 'cromwellConfig'
+  | typeof cromwellConfigIconId
+  | typeof rstudioConfigIconId
   | 'terminal'
   | 'genomicExtractions';
 
@@ -159,19 +166,17 @@ const CompoundIcon = ({
 
 export const UserAppIcon = (props: {
   iconConfig: IconConfig;
-  workspaceNamespace: string;
   userSuspended: boolean;
-  status: AppStatus;
   appType: UIAppType;
 }) => {
-  const { iconConfig, workspaceNamespace, userSuspended, status, appType } =
-    props;
+  const { iconConfig, userSuspended, appType } = props;
+  const { userApps } = useStore(userAppsStore);
   const appTypeAssets = appAssets.find((aa) => aa.appType === appType);
   return (
     <CompoundIcon {...{ iconConfig }} iconPath={appTypeAssets?.icon}>
       <AppStatusIndicator
-        {...{ workspaceNamespace, userSuspended }}
-        appStatus={status}
+        {...{ userSuspended }}
+        appStatus={findApp(userApps, appType)?.status}
         style={styles.statusIconContainer}
       />
     </CompoundIcon>
@@ -374,7 +379,6 @@ const DisplayIcon = (props: DisplayIconProps) => {
     icon,
   } = props;
 
-  const { userApps } = useStore(userAppsStore);
   return switchCase(
     icon.id,
     [
@@ -419,15 +423,21 @@ const DisplayIcon = (props: DisplayIconProps) => {
       ),
     ],
     [
-      'cromwellConfig',
+      cromwellConfigIconId,
       () => (
         <UserAppIcon
           iconConfig={icon}
-          workspaceNamespace={workspace.namespace}
-          status={
-            userApps?.find((app) => app.appType === AppType.CROMWELL)?.status
-          }
           appType={UIAppType.CROMWELL}
+          {...{ userSuspended }}
+        />
+      ),
+    ],
+    [
+      rstudioConfigIconId,
+      () => (
+        <UserAppIcon
+          iconConfig={icon}
+          appType={UIAppType.RSTUDIO}
           {...{ userSuspended }}
         />
       ),
@@ -504,8 +514,22 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
 
   const disableEnvironmentSidebarIcons = !!loadingError || userSuspended;
 
-  // TODO: not sure why the iconKey needs to be converted to string here
-  const config: { [iconKey: string]: IconConfig } = {
+  const gkeAppIconConfig = (
+    id: SidebarIconId,
+    label: string,
+    tooltip: string
+  ): IconConfig => ({
+    id,
+    disabled: disableEnvironmentSidebarIcons,
+    faIcon: null,
+    label,
+    showIcon: () => true,
+    style: { width: '36px' },
+    tooltip: runtimeTooltip(tooltip, loadingError, userSuspended),
+    hasContent: true,
+  });
+
+  const config: Record<SidebarIconId, IconConfig> = {
     criteria: {
       id: 'criteria',
       disabled: false,
@@ -590,20 +614,16 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       ),
       hasContent: true,
     },
-    cromwellConfig: {
-      id: 'cromwellConfig',
-      disabled: disableEnvironmentSidebarIcons,
-      faIcon: null,
-      label: 'Cromwell Icon',
-      showIcon: () => true,
-      style: { width: '36px' },
-      tooltip: runtimeTooltip(
-        'Cromwell Cloud Environment',
-        loadingError,
-        userSuspended
-      ),
-      hasContent: true,
-    },
+    [cromwellConfigIconId]: gkeAppIconConfig(
+      cromwellConfigIconId,
+      'Cromwell Icon',
+      'Cromwell Cloud Environment'
+    ),
+    [rstudioConfigIconId]: gkeAppIconConfig(
+      rstudioConfigIconId,
+      'RStudio Icon',
+      'RStudio Cloud Environment'
+    ),
     terminal: {
       id: 'terminal',
       disabled: disableEnvironmentSidebarIcons,
@@ -685,7 +705,10 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
       keys.push('apps');
     }
     if (config.enableCromwellGKEApp) {
-      keys.push('cromwellConfig');
+      keys.push(cromwellConfigIconId);
+    }
+    if (config.enableRStudioGKEApp) {
+      keys.push(rstudioConfigIconId);
     }
     keys.push('runtimeConfig', 'terminal');
   }

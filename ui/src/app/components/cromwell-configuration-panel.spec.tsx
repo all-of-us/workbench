@@ -1,21 +1,10 @@
 import * as React from 'react';
 
-import {
-  AppStatus,
-  DisksApi,
-  ProfileApi,
-  WorkspaceAccessLevel,
-  WorkspacesApi,
-} from 'generated/fetch';
+import { AppStatus, DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import {
-  appsApi,
-  profileApi,
-  registerApiClient,
-} from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
-import { profileStore, serverConfigStore } from 'app/utils/stores';
+import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -28,28 +17,45 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
-import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   workspaceStubs,
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
-import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
-import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
+import {
+  CromwellConfigurationPanel,
+  CromwellConfigurationPanelProps,
+} from './cromwell-configuration-panel';
 
 describe('CromwellConfigurationPanel', () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
-  const DEFAULT_PROPS = {
+
+  const DEFAULT_PROPS: CromwellConfigurationPanelProps = {
     onClose,
+    creatorFreeCreditsRemaining: null,
+    workspace: {
+      ...workspaceStubs[0],
+      accessLevel: WorkspaceAccessLevel.WRITER,
+      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+    },
+    profileState: {
+      profile: ProfileStubVariables.PROFILE_STUB,
+      load: jest.fn(),
+      reload: jest.fn(),
+      updateCache: jest.fn(),
+    },
   };
 
   let disksApiStub: DisksApiStub;
-  let workspacesApiStub: WorkspacesApiStub;
 
-  const component = async (propOverrides?: object) => {
+  const component = async (
+    propOverrides?: Partial<CromwellConfigurationPanelProps>
+  ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
     const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
@@ -59,23 +65,6 @@ describe('CromwellConfigurationPanel', () => {
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
     registerApiClient(DisksApi, disksApiStub);
-
-    workspacesApiStub = new WorkspacesApiStub();
-    registerApiClient(WorkspacesApi, workspacesApiStub);
-    currentWorkspaceStore.next({
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    });
-
-    registerApiClient(ProfileApi, new ProfileApiStub());
-    profileStore.set({
-      profile: await profileApi().getMe(),
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    });
 
     serverConfigStore.set({
       config: {
@@ -93,14 +82,6 @@ describe('CromwellConfigurationPanel', () => {
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
-  });
-
-  it('should show configuration panel while not loading', async () => {
-    const wrapper = await component();
-    expect(wrapper.exists('#cromwell-configuration-panel')).toEqual(true);
-    expect(wrapper.exists('cromwell-configuration-panel-spinner')).toEqual(
-      false
-    );
   });
 
   it('start button should create cromwell and close panel', async () => {

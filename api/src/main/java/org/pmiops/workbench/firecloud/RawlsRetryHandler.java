@@ -19,10 +19,10 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
 
   private static final Logger logger = Logger.getLogger(RawlsRetryHandler.class.getName());
 
-  private static class FirecloudRetryPolicy extends ResponseCodeRetryPolicy {
+  private static class RawlsRetryPolicy extends ResponseCodeRetryPolicy {
 
-    public FirecloudRetryPolicy() {
-      super("Firecloud API");
+    public RawlsRetryPolicy() {
+      super("Rawls API");
     }
 
     @Override
@@ -54,7 +54,8 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
   @Autowired
   public RawlsRetryHandler(
       BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
-    super(backoffPolicy, new FirecloudRetryPolicy(), termsOfServiceApiProvider);
+    super(backoffPolicy, new RawlsRetryPolicy(), termsOfServiceApiProvider);
+
   }
 
   @Override

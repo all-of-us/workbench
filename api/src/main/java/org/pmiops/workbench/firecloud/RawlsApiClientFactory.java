@@ -21,7 +21,7 @@ public class RawlsApiClientFactory {
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
   // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
-  // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
+  // its API scopes (see https://api.rawls.org/api-docs.yaml), we'll need to update this list.
   public static final List<String> SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -89,7 +89,7 @@ public class RawlsApiClientFactory {
   public ApiClient newRawlsApiClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    apiClient.setBasePath(workbenchConfig.firecloud.rawlsBaseUrl);
     apiClient.addDefaultHeader(X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     apiClient

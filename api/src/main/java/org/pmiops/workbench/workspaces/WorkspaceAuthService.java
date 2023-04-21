@@ -153,7 +153,7 @@ public class WorkspaceAuthService {
         log.info(
             String.format(
                 "removing user '%s' from billing project '%s'", email, billingProjectName));
-        fireCloudService.removeOwnerFromBillingProject(email, billingProjectName, Optional.empty());
+        fireCloudService.removeOwnerFromBillingProjectAsService(email, billingProjectName);
       } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
         log.info(
             String.format("adding user '%s' to billing project '%s'", email, billingProjectName));

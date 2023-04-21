@@ -57,8 +57,7 @@ public interface FireCloudService {
    * <p>The call is made by the SA by default. An optional callerAccessToken can be passed in to use
    * that as the caller instead.
    */
-  void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
+  void removeOwnerFromBillingProjectAsService(String ownerEmailToRemove, String projectName);
 
   int NUM_RANDOM_CHARS = 20;
   String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";

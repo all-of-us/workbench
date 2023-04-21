@@ -22,7 +22,6 @@ import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/c
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import { DiskSelector } from 'app/components/runtime-configuration-panel/disk-selector';
-import { DiskSizeSelector } from 'app/components/runtime-configuration-panel/disk-size-selector';
 import { GpuConfigSelector } from 'app/components/runtime-configuration-panel/gpu-config-selector';
 import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
 import { OfferDeleteDiskWithUpdate } from 'app/components/runtime-configuration-panel/offer-delete-disk-with-update';
@@ -38,7 +37,6 @@ import {
   switchCase,
   withCdrVersions,
   withCurrentWorkspace,
-  withUserProfile,
 } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
@@ -72,6 +70,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {
   diskStore,
+  ProfileStore,
   runtimeStore,
   serverConfigStore,
   useStore,
@@ -175,8 +174,7 @@ export const PresetSelector = ({
 
 const PanelMain = fp.flow(
   withCdrVersions(),
-  withCurrentWorkspace(),
-  withUserProfile()
+  withCurrentWorkspace()
 )(
   ({
     cdrVersionTiersResponse,
@@ -188,7 +186,6 @@ const PanelMain = fp.flow(
   }) => {
     const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
-    const { enableGpu, enablePersistentDisk } = serverConfigStore.get().config;
 
     const { hasWgsData: allowDataproc } = findCdrVersion(
       cdrVersionId,
@@ -702,36 +699,17 @@ const PanelMain = fp.flow(
                       validMachineTypes={validMainMachineTypes}
                       machineType={analysisConfig.machine.name}
                     />
-                    {enablePersistentDisk || (
-                      <DiskSizeSelector
-                        idPrefix='runtime'
-                        onChange={(size: number) =>
-                          setAnalysisConfig({
-                            ...analysisConfig,
-                            diskConfig: {
-                              size,
-                              detachable: false,
-                              detachableType: null,
-                              existingDiskName: null,
-                            },
-                          })
-                        }
-                        diskSize={analysisConfig.diskConfig.size}
-                        disabled={disableControls}
-                      />
-                    )}
                   </div>
-                  {enableGpu &&
-                    analysisConfig.computeType === ComputeType.Standard && (
-                      <GpuConfigSelector
-                        disabled={disableControls}
-                        onChange={(gpuConfig: GpuConfig) =>
-                          setAnalysisConfig({ ...analysisConfig, gpuConfig })
-                        }
-                        selectedMachine={analysisConfig.machine}
-                        gpuConfig={analysisConfig.gpuConfig}
-                      />
-                    )}
+                  {analysisConfig.computeType === ComputeType.Standard && (
+                    <GpuConfigSelector
+                      disabled={disableControls}
+                      onChange={(gpuConfig: GpuConfig) =>
+                        setAnalysisConfig({ ...analysisConfig, gpuConfig })
+                      }
+                      selectedMachine={analysisConfig.machine}
+                      gpuConfig={analysisConfig.gpuConfig}
+                    />
+                  )}
                   <FlexRow
                     style={{
                       marginTop: '1.5rem',
@@ -835,24 +813,22 @@ const PanelMain = fp.flow(
                     </FlexColumn>
                   </FlexRow>
                 </div>
-                {enablePersistentDisk && (
-                  <DiskSelector
-                    diskConfig={analysisConfig.diskConfig}
-                    onChange={(diskConfig) =>
-                      setAnalysisConfig({
-                        ...analysisConfig,
-                        diskConfig,
-                        detachedDisk: diskConfig.detachable
-                          ? null
-                          : gcePersistentDisk,
-                      })
-                    }
-                    disabled={disableControls}
-                    disableDetachableReason={disableDetachableReason}
-                    existingDisk={gcePersistentDisk}
-                    computeType={analysisConfig.computeType}
-                  />
-                )}
+                <DiskSelector
+                  diskConfig={analysisConfig.diskConfig}
+                  onChange={(diskConfig) =>
+                    setAnalysisConfig({
+                      ...analysisConfig,
+                      diskConfig,
+                      detachedDisk: diskConfig.detachable
+                        ? null
+                        : gcePersistentDisk,
+                    })
+                  }
+                  disabled={disableControls}
+                  disableDetachableReason={disableDetachableReason}
+                  existingDisk={gcePersistentDisk}
+                  computeType={analysisConfig.computeType}
+                />
                 {runtimeExists && updateMessaging.warn && (
                   <WarningMessage iconSize={30} iconPosition={'center'}>
                     <div>{updateMessaging.warn}</div>
@@ -984,11 +960,19 @@ const PanelMain = fp.flow(
   }
 );
 
+export interface RuntimeConfigurationPanelProps {
+  onClose?: () => void;
+  initialPanelContent?: PanelContent;
+  creatorFreeCreditsRemaining?: number;
+  profileState: ProfileStore;
+}
+
 export const RuntimeConfigurationPanel = ({
   onClose = () => {},
   initialPanelContent = null,
   creatorFreeCreditsRemaining = null,
-}) => {
+  profileState,
+}: RuntimeConfigurationPanelProps) => {
   const { runtimeLoaded } = useStore(runtimeStore);
   if (!runtimeLoaded) {
     return <Spinner style={{ width: '100%', marginTop: '7.5rem' }} />;
@@ -997,7 +981,12 @@ export const RuntimeConfigurationPanel = ({
   // TODO: can we remove this indirection?
   return (
     <PanelMain
-      {...{ onClose, initialPanelContent, creatorFreeCreditsRemaining }}
+      {...{
+        onClose,
+        initialPanelContent,
+        creatorFreeCreditsRemaining,
+        profileState,
+      }}
     />
   );
 };

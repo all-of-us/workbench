@@ -4,15 +4,39 @@ import * as fp from 'lodash/fp';
 
 import { BillingStatus } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { cond, withCurrentWorkspace } from 'app/utils';
+import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
+import { ProfileStore } from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
-import { RuntimeConfigurationPanel } from './runtime-configuration-panel';
+import {
+  RuntimeConfigurationPanel,
+  RuntimeConfigurationPanelProps,
+} from './runtime-configuration-panel';
 import { DisabledPanel } from './runtime-configuration-panel/disabled-panel';
 
-export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
-  ({ onClose, workspace, type = 'runtime', runtimeConfPanelInitialState }) => {
+export interface ConfigurationPanelProps {
+  onClose: () => void;
+  type: UIAppType;
+  runtimeConfPanelInitialState?: RuntimeConfigurationPanelProps['initialPanelContent'];
+}
+
+export const ConfigurationPanel = fp.flow(
+  withCurrentWorkspace(),
+  withUserProfile()
+)(
+  ({
+    onClose,
+    workspace,
+    type,
+    runtimeConfPanelInitialState = null,
+    profileState,
+  }: ConfigurationPanelProps & {
+    workspace: WorkspaceData;
+    profileState: ProfileStore;
+  }) => {
     const { namespace, id } = workspace;
     const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] =
       useState(null);
@@ -44,20 +68,33 @@ export const ConfigurationPanel = fp.flow(withCurrentWorkspace())(
             () => <DisabledPanel />,
           ],
           [
-            type === 'runtime',
+            type === UIAppType.JUPYTER,
             () => (
               <div>
                 <RuntimeConfigurationPanel
                   {...{ onClose, creatorFreeCreditsRemaining }}
                   initialPanelContent={runtimeConfPanelInitialState}
+                  profileState={profileState}
                 />
               </div>
             ),
           ],
+          [
+            type === UIAppType.CROMWELL,
+            () => (
+              <CromwellConfigurationPanel
+                {...{
+                  onClose,
+                  creatorFreeCreditsRemaining,
+                  workspace,
+                  profileState,
+                }}
+              />
+            ),
+          ],
+          // UIAppType.RStudio
           () => (
-            <CromwellConfigurationPanel
-              {...{ onClose, creatorFreeCreditsRemaining, workspace }}
-            />
+            <p>The RStudio configuration panel is currently in development.</p>
           )
         )}
       </div>

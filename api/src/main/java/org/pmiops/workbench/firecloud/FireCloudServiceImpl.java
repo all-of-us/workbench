@@ -27,6 +27,8 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -46,6 +48,11 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequestClone;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+
+import org.pmiops.workbench.notebooks.NotebookUtils;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequest;
+import org.pmiops.workbench.rawls.model.RawlsUpdateRawlsBillingAccountRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryException;
@@ -61,6 +68,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
+
   private final Provider<BillingV2Api> serviceAccountBillingV2ApiProvider;
   private final Provider<BillingV2Api> endUserBillingV2ApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
@@ -293,20 +301,11 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken) {
+  public void removeOwnerFromBillingProjectAsService(
+      String ownerEmailToRemove, String projectName) {
     Preconditions.checkArgument(ownerEmailToRemove.contains("@"));
 
-    final BillingApi scopedBillingApi;
-
-    BillingV2Api billingV2Api;
-
-    if (callerAccessToken.isPresent()) {
-      billingV2Api = endUserBillingV2ApiProvider.get();
-    } else {
-      billingV2Api = serviceAccountBillingV2ApiProvider.get();
-    }
-
+    final BillingV2Api billingV2Api = serviceAccountBillingV2ApiProvider.get();
     rawlsRetryHandler.run(
         (context) -> {
           billingV2Api.removeUserFromBillingProjectV2(
