@@ -332,6 +332,8 @@ public class WorkbenchConfig {
     public boolean enableRStudioGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
+    // If true, enable Tanagra
+    public boolean enableTanagra;
   }
 
   public static class ActionAuditConfig {
