@@ -1,36 +1,26 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 
 import { AppType, UserAppEnvironment } from 'generated/fetch';
 
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
+import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { appsApi } from 'app/services/swagger-fetch-clients';
+import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
-import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
-import { createUserApp } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import {
-  canCreateApp,
-  defaultCromwellConfig,
-  findApp,
-  UIAppType,
-} from './apps-panel/utils';
+import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
-import { TooltipTrigger } from './popups';
-
-const { useState } = React;
 
 const cromwellSupportArticles = [
   {
@@ -69,51 +59,22 @@ export interface CromwellConfigurationPanelProps {
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
+  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
 }
 
-export const CromwellConfigurationPanel = ({
+export const BaseCromwellConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
+  gkeAppsInWorkspace,
 }: CromwellConfigurationPanelProps) => {
-  const [gkeAppsInWorkspace, setGkeAppsInWorkspace] =
-    useState<UserAppEnvironment[]>();
-  const [creatingCromwellApp, setCreatingCromwellApp] = useState(false);
-
   const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
-  const loadingApps = gkeAppsInWorkspace === undefined;
-
   const { profile } = profileState;
-
-  useEffect(() => {
-    appsApi()
-      .listAppsInWorkspace(workspace.namespace)
-      .then(setGkeAppsInWorkspace);
-  }, []);
-
-  const createEnabled =
-    !loadingApps && !creatingCromwellApp && canCreateApp(app);
 
   const onDismiss = () => {
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
-  };
-
-  const onCreate = () => {
-    setCreatingCromwellApp(true);
-    fetchWithErrorModal(
-      () => createUserApp(workspace.namespace, defaultCromwellConfig),
-      {
-        customErrorResponseFormatter: (error: ApiErrorResponse) =>
-          error?.originalResponse?.status === 409 && {
-            title: 'Error Creating Cromwell Environment',
-            message:
-              'Please wait a few minutes and try to create your Cromwell Environment again.',
-            onDismiss,
-          },
-      }
-    ).then(() => onDismiss());
   };
 
   return (
@@ -162,19 +123,14 @@ export const CromwellConfigurationPanel = ({
         </WarningMessage>
       </div>
       <div style={{ ...styles.controlSection }}>
-        <FlexRow style={{ alignItems: 'center' }}>
-          <div style={{ fontWeight: 'bold', marginRight: '0.5rem' }}>
-            Cloud compute profile
-          </div>
-          <TooltipTrigger
-            content='The cloud compute profile for Cromwell beta is non-configurable.'
-            side={'right'}
-          >
-            <div style={styles.disabledCloudProfile}>
-              {`${cpu} CPUS, ${memory}GB RAM, ${defaultCromwellConfig.persistentDiskRequest.size}GB disk`}
-            </div>
-          </TooltipTrigger>
-        </FlexRow>
+        <DisabledCloudComputeProfile
+          cpu={cpu}
+          memory={memory}
+          persistentDiskRequestSize={
+            defaultCromwellConfig.persistentDiskRequest.size
+          }
+          appType={AppType.CROMWELL}
+        />
       </div>
       <div style={{ ...styles.controlSection }}>
         <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
@@ -198,15 +154,17 @@ export const CromwellConfigurationPanel = ({
             Terminal or Jupyter notebook
           </div>
         </div>
-        <Button
-          id='cromwell-cloud-environment-create-button'
-          aria-label='cromwell cloud environment create button'
-          onClick={onCreate}
-          disabled={!createEnabled}
-        >
-          Start
-        </Button>
+        <CreateGKEAppButton
+          createAppRequest={defaultCromwellConfig}
+          existingApp={app}
+          workspaceNamespace={workspace.namespace}
+          onDismiss={onDismiss}
+        />
       </FlexRow>
     </FlexColumn>
   );
 };
+
+export const CromwellConfigurationPanel = withWorkspaceGkeApps(
+  BaseCromwellConfigurationPanel
+);

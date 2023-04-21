@@ -3,10 +3,6 @@ import * as React from 'react';
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import {
-  BaseCromwellConfigurationPanel,
-  CromwellConfigurationPanelProps,
-} from 'app/components/cromwell-configuration-panel';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -24,13 +20,17 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 
-import { defaultCromwellConfig } from './apps-panel/utils';
+import { defaultRStudioConfig } from './apps-panel/utils';
+import {
+  BaseRStudioConfigurationPanel,
+  RStudioConfigurationPanelProps,
+} from './rstudio-configuration-panel';
 
-describe('CromwellConfigurationPanel', () => {
+describe('RStudioConfigurationPanel', () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
 
-  const DEFAULT_PROPS: CromwellConfigurationPanelProps = {
+  const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
     onClose,
     creatorFreeCreditsRemaining: null,
     workspace: {
@@ -51,10 +51,10 @@ describe('CromwellConfigurationPanel', () => {
   let disksApiStub: DisksApiStub;
 
   const component = async (
-    propOverrides?: Partial<CromwellConfigurationPanelProps>
+    propOverrides?: Partial<RStudioConfigurationPanelProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<BaseCromwellConfigurationPanel {...allProps} />);
+    const c = mountWithRouter(<BaseRStudioConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };
@@ -81,7 +81,7 @@ describe('CromwellConfigurationPanel', () => {
     jest.useRealTimers();
   });
 
-  it('start button should create cromwell and close panel', async () => {
+  it('start button should create rstudio and close panel', async () => {
     const wrapper = await component({
       gkeAppsInWorkspace: [],
     });
@@ -91,7 +91,7 @@ describe('CromwellConfigurationPanel', () => {
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
     const startButton = wrapper
-      .find('#Cromwell-cloud-environment-create-button')
+      .find('#RStudio-cloud-environment-create-button')
       .first();
 
     startButton.simulate('click');
@@ -99,12 +99,12 @@ describe('CromwellConfigurationPanel', () => {
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
     expect(spyCreateApp).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      defaultCromwellConfig
+      defaultRStudioConfig
     );
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+  it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
     const wrapper = await component();
 
     const costEstimator = (w) => w.find('[data-test-id="cost-estimator"]');
@@ -115,6 +115,6 @@ describe('CromwellConfigurationPanel', () => {
 
     expect(costEstimator(wrapper).exists()).toBeTruthy();
     expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
-    expect(pausedCost(wrapper).text()).toEqual('$0.20 per hour');
+    expect(pausedCost(wrapper).text()).toEqual('$0.21 per hour');
   });
 });

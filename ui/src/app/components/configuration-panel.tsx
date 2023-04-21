@@ -5,12 +5,13 @@ import * as fp from 'lodash/fp';
 import { BillingStatus } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
+import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
+import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
@@ -88,13 +89,22 @@ export const ConfigurationPanel = fp.flow(
                   creatorFreeCreditsRemaining,
                   workspace,
                   profileState,
+                  workspaceNamespace: workspace.namespace,
                 }}
               />
             ),
           ],
           // UIAppType.RStudio
           () => (
-            <p>The RStudio configuration panel is currently in development.</p>
+            <RStudioConfigurationPanel
+              {...{
+                onClose,
+                creatorFreeCreditsRemaining,
+                workspace,
+                profileState,
+                workspaceNamespace: workspace.namespace,
+              }}
+            />
           )
         )}
       </div>
