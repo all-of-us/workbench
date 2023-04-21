@@ -55,7 +55,6 @@ public class RawlsRetryHandler extends TerraServiceRetryHandler<ApiException> {
   public RawlsRetryHandler(
       BackOffPolicy backoffPolicy, Provider<TermsOfServiceApi> termsOfServiceApiProvider) {
     super(backoffPolicy, new RawlsRetryPolicy(), termsOfServiceApiProvider);
-
   }
 
   @Override
