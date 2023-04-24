@@ -4,7 +4,6 @@ import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
-import WarningDeleteCromwellModal from 'app/modal/warning-delete-cromwell-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language } from 'app/text-labels';
@@ -29,6 +28,7 @@ describe('Cromwell GKE App', () => {
   test('Create and delete a Cromwell GKE app', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
+    const cromwellPanel = new CromwellConfigurationPanel(page);
     const appsPanel = new AppsPanel(page);
     await appsPanel.open();
 
@@ -76,29 +76,7 @@ describe('Cromwell GKE App', () => {
 
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
-    const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
-    const deleteButton = new Button(page, deleteXPath);
-    expect(await deleteButton.exists()).toBeTruthy();
-    await deleteButton.click();
-
-    const warningDeleteCromwellModal = new WarningDeleteCromwellModal(page);
-    expect(warningDeleteCromwellModal.isLoaded());
-    await warningDeleteCromwellModal.clickYesDeleteButton();
-
-    await appsPanel.pollForStatus(expandedCromwellXpath, 'DELETING');
-
-    // poll for deleted (unexpanded) by repeatedly closing and opening
-
-    const isDeleted = await waitForFn(
-      async () => {
-        await appsPanel.close();
-        await appsPanel.open();
-        const unexpanded = new Button(page, unexpandedCromwellXPath);
-        return await unexpanded.exists();
-      },
-      10e3, // every 10 sec
-      2 * 60e3 // with a 2 min timeout
-    );
+    const isDeleted = cromwellPanel.deleteCromwellGkeApp();
     expect(isDeleted).toBeTruthy();
   });
 
@@ -112,7 +90,7 @@ describe('Cromwell GKE App', () => {
     const notebook = await workspaceDataPage.createNotebook(notebookName, Language.Python);
 
     // Select and run Cromwell Setup snippet from menu
-    await notebook.selectSnippet('All of Us Cromwell Setup Python snippets');
+    await notebook.selectSnippet('All of Us Cromwell Setup Python snippets', '(1) Setup');
     let snippetOutput = await notebook.runCodeCell(1);
 
     // Confirm Cromwell has not started
@@ -122,8 +100,8 @@ describe('Cromwell GKE App', () => {
       true
     );
 
-    const cromwellPanel = new CromwellConfigurationPanel(page);
     //Start Cromwell
+    const cromwellPanel = new CromwellConfigurationPanel(page);
     await cromwellPanel.startCromwellGkeApp();
 
     // Re-run the code snippet to check PROVISIONING state
@@ -146,7 +124,7 @@ describe('Cromwell GKE App', () => {
     expect(success).toBe(true);
 
     // Upload wdl and json files to notebook
-    // Improvement: Create uploadFiles method
+    // TODO: Improvement: Create uploadFiles method
     await notebook.uploadFile(wdlFileName, wdlFilePath);
     await notebook.uploadFile(jsonFileName, jsonFilePath);
 
