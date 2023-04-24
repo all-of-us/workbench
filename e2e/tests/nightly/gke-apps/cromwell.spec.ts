@@ -102,7 +102,7 @@ describe('Cromwell GKE App', () => {
     expect(isDeleted).toBeTruthy();
   });
 
-  test('Create notebook and access %s snippets', async () => {
+  test('Run cromwell using python notebook', async () => {
     // Create or re-use workspace
     await findOrCreateWorkspace(page, { workspaceName });
 
