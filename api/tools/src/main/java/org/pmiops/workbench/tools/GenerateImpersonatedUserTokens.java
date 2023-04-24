@@ -29,7 +29,7 @@ public class GenerateImpersonatedUserTokens {
   private static Option projectId =
       Option.builder()
           .longOpt("project-id")
-          .desc("Workbench project id indicating the environment, e.g. all-of-us-rw-perf")
+          .desc("Workbench project id indicating the environment, e.g. all-of-us-rw-stable")
           .required()
           .hasArg()
           .build();
