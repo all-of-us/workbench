@@ -2,7 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
-import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY_ALL;
 
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -556,9 +556,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey questions
-    if (prePackagedConceptSet.contains(SURVEY)
+    if (prePackagedConceptSet.contains(SURVEY_ALL)
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
-      selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());
+      selectedConceptSetsBuilder.add(buildPrePackagedAllSurveyConceptSet());
     }
     return selectedConceptSetsBuilder.build();
   }
@@ -1569,7 +1569,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return Optional.ofNullable(nullableList).orElse(new ArrayList<>());
   }
 
-  private DbConceptSet buildPrePackagedSurveyConceptSet() {
+  private DbConceptSet buildPrePackagedAllSurveyConceptSet() {
     final DbConceptSet surveyConceptSet = new DbConceptSet();
     surveyConceptSet.setName("All Surveys");
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
@@ -1704,6 +1704,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private boolean isPrepackagedAllSurveys(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
-    return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY);
+    return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY_ALL);
   }
 }
