@@ -199,6 +199,21 @@
       "microarrayHailStoragePath": "microarray/hail.mt",
       "microarrayVcfManifestPath": "microarray/vcf/manifest.csv",
       "microarrayIdatManifestPath": "microarray/idat/manifest.csv",
+      "wgsVdsPath": "wgs/short_read/snpindel/vds/hail.vds",
+      "wgsExomeMultiHailPath": "wgs/short_read/snpindel/exome/multiMT/hail.mt",
+      "wgsExomeSplitHailPath": "wgs/short_read/snpindel/exome/splitMT/hail.mt",
+      "wgsExomeVcfPath": "wgs/short_read/snpindel/exome/vcf",
+      "wgsAcafThresholdMultiHailPath": "wgs/short_read/snpindel/acaf_threshold/multiMT/hail.mt",
+      "wgsAcafThresholdSplitHailPath": "wgs/short_read/snpindel/acaf_threshold/splitMT/hail.mt",
+      "wgsAcafThresholdVcfPath": "wgs/short_read/snpindel/acaf_threshold/vcf",
+      "wgsClinvarMultiHailPath": "wgs/short_read/snpindel/clinvar/multiMT/hail.mt",
+      "wgsClinvarSplitHailPath": "wgs/short_read/snpindel/clinvar/splitMT/hail.mt",
+      "wgsClinvarVcfPath": "wgs/short_read/snpindel/clinvar/vcf",
+      "wgsLongReadsManifestPath": "wgs/long_read/manifest.csv",
+      "wgsLongReadsHailGRCh38": "wgs/long_read/hail.mt/GRCh38",
+      "wgsLongReadsHailT2T": "wgs/long_read/hail.mt/T2T",
+      "wgsLongReadsJointVcfGRCh38": "wgs/long_read/joint_vcf/GRCh38",
+      "wgsLongReadsJointVcfT2T": "wgs/long_read/joint_vcf/T2T",
       "accessTier": "controlled"
     }
   ]
