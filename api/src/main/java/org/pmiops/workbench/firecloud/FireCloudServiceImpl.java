@@ -80,7 +80,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
-  private final FirecloudApiClientFactory firecloudApiClientFactory;
 
   private final FirecloudRetryHandler retryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
@@ -132,7 +131,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudCacheConfig.SERVICE_ACCOUNT_REQUEST_SCOPED_GROUP_CACHE)
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
-      FirecloudApiClientFactory firecloudApiClientFactory,
       FirecloudRetryHandler retryHandler,
       RawlsRetryHandler rawlsRetryHandler) {
     this.configProvider = configProvider;
@@ -148,7 +146,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.termsOfServiceApiProvider = termsOfServiceApiProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
-    this.firecloudApiClientFactory = firecloudApiClientFactory;
     this.retryHandler = retryHandler;
     this.rawlsRetryHandler = rawlsRetryHandler;
   }
