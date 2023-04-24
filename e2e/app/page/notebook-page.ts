@@ -723,12 +723,13 @@ export default class NotebookPage extends NotebookFrame {
     await snippetMenu.click();
 
     const snippetsMenuListXpath = `${snippetsMenuXpath}/following-sibling::ul`;
-    const categoryXpath = `${snippetsMenuListXpath}//*[contains(normalize-space(text()), \"${snippetsName}\")]`;
+    const categoryXpath = snippetsMenuListXpath + '//*[contains(normalize-space(text()), ' + '"' + snippetsName + '")]';
     const subMenu = await notebookIFrame.waitForXPath(categoryXpath);
 
     await subMenu.hover();
 
-    const categoryXSubpath = `${categoryXpath}/following-sibling::ul//*[@class="snippet" and contains(normalize-space(text()), "(1) Setup")]`;
+    const categoryXSubpath = `${categoryXpath}/following-sibling::ul//*[@class="snippet" and 
+    contains(normalize-space(text()), "(1) Setup")]`;
     const snipSubBtn = await notebookIFrame.waitForXPath(categoryXSubpath);
     await snipSubBtn.focus();
     await snipSubBtn.click();
