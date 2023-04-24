@@ -5,9 +5,19 @@ import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
 import WarningDeleteCromwellModal from 'app/modal/warning-delete-cromwell-modal';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
+import { makeRandomName } from 'utils/str-utils';
+import { Language } from 'app/text-labels';
+import expect from 'expect';
+import path from 'path';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
+const wdlFileName = 'cromwell.wdl';
+const jsonFileName = 'cromwell.json';
+const fileBasePath = '../../../../resources/cromwell/';
+const wdlFilePath = path.relative(process.cwd(), __dirname + fileBasePath + wdlFileName);
+const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jsonFileName);
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
@@ -90,5 +100,69 @@ describe('Cromwell GKE App', () => {
       2 * 60e3 // with a 2 min timeout
     );
     expect(isDeleted).toBeTruthy();
+  });
+
+  test('Create notebook and access %s snippets', async () => {
+    // Create or re-use workspace
+    await findOrCreateWorkspace(page, { workspaceName });
+
+    // Create and Open notebook
+    const workspaceDataPage = new WorkspaceDataPage(page);
+    const notebookName = makeRandomName('cromwell-python');
+    const notebook = await workspaceDataPage.createNotebook(notebookName, Language.Python);
+
+    // Select and run Cromwell Setup snippet from menu
+    await notebook.selectSnippet('All of Us Cromwell Setup Python snippets');
+    let snippetOutput = await notebook.runCodeCell(1);
+
+    // Confirm Cromwell has not started
+    // TODO: Fix the snippet to use cromshell-alpha
+    const cromshell_version = snippetOutput.includes('Found cromshell_alpha') ? 'cromshell-alpha' : 'cromshell-beta';
+    expect(snippetOutput.includes('CROMWELL app does not exist. Please create cromwell server from workbench')).toBe(
+      true
+    );
+
+    const cromwellPanel = new CromwellConfigurationPanel(page);
+    //Start Cromwell
+    await cromwellPanel.startCromwellGkeApp();
+
+    // Re-run the code snippet to check PROVISIONING state
+    snippetOutput = await notebook.runCodeCell(1);
+    expect(snippetOutput.includes('Existing CROMWELL app found')).toBe(true);
+    expect(snippetOutput.includes('app_status=PROVISIONING')).toBe(true);
+
+    // Re-run code snippet until cromwell is running
+    const success = await waitForFn(
+      async () => {
+        snippetOutput = await notebook.runCodeCell(1);
+        console.log(snippetOutput);
+        expect(snippetOutput.includes('Existing CROMWELL app found')).toBe(true);
+        return snippetOutput.includes('app_status=RUNNING');
+      },
+      15e3,
+      10 * 60e3
+    );
+
+    expect(success).toBe(true);
+
+    // Upload wdl and json files to notebook
+    // Improvement: Create uploadFiles method
+    await notebook.uploadFile(wdlFileName, wdlFilePath);
+    await notebook.uploadFile(jsonFileName, jsonFilePath);
+
+    // Submit wdl to cromwell
+    const submitJob = await notebook.runCodeCell(2, {
+      code: `!${cromshell_version} submit ${wdlFileName} ${jsonFileName}`
+    });
+    expect(submitJob.includes('Submitting job to server'));
+    expect(submitJob.includes('"status": "Submitted"'));
+
+    const isDeleted = await cromwellPanel.deleteCromwellGkeApp();
+
+    expect(isDeleted).toBeTruthy();
+
+    // Clean up: notebook and workspace
+    await notebook.deleteNotebook(notebookName);
+    await workspaceDataPage.deleteWorkspace();
   });
 });
