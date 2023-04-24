@@ -12,7 +12,7 @@ buildscript {
         HIBERNATE_VERSION = '5.6.9.Final'
         JACKSON_DATABIND_VERSION = '2.13.4'
         JACKSON_VERSION = '2.13.4'
-        KOTLIN_VERSION = '1.5.32'
+        KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
         MAPSTRUCT_VERSION = '1.4.2.Final'
         MOCKITO_KOTLIN_VERSION = '4.1.0'
@@ -28,6 +28,12 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+    // https://github.com/spring-projects/spring-boot/issues/26864
+    // https://github.com/spring-projects/spring-boot/issues/26946
+    // https://github.com/spring-projects/spring-boot/issues/26947
+    // https://github.com/spring-projects/spring-boot/commit/cd808d2f189a7a550adec286c1722b5b6f1c19e7
+    project.getExtensions().getExtraProperties().set('kotlin.version', '1.8.20') // KOTLIN_VERSION
 }
 
 plugins {
@@ -39,7 +45,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '5.12.5'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.32'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.20' // KOTLIN_VERSION
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
@@ -263,7 +269,7 @@ sourceSets {
     // SorceSets added by Java plugin. These share a namespace with the ones users create.
     //
     generated {
-        compileClasspath = configurations.generatedCompile
+        compileClasspath = configurations.generatedCompileClasspath
         java {
             srcDir SWAGGER_2_CODEGEN_DIR
             srcDir SWAGGER_3_CODEGEN_DIR
