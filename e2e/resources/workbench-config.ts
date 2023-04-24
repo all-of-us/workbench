@@ -91,30 +91,11 @@ const stable: IEnvConfig = {
   ENABLED_PERSISTENT_DISK: true
 };
 
-// workbench perf environment
-const perf: IEnvConfig = {
-  LOGIN_URL_DOMAIN_NAME: process.env.PERF_LOGIN_URL || 'https://all-of-us-rw-perf.appspot.com',
-  API_HOSTNAME: process.env.API_HOSTNAME || 'api-dot-all-of-us-rw-perf.appspot.com',
-  EMAIL_DOMAIN_NAME: '@perf.fake-research-aou.org',
-  WRITER_USER: process.env.WRITER_USER || 'puppetciperfwriter1@perf.fake-research-aou.org',
-  READER_USER: process.env.READER_USER || 'puppetciperfreader@perf.fake-research-aou.org',
-  ACCESS_TEST_USER: 'TODO - NOT AVAILABLE',
-  ADMIN_TEST_USER: 'TODO - NOT AVAILABLE',
-  EGRESS_TEST_USER: 'TODO - NOT AVAILABLE',
-  DEFAULT_CDR_VERSION_NAME: 'Synthetic Dataset v4',
-  OLD_CDR_VERSION_NAME: 'Synthetic Dataset v3',
-  CONTROLLED_TIER_CDR_VERSION_NAME: 'TODO - NOT AVAILABLE',
-  LOGIN_GOV_USER: 'aou-dev-registration@broadinstitute.org',
-  RAS_TEST_USER: process.env.RAS_TEST_USER,
-  ENABLED_PERSISTENT_DISK: true
-};
-
 const environment = {
   local,
   test,
   staging,
-  stable,
-  perf
+  stable
 };
 
 type Config = IEnvConfig & ICredentialConfig & IPathConfig;

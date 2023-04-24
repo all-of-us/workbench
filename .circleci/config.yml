@@ -324,10 +324,10 @@ commands:
   puppeteer-access-test-user-setup:
     parameters:
       env_name:
-        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: [ "test", "staging", "local", "perf" ]
+        enum: [ "test", "staging", "local" ]
     steps:
       - gcloud-auth-login
       - run:
@@ -587,10 +587,10 @@ jobs:
     executor: puppeteer-executor
     parameters:
       env_name:
-        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: [ "test", "staging", "local", "perf" ]
+        enum: [ "test", "staging", "local" ]
     steps:
       - checkout-code
       # When running on PRs, only UI changes are exercised.
@@ -637,10 +637,10 @@ jobs:
     executor: puppeteer-executor
     parameters:
       env_name:
-        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
-        enum: ["test", "staging", "local", "perf"]
+        enum: ["test", "staging", "local"]
       test_mode:
         description: Switching between "nightly-integration" and normal "integration" test mode
         default: "integration"

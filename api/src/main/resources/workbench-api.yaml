@@ -6983,7 +6983,6 @@ definitions:
         type: string
         enum:
         - test
-        - perf
         - staging
         - stable
         - preprod

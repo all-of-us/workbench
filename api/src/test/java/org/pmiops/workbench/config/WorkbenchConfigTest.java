@@ -16,7 +16,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy.
 public class WorkbenchConfigTest {
 
   private static Stream<String> allEnvs() {
-    return Stream.of("local", "test", "perf", "staging", "stable", "preprod", "prod");
+    return Stream.of("local", "test", "staging", "stable", "preprod", "prod");
   }
 
   @ParameterizedTest(name = "config_{0}.json is valid")

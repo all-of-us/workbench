@@ -82,26 +82,6 @@ ENVIRONMENTS = {
       }
     }
   }),
-  "all-of-us-rw-perf" => env_with_defaults("perf", {
-    :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
-    :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :gae_vars => make_gae_vars(5, 20),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_cdr_wgs_project => "all-of-us-workbench-test",
-    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :accessTiers => {
-      "registered" => {
-        :ingest_cdr_project => "fc-aou-vpc-ingest-perf",
-        :dest_cdr_project => "fc-aou-cdr-perf",
-        :auth_domain_group_email => "all-of-us-registered-perf@perf.test.firecloud.org",
-      },
-      "controlled" => {
-        :ingest_cdr_project => "fc-aou-vpc-ingest-perf-ct",
-        :dest_cdr_project => "fc-aou-cdr-perf-ct",
-        :auth_domain_group_email => "all-of-us-controlled-perf@perf.test.firecloud.org",
-      }
-    }
-  }),
   "all-of-us-rw-stable" => env_with_defaults("stable", {
     :api_endpoint_host => "api.stable.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
