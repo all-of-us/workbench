@@ -353,14 +353,10 @@ export const WorkspaceEdit = fp.flow(
       this.state = {
         billingAccountFetched: false,
         billingAccounts: [],
-        cdrVersions: props.workspace
-          ? this.getCdrVersions(props.workspace.accessTierShortName)
-          : this.getCdrVersions(DEFAULT_ACCESS_TIER),
+        cdrVersions: this.initializeCdrVersions(props),
         cloneUserRole: false,
         loading: false,
-        populationChecked: props.workspace
-          ? props.workspace.researchPurpose.populationDetails.length > 0
-          : undefined,
+        populationChecked: this.initializePopulationChecked(props),
         selectResearchPurpose: this.updateSelectedResearch(),
         fetchBillingAccountError: false,
         fetchBillingAccountLoading: false,
@@ -377,6 +373,26 @@ export const WorkspaceEdit = fp.flow(
         workspaceNewAclDelayed: false,
         workspaceNewAclDelayedContinueFn: () => {},
       };
+    }
+
+    initializeCdrVersions(props: WorkspaceEditProps) {
+      const defaultValue = this.getCdrVersions(DEFAULT_ACCESS_TIER);
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        return defaultValue;
+      }
+      return props.workspace
+        ? this.getCdrVersions(props.workspace.accessTierShortName)
+        : defaultValue;
+    }
+
+    initializePopulationChecked(props: WorkspaceEditProps) {
+      const defaultValue = undefined;
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        return defaultValue;
+      }
+      return props.workspace
+        ? props.workspace.researchPurpose.populationDetails.length > 0
+        : defaultValue;
     }
 
     cancel(): void {
