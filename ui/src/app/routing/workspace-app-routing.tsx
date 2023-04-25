@@ -10,7 +10,7 @@ import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
 import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
 import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
-import { AppsList } from 'app/pages/appAnalysis/apps-list';
+import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
 import { CohortPage } from 'app/pages/data/cohort/cohort-page';
 import { CohortReviewPage } from 'app/pages/data/cohort-review/cohort-review-page';
@@ -91,7 +91,7 @@ const WorkspaceEditPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(WorkspaceEdit);
-const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppsList);
+const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();

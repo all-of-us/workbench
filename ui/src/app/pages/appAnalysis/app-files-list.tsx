@@ -43,7 +43,7 @@ const styles = reactStyles({
   },
 });
 
-export const AppsList = withCurrentWorkspace()((props) => {
+export const AppFilesList = withCurrentWorkspace()((props) => {
   const { workspace } = props;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
