@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 
@@ -182,7 +182,7 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyZeroInteractions(mockLeonardoNotebooksClient);
+    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -193,7 +193,7 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyZeroInteractions(mockLeonardoNotebooksClient);
+    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -205,7 +205,7 @@ public class EgressRemediationServiceTest {
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
-    verifyZeroInteractions(mockLeonardoNotebooksClient);
+    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -406,7 +406,7 @@ public class EgressRemediationServiceTest {
     saveOldEvents(oldEvent(Duration.ofMinutes(30L)).setStatus(DbEgressEventStatus.REMEDIATED));
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
-    verifyZeroInteractions(mockMailService);
+    verifyNoInteractions(mockMailService);
   }
 
   @Test
@@ -434,7 +434,7 @@ public class EgressRemediationServiceTest {
 
     egressRemediationService.remediateEgressEvent(saveNewEvent());
 
-    verifyZeroInteractions(mockJiraApi);
+    verifyNoInteractions(mockJiraApi);
   }
 
   @Test

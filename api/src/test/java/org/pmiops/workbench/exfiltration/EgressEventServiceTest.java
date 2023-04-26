@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.common.collect.ImmutableList;
@@ -191,7 +191,7 @@ public class EgressEventServiceTest {
 
     fakeClock.setInstant(NOW);
     egressEventService.handleEvent(oldEgressEvent);
-    verifyZeroInteractions(mockTaskQueueService);
+    verifyNoInteractions(mockTaskQueueService);
 
     Iterable<DbEgressEvent> dbEvents = egressEventDao.findAll();
     assertThat(dbEvents).hasSize(1);

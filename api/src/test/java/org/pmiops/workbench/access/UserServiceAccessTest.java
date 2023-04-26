@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
@@ -463,7 +463,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // bypassed modules do not expire: so no email
@@ -483,7 +483,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -570,7 +570,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // one or more bypassed modules will not affect whether emails are sent.
@@ -654,7 +654,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -703,7 +703,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // 15 days is sooner, so that's the email we send rather than 30
@@ -766,7 +766,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -852,7 +852,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test

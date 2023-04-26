@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.api.client.http.HttpMethods;
 import java.time.Instant;
@@ -128,7 +128,7 @@ public class RequestTimeMetricInterceptorTest {
     requestTimeMetricInterceptor.postHandle(
         mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
-    verifyZeroInteractions(mockLogsBasedMetricService);
+    verifyNoInteractions(mockLogsBasedMetricService);
   }
 
   @Test
@@ -136,6 +136,6 @@ public class RequestTimeMetricInterceptorTest {
     requestTimeMetricInterceptor.postHandle(
         mockHttpServletRequest, mockHttpServletResponse, new Object(), mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
-    verifyZeroInteractions(mockLogsBasedMetricService);
+    verifyNoInteractions(mockLogsBasedMetricService);
   }
 }

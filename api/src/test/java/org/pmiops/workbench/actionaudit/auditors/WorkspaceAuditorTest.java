@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -258,7 +258,7 @@ public class WorkspaceAuditorTest {
   @Test
   public void testCollaborateWithEmptyMapDoesNothing() {
     workspaceAuditor.fireCollaborateAction(WORKSPACE_1_DB_ID, Collections.emptyMap());
-    verifyZeroInteractions(mockActionAuditService);
+    verifyNoInteractions(mockActionAuditService);
   }
 
   @Test

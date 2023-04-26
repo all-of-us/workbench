@@ -15,7 +15,7 @@ buildscript {
         KOTLIN_VERSION = '1.5.32'
         LIQUIBASE_VERSION = '4.16.1'
         MAPSTRUCT_VERSION = '1.4.2.Final'
-        MOCKITO_KOTLIN_VERSION = '2.2.0'
+        MOCKITO_KOTLIN_VERSION = '4.1.0'
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
@@ -47,7 +47,7 @@ plugins {
     // the newer release version and have AoU-specific modifications re-applied.
     id 'org.hidetake.swagger.generator' version '2.18.2'
     id 'org.owasp.dependencycheck' version '7.4.4'
-    id 'org.springframework.boot' version '2.3.12.RELEASE'
+    id 'org.springframework.boot' version '2.7.4'
 }
 
 
@@ -508,7 +508,7 @@ dependencies {
     __tools__Implementation 'commons-cli:commons-cli:1.5.0'
     __tools__Implementation 'com.opencsv:opencsv:5.7.0'
 
-    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'org.mockito:mockito-core:5.3.1'
     testImplementation "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testImplementation "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testImplementation 'com.h2database:h2:1.4.194'
@@ -517,7 +517,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test:$project.ext.KOTLIN_VERSION"
 
     // Use Mockito for testing only.
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
     // Test deps
     testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
