@@ -40,7 +40,6 @@ public class RequestTimeMetricInterceptorTest {
   private static final Instant END_INSTANT = START_INSTANT.plusMillis(DURATION_MILLIS);
   private static final String METHOD_NAME = "getMe";
 
-
   @Mock private HttpServletRequest mockHttpServletRequest;
   @Mock private HttpServletResponse mockHttpServletResponse;
   @Mock private HandlerMethod mockHandlerMethod;

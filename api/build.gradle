@@ -15,7 +15,7 @@ buildscript {
         KOTLIN_VERSION = '1.5.32'
         LIQUIBASE_VERSION = '4.16.1'
         MAPSTRUCT_VERSION = '1.4.2.Final'
-        MOCKITO_KOTLIN_VERSION = '2.2.0'
+        MOCKITO_KOTLIN_VERSION = '4.1.0'
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
@@ -517,7 +517,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test:$project.ext.KOTLIN_VERSION"
 
     // Use Mockito for testing only.
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
     // Test deps
     testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
