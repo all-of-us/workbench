@@ -376,23 +376,17 @@ export const WorkspaceEdit = fp.flow(
     }
 
     initializeCdrVersions(props: WorkspaceEditProps) {
-      const defaultValue = this.getCdrVersions(DEFAULT_ACCESS_TIER);
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        return defaultValue;
+      if (this.isMode(WorkspaceEditMode.Create) || !props.workspace) {
+        return this.getCdrVersions(DEFAULT_ACCESS_TIER);
       }
-      return props.workspace
-        ? this.getCdrVersions(props.workspace.accessTierShortName)
-        : defaultValue;
+      return this.getCdrVersions(props.workspace.accessTierShortName);
     }
 
     initializePopulationChecked(props: WorkspaceEditProps) {
-      const defaultValue = undefined;
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        return defaultValue;
+      if (this.isMode(WorkspaceEditMode.Create) || !props.workspace) {
+        return undefined;
       }
-      return props.workspace
-        ? props.workspace.researchPurpose.populationDetails.length > 0
-        : defaultValue;
+      return props.workspace.researchPurpose.populationDetails.length > 0;
     }
 
     cancel(): void {
