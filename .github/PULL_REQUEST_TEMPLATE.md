@@ -12,6 +12,7 @@ Reminder: If you decide to merge with any failing checks, add an explanatory com
 - [ ] If this PR is intended to complete a JIRA story, I have checked that all AC are met for that story
 - [ ] I have manually tested this change and my testing process is described above
 - [ ] This PR includes appropriate automated tests, and I have documented any behavior that cannot be tested with code
+- [ ] If this fixes a bug, ensure the steps to reproduce are in the Jira ticket or provided above.
 - [ ] I have added explanatory comments where the logic is not obvious
 - [ ] If this change impacts deployment safety (e.g. removing/altering APIs which are in use) I have documented the impacts in the description
 - [ ] If this includes a new feature flag, I have created and linked new JIRA tickets to (a) turn on the feature flag and (b) remove it later
