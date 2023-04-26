@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Measure.MeasureDouble;
@@ -114,7 +114,7 @@ public class MonitoringServiceTest {
   public void testRecordValue_noOpOnEmptyMap() {
     monitoringService.recordValues(Collections.emptyMap());
     verify(mockInitService).createAndRegister();
-    verifyZeroInteractions(mockStatsRecorder);
-    verifyZeroInteractions(mockMeasureMap);
+    verifyNoInteractions(mockStatsRecorder);
+    verifyNoInteractions(mockMeasureMap);
   }
 }
