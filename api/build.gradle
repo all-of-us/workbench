@@ -51,7 +51,7 @@ plugins {
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    id 'org.hidetake.swagger.generator' version '2.18.2'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
     id 'org.owasp.dependencycheck' version '7.4.4'
     id 'org.springframework.boot' version '2.7.4'
 }
@@ -578,9 +578,9 @@ tasks.withType(Test) {
         }
         reports {
             // Write XML file (used by CircleCI, Jenkins, etc) to api/build/test-results/test
-            junitXml.enabled = true
+            junitXml.required = true
             // Write human-readable test report to api/build/reports/
-            html.enabled = true
+            html.required = true
         }
     }
     // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
@@ -669,7 +669,7 @@ def db_port = System.getenv("DB_PORT")
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+    mainClass = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -678,7 +678,7 @@ task fetchFireCloudUserProfile(type: JavaExec) {
 // See project.rb command: fetch-workspace-details
 task fetchWorkspaceDetails(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
+    mainClass = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -687,7 +687,7 @@ task fetchWorkspaceDetails(type: JavaExec) {
 // See project.rb command: generate-impersonated-user-tokens
 task generateImpersonatedUserTokens(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
+    mainClass = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -696,7 +696,7 @@ task generateImpersonatedUserTokens(type: JavaExec) {
 // See project.rb command: delete-workspaces
 task deleteWorkspaces(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.DeleteWorkspaces"
+    mainClass = "org.pmiops.workbench.tools.DeleteWorkspaces"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -705,7 +705,7 @@ task deleteWorkspaces(type: JavaExec) {
 // See project.rb command: invalidate-rdr-export
 task invalidateRdrExport(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.InvalidateRdrExport"
+    mainClass = "org.pmiops.workbench.tools.InvalidateRdrExport"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -714,7 +714,7 @@ task invalidateRdrExport(type: JavaExec) {
 // See project.rb command: backfill-entities-to-rdr
 task backfillEntitiesToRdr(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.BackfillEntitiesToRdr"
+    mainClass = "org.pmiops.workbench.tools.BackfillEntitiesToRdr"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -726,7 +726,7 @@ task backfillEntitiesToRdr(type: JavaExec) {
 // - docker-compose.yaml#updateConfig (used by "dev-up" command)
 task loadConfig(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ConfigLoader"
+    mainClass = "org.pmiops.workbench.tools.ConfigLoader"
     if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
         args config_key, config_file
     }
@@ -736,7 +736,7 @@ task loadConfig(type: JavaExec) {
 // - devstart.rb > list_runtimes
 task manageLeonardoRuntimes(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
+    mainClass = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -746,7 +746,7 @@ task manageLeonardoRuntimes(type: JavaExec) {
 // - devstart.rb > set_authority
 task setAuthority(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.SetAuthority"
+    mainClass = "org.pmiops.workbench.tools.SetAuthority"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -756,7 +756,7 @@ task setAuthority(type: JavaExec) {
 // - devstart.rb > update_cdr_config_for_project (called by run-local-migrations)
 task updateCdrConfig(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
+    mainClass = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -765,7 +765,7 @@ task updateCdrConfig(type: JavaExec) {
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
+    mainClass = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -774,7 +774,7 @@ task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
 // See project.rb command: create-terra-method-snapshot
 task createTerraMethodSnapshot(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
+    mainClass = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -783,7 +783,7 @@ task createTerraMethodSnapshot(type: JavaExec) {
 // See project.rb command: load-institutions
 task loadInstitutions(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
+    mainClass = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -792,7 +792,7 @@ task loadInstitutions(type: JavaExec) {
 // See project.rb command: fix-desynchronized-billing-project-owners
 task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
+    mainClass = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -801,7 +801,7 @@ task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
 // See project.rb command: set-access-module-timestamps
 task setAccessModuleTimestamps(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
+    mainClass = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -810,7 +810,7 @@ task setAccessModuleTimestamps(type: JavaExec) {
 // See project.rb command: export-workspace-operations
 task exportWorkspaceOperations(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ExportWorkspaceOperations"
+    mainClass = "org.pmiops.workbench.tools.ExportWorkspaceOperations"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
