@@ -785,7 +785,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(Collectors.toList());
     final List<Long> dbConceptSetIds =
         conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
-    List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
+    Set<DbConceptSetConceptId> dbConceptSetConceptIds = new HashSet<>();
     List<Long> surveyConceptIds = new ArrayList<>();
     List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     if (domain.equals(Domain.SURVEY)) {
@@ -793,8 +793,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         return Optional.empty();
       }
       if (userSurveyConceptSet(dbConceptSets)) {
-        dbConceptSetConceptIds = findDomainConceptIds(domain, dbConceptSetIds);
+        dbConceptSetConceptIds.addAll(findDomainConceptIds(domain, dbConceptSetIds));
       }
+      // handle prepackaged PFHH
+      if (prePackagedPfhhSurveyConceptSet(dbConceptSets)) {
+        dbConceptSetConceptIds.addAll(
+            findSurveyQuestionConceptIds(
+                ImmutableList.of(
+                    PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(PrePackagedConceptSetEnum.SURVEY_PFHH))));
+      }
+      // Resolve PFHH question_concept_ids to answer_concept_ids
       List<Long> questionConceptIds =
           dbConceptSetConceptIds.stream()
               .map(DbConceptSetConceptId::getConceptId)
@@ -804,10 +812,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
       if (!pfhhSurveyQuestionIds.isEmpty()) {
         // need to filter out PFHH survey questions for other survey questions
-        List<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
+        Set<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
             dbConceptSetConceptIds.stream()
                 .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         dbConceptSetConceptIds = dbNonPFHHSurveyQuestions;
         // find all answers for the questions
         dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
@@ -817,32 +825,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           surveyConceptIds.addAll(
               dbConceptSets.stream()
                   .filter(d -> d.getConceptSetId() == 0)
+                  .filter(
+                      d -> !d.getName().equals(PrePackagedConceptSetEnum.SURVEY_PFHH.toString()))
                   .map(
                       d ->
                           PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(
                               PrePackagedConceptSetEnum.valueOf(d.getName())))
                   .collect(Collectors.toList()));
-          System.out.println(
-              "***buildConceptIdSqlInClause -> add all survey-question-concept_ids ");
-          System.out.println(
-              "dbConceptSets Names -> "
-                  + dbConceptSets.stream().map(d -> d.getName()).collect(Collectors.joining(",")));
-          System.out.println(
-              "surveyConceptIds -> "
-                  + surveyConceptIds.stream()
-                      .map(d -> d.toString())
-                      .collect(Collectors.joining(",")));
         }
       }
     } else {
-      dbConceptSetConceptIds = findMultipleDomainConceptIds(domain, dbConceptSetIds);
+      dbConceptSetConceptIds.addAll(findMultipleDomainConceptIds(domain, dbConceptSetIds));
     }
 
     if (dbConceptSetConceptIds.isEmpty()
         && dbCriteriaAnswerIds.isEmpty()
         && surveyConceptIds.isEmpty()) {
-      System.out.println(
-          ">>> dbConceptSetConceptIds, dbCriteriaAnswerIds & surveyConceptIds are empty -> returning empty");
       return Optional.empty();
     } else {
       StringBuilder queryBuilder = new StringBuilder();
@@ -885,7 +883,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         }
         if (workbenchConfigProvider.get().featureFlags.enableDataExplorer) {
           if (!surveyConceptIds.isEmpty()) {
-            if (queryBuilder.toString().contains("question_concept_id IN (")) {
+            if (queryBuilder.toString().contains("question_concept_id IN (")
+                || queryBuilder.toString().contains("answer_concept_id IN (")) {
               queryBuilder.append(" OR question_concept_id IN ");
             } else {
               queryBuilder.append("question_concept_id IN ");
@@ -896,7 +895,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     surveyConceptIds.stream()
                         .map(c -> c.toString())
                         .collect(Collectors.joining(","))));
-            System.out.println("*****" + queryBuilder.toString() + "\n****");
           }
         }
       }
@@ -921,6 +919,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private boolean prePackagedSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
     return dbConceptSets.stream()
         .anyMatch(c -> c.getConceptSetId() == 0 && Domain.SURVEY.equals(c.getDomainEnum()));
+  }
+
+  private boolean prePackagedPfhhSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
+    return dbConceptSets.stream()
+        .anyMatch(
+            c ->
+                c.getConceptSetId() == 0
+                    && Domain.SURVEY.equals(c.getDomainEnum())
+                    && c.getName().equals(PrePackagedConceptSetEnum.SURVEY_PFHH.toString()));
   }
 
   private QueryJobConfiguration buildQueryJobConfiguration(
