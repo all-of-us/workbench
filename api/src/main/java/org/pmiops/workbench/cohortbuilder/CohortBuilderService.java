@@ -80,4 +80,6 @@ public interface CohortBuilderService {
   List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds);
 
   List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys);
+
+  List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);
 }

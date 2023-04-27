@@ -637,7 +637,15 @@ const BoxHeader = ({
 
 const prepackagedConceptSetToString = {
   PERSON: 'Demographics',
-  SURVEY: 'All Surveys',
+  SURVEY_ALL: 'All Surveys',
+  SURVEY_BASICS: 'The Basics',
+  SURVEY_LIFESTYLE: 'Lifestyle',
+  SURVEY_OVERALL_HEALTH: 'Overall Health',
+  SURVEY_HEALTHCARE_ACCESS_UTILIZATION: 'Healthcare Access & Utilization',
+  SURVEY_COPE: 'COVID-19 Paricipant Experience(COPE)',
+  SURVEY_SDOH: 'Social Determinants of Health',
+  SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
+  SURVEY_PFHH: 'Personal and Family Health History',
   FITBIT_HEART_RATE_SUMMARY: 'Fitbit Heart Rate Summary',
   FITBIT_ACTIVITY: 'Fitbit Activity Summary',
   FITBIT_HEART_RATE_LEVEL: 'Fitbit Heart Rate Level',
@@ -650,7 +658,15 @@ const prepackagedConceptSetToString = {
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
-  [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYALL]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYBASICS]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYLIFESTYLE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYCOPE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYSDOH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEYPFHH]: Domain.SURVEY,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
