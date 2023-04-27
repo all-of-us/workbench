@@ -13,7 +13,6 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-// TODO joel move to components
 import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
