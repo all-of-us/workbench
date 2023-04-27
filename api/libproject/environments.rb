@@ -85,7 +85,7 @@ ENVIRONMENTS = {
   "all-of-us-rw-stable" => env_with_defaults("stable", {
     :api_endpoint_host => "api.stable.fake-research-aou.org",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :gae_vars => make_gae_vars(0, 10, 'F3'),
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
@@ -104,7 +104,7 @@ ENVIRONMENTS = {
   }),
   "all-of-us-rw-preprod" => env_with_defaults("preprod", {
     :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
-    :gae_vars => make_gae_vars(0, 10, 'F3'),
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
     :source_cdr_project => "aou-res-curation-output-prod",
     :source_cdr_wgs_project => "aou-genomics-curation-prod",
