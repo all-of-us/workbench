@@ -39,6 +39,7 @@ import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
@@ -148,6 +149,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
+  private final ImmutableMap<PrePackagedConceptSetEnum, Long> PRE_PACKAGED_SURVEY_CONCEPT_IDS =
+      ImmutableMap.<PrePackagedConceptSetEnum, Long>builder()
+          .put(PrePackagedConceptSetEnum.SURVEY_BASICS, 1586134L)
+          .put(PrePackagedConceptSetEnum.SURVEY_LIFESTYLE, 1585855L)
+          .put(PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH, 1585710L)
+          .put(PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION, 43528895L)
+          .put(PrePackagedConceptSetEnum.SURVEY_COPE, 1333342L)
+          .put(PrePackagedConceptSetEnum.SURVEY_SDOH, 40192389L)
+          .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, 1741006L)
+          .put(PrePackagedConceptSetEnum.SURVEY_PFHH, 1740639L)
+          .build();
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -259,7 +271,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock,
-      Provider<DbUser> userProvider) {
+      Provider<DbUser> userProvider,
+      CBCriteriaDao cBCriteriaDao) {
     this.bigQueryService = bigQueryService;
     this.cohortBuilderService = cohortBuilderService;
     this.cohortService = cohortService;
@@ -275,6 +288,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
     this.userProvider = userProvider;
+    this.cBCriteriaDao = cBCriteriaDao;
   }
 
   @Override
@@ -340,6 +354,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary")
           .put(Domain.ZIP_CODE_SOCIOECONOMIC, "observation")
           .build();
+  private final CBCriteriaDao cBCriteriaDao;
 
   @Override
   public TableResult previewBigQueryJobConfig(DataSetPreviewRequest request) {
@@ -365,19 +380,33 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
     if (supportsConceptSets(domain)) {
-      List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
+      Set<DbConceptSetConceptId> dbConceptSetConceptIds = new HashSet<>();
       List<Long> dbCriteriaAnswerIds = new ArrayList<>();
       switch (domain) {
         case SURVEY:
-        case PHYSICAL_MEASUREMENT_CSS:
           if (!isPrepackagedAllSurveys(request)) {
-            dbConceptSetConceptIds =
-                findDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+            dbConceptSetConceptIds.addAll(
+                findDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
+
+            System.out.println(
+                "enableDataExplorer Flag: ="
+                    + workbenchConfigProvider.get().featureFlags.enableDataExplorer);
+            List<Long> prePackagedSurveyConceptIds =
+                request.getPrePackagedConceptSet().stream()
+                    .map(p -> PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(p))
+                    .collect(Collectors.toList());
+
+            // add selected prePackaged survey question concept ids
+            if (!prePackagedSurveyConceptIds.isEmpty()) {
+              dbConceptSetConceptIds.addAll(
+                  findSurveyQuestionConceptIds(prePackagedSurveyConceptIds));
+            }
           }
           List<Long> questionConceptIds =
               dbConceptSetConceptIds.stream()
                   .map(DbConceptSetConceptId::getConceptId)
                   .collect(Collectors.toList());
+
           // find any questions that belong to PFHH survey. The PFHH survey should
           // only use answer ids when looking up participants.
           List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
@@ -387,7 +416,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 dbConceptSetConceptIds.stream()
                     .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
                     .collect(Collectors.toList());
-            dbConceptSetConceptIds = dbNonPFHHSurveyQuestions;
+            dbConceptSetConceptIds.addAll(dbNonPFHHSurveyQuestions);
             // find all answers for the questions
             dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
           }
@@ -395,8 +424,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         default:
           // Get all source concepts and check to see if they cross this domain. Please see:
           // https://precisionmedicineinitiative.atlassian.net/browse/RW-7657
-          dbConceptSetConceptIds =
-              findMultipleDomainConceptIds(request.getDomain(), request.getConceptSetIds());
+          dbConceptSetConceptIds.addAll(
+              findMultipleDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
           break;
       }
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
@@ -560,6 +589,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       selectedConceptSetsBuilder.add(buildPrePackagedAllSurveyConceptSet());
     }
+
+    System.out.println(
+        "enableDataExplorer Flag: ="
+            + workbenchConfigProvider.get().featureFlags.enableDataExplorer);
+    // call buildPrePackagedSurveyConceptSets to get list of dbConceptSet for surveys
+    selectedConceptSetsBuilder.addAll(buildPrePackagedSurveyConceptSets(prePackagedConceptSet));
+
     return selectedConceptSetsBuilder.build();
   }
 
@@ -750,10 +786,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final List<Long> dbConceptSetIds =
         conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
     List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
+    List<Long> selectedPrePackagedSurveyConceptIds = new ArrayList<>();
     List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     if (domain.equals(Domain.SURVEY)) {
       if (!prePackagedSurveyConceptSet(dbConceptSets)) {
         dbConceptSetConceptIds = findDomainConceptIds(domain, dbConceptSetIds);
+        // @TODO for SQL... to notebook....
+        // get surveyConceptId list for individual selected prePackaged surveys
+        // in a separate list - translate from name to survey concept_id
+        //        selectedPrePackagedSurveyConceptIds.addAll(
+        //            getSurveyConceptIds()....
+        //        );
+        System.out.println(
+            "****buildConceptIdSqlInClause -> add all survey-question-concept_ids to dbConceptSetConceptIds here?   OR OR OR...***");
       }
       List<Long> questionConceptIds =
           dbConceptSetConceptIds.stream()
@@ -772,6 +817,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         // find all answers for the questions
         dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }
+      // @TODO collect names of all prePackaged Surveys (except "All Surveys")
+      // ?? here or at the end?
     } else {
       dbConceptSetConceptIds = findMultipleDomainConceptIds(domain, dbConceptSetIds);
     }
@@ -816,6 +863,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             "answer_concept_id IN (@answerConceptIds)"
                 .replaceAll("@answerConceptIds", answerConceptIds));
       }
+
+      System.out.println(
+          "****dbConceptSetConceptIds- SQL clause magic here before return stmt?\n ** question_concept_id in (cb_criteria sql for Qc using survey concept_id_list?)***");
+
       return Optional.of("(" + queryBuilder + ")");
     }
   }
@@ -1576,6 +1627,25 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return surveyConceptSet;
   }
 
+  private DbConceptSet createSurveyDbConceptSet(PrePackagedConceptSetEnum surveyEnum) {
+    final DbConceptSet surveyConceptSet = new DbConceptSet();
+    surveyConceptSet.setName(surveyEnum.toString());
+    surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
+    return surveyConceptSet;
+  }
+
+  private List<DbConceptSet> buildPrePackagedSurveyConceptSets(
+      List<PrePackagedConceptSetEnum> prePackagedConceptSet) {
+    List<DbConceptSet> surveyDbConceptSets = new ArrayList<>();
+    if (prePackagedConceptSet.contains(SURVEY_ALL)
+        || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
+      return ImmutableList.of(createSurveyDbConceptSet(SURVEY_ALL));
+    }
+    return prePackagedConceptSet.stream()
+        .map(s -> createSurveyDbConceptSet(s))
+        .collect(Collectors.toList());
+  }
+
   /**
    * If the domain is Condition/Procedure and the concept set contains a source concept then it may
    * have multiple domains. Please see: <a
@@ -1648,6 +1718,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @NotNull
   private List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds) {
     return cohortBuilderService.findPFHHSurveyAnswerIds(conceptIds);
+  }
+
+  @NotNull
+  private List<DbConceptSetConceptId> findSurveyQuestionConceptIds(List<Long> surveyConceptIds) {
+    // Since we do not save prepackaged concept ids to user concept set,
+    // we will convert all prepackaged concept ids to DbConceptSetConceptId objects
+    return cohortBuilderService.findSurveyQuestionIds(surveyConceptIds).stream()
+        .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(false).build())
+        .collect(Collectors.toList());
   }
 
   private List<DbConceptSetConceptId> findMultipleDomainConceptIds(
