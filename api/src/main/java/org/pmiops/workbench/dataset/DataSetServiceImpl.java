@@ -2,6 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
+import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.QUESTION_LOOKUP_SQL;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
@@ -387,19 +388,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           if (!isPrepackagedAllSurveys(request)) {
             dbConceptSetConceptIds.addAll(
                 findDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
+            if (workbenchConfigProvider.get().featureFlags.enableDataExplorer) {
+              List<Long> prePackagedSurveyConceptIds =
+                  request.getPrePackagedConceptSet().stream()
+                      .map(p -> PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(p))
+                      .collect(Collectors.toList());
 
-            System.out.println(
-                "enableDataExplorer Flag: ="
-                    + workbenchConfigProvider.get().featureFlags.enableDataExplorer);
-            List<Long> prePackagedSurveyConceptIds =
-                request.getPrePackagedConceptSet().stream()
-                    .map(p -> PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(p))
-                    .collect(Collectors.toList());
-
-            // add selected prePackaged survey question concept ids
-            if (!prePackagedSurveyConceptIds.isEmpty()) {
-              dbConceptSetConceptIds.addAll(
-                  findSurveyQuestionConceptIds(prePackagedSurveyConceptIds));
+              // add selected prePackaged survey question concept ids
+              if (!prePackagedSurveyConceptIds.isEmpty()) {
+                dbConceptSetConceptIds.addAll(
+                    findSurveyQuestionConceptIds(prePackagedSurveyConceptIds));
+              }
             }
           }
           List<Long> questionConceptIds =
@@ -583,18 +582,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
-    // If pre packaged all survey concept set is selected create a temp concept set with concept ids
-    // of all survey questions
-    if (prePackagedConceptSet.contains(SURVEY)
-        || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
-      selectedConceptSetsBuilder.add(buildPrePackagedAllSurveyConceptSet());
+    if (workbenchConfigProvider.get().featureFlags.enableDataExplorer) {
+      selectedConceptSetsBuilder.addAll(buildPrePackagedSurveyConceptSets(prePackagedConceptSet));
+    } else {
+      // If pre packaged all survey concept set is selected create a temp concept set with concept
+      // ids of all survey questions
+      if (prePackagedConceptSet.contains(SURVEY)
+          || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
+        selectedConceptSetsBuilder.add(buildPrePackagedAllSurveyConceptSet());
+      }
     }
-
-    System.out.println(
-        "enableDataExplorer Flag: ="
-            + workbenchConfigProvider.get().featureFlags.enableDataExplorer);
-    // call buildPrePackagedSurveyConceptSets to get list of dbConceptSet for surveys
-    selectedConceptSetsBuilder.addAll(buildPrePackagedSurveyConceptSets(prePackagedConceptSet));
 
     return selectedConceptSetsBuilder.build();
   }
@@ -786,19 +783,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final List<Long> dbConceptSetIds =
         conceptSets.stream().map(DbConceptSet::getConceptSetId).collect(Collectors.toList());
     List<DbConceptSetConceptId> dbConceptSetConceptIds = new ArrayList<>();
-    List<Long> selectedPrePackagedSurveyConceptIds = new ArrayList<>();
+    List<Long> surveyConceptIds = new ArrayList<>();
     List<Long> dbCriteriaAnswerIds = new ArrayList<>();
     if (domain.equals(Domain.SURVEY)) {
-      if (!prePackagedSurveyConceptSet(dbConceptSets)) {
+      if (prePackagedAllSurveyConceptSet(dbConceptSets)) {
+        return Optional.empty();
+      }
+      if (userSurveyConceptSet(dbConceptSets)) {
         dbConceptSetConceptIds = findDomainConceptIds(domain, dbConceptSetIds);
-        // @TODO for SQL... to notebook....
-        // get surveyConceptId list for individual selected prePackaged surveys
-        // in a separate list - translate from name to survey concept_id
-        //        selectedPrePackagedSurveyConceptIds.addAll(
-        //            getSurveyConceptIds()....
-        //        );
-        System.out.println(
-            "****buildConceptIdSqlInClause -> add all survey-question-concept_ids to dbConceptSetConceptIds here?   OR OR OR...***");
       }
       List<Long> questionConceptIds =
           dbConceptSetConceptIds.stream()
@@ -817,13 +809,37 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         // find all answers for the questions
         dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
       }
-      // @TODO collect names of all prePackaged Surveys (except "All Surveys")
-      // ?? here or at the end?
+      if (prePackagedSurveyConceptSet(dbConceptSets)) {
+        if (workbenchConfigProvider.get().featureFlags.enableDataExplorer) {
+          surveyConceptIds.addAll(
+              dbConceptSets.stream()
+                  .filter(d -> d.getConceptSetId() == 0)
+                  .map(
+                      d ->
+                          PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(
+                              PrePackagedConceptSetEnum.valueOf(d.getName())))
+                  .collect(Collectors.toList()));
+          System.out.println(
+              "***buildConceptIdSqlInClause -> add all survey-question-concept_ids ");
+          System.out.println(
+              "dbConceptSets Names -> "
+                  + dbConceptSets.stream().map(d -> d.getName()).collect(Collectors.joining(",")));
+          System.out.println(
+              "surveyConceptIds -> "
+                  + surveyConceptIds.stream()
+                      .map(d -> d.toString())
+                      .collect(Collectors.joining(",")));
+        }
+      }
     } else {
       dbConceptSetConceptIds = findMultipleDomainConceptIds(domain, dbConceptSetIds);
     }
 
-    if (dbConceptSetConceptIds.isEmpty() && dbCriteriaAnswerIds.isEmpty()) {
+    if (dbConceptSetConceptIds.isEmpty()
+        && dbCriteriaAnswerIds.isEmpty()
+        && surveyConceptIds.isEmpty()) {
+      System.out.println(
+          ">>> dbConceptSetConceptIds, dbCriteriaAnswerIds & surveyConceptIds are empty -> returning empty");
       return Optional.empty();
     } else {
       StringBuilder queryBuilder = new StringBuilder();
@@ -853,22 +869,50 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replaceAll("unnest", "")
                 .replaceAll("(@sourceConceptIds)", sourceConceptIds));
       }
-      if (Domain.SURVEY.equals(domain) && !dbCriteriaAnswerIds.isEmpty()) {
-        String answerConceptIds =
-            dbCriteriaAnswerIds.stream().map(Object::toString).collect(Collectors.joining(","));
-        if (queryBuilder.toString().contains("question_concept_id IN (")) {
-          queryBuilder.append(" OR ");
+      if (Domain.SURVEY.equals(domain)) {
+        if (!dbCriteriaAnswerIds.isEmpty()) {
+          String answerConceptIds =
+              dbCriteriaAnswerIds.stream().map(Object::toString).collect(Collectors.joining(","));
+          if (queryBuilder.toString().contains("question_concept_id IN (")) {
+            queryBuilder.append(" OR ");
+          }
+          queryBuilder.append(
+              "answer_concept_id IN (@answerConceptIds)"
+                  .replaceAll("@answerConceptIds", answerConceptIds));
         }
-        queryBuilder.append(
-            "answer_concept_id IN (@answerConceptIds)"
-                .replaceAll("@answerConceptIds", answerConceptIds));
+        if (workbenchConfigProvider.get().featureFlags.enableDataExplorer) {
+          if (!surveyConceptIds.isEmpty()) {
+            if (queryBuilder.toString().contains("question_concept_id IN (")) {
+              queryBuilder.append(" OR question_concept_id IN ");
+            } else {
+              queryBuilder.append("question_concept_id IN ");
+            }
+            queryBuilder.append(
+                QUESTION_LOOKUP_SQL.replaceAll(
+                    "@surveyConceptIds",
+                    surveyConceptIds.stream()
+                        .map(c -> c.toString())
+                        .collect(Collectors.joining(","))));
+            System.out.println("*****" + queryBuilder.toString() + "\n****");
+          }
+        }
       }
-
-      System.out.println(
-          "****dbConceptSetConceptIds- SQL clause magic here before return stmt?\n ** question_concept_id in (cb_criteria sql for Qc using survey concept_id_list?)***");
-
       return Optional.of("(" + queryBuilder + ")");
     }
+  }
+
+  private boolean userSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
+    return dbConceptSets.stream()
+        .anyMatch(c -> c.getConceptSetId() > 0 && Domain.SURVEY.equals(c.getDomainEnum()));
+  }
+
+  private boolean prePackagedAllSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
+    return dbConceptSets.stream()
+        .anyMatch(
+            c ->
+                c.getConceptSetId() == 0
+                    && Domain.SURVEY.equals(c.getDomainEnum())
+                    && c.getName().equals(SURVEY.toString()));
   }
 
   private boolean prePackagedSurveyConceptSet(List<DbConceptSet> dbConceptSets) {

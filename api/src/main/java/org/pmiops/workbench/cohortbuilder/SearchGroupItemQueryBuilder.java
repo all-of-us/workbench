@@ -124,6 +124,17 @@ public final class SearchGroupItemQueryBuilder {
           + "WHERE domain_id = 'SURVEY'\n"
           + "AND type = 'PPI'\n"
           + "AND subtype = 'ANSWER')";
+  public static final String QUESTION_LOOKUP_SQL =
+      "(SELECT DISTINCT concept_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "JOIN (select cast(cr.id as string) as id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "WHERE concept_id IN (@surveyConceptIds)\n"
+          + "AND domain_id = 'SURVEY') a\n"
+          + "ON (c.path like CONCAT('%', a.id, '.%'))\n"
+          + "WHERE domain_id = 'SURVEY'\n"
+          + "AND type = 'PPI'\n"
+          + "AND subtype = 'QUESTION')";
   private static final String PARENT_STANDARD_OR_SOURCE_SQL =
       CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL + "\n";
   private static final String DRUG_SQL =
