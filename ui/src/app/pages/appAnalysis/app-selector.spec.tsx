@@ -39,13 +39,12 @@ describe('App Selector', () => {
     });
   };
 
-  const component = () => {
-    return mount(
+  const component = () =>
+    mount(
       <MemoryRouter>
         <AppSelector workspace={currentWorkspaceStore.getValue()} />
       </MemoryRouter>
     );
-  };
 
   beforeEach(() => {
     currentWorkspaceStore.next({
