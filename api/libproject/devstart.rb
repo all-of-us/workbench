@@ -1290,9 +1290,11 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   gcc.validate()
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{
-      ./gradlew fetchFireCloudUserProfile
-     -PappArgs=["#{op.opts.user}"]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        ./gradlew fetchFireCloudUserProfile
+       -PappArgs=["#{op.opts.user}"]}
+  end
 end
 
 Common.register_command({
@@ -1328,9 +1330,11 @@ def fetch_workspace_details(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{
-      ./gradlew fetchWorkspaceDetails
-     -PappArgs=[#{flags.join(',')}]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        ./gradlew fetchWorkspaceDetails
+       -PappArgs=[#{flags.join(',')}]}
+  end
 end
 
 Common.register_command({
@@ -1485,9 +1489,11 @@ def load_institutions(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{
-      ./gradlew loadInstitutions
-     -PappArgs=[#{gradle_args.join(',')}]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        ./gradlew loadInstitutions
+       -PappArgs=[#{gradle_args.join(',')}]}
+  end
 end
 
 LOAD_INSTITUTIONS_CMD = "load-institutions"
@@ -1541,9 +1547,11 @@ def delete_workspaces(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{
-      ./gradlew deleteWorkspaces
-     -PappArgs=[#{flags.join(',')}]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        ./gradlew deleteWorkspaces
+       -PappArgs=[#{flags.join(',')}]}
+  end
 end
 
 DELETE_WORKSPACES_CMD = "delete-workspaces"
@@ -1609,9 +1617,11 @@ def invalidate_rdr_export(cmd_name, *args)
   flags.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{
-      ./gradlew invalidateRdrExport
-     -PappArgs=[#{flags.join(',')}]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        ./gradlew invalidateRdrExport
+       -PappArgs=[#{flags.join(',')}]}
+  end
 end
 
 INVALIDATE_RDR_EXPORT = "invalidate-rdr-export";
@@ -1721,9 +1731,11 @@ def set_authority(cmd_name, *args)
   end
 
   ENV.update(read_db_vars(gcc))
-  Common.new.run_inline %W{
-    ./gradlew setAuthority
-   -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  ServiceAccountContext.new(gcc.project).run do
+    Common.new.run_inline %W{
+      ./gradlew setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  end
 end
 
 Common.register_command({
@@ -2271,7 +2283,9 @@ def create_or_update_workbench_db_cmd(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  create_or_update_workbench_db
+  ServiceAccountContext.new(gcc.project).run do
+    create_or_update_workbench_db
+  end
 end
 
 Common.register_command({
@@ -2359,7 +2373,9 @@ def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
     yield gcc
   else
     ENV.update(read_db_vars(gcc))
-    yield gcc
+    ServiceAccountContext.new(gcc.project).run do
+      yield gcc
+    end
   end
 end
 
@@ -2408,24 +2424,26 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   ENV.update(read_db_vars(gcc))
-  # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
-  migrate_database(gcc, op.opts.account, op.opts.dry_run)
-  if (op.opts.key_file)
-    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
-  end
-  load_config(gcc.project, op.opts.dry_run)
-  cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-  update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+  ServiceAccountContext.new(gcc.project).run do
+    # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
+    migrate_database(gcc, op.opts.account, op.opts.dry_run)
+    if (op.opts.key_file)
+      ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
+    end
+    load_config(gcc.project, op.opts.dry_run)
+    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
-  # Keep the cloud proxy context open for the service account credentials.
-  dry_flag = op.opts.dry_run ? %W{--dry-run} : []
-  deploy_args = %W{
-    --project #{gcc.project}
-    --version #{op.opts.version}
-    #{op.opts.promote ? "--promote" : "--no-promote"}
-    --quiet
-  } + dry_flag
-  deploy_api(cmd_name, deploy_args)
+    # Keep the cloud proxy context open for the service account credentials.
+    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
+    deploy_args = %W{
+      --project #{gcc.project}
+      --version #{op.opts.version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+    } + dry_flag
+    deploy_api(cmd_name, deploy_args)
+  end
 end
 
 Common.register_command({
@@ -2441,7 +2459,9 @@ def run_cloud_migrations(cmd_name, args)
   op.parse.validate
   gcc.validate()
   ENV.update(read_db_vars(gcc))
-  migrate_database(gcc)
+  ServiceAccountContext.new(gcc.project).run do
+    migrate_database(gcc)
+  end
 end
 
 Common.register_command({
@@ -2535,7 +2555,9 @@ def set_access_module_timestamps(cmd_name, *args)
   gradle_args.map! { |f| "'#{f}'" }
 
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew setAccessModuleTimestamps -PappArgs=[#{gradle_args.join(',')}]}
+  end
 end
 
 SET_ACCESS_MODULE_TIMESTAMPS_CMD = "set-access-module-timestamps"
@@ -2563,7 +2585,9 @@ def export_workspace_operations(cmd_name, *args)
 
   common = Common.new
   ENV.update(read_db_vars(gcc))
-  common.run_inline %W{./gradlew exportWorkspaceOperations}
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew exportWorkspaceOperations}
+  end
 end
 
 EXPORT_WORKSPACE_OPERATIONS_CMD = "export-workspace-operations"
