@@ -67,18 +67,18 @@ import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
-  // The Leonardo user role who creates Leonardo APP or disks.
+  // The user role in Leonardo for creating environments or disks.
   private static final String LEONARDO_CREATOR_ROLE = "creator";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
-  private static Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
+  private static final Set<LeonardoRuntimeStatus> STOPPABLE_RUNTIME_STATUSES =
       ImmutableSet.of(
           LeonardoRuntimeStatus.RUNNING,
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
 
-  private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
+  private static final Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
       ImmutableSet.of(
           LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
 
