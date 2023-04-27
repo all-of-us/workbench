@@ -56,9 +56,28 @@ plugins {
     id 'org.springframework.boot' version '2.7.4'
 }
 
-
 if (JavaVersion.current() != JavaVersion.VERSION_11) {
     throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md. The java version used ${JavaVersion.current()}")
+}
+
+if (System.getenv("ADD_XLINT_DEPRECATION")) {
+  allprojects {
+    gradle.projectsEvaluated {
+      tasks.withType(JavaCompile) {
+        options.compilerArgs.add("-Xlint:deprecation")
+      }
+    }
+  }
+}
+
+if (System.getenv("ADD_XLINT_UNCHECKED")) {
+  allprojects {
+    gradle.projectsEvaluated {
+      tasks.withType(JavaCompile) {
+        options.compilerArgs.add("-Xlint:unchecked")
+      }
+    }
+  }
 }
 
 // Artifact configurations derived from base configs. Configuration names
