@@ -37,12 +37,12 @@ const styles = reactStyles({
 });
 
 interface AppSelectorProps {
-  workspaceData: WorkspaceData;
+  workspace: WorkspaceData;
 }
 
 export const AppSelector = (props: AppSelectorProps) => {
-  const { workspaceData } = props;
-  const { billingStatus, accessLevel } = workspaceData || {};
+  const { workspace } = props;
+  const { billingStatus, accessLevel } = workspace;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
   const [showJupyterModal, setShowJupyterModal] = useState(false);
@@ -125,9 +125,8 @@ export const AppSelector = (props: AppSelectorProps) => {
       )}
       {showJupyterModal && !showSelectAppModal && (
         <NewNotebookModal
+          {...{ workspace, onClose }}
           data-test-id='jupyter-modal'
-          onClose={() => onClose()}
-          workspace={workspaceData}
           existingNameList={null}
           onBack={() => setShowSelectAppModal(true)}
         />

@@ -19,15 +19,13 @@ const styles = reactStyles({
 });
 
 interface AppFilesListProps extends WithSpinnerOverlayProps {
-  workspaceData: WorkspaceData;
+  workspace: WorkspaceData;
 }
 export const AppFilesList = withCurrentWorkspace()(
   (props: AppFilesListProps) => {
-    const { workspaceData } = props;
+    const { workspace } = props;
 
-    useEffect(() => {
-      props.hideSpinner();
-    }, []);
+    useEffect(() => props.hideSpinner(), []);
 
     return (
       <FadeBox style={styles.fadeBox}>
@@ -36,7 +34,7 @@ export const AppFilesList = withCurrentWorkspace()(
             <ListPageHeader style={{ paddingRight: '2.25rem' }}>
               Your Analyses
             </ListPageHeader>
-            <AppSelector {...{ workspaceData }} />
+            <AppSelector {...{ workspace }} />
           </FlexRow>
         </FlexColumn>
       </FadeBox>

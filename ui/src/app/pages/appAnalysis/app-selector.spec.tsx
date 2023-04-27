@@ -42,7 +42,7 @@ describe('App Selector', () => {
   const component = () => {
     return mount(
       <MemoryRouter>
-        <AppSelector workspaceData={currentWorkspaceStore.getValue()} />
+        <AppSelector workspace={currentWorkspaceStore.getValue()} />
       </MemoryRouter>
     );
   };
