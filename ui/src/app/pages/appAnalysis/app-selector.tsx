@@ -42,10 +42,13 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
-  const { billingStatus, accessLevel } = workspace;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
   const [showJupyterModal, setShowJupyterModal] = useState(false);
+
+  const canCreateApps =
+    workspace.billingStatus === BillingStatus.ACTIVE &&
+    WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
 
   const onClose = () => {
     setSelectedApp('');
@@ -72,10 +75,7 @@ export const AppSelector = (props: AppSelectorProps) => {
         onClick={() => {
           setShowSelectAppModal(true);
         }}
-        disabled={
-          billingStatus === BillingStatus.INACTIVE ||
-          !WorkspacePermissionsUtil.canWrite(accessLevel)
-        }
+        disabled={!canCreateApps}
       >
         <div style={{ paddingRight: '0.75rem' }}>Start</div>
         <FontAwesomeIcon icon={faPlusCircle} />
@@ -107,7 +107,7 @@ export const AppSelector = (props: AppSelectorProps) => {
               style={{ marginRight: '3rem' }}
               type='secondary'
               aria-label='close'
-              onClick={() => onClose()}
+              onClick={onClose}
             >
               Close
             </Button>
@@ -115,7 +115,7 @@ export const AppSelector = (props: AppSelectorProps) => {
               data-test-id='next-btn'
               type='primary'
               aria-label='next'
-              onClick={() => onNext()}
+              onClick={onNext}
               disabled={selectedApp === ''}
             >
               Next
