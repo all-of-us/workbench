@@ -321,7 +321,7 @@ public final class DbStorageEnums {
           ImmutableBiMap.<PrePackagedConceptSetEnum, Short>builder()
               .put(PrePackagedConceptSetEnum.NONE, (short) 0)
               .put(PrePackagedConceptSetEnum.PERSON, (short) 1)
-              .put(PrePackagedConceptSetEnum.SURVEY_ALL, (short) 2)
+              .put(PrePackagedConceptSetEnum.SURVEY, (short) 2)
               .put(PrePackagedConceptSetEnum.BOTH, (short) 3)
               .put(PrePackagedConceptSetEnum.FITBIT_ACTIVITY, (short) 4)
               .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL, (short) 5)

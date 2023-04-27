@@ -5586,7 +5586,7 @@ definitions:
     enum:
     - NONE
     - PERSON
-    - SURVEY_ALL
+    - SURVEY
     - SURVEY_BASICS
     - SURVEY_LIFESTYLE
     - SURVEY_OVERALL_HEALTH
