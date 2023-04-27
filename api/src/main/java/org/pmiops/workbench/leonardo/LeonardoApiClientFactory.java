@@ -8,6 +8,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 
 @Service
 public class LeonardoApiClientFactory {
@@ -66,10 +67,10 @@ public class LeonardoApiClientFactory {
    * Creates a Leonardo notebooks API client, unauthenticated. Most clients should use an
    * authenticated, request scoped bean instead of calling this directly.
    */
-  public org.pmiops.workbench.notebooks.ApiClient newNotebooksClient() {
+  public ApiClient newNotebooksClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final org.pmiops.workbench.notebooks.ApiClient apiClient =
-        new org.pmiops.workbench.notebooks.ApiClient()
+    final ApiClient apiClient =
+        new ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
