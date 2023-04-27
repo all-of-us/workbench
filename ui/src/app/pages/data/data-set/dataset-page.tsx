@@ -637,7 +637,7 @@ const BoxHeader = ({
 
 const prepackagedConceptSetToString = {
   PERSON: 'Demographics',
-  SURVEY_ALL: 'All Surveys',
+  SURVEY: 'All Surveys',
   SURVEY_BASICS: 'The Basics',
   SURVEY_LIFESTYLE: 'Lifestyle',
   SURVEY_OVERALL_HEALTH: 'Overall Health',
@@ -658,7 +658,7 @@ const prepackagedConceptSetToString = {
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
-  [PrePackagedConceptSetEnum.SURVEYALL]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYBASICS]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYLIFESTYLE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH]: Domain.SURVEY,
