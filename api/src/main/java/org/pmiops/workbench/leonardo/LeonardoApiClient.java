@@ -2,12 +2,12 @@ package org.pmiops.workbench.leonardo;
 
 import java.util.List;
 import java.util.Map;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -60,7 +60,8 @@ public interface LeonardoApiClient {
   StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
 
   /** Gets information about a persistent disk */
-  GetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName) throws WorkbenchException;
+  GetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
+      throws WorkbenchException;
 
   /** Deletes a persistent disk */
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
@@ -70,7 +71,8 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks by google project */
-  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(String googleProject, boolean includeDeleted);
+  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+      String googleProject, boolean includeDeleted);
 
   /**
    * Creates Leonardo app owned by the current authenticated user.

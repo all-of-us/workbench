@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ProxyApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -13,13 +19,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
-
-import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.ProxyApi;
 
 @org.springframework.context.annotation.Configuration
 public class LeonardoConfig {
@@ -83,7 +82,8 @@ public class LeonardoConfig {
 
   @Bean(name = USER_LEONARDO_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient leoUserApiClient(UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
+  public ApiClient leoUserApiClient(
+      UserAuthentication userAuthentication, LeonardoApiClientFactory factory) {
     ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(userAuthentication.getCredentials());
     return apiClient;
@@ -133,13 +133,13 @@ public class LeonardoConfig {
     return api;
   }
 
-//  @Bean
-//  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-//  public JupyterApi jupyterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
-//    JupyterApi api = new JupyterApi();
-//    api.setApiClient(apiClient);
-//    return api;
-//  }
+  //  @Bean
+  //  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  //  public JupyterApi jupyterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  //    JupyterApi api = new JupyterApi();
+  //    api.setApiClient(apiClient);
+  //    return api;
+  //  }
 
   @Bean(name = SERVICE_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)

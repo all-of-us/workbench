@@ -16,12 +16,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ProxyApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDataprocConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateGceConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequestRuntimeConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UserJupyterExtensionConfig;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -49,24 +63,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.ProxyApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UserJupyterExtensionConfig;
-
-
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
   // The user role in Leonardo for creating environments or disks.
@@ -75,14 +71,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
   private static final Set<ClusterStatus> STOPPABLE_RUNTIME_STATUSES =
-      ImmutableSet.of(
-          ClusterStatus.RUNNING,
-          ClusterStatus.STARTING,
-          ClusterStatus.UPDATING);
+      ImmutableSet.of(ClusterStatus.RUNNING, ClusterStatus.STARTING, ClusterStatus.UPDATING);
 
   private static final Set<AppStatus> STOPPABLE_APP_STATUSES =
-      ImmutableSet.of(
-          AppStatus.RUNNING, AppStatus.PROVISIONING, AppStatus.STARTING);
+      ImmutableSet.of(AppStatus.RUNNING, AppStatus.PROVISIONING, AppStatus.STARTING);
 
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
@@ -188,12 +180,15 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   private OneOfRuntimeConfig buildRuntimeConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
-      return new OneOfRuntimeConfig(leonardoMapper.toLeonardoGceConfig(runtime.getGceConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone));
+      return new OneOfRuntimeConfig(
+          leonardoMapper
+              .toLeonardoGceConfig(runtime.getGceConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone));
     } else if (runtime.getGceWithPdConfig() != null) {
-      return new OneOfRuntimeConfig(leonardoMapper
-          .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
-          .zone(workbenchConfigProvider.get().firecloud.gceVmZone));
+      return new OneOfRuntimeConfig(
+          leonardoMapper
+              .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())
+              .zone(workbenchConfigProvider.get().firecloud.gceVmZone));
     } else {
       DataprocConfig dataprocConfig =
           leonardoMapper.toLeonardoDataProcConfig(runtime.getDataprocConfig());
@@ -204,15 +199,17 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
   }
 
-
   private UpdateRuntimeRequestRuntimeConfig buildRuntimeUpdateConfig(Runtime runtime) {
     if (runtime.getGceConfig() != null) {
-      return new UpdateRuntimeRequestRuntimeConfig(leonardoMapper.toLeonardoUpdateGceConfig(runtime.getGceConfig()));
+      return new UpdateRuntimeRequestRuntimeConfig(
+          leonardoMapper.toLeonardoUpdateGceConfig(runtime.getGceConfig()));
     } else if (runtime.getGceWithPdConfig() != null) {
-      return new UpdateRuntimeRequestRuntimeConfig(leonardoMapper.toLeonardoUpdateGceConfig(runtime.getGceWithPdConfig()));
+      return new UpdateRuntimeRequestRuntimeConfig(
+          leonardoMapper.toLeonardoUpdateGceConfig(runtime.getGceWithPdConfig()));
     } else {
-      return new UpdateRuntimeRequestRuntimeConfig(leonardoMapper.toLeonardoUpdateDataProcConfig(runtime.getDataprocConfig()));
-  }
+      return new UpdateRuntimeRequestRuntimeConfig(
+          leonardoMapper.toLeonardoUpdateDataProcConfig(runtime.getDataprocConfig()));
+    }
   }
 
   @Override
@@ -232,10 +229,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     leonardoRetryHandler.run(
         (context) -> {
-            runtimesApi.createRuntime(
-                runtime.getGoogleProject(),
-                runtime.getRuntimeName(),
-                buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
+          runtimesApi.createRuntime(
+              runtime.getGoogleProject(),
+              runtime.getRuntimeName(),
+              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
           return null;
         });
   }
@@ -440,8 +437,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     DisksApi disksApi = diskApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
-          disksApi.updateDisk(
-              googleProject, diskName, new UpdateDiskRequest().size(diskSize));
+          disksApi.updateDisk(googleProject, diskName, new UpdateDiskRequest().size(diskSize));
           return null;
         });
   }
@@ -469,7 +465,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     KubernetesRuntimeConfig kubernetesRuntimeConfig = createAppRequest.getKubernetesRuntimeConfig();
     PersistentDiskRequest persistentDiskRequest = createAppRequest.getPersistentDiskRequest();
 
-    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest leonardoCreateAppRequest = new org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest
+        leonardoCreateAppRequest =
+            new org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest();
     Map<String, String> appLabels =
         new ImmutableMap.Builder<String, String>()
             .put(LeonardoLabelHelper.LEONARDO_LABEL_AOU, "true")
