@@ -2,7 +2,7 @@ package org.pmiops.workbench.dataset;
 
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
-import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY_ALL;
+import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -585,7 +585,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
     // of all survey questions
-    if (prePackagedConceptSet.contains(SURVEY_ALL)
+    if (prePackagedConceptSet.contains(SURVEY)
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       selectedConceptSetsBuilder.add(buildPrePackagedAllSurveyConceptSet());
     }
@@ -1637,9 +1637,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private List<DbConceptSet> buildPrePackagedSurveyConceptSets(
       List<PrePackagedConceptSetEnum> prePackagedConceptSet) {
     List<DbConceptSet> surveyDbConceptSets = new ArrayList<>();
-    if (prePackagedConceptSet.contains(SURVEY_ALL)
+    if (prePackagedConceptSet.contains(SURVEY)
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
-      return ImmutableList.of(createSurveyDbConceptSet(SURVEY_ALL));
+      return ImmutableList.of(createSurveyDbConceptSet(SURVEY));
     }
     return prePackagedConceptSet.stream()
         .map(s -> createSurveyDbConceptSet(s))
@@ -1783,6 +1783,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private boolean isPrepackagedAllSurveys(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
-    return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY_ALL);
+    return domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY);
   }
 }
