@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -125,6 +126,9 @@ public interface LeonardoMapper {
       @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
     leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
   }
+
+  @ValueMapping(source = "BALANCED", target = MappingConstants.NULL) // we don't support Balanced
+  DiskType toApiDiskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType diskType);
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -244,7 +248,8 @@ public interface LeonardoMapper {
 
   @ValueMapping(source = "CUSTOM", target = "RSTUDIO")
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
-  AppType toApiAppType(LeonardoAppType appType);
+  @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS
+  AppType toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
