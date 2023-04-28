@@ -2373,7 +2373,7 @@ def with_optional_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
     yield gcc
   else
     ENV.update(read_db_vars(gcc))
-    ServiceAccountContext.new(gcc.project).run do
+    ServiceAccountContext.new(gcc.project, service_account, key_file).run do
       yield gcc
     end
   end
@@ -2424,7 +2424,7 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(gcc.project, op.opts.account, op.opts.key_file).run do
     # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
     migrate_database(gcc, op.opts.account, op.opts.dry_run)
     load_config(gcc.project, op.opts.dry_run)
