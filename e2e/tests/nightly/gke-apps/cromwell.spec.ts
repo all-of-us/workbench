@@ -7,7 +7,6 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language } from 'app/text-labels';
 import path from 'path';
-import Button from 'app/element/button';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
@@ -25,32 +24,11 @@ describe('Cromwell GKE App', () => {
   test('Create and delete a Cromwell GKE app', async () => {
     await findOrCreateWorkspace(page, { workspaceName: 'e2eCreateCromwellGkeAppsPanelTest' });
 
-    const appsPanel = new AppsPanel(page);
-    await appsPanel.open();
-
-    // Cromwell is not running, so it appears in unexpanded mode
-
-    const unexpandedCromwellXPath = `${appsPanel.getXpath()}//*[@data-test-id="Cromwell-unexpanded"]`;
-    const unexpandedCromwell = new Button(page, unexpandedCromwellXPath);
-
-    expect(await unexpandedCromwell.exists()).toBeTruthy();
-    await unexpandedCromwell.click();
-
-    // clicking an unexpanded GKE App:
-    // 1. closes the apps panel
-    // 2. opens the config panel
-
     const configPanel = new CromwellConfigurationPanel(page);
-    await configPanel.isVisible();
+    const appsPanel = new AppsPanel(page);
 
-    // now we can create a Cromwell app by clicking the button on this page
+    await configPanel.startCromwellGkeApp();
 
-    const createXPath = `${configPanel.getXpath()}//*[@id="Cromwell-cloud-environment-create-button"]`;
-    const createButton = new Button(page, createXPath);
-    expect(await createButton.exists()).toBeTruthy();
-    await createButton.click();
-
-    // clicking create:
     // 1. closes the config panel
     // 2. waits a few seconds
     // 3. opens the apps panel
@@ -103,6 +81,7 @@ describe('Cromwell GKE App', () => {
 
     //Start Cromwell
     await cromwellPanel.startCromwellGkeApp();
+    await appsPanel.close();
 
     // Re-run the code snippet to check PROVISIONING state
     snippetOutput = await notebook.runCodeCell(1);

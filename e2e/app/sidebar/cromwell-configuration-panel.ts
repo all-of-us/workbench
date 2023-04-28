@@ -31,7 +31,6 @@ export default class CromwellConfigurationPanel extends BaseEnvironmentPanel {
     expect(await createButton.exists()).toBeTruthy();
     await createButton.click();
 
-    await appsPanel.close();
     return;
   }
 }
