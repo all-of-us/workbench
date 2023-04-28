@@ -20,7 +20,6 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
@@ -178,7 +177,7 @@ public interface LeonardoMapper {
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   ListRuntimeResponse toApiListRuntimeResponse(
-      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
@@ -186,7 +185,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
-  Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
+  Runtime toApiRuntime(org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "autopauseThreshold", ignore = true)
@@ -196,7 +195,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
-  Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+  Runtime toApiRuntime(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
 
