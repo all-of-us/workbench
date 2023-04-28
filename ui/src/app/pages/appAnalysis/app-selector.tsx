@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,9 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BillingStatus } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
-import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ListPageHeader } from 'app/components/headers';
 import {
   Modal,
   ModalBody,
@@ -18,17 +15,13 @@ import {
 } from 'app/components/modals';
 import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
 import colors from 'app/styles/colors';
-import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
+import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
 const styles = reactStyles({
-  fadeBox: {
-    margin: 'auto',
-    marginTop: '1.5rem',
-    width: '95.7%',
-  },
   startButton: {
     paddingLeft: '0.75rem',
     height: '3rem',
@@ -43,74 +36,50 @@ const styles = reactStyles({
   },
 });
 
-export const AppsList = withCurrentWorkspace()((props) => {
+interface AppSelectorProps {
+  workspace: WorkspaceData;
+}
+
+export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
   const [selectedApp, setSelectedApp] = useState('');
   const [showSelectAppModal, setShowSelectAppModal] = useState(false);
   const [showJupyterModal, setShowJupyterModal] = useState(false);
 
-  const canWrite = (): boolean => {
-    return WorkspacePermissionsUtil.canWrite(props.workspace.accessLevel);
-  };
-
-  const closeAllApplicationModal = () => {
-    setShowJupyterModal(false);
-  };
+  const canCreateApps =
+    workspace.billingStatus === BillingStatus.ACTIVE &&
+    WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
 
   const onClose = () => {
     setSelectedApp('');
-    closeAllApplicationModal();
     setShowSelectAppModal(false);
-  };
-
-  const backToSelectAppModal = () => {
-    setShowSelectAppModal(true);
-  };
-
-  const onJupyterAppSelect = () => {
-    AnalyticsTracker.Notebooks.OpenCreateModal();
-    setShowSelectAppModal(false);
-    setShowJupyterModal(true);
+    setShowJupyterModal(false);
   };
 
   const onNext = () => {
+    setShowSelectAppModal(false);
     switch (selectedApp) {
       case JUPYTER_APP:
-        onJupyterAppSelect();
+        AnalyticsTracker.Notebooks.OpenCreateModal();
+        setShowJupyterModal(true);
         break;
     }
   };
 
-  useEffect(() => {
-    props.hideSpinner();
-  }, []);
-
   return (
     <>
-      <FadeBox style={styles.fadeBox}>
-        <FlexColumn>
-          <FlexRow>
-            <ListPageHeader style={{ paddingRight: '2.25rem' }}>
-              Your Analysis
-            </ListPageHeader>
-            <Button
-              aria-label='start'
-              data-test-id='start-button'
-              style={styles.startButton}
-              onClick={() => {
-                setShowSelectAppModal(true);
-              }}
-              disabled={
-                workspace.billingStatus === BillingStatus.INACTIVE ||
-                !canWrite()
-              }
-            >
-              <div style={{ paddingRight: '0.75rem' }}>Start</div>
-              <FontAwesomeIcon icon={faPlusCircle} />
-            </Button>
-          </FlexRow>
-        </FlexColumn>
-      </FadeBox>
+      <Button
+        aria-label='start'
+        data-test-id='start-button'
+        style={styles.startButton}
+        onClick={() => {
+          setShowSelectAppModal(true);
+        }}
+        disabled={!canCreateApps}
+      >
+        <div style={{ paddingRight: '0.75rem' }}>Start</div>
+        <FontAwesomeIcon icon={faPlusCircle} />
+      </Button>
       {showSelectAppModal && (
         <Modal
           data-test-id='select-application-modal'
@@ -138,7 +107,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               style={{ marginRight: '3rem' }}
               type='secondary'
               aria-label='close'
-              onClick={() => onClose()}
+              onClick={onClose}
             >
               Close
             </Button>
@@ -146,7 +115,7 @@ export const AppsList = withCurrentWorkspace()((props) => {
               data-test-id='next-btn'
               type='primary'
               aria-label='next'
-              onClick={() => onNext()}
+              onClick={onNext}
               disabled={selectedApp === ''}
             >
               Next
@@ -156,13 +125,12 @@ export const AppsList = withCurrentWorkspace()((props) => {
       )}
       {showJupyterModal && !showSelectAppModal && (
         <NewNotebookModal
+          {...{ workspace, onClose }}
           data-test-id='jupyter-modal'
-          onClose={() => onClose()}
-          workspace={props.workspace}
           existingNameList={null}
-          onBack={() => backToSelectAppModal()}
+          onBack={() => setShowSelectAppModal(true)}
         />
       )}
     </>
   );
-});
+};

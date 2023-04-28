@@ -1,0 +1,43 @@
+import * as React from 'react';
+import { useEffect } from 'react';
+
+import { FadeBox } from 'app/components/containers';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { ListPageHeader } from 'app/components/headers';
+import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { WorkspaceData } from 'app/utils/workspace-data';
+
+import { AppSelector } from './app-selector';
+
+const styles = reactStyles({
+  fadeBox: {
+    margin: 'auto',
+    marginTop: '1.5rem',
+    width: '95.7%',
+  },
+});
+
+interface AppFilesListProps extends WithSpinnerOverlayProps {
+  workspace: WorkspaceData;
+}
+export const AppFilesList = withCurrentWorkspace()(
+  (props: AppFilesListProps) => {
+    const { workspace } = props;
+
+    useEffect(() => props.hideSpinner(), []);
+
+    return (
+      <FadeBox style={styles.fadeBox}>
+        <FlexColumn>
+          <FlexRow>
+            <ListPageHeader style={{ paddingRight: '2.25rem' }}>
+              Your Analyses
+            </ListPageHeader>
+            <AppSelector {...{ workspace }} />
+          </FlexRow>
+        </FlexColumn>
+      </FadeBox>
+    );
+  }
+);
