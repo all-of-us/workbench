@@ -15,14 +15,17 @@ import {
 } from 'generated/fetch';
 
 import { AppsPanel } from 'app/components/apps-panel';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
 import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
 import {
+  cromwellConfigIconId,
   HelpSidebarIcons,
   IconConfig,
+  rstudioConfigIconId,
   showConceptIcon,
   showCriteriaIcon,
   SidebarIconId,
@@ -143,19 +146,26 @@ const styles = reactStyles({
     paddingLeft: 12,
     width: 160,
   },
-  cromwellBetaBadge: {
-    border: `3px solid #F0B1D0`,
+  betaBadge: {
+    border: `3px solid`,
     borderRadius: '11px',
     padding: '0 0.5rem',
     backgroundColor: colors.white,
     lineHeight: '1rem',
+  },
+  cromwellBetaBadge: {
+    borderColor: `#F0B1D0`,
+  },
+  rstudioBetaBadge: {
+    borderColor: `#72abdc`,
   },
 });
 
 const SIDEBAR_ICONS_DISABLED_WHEN_USER_SUSPENDED = [
   'apps',
   'runtimeConfig',
-  'cromwellConfig',
+  cromwellConfigIconId,
+  rstudioConfigIconId,
   'terminal',
 ] as SidebarIconId[];
 
@@ -237,15 +247,11 @@ interface State {
   runtimeConfPanelInitialState: PanelContent | null;
 }
 
-const CromwellBetaBadge = ({ style }) => (
-  <TooltipTrigger
-    content={
-      'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
-    }
-  >
+const BetaBadge = ({ tooltipContent, style }) => (
+  <TooltipTrigger content={tooltipContent}>
     <div
       style={{
-        ...styles.cromwellBetaBadge,
+        ...styles.betaBadge,
         ...style,
       }}
     >
@@ -451,6 +457,13 @@ export const HelpSidebar = fp.flow(
     } {
       const { pageKey, workspace, cohortContext } = this.props;
 
+      const sharedGKEAppConfigSidebarContent = {
+        headerPadding: '1.125rem',
+        bodyWidthRem: '55',
+        bodyPadding: '0 1.875rem',
+        showFooter: false,
+      };
+
       switch (activeIcon) {
         case 'help':
           return {
@@ -495,6 +508,7 @@ export const HelpSidebar = fp.flow(
               <ConfigurationPanel
                 {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
+                type={UIAppType.JUPYTER}
               />
             ),
             showFooter: false,
@@ -516,9 +530,9 @@ export const HelpSidebar = fp.flow(
             ),
             showFooter: false,
           };
-        case 'cromwellConfig':
+        case cromwellConfigIconId:
           return {
-            headerPadding: '1.125rem',
+            ...sharedGKEAppConfigSidebarContent,
             renderHeader: () => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <h3
@@ -529,23 +543,54 @@ export const HelpSidebar = fp.flow(
                 >
                   Cromwell Cloud Environment
                 </h3>
-                <CromwellBetaBadge
+                <BetaBadge
+                  tooltipContent={
+                    'We are regularly improving the Cromwell experience. If you have feedback, reach out to support@researchallofus.org'
+                  }
                   style={{
                     marginLeft: '0.5rem',
+                    ...styles.cromwellBetaBadge,
                   }}
                 />
               </div>
             ),
-            bodyWidthRem: '55',
-            bodyPadding: '0 1.875rem',
             renderBody: () => (
               <ConfigurationPanel
-                type='cromwell'
+                type={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
-                runtimeConfPanelInitialState={null}
               />
             ),
-            showFooter: false,
+          };
+        case rstudioConfigIconId:
+          return {
+            ...sharedGKEAppConfigSidebarContent,
+            renderHeader: () => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  RStudio Cloud Environment
+                </h3>
+                <BetaBadge
+                  tooltipContent={
+                    'We are regularly improving the RStudio experience. If you have feedback, reach out to support@researchallofus.org'
+                  }
+                  style={{
+                    marginLeft: '0.5rem',
+                    ...styles.rstudioBetaBadge,
+                  }}
+                />
+              </div>
+            ),
+            renderBody: () => (
+              <ConfigurationPanel
+                type={UIAppType.RSTUDIO}
+                onClose={() => this.setActiveIcon(null)}
+              />
+            ),
           };
         case 'notebooksHelp':
           return {

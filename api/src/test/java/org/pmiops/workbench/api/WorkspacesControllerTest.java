@@ -42,7 +42,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
@@ -2387,8 +2386,7 @@ public class WorkspacesControllerTest {
     verify(fireCloudService, times(1))
         .addOwnerToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never()).addOwnerToBillingProject(eq(writerUser.getUsername()), any());
-    verify(fireCloudService, never())
-        .removeOwnerFromBillingProject(any(), any(), eq(Optional.empty()));
+    verify(fireCloudService, never()).removeOwnerFromBillingProjectAsService(any(), any());
   }
 
   @Test
@@ -2439,12 +2437,11 @@ public class WorkspacesControllerTest {
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
     verify(fireCloudService, times(1))
-        .removeOwnerFromBillingProject(
-            ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
+        .removeOwnerFromBillingProjectAsService(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never())
-        .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
+        .removeOwnerFromBillingProjectAsService(eq(writerUser.getUsername()), any());
     verify(fireCloudService, never())
-        .removeOwnerFromBillingProject(eq(currentUser.getUsername()), any(), eq(Optional.empty()));
+        .removeOwnerFromBillingProjectAsService(eq(currentUser.getUsername()), any());
   }
 
   @Test

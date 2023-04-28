@@ -3,11 +3,22 @@ import { mount, ReactWrapper } from 'enzyme';
 
 import { AppStatus } from 'generated/fetch';
 
-import { IconConfig, RuntimeIcon } from 'app/components/help-sidebar-icons';
-import { serverConfigStore } from 'app/utils/stores';
+import {
+  cromwellConfigIconId,
+  IconConfig,
+  rstudioConfigIconId,
+  RuntimeIcon,
+} from 'app/components/help-sidebar-icons';
+import { serverConfigStore, userAppsStore } from 'app/utils/stores';
 import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterIcon from 'assets/images/Jupyter-icon.png';
+import rstudioIcon from 'assets/images/RStudio-icon.png';
+
+import {
+  createListAppsCromwellResponse,
+  createListAppsRStudioResponse,
+} from 'testing/stubs/apps-api-stub';
 
 import { UIAppType } from './apps-panel/utils';
 import { UserAppIcon } from './help-sidebar-icons';
@@ -40,21 +51,57 @@ describe('CompoundIcons', () => {
 
   it('UserAppIcon renders for Cromwell', () => {
     const icon = cromwellIcon;
-    const iconId = 'cromwellConfig';
     const label = 'Cromwell Icon';
-    const iconConfig = getIconConfig(iconId, label);
+    const iconConfig = getIconConfig(cromwellConfigIconId, label);
+
+    userAppsStore.set({
+      userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
+    });
 
     const wrapper = mount(
       <UserAppIcon
         iconConfig={iconConfig}
-        workspaceNamespace=''
         userSuspended={false}
-        status={AppStatus.RUNNING}
         appType={UIAppType.CROMWELL}
       />
     );
 
-    verifySidebarIcon(wrapper, `help-sidebar-icon-${iconId}`, icon, label);
+    verifySidebarIcon(
+      wrapper,
+      `help-sidebar-icon-${cromwellConfigIconId}`,
+      icon,
+      label
+    );
+
+    const statusIndicator = wrapper.find(
+      `[data-test-id="app-status-icon-container"]`
+    );
+    expect(statusIndicator.exists()).toBeTruthy();
+  });
+
+  it('UserAppIcon renders for RStudio', () => {
+    const icon = rstudioIcon;
+    const label = 'RStudio Icon';
+    const iconConfig = getIconConfig(rstudioConfigIconId, label);
+
+    userAppsStore.set({
+      userApps: [createListAppsRStudioResponse({ status: AppStatus.RUNNING })],
+    });
+
+    const wrapper = mount(
+      <UserAppIcon
+        iconConfig={iconConfig}
+        userSuspended={false}
+        appType={UIAppType.RSTUDIO}
+      />
+    );
+
+    verifySidebarIcon(
+      wrapper,
+      `help-sidebar-icon-${rstudioConfigIconId}`,
+      icon,
+      label
+    );
 
     const statusIndicator = wrapper.find(
       `[data-test-id="app-status-icon-container"]`

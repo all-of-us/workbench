@@ -4704,6 +4704,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable visual data explorer.
+      enableTanagra:
+        type: boolean
+        default: false
+        description: Whether to enable Tanagra.
 
   RuntimeImage:
     type: object
@@ -6979,7 +6983,6 @@ definitions:
         type: string
         enum:
         - test
-        - perf
         - staging
         - stable
         - preprod

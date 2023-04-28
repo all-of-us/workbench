@@ -1,6 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
+    "rawlsBaseUrl": "https:\/\/rawls.dsde-dev.broadinstitute.org",
     "samBaseUrl": "https:\/\/sam.dsde-dev.broadinstitute.org",
     "terraUiBaseUrl": "https:\/\/bvdp-saturn-dev.appspot.com",
     "notebookRuntimeMaxAgeDays": 7,
@@ -115,15 +116,13 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableGenomicExtraction": true,
-    "enableGpu": true,
-    "enablePersistentDisk": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableUpdatedDemographicSurvey": true,
     "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
-    "enableDataExplorer": true
+    "enableDataExplorer": true,
+    "enableTanagra": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

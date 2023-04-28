@@ -258,7 +258,7 @@ public class WorkspaceAuthServiceTest {
     verify(mockFireCloudService)
         .updateWorkspaceACL(namespace, fcName, buildAclUpdates(expectedFcUpdates));
     verify(mockFireCloudService, times(expectedBpRemovals))
-        .removeOwnerFromBillingProject(anyString(), anyString(), any());
+        .removeOwnerFromBillingProjectAsService(anyString(), anyString());
     verify(mockFireCloudService, times(expectedBpAdditions))
         .addOwnerToBillingProject(anyString(), anyString());
   }

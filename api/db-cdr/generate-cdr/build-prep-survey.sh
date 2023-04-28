@@ -36,6 +36,13 @@ TOPIC_PARENT_ID=0
 QUESTION_PARENT_ID=0
 ANSWER_PARENT_ID=0
 OUTPUT_FILE_NAME=$(echo "$FILE_NAME" | cut -d'_' -f 1 | xargs -I {} bash -c 'echo {}.csv')
+sibling='siblingdigestivecondition_livercondition'
+daughter='daughterdigestivecondition_livercondition'
+father='fatherdigestivecondition_livercondition'
+son='sondigestivecondition_livercondition'
+grandparent='grandparentdigestivecondition_livercondition'
+mother='motherdigestivecondition_livercondition'
+other_liver_question="Liver condition - family_member (Family Health History v1)"
 
 function simple_select() {
   # run this query to initializing our .bigqueryrc configuration file
@@ -147,6 +154,30 @@ function find_info() {
   echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
 }
 
+function find_family_health_history() {
+  local concept_id=$1
+  local concept_name=$2
+  local survey_name=$3
+  query="select distinct
+  'SURVEY' as domain_id,
+  0 as is_standard,
+  'PPI' as type,
+  'ANSWER' as subtype,
+  836839 as concept_id,
+  concept_code as code,
+  '$concept_name' as name,
+  value_source_concept_id as value,
+  0 as is_group,
+  1 as is_selectable,
+  0 as has_attribute,
+  1 as has_hierarchy,
+  '$survey_name' as survey
+  from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+  join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on c.concept_id = o.value_source_concept_id
+  where value_source_concept_id = $concept_id"
+  echo $(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format=csv "$query" | sed "1 d" | tr '\n' '|')
+}
+
 function increment_ids() {
   increment_topic_parent_id "$ID"
   increment_question_parent_id "$ID"
@@ -167,6 +198,26 @@ function increment_question_parent_id() {
 
 function increment_answer_parent_id() {
   ANSWER_PARENT_ID=$(($1))
+}
+
+function liver_condition_question() {
+  [[ "$1" == "836839" ]]
+}
+
+function get_other_liver_answers() {
+  result1=$(find_family_health_history "$1" "$2" "$3")
+  IFS=$'|' read -a result1_array <<< "$result1"
+  echo "${result1_array[0]}"
+}
+
+function write_line() {
+  if [[ "$2" = 0 ]]
+  then
+    echo "writing survey: $1"
+  else
+    echo "writing answers for concept_code: $1"
+  fi
+  echo "$ID,$2,$3" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
 }
 
 # run this query to initializing our .bigqueryrc configuration file
@@ -235,22 +286,60 @@ do
   for res in "${result_array[@]}"
   do
     type=$(echo "${res}" | cut -d "," -f 4)
+    question_concept=$(echo "${res}" | cut -d "," -f 5)
+    answer_code=$(echo "${res}" | cut -d "," -f 6 | tr '[:upper:]' '[:lower:]')
+
     if [[ "$type" == "SURVEY" ]]
     then
-      echo "writing survey: $survey_name"
-      echo "$ID,0,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      write_line "$survey_name" 0 "$res"
       increment_ids
     elif [[ "$type" == "QUESTION" && "${#result_array[@]}" -ge 2 ]]
     then
-      echo "writing question for concept_code: $concept_code"
-      echo "$ID,$QUESTION_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      write_line "$concept_code" "$QUESTION_PARENT_ID" "$res"
       increment_answer_parent_id "$ID"
       increment_id
     elif [[ "$type" == "ANSWER" ]]
     then
-      echo "writing answers for concept_code: $concept_code"
-      echo "$ID,$ANSWER_PARENT_ID,${res}" >> "$TEMP_FILE_DIR/$OUTPUT_FILE_NAME"
+      write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
       increment_id
+      if liver_condition_question "$question_concept"
+      then
+        case $answer_code in
+        "$sibling")
+          res=$(get_other_liver_answers 43529178 "${other_liver_question/family_member/Sibling}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        "$daughter")
+          res=$(get_other_liver_answers 43529169 "${other_liver_question/family_member/Daughter}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        "$father")
+          res=$(get_other_liver_answers 43529172 "${other_liver_question/family_member/Father}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        "$son")
+          res=$(get_other_liver_answers 43529180 "${other_liver_question/family_member/Son}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        "$grandparent")
+          res=$(get_other_liver_answers 43529174 "${other_liver_question/family_member/Grandparent}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        "$mother")
+          res=$(get_other_liver_answers 43529176 "${other_liver_question/family_member/Mother}" "$survey_name")
+          write_line "$concept_code" "$ANSWER_PARENT_ID" "$res"
+          increment_id
+          ;;
+        *)
+          echo "No match found for liver other condition - skipping"
+          ;;
+        esac
+      fi
     fi
   done
 

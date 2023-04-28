@@ -76,7 +76,7 @@ public class WorkbenchConfig {
   // Environment config variables related to Terra billing projects / GCP projects.
   public static class BillingConfig {
     // The environment-driven prefix to apply to Terra billing projects we create. Example:
-    // "aou-rw-perf-" causes us to create projects named like "aou-rw-perf-8aec175b".
+    // "aou-rw-stable-" causes us to create projects named like "aou-rw-stable-8aec175b".
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
@@ -129,6 +129,7 @@ public class WorkbenchConfig {
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
+    public String rawlsBaseUrl;
     public String samBaseUrl;
     public String terraUiBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
@@ -319,16 +320,10 @@ public class WorkbenchConfig {
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
     public boolean enableGenomicExtraction;
-    // If true, the backend and UI will support gpu for standard vm
-    public boolean enableGpu;
-    // If true, the backend and UI will support persistent disk as the default notebook storage
-    public boolean enablePersistentDisk;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable demographicSurveyV2 in the UI
-    public boolean enableUpdatedDemographicSurvey;
     // If true, enable enableConceptSetsInCohortBuilder
     public boolean enableConceptSetsInCohortBuilder;
     // If true, enable using the Cromwell GKE app
@@ -337,6 +332,8 @@ public class WorkbenchConfig {
     public boolean enableRStudioGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
+    // If true, enable Tanagra
+    public boolean enableTanagra;
   }
 
   public static class ActionAuditConfig {

@@ -68,16 +68,14 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableGenomicExtraction",
       source = "config.featureFlags.enableGenomicExtraction")
-  @Mapping(target = "enableGpu", source = "config.featureFlags.enableGpu")
-  @Mapping(target = "enablePersistentDisk", source = "config.featureFlags.enablePersistentDisk")
+  @Mapping(target = "enableGpu", constant = "true")
+  @Mapping(target = "enablePersistentDisk", constant = "true")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
-  @Mapping(
-      target = "enableUpdatedDemographicSurvey",
-      source = "config.featureFlags.enableUpdatedDemographicSurvey")
+  @Mapping(target = "enableUpdatedDemographicSurvey", constant = "true")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(
       target = "enableConceptSetsInCohortBuilder",
@@ -85,5 +83,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableCromwellGKEApp", source = "config.featureFlags.enableCromwellGKEApp")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
+  @Mapping(target = "enableTanagra", source = "config.featureFlags.enableTanagra")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

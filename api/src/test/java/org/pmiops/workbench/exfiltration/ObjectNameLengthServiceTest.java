@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.THRESHOLD_MB;
 
 import com.google.common.collect.Lists;
@@ -67,9 +67,9 @@ public class ObjectNameLengthServiceTest {
 
     objectNameLengthService.calculateObjectNameLength();
 
-    verifyZeroInteractions(iamService);
-    verifyZeroInteractions(egressEventDao);
-    verifyZeroInteractions(egressRemediationService);
+    verifyNoInteractions(iamService);
+    verifyNoInteractions(egressEventDao);
+    verifyNoInteractions(egressRemediationService);
   }
 
   @Test

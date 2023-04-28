@@ -244,6 +244,43 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
   });
 
+  it('should initialize cdr versions dropdown options to the default tier when creating workspaces', async () => {
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    workspace.accessTierShortName = AccessTierShortNames.Controlled;
+
+    workspaceEditMode = WorkspaceEditMode.Create;
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const cdrSelectionOptions = wrapper
+      .find('[data-test-id="select-cdr-version"]')
+      .find('select')
+      .find('option')
+      .map((option) => option.prop('value'));
+
+    expect(cdrSelectionOptions).toEqual([
+      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+      CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
+    ]);
+  });
+
+  it('should initialize the specific populations checkbox as unchecked when creating workspaces', async () => {
+    workspace.researchPurpose.populationDetails = [
+      SpecificPopulationEnum.AGECHILDREN,
+    ];
+    workspaceEditMode = WorkspaceEditMode.Create;
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(
+      wrapper
+        .find('[data-test-id="specific-population-yes"]')
+        .first()
+        .prop('checked')
+    ).toEqual(false);
+  });
+
   it('should clear all selected specific populations if NO underrepresented populations study is selected', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
@@ -922,6 +959,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('should show error message if Other text for Special Population is more than 100 characters', async () => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
     const wrapper = component();
     expect(
       wrapper
