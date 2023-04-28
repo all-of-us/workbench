@@ -48,10 +48,14 @@ describe('Cromwell GKE App', () => {
     expect(cromwellText).toContain('Status: PROVISIONING');
     console.log('Cromwell status: PROVISIONING');
 
+    // Poll until cromwell is running
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
+    // Cromwell is running, now lets delete it
     const isDeleted = await appsPanel.deleteCromwellGkeApp();
     expect(isDeleted).toBeTruthy();
+
+    // Clean up: Delete workspace
     const workspaceDataPage = new WorkspaceDataPage(page);
     await workspaceDataPage.deleteWorkspace();
   });
