@@ -253,7 +253,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       String workspaceNamespace, ListRuntimeDeleteRequest req) {
     final String googleProject =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
-    List<LeonardoListRuntimeResponse> runtimesToDelete =
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> runtimesToDelete =
         filterByRuntimesInList(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
                 req.getRuntimesToDelete())
@@ -262,7 +262,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         runtime ->
             leonardoNotebooksClient.deleteRuntimeAsService(
                 runtime.getGoogleProject(), runtime.getRuntimeName()));
-    List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
                 leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
                 req.getRuntimesToDelete())
@@ -284,7 +284,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
         googleProject,
         runtimesToDelete.stream()
-            .map(LeonardoListRuntimeResponse::getRuntimeName)
+            .map(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse::getRuntimeName)
             .collect(Collectors.toList()));
     return runtimesInProjectAffected.stream()
         .map(leonardoMapper::toApiListRuntimeResponse)
@@ -440,8 +440,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 .userModel(userMapper.toApiUser(userRole, null)));
   }
 
-  private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
+  private static Stream<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> filterByRuntimesInList(
+      Stream<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
     // Null means keep all runtimes.
     return runtimesToFilter.filter(
         runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));
