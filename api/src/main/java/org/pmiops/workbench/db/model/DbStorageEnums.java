@@ -331,14 +331,15 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 9)
               .put(PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC, (short) 10)
               .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_LEVEL, (short) 11)
-              .put(PrePackagedConceptSetEnum.SURVEY_BASICS, (short) 12)
-              .put(PrePackagedConceptSetEnum.SURVEY_LIFESTYLE, (short) 13)
-              .put(PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH, (short) 14)
-              .put(PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION, (short) 15)
-              .put(PrePackagedConceptSetEnum.SURVEY_COPE, (short) 16)
-              .put(PrePackagedConceptSetEnum.SURVEY_SDOH, (short) 17)
-              .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, (short) 18)
-              .put(PrePackagedConceptSetEnum.SURVEY_PFHH, (short) 19)
+              .put(PrePackagedConceptSetEnum.FITBIT_SLEEP_DAILY_SUMMARY, (short) 12)
+              .put(PrePackagedConceptSetEnum.SURVEY_BASICS, (short) 13)
+              .put(PrePackagedConceptSetEnum.SURVEY_LIFESTYLE, (short) 14)
+              .put(PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH, (short) 15)
+              .put(PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION, (short) 16)
+              .put(PrePackagedConceptSetEnum.SURVEY_COPE, (short) 17)
+              .put(PrePackagedConceptSetEnum.SURVEY_SDOH, (short) 18)
+              .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, (short) 19)
+              .put(PrePackagedConceptSetEnum.SURVEY_PFHH, (short) 20)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
