@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -72,8 +71,10 @@ public class DisksController implements DisksApiDelegate {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse>
+        responseList =
+            leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(
+                googleProject, false);
 
     List<Disk> diskList =
         PersistentDiskUtils.findTheMostRecentActiveDisks(

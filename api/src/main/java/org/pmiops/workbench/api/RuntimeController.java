@@ -34,10 +34,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
@@ -117,7 +113,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     try {
       GetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      if (org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus.ERROR.equals(
+          leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
                 "Observed Leonardo runtime with unexpected error status:\n%s",
@@ -139,32 +136,34 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private Runtime getOverrideFromListRuntimes(String googleProject) {
-    Optional<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> mostRecentRuntimeMaybe =
-        leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
-            .sorted(
-                (a, b) -> {
-                  String aCreatedDate, bCreatedDate;
-                  if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
-                    aCreatedDate = "";
-                  } else {
-                    aCreatedDate = a.getAuditInfo().getCreatedDate();
-                  }
+    Optional<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        mostRecentRuntimeMaybe =
+            leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
+                .sorted(
+                    (a, b) -> {
+                      String aCreatedDate, bCreatedDate;
+                      if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
+                        aCreatedDate = "";
+                      } else {
+                        aCreatedDate = a.getAuditInfo().getCreatedDate();
+                      }
 
-                  if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
-                    bCreatedDate = "";
-                  } else {
-                    bCreatedDate = b.getAuditInfo().getCreatedDate();
-                  }
+                      if (b.getAuditInfo() == null || b.getAuditInfo().getCreatedDate() == null) {
+                        bCreatedDate = "";
+                      } else {
+                        bCreatedDate = b.getAuditInfo().getCreatedDate();
+                      }
 
-                  return bCreatedDate.compareTo(aCreatedDate);
-                })
-            .findFirst();
+                      return bCreatedDate.compareTo(aCreatedDate);
+                    })
+                .findFirst();
 
     if (!mostRecentRuntimeMaybe.isPresent()) {
       throw new NotFoundException();
     }
 
-    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse mostRecentRuntime = mostRecentRuntimeMaybe.get();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse mostRecentRuntime =
+        mostRecentRuntimeMaybe.get();
 
     @SuppressWarnings("unchecked")
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
