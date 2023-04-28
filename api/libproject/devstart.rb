@@ -2424,23 +2424,24 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project, op.opts.account, op.opts.key_file).run do
-    # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
-    migrate_database(gcc, op.opts.account, op.opts.dry_run)
-    load_config(gcc.project, op.opts.dry_run)
-    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
-    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
-
-    # Keep the cloud proxy context open for the service account credentials.
-    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
-    deploy_args = %W{
-      --project #{gcc.project}
-      --version #{op.opts.version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-    } + dry_flag
-    deploy_api(cmd_name, deploy_args)
+  # Note: `gcc` does not get correctly initialized with 'op.opts.account' so we need to be explicit
+  migrate_database(gcc, op.opts.account, op.opts.dry_run)
+  if (op.opts.key_file)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
   end
+  load_config(gcc.project, op.opts.dry_run)
+  cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+  update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
+
+  # Keep the cloud proxy context open for the service account credentials.
+  dry_flag = op.opts.dry_run ? %W{--dry-run} : []
+  deploy_args = %W{
+    --project #{gcc.project}
+    --version #{op.opts.version}
+    #{op.opts.promote ? "--promote" : "--no-promote"}
+    --quiet
+  } + dry_flag
+  deploy_api(cmd_name, deploy_args)
 end
 
 Common.register_command({
