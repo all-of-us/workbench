@@ -64,9 +64,11 @@ public interface LeonardoMapper {
   @Mapping(target = "properties", ignore = true)
   @Mapping(target = "componentGatewayEnabled", ignore = true)
   @Mapping(target = "workerPrivateAccess", ignore = true)
+  @Mapping(target = "region", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig toLeonardoDataProcConfig(
       DataprocConfig dataprocConfig);
 
+  @Mapping(target = "cloudService", ignore = true)
   UpdateDataprocConfig toLeonardoUpdateDataProcConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
@@ -91,11 +93,11 @@ public interface LeonardoMapper {
   GceWithPdConfig toGceWithPdConfig(
       LeonardoGceConfig leonardoGceConfig, LeonardoDiskConfig leonardoDiskConfig);
 
-  //  @Mapping(target = "bootDiskSize", ignore = true)
-  //  @Mapping(target = "cloudService", ignore = true)
-  //  @Mapping(target = "zone", ignore = true)
+  @Mapping(target = "cloudService", ignore = true)
   UpdateGceConfig toLeonardoUpdateGceConfig(GceConfig gceConfig);
 
+  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "diskSize", ignore = true)
   UpdateGceConfig toLeonardoUpdateGceConfig(GceWithPdConfig gceWithPdConfig);
 
   @Mapping(target = "labels", ignore = true)
