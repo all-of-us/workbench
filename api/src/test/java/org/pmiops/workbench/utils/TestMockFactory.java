@@ -256,8 +256,8 @@ public class TestMockFactory {
     return dbWorkspace;
   }
 
-  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
-    final DbAccessTier accessTier =
+  public static DbAccessTier createRegisteredTier(){
+    return
         new DbAccessTier()
             .setAccessTierId(1)
             .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
@@ -266,11 +266,13 @@ public class TestMockFactory {
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
             .setServicePerimeter("registered/tier/perimeter")
             .setEnableUserWorkflows(false);
-    return accessTierDao.save(accessTier);
+  }
+  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
+    return accessTierDao.save(createRegisteredTier());
   }
 
-  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
-    return accessTierDao.save(
+  public static DbAccessTier createControlledTier() {
+    return
         new DbAccessTier()
             .setAccessTierId(2)
             .setShortName("controlled")
@@ -278,7 +280,11 @@ public class TestMockFactory {
             .setAuthDomainName("Controlled Tier Auth Domain")
             .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
             .setServicePerimeter("controlled/tier/perimeter")
-            .setEnableUserWorkflows(true));
+            .setEnableUserWorkflows(true);
+  }
+
+  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
+    return accessTierDao.save(createControlledTier());
   }
 
   public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
@@ -293,6 +299,17 @@ public class TestMockFactory {
     return accessModuleDao.findAll();
   }
 
+  public static DbCdrVersion createDefaultCdrVersion(long id){
+    final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(id);
+    cdrVersion.setName("1");
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
+    cdrVersion.setCdrDbName("");
+    cdrVersion.setAccessTier(createRegisteredTier());
+    return cdrVersion;
+  }
+
   public static DbCdrVersion createDefaultCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
     return createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
@@ -300,20 +317,22 @@ public class TestMockFactory {
 
   public static DbCdrVersion createDefaultCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
-    final DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(id);
-    cdrVersion.setName("1");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
+    final DbCdrVersion cdrVersion = createDefaultCdrVersion(id);
+    accessTierDao.save(cdrVersion.getAccessTier());
     return cdrVersionDao.save(cdrVersion);
+  }
+
+  public static DbCdrVersion createControlledTierCdrVersion(long id) {
+    DbCdrVersion cdrVersion = createDefaultCdrVersion(id);
+    DbAccessTier controlledTier = createControlledTier();
+    cdrVersion.setAccessTier(controlledTier);
+    return cdrVersion;
   }
 
   public static DbCdrVersion createControlledTierCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
-    DbCdrVersion cdrVersion = createDefaultCdrVersion(cdrVersionDao, accessTierDao, id);
-    cdrVersion.setAccessTier(createControlledTierForTests(accessTierDao));
+    DbCdrVersion cdrVersion = createControlledTierCdrVersion(id);
+    accessTierDao.save(cdrVersion.getAccessTier());
     return cdrVersionDao.save(cdrVersion);
   }
 
