@@ -13,11 +13,15 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoApiClient;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
@@ -29,7 +33,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.model.AppType;
@@ -65,6 +68,7 @@ public class DisksControllerTest {
     FakeClockConfiguration.class,
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,
+    NewLeonardoMapperImpl.class,
   })
   static class Configuration {
 
@@ -84,6 +88,7 @@ public class DisksControllerTest {
   @Captor private ArgumentCaptor<LeonardoUpdateDiskRequest> updateDiskRequestCaptor;
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
+  @MockBean NewLeonardoApiClient mockNewLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
 
   @Autowired UserDao userDao;
@@ -107,17 +112,16 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_getDisk() throws ApiException {
+  public void test_getDisk() {
     String createDate = "2021-08-06T16:57:29.827954Z";
     String pdName = "pdName";
-    LeonardoGetPersistentDiskResponse getResponse =
-        new LeonardoGetPersistentDiskResponse()
+    GetPersistentDiskResponse getResponse =
+        new GetPersistentDiskResponse()
             .name(pdName)
             .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.READY)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
+            .auditInfo(new AuditInfo().createdDate(createDate).creator(user.getUsername()));
 
     Disk disk =
         new Disk()
@@ -129,7 +133,7 @@ public class DisksControllerTest {
             .creator(user.getUsername())
             .isGceRuntime(true);
 
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
+    when(mockNewLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
         .thenReturn(getResponse);
     assertThat(disksController.getDisk(WORKSPACE_NS, pdName).getBody()).isEqualTo(disk);
   }
@@ -138,16 +142,15 @@ public class DisksControllerTest {
   public void test_getDisk_nullProject() {
     String createDate = "2021-08-06T16:57:29.827954Z";
     String pdName = "pdName";
-    LeonardoGetPersistentDiskResponse getResponse =
-        new LeonardoGetPersistentDiskResponse()
+    GetPersistentDiskResponse getResponse =
+        new GetPersistentDiskResponse()
             .name(pdName)
             .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(LeonardoDiskStatus.READY)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
+            .auditInfo(new AuditInfo().createdDate(createDate).creator(user.getUsername()));
 
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
+    when(mockNewLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
         .thenReturn(getResponse);
 
     when(mockWorkspaceService.lookupWorkspaceByNamespace(null)).thenThrow(new NotFoundException());
@@ -157,7 +160,7 @@ public class DisksControllerTest {
 
   @Test
   public void test_getDisk_nullDisk() {
-    when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, null))
+    when(mockNewLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, null))
         .thenThrow(new NotFoundException());
 
     assertThrows(NotFoundException.class, () -> disksController.getDisk(WORKSPACE_NS, null));

@@ -3,6 +3,8 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoApiClient;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoMapper;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -21,16 +23,23 @@ public class DisksController implements DisksApiDelegate {
   private static final Logger log = Logger.getLogger(DisksController.class.getName());
 
   private final LeonardoApiClient leonardoNotebooksClient;
+  private final NewLeonardoApiClient newLeonardoClient;
   private final LeonardoMapper leonardoMapper;
+  private final NewLeonardoMapper newLeonardoMapper;
+
   private final WorkspaceService workspaceService;
 
   @Autowired
   public DisksController(
       LeonardoApiClient leonardoNotebooksClient,
+      NewLeonardoApiClient newLeonardoClient,
       LeonardoMapper leonardoMapper,
+      NewLeonardoMapper newLeonardoMapper,
       WorkspaceService workspaceService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.newLeonardoClient = newLeonardoClient;
     this.leonardoMapper = leonardoMapper;
+    this.newLeonardoMapper = newLeonardoMapper;
     this.workspaceService = workspaceService;
   }
 
@@ -39,8 +48,8 @@ public class DisksController implements DisksApiDelegate {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
     Disk disk =
-        leonardoMapper.toApiGetDiskResponse(
-            leonardoNotebooksClient.getPersistentDisk(googleProject, diskName));
+        newLeonardoMapper.toApiGetDiskResponse(
+            newLeonardoClient.getPersistentDisk(googleProject, diskName));
 
     if (DiskStatus.FAILED.equals(disk.getStatus())) {
       log.warning(

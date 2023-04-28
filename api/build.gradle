@@ -357,6 +357,10 @@ clean.doFirst {
 }
 
 repositories {
+    maven {
+        // for the Leonardo client
+        url 'https://broadinstitute.jfrog.io/artifactory/libs-release-local'
+    }
     mavenCentral()
 }
 
@@ -470,6 +474,8 @@ dependencies {
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
     implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
+
+    implementation "org.broadinstitute.dsde.workbench:leonardo-client_2.11:1.3.6-f6a1109"
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
