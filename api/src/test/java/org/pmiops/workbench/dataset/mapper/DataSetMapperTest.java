@@ -156,8 +156,7 @@ public class DataSetMapperTest {
     DataSetRequest request = new DataSetRequest();
     request.setName("New Name");
     request.setPrePackagedConceptSet(
-        Arrays.asList(
-            PrePackagedConceptSetEnum.SURVEY_ALL, PrePackagedConceptSetEnum.FITBIT_ACTIVITY));
+        Arrays.asList(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.FITBIT_ACTIVITY));
     final DbDataset toDataSet = dataSetMapper.dataSetRequestToDb(request, dbDataset, fakeClock);
     assertThat(toDataSet.getName()).isEqualTo("New Name");
     assertThat(toDataSet.getCohortIds()).isEqualTo(dbDataset.getCohortIds());
