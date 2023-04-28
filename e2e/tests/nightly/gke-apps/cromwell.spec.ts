@@ -1,19 +1,18 @@
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import AppsPanel from 'app/sidebar/apps-panel';
-import Button from 'app/element/button';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
 import { waitForFn } from 'utils/waits-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language } from 'app/text-labels';
-import expect from 'expect';
 import path from 'path';
+import Button from 'app/element/button';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
-const wdlFileName = 'cromwell.wdl';
-const jsonFileName = 'cromwell.json';
+const wdlFileName = 'hello.wdl';
+const jsonFileName = 'empty.json';
 const fileBasePath = '../../../../resources/cromwell/';
 const wdlFilePath = path.relative(process.cwd(), __dirname + fileBasePath + wdlFileName);
 const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jsonFileName);
@@ -23,12 +22,9 @@ describe('Cromwell GKE App', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eCreateCromwellGkeAppTest';
-
   test('Create and delete a Cromwell GKE app', async () => {
-    await findOrCreateWorkspace(page, { workspaceName });
+    await findOrCreateWorkspace(page, { workspaceName: 'e2eCreateCromwellGkeAppsPanelTest' });
 
-    const cromwellPanel = new CromwellConfigurationPanel(page);
     const appsPanel = new AppsPanel(page);
     await appsPanel.open();
 
@@ -76,13 +72,18 @@ describe('Cromwell GKE App', () => {
 
     await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
 
-    const isDeleted = cromwellPanel.deleteCromwellGkeApp();
+    const isDeleted = await appsPanel.deleteCromwellGkeApp();
     expect(isDeleted).toBeTruthy();
+    const workspaceDataPage = new WorkspaceDataPage(page);
+    await workspaceDataPage.deleteWorkspace();
   });
 
   test('Run cromwell using python notebook', async () => {
+    const appsPanel = new AppsPanel(page);
+    const cromwellPanel = new CromwellConfigurationPanel(page);
+
     // Create or re-use workspace
-    await findOrCreateWorkspace(page, { workspaceName });
+    await findOrCreateWorkspace(page, { workspaceName: 'e2eSubmitCromwellJobsTest' });
 
     // Create and Open notebook
     const workspaceDataPage = new WorkspaceDataPage(page);
@@ -101,7 +102,6 @@ describe('Cromwell GKE App', () => {
     );
 
     //Start Cromwell
-    const cromwellPanel = new CromwellConfigurationPanel(page);
     await cromwellPanel.startCromwellGkeApp();
 
     // Re-run the code snippet to check PROVISIONING state
@@ -134,8 +134,7 @@ describe('Cromwell GKE App', () => {
     });
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
-
-    const isDeleted = await cromwellPanel.deleteCromwellGkeApp();
+    const isDeleted = await appsPanel.deleteCromwellGkeApp();
 
     expect(isDeleted).toBeTruthy();
 
