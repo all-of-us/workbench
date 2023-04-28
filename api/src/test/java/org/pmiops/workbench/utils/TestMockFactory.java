@@ -256,31 +256,30 @@ public class TestMockFactory {
     return dbWorkspace;
   }
 
-  public static DbAccessTier createRegisteredTier(){
-    return
-        new DbAccessTier()
-            .setAccessTierId(1)
-            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .setDisplayName("Registered Tier")
-            .setAuthDomainName("Registered Tier Auth Domain")
-            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-            .setServicePerimeter("registered/tier/perimeter")
-            .setEnableUserWorkflows(false);
+  public static DbAccessTier createRegisteredTier() {
+    return new DbAccessTier()
+        .setAccessTierId(1)
+        .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+        .setDisplayName("Registered Tier")
+        .setAuthDomainName("Registered Tier Auth Domain")
+        .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+        .setServicePerimeter("registered/tier/perimeter")
+        .setEnableUserWorkflows(false);
   }
+
   public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
     return accessTierDao.save(createRegisteredTier());
   }
 
   public static DbAccessTier createControlledTier() {
-    return
-        new DbAccessTier()
-            .setAccessTierId(2)
-            .setShortName("controlled")
-            .setDisplayName("Controlled Tier")
-            .setAuthDomainName("Controlled Tier Auth Domain")
-            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter")
-            .setEnableUserWorkflows(true);
+    return new DbAccessTier()
+        .setAccessTierId(2)
+        .setShortName("controlled")
+        .setDisplayName("Controlled Tier")
+        .setAuthDomainName("Controlled Tier Auth Domain")
+        .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+        .setServicePerimeter("controlled/tier/perimeter")
+        .setEnableUserWorkflows(true);
   }
 
   public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
@@ -299,7 +298,7 @@ public class TestMockFactory {
     return accessModuleDao.findAll();
   }
 
-  public static DbCdrVersion createDefaultCdrVersion(long id){
+  public static DbCdrVersion createDefaultCdrVersion(long id) {
     final DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(id);
     cdrVersion.setName("1");
