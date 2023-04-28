@@ -4860,6 +4860,7 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+      - pd-balanced
   Disk:
     description: The configuration of a persistent disk, returned in disk responses
     type: object
