@@ -4,7 +4,6 @@ import BaseEnvironmentPanel from './base-environment-panel';
 import { waitForFn } from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
-import expect from 'expect';
 import WarningDeleteCromwellModal from '../modal/warning-delete-cromwell-modal';
 
 const defaultXpath = '//*[@data-test-id="apps-panel"]';
