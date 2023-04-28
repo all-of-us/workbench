@@ -302,7 +302,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     try {
       return leonardoRetryHandler.runAndThrowChecked(
           (context) -> runtimesApi.getRuntime(googleProject, runtimeName));
-    } catch (ApiException e) {
+    } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
       throw ExceptionUtils.convertLeonardoException(e);
     }
   }
@@ -362,7 +362,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                               r.getGoogleProject(), r.getRuntimeName());
                           return null;
                         });
-                  } catch (ApiException e) {
+                  } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
                     log.log(
                         Level.WARNING,
                         String.format(
@@ -416,7 +416,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     try {
       return leonardoRetryHandler.runAndThrowChecked(
           (context) -> disksApi.getDisk(googleProject, diskName));
-    } catch (ApiException e) {
+    } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
       throw ExceptionUtils.convertLeonardoException(e);
     }
   }
@@ -591,7 +591,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public boolean getLeonardoStatus() {
     try {
       serviceInfoApiProvider.get().getSystemStatus();
-    } catch (org.pmiops.workbench.leonardo.ApiException e) {
+    } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
       // If any of the systems for notebooks are down, it won't work for us.
       log.log(Level.WARNING, "notebooks status check request failed", e);
       return false;
@@ -648,7 +648,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                               r.getCloudContext().getCloudResource(), r.getAppName());
                           return null;
                         });
-                  } catch (ApiException e) {
+                  } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
                     log.log(
                         Level.WARNING,
                         String.format(
