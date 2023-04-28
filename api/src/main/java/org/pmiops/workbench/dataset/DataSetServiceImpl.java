@@ -407,11 +407,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
           if (!pfhhSurveyQuestionIds.isEmpty()) {
             // need to filter out PFHH survey questions for other survey questions
-            List<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
+            Set<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
                 dbConceptSetConceptIds.stream()
                     .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
-                    .collect(Collectors.toList());
-            dbConceptSetConceptIds.addAll(dbNonPFHHSurveyQuestions);
+                    .collect(Collectors.toSet());
+            dbConceptSetConceptIds = dbNonPFHHSurveyQuestions;
             // find all answers for the questions
             dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
           }
@@ -818,6 +818,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           && prePackagedSurveyConceptSet(dbConceptSets)) {
         surveyConceptIds.addAll(
             dbConceptSets.stream()
+                .filter(d -> d.getDomainEnum().equals(Domain.SURVEY))
                 .filter(d -> d.getConceptSetId() == 0)
                 .filter(d -> !d.getName().equals(PrePackagedConceptSetEnum.SURVEY_PFHH.toString()))
                 .map(

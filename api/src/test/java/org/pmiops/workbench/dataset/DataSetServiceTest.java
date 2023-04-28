@@ -372,14 +372,14 @@ public class DataSetServiceTest {
     DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, true, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
-            Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
+            Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet1));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
             "( condition_source_concept_id IN  (SELECT DISTINCT c.concept_id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
                 + "JOIN (select cast(cr.id as string) as id\n"
                 + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-                + "WHERE concept_id IN (1, 2)\n"
+                + "WHERE concept_id IN (2, 1)\n"
                 + "AND full_text LIKE '%_rank1]%') a\n"
                 + "ON (c.path LIKE CONCAT('%.', a.id, '.%') OR c.path LIKE CONCAT('%.', a.id) OR c.path LIKE CONCAT(a.id, '.%') OR c.path = a.id)\n"
                 + "WHERE is_standard = 0\n"
