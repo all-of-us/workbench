@@ -422,7 +422,7 @@ dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'io.netty:netty-common:4.1.82.Final'
-    implementation 'org.json:json:20220924'
+    implementation 'org.json:json:20230227'
 
     // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
 
@@ -436,7 +436,7 @@ dependencies {
     implementation 'com.google.auth:google-auth-library-appengine:1.11.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.11.0'
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.7.0'
-    implementation 'com.google.cloud:google-cloud-bigquery:2.17.0'
+    implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
     implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
     implementation 'com.google.cloud:google-cloud-monitoring:3.4.6'
