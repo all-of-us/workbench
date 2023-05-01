@@ -13,11 +13,11 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
-  static DEFAULT_WORKSPACE_CDR_VERSION_ID = 'fakeCdrVersion';
+  static DEFAULT_WORKSPACE_CDR_VERSION_ID = '-1';
   static ALT_WORKSPACE_CDR_VERSION = 'Alternative CDR Version';
-  static ALT_WORKSPACE_CDR_VERSION_ID = 'altCdrVersion';
+  static ALT_WORKSPACE_CDR_VERSION_ID = '-2';
   static CONTROLLED_TIER_CDR_VERSION = 'Controlled Tier CDR Version';
-  static CONTROLLED_TIER_CDR_VERSION_ID = 'ctCdrVersion';
+  static CONTROLLED_TIER_CDR_VERSION_ID = '-3';
 }
 
 export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
