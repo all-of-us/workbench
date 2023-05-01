@@ -26,7 +26,7 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
-import { dropNotebookFileSuffix, getExistingNotebooks } from './util';
+import { dropNotebookFileSuffix, listNotebooks } from './util';
 
 const styles = {
   heading: {
@@ -150,7 +150,7 @@ export const NotebookList = withCurrentWorkspace()(
       try {
         const { workspace } = this.props;
         this.setState({ loading: true });
-        getExistingNotebooks(workspace).then((notebookList) => {
+        listNotebooks(workspace).then((notebookList) => {
           this.setState({
             notebookList,
             notebookNameList: notebookList.map((fd) =>

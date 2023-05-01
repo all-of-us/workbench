@@ -6,9 +6,10 @@ import { ResourceType, WorkspaceResource } from 'generated/fetch';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
+import { withErrorModal } from 'app/components/modals';
 import { ResourceList } from 'app/components/resource-list';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { getExistingNotebooks } from 'app/pages/analysis/util';
+import { listNotebooks } from 'app/pages/analysis/util';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { convertToResource } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -32,17 +33,26 @@ export const AppFilesList = withCurrentWorkspace()(
     const [notebookResources, setNotebookResources] =
       useState<WorkspaceResource[]>();
 
-    const loadNotebooks = async () =>
-      getExistingNotebooks(workspace)
-        .then((notebookList) =>
-          notebookList.map((notebook) =>
-            convertToResource(notebook, ResourceType.NOTEBOOK, workspace)
+    const loadNotebooks = withErrorModal(
+      {
+        title: 'Error Loading Notebook Files',
+        message: 'Please refresh to try again.',
+        onDismiss: () => props.hideSpinner(),
+      },
+      async () => {
+        props.showSpinner();
+        listNotebooks(workspace)
+          .then((notebookList) =>
+            notebookList.map((notebook) =>
+              convertToResource(notebook, ResourceType.NOTEBOOK, workspace)
+            )
           )
-        )
-        .then(setNotebookResources);
+          .then(setNotebookResources);
+        props.hideSpinner();
+      }
+    );
 
     useEffect(() => {
-      props.hideSpinner();
       if (workspace) {
         loadNotebooks();
       }
