@@ -46,9 +46,7 @@ function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
 }
 
 function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {
-  return wrapper
-    .find(`[id="numerical-input-${index}-0"]`)
-    .hostNodes();
+  return wrapper.find(`[id="numerical-input-${index}-0"]`).hostNodes();
 }
 
 describe('AttributesPageV2', () => {
