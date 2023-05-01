@@ -51,19 +51,19 @@ export const AppFilesList = withCurrentWorkspace()(
     return (
       <FadeBox style={styles.fadeBox}>
         <FlexColumn>
-          <FlexRow>
+          <FlexRow style={{ paddingBottom: '0.75rem' }}>
             <ListPageHeader style={{ paddingRight: '2.25rem' }}>
               Your Analyses
             </ListPageHeader>
             <AppSelector {...{ workspace }} />
-            {workspace && notebookResources && (
-              <ResourceList
-                workspaces={[workspace]}
-                workspaceResources={notebookResources}
-                onUpdate={() => loadNotebooks()}
-              />
-            )}
           </FlexRow>
+          {workspace && notebookResources && (
+            <ResourceList
+              workspaces={[workspace]}
+              workspaceResources={notebookResources}
+              onUpdate={() => loadNotebooks()}
+            />
+          )}
         </FlexColumn>
       </FadeBox>
     );
