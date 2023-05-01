@@ -210,7 +210,7 @@ commands:
           background: true
       - run:
           name: Wait for local API server to start
-          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 5m
 
   launch-local-ui:
     description: "Launch local UI server"
