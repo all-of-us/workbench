@@ -27,8 +27,8 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     cdrVersionId:
       CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
     accessTierShortName: AccessTierShortNames.Registered,
-    creationTime: new Date().getTime(),
-    lastModifiedTime: new Date().getTime(),
+    creationTime: new Date('2023-02-03 00:00:00Z').getTime(),
+    lastModifiedTime: new Date('2023-02-03 00:00:00Z').getTime(),
     researchPurpose: {
       ancestry: false,
       anticipatedFindings: '',
