@@ -25,7 +25,6 @@ describe('Cromwell GKE App', () => {
     await findOrCreateWorkspace(page, { workspaceName: 'e2eCreateCromwellGkeAppsPanelTest' });
 
     const configPanel = new CromwellConfigurationPanel(page);
-    const appsPanel = new AppsPanel(page);
 
     await configPanel.startCromwellGkeApp();
 
@@ -35,6 +34,7 @@ describe('Cromwell GKE App', () => {
 
     await page.waitForXPath(configPanel.getXpath(), { visible: false });
 
+    const appsPanel = new AppsPanel(page);
     await appsPanel.isVisible();
     const expandedCromwellXpath = `${appsPanel.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
     await page.waitForXPath(expandedCromwellXpath);
@@ -117,6 +117,9 @@ describe('Cromwell GKE App', () => {
     });
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
+
+    // TODO: Add more steps for the submitted cromwell jobs like confirm its running etc
+    // In the meantime we will go ahead, delete cromwell and start cleanup
     const isDeleted = await appsPanel.deleteCromwellGkeApp();
 
     expect(isDeleted).toBeTruthy();

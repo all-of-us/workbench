@@ -28,10 +28,9 @@ export default class AppsPanel extends BaseEnvironmentPanel {
   }
 
   async deleteCromwellGkeApp(): Promise<boolean> {
-    const appsPanel = new AppsPanel(page);
-    await appsPanel.open();
+    await this.open();
 
-    const expandedCromwellXpath = `${appsPanel.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
+    const expandedCromwellXpath = `${this.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
     const deleteXPath = `${expandedCromwellXpath}//*[@data-test-id="Cromwell-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
@@ -40,15 +39,15 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     expect(warningDeleteCromwellModal.isLoaded());
     await warningDeleteCromwellModal.clickYesDeleteButton();
 
-    await appsPanel.pollForStatus(expandedCromwellXpath, 'DELETING');
+    await this.pollForStatus(expandedCromwellXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening
 
-    const unexpandedCromwellXPath = `${appsPanel.getXpath()}//*[@data-test-id="Cromwell-unexpanded"]`;
+    const unexpandedCromwellXPath = `${this.getXpath()}//*[@data-test-id="Cromwell-unexpanded"]`;
     const isDeleted = await waitForFn(
       async () => {
-        await appsPanel.close();
-        await appsPanel.open();
+        await this.close();
+        await this.open();
         const unexpanded = new Button(page, unexpandedCromwellXPath);
         return await unexpanded.exists();
       },
