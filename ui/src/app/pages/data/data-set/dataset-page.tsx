@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {RouteComponentProps, withRouter} from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 
 import {
   CdrVersionTiersResponse,
@@ -23,7 +23,7 @@ import {
   ResourceType,
 } from 'generated/fetch';
 
-import { AlertInfo } from 'app/components/alert';
+import {AlertInfo} from 'app/components/alert';
 import {
   Button,
   Clickable,
@@ -31,28 +31,25 @@ import {
   StyledExternalLink,
   StyledRouterLink,
 } from 'app/components/buttons';
-import { FadeBox } from 'app/components/containers';
-import { CreateModal } from 'app/components/create-modal';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
-import { CheckBox } from 'app/components/inputs';
-import { TooltipTrigger } from 'app/components/popups';
-import { Spinner, SpinnerOverlay } from 'app/components/spinners';
-import {
-  WithErrorModalProps,
-  withErrorModalWrapper,
-} from 'app/components/with-error-modal-wrapper';
-import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { CircleWithText } from 'app/icons/circleWithText';
-import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
-import { GenomicExtractionModal } from 'app/pages/data/data-set/genomic-extraction-modal';
+import {FadeBox} from 'app/components/containers';
+import {CreateModal} from 'app/components/create-modal';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
+import {WithErrorModalProps, withErrorModalWrapper,} from 'app/components/with-error-modal-wrapper';
+import {WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {CircleWithText} from 'app/icons/circleWithText';
+import {ExportDatasetModal} from 'app/pages/data/data-set/export-dataset-modal';
+import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {
   cohortsApi,
   conceptSetsApi,
   dataSetApi,
   workspacesApi,
 } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
@@ -63,14 +60,14 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
-import { getCdrVersion } from 'app/utils/cdr-versions';
-import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
-import { apiCallWithGatewayTimeoutRetries } from 'app/utils/retry';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
-import { WorkspaceData } from 'app/utils/workspace-data';
-import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
-import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
+import {AnalyticsTracker} from 'app/utils/analytics';
+import {getCdrVersion} from 'app/utils/cdr-versions';
+import {currentWorkspaceStore, useNavigation} from 'app/utils/navigation';
+import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
+import {MatchParams, serverConfigStore} from 'app/utils/stores';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -656,8 +653,11 @@ const prepackagedConceptSetToString = {
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
 
-const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
+const PREPACKAGED_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
+};
+
+const PREPACKAGED_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYBASICS]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYLIFESTYLE]: Domain.SURVEY,
@@ -811,11 +811,22 @@ export const DatasetPage = fp.flow(
     const [savingDataset, setSavingDataset] = useState(false);
 
     const updatePrepackagedDomains = () => {
-      PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
+      PREPACKAGED_DOMAINS = PREPACKAGED_PERSON_DOMAIN;
       const { hasFitbitData, hasFitbitSleepData, hasWgsData } = getCdrVersion(
         workspace,
         cdrVersionTiersResponse
       );
+      if (serverConfigStore.get().config.enableDataExplorer) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_SURVEY_DOMAINS,
+        };
+      } else {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...{ [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY },
+        };
+      }
       if (hasFitbitData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
@@ -1099,6 +1110,7 @@ export const DatasetPage = fp.flow(
       selected: boolean
     ) => {
       const updatedPrepackaged = new Set(selectedPrepackagedConceptSets);
+      // Maybe not use a set here?...
       const updatedDomainsWithConceptSetIds = new Set(
         selectedDomainsWithConceptSetIds
       );
