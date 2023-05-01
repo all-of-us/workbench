@@ -1694,6 +1694,7 @@ def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
   op.opts.dry_run = false
+  op.opts.confirm_add_all = false
   op.add_option(
        "--email [EMAIL,...]",
        ->(opts, v) { opts.email = v},
@@ -1712,6 +1713,11 @@ def authority_options(cmd_name, args)
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
+  op.add_option(
+      "--confirm_add_all",
+      ->(opts, _) { opts.confirm_add_all = "true"},
+      "Confirm that you want to add ALL authorities to the user(s)."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
   return op
 end
@@ -1722,19 +1728,11 @@ def set_authority(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  if not op.opts.remove and op.opts.authority.upcase.include? "ALL"
-    get_user_confirmation(
-      "Adding ALL authorities is redundant and rarely useful; to transitively " +
-      "grant all authorities, simply add the all-encompassing DEVELOPER authority.\n" +
-      "Do you want to add ALL authorities anyways?"
-    )
-  end
-
   ENV.update(read_db_vars(gcc))
   ServiceAccountContext.new(gcc.project).run do
     Common.new.run_inline %W{
       ./gradlew setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.confirm_add_all}]}
   end
 end
 
@@ -1750,7 +1748,7 @@ def set_authority_local(cmd_name, *args)
   op = authority_options(cmd_name, args)
   op.parse.validate
 
-  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
+  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.confirm_add_all}]"]
   common = Common.new
   common.run_inline %W{./gradlew setAuthority} + app_args
 end

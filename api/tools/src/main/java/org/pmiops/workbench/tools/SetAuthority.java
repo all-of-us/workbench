@@ -45,18 +45,29 @@ public class SetAuthority extends Tool {
     return (args) -> {
       // User-friendly command-line parsing is done in devstart.rb, so we do only simple positional
       // argument parsing here.
-      if (args.length != 4) {
+      if (args.length != 5) {
         throw new IllegalArgumentException(
-            "Expected 4 args (email_list, authorities, remove, dry_run). Got "
+            "Expected 5 args (email_list, authorities, remove, dry_run, confirm_add_all). Got "
                 + Arrays.asList(args));
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
-      Set<Authority> authorities = commaDelimitedStringToAuthoritySet(args[1]);
+      String authoritiesArgument = args[1];
+      Set<Authority> authorities = commaDelimitedStringToAuthoritySet(authoritiesArgument);
       boolean remove = Boolean.valueOf(args[2]);
       boolean dryRun = Boolean.valueOf(args[3]);
+      boolean confirmAddAll = Boolean.valueOf(args[4]);
       int numUsers = 0;
       int numErrors = 0;
       int numChanged = 0;
+
+      if (!remove
+          && authoritiesArgument.toUpperCase().contains(ALL_AUTHORITIES)
+          && !confirmAddAll) {
+        String addAllWarning =
+            "Adding ALL authorities is redundant and rarely useful; to transitively grant all authorities, simply add the all-encompassing DEVELOPER authority. If you still want to add ALL authorities, set the --confirm_add_all flag.";
+        log.log(Level.SEVERE, addAllWarning);
+        throw new IllegalArgumentException(addAllWarning);
+      }
 
       for (String email : emails) {
         numUsers++;
