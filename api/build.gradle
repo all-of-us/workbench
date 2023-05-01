@@ -658,8 +658,12 @@ appengineStart {
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+// This restricts the language features that may be used to those at or below the given Java
+// version.
+sourceCompatibility = 11
+
+// This restricts the runtime environment to be at or above the given Java version.
+targetCompatibility = 11
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
@@ -842,12 +846,12 @@ task exportWorkspaceOperations(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
