@@ -24,8 +24,7 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
-    cdrVersionId:
-      CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     accessTierShortName: AccessTierShortNames.Registered,
     creationTime: new Date('2023-02-03 00:00:00Z').getTime(),
     lastModifiedTime: new Date('2023-02-03 00:00:00Z').getTime(),
