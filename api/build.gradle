@@ -120,11 +120,6 @@ def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
                     'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
                     'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
                     'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
-                    // java8
-                    // Option. Use Java8 classes instead of third party equivalents
-                    //   true - Use Java 8 classes such as Base64
-                    //   false - Various third party libraries as needed
-                    'java8'            : 'true',
             ]
         }
     }
@@ -154,7 +149,6 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
                     'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
                     'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
                     'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
-                    'java8'            : 'true',
             ]
         }
         // Validation only works for Swagger 2 - skip.
@@ -218,8 +212,7 @@ swaggerSources {
                     // Generates delegate interfaces; used to make method annotations work without
                     // having to copy them to our implementations.
                     'delegatePattern': 'true',
-                    'dateLibrary'    : 'java8',
-                    'java8'          : 'true',
+                    'dateLibrary'    : 'java8'
             ]
         }
     }
