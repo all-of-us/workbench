@@ -372,7 +372,7 @@ public class DataSetServiceTest {
     DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, true, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
-            Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet1));
+            Domain.CONDITION, ImmutableList.of(conceptSet2, conceptSet1));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
             "( condition_source_concept_id IN  (SELECT DISTINCT c.concept_id\n"
