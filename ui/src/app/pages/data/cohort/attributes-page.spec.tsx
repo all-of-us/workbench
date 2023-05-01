@@ -41,13 +41,13 @@ function component(): ReactWrapper {
 
 function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
   return wrapper
-    .find(`Dropdown[data-test-id="numerical-dropdown-${index}"]`)
+    .find(`Dropdown[id="numerical-dropdown-${index}"]`)
     .instance() as Dropdown;
 }
 
 function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {
   return wrapper
-    .find(`[data-test-id="numerical-input-${index}-0"]`)
+    .find(`[id="numerical-input-${index}-0"]`)
     .hostNodes();
 }
 
@@ -112,7 +112,7 @@ describe('AttributesPageV2', () => {
     ).toHaveBeenCalledTimes(0);
     expect(wrapper.find('div[id="numerical-dropdown-0"]').length).toBe(1);
     expect(wrapper.find('div[id="numerical-dropdown-1"]').length).toBe(1);
-    expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(0);
+    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(0);
     expect(
       wrapper.find('div[id="attributes-add-btn"]').first().props().disabled
     ).toBeFalsy();
@@ -205,7 +205,7 @@ describe('AttributesPageV2', () => {
       preventDefault: () => {},
     });
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="numerical-input-0-0"]').length).toBe(2);
+    expect(wrapper.find('[id="numerical-input-0-0"]').length).toBe(2);
     expect(
       wrapper.find('[data-test-id="attributes-calculate-btn"]').first().props()
         .disabled
