@@ -308,7 +308,9 @@ export const AttributesPage = fp.flow(
   const [formValid, setFormValid] = useState(false);
   const [isCOPEOrMinuteSurvey, setIsCOPEOrMinuteSurvey] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [options, setOptions] = useState(defaultOptions);
+  const [options, setOptions] = useState(
+    JSON.parse(JSON.stringify(defaultOptions))
+  );
 
   const isSurvey = () => {
     return node.domainId === Domain.SURVEY;
@@ -348,7 +350,6 @@ export const AttributesPage = fp.flow(
         setAttributeCount(null);
         setCatAttributes(catAttributes);
         setNumAttributes(numAttributes);
-        setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
         setLoading(false);
       });
   };
@@ -443,7 +444,6 @@ export const AttributesPage = fp.flow(
         setNumAttributes(numAttributes);
       }
       setAttributeCount(null);
-      setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
       setIsCOPEOrMinuteSurvey(true);
       setLoading(false);
     } else {
@@ -536,7 +536,6 @@ export const AttributesPage = fp.flow(
       setOptions(options);
       setAttributeCount(nodeCount());
       setNumAttributes(updatedNumAttributes);
-      setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
       setFormValid(true);
       setLoading(false);
     }
