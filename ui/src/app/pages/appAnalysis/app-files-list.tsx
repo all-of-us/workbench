@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { ResourceType, WorkspaceResource } from 'generated/fetch';
+import { WorkspaceResource } from 'generated/fetch';
 
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -11,7 +11,7 @@ import { ResourceList } from 'app/components/resource-list';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { listNotebooks } from 'app/pages/analysis/util';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { convertToResource } from 'app/utils/resources';
+import { convertToResources } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { AppSelector } from './app-selector';
@@ -42,11 +42,7 @@ export const AppFilesList = withCurrentWorkspace()(
       async () => {
         props.showSpinner();
         listNotebooks(workspace)
-          .then((notebookList) =>
-            notebookList.map((notebook) =>
-              convertToResource(notebook, ResourceType.NOTEBOOK, workspace)
-            )
-          )
+          .then((notebooks) => convertToResources(notebooks, workspace))
           .then(setNotebookResources);
         props.hideSpinner();
       }
