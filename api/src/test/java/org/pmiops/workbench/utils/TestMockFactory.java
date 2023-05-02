@@ -301,16 +301,8 @@ public class TestMockFactory {
     return cdrVersion;
   }
 
-  public static DbCdrVersion createDefaultCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
-    return createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
-  }
-
-  public static DbCdrVersion createDefaultCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
-    final DbCdrVersion cdrVersion = createDefaultCdrVersion(id);
-    accessTierDao.save(cdrVersion.getAccessTier());
-    return cdrVersionDao.save(cdrVersion);
+  public static DbCdrVersion createDefaultCdrVersion() {
+    return createDefaultCdrVersion(1);
   }
 
   public static DbCdrVersion createControlledTierCdrVersion(long id) {
