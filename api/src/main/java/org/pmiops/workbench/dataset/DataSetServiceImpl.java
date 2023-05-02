@@ -313,12 +313,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
             .orElseThrow(noDataSetFound(dataSetId, workspaceId));
 
-    int version = Etags.toVersion(request.getEtag());
-    if (dbDataSet.getVersion() != version) {
+    if (dbDataSet.getVersion() != Etags.toVersion(request.getEtag())) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock);
-    return saveDataSet(dbMappingConvert);
+
+    return saveDataSet(dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock));
   }
 
   // For domains for which we've assigned a base table in BigQuery, we keep a map here
