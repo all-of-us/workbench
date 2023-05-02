@@ -2,9 +2,9 @@ package org.pmiops.workbench.exfiltration.impl;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 
+import jakarta.mail.MessagingException;
 import java.time.Clock;
 import javax.inject.Provider;
-import jakarta.mail.MessagingException;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;

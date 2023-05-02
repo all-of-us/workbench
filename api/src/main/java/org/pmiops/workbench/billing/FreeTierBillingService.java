@@ -3,6 +3,7 @@ package org.pmiops.workbench.billing;
 import static org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCostView;
 
 import com.google.common.collect.Sets;
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -18,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import jakarta.mail.MessagingException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
