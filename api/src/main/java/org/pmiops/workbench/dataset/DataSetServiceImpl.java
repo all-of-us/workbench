@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -299,18 +300,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
   }
 
+  private Supplier<NotFoundException> noDataSetFound(long dataSetId, long workspaceId) {
+    return () ->
+        new NotFoundException(
+            "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
+  }
+
   @Override
   public DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest request) {
     DbDataset dbDataSet =
         dataSetDao
             .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        "No DataSet found for dataSetId "
-                            + dataSetId
-                            + " and workspaceId "
-                            + workspaceId));
+            .orElseThrow(noDataSetFound(dataSetId, workspaceId));
 
     int version = Etags.toVersion(request.getEtag());
     if (dbDataSet.getVersion() != version) {
@@ -1180,13 +1181,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public void deleteDataSet(long workspaceId, long dataSetId) {
     DbDataset dbDataset =
         this.getDbDataSet(workspaceId, dataSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        "No DataSet found for dataSetId "
-                            + dataSetId
-                            + " and workspaceId "
-                            + workspaceId));
+            .orElseThrow(noDataSetFound(dataSetId, workspaceId));
     userRecentResourceService.deleteDataSetEntry(workspaceId, dbDataset.getCreatorId(), dataSetId);
     dataSetDao.deleteById(dataSetId);
   }
