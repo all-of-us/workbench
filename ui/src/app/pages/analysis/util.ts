@@ -20,7 +20,7 @@ export function appendNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export const getExistingNotebooks = (workspace): Promise<FileDetail[]> => {
+export const listNotebooks = (workspace): Promise<FileDetail[]> => {
   const { namespace, id } = workspace;
   return notebooksApi().getNoteBookList(namespace, id);
 };
@@ -28,6 +28,6 @@ export const getExistingNotebooks = (workspace): Promise<FileDetail[]> => {
 export const getExistingNotebookNames = async (
   workspace
 ): Promise<string[]> => {
-  const notebooks = await getExistingNotebooks(workspace);
+  const notebooks = await listNotebooks(workspace);
   return notebooks.map((fd) => dropNotebookFileSuffix(fd.name));
 };

@@ -165,6 +165,14 @@ export function convertToResource(
   };
 }
 
+export const convertToResources = (
+  notebookList: FileDetail[],
+  workspace: WorkspaceData
+) =>
+  notebookList.map((notebook) =>
+    convertToResource(notebook, ResourceType.NOTEBOOK, workspace)
+  );
+
 /* Name validation for resources.
  *
  * Notebooks have characters that are disallowed. Specifically, Jupyter only disallows :/\
