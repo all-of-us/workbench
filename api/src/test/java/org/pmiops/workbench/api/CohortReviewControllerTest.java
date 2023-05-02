@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.*;
@@ -336,7 +337,8 @@ public class CohortReviewControllerTest {
     user.setDisabled(false);
     currentUser = userDao.save(user);
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersion);
 

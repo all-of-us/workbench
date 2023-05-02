@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
@@ -111,7 +112,9 @@ public class OfflineRuntimeControllerTest {
   @BeforeEach
   public void setUp() {
     runtimeProjectIdIndex = 0;
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    DbCdrVersion cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
+    cdrVersionDao.save(cdrVersion);
 
     user1 = new DbUser();
     user1.setUsername("alice@fake-research-aou.org");

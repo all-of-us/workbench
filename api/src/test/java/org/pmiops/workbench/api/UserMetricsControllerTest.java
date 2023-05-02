@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
@@ -118,7 +119,10 @@ public class UserMetricsControllerTest {
   @BeforeEach
   public void setUp() {
     final DbCdrVersion dbCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+        createDefaultCdrVersion();
+
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    cdrVersionDao.save(dbCdrVersion);
 
     dbUser = new DbUser().setUserId(123L);
 

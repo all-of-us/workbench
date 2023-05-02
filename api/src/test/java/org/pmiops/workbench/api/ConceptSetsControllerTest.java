@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -295,7 +296,9 @@ public class ConceptSetsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    DbCdrVersion cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
+    cdrVersionDao.save(cdrVersion);
     workspace =
         createTestWorkspace(
             WORKSPACE_NAMESPACE,

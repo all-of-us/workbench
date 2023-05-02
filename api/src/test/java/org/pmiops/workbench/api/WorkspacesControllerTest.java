@@ -21,6 +21,7 @@ import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -409,7 +410,8 @@ public class WorkspacesControllerTest {
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
     when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
+    cdrVersion = createDefaultCdrVersion(1);
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -419,7 +421,8 @@ public class WorkspacesControllerTest {
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
     DbCdrVersion archivedCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+        createDefaultCdrVersion(2);
+    accessTierDao.save(archivedCdrVersion.getAccessTier());
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);

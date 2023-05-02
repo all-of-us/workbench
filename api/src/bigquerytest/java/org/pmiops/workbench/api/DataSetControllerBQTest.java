@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
@@ -271,7 +272,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .thenReturn(fcResponse)
         .thenReturn(fcResponse);
 
-    dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    dbCdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(dbCdrVersion.getAccessTier());
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import java.sql.Timestamp;
@@ -585,7 +586,9 @@ public class WorkspaceServiceTest {
   public void userWithoutRegisterTierAccessRTWorkspace() {
     DbWorkspace dbWorkspace = dbWorkspaces.get(0);
     DbCdrVersion dbCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+        createDefaultCdrVersion();
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
