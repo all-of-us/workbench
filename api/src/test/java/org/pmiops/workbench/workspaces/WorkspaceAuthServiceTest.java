@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -299,7 +300,7 @@ public class WorkspaceAuthServiceTest {
 
   private void stubRegisteredTier() {
     when(mockAccessTierService.getRegisteredTierOrThrow())
-        .thenReturn(TestMockFactory.createRegisteredTierForTests(accessTierDao));
+        .thenReturn(accessTierDao.save(createRegisteredTier()));
   }
 
   private void stubUpdateAcl(String namespace, String fcName) {

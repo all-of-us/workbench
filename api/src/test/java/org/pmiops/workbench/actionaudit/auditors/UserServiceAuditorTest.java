@@ -2,6 +2,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -51,7 +52,7 @@ public class UserServiceAuditorTest {
 
   @Test
   public void testFireUpdateAccessTiersAction_userAgent_register() {
-    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
     List<DbAccessTier> newTiers = Collections.singletonList(registeredTier);
 
     DbUser user = createUser();
@@ -69,7 +70,7 @@ public class UserServiceAuditorTest {
 
   @Test
   public void testFireUpdateAccessTiersAction_userAgent_unregister() {
-    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
     List<DbAccessTier> oldTiers = Collections.singletonList(registeredTier);
 
     DbUser user = createUser();
@@ -87,7 +88,7 @@ public class UserServiceAuditorTest {
 
   @Test
   public void testFireUpdateAccessTiersAction_systemAgent_addControlled() {
-    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
     DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     List<DbAccessTier> oldTiers = Collections.singletonList(registeredTier);
     List<DbAccessTier> newTiers = ImmutableList.of(registeredTier, controlledTier);

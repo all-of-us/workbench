@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class InstitutionTierRequirementDaoTest {
     testInst =
         institutionDao.save(
             new DbInstitution().setShortName("Broad").setDisplayName("The Broad Institute"));
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
   }
 

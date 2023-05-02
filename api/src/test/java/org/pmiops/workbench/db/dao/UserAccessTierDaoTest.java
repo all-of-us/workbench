@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -38,7 +39,7 @@ public class UserAccessTierDaoTest {
     user.setUserId(100);
     user = userDao.save(user);
 
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
   }
 

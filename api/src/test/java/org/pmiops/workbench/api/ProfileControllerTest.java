@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -253,7 +254,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
     // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     rtAddressesConfig =
         new InstitutionTierConfig()

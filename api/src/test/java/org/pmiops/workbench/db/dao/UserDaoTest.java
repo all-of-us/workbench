@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -66,7 +67,7 @@ public class UserDaoTest {
 
   @BeforeEach
   public void setup() {
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
     TestMockFactory.createAccessModules(accessModuleDao);
   }
 

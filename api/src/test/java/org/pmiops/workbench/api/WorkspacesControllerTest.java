@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.PageImpl;
@@ -399,7 +400,7 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 

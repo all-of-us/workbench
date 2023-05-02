@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -106,7 +107,7 @@ public class CdrVersionServiceTest {
     user.setUsername("user");
     user = userDao.save(user);
 
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     defaultCdrVersion =
         makeCdrVersion(

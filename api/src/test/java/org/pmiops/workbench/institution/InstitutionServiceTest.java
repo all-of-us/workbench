@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -76,7 +77,7 @@ public class InstitutionServiceTest {
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
     ctTierConfig = new InstitutionTierConfig().accessTierShortName(controlledTier.getShortName());
