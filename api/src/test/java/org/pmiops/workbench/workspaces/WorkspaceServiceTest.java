@@ -588,7 +588,7 @@ public class WorkspaceServiceTest {
     DbWorkspace dbWorkspace = dbWorkspaces.get(0);
     DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
     accessTierDao.save(dbCdrVersion.getAccessTier());
-    cdrVersionDao.save(dbCdrVersion);
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
         .thenReturn(Collections.singletonList(AccessTierService.CONTROLLED_TIER_SHORT_NAME));
