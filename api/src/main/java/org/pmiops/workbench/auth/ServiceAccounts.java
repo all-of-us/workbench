@@ -1,9 +1,5 @@
 package org.pmiops.workbench.auth;
 
-import com.google.appengine.api.appidentity.AppIdentityService;
-import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import com.google.appengine.api.utils.SystemProperty;
-import com.google.auth.appengine.AppEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
@@ -38,26 +34,7 @@ public class ServiceAccounts {
    */
   public static GoogleCredentials getScopedServiceCredentials(List<String> scopes)
       throws IOException {
-
-    GoogleCredentials credentials;
-    if (SystemProperty.environment.value() == null
-        || SystemProperty.Environment.Value.Development.equals(
-            SystemProperty.environment.value())) {
-      // When running in a local dev environment, we simply get the application default credentials.
-      //
-      // TODO(gjuggler): it may be possible to remove this branch point altogether, and use the
-      // AppIdentityService approach even when running a local app engine server. I tested this
-      // out locally and it *seemed* to work, but it needs a bit more careful vetting.
-      credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
-    } else {
-      AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
-      credentials =
-          AppEngineCredentials.newBuilder()
-              .setScopes(scopes)
-              .setAppIdentityService(appIdentityService)
-              .build();
-    }
-
+    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
     credentials.refreshIfExpired();
     return credentials;
   }
