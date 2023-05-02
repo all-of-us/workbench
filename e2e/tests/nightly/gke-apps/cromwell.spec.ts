@@ -77,8 +77,15 @@ describe('Cromwell GKE App', () => {
     let snippetOutput = await notebook.runCodeCell(1);
 
     // Confirm Cromwell has not started
-    // TODO: Fix the snippet to use cromshell-alpha
-    const cromshell_version = snippetOutput.includes('Found cromshell_alpha') ? 'cromshell-alpha' : 'cromshell-beta';
+    /* The snippet output is usually like
+      Scanning for cromshell 2 beta
+      Scanning for cromshell 2 alpha...
+      Found cromshell-alpha, please use cromshell-alpha
+      Checking status for CROMWELL app....
+     */
+    // We are trying to find the correct version cromshell-alpha or cromshell-beta
+    // This is temp, once docker image is updated, we will always cromshell which will be alias for cromshell-beta
+    const cromshell_version = snippetOutput.split(', please use ')[1].split('\n')[0];
     expect(snippetOutput.includes('CROMWELL app does not exist. Please create cromwell server from workbench')).toBe(
       true
     );
