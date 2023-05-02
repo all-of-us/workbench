@@ -279,7 +279,7 @@ const ImmutableListItem: React.FunctionComponent<{
 }> = ({ name, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
-    <div style={styles.listItem}>
+    <div style={(condition ? {...styles.listItem, marginLeft: '12px'} : styles.listItem)}>
       <input
         type='checkbox'
         value={name}
@@ -1120,8 +1120,23 @@ export const DatasetPage = fp.flow(
           conceptSetId: null,
           domain: PREPACKAGED_DOMAINS[prepackaged],
         });
+        // 1. Add if all surveys are selected
+        if (prepackaged === PrePackagedConceptSetEnum.SURVEY){
+          // then select all individual-surveys... iterate over all prepackaged surveys...
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYPFHH);
+        }
+        // 2. select All surveys if every one of individual surveys is selected
+
+
+
       } else {
+        // 1. if ALL surveys unselected -> then do:
+        // updatedPrepackaged.delete( individual enums for surveys)
+        // 2. if any other surveys selected
+        // uncheck updatedPrepackaged.delete-All surveys
+
         updatedPrepackaged.delete(prepackaged);
+        // TODO
         updatedDomainsWithConceptSetIds.forEach(
           (domainWithConceptSetId: DomainWithConceptSetId) => {
             if (
