@@ -21,6 +21,7 @@ import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
@@ -2172,7 +2173,9 @@ public class WorkspacesControllerTest {
     DbUser reader = createUser("reader@gmail.com");
     DbUser writer = createUser("writer@gmail.com");
     DbCdrVersion controlledTierCdr =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
+        createControlledTierCdrVersion(2);
+    accessTierDao.save(controlledTierCdr.getAccessTier());
+    cdrVersionDao.save(controlledTierCdr);
 
     Workspace workspace =
         workspacesController
@@ -2452,7 +2455,9 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspacePatch_publishedWorkspace() {
     DbCdrVersion ctCdrVersion =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
+        createControlledTierCdrVersion(5L);
+    accessTierDao.save(ctCdrVersion.getAccessTier());
+    cdrVersionDao.save(ctCdrVersion);
 
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 

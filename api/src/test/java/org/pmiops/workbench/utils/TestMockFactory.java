@@ -312,13 +312,6 @@ public class TestMockFactory {
     return cdrVersion;
   }
 
-  public static DbCdrVersion createControlledTierCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
-    DbCdrVersion cdrVersion = createControlledTierCdrVersion(id);
-    accessTierDao.save(cdrVersion.getAccessTier());
-    return cdrVersionDao.save(cdrVersion);
-  }
-
   public static DbUserCodeOfConductAgreement createDuccAgreement(
       DbUser dbUser, int signedVersion, Timestamp completionTime) {
     DbUserCodeOfConductAgreement ducc = new DbUserCodeOfConductAgreement();

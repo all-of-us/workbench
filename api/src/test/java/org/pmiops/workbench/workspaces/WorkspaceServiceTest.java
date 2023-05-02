@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdrVersion;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -61,7 +62,6 @@ import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.profile.ProfileMapper;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -572,7 +572,9 @@ public class WorkspaceServiceTest {
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
     DbCdrVersion dbCdrVersion =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 1);
+        createControlledTierCdrVersion(1);
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     workspaceDao.save(dbWorkspace);
     assertThrows(
@@ -608,7 +610,9 @@ public class WorkspaceServiceTest {
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
     DbCdrVersion dbCdrVersion =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 1);
+        createControlledTierCdrVersion(1);
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
 
     addMockedWorkspace(dbWorkspace);
