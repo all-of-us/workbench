@@ -4,13 +4,28 @@
   },
   "interactions": [
     {
-      "description": "a request for all dogs with the builder pattern",
+      "description": "a request for workspaces associated with a user",
       "providerStates": [
         {
-          "name": "I have a list of dogs"
+          "name": "User has workspaces"
         }
       ],
       "request": {
+        "headers": {
+          "authorization": "Bearer oranges"
+        },
+        "matchingRules": {
+          "header": {
+            "$.authorization[0]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
         "method": "GET",
         "path": "/v1/workspaces"
       },
@@ -24,12 +39,96 @@
                 "adminLocked": false,
                 "billingAccountName": "billing-account",
                 "billingStatus": "ACTIVE",
-                "cdrVersionId": "fakeCdrVersionGunicorn",
-                "creationTime": 1678387160259,
-                "id": "1Gunicorn",
-                "lastModifiedTime": 1678387160259,
-                "name": "defaultWorkspaceGunicorn",
-                "namespace": "defaultNamespaceGunicorn",
+                "cdrVersionId": "-1",
+                "creationTime": 1675382400000,
+                "id": "1A",
+                "lastModifiedTime": 1675382400000,
+                "name": "defaultWorkspaceA",
+                "namespace": "defaultNamespaceA",
+                "published": false,
+                "researchPurpose": {
+                  "ancestry": false,
+                  "anticipatedFindings": "",
+                  "commercialPurpose": false,
+                  "controlSet": false,
+                  "diseaseFocusedResearch": false,
+                  "disseminateResearchFindingList": [],
+                  "drugDevelopment": true,
+                  "educational": true,
+                  "ethics": true,
+                  "intendedStudy": "",
+                  "methodsDevelopment": false,
+                  "needsReviewPrompt": false,
+                  "otherPurpose": false,
+                  "otherPurposeDetails": "",
+                  "populationDetails": [
+                    "AGE_OLDER_MORE_THAN_75",
+                    "RACE_NHPI"
+                  ],
+                  "populationHealth": true,
+                  "reasonForAllOfUs": "",
+                  "researchOutcomeList": [],
+                  "reviewRequested": false,
+                  "scientificApproach": "",
+                  "socialBehavioral": false
+                }
+              }
+            },
+            {
+              "accessLevel": "WRITER",
+              "workspace": {
+                "accessTierShortName": "registered",
+                "adminLocked": false,
+                "billingAccountName": "billing-account",
+                "billingStatus": "ACTIVE",
+                "cdrVersionId": "-1",
+                "creationTime": 1675382400000,
+                "id": "1B",
+                "lastModifiedTime": 1675382400000,
+                "name": "defaultWorkspaceB",
+                "namespace": "defaultNamespaceB",
+                "published": false,
+                "researchPurpose": {
+                  "ancestry": false,
+                  "anticipatedFindings": "",
+                  "commercialPurpose": false,
+                  "controlSet": false,
+                  "diseaseFocusedResearch": false,
+                  "disseminateResearchFindingList": [],
+                  "drugDevelopment": true,
+                  "educational": true,
+                  "ethics": true,
+                  "intendedStudy": "",
+                  "methodsDevelopment": false,
+                  "needsReviewPrompt": false,
+                  "otherPurpose": false,
+                  "otherPurposeDetails": "",
+                  "populationDetails": [
+                    "AGE_OLDER_MORE_THAN_75",
+                    "RACE_NHPI"
+                  ],
+                  "populationHealth": true,
+                  "reasonForAllOfUs": "",
+                  "researchOutcomeList": [],
+                  "reviewRequested": false,
+                  "scientificApproach": "",
+                  "socialBehavioral": false
+                }
+              }
+            },
+            {
+              "accessLevel": "WRITER",
+              "workspace": {
+                "accessTierShortName": "registered",
+                "adminLocked": false,
+                "billingAccountName": "billing-account",
+                "billingStatus": "ACTIVE",
+                "cdrVersionId": "-1",
+                "creationTime": 1675382400000,
+                "id": "1C",
+                "lastModifiedTime": 1675382400000,
+                "name": "defaultWorkspaceC",
+                "namespace": "defaultNamespaceC",
                 "published": false,
                 "researchPurpose": {
                   "ancestry": false,
