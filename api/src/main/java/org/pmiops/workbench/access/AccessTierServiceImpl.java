@@ -5,7 +5,6 @@ import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -76,28 +75,26 @@ public class AccessTierServiceImpl implements AccessTierService {
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     addToAuthDomainIdempotent(user, accessTier);
 
-    Consumer<DbUserAccessTier> maybeUpdate = entryToUpdate -> {
-      // don't update if already ENABLED
-      if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
-        userAccessTierDao.save(
-            entryToUpdate
-                .setTierAccessStatus(TierAccessStatus.ENABLED)
-                .setLastUpdated(now()));
-      }
-    };
-
-    Runnable create = () ->
-        userAccessTierDao.save(
-            new DbUserAccessTier()
-                .setUser(user)
-                .setAccessTier(accessTier)
-                .setTierAccessStatus(TierAccessStatus.ENABLED)
-                .setFirstEnabled(now())
-                .setLastUpdated(now()));
-
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
-        .ifPresentOrElse(maybeUpdate, create);
+        .ifPresentOrElse(
+            entryToUpdate -> {
+              // don't update if already ENABLED
+              if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
+                userAccessTierDao.save(
+                    entryToUpdate
+                        .setTierAccessStatus(TierAccessStatus.ENABLED)
+                        .setLastUpdated(now()));
+              }
+            },
+            () ->
+                userAccessTierDao.save(
+                    new DbUserAccessTier()
+                        .setUser(user)
+                        .setAccessTier(accessTier)
+                        .setTierAccessStatus(TierAccessStatus.ENABLED)
+                        .setFirstEnabled(now())
+                        .setLastUpdated(now())));
   }
 
   /**
