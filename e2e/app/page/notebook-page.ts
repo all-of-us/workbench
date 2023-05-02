@@ -713,4 +713,25 @@ export default class NotebookPage extends NotebookFrame {
     await this.page.keyboard.press('Enter', { delay: 20 });
     await this.page.keyboard.up(keyboardCommand);
   }
+
+  async selectSnippet(snippetsName: string, subCategory: string): Promise<void> {
+    const notebookIFrame = await this.getIFrame();
+
+    const snippetsMenuXpath = '//*[@class="dropdown-toggle" and contains(normalize-space(text()), "Snippets")]';
+    const snippetMenu = await notebookIFrame.waitForXPath(snippetsMenuXpath);
+    await snippetMenu.focus();
+    await snippetMenu.click();
+
+    const snippetsMenuListXpath = `${snippetsMenuXpath}/following-sibling::ul`;
+    const categoryXpath = `${snippetsMenuListXpath}//*[contains(normalize-space(text()), "${snippetsName}")]`;
+    const subMenu = await notebookIFrame.waitForXPath(categoryXpath);
+
+    await subMenu.hover();
+
+    const categoryXSubpath = `${categoryXpath}/following-sibling::ul//*[@class="snippet" and 
+    contains(normalize-space(text()), "${subCategory}")]`;
+    const snipSubBtn = await notebookIFrame.waitForXPath(categoryXSubpath);
+    await snipSubBtn.focus();
+    await snipSubBtn.click();
+  }
 }
