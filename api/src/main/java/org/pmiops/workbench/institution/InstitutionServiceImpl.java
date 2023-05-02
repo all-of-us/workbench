@@ -7,6 +7,8 @@ import static org.pmiops.workbench.institution.InstitutionUtils.getEmailDomainsB
 import static org.pmiops.workbench.institution.InstitutionUtils.getTierConfigByTier;
 
 import com.google.common.base.Strings;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,8 +20,6 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
