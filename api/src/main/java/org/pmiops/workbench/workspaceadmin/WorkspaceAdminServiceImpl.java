@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;

@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;

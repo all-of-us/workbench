@@ -4,7 +4,7 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.SUMOLOGIC_
 
 import java.time.Clock;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.EgressEventDao;

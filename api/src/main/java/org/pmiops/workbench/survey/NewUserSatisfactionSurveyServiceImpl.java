@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;

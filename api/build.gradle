@@ -471,6 +471,7 @@ dependencies {
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's

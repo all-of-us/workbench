@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
