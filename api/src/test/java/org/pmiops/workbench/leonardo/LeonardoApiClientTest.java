@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -171,7 +171,7 @@ public class LeonardoApiClientTest {
             .setBigqueryProject("cdr")
             .setBigqueryDataset("bq")
             .setAccessTier(
-                TestMockFactory.createControlledTierForTests(accessTierDao)
+                accessTierDao.save(createControlledTier())
                     .setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);

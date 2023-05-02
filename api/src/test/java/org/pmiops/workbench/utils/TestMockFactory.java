@@ -267,10 +267,6 @@ public class TestMockFactory {
         .setEnableUserWorkflows(false);
   }
 
-  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
-    return accessTierDao.save(createRegisteredTier());
-  }
-
   public static DbAccessTier createControlledTier() {
     return new DbAccessTier()
         .setAccessTierId(2)
@@ -280,10 +276,6 @@ public class TestMockFactory {
         .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
         .setServicePerimeter("controlled/tier/perimeter")
         .setEnableUserWorkflows(true);
-  }
-
-  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
-    return accessTierDao.save(createControlledTier());
   }
 
   public static void removeControlledTierForTests(AccessTierDao accessTierDao) {

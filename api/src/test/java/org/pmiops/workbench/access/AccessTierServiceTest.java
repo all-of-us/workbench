@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.sql.Timestamp;
@@ -21,7 +22,6 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -87,7 +87,7 @@ public class AccessTierServiceTest {
   @Test
   public void test_getAllTiers_2() {
     final DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
 
     assertThat(accessTierService.getAllTiers())
         .containsExactly(controlledTier, registeredTier)
@@ -119,7 +119,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
     addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
 
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
     addDaoEntry(user, controlledTier, TierAccessStatus.ENABLED);
 
     assertThat(accessTierService.getAccessTiersForUser(user))
@@ -134,7 +134,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
 
     // simply to show a non-Registered tier exists but we don't add the user to it
-    TestMockFactory.createControlledTierForTests(accessTierDao);
+    accessTierDao.save(createControlledTier());
 
     accessTierService.addUserToTier(user, registeredTier);
 
@@ -330,7 +330,7 @@ public class AccessTierServiceTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     final DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
 
     accessTierService.addUserToAllTiers(user);
 

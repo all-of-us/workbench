@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.base.Splitter;
@@ -334,7 +335,7 @@ public class UserDaoTest {
     addUserToTier(user, registeredTier);
 
     // this also won't match
-    TestMockFactory.createControlledTierForTests(accessTierDao);
+    accessTierDao.save(createControlledTier());
 
     final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
@@ -349,7 +350,7 @@ public class UserDaoTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
     addUserToTier(user, controlledTier);
 
     final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
@@ -369,7 +370,7 @@ public class UserDaoTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
     addUserToTier(user, controlledTier);
     removeUserFromTier(user, controlledTier);
 

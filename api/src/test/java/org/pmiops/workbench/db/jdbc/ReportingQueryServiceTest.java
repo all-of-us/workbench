@@ -15,6 +15,7 @@ import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__RAS_LOGIN_GOV_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__TWO_FACTOR_AUTH_COMPLETION_TIME;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -140,7 +141,7 @@ public class ReportingQueryServiceTest {
   @BeforeEach
   public void setup() {
     registeredTier = accessTierDao.save(createRegisteredTier());
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    controlledTier = accessTierDao.save(createControlledTier());
     TestMockFactory.createAccessModules(accessModuleDao);
     dbInstitution = createDbInstitution();
     twoFactorAuthModule = accessModuleDao.findOneByName(DbAccessModuleName.TWO_FACTOR_AUTH).get();

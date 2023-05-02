@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.sql.Timestamp;
@@ -15,7 +16,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.model.TierAccessStatus;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -40,7 +40,7 @@ public class UserAccessTierDaoTest {
     user = userDao.save(user);
 
     registeredTier = accessTierDao.save(createRegisteredTier());
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    controlledTier = accessTierDao.save(createControlledTier());
   }
 
   @Test

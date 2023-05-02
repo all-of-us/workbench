@@ -2,6 +2,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.base.Splitter;
@@ -22,7 +23,6 @@ import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -89,7 +89,7 @@ public class UserServiceAuditorTest {
   @Test
   public void testFireUpdateAccessTiersAction_systemAgent_addControlled() {
     DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
-    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    DbAccessTier controlledTier = accessTierDao.save(createControlledTier());
     List<DbAccessTier> oldTiers = Collections.singletonList(registeredTier);
     List<DbAccessTier> newTiers = ImmutableList.of(registeredTier, controlledTier);
 
