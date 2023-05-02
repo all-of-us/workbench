@@ -52,7 +52,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -118,8 +117,7 @@ public class UserMetricsControllerTest {
 
   @BeforeEach
   public void setUp() {
-    final DbCdrVersion dbCdrVersion =
-        createDefaultCdrVersion();
+    final DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
 
     accessTierDao.save(dbCdrVersion.getAccessTier());
     cdrVersionDao.save(dbCdrVersion);

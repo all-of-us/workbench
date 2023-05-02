@@ -288,8 +288,7 @@ public class RuntimeControllerTest {
             .setCdrDbName("")
             .setBigqueryDataset(BIGQUERY_DATASET)
             .setAccessTier(
-                accessTierDao.save(createControlledTier())
-                    .setDatasetsBucket("gs://cdr-bucket"))
+                accessTierDao.save(createControlledTier()).setDatasetsBucket("gs://cdr-bucket"))
             .setStorageBasePath("v99")
             .setWgsCramManifestPath("wgs/cram/manifest.csv");
 

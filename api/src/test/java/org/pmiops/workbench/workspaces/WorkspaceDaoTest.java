@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

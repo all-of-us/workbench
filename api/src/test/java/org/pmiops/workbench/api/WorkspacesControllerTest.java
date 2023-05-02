@@ -421,8 +421,7 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
-    DbCdrVersion archivedCdrVersion =
-        createDefaultCdrVersion(2);
+    DbCdrVersion archivedCdrVersion = createDefaultCdrVersion(2);
     accessTierDao.save(archivedCdrVersion.getAccessTier());
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
@@ -2172,8 +2171,7 @@ public class WorkspacesControllerTest {
     DbUser cloner = createUser("cloner@gmail.com");
     DbUser reader = createUser("reader@gmail.com");
     DbUser writer = createUser("writer@gmail.com");
-    DbCdrVersion controlledTierCdr =
-        createControlledTierCdrVersion(2);
+    DbCdrVersion controlledTierCdr = createControlledTierCdrVersion(2);
     accessTierDao.save(controlledTierCdr.getAccessTier());
     cdrVersionDao.save(controlledTierCdr);
 
@@ -2454,8 +2452,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspacePatch_publishedWorkspace() {
-    DbCdrVersion ctCdrVersion =
-        createControlledTierCdrVersion(5L);
+    DbCdrVersion ctCdrVersion = createControlledTierCdrVersion(5L);
     accessTierDao.save(ctCdrVersion.getAccessTier());
     cdrVersionDao.save(ctCdrVersion);
 

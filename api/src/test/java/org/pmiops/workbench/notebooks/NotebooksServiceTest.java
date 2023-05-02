@@ -44,7 +44,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;

@@ -170,9 +170,7 @@ public class LeonardoApiClientTest {
             .setCdrDbName("")
             .setBigqueryProject("cdr")
             .setBigqueryDataset("bq")
-            .setAccessTier(
-                accessTierDao.save(createControlledTier())
-                    .setDatasetsBucket(CDR_BUCKET))
+            .setAccessTier(accessTierDao.save(createControlledTier()).setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);
     testWorkspace =

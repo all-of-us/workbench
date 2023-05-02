@@ -571,8 +571,7 @@ public class WorkspaceServiceTest {
             "Controlled Tier Workspace",
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
-    DbCdrVersion dbCdrVersion =
-        createControlledTierCdrVersion(1);
+    DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
     accessTierDao.save(dbCdrVersion.getAccessTier());
     cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
@@ -587,8 +586,7 @@ public class WorkspaceServiceTest {
   @Test
   public void userWithoutRegisterTierAccessRTWorkspace() {
     DbWorkspace dbWorkspace = dbWorkspaces.get(0);
-    DbCdrVersion dbCdrVersion =
-        createDefaultCdrVersion();
+    DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
     accessTierDao.save(dbCdrVersion.getAccessTier());
     cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
@@ -609,8 +607,7 @@ public class WorkspaceServiceTest {
             "Controlled Tier Workspace",
             DEFAULT_WORKSPACE_NAMESPACE,
             WorkspaceActiveStatus.ACTIVE);
-    DbCdrVersion dbCdrVersion =
-        createControlledTierCdrVersion(1);
+    DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
     accessTierDao.save(dbCdrVersion.getAccessTier());
     cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
