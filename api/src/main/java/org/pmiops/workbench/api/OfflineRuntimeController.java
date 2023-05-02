@@ -287,7 +287,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(disk.getGoogleProject());
-    if (!workspace.isPresent()) {
+    if (workspace.isEmpty()) {
       log.warning(
           String.format(
               "skipping disk '%s' associated with unknown Google project '%s'",

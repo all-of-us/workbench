@@ -301,19 +301,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest request) {
-    Optional<DbDataset> dbDataSet =
-        dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
-
-    if (!dbDataSet.isPresent()) {
-      throw new NotFoundException(
-          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
-    }
+    DbDataset dbDataSet =
+        dataSetDao
+            .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        "No DataSet found for dataSetId "
+                            + dataSetId
+                            + " and workspaceId "
+                            + workspaceId));
 
     int version = Etags.toVersion(request.getEtag());
-    if (dbDataSet.get().getVersion() != version) {
+    if (dbDataSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet.get(), clock);
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock);
     return saveDataSet(dbMappingConvert);
   }
 
@@ -1175,13 +1178,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public void deleteDataSet(long workspaceId, long dataSetId) {
-    Optional<DbDataset> dbDataset = this.getDbDataSet(workspaceId, dataSetId);
-    if (!dbDataset.isPresent()) {
-      throw new NotFoundException(
-          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
-    }
-    userRecentResourceService.deleteDataSetEntry(
-        workspaceId, dbDataset.get().getCreatorId(), dataSetId);
+    DbDataset dbDataset =
+        this.getDbDataSet(workspaceId, dataSetId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        "No DataSet found for dataSetId "
+                            + dataSetId
+                            + " and workspaceId "
+                            + workspaceId));
+    userRecentResourceService.deleteDataSetEntry(workspaceId, dbDataset.getCreatorId(), dataSetId);
     dataSetDao.deleteById(dataSetId);
   }
 
@@ -1222,7 +1228,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> domainValuePairs) {
     final Optional<Domain> domainMaybe =
         domainValuePairs.stream().map(DomainValuePair::getDomain).findFirst();
-    if (!domainMaybe.isPresent()) {
+    if (domainMaybe.isEmpty()) {
       return ValuesLinkingPair.emptyPair();
     }
 
