@@ -114,7 +114,7 @@ constructor(
     private fun getDbWorkspace(event: SumologicEgressEvent): DbWorkspace {
         // Load the workspace via the GCP project name
         val dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.projectName)
-        if (!dbWorkspaceMaybe.isPresent()) {
+        if (dbWorkspaceMaybe.isEmpty) {
             // Failing to find a workspace is odd enough that we want to return a non-success
             // response at the API level. But it's also worth storing a permanent record of the
             // high-egress event by logging it without a workspace target.

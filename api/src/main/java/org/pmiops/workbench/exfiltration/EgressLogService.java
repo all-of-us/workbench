@@ -78,7 +78,7 @@ public class EgressLogService {
     Instant endTime = event.getCreationTime().toInstant();
     Optional<SumologicEgressEvent> maybeSumologicEvent =
         maybeParseSumologicEvent(event.getSumologicEvent());
-    if (!maybeSumologicEvent.isPresent()) {
+    if (maybeSumologicEvent.isEmpty()) {
       return new ArrayList<>();
     }
     Instant startTime =

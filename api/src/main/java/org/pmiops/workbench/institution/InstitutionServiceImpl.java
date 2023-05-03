@@ -252,7 +252,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         getTierConfigByTier(institution, accessTierShortName);
     final boolean validated;
     final String logMsg;
-    if (!tierConfig.isPresent()) {
+    if (tierConfig.isEmpty()) {
       logMsg =
           String.format(
               "Cannot validate email because the membership requirement for institution '%s' and "
@@ -405,7 +405,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     List<UserTierEligibility> userTierEligibilities = new ArrayList<>();
 
     Optional<Institution> institution = getByUser(user);
-    if (!institution.isPresent()) {
+    if (institution.isEmpty()) {
       return userTierEligibilities;
     }
 

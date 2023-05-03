@@ -76,7 +76,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     Optional<DbWorkspace> dbWorkspaceMaybe =
         workspaceDao.getByGoogleProject(event.getProjectName());
     String workspaceNamespace;
-    if (!dbWorkspaceMaybe.isPresent()) {
+    if (dbWorkspaceMaybe.isEmpty()) {
       logger.warning(
           String.format(
               "Workspace not found by given Google Project Id: %s", event.getProjectName()));
@@ -120,7 +120,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         && event.getVmPrefix().startsWith("all-of-us")) {
       Optional<DbUser> dbUserMaybe =
           vmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
-      if (!dbUserMaybe.isPresent()) {
+      if (dbUserMaybe.isEmpty()) {
         logger.warning(String.format("User not found by given VM prefix: %s", event.getVmPrefix()));
         return Collections.emptyList();
       }
@@ -195,9 +195,7 @@ public class EgressEventServiceImpl implements EgressEventService {
       SumologicEgressEvent event,
       Optional<DbUser> userMaybe,
       Optional<DbWorkspace> workspaceMaybe) {
-    if (event.getTimeWindowDuration() == null
-        || !userMaybe.isPresent()
-        || !workspaceMaybe.isPresent()) {
+    if (event.getTimeWindowDuration() == null || userMaybe.isEmpty() || workspaceMaybe.isEmpty()) {
       return false;
     }
     if (!isEventStale(event)) {

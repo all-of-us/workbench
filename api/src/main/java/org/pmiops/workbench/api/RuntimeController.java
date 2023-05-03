@@ -139,7 +139,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private Runtime getOverrideFromListRuntimes(String googleProject) {
     Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
         leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
-            .sorted(
+            .min(
                 (a, b) -> {
                   String aCreatedDate, bCreatedDate;
                   if (a.getAuditInfo() == null || a.getAuditInfo().getCreatedDate() == null) {
@@ -155,14 +155,10 @@ public class RuntimeController implements RuntimeApiDelegate {
                   }
 
                   return bCreatedDate.compareTo(aCreatedDate);
-                })
-            .findFirst();
+                });
 
-    if (!mostRecentRuntimeMaybe.isPresent()) {
-      throw new NotFoundException();
-    }
-
-    LeonardoListRuntimeResponse mostRecentRuntime = mostRecentRuntimeMaybe.get();
+    LeonardoListRuntimeResponse mostRecentRuntime =
+        mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
     @SuppressWarnings("unchecked")
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();

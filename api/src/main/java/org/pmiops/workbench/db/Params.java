@@ -69,8 +69,7 @@ public class Params {
       }
     } else {
       // assert cloudSqlInstanceName != null
-      if (!getEnv("GOOGLE_APPLICATION_CREDENTIALS").isPresent()
-          && !getEnv("GAE_INSTANCE").isPresent()) {
+      if (getEnv("GOOGLE_APPLICATION_CREDENTIALS").isEmpty() && getEnv("GAE_INSTANCE").isEmpty()) {
         throw new IllegalStateException(
             "Google Application Default Credentials are required to connect directly to Cloud SQL."
                 + " Outside of App Engine, they can be provided with the environment variable"

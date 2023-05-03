@@ -145,7 +145,7 @@ public class StackdriverStatsExporterService {
    * @return
    */
   private String getSpoofedNodeId() {
-    if (!spoofedNodeId.isPresent()) {
+    if (spoofedNodeId.isEmpty()) {
       spoofedNodeId = Optional.of(UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString());
     }
     return spoofedNodeId.get();

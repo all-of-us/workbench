@@ -483,13 +483,14 @@ public class GenomicExtractionService {
   }
 
   public void abortGenomicExtractionJob(DbWorkspace dbWorkspace, String jobId) throws ApiException {
-    Optional<DbWgsExtractCromwellSubmission> dbSubmission =
-        wgsExtractCromwellSubmissionDao.findByWorkspaceWorkspaceIdAndWgsExtractCromwellSubmissionId(
-            dbWorkspace.getWorkspaceId(), Long.valueOf(jobId));
-
-    if (!dbSubmission.isPresent()) {
-      throw new NotFoundException("Specified dataset is not in workspace " + dbWorkspace.getName());
-    }
+    DbWgsExtractCromwellSubmission dbSubmission =
+        wgsExtractCromwellSubmissionDao
+            .findByWorkspaceWorkspaceIdAndWgsExtractCromwellSubmissionId(
+                dbWorkspace.getWorkspaceId(), Long.valueOf(jobId))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        "Specified dataset is not in workspace " + dbWorkspace.getName()));
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
@@ -499,6 +500,6 @@ public class GenomicExtractionService {
         .abortSubmission(
             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
             cohortExtractionConfig.operationalTerraWorkspaceName,
-            dbSubmission.get().getSubmissionId());
+            dbSubmission.getSubmissionId());
   }
 }
