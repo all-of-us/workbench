@@ -2,8 +2,8 @@ package org.pmiops.workbench.leonardo;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +56,7 @@ public class LeonardoApiClientFactory {
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 
@@ -66,17 +64,15 @@ public class LeonardoApiClientFactory {
    * Creates a Leonardo notebooks API client, unauthenticated. Most clients should use an
    * authenticated, request scoped bean instead of calling this directly.
    */
-  public org.pmiops.workbench.notebooks.ApiClient newNotebooksClient() {
+  public ApiClient newNotebooksClient() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    final org.pmiops.workbench.notebooks.ApiClient apiClient =
-        new org.pmiops.workbench.notebooks.ApiClient()
+    final ApiClient apiClient =
+        new ApiClient()
             .setBasePath(workbenchConfig.firecloud.leoBaseUrl)
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 }
