@@ -52,7 +52,7 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   public boolean verifyCaptcha(String responseToken) throws ApiException {
     CaptchaVerificationResponse response =
         captchaApiProvider.get().verify(cloudStorageClient.getCaptchaServerKey(), responseToken);
-    if (!response.getSuccess()) {
+    if (!response.isSuccess()) {
       log.log(
           Level.WARNING,
           String.format(
@@ -80,6 +80,6 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
       log.log(
           Level.SEVERE, String.format("Captcha Host Name %s does not match UI", captchaHostname));
     }
-    return response.getSuccess() && captchaHostNameMatchUI;
+    return response.isSuccess() && captchaHostNameMatchUI;
   }
 }

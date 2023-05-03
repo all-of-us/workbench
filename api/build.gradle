@@ -117,33 +117,6 @@ ext.SWAGGER_2_RAW_OPTS = [
         '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
 ]
 
-// Helper function to define a Java client Swagger codegen targets for the Gradle
-// Swagger Generator Plugin: https://github.com/int128/gradle-swagger-generator-plugin#code-generation
-def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
-    return {
-        inputFile = file("src/main/resources/${yaml}")
-        code {
-            configuration = configurations.__swaggerCodegenV2__
-            language = 'java'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
-            // Since the output directory is shared among these swagger tasks, wiping
-            // the directory would result in task invalidation / churn.
-            wipeOutputDir = false
-            rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
-            additionalProperties = [
-                    'sourceFolder'     : '',
-                    'library'          : 'okhttp-gson',
-                    'serializableModel': 'true',
-                    'dateLibrary'      : 'java8',
-                    'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
-                    'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
-                    'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
-            ]
-        }
-    }
-}
-
 def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
     return {
         inputFile = file("src/main/resources/${yaml}")
@@ -194,15 +167,15 @@ swaggerSources {
     rawls swagger3JavaClient("rawls.yaml", "rawls", [
             '--model-name-prefix', 'Rawls'
     ])
-    notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
+    notebooks swagger3JavaClient("notebooks.yaml", "notebooks")
     jira swagger3JavaClient("jira.yaml", "jira")
-    mandrill swagger2JavaClient("mandrill.yaml", "mandrill")
-    moodle swagger2JavaClient("moodle.yaml", "moodle")
-    rdr swagger2JavaClient("rdr.yaml", "rdr", [
+    mandrill swagger3JavaClient("mandrill.yaml", "mandrill")
+    moodle swagger3JavaClient("moodle.yaml", "moodle")
+    rdr swagger3JavaClient("rdr.yaml", "rdr", [
             '--model-name-prefix', 'Rdr'
     ])
-    captcha swagger2JavaClient("captcha.yaml", "captcha")
-    shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
+    captcha swagger3JavaClient("captcha.yaml", "captcha")
+    shibboleth swagger3JavaClient("shibboleth.yaml", "shibboleth")
 
     leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
             '--model-name-prefix', 'Leonardo'
