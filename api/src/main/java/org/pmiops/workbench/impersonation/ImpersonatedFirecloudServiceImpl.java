@@ -101,8 +101,9 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   @Override
   public void deleteWorkspace(
       @Nonnull DbUser dbUser, String workspaceNamespace, String firecloudName) throws IOException {
-    WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
-    rawlsRetryHandler.run(
+    org.pmiops.workbench.firecloud.api.WorkspacesApi workspacesApi =
+        getFcImpersonatedWorkspacesApi(dbUser);
+    firecloudRetryHandler.run(
         (context) -> {
           workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
           return null;
@@ -117,6 +118,12 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   private WorkspacesApi getImpersonatedWorkspacesApi(@Nonnull DbUser dbUser) throws IOException {
     return new WorkspacesApi(
         rawlsApiClientFactory.newImpersonatedRawlsApiClient(dbUser.getUsername()));
+  }
+
+  private org.pmiops.workbench.firecloud.api.WorkspacesApi getFcImpersonatedWorkspacesApi(
+      @Nonnull DbUser dbUser) throws IOException {
+    return new org.pmiops.workbench.firecloud.api.WorkspacesApi(
+        firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 
   private ResourcesApi getImpersonatedResourceApi(@Nonnull DbUser dbUser) throws IOException {

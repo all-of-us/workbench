@@ -34,11 +34,12 @@ public class RawlsConfig {
   public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
       "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
-  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
-  public static final String END_USER_WORKSPACE_API = "workspacesApi";
-  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
-  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
-  public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
+  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "rawlsWorkspaceAclsApi";
+  public static final String END_USER_WORKSPACE_API = "rawlsWorkspacesApi";
+  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API =
+      "rawlsLenientTimeoutWorkspacesApi";
+  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "rawlsServiceAccountBillingV2Api";
+  public static final String END_USER_STATIC_BILLING_V2_API = "rawlsEndUserBillingV2Api";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)

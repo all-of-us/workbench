@@ -78,6 +78,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
+  private final Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi>
+      fcEndUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
@@ -120,6 +122,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<NihApi> nihApiProvider,
       @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
+          Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi> fcEndUserWorkspacesApiProvider,
       @Qualifier(RawlsConfig.END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
           Provider<WorkspacesApi> endUserLenientTimeoutWorkspacesApiProvider,
       @Qualifier(RawlsConfig.SERVICE_ACCOUNT_WORKSPACE_API)
@@ -140,6 +144,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
+    this.fcEndUserWorkspacesApiProvider = fcEndUserWorkspacesApiProvider;
     this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
@@ -404,10 +409,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void deleteWorkspace(String workspaceNamespace, String firecloudName) {
-    WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
-    rawlsRetryHandler.run(
+    retryHandler.run(
         (context) -> {
-          workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
+          fcEndUserWorkspacesApiProvider.get().deleteWorkspace(workspaceNamespace, firecloudName);
           return null;
         });
   }

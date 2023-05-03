@@ -21,6 +21,7 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
+import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -47,6 +48,7 @@ public class FireCloudConfig {
       "wgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
+  public static final String END_USER_WORKSPACE_API = "workspacesApi";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -113,6 +115,14 @@ public class FireCloudConfig {
     ApiClient apiClient = factory.newApiClient();
     apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
     return apiClient;
+  }
+
+  @Bean(name = END_USER_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
   }
 
   @Bean

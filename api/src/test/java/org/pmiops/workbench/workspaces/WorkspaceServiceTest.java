@@ -63,7 +63,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
