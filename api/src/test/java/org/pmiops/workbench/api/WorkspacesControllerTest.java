@@ -20,6 +20,10 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.FakeClockConfiguration.NOW_TIME;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTierCdrVersion;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.PageImpl;
@@ -399,7 +403,7 @@ public class WorkspacesControllerTest {
     workbenchConfig.billing.projectNamePrefix = "aou-local";
 
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
@@ -407,7 +411,8 @@ public class WorkspacesControllerTest {
         .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
     when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
+    cdrVersion = createDefaultCdrVersion(1);
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -416,8 +421,8 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
-    DbCdrVersion archivedCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    DbCdrVersion archivedCdrVersion = createDefaultCdrVersion(2);
+    accessTierDao.save(archivedCdrVersion.getAccessTier());
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
@@ -1394,7 +1399,7 @@ public class WorkspacesControllerTest {
         () -> {
           Workspace originalWorkspace = createWorkspace();
           originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
-          DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+          DbAccessTier altAccessTier = accessTierDao.save(createControlledTier());
           altAccessTier = accessTierDao.save(altAccessTier);
           DbCdrVersion altCdrVersion = new DbCdrVersion();
           altCdrVersion.setCdrVersionId(2);
@@ -2166,8 +2171,9 @@ public class WorkspacesControllerTest {
     DbUser cloner = createUser("cloner@gmail.com");
     DbUser reader = createUser("reader@gmail.com");
     DbUser writer = createUser("writer@gmail.com");
-    DbCdrVersion controlledTierCdr =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 2);
+    DbCdrVersion controlledTierCdr = createControlledTierCdrVersion(2);
+    accessTierDao.save(controlledTierCdr.getAccessTier());
+    cdrVersionDao.save(controlledTierCdr);
 
     Workspace workspace =
         workspacesController
@@ -2446,8 +2452,9 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspacePatch_publishedWorkspace() {
-    DbCdrVersion ctCdrVersion =
-        TestMockFactory.createControlledTierCdrVersion(cdrVersionDao, accessTierDao, 5L);
+    DbCdrVersion ctCdrVersion = createControlledTierCdrVersion(5L);
+    accessTierDao.save(ctCdrVersion.getAccessTier());
+    cdrVersionDao.save(ctCdrVersion);
 
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 

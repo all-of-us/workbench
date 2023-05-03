@@ -4,6 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -31,7 +33,6 @@ import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.UserTierEligibility;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -76,8 +77,8 @@ public class InstitutionServiceTest {
   public void setUp() {
     // will be retrieved as roundTrippedTestInst
     service.createInstitution(testInst);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
+    controlledTier = accessTierDao.save(createControlledTier());
     rtTierConfig = new InstitutionTierConfig().accessTierShortName(registeredTier.getShortName());
     ctTierConfig = new InstitutionTierConfig().accessTierShortName(controlledTier.getShortName());
   }

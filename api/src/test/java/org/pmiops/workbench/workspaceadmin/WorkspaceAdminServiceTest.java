@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.Date;
 import com.google.cloud.storage.Blob;
@@ -169,7 +170,9 @@ public class WorkspaceAdminServiceTest {
   public void setUp() {
     currentUser = new DbUser();
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
+    cdrVersionDao.save(cdrVersion);
 
     when(mockFirecloudService.getWorkspaceAsService(any(), any()))
         .thenReturn(

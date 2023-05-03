@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
@@ -171,8 +173,8 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
+    controlledTier = accessTierDao.save(createControlledTier());
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
     dbUser = new DbUser();

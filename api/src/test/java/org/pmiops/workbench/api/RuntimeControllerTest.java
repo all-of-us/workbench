@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME_TRUE;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
@@ -112,7 +113,6 @@ import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -288,8 +288,7 @@ public class RuntimeControllerTest {
             .setCdrDbName("")
             .setBigqueryDataset(BIGQUERY_DATASET)
             .setAccessTier(
-                TestMockFactory.createControlledTierForTests(accessTierDao)
-                    .setDatasetsBucket("gs://cdr-bucket"))
+                accessTierDao.save(createControlledTier()).setDatasetsBucket("gs://cdr-bucket"))
             .setStorageBasePath("v99")
             .setWgsCramManifestPath("wgs/cram/manifest.csv");
 

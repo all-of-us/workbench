@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.lang.reflect.Method;
@@ -13,10 +14,10 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndTier;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -132,7 +133,10 @@ public class WorkspaceDaoTest {
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setGoogleProject(GOOGLE_PROJECT);
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    workspace.setCdrVersion(TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
+    DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
+    workspace.setCdrVersion(dbCdrVersion);
     workspace = workspaceDao.save(workspace);
     return workspace;
   }

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -14,7 +15,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -118,7 +118,7 @@ public class CdrConfigVOMapperTest {
 
   @Test
   public void test_populateAccessTier() {
-    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
 
     CdrVersionVO cdrVersionVO = new CdrVersionVO();
     cdrVersionVO.accessTier = registeredTier.getShortName();
@@ -133,7 +133,7 @@ public class CdrConfigVOMapperTest {
 
   @Test
   public void test_populateAccessTier_missing() {
-    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier registeredTier = accessTierDao.save(createRegisteredTier());
 
     CdrVersionVO cdrVersionVO = new CdrVersionVO();
     cdrVersionVO.accessTier = "a tier which doesn't exist";
