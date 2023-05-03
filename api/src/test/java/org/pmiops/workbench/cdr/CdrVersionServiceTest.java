@@ -4,6 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -30,7 +32,6 @@ import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -106,7 +107,7 @@ public class CdrVersionServiceTest {
     user.setUsername("user");
     user = userDao.save(user);
 
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     defaultCdrVersion =
         makeCdrVersion(
@@ -131,7 +132,7 @@ public class CdrVersionServiceTest {
             false,
             false);
 
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    controlledTier = accessTierDao.save(createControlledTier());
 
     controlledCdrVersion =
         makeCdrVersion(

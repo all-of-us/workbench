@@ -74,13 +74,10 @@ public class IamServiceImpl implements IamService {
       List<String> petServiceAccountsToRevokePermission = new ArrayList<>();
       for (String userEmail : userEmails) {
         // TODO can we make these requests in parallel?
-        Optional<String> petSaMaybe =
-            getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail);
-        if (petSaMaybe.isPresent()) {
-          petServiceAccountsToRevokePermission.add(petSaMaybe.get());
-        } else {
-          petServiceAccountFailures.add(userEmail);
-        }
+        getOrCreatePetServiceAccountUsingImpersonation(googleProject, userEmail)
+            .ifPresentOrElse(
+                petServiceAccountsToRevokePermission::add,
+                () -> petServiceAccountFailures.add(userEmail));
       }
       revokeLifeScienceRunnerRole(googleProject, petServiceAccountsToRevokePermission);
     } catch (IOException | ApiException e) {

@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.cloud.PageImpl;
 import com.google.cloud.bigquery.Field;
@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Doubles;
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -32,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.mail.MessagingException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -140,7 +140,7 @@ public class FreeTierBillingServiceTest {
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     // check that we alert for the 50% threshold
 
@@ -153,7 +153,7 @@ public class FreeTierBillingServiceTest {
     // check that we do not alert twice for the 50% threshold
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 75% threshold
 
@@ -170,7 +170,7 @@ public class FreeTierBillingServiceTest {
     // check that we do not alert twice for the 75% threshold
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -184,7 +184,7 @@ public class FreeTierBillingServiceTest {
     // check that we do not alert twice for 100%
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -212,7 +212,7 @@ public class FreeTierBillingServiceTest {
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costUnderThreshold);
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     // check that we alert for the 30% threshold
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
@@ -224,7 +224,7 @@ public class FreeTierBillingServiceTest {
     // check that we do not alert twice for the 30% threshold
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for the 65% threshold
 
@@ -242,7 +242,7 @@ public class FreeTierBillingServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costOverThreshold);
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
 
     // check that we alert for expiration when we hit 100%
 
@@ -256,7 +256,7 @@ public class FreeTierBillingServiceTest {
 
     allBQCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, costToTriggerExpiration);
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
   }
 
   @Test
@@ -312,7 +312,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
@@ -332,7 +332,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 49.99);
   }
@@ -404,7 +404,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 150.0);
   }
 
@@ -437,7 +437,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoMoreInteractions(mailService);
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 300.0);
 
     verify(mockUserServiceAuditor)
@@ -649,6 +649,7 @@ public class FreeTierBillingServiceTest {
     final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
     final double user2Costs = 999.0;
+
     final DbUser user2 = createUser("another user");
     createWorkspace(user2, "project 3");
 
@@ -766,7 +767,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     allBQCosts = ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 100.1);
 
@@ -793,7 +794,7 @@ public class FreeTierBillingServiceTest {
     commitTransaction();
 
     freeTierBillingService.checkFreeTierBillingUsageForUsers(Sets.newHashSet(user), allBQCosts);
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
 
     TestTransaction.start();
     DbWorkspace anotherWorkspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT + "4");

@@ -6,10 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.google.api.client.http.HttpMethods;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -38,12 +38,11 @@ public class RequestTimeMetricInterceptorTest {
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
   private static final long DURATION_MILLIS = 1500L;
   private static final Instant END_INSTANT = START_INSTANT.plusMillis(DURATION_MILLIS);
-  private static final String METHOD_NAME = "frobnicate";
+  private static final String METHOD_NAME = "getMe";
 
   @Mock private HttpServletRequest mockHttpServletRequest;
   @Mock private HttpServletResponse mockHttpServletResponse;
   @Mock private HandlerMethod mockHandlerMethod;
-  @Mock private Method mockMethod;
   @Mock private ModelAndView mockModelAndView;
 
   @MockBean private LogsBasedMetricService mockLogsBasedMetricService;
@@ -60,10 +59,9 @@ public class RequestTimeMetricInterceptorTest {
   public static class Config {}
 
   @BeforeEach
-  public void setup() {
+  public void setup() throws NoSuchMethodException {
     doReturn(HttpMethods.GET).when(mockHttpServletRequest).getMethod();
-    doReturn(METHOD_NAME).when(mockMethod).getName();
-    doReturn(mockMethod).when(mockHandlerMethod).getMethod();
+    doReturn(ProfileApi.class.getMethod(METHOD_NAME)).when(mockHandlerMethod).getMethod();
   }
 
   @Test
@@ -130,7 +128,7 @@ public class RequestTimeMetricInterceptorTest {
     requestTimeMetricInterceptor.postHandle(
         mockHttpServletRequest, mockHttpServletResponse, mockHandlerMethod, mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
-    verifyZeroInteractions(mockLogsBasedMetricService);
+    verifyNoInteractions(mockLogsBasedMetricService);
   }
 
   @Test
@@ -138,6 +136,6 @@ public class RequestTimeMetricInterceptorTest {
     requestTimeMetricInterceptor.postHandle(
         mockHttpServletRequest, mockHttpServletResponse, new Object(), mockModelAndView);
     verify(mockHttpServletRequest, never()).setAttribute(anyString(), any());
-    verifyZeroInteractions(mockLogsBasedMetricService);
+    verifyNoInteractions(mockLogsBasedMetricService);
   }
 }

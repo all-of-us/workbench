@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -261,9 +262,10 @@ public class CohortsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     cohortDefinition = CohortDefinitions.males();
     cohortCriteria = new Gson().toJson(cohortDefinition);

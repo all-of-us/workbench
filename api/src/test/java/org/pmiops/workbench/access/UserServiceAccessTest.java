@@ -7,11 +7,14 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableList;
+import jakarta.mail.MessagingException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -22,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
-import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.Agent;
@@ -171,8 +173,8 @@ public class UserServiceAccessTest {
     providedWorkbenchConfig.access.renewal.expiryDays = EXPIRATION_DAYS;
     providedWorkbenchConfig.access.renewal.expiryDaysWarningThresholds =
         ImmutableList.of(1L, 3L, 7L, 15L, 30L);
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
+    controlledTier = accessTierDao.save(createControlledTier());
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
 
     dbUser = new DbUser();
@@ -463,7 +465,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // bypassed modules do not expire: so no email
@@ -483,7 +485,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -570,7 +572,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // one or more bypassed modules will not affect whether emails are sent.
@@ -654,7 +656,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -703,7 +705,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   // 15 days is sooner, so that's the email we send rather than 30
@@ -766,7 +768,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test
@@ -852,7 +854,7 @@ public class UserServiceAccessTest {
 
     userService.maybeSendAccessTierExpirationEmails(dbUser);
 
-    verifyZeroInteractions(mailService);
+    verifyNoInteractions(mailService);
   }
 
   @Test

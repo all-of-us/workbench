@@ -8,9 +8,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
@@ -154,7 +155,7 @@ public class UserServiceTest {
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
 
     // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
@@ -303,7 +304,7 @@ public class UserServiceTest {
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     userService.syncComplianceTrainingStatusV2();
-    verifyZeroInteractions(mockComplianceService);
+    verifyNoInteractions(mockComplianceService);
   }
 
   @Test

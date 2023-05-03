@@ -12,10 +12,10 @@ buildscript {
         HIBERNATE_VERSION = '5.6.9.Final'
         JACKSON_DATABIND_VERSION = '2.13.4'
         JACKSON_VERSION = '2.13.4'
-        KOTLIN_VERSION = '1.5.32'
+        KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
         MAPSTRUCT_VERSION = '1.4.2.Final'
-        MOCKITO_KOTLIN_VERSION = '2.2.0'
+        MOCKITO_KOTLIN_VERSION = '4.1.0'
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.31.1'
         SPRINGFOX_VERSION = '3.0.0'
@@ -28,6 +28,12 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+    // https://github.com/spring-projects/spring-boot/issues/26864
+    // https://github.com/spring-projects/spring-boot/issues/26946
+    // https://github.com/spring-projects/spring-boot/issues/26947
+    // https://github.com/spring-projects/spring-boot/commit/cd808d2f189a7a550adec286c1722b5b6f1c19e7
+    project.getExtensions().getExtraProperties().set('kotlin.version', '1.8.20') // KOTLIN_VERSION
 }
 
 plugins {
@@ -39,20 +45,39 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.diffplug.spotless' version '5.12.5'
     id 'com.google.cloud.tools.appengine-appenginewebxml' version '2.4.5'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.32'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.20' // KOTLIN_VERSION
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
     // to match the modules imported by the Swagger codegen templates, and (2) some template files
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
-    id 'org.hidetake.swagger.generator' version '2.18.2'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
     id 'org.owasp.dependencycheck' version '7.4.4'
-    id 'org.springframework.boot' version '2.3.12.RELEASE'
+    id 'org.springframework.boot' version '2.7.4'
 }
-
 
 if (JavaVersion.current() != JavaVersion.VERSION_11) {
     throw new GradleException("This build must be run with Java 11. See developer-system-initialization.md. The java version used ${JavaVersion.current()}")
+}
+
+if (System.getenv("ADD_XLINT_DEPRECATION")) {
+  allprojects {
+    gradle.projectsEvaluated {
+      tasks.withType(JavaCompile) {
+        options.compilerArgs.add("-Xlint:deprecation")
+      }
+    }
+  }
+}
+
+if (System.getenv("ADD_XLINT_UNCHECKED")) {
+  allprojects {
+    gradle.projectsEvaluated {
+      tasks.withType(JavaCompile) {
+        options.compilerArgs.add("-Xlint:unchecked")
+      }
+    }
+  }
 }
 
 // Artifact configurations derived from base configs. Configuration names
@@ -263,7 +288,7 @@ sourceSets {
     // SorceSets added by Java plugin. These share a namespace with the ones users create.
     //
     generated {
-        compileClasspath = configurations.generatedCompile
+        compileClasspath = configurations.generatedCompileClasspath
         java {
             srcDir SWAGGER_2_CODEGEN_DIR
             srcDir SWAGGER_3_CODEGEN_DIR
@@ -397,7 +422,7 @@ dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation 'com.auth0:java-jwt:3.19.2'
     implementation 'io.netty:netty-common:4.1.82.Final'
-    implementation 'org.json:json:20220924'
+    implementation 'org.json:json:20230227'
 
     // TODO: consider switching google deps to the BOM.  https://cloud.google.com/java/docs/bom
 
@@ -411,7 +436,7 @@ dependencies {
     implementation 'com.google.auth:google-auth-library-appengine:1.11.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.11.0'
     implementation 'com.google.cloud.sql:mysql-socket-factory:1.7.0'
-    implementation 'com.google.cloud:google-cloud-bigquery:2.17.0'
+    implementation 'com.google.cloud:google-cloud-bigquery:2.25.0'
     implementation 'com.google.cloud:google-cloud-iamcredentials:2.3.6'
     implementation 'com.google.cloud:google-cloud-logging:3.11.5'
     implementation 'com.google.cloud:google-cloud-monitoring:3.4.6'
@@ -471,6 +496,7 @@ dependencies {
     implementation "org.springframework:spring-webmvc:$project.ext.SPRING_FRAMEWORK_VERSION"
 
     implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
+    implementation 'jakarta.mail:jakarta.mail-api:2.1.1'
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
@@ -508,7 +534,7 @@ dependencies {
     __tools__Implementation 'commons-cli:commons-cli:1.5.0'
     __tools__Implementation 'com.opencsv:opencsv:5.7.0'
 
-    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'org.mockito:mockito-core:5.3.1'
     testImplementation "com.google.truth:truth:$project.ext.GOOGLE_TRUTH_VERSION"
     testImplementation "com.google.truth.extensions:truth-java8-extension:$project.ext.GOOGLE_TRUTH_VERSION"
     testImplementation 'com.h2database:h2:1.4.194'
@@ -517,7 +543,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test:$project.ext.KOTLIN_VERSION"
 
     // Use Mockito for testing only.
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
 
     // Test deps
     testImplementation("org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION") {
@@ -572,9 +598,9 @@ tasks.withType(Test) {
         }
         reports {
             // Write XML file (used by CircleCI, Jenkins, etc) to api/build/test-results/test
-            junitXml.enabled = true
+            junitXml.required = true
             // Write human-readable test report to api/build/reports/
-            html.enabled = true
+            html.required = true
         }
     }
     // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
@@ -633,8 +659,12 @@ appengineStart {
 group = 'org.pmiops.allofus.workbench'
 version = '0.1.0'          // Version in generated output
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+// This restricts the language features that may be used to those at or below the given Java
+// version.
+sourceCompatibility = 11
+
+// This restricts the runtime environment to be at or above the given Java version.
+targetCompatibility = 11
 
 task listProjectAPIs(type: GenerateAPIListingTask)
 
@@ -663,7 +693,7 @@ def db_port = System.getenv("DB_PORT")
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+    mainClass = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -672,7 +702,7 @@ task fetchFireCloudUserProfile(type: JavaExec) {
 // See project.rb command: fetch-workspace-details
 task fetchWorkspaceDetails(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
+    mainClass = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -681,7 +711,7 @@ task fetchWorkspaceDetails(type: JavaExec) {
 // See project.rb command: generate-impersonated-user-tokens
 task generateImpersonatedUserTokens(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
+    mainClass = "org.pmiops.workbench.tools.GenerateImpersonatedUserTokens"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -690,7 +720,7 @@ task generateImpersonatedUserTokens(type: JavaExec) {
 // See project.rb command: delete-workspaces
 task deleteWorkspaces(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.DeleteWorkspaces"
+    mainClass = "org.pmiops.workbench.tools.DeleteWorkspaces"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -699,7 +729,7 @@ task deleteWorkspaces(type: JavaExec) {
 // See project.rb command: invalidate-rdr-export
 task invalidateRdrExport(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.InvalidateRdrExport"
+    mainClass = "org.pmiops.workbench.tools.InvalidateRdrExport"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -708,7 +738,7 @@ task invalidateRdrExport(type: JavaExec) {
 // See project.rb command: backfill-entities-to-rdr
 task backfillEntitiesToRdr(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.BackfillEntitiesToRdr"
+    mainClass = "org.pmiops.workbench.tools.BackfillEntitiesToRdr"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -720,7 +750,7 @@ task backfillEntitiesToRdr(type: JavaExec) {
 // - docker-compose.yaml#updateConfig (used by "dev-up" command)
 task loadConfig(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ConfigLoader"
+    mainClass = "org.pmiops.workbench.tools.ConfigLoader"
     if (project.hasProperty("config_key") && project.hasProperty("config_file")) {
         args config_key, config_file
     }
@@ -730,7 +760,7 @@ task loadConfig(type: JavaExec) {
 // - devstart.rb > list_runtimes
 task manageLeonardoRuntimes(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
+    mainClass = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -740,7 +770,7 @@ task manageLeonardoRuntimes(type: JavaExec) {
 // - devstart.rb > set_authority
 task setAuthority(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.SetAuthority"
+    mainClass = "org.pmiops.workbench.tools.SetAuthority"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -750,7 +780,7 @@ task setAuthority(type: JavaExec) {
 // - devstart.rb > update_cdr_config_for_project (called by run-local-migrations)
 task updateCdrConfig(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
+    mainClass = "org.pmiops.workbench.tools.cdrconfig.UpdateCdrConfig"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -759,7 +789,7 @@ task updateCdrConfig(type: JavaExec) {
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
+    mainClass = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -768,7 +798,7 @@ task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
 // See project.rb command: create-terra-method-snapshot
 task createTerraMethodSnapshot(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
+    mainClass = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -777,7 +807,7 @@ task createTerraMethodSnapshot(type: JavaExec) {
 // See project.rb command: load-institutions
 task loadInstitutions(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
+    mainClass = "org.pmiops.workbench.tools.institutions.LoadInstitutions"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -786,7 +816,7 @@ task loadInstitutions(type: JavaExec) {
 // See project.rb command: fix-desynchronized-billing-project-owners
 task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
+    mainClass = "org.pmiops.workbench.tools.FixDesynchronizedBillingProjectOwners"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -795,7 +825,7 @@ task fixDesynchronizedBillingProjectOwners(type: JavaExec) {
 // See project.rb command: set-access-module-timestamps
 task setAccessModuleTimestamps(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
+    mainClass = "org.pmiops.workbench.tools.SetAccessModuleTimestamps"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -804,7 +834,7 @@ task setAccessModuleTimestamps(type: JavaExec) {
 // See project.rb command: export-workspace-operations
 task exportWorkspaceOperations(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    main = "org.pmiops.workbench.tools.ExportWorkspaceOperations"
+    mainClass = "org.pmiops.workbench.tools.ExportWorkspaceOperations"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
@@ -817,12 +847,12 @@ task exportWorkspaceOperations(type: JavaExec) {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 

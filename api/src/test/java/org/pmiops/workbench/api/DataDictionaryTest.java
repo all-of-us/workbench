@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,6 @@ import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -87,7 +87,9 @@ public class DataDictionaryTest {
 
   @BeforeEach
   public void setUp() {
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
     dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));

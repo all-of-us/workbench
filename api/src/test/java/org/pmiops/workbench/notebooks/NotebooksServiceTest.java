@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -50,7 +51,6 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.MockNotebook;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,8 +116,10 @@ public class NotebooksServiceTest {
 
     // workspaceDao is a mock, so we don't need to save the workspace
     dbWorkspace = new DbWorkspace();
-    dbWorkspace.setCdrVersion(
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
+    DbCdrVersion cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
+    cdrVersion = cdrVersionDao.save(cdrVersion);
+    dbWorkspace.setCdrVersion(cdrVersion);
 
     fromCDRVersion = new DbCdrVersion();
     toCDRVersion = new DbCdrVersion();

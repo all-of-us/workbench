@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
@@ -209,7 +209,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
+    cdrVersion.setAccessTier(accessTierDao.save(createRegisteredTier()));
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     cdrVersion = cdrVersionDao.save(cdrVersion);

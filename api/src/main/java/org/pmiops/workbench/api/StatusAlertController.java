@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import java.util.Optional;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.StatusAlertDao;
 import org.pmiops.workbench.db.model.DbStatusAlert;
@@ -22,14 +21,11 @@ public class StatusAlertController implements StatusAlertApiDelegate {
 
   @Override
   public ResponseEntity<StatusAlert> getStatusAlert() {
-    Optional<DbStatusAlert> dbStatusAlertOptional =
-        statusAlertDao.findFirstByOrderByStatusAlertIdDesc();
-    if (dbStatusAlertOptional.isPresent()) {
-      DbStatusAlert dbStatusAlert = dbStatusAlertOptional.get();
-      return ResponseEntity.ok(StatusAlertConversionUtils.toApiStatusAlert(dbStatusAlert));
-    } else {
-      return ResponseEntity.ok(new StatusAlert());
-    }
+    return ResponseEntity.ok(
+        statusAlertDao
+            .findFirstByOrderByStatusAlertIdDesc()
+            .map(StatusAlertConversionUtils::toApiStatusAlert)
+            .orElse(new StatusAlert()));
   }
 
   @Override

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -39,7 +40,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -299,7 +299,7 @@ public class WorkspaceAuthServiceTest {
 
   private void stubRegisteredTier() {
     when(mockAccessTierService.getRegisteredTierOrThrow())
-        .thenReturn(TestMockFactory.createRegisteredTierForTests(accessTierDao));
+        .thenReturn(accessTierDao.save(createRegisteredTier()));
   }
 
   private void stubUpdateAcl(String namespace, String fcName) {

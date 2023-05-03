@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -70,7 +70,7 @@ public class OfflineEgressControllerTest {
     fakeClock.setInstant(FakeClockConfiguration.NOW.toInstant());
     offlineEgressController.checkPendingEgressEvents();
 
-    verifyZeroInteractions(mockTaskQueueService);
+    verifyNoInteractions(mockTaskQueueService);
   }
 
   private DbEgressEvent newEvent() {

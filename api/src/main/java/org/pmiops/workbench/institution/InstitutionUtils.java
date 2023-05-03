@@ -29,7 +29,7 @@ public class InstitutionUtils {
       Institution institution, String accessTierShortName) {
     Optional<InstitutionTierConfig> tierConfig =
         getTierConfigByTier(institution, accessTierShortName);
-    if (!tierConfig.isPresent() || tierConfig.get().getEmailAddresses() == null) {
+    if (tierConfig.isEmpty() || tierConfig.get().getEmailAddresses() == null) {
       return new HashSet<>();
     }
     return new HashSet<>(tierConfig.get().getEmailAddresses());
@@ -43,7 +43,7 @@ public class InstitutionUtils {
       Institution institution, String accessTierShortName) {
     Optional<InstitutionTierConfig> tierConfig =
         getTierConfigByTier(institution, accessTierShortName);
-    if (!tierConfig.isPresent() || tierConfig.get().getEmailDomains() == null) {
+    if (tierConfig.isEmpty() || tierConfig.get().getEmailDomains() == null) {
       return new HashSet<>();
     }
     return new HashSet<>(tierConfig.get().getEmailDomains());

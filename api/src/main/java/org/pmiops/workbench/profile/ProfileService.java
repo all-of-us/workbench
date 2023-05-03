@@ -170,7 +170,7 @@ public class ProfileService {
     Optional<DbInstitution> institution =
         institutionDao.findOneByShortName(
             verifiedInstitutionalAffiliation.getInstitutionShortName());
-    if (!institution.isPresent()) {
+    if (institution.isEmpty()) {
       throw new NotFoundException(
           String.format(
               "Could not find institution %s in database",
