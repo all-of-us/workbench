@@ -11,6 +11,7 @@ import org.pmiops.workbench.cloudtasks.TaskQueueService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.impersonation.ImpersonatedUserService;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.utils.UserUtils;
@@ -83,14 +84,32 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
     } else {
       taskQueueService.groupAndPushDeleteTestWorkspaceTasks(
           testUserConf.testUserEmails.stream()
-              .flatMap(this::enumerateWorkspaces)
+              .flatMap(this::enumerateAoUWorkspaces)
               .collect(Collectors.toList()));
     }
 
     return ResponseEntity.ok().build();
   }
 
-  private Stream<TestUserWorkspace> enumerateWorkspaces(String username) {
+  @Override
+  public ResponseEntity<Void> deleteAllTestUserWorkspacesOrphanedInRawls() {
+    WorkbenchConfig config = workbenchConfigProvider.get();
+    WorkbenchConfig.E2ETestUserConfig testUserConf = config.e2eTestUsers;
+
+    // only some environments have test users
+    if (testUserConf == null) {
+      LOGGER.info("This environment does not have a test user config block.  Exiting.");
+    } else {
+      taskQueueService.groupAndPushDeleteTestWorkspaceInRawlsTasks(
+          testUserConf.testUserEmails.stream()
+              .flatMap(this::enumerateRawlsWorkspaces)
+              .collect(Collectors.toList()));
+    }
+
+    return ResponseEntity.ok().build();
+  }
+
+  private Stream<TestUserWorkspace> enumerateAoUWorkspaces(String username) {
     List<WorkspaceResponse> workspaces = impersonatedWorkspaceService.getOwnedWorkspaces(username);
     LOGGER.info(
         String.format(
@@ -104,5 +123,22 @@ public class OfflineTestUsersController implements OfflineTestUsersApiDelegate {
                     .username(username)
                     .wsNamespace(ws.getWorkspace().getNamespace())
                     .wsFirecloudId(ws.getWorkspace().getId()));
+  }
+
+  private Stream<TestUserRawlsWorkspace> enumerateRawlsWorkspaces(String username) {
+    var workspaces = impersonatedWorkspaceService.getOwnedWorkspacesOrphanedInRawls(username);
+    LOGGER.info(
+        String.format(
+            "Test user %s currently owns %d workspaces in Rawls; queueing for deletion",
+            username, workspaces.size()));
+
+    return workspaces.stream()
+        .map(
+            ws ->
+                new TestUserRawlsWorkspace()
+                    .username(username)
+                    .wsNamespace(ws.getWorkspace().getNamespace())
+                    .wsGoogleProject(ws.getWorkspace().getGoogleProject())
+                    .wsFirecloudId(ws.getWorkspace().getName()));
   }
 }

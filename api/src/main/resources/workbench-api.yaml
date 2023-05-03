@@ -2040,6 +2040,17 @@ paths:
       responses:
         204:
           description: No content.
+  "/v1/cron/deleteTestUserWorkspacesOrphanedInRawls":
+    get:
+      security: []
+      tags:
+        - offlineTestUsers
+        - cron
+      description: "Delete all test users' workspaces from Rawls"
+      operationId: deleteAllTestUserWorkspacesOrphanedInRawls
+      responses:
+        204:
+          description: No content.
 
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly":
     parameters:
@@ -3094,6 +3105,28 @@ paths:
           description: Batch of workspace deletions to process.
           schema:
             "$ref": "#/definitions/DeleteTestUserWorkspacesRequest"
+      responses:
+        200:
+          description: 'Workspaces deleted'
+  "/v1/cloudTask/deleteTestUserWorkspacesInRawls":
+    post:
+      security: []
+      tags:
+        - cloudTaskWorkspaces
+        - cloudTask
+      description: >
+        Deletes the requested test user workspaces in Rawls (Terra Workspace service).
+        This may be necessary in case of a mismatch between the RW and Terra views of workspaces
+      operationId: deleteTestUserWorkspacesInRawls
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: Batch of Rawls workspace deletions to process.
+          schema:
+            "$ref": "#/definitions/DeleteTestUserRawlsWorkspacesRequest"
       responses:
         200:
           description: 'Workspaces deleted'
@@ -9024,6 +9057,11 @@ definitions:
     items:
       "$ref": "#/definitions/TestUserWorkspace"
 
+  DeleteTestUserRawlsWorkspacesRequest:
+    type: array
+    items:
+      "$ref": "#/definitions/TestUserRawlsWorkspace"
+
   TestUserWorkspace:
     type: object
     required:
@@ -9036,6 +9074,27 @@ definitions:
         type: string
       wsNamespace:
         description: 'Workspace Namespace'
+        type: string
+      wsFirecloudId:
+        description: 'Firecloud ID for the Workspace'
+        type: string
+
+  TestUserRawlsWorkspace:
+    type: object
+    required:
+      - username
+      - wsNamespace
+      - wsGoogleProject
+      - wsFirecloudId
+    properties:
+      username:
+        description: 'Test username (email address including GSuite)'
+        type: string
+      wsNamespace:
+        description: 'Workspace Namespace'
+        type: string
+      wsGoogleProject:
+        description: 'Workspace Google Project'
         type: string
       wsFirecloudId:
         description: 'Firecloud ID for the Workspace'
