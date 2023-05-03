@@ -2690,9 +2690,25 @@ def delete_orphaned_workspaces(cmd_name, *args)
   op.add_typed_option(
         '--project [project]',
         String,
-        ->(opts, p) { opts.project = p },
+        ->(opts, v) { opts.project = v },
         'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
   op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+        '--username [email]',
+        String,
+        ->(opts, v) { opts.username = v },
+        'The user whose workspaces we want to delete.')
+  op.add_validator ->(opts) { raise ArgumentError.new("Username required") unless opts.username }
+
+  op.add_typed_option(
+      '--dry-run [false]',
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "Don't actually delete, but show what would have happened.  Defaults to true.")
+  op.opts.dry_run = true
+
+  op.parse.validate
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -2700,9 +2716,9 @@ def delete_orphaned_workspaces(cmd_name, *args)
   gcc.validate()
 
   gradle_args = ([
-      ["--project", op.opts.project],
-#       ["--organization", op.opts.organization],
-#       ["--terra-admin-token", op.opts.terra_admin_token]
+    ["--project", op.opts.project],
+    ["--username", op.opts.username],
+    ["--dry-run", op.opts.dry_run],
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }

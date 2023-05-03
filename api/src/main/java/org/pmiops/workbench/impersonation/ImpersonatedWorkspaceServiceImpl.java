@@ -198,14 +198,24 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       throw new ServerErrorException(e);
     }
 
-    try {
-      // use the real FirecloudService here because impersonation is not needed;
-      // billing projects are owned by the App SA
-      firecloudService.deleteBillingProject(wsNamespace);
-    } catch (Exception e) {
-      String msg =
-          String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
-      logger.warning(msg);
-    }
+    // TODO
+    // I can't figure out how to make this work from a tool
+
+    // 2023-05-03 18:52:06.815  WARN 20371 --- [           main]
+    // o.p.w.i.ImpersonatedWorkspaceServiceImpl :
+    // Error deleting billing project aou-rw-test-cce862eb: No qualifying bean of type
+    // 'org.pmiops.workbench.rawls.api.BillingV2Api' available: expected at least 1 bean which
+    // qualifies as autowire candidate. Dependency annotations:
+    // {@org.springframework.beans.factory.annotation.Qualifier(value="serviceAccountBillingV2Api")}
+
+    //    try {
+    //      // use the real FirecloudService here because impersonation is not needed;
+    //      // billing projects are owned by the App SA
+    //      firecloudService.deleteBillingProject(wsNamespace);
+    //    } catch (Exception e) {
+    //      String msg =
+    //          String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
+    //      logger.warning(msg);
+    //    }
   }
 }
