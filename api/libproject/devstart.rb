@@ -2681,3 +2681,42 @@ def run_mysql_cmd(cmd)
     "mariadb:10.2 " +
     cmd
 end
+
+def delete_orphaned_workspaces(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, p) { opts.project = p },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+      ["--project", op.opts.project],
+#       ["--organization", op.opts.organization],
+#       ["--terra-admin-token", op.opts.terra_admin_token]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  ENV.update(read_db_vars(gcc))
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew deleteOrphanedWorkspaces -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+DELETE_ORPHANED_WORKSPACES_CMD = "delete-orphaned-workspaces"
+
+Common.register_command({
+    :invocation => DELETE_ORPHANED_WORKSPACES_CMD,
+    :description => "Do something with orphaned projects I guess",
+    :fn => ->(*args) {delete_orphaned_workspaces(DELETE_ORPHANED_WORKSPACES_CMD, *args)}
+})

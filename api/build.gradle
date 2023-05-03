@@ -840,6 +840,14 @@ task exportWorkspaceOperations(type: JavaExec) {
     }
 }
 
+// See project.rb command: delete-orphaned-workspaces
+task deleteOrphanedWorkspaces(type: JavaExec) {
+    classpath = sourceSets.__tools__.runtimeClasspath
+    mainClass = "org.pmiops.workbench.tools.DeleteOrphanedWorkspaces"
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
 //
 // Kotlin Plugin compiler arguments
 // https://kotlinlang.org/docs/reference/using-gradle.html#compiler-options

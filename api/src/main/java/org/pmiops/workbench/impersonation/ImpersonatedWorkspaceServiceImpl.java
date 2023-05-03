@@ -1,8 +1,11 @@
 package org.pmiops.workbench.impersonation;
 
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -13,9 +16,11 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       Logger.getLogger(ImpersonatedWorkspaceServiceImpl.class.getName());
 
   private final BillingProjectAuditor billingProjectAuditor;
+  private final FirecloudMapper firecloudMapper;
   private final FireCloudService firecloudService;
   private final ImpersonatedFirecloudService impersonatedFirecloudService;
   private final UserDao userDao;
@@ -41,12 +47,14 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   @Autowired
   public ImpersonatedWorkspaceServiceImpl(
       BillingProjectAuditor billingProjectAuditor,
+      FirecloudMapper firecloudMapper,
       FireCloudService firecloudService,
       ImpersonatedFirecloudService impersonatedFirecloudService,
       UserDao userDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper) {
     this.billingProjectAuditor = billingProjectAuditor;
+    this.firecloudMapper = firecloudMapper;
     this.firecloudService = firecloudService;
     this.impersonatedFirecloudService = impersonatedFirecloudService;
     this.userDao = userDao;
@@ -74,6 +82,54 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
+  public List<FirecloudWorkspaceResponse> getOwnedWorkspacesOrphanedInRawls(String username) {
+    final DbUser dbUser = userDao.findUserByUsername(username);
+    if (dbUser == null) {
+      logger.warning(String.format("user %s not found", username));
+      return Collections.emptyList();
+    }
+
+    try {
+      // return all Rawls workspaces which are NOT in the AoU DB (or deleted)
+      // see WorkspaceMapper.toApiWorkspaceResponses() for the more typical case (active in AoU DB)
+      return notInAouDb(impersonatedFirecloudService.getWorkspaces(dbUser)).stream()
+          .filter(this::isOwner)
+          .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
+  private boolean isOwner(FirecloudWorkspaceResponse response) {
+    return firecloudMapper.fcToApiWorkspaceAccessLevel(response.getAccessLevel())
+        == WorkspaceAccessLevel.OWNER;
+  }
+
+  private List<FirecloudWorkspaceResponse> notInAouDb(
+      List<FirecloudWorkspaceResponse> fcWorkspaces) {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid =
+        fcWorkspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                    fcWorkspace -> fcWorkspace));
+
+    Set<String> fcUuids = fcWorkspacesByUuid.keySet();
+
+    Set<String> dbWorkspaceUuids =
+        workspaceDao.findActiveByFirecloudUuidIn(fcUuids).stream()
+            .map(DbWorkspace::getFirecloudUuid)
+            .collect(Collectors.toSet());
+
+    // return FC workspaces which are not in the AoU DB
+    return Sets.difference(fcUuids, dbWorkspaceUuids).stream()
+        .map(fcWorkspacesByUuid::get)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public void deleteWorkspace(String username, String wsNamespace, String wsId) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
@@ -89,8 +145,8 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(
           dbUser, dbWorkspace.getGoogleProject());
     } catch (IOException e) {
-      // Ignore exceptions and proceed with workspace deletion, we don' want error here stop us
-      // trying to delete workspace.
+      // Ignore exceptions and proceed with workspace deletion.
+      // We don't want an error here to stop us from trying to delete the workspace.
       logger.log(
           Level.WARNING,
           String.format(
@@ -112,6 +168,40 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       // billing projects are owned by the App SA
       firecloudService.deleteBillingProject(wsNamespace);
       billingProjectAuditor.fireDeleteAction(wsNamespace);
+    } catch (Exception e) {
+      String msg =
+          String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
+      logger.warning(msg);
+    }
+  }
+
+  @Override
+  public void deleteOrphanedRawlsWorkspace(
+      String username, String wsNamespace, String googleProject, String wsId) {
+    final DbUser dbUser = userDao.findUserByUsername(username);
+
+    try {
+      impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(dbUser, googleProject);
+    } catch (IOException e) {
+      // Ignore exceptions and proceed with workspace deletion.
+      // We don't want an error here to stop us from trying to delete the workspace.
+      logger.log(
+          Level.WARNING,
+          String.format(
+              "An error occurred while deleting k8s resources for workspace %s", wsNamespace),
+          e);
+    }
+
+    try {
+      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+
+    try {
+      // use the real FirecloudService here because impersonation is not needed;
+      // billing projects are owned by the App SA
+      firecloudService.deleteBillingProject(wsNamespace);
     } catch (Exception e) {
       String msg =
           String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
