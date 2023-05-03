@@ -63,6 +63,7 @@ const styles = reactStyles({
   },
   graphColumnBody: {
     background: colors.white,
+    display: 'block',
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',
@@ -114,8 +115,8 @@ const styles = reactStyles({
     textAlign: 'center',
   },
   unitsLabel: {
-    width: '33rem',
-    margin: '0 0 -2.475rem 18.75rem',
+    float: 'left',
+    width: '3rem',
     color: colors.accent,
   },
   textSearch: {
