@@ -575,7 +575,7 @@ public class WorkspaceServiceTest {
     accessTierDao.save(dbCdrVersion.getAccessTier());
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
-   workspaceDao.save(dbWorkspace);
+    workspaceDao.save(dbWorkspace);
     assertThrows(
         ForbiddenException.class,
         () ->
