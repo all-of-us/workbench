@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.SimpleThreadScope;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -25,12 +24,6 @@ public class CommandLineToolApplicationRunListener implements SpringApplicationR
       Logger.getLogger(CommandLineToolApplicationRunListener.class.getName());
 
   public CommandLineToolApplicationRunListener(SpringApplication application, String[] args) {}
-
-  @Override
-  public void starting() {}
-
-  @Override
-  public void environmentPrepared(ConfigurableEnvironment environment) {}
 
   /**
    * Called once the {@link ApplicationContext} has been created and prepared, but before sources

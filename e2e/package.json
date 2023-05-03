@@ -21,8 +21,6 @@
     "test-nightly-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false TEST_MODE=nightly-integration yarn _test --maxWorkers=1",
     "test-local-nightly": "cross-env WORKBENCH_ENV=local TEST_MODE=nightly-integration yarn _test --maxWorkers=3",
     "test-local-nightly:debug": "cross-env PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false WORKBENCH_ENV=local TEST_MODE=nightly-integration yarn _test --detectOpenHandles",
-    "test-perf": "cross-env WORKBENCH_ENV=perf yarn _test",
-    "test-perf:debug": "cross-env PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false WORKBENCH_ENV=perf yarn _test --maxWorkers=1",
     "test-staging": "cross-env WORKBENCH_ENV=staging yarn _test --maxWorkers=2",
     "test-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_DEBUG=true PUPPETEER_HEADLESS=false yarn _test --maxWorkers=1",
     "test-staging-nightly": "cross-env WORKBENCH_ENV=staging TEST_MODE=nightly-integration yarn _test --maxWorkers=2",

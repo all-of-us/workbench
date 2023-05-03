@@ -1,9 +1,9 @@
 package org.pmiops.workbench.mail;
 
+import jakarta.mail.MessagingException;
 import java.time.Instant;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.mail.MessagingException;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;

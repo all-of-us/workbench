@@ -4,6 +4,7 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LA
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -289,7 +289,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(disk.getGoogleProject());
-    if (!workspace.isPresent()) {
+    if (workspace.isEmpty()) {
       log.warning(
           String.format(
               "skipping disk '%s' associated with unknown Google project '%s'",

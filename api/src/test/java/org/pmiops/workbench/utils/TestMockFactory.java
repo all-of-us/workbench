@@ -24,7 +24,6 @@ import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -256,29 +255,26 @@ public class TestMockFactory {
     return dbWorkspace;
   }
 
-  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
-    final DbAccessTier accessTier =
-        new DbAccessTier()
-            .setAccessTierId(1)
-            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-            .setDisplayName("Registered Tier")
-            .setAuthDomainName("Registered Tier Auth Domain")
-            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
-            .setServicePerimeter("registered/tier/perimeter")
-            .setEnableUserWorkflows(false);
-    return accessTierDao.save(accessTier);
+  public static DbAccessTier createRegisteredTier() {
+    return new DbAccessTier()
+        .setAccessTierId(1)
+        .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+        .setDisplayName("Registered Tier")
+        .setAuthDomainName("Registered Tier Auth Domain")
+        .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+        .setServicePerimeter("registered/tier/perimeter")
+        .setEnableUserWorkflows(false);
   }
 
-  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
-    return accessTierDao.save(
-        new DbAccessTier()
-            .setAccessTierId(2)
-            .setShortName("controlled")
-            .setDisplayName("Controlled Tier")
-            .setAuthDomainName("Controlled Tier Auth Domain")
-            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter")
-            .setEnableUserWorkflows(true));
+  public static DbAccessTier createControlledTier() {
+    return new DbAccessTier()
+        .setAccessTierId(2)
+        .setShortName("controlled")
+        .setDisplayName("Controlled Tier")
+        .setAuthDomainName("Controlled Tier Auth Domain")
+        .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+        .setServicePerimeter("controlled/tier/perimeter")
+        .setEnableUserWorkflows(true);
   }
 
   public static void removeControlledTierForTests(AccessTierDao accessTierDao) {
@@ -293,28 +289,26 @@ public class TestMockFactory {
     return accessModuleDao.findAll();
   }
 
-  public static DbCdrVersion createDefaultCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
-    return createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
-  }
-
-  public static DbCdrVersion createDefaultCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
+  public static DbCdrVersion createDefaultCdrVersion(long id) {
     final DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(id);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
-    return cdrVersionDao.save(cdrVersion);
+    cdrVersion.setAccessTier(createRegisteredTier());
+    return cdrVersion;
   }
 
-  public static DbCdrVersion createControlledTierCdrVersion(
-      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
-    DbCdrVersion cdrVersion = createDefaultCdrVersion(cdrVersionDao, accessTierDao, id);
-    cdrVersion.setAccessTier(createControlledTierForTests(accessTierDao));
-    return cdrVersionDao.save(cdrVersion);
+  public static DbCdrVersion createDefaultCdrVersion() {
+    return createDefaultCdrVersion(1);
+  }
+
+  public static DbCdrVersion createControlledTierCdrVersion(long id) {
+    DbCdrVersion cdrVersion = createDefaultCdrVersion(id);
+    DbAccessTier controlledTier = createControlledTier();
+    cdrVersion.setAccessTier(controlledTier);
+    return cdrVersion;
   }
 
   public static DbUserCodeOfConductAgreement createDuccAgreement(

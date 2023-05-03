@@ -1,9 +1,14 @@
-import { AppStatus, CreateAppRequest } from 'generated/fetch';
+import { AppStatus, AppType, CreateAppRequest } from 'generated/fetch';
 
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { userAppsStore } from './stores';
+
+export const appTypeToString: Record<AppType, string> = {
+  [AppType.CROMWELL]: 'Cromwell',
+  [AppType.RSTUDIO]: 'RStudio',
+};
 
 const appStatusesRequiringUpdates = [
   AppStatus.DELETING,

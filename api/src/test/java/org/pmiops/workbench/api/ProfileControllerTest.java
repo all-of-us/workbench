@@ -15,10 +15,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -27,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import javax.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -253,7 +254,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
     // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
 
     rtAddressesConfig =
         new InstitutionTierConfig()

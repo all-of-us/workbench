@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.google.GoogleConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
@@ -124,7 +125,7 @@ public class UserControllerTest {
 
   @BeforeEach
   public void setUp() {
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = accessTierDao.save(createRegisteredTier());
     user = userDao.save(new DbUser());
     addUserToTier(user, registeredTier);
     saveFamily();

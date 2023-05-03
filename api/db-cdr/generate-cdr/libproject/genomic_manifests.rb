@@ -54,9 +54,6 @@ FILE_ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
   },
-  "all-of-us-rw-perf" => {
-    :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
-  },
   "all-of-us-rw-staging" => {
     :source_config => CURATION_SYNTHETIC_SOURCE_CONFIG,
   },

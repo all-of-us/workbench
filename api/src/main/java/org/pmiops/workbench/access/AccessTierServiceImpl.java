@@ -75,27 +75,26 @@ public class AccessTierServiceImpl implements AccessTierService {
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     addToAuthDomainIdempotent(user, accessTier);
 
-    Optional<DbUserAccessTier> existingEntryMaybe =
-        userAccessTierDao.getByUserAndAccessTier(user, accessTier);
-
-    if (existingEntryMaybe.isPresent()) {
-      final DbUserAccessTier entryToUpdate = existingEntryMaybe.get();
-
-      // don't update if already ENABLED
-      if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
-        userAccessTierDao.save(
-            entryToUpdate.setTierAccessStatus(TierAccessStatus.ENABLED).setLastUpdated(now()));
-      }
-    } else {
-      final DbUserAccessTier entryToInsert =
-          new DbUserAccessTier()
-              .setUser(user)
-              .setAccessTier(accessTier)
-              .setTierAccessStatus(TierAccessStatus.ENABLED)
-              .setFirstEnabled(now())
-              .setLastUpdated(now());
-      userAccessTierDao.save(entryToInsert);
-    }
+    userAccessTierDao
+        .getByUserAndAccessTier(user, accessTier)
+        .ifPresentOrElse(
+            entryToUpdate -> {
+              // don't update if already ENABLED
+              if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
+                userAccessTierDao.save(
+                    entryToUpdate
+                        .setTierAccessStatus(TierAccessStatus.ENABLED)
+                        .setLastUpdated(now()));
+              }
+            },
+            () ->
+                userAccessTierDao.save(
+                    new DbUserAccessTier()
+                        .setUser(user)
+                        .setAccessTier(accessTier)
+                        .setTierAccessStatus(TierAccessStatus.ENABLED)
+                        .setFirstEnabled(now())
+                        .setLastUpdated(now())));
   }
 
   /**

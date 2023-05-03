@@ -76,7 +76,7 @@ public class WorkbenchConfig {
   // Environment config variables related to Terra billing projects / GCP projects.
   public static class BillingConfig {
     // The environment-driven prefix to apply to Terra billing projects we create. Example:
-    // "aou-rw-perf-" causes us to create projects named like "aou-rw-perf-8aec175b".
+    // "aou-rw-stable-" causes us to create projects named like "aou-rw-stable-8aec175b".
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
@@ -332,6 +332,8 @@ public class WorkbenchConfig {
     public boolean enableRStudioGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
+    // If true, enable Tanagra
+    public boolean enableTanagra;
   }
 
   public static class ActionAuditConfig {

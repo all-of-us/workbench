@@ -5,7 +5,7 @@ import {
 } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { BillingStatus, FileDetail, ResourceType } from 'generated/fetch';
+import { BillingStatus, FileDetail } from 'generated/fetch';
 
 import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -21,12 +21,12 @@ import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { convertToResource } from 'app/utils/resources';
+import { convertToResources } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
-import { dropNotebookFileSuffix, getExistingNotebooks } from './util';
+import { dropNotebookFileSuffix, listNotebooks } from './util';
 
 const styles = {
   heading: {
@@ -150,7 +150,7 @@ export const NotebookList = withCurrentWorkspace()(
       try {
         const { workspace } = this.props;
         this.setState({ loading: true });
-        getExistingNotebooks(workspace).then((notebookList) => {
+        listNotebooks(workspace).then((notebookList) => {
           this.setState({
             notebookList,
             notebookNameList: notebookList.map((fd) =>
@@ -182,9 +182,7 @@ export const NotebookList = withCurrentWorkspace()(
     getNotebookListAsResources = () => {
       const { workspace } = this.props;
       const { notebookList } = this.state;
-      return notebookList.map((notebook) => {
-        return convertToResource(notebook, ResourceType.NOTEBOOK, workspace);
-      });
+      return convertToResources(notebookList, workspace);
     };
 
     render() {

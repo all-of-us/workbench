@@ -6,7 +6,6 @@ import { Dropdown } from 'primereact/dropdown';
 
 import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { AppsList } from 'app/pages/appAnalysis/apps-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
@@ -18,7 +17,9 @@ import {
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-describe('Apps list', () => {
+import { AppSelector } from './app-selector';
+
+describe('App Selector', () => {
   const startButton = (wrapper) => {
     return wrapper.find('[data-test-id="start-button"]').first();
   };
@@ -38,14 +39,12 @@ describe('Apps list', () => {
     });
   };
 
-  const component = () => {
-    return mount(
+  const component = () =>
+    mount(
       <MemoryRouter>
-        <AppsList hideSpinner={() => {}} />
-        );
+        <AppSelector workspace={currentWorkspaceStore.getValue()} />
       </MemoryRouter>
     );
-  };
 
   beforeEach(() => {
     currentWorkspaceStore.next({

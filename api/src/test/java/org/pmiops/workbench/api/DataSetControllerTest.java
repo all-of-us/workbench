@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 import static org.pmiops.workbench.google.GoogleConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
@@ -339,7 +340,8 @@ public class DataSetControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace =

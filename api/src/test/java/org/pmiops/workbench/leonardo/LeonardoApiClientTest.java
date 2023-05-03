@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -174,9 +175,7 @@ public class LeonardoApiClientTest {
             .setCdrDbName("")
             .setBigqueryProject("cdr")
             .setBigqueryDataset("bq")
-            .setAccessTier(
-                TestMockFactory.createControlledTierForTests(accessTierDao)
-                    .setDatasetsBucket(CDR_BUCKET))
+            .setAccessTier(accessTierDao.save(createControlledTier()).setDatasetsBucket(CDR_BUCKET))
             .setStorageBasePath(CDR_STORAGE_BASE_PATH)
             .setWgsCramManifestPath(WGS_PATH);
     testWorkspace =

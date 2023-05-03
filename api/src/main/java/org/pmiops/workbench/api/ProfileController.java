@@ -2,15 +2,15 @@ package org.pmiops.workbench.api;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.base.Strings;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;

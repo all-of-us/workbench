@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
@@ -52,7 +53,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -118,8 +118,10 @@ public class UserMetricsControllerTest {
 
   @BeforeEach
   public void setUp() {
-    final DbCdrVersion dbCdrVersion =
-        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
+
+    accessTierDao.save(dbCdrVersion.getAccessTier());
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
 
     dbUser = new DbUser().setUserId(123L);
 

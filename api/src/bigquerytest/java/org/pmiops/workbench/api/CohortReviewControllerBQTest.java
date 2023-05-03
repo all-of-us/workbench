@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -81,7 +82,6 @@ import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
@@ -214,7 +214,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                         currentUser.getUsername(),
                         new RawlsWorkspaceAccessEntry().accessLevel("OWNER"))));
 
-    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = createDefaultCdrVersion();
+    accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);

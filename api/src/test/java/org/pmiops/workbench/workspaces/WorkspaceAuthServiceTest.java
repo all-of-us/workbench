@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+<<<<<<< HEAD
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
@@ -40,6 +42,8 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
+=======
+>>>>>>> origin/main
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -291,7 +295,7 @@ public class WorkspaceAuthServiceTest {
 
   private void stubRegisteredTier() {
     when(mockAccessTierService.getRegisteredTierOrThrow())
-        .thenReturn(TestMockFactory.createRegisteredTierForTests(accessTierDao));
+        .thenReturn(accessTierDao.save(createRegisteredTier()));
   }
 
   private void stubUpdateAcl(String namespace, String fcName) {
