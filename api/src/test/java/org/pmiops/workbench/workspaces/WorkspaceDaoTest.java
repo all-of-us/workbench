@@ -135,7 +135,7 @@ public class WorkspaceDaoTest {
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
     accessTierDao.save(dbCdrVersion.getAccessTier());
-    cdrVersionDao.save(dbCdrVersion);
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     workspace.setCdrVersion(dbCdrVersion);
     workspace = workspaceDao.save(workspace);
     return workspace;

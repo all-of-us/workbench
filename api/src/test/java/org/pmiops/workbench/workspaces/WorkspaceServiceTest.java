@@ -573,9 +573,9 @@ public class WorkspaceServiceTest {
             WorkspaceActiveStatus.ACTIVE);
     DbCdrVersion dbCdrVersion = createControlledTierCdrVersion(1);
     accessTierDao.save(dbCdrVersion.getAccessTier());
-    cdrVersionDao.save(dbCdrVersion);
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
     dbWorkspace.setCdrVersion(dbCdrVersion);
-    workspaceDao.save(dbWorkspace);
+   workspaceDao.save(dbWorkspace);
     assertThrows(
         ForbiddenException.class,
         () ->

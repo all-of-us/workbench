@@ -298,7 +298,7 @@ public class ConceptSetsControllerTest {
 
     DbCdrVersion cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
     workspace =
         createTestWorkspace(
             WORKSPACE_NAMESPACE,

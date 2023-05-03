@@ -340,7 +340,7 @@ public class CohortReviewControllerTest {
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace =
         createTestWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cdrVersion.getCdrVersionId());

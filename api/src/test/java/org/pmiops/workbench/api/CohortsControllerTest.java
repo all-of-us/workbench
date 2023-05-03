@@ -265,7 +265,7 @@ public class CohortsControllerTest {
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
     cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     cohortDefinition = CohortDefinitions.males();
     cohortCriteria = new Gson().toJson(cohortDefinition);

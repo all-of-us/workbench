@@ -118,7 +118,7 @@ public class NotebooksServiceTest {
     dbWorkspace = new DbWorkspace();
     DbCdrVersion cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
     dbWorkspace.setCdrVersion(cdrVersion);
 
     fromCDRVersion = new DbCdrVersion();

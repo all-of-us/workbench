@@ -117,10 +117,10 @@ public class UserMetricsControllerTest {
 
   @BeforeEach
   public void setUp() {
-    final DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
+    DbCdrVersion dbCdrVersion = createDefaultCdrVersion();
 
     accessTierDao.save(dbCdrVersion.getAccessTier());
-    cdrVersionDao.save(dbCdrVersion);
+    dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
 
     dbUser = new DbUser().setUserId(123L);
 

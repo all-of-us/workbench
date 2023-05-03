@@ -89,7 +89,7 @@ public class DataDictionaryTest {
   public void setUp() {
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
     dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));

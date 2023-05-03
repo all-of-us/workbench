@@ -114,7 +114,7 @@ public class OfflineRuntimeControllerTest {
     runtimeProjectIdIndex = 0;
     DbCdrVersion cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     user1 = new DbUser();
     user1.setUsername("alice@fake-research-aou.org");
