@@ -29,6 +29,10 @@ import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequ
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
+import org.pmiops.workbench.tools.factories.ToolsFirecloudApiClientFactory;
+import org.pmiops.workbench.tools.factories.ToolsFirecloudImpersonatedServiceAccountApiClientFactory;
+import org.pmiops.workbench.tools.factories.ToolsRawlsApiClientFactory;
+import org.pmiops.workbench.tools.factories.ToolsRawlsImpersonatedServiceAccountApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -72,23 +76,23 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
     return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
   }
 
-  public static FcImpersonatedServiceAccountApiClientFactory
+  public static ToolsFirecloudImpersonatedServiceAccountApiClientFactory
       wgsCohortExtractionServiceAccountApiClientFactory(WorkbenchConfig config) throws IOException {
-    return new FcImpersonatedServiceAccountApiClientFactory(
+    return new ToolsFirecloudImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
   }
 
-  public static RawlsImpersonatedServiceAccountApiClientFactory
+  public static ToolsRawlsImpersonatedServiceAccountApiClientFactory
       wgsCohortExtractionRawlsServiceAccountApiClientFactory(WorkbenchConfig config)
           throws IOException {
-    return new RawlsImpersonatedServiceAccountApiClientFactory(
+    return new ToolsRawlsImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.rawlsBaseUrl);
   }
 
   private String getExtractionPetSa(String googleProject, WorkbenchConfig workbenchConfig)
       throws IOException, InterruptedException {
     String accessToken =
-        FcImpersonatedServiceAccountApiClientFactory.getAccessToken(
+        ToolsFirecloudImpersonatedServiceAccountApiClientFactory.getAccessToken(
             workbenchConfig.wgsCohortExtraction.serviceAccount);
     log.info("Extraction SA Access Token: " + accessToken);
 
@@ -130,9 +134,9 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());
 
       WorkbenchConfig workbenchConfig = workbenchConfig(configJsonFilepath);
-      FirecloudApiClientFactory firecloudApiClientFactory =
+      ToolsFirecloudApiClientFactory firecloudApiClientFactory =
           wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
-      RawlsApiClientFactory rawlsApiClientFactory =
+      ToolsRawlsApiClientFactory rawlsApiClientFactory =
           wgsCohortExtractionRawlsServiceAccountApiClientFactory(workbenchConfig);
 
       log.info("Creating billing project");

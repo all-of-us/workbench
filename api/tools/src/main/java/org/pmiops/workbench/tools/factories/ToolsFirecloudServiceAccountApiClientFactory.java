@@ -1,13 +1,13 @@
-package org.pmiops.workbench.tools;
+package org.pmiops.workbench.tools.factories;
 
 import java.io.IOException;
 import java.util.Arrays;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.rawls.ApiClient;
+import org.pmiops.workbench.firecloud.ApiClient;
 
-public class RawlsServiceAccountAPIClientFactory extends RawlsApiClientFactory {
+public class ToolsFirecloudServiceAccountApiClientFactory extends ToolsFirecloudApiClientFactory {
 
-  public RawlsServiceAccountAPIClientFactory(String apiUrl) throws IOException {
+  public ToolsFirecloudServiceAccountApiClientFactory(String apiUrl) throws IOException {
     super(newApiClient(apiUrl));
   }
 

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools;
+package org.pmiops.workbench.tools.factories;
 
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.protobuf.Duration;
@@ -7,9 +7,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.pmiops.workbench.rawls.ApiClient;
 
-public class RawlsImpersonatedServiceAccountApiClientFactory extends RawlsApiClientFactory {
+public class ToolsRawlsImpersonatedServiceAccountApiClientFactory
+    extends ToolsRawlsApiClientFactory {
 
-  public RawlsImpersonatedServiceAccountApiClientFactory(
+  public ToolsRawlsImpersonatedServiceAccountApiClientFactory(
       String targetServiceAccount, String rawlsBaseUrl) throws IOException {
     super(newApiClient(targetServiceAccount, rawlsBaseUrl));
   }

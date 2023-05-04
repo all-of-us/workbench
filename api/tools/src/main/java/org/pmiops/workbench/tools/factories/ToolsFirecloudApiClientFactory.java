@@ -1,15 +1,15 @@
-package org.pmiops.workbench.tools;
+package org.pmiops.workbench.tools.factories;
 
 import java.io.IOException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.api.MethodRepositoryApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 
-public abstract class FirecloudApiClientFactory {
+public abstract class ToolsFirecloudApiClientFactory {
 
   protected ApiClient apiClient;
 
-  protected FirecloudApiClientFactory(ApiClient apiClient) {
+  protected ToolsFirecloudApiClientFactory(ApiClient apiClient) {
     this.apiClient = apiClient;
   }
 
