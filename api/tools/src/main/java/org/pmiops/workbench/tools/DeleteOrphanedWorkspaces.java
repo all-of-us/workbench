@@ -72,6 +72,7 @@ public class DeleteOrphanedWorkspaces extends Tool {
       Option.builder()
           .longOpt("delete")
           .desc("Enable to actually delete the workspaces.  Defaults to count only.")
+          .hasArg()
           .build();
 
   private static final Options OPTIONS =

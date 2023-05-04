@@ -2725,7 +2725,7 @@ def delete_orphaned_workspaces(cmd_name, *args)
     ["--project", op.opts.project],
     ["--username", op.opts.username],
     ["--limit", op.opts.limit],
-#    ["--delete", op.opts.delete],
+    ["--delete", op.opts.delete],
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
