@@ -3,6 +3,8 @@ package org.pmiops.workbench.tools;
 import com.google.common.primitives.Ints;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -20,9 +22,12 @@ import org.pmiops.workbench.iam.SamRetryHandler;
 import org.pmiops.workbench.impersonation.ImpersonatedFirecloudServiceImpl;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceServiceImpl;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -48,8 +53,8 @@ public class DeleteWorkspaces extends Tool {
 
   private static final List<String> ALLOWED_RW_ENVS = List.of("all-of-us-workbench-test");
 
-  // I have not figured out how to connect the BillingV2Api bean correctly in this tool,
-  // so it fails
+  // I have not figured out how to connect the BillingV2Api beans correctly in this tool,
+  // so BP deletion fails
 
   private static final boolean DELETE_BILLING_PROJECTS = false;
 
@@ -87,12 +92,19 @@ public class DeleteWorkspaces extends Tool {
           .addOption(LIMIT_OPT)
           .addOption(DELETE_OPT);
 
+  private final ImpersonatedWorkspaceService workspaceService;
+
   public static void main(String[] args) {
     CommandLineToolConfig.runCommandLine(DeleteWorkspaces.class, args);
   }
 
+  @Autowired
+  DeleteWorkspaces(ImpersonatedWorkspaceService workspaceService) {
+    this.workspaceService = workspaceService;
+  }
+
   @Bean
-  public CommandLineRunner run(ImpersonatedWorkspaceService workspaceService) {
+  public CommandLineRunner run() {
     return (args) -> {
       final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
       final String rwEnvOpt = opts.getOptionValue(RW_PROJ_OPT.getLongOpt());
@@ -109,19 +121,33 @@ public class DeleteWorkspaces extends Tool {
           opts.hasOption(DELETE_OPT)
               && Boolean.parseBoolean(opts.getOptionValue(DELETE_OPT.getLongOpt()));
 
-      deleteAoUWorkspaces(workspaceService, rwEnvOpt, usernameOpt, limitOpt, deleteOpt);
-      deleteRawlsWorkspaces(workspaceService, rwEnvOpt, usernameOpt, limitOpt, deleteOpt);
+      // AoU
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listAouWorkspaces,
+          this::deleteAouWorkspace);
+      // Rawls
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listRawlsWorkspaces,
+          this::deleteRawlsWorkspace);
     };
   }
 
-  private static void deleteAoUWorkspaces(
-      ImpersonatedWorkspaceService workspaceService,
+  private <T> void deleteWorkspaces(
       String rwEnvOpt,
       String usernameOpt,
       Optional<Integer> limitOpt,
-      boolean deleteOpt) {
-    var workspaces = workspaceService.getOwnedWorkspaces(usernameOpt);
-    LOG.info(String.format("Found %d AoU workspaces in %s", workspaces.size(), rwEnvOpt));
+      boolean deleteOpt,
+      BiFunction<String, String, List<T>> listWorkspaces,
+      BiConsumer<T, String> deleteWorkspace) {
+    List<T> workspaces = listWorkspaces.apply(usernameOpt, rwEnvOpt);
 
     if (deleteOpt) {
       limitOpt
@@ -131,58 +157,40 @@ public class DeleteWorkspaces extends Tool {
                 return workspaces.stream().limit(l);
               })
           .orElse(workspaces.stream())
-          .forEach(
-              ws -> {
-                String namespace = ws.getWorkspace().getNamespace();
-                String fcName = ws.getWorkspace().getId();
-                LOG.info(String.format("Deleting workspace %s/%s", namespace, fcName));
-                try {
-                  workspaceService.deleteWorkspace(
-                      usernameOpt, namespace, fcName, DELETE_BILLING_PROJECTS);
-                } catch (Exception e) {
-                  LOG.severe(e.getMessage());
-                }
-              });
+          .forEach(ws -> deleteWorkspace.accept(ws, usernameOpt));
     } else {
       LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
     }
   }
 
-  private static void deleteRawlsWorkspaces(
-      ImpersonatedWorkspaceService workspaceService,
-      String rwEnvOpt,
-      String usernameOpt,
-      Optional<Integer> limitOpt,
-      boolean deleteOpt) {
-    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(usernameOpt);
+  private List<WorkspaceResponse> listAouWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspaces(username);
+    LOG.info(String.format("Found %d AoU workspaces in %s", workspaces.size(), rwEnv));
+    return workspaces;
+  }
+
+  private List<RawlsWorkspaceListResponse> listRawlsWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(username);
     LOG.info(
         String.format(
             "Found %d Rawls workspaces which are not present in the %s DB",
-            workspaces.size(), rwEnvOpt));
+            workspaces.size(), rwEnv));
+    return workspaces;
+  }
 
-    if (deleteOpt) {
-      limitOpt
-          .map(
-              l -> {
-                LOG.info(String.format("Limiting to the first %d workspaces.", l));
-                return workspaces.stream().limit(l);
-              })
-          .orElse(workspaces.stream())
-          .forEach(
-              ws -> {
-                LOG.info(
-                    String.format(
-                        "Deleting Rawls workspace %s/%s",
-                        ws.getWorkspace().getNamespace(), ws.getWorkspace().getName()));
-                workspaceService.deleteOrphanedRawlsWorkspace(
-                    usernameOpt,
-                    ws.getWorkspace().getNamespace(),
-                    ws.getWorkspace().getGoogleProject(),
-                    ws.getWorkspace().getName(),
-                    DELETE_BILLING_PROJECTS);
-              });
-    } else {
-      LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
-    }
+  private void deleteAouWorkspace(WorkspaceResponse response, String username) {
+    String namespace = response.getWorkspace().getNamespace();
+    String fcName = response.getWorkspace().getId();
+    LOG.info(String.format("Deleting workspace %s/%s", namespace, fcName));
+    workspaceService.deleteWorkspace(username, namespace, fcName, DELETE_BILLING_PROJECTS);
+  }
+
+  private void deleteRawlsWorkspace(RawlsWorkspaceListResponse response, String username) {
+    String namespace = response.getWorkspace().getNamespace();
+    String fcName = response.getWorkspace().getName();
+    String googleProject = response.getWorkspace().getGoogleProject();
+    LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
+    workspaceService.deleteOrphanedRawlsWorkspace(
+        username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
   }
 }
