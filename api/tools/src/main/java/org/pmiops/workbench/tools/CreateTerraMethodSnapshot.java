@@ -24,6 +24,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodID;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodIO;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodQuery;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodResponse;
+import org.pmiops.workbench.tools.factories.ToolsFirecloudApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -112,7 +113,7 @@ public class CreateTerraMethodSnapshot extends Tool {
 
       WorkbenchConfig workbenchConfig =
           CreateWgsCohortExtractionBillingProjectWorkspace.workbenchConfig(configJsonFilepath);
-      FirecloudApiClientFactory firecloudApiClientFactory =
+      ToolsFirecloudApiClientFactory firecloudApiClientFactory =
           CreateWgsCohortExtractionBillingProjectWorkspace
               .wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 

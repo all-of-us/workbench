@@ -24,6 +24,7 @@ import org.pmiops.workbench.rawls.model.RawlsProjectRole;
 import org.pmiops.workbench.rawls.model.RawlsRawlsBillingProjectMember;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.tools.factories.ToolsRawlsServiceAccountApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -213,8 +214,8 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
-      RawlsServiceAccountAPIClientFactory apiFactory =
-          new RawlsServiceAccountAPIClientFactory(
+      ToolsRawlsServiceAccountApiClientFactory apiFactory =
+          new ToolsRawlsServiceAccountApiClientFactory(
               opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt()));
 
       // An empty set indicates no billing projects should be filtered.

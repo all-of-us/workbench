@@ -15,6 +15,7 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.tools.factories.ToolsRawlsServiceAccountApiClientFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +58,7 @@ public class FetchWorkspaceDetails extends Tool {
       String workspaceNamespace = opts.getOptionValue(workspaceProjectIdOpt.getLongOpt());
 
       WorkspacesApi workspacesApi =
-          (new RawlsServiceAccountAPIClientFactory(
+          (new ToolsRawlsServiceAccountApiClientFactory(
                   opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt())))
               .workspacesApi();
 

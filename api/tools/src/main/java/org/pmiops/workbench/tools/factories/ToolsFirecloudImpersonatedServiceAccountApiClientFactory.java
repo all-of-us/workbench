@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools;
+package org.pmiops.workbench.tools.factories;
 
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.protobuf.Duration;
@@ -7,9 +7,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.pmiops.workbench.firecloud.ApiClient;
 
-public class FcImpersonatedServiceAccountApiClientFactory extends FirecloudApiClientFactory {
+public class ToolsFirecloudImpersonatedServiceAccountApiClientFactory extends
+    ToolsFirecloudApiClientFactory {
 
-  public FcImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
+  public ToolsFirecloudImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
       throws IOException {
     super(newApiClient(targetServiceAccount, fcBaseUrl));
   }
