@@ -16,6 +16,8 @@ const fileBasePath = '../../../../resources/cromwell/';
 const wdlFilePath = path.relative(process.cwd(), __dirname + fileBasePath + wdlFileName);
 const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jsonFileName);
 
+// The use of %s in the following commands is temp, once docker image is updated, we will always use
+// cromshell which will be alias for cromshell-beta
 const cromshellSubmitPythonCmd = `!%s submit ${wdlFileName} ${jsonFileName}`;
 const cromshellSubmitRCmd =
   `system2('%s', args = c('submit', '${wdlFileName}','${jsonFileName}'), ` + ' stdout = TRUE, stderr = TRUE)';
