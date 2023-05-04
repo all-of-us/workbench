@@ -13,7 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.config.EnvVars;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,6 +27,7 @@ public class StackdriverStatsExporterService {
 
   private static final Logger logger =
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
+  @Autowired private EnvVars envVars;
   private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
   private static final String MONITORED_RESOURCE_TYPE = "generic_node";
   public static final String PROJECT_ID_LABEL = "project_id";
@@ -37,14 +40,11 @@ public class StackdriverStatsExporterService {
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private Optional<String> spoofedNodeId;
-  @VisibleForTesting public Optional<String> gaeInstanceId;
 
   public StackdriverStatsExporterService(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.initialized = false;
     this.spoofedNodeId = Optional.empty();
-    gaeInstanceId =
-        Optional.ofNullable(System.getenv("GAE_INSTANCE")).map(s -> s.trim()).filter(s -> s != "");
   }
 
   /**
@@ -119,20 +119,23 @@ public class StackdriverStatsExporterService {
   }
 
   private String getNodeId() {
-    return gaeInstanceId.orElseGet(
-        () -> {
-          final String newNodeId = getSpoofedNodeId();
-          if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
-            logger.log(
-                Level.FINE, String.format("Spoofed nodeID for local process is %s.", newNodeId));
-          } else {
-            logger.warning(
-                String.format(
-                    "Failed to retrieve instance ID from ModulesService. Using %s instead.",
-                    newNodeId));
-          }
-          return getSpoofedNodeId();
-        });
+    return envVars
+        .get("GAE_INSTANCE")
+        .orElseGet(
+            () -> {
+              final String newNodeId = getSpoofedNodeId();
+              if (workbenchConfigProvider.get().server.shortName.equals("Local")) {
+                logger.log(
+                    Level.FINE,
+                    String.format("Spoofed nodeID for local process is %s.", newNodeId));
+              } else {
+                logger.warning(
+                    String.format(
+                        "Failed to retrieve instance ID from ModulesService. Using %s instead.",
+                        newNodeId));
+              }
+              return getSpoofedNodeId();
+            });
   }
 
   /**
