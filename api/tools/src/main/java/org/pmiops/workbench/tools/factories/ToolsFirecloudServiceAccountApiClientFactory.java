@@ -5,8 +5,7 @@ import java.util.Arrays;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.firecloud.ApiClient;
 
-public class ToolsFirecloudServiceAccountApiClientFactory extends
-    ToolsFirecloudApiClientFactory {
+public class ToolsFirecloudServiceAccountApiClientFactory extends ToolsFirecloudApiClientFactory {
 
   public ToolsFirecloudServiceAccountApiClientFactory(String apiUrl) throws IOException {
     super(newApiClient(apiUrl));

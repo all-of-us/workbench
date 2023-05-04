@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.pmiops.workbench.rawls.ApiClient;
 
-public class ToolsRawlsImpersonatedServiceAccountApiClientFactory extends ToolsRawlsApiClientFactory {
+public class ToolsRawlsImpersonatedServiceAccountApiClientFactory
+    extends ToolsRawlsApiClientFactory {
 
   public ToolsRawlsImpersonatedServiceAccountApiClientFactory(
       String targetServiceAccount, String rawlsBaseUrl) throws IOException {

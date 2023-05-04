@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.pmiops.workbench.firecloud.ApiClient;
 
-public class ToolsFirecloudImpersonatedServiceAccountApiClientFactory extends
-    ToolsFirecloudApiClientFactory {
+public class ToolsFirecloudImpersonatedServiceAccountApiClientFactory
+    extends ToolsFirecloudApiClientFactory {
 
-  public ToolsFirecloudImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
-      throws IOException {
+  public ToolsFirecloudImpersonatedServiceAccountApiClientFactory(
+      String targetServiceAccount, String fcBaseUrl) throws IOException {
     super(newApiClient(targetServiceAccount, fcBaseUrl));
   }
 
