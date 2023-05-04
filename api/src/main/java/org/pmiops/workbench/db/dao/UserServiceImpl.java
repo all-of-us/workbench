@@ -533,7 +533,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           (badgeName) -> {
             Optional<BadgeDetailsV2> badge =
                 Optional.ofNullable(userBadgesByName.get(badgeName))
-                    .filter(BadgeDetailsV2::getValid);
+                    .filter(BadgeDetailsV2::isValid);
 
             if (badge.isEmpty()) {
               return Optional.empty();

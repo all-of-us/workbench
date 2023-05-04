@@ -385,7 +385,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     ProxyApi proxyApi = proxyApiProvider.get();
     notebooksRetryHandler.run(
         (context) -> {
-          proxyApi.welderLocalize(googleProject, runtimeName, welderReq);
+          proxyApi.welderLocalize(welderReq, googleProject, runtimeName);
           return null;
         });
   }
@@ -395,7 +395,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       String googleProject, String runtime, StorageLink storageLink) {
     ProxyApi proxyApi = proxyApiProvider.get();
     return notebooksRetryHandler.run(
-        (context) -> proxyApi.welderCreateStorageLink(googleProject, runtime, storageLink));
+        (context) -> proxyApi.welderCreateStorageLink(storageLink, googleProject, runtime));
   }
 
   @Override

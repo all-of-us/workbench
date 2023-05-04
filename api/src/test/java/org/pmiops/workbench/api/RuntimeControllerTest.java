@@ -1350,7 +1350,7 @@ public class RuntimeControllerTest {
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
 
     verify(proxyApi)
-        .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
 
     Localize welderReq = welderReqCaptor.getValue();
     assertThat(
@@ -1400,7 +1400,7 @@ public class RuntimeControllerTest {
     RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
     verify(proxyApi)
-        .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
 
     Localize welderReq = welderReqCaptor.getValue();
 
@@ -1442,7 +1442,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace("other-proj", GOOGLE_PROJECT_ID_2, "myotherworkspace", LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize("other-proj", req).getBody();
     verify(proxyApi)
-        .welderLocalize(eq(GOOGLE_PROJECT_ID_2), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID_2), eq(getRuntimeName()));
 
     Localize welderReq = welderReqCaptor.getValue();
 
@@ -1485,7 +1485,7 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
     verify(proxyApi)
-        .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
 
     // Config files only.
     Localize welderReq = welderReqCaptor.getValue();
