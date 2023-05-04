@@ -2680,3 +2680,65 @@ def run_mysql_cmd(cmd)
     "mariadb:10.2 " +
     cmd
 end
+
+def delete_orphaned_workspaces(cmd_name, *args)
+  common = Common.new
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_typed_option(
+        '--project [project]',
+        String,
+        ->(opts, v) { opts.project = v },
+        'AoU environment GCP project full name. Used to pick MySQL instance & credentials.')
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+        '--username [email]',
+        String,
+        ->(opts, v) { opts.username = v },
+        'The user whose workspaces we want to delete.')
+  op.add_validator ->(opts) { raise ArgumentError.new("Username required") unless opts.username }
+
+  op.add_typed_option(
+      '--limit [limit]',
+      String,
+      ->(opts, v) { opts.limit = v },
+      'The maximum number of workspaces to delete per step.')
+
+  op.add_typed_option(
+      '--delete',
+      TrueClass,
+      ->(opts, v) { opts.delete = v },
+      'Set to delete. Defaults to count only.')
+  op.opts.delete = false
+
+  op.parse.validate
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  gcc.validate()
+
+  gradle_args = ([
+    ["--project", op.opts.project],
+    ["--username", op.opts.username],
+    ["--limit", op.opts.limit],
+    ["--delete", op.opts.delete],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  # Gradle args need to be single-quote wrapped.
+  gradle_args.map! { |f| "'#{f}'" }
+
+  ENV.update(read_db_vars(gcc))
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.run_inline %W{./gradlew deleteOrphanedWorkspaces -PappArgs=[#{gradle_args.join(',')}]}
+  end
+end
+
+DELETE_ORPHANED_WORKSPACES_CMD = "delete-orphaned-workspaces"
+
+Common.register_command({
+    :invocation => DELETE_ORPHANED_WORKSPACES_CMD,
+    :description => "Delete a user's workspaces in Rawls which are no longer in AoU",
+    :fn => ->(*args) {delete_orphaned_workspaces(DELETE_ORPHANED_WORKSPACES_CMD, *args)}
+})
