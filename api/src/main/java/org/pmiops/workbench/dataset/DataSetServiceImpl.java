@@ -273,8 +273,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       UserRecentResourceService userRecentResourceService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock,
-      Provider<DbUser> userProvider,
-      CBCriteriaDao cBCriteriaDao) {
+      Provider<DbUser> userProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortBuilderService = cohortBuilderService;
     this.cohortService = cohortService;
@@ -290,7 +289,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
     this.userProvider = userProvider;
-    this.cBCriteriaDao = cBCriteriaDao;
   }
 
   @Override
@@ -358,7 +356,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary")
           .put(Domain.ZIP_CODE_SOCIOECONOMIC, "observation")
           .build();
-  private final CBCriteriaDao cBCriteriaDao;
 
   @Override
   public TableResult previewBigQueryJobConfig(DataSetPreviewRequest request) {
