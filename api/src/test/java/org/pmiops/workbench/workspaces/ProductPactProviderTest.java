@@ -124,18 +124,25 @@ public class ProductPactProviderTest {
     firstFirecloudWorkspaceDetails.setNamespace("defaultNamespaceA");
     firstFirecloudWorkspaceDetails.setWorkspaceId("1337");
     firstFirecloudWorkspaceDetails.setName("1A");
+    firstFirecloudWorkspaceDetails.setBucketName("");
+    firstFirecloudWorkspaceDetails.setCreatedBy("");
     firstFirecloudWorkspaceResponse.setWorkspace(firstFirecloudWorkspaceDetails);
     firstFirecloudWorkspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
 
+
     secondFirecloudWorkspaceDetails.setNamespace("defaultNamespaceB");
     secondFirecloudWorkspaceDetails.setWorkspaceId("1338");
-    secondFirecloudWorkspaceDetails.setName("1A");
+    secondFirecloudWorkspaceDetails.setName("1B");
+    secondFirecloudWorkspaceDetails.setBucketName("");
+    secondFirecloudWorkspaceDetails.setCreatedBy("");
     secondFirecloudWorkspaceResponse.setWorkspace(secondFirecloudWorkspaceDetails);
     secondFirecloudWorkspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
 
-    thirdFirecloudWorkspaceDetails.setNamespace("defaultNamespaceB");
+    thirdFirecloudWorkspaceDetails.setNamespace("defaultNamespaceC");
     thirdFirecloudWorkspaceDetails.setWorkspaceId("1339");
-    thirdFirecloudWorkspaceDetails.setName("1A");
+    thirdFirecloudWorkspaceDetails.setName("1C");
+    thirdFirecloudWorkspaceDetails.setBucketName("");
+    thirdFirecloudWorkspaceDetails.setCreatedBy("");
     thirdFirecloudWorkspaceResponse.setWorkspace(thirdFirecloudWorkspaceDetails);
     thirdFirecloudWorkspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
 
@@ -172,6 +179,14 @@ public class ProductPactProviderTest {
     firstSpecificPopulations.add(SpecificPopulationEnum.RACE_NHPI);
     firstSpecificPopulations.add(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75);
     firstWorkspace.setSpecificPopulationsEnum(firstSpecificPopulations);
+    firstWorkspace.setAdminLockedReason("");
+    firstWorkspace.setVersion(0);
+    firstWorkspace.setGoogleProject("");
+    firstWorkspace.setLastModifiedBy("");
+    firstWorkspace.setApproved(false);
+    firstWorkspace.setDisseminateResearchOther("");
+    firstWorkspace.setOtherPopulationDetails("");
+    firstWorkspace.setTimeRequested(new Timestamp(1675382400000L)); //February 3rd 2023 00:00:00
 
     secondWorkspace.setAncestry(false);
     secondWorkspace.setAnticipatedFindings("");
@@ -190,13 +205,21 @@ public class ProductPactProviderTest {
     DbCdrVersion secondRegisteredCdr = createDefaultCdrVersion(-1);
     secondWorkspace.setCdrVersion(secondRegisteredCdr);
     secondWorkspace.setFirecloudName("Coral");
-    secondWorkspace.setFirecloudUuid("1337");
+    secondWorkspace.setFirecloudUuid("1338");
     secondWorkspace.setCreationTime(new Timestamp(1675382400000L)); //February 3rd 2023 00:00:00
     secondWorkspace.setLastModifiedTime(new Timestamp(1675382400000L)); //February 3rd 2023 00:00:00
     HashSet<SpecificPopulationEnum> secondSpecificPopulations = new HashSet<>();
     secondSpecificPopulations.add(SpecificPopulationEnum.RACE_NHPI);
     secondSpecificPopulations.add(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75);
     secondWorkspace.setSpecificPopulationsEnum(secondSpecificPopulations);
+    secondWorkspace.setAdminLockedReason("");
+    secondWorkspace.setVersion(0);
+    secondWorkspace.setGoogleProject("");
+    secondWorkspace.setLastModifiedBy("");
+    secondWorkspace.setApproved(false);
+    secondWorkspace.setDisseminateResearchOther("");
+    secondWorkspace.setOtherPopulationDetails("");
+    secondWorkspace.setTimeRequested(new Timestamp(1675382400000L));
 
     thirdWorkspace.setAncestry(false);
     thirdWorkspace.setAnticipatedFindings("");
@@ -215,13 +238,21 @@ public class ProductPactProviderTest {
     DbCdrVersion thirdRegisteredCdr = createDefaultCdrVersion(-1);
     thirdWorkspace.setCdrVersion(thirdRegisteredCdr);
     thirdWorkspace.setFirecloudName("Coral");
-    thirdWorkspace.setFirecloudUuid("1337");
+    thirdWorkspace.setFirecloudUuid("1339");
     thirdWorkspace.setCreationTime(new Timestamp(1675382400000L)); //February 3rd 2023 00:00:00
     thirdWorkspace.setLastModifiedTime(new Timestamp(1675382400000L)); //February 3rd 2023 00:00:00
     HashSet<SpecificPopulationEnum> thirdSpecificPopulations = new HashSet<>();
     thirdSpecificPopulations.add(SpecificPopulationEnum.RACE_NHPI);
     thirdSpecificPopulations.add(SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75);
     thirdWorkspace.setSpecificPopulationsEnum(thirdSpecificPopulations);
+    thirdWorkspace.setAdminLockedReason("");
+    thirdWorkspace.setVersion(0);
+    thirdWorkspace.setGoogleProject("");
+    thirdWorkspace.setLastModifiedBy("");
+    thirdWorkspace.setApproved(false);
+    thirdWorkspace.setDisseminateResearchOther("");
+    thirdWorkspace.setOtherPopulationDetails("");
+    thirdWorkspace.setTimeRequested(new Timestamp(1675382400000L));
 
     when(prototypeFactoryStub.get()).thenReturn(mockWorkspacesApi);
     when(mockWorkspacesApi.listWorkspaces(any())).thenReturn(firecloudWorkspaceResponseList);

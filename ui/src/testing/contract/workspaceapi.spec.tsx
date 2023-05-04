@@ -33,7 +33,7 @@ import {
 } from 'testing/stubs/profile-api-stub';
 import { buildWorkspaceResponseStubs } from 'testing/stubs/workspaces';
 
-const { like } = MatchersV3;
+const { arrayContaining, like, eachLike } = MatchersV3;
 
 // Create a 'pact' between the two applications in the integration we are testing
 const provider = new PactV3({
@@ -58,11 +58,11 @@ describe('WorkspaceList', () => {
     return mountWithRouter(<WorkspaceList {...props} />);
   };
 
-  function getCardNames(wrapper: ReactWrapper) {
+  const getCardNames = (wrapper: ReactWrapper) => {
     return wrapper
       .find('[data-test-id="workspace-card-name"]')
       .map((c) => c.text());
-  }
+  };
 
   beforeEach(() => {
     reload.mockImplementation(async () => {
@@ -96,7 +96,9 @@ describe('WorkspaceList', () => {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
         body: {
-          items: buildWorkspaceResponseStubs(['A', 'B', 'C']),
+          items: arrayContaining(
+            ...buildWorkspaceResponseStubs(['A', 'B', 'C'])
+          ),
         },
       });
 

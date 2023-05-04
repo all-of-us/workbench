@@ -37,21 +37,30 @@
               "workspace": {
                 "accessTierShortName": "registered",
                 "adminLocked": false,
+                "adminLockedReason": "",
                 "billingAccountName": "billing-account",
                 "billingStatus": "ACTIVE",
                 "cdrVersionId": "-1",
                 "creationTime": 1675382400000,
+                "creator": "",
+                "etag": "\"0\"",
+                "googleBucketName": "",
+                "googleProject": "",
                 "id": "1A",
+                "lastModifiedBy": "",
                 "lastModifiedTime": 1675382400000,
                 "name": "defaultWorkspaceA",
                 "namespace": "defaultNamespaceA",
                 "published": false,
                 "researchPurpose": {
+                  "additionalNotes": "additional notes",
                   "ancestry": false,
                   "anticipatedFindings": "",
+                  "approved": false,
                   "commercialPurpose": false,
                   "controlSet": false,
                   "diseaseFocusedResearch": false,
+                  "diseaseOfFocus": "cancer",
                   "disseminateResearchFindingList": [],
                   "drugDevelopment": true,
                   "educational": true,
@@ -59,6 +68,8 @@
                   "intendedStudy": "",
                   "methodsDevelopment": false,
                   "needsReviewPrompt": false,
+                  "otherDisseminateResearchFindings": "",
+                  "otherPopulationDetails": "",
                   "otherPurpose": false,
                   "otherPurposeDetails": "",
                   "populationDetails": [
@@ -70,7 +81,9 @@
                   "researchOutcomeList": [],
                   "reviewRequested": false,
                   "scientificApproach": "",
-                  "socialBehavioral": false
+                  "socialBehavioral": false,
+                  "timeRequested": 1675382400000,
+                  "timeReviewed": null
                 }
               }
             },
@@ -79,21 +92,30 @@
               "workspace": {
                 "accessTierShortName": "registered",
                 "adminLocked": false,
+                "adminLockedReason": "",
                 "billingAccountName": "billing-account",
                 "billingStatus": "ACTIVE",
                 "cdrVersionId": "-1",
                 "creationTime": 1675382400000,
+                "creator": "",
+                "etag": "\"0\"",
+                "googleBucketName": "",
+                "googleProject": "",
                 "id": "1B",
+                "lastModifiedBy": "",
                 "lastModifiedTime": 1675382400000,
                 "name": "defaultWorkspaceB",
                 "namespace": "defaultNamespaceB",
                 "published": false,
                 "researchPurpose": {
+                  "additionalNotes": "additional notes",
                   "ancestry": false,
                   "anticipatedFindings": "",
+                  "approved": false,
                   "commercialPurpose": false,
                   "controlSet": false,
                   "diseaseFocusedResearch": false,
+                  "diseaseOfFocus": "cancer",
                   "disseminateResearchFindingList": [],
                   "drugDevelopment": true,
                   "educational": true,
@@ -101,6 +123,8 @@
                   "intendedStudy": "",
                   "methodsDevelopment": false,
                   "needsReviewPrompt": false,
+                  "otherDisseminateResearchFindings": "",
+                  "otherPopulationDetails": "",
                   "otherPurpose": false,
                   "otherPurposeDetails": "",
                   "populationDetails": [
@@ -112,7 +136,9 @@
                   "researchOutcomeList": [],
                   "reviewRequested": false,
                   "scientificApproach": "",
-                  "socialBehavioral": false
+                  "socialBehavioral": false,
+                  "timeRequested": 1675382400000,
+                  "timeReviewed": null
                 }
               }
             },
@@ -121,21 +147,30 @@
               "workspace": {
                 "accessTierShortName": "registered",
                 "adminLocked": false,
+                "adminLockedReason": "",
                 "billingAccountName": "billing-account",
                 "billingStatus": "ACTIVE",
                 "cdrVersionId": "-1",
                 "creationTime": 1675382400000,
+                "creator": "",
+                "etag": "\"0\"",
+                "googleBucketName": "",
+                "googleProject": "",
                 "id": "1C",
+                "lastModifiedBy": "",
                 "lastModifiedTime": 1675382400000,
                 "name": "defaultWorkspaceC",
                 "namespace": "defaultNamespaceC",
                 "published": false,
                 "researchPurpose": {
+                  "additionalNotes": "additional notes",
                   "ancestry": false,
                   "anticipatedFindings": "",
+                  "approved": false,
                   "commercialPurpose": false,
                   "controlSet": false,
                   "diseaseFocusedResearch": false,
+                  "diseaseOfFocus": "cancer",
                   "disseminateResearchFindingList": [],
                   "drugDevelopment": true,
                   "educational": true,
@@ -143,6 +178,8 @@
                   "intendedStudy": "",
                   "methodsDevelopment": false,
                   "needsReviewPrompt": false,
+                  "otherDisseminateResearchFindings": "",
+                  "otherPopulationDetails": "",
                   "otherPurpose": false,
                   "otherPurposeDetails": "",
                   "populationDetails": [
@@ -154,7 +191,9 @@
                   "researchOutcomeList": [],
                   "reviewRequested": false,
                   "scientificApproach": "",
-                  "socialBehavioral": false
+                  "socialBehavioral": false,
+                  "timeRequested": 1675382400000,
+                  "timeReviewed": null
                 }
               }
             }
@@ -162,6 +201,33 @@
         },
         "headers": {
           "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "arrayContains",
+                  "variants": [
+                    {
+                      "index": 0,
+                      "rules": {}
+                    },
+                    {
+                      "index": 1,
+                      "rules": {}
+                    },
+                    {
+                      "index": 2,
+                      "rules": {}
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "header": {}
         },
         "status": 200
       }
