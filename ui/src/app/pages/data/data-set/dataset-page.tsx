@@ -276,13 +276,18 @@ const checkNameWidth = (element: HTMLDivElement) =>
 
 const ImmutableListItem: React.FunctionComponent<{
   name: string;
+  isSublist: boolean;
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
-}> = ({ name, onChange, checked, showSourceConceptIcon }) => {
+}> = ({ name, isSublist, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
-    <div style={styles.listItem}>
+    <div
+      style={
+        isSublist ? { ...styles.listItem, marginLeft: '12px' } : styles.listItem
+      }
+    >
       <input
         type='checkbox'
         value={name}
@@ -635,17 +640,9 @@ const BoxHeader = ({
 // For now, this client-side enum tracks the desired state: a set of selectable
 // prepackaged concept sets.
 
-const prepackagedConceptSetToString = {
+const prepackagedAllSurveyConceptSetToString = {
   PERSON: 'Demographics',
   SURVEY: 'All Surveys',
-  SURVEY_BASICS: 'The Basics',
-  SURVEY_LIFESTYLE: 'Lifestyle',
-  SURVEY_OVERALL_HEALTH: 'Overall Health',
-  SURVEY_HEALTHCARE_ACCESS_UTILIZATION: 'Healthcare Access & Utilization',
-  SURVEY_COPE: 'COVID-19 Paricipant Experience(COPE)',
-  SURVEY_SDOH: 'Social Determinants of Health',
-  SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
-  SURVEY_PFHH: 'Personal and Family Health History',
   FITBIT_HEART_RATE_SUMMARY: 'Fitbit Heart Rate Summary',
   FITBIT_ACTIVITY: 'Fitbit Activity Summary',
   FITBIT_HEART_RATE_LEVEL: 'Fitbit Heart Rate Level',
@@ -656,9 +653,23 @@ const prepackagedConceptSetToString = {
   ZIP_CODE_SOCIOECONOMIC: 'Zip Code Socioeconomic Status Data',
 };
 
+const prepackagedSurveyConceptSetToString = {
+  SURVEY_BASICS: 'The Basics',
+  SURVEY_LIFESTYLE: 'Lifestyle',
+  SURVEY_OVERALL_HEALTH: 'Overall Health',
+  SURVEY_HEALTHCARE_ACCESS_UTILIZATION: 'Healthcare Access & Utilization',
+  SURVEY_COPE: 'COVID-19 Paricipant Experience(COPE)',
+  SURVEY_SDOH: 'Social Determinants of Health',
+  SURVEY_COVID_VACCINE: 'COVID-19 Vaccine',
+  SURVEY_PFHH: 'Personal and Family Health History',
+};
+
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
+};
+
+const PREPACKAGED_SURVEY_DOMAINS = {
   [PrePackagedConceptSetEnum.SURVEYBASICS]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYLIFESTYLE]: Domain.SURVEY,
   [PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH]: Domain.SURVEY,
@@ -691,6 +702,7 @@ const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
   [PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC,
 };
 let PREPACKAGED_DOMAINS = {};
+let prepackagedConceptSetToString = {};
 
 // For converting domain strings to type Domain
 const reverseDomainEnum = {
@@ -812,10 +824,21 @@ export const DatasetPage = fp.flow(
 
     const updatePrepackagedDomains = () => {
       PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
+      prepackagedConceptSetToString = prepackagedAllSurveyConceptSetToString;
       const { hasFitbitData, hasFitbitSleepData, hasWgsData } = getCdrVersion(
         workspace,
         cdrVersionTiersResponse
       );
+      if (serverConfigStore.get().config.enableDataExplorer) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_SURVEY_DOMAINS,
+        };
+        prepackagedConceptSetToString = {
+          ...prepackagedConceptSetToString,
+          ...prepackagedSurveyConceptSetToString,
+        };
+      }
       if (hasFitbitData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
@@ -1103,18 +1126,46 @@ export const DatasetPage = fp.flow(
         selectedDomainsWithConceptSetIds
       );
       if (selected) {
+        // if all surveys selected -> make all individual surveys selected
+        if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
+          for (const enumKey in Object.keys(PrePackagedConceptSetEnum)) {
+            if (enumKey.includes('SURVEY_')) {
+              updatedPrepackaged.add(enumKey);
+            }
+          }
+        }
+        // if *all* individual surveys are selected, then make all-surveys selected
+        // code here ...
         updatedPrepackaged.add(prepackaged);
         updatedDomainsWithConceptSetIds.add({
           conceptSetId: null,
           domain: PREPACKAGED_DOMAINS[prepackaged],
         });
       } else {
+        // if All-surveys is unselected -> unselect all individual surveys
+        if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
+          for (const enumKey in Object.keys(PrePackagedConceptSetEnum)) {
+            if (enumKey.includes('SURVEY_')) {
+              updatedPrepackaged.delete(enumKey);
+            }
+          }
+        }
+        // if *any* of the individual survey is unselected, unselect all-surveys
+        // code here ...
+
         updatedPrepackaged.delete(prepackaged);
         updatedDomainsWithConceptSetIds.forEach(
           (domainWithConceptSetId: DomainWithConceptSetId) => {
             if (
-              domainWithConceptSetId.conceptSetId === null &&
-              domainWithConceptSetId.domain === PREPACKAGED_DOMAINS[prepackaged]
+              (PREPACKAGED_DOMAINS[prepackaged] === Domain.SURVEY &&
+                domainWithConceptSetId.domain === Domain.SURVEY &&
+                !Array.from(updatedPrepackaged).some((domain) =>
+                  domain.toString().includes('SURVEY')
+                )) ||
+              (PREPACKAGED_DOMAINS[prepackaged] !== Domain.SURVEY &&
+                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.domain ===
+                  PREPACKAGED_DOMAINS[prepackaged])
             ) {
               updatedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
             }
@@ -1652,6 +1703,7 @@ export const DatasetPage = fp.flow(
                   <Subheader>Prepackaged Cohorts</Subheader>
                   <ImmutableListItem
                     name='All Participants'
+                    isSublist={false}
                     data-test-id='all-participant'
                     checked={includesAllParticipants}
                     onChange={() => selectPrePackagedCohort()}
@@ -1723,6 +1775,9 @@ export const DatasetPage = fp.flow(
                     return (
                       <ImmutableListItem
                         name={prepackagedConceptSetToString[p] || p}
+                        isSublist={Object.values(
+                          prepackagedSurveyConceptSetToString
+                        ).includes(prepackagedConceptSetToString[p])}
                         data-test-id='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
@@ -1741,6 +1796,7 @@ export const DatasetPage = fp.flow(
                       <ImmutableListItem
                         key={conceptSet.id}
                         name={conceptSet.name}
+                        isSublist={false}
                         data-test-id='concept-set-list-item'
                         checked={selectedConceptSetIds.includes(conceptSet.id)}
                         onChange={() =>
