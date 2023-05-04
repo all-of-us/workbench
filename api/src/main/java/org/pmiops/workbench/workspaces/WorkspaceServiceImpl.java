@@ -41,9 +41,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
@@ -54,6 +51,10 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
+  private final FirecloudMapper firecloudMapper;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final CloudBillingClient cloudBillingClient;
@@ -98,6 +100,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
+      FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       CloudBillingClient cloudBillingClient,
@@ -117,6 +120,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.firecloudMapper = firecloudMapper;
     this.freeTierBillingService = freeTierBillingService;
     this.userDao = userDao;
     this.userMapper = userMapper;
@@ -158,8 +162,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     validateWorkspaceTierAccess(dbWorkspace);
 
-    FirecloudWorkspaceResponse fcResponse;
-    FirecloudWorkspaceDetails fcWorkspace;
+    RawlsWorkspaceResponse fcResponse;
+    RawlsWorkspaceDetails fcWorkspace;
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
     // This enforces access controls.
@@ -168,15 +172,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
-    if (fcResponse.getAccessLevel().equals(WorkspaceAuthService.PROJECT_OWNER_ACCESS_LEVEL)) {
-      // We don't expose PROJECT_OWNER in our API; just use OWNER.
-      workspaceResponse.setAccessLevel(WorkspaceAccessLevel.OWNER);
-    } else {
-      workspaceResponse.setAccessLevel(WorkspaceAccessLevel.fromValue(fcResponse.getAccessLevel()));
-      if (workspaceResponse.getAccessLevel() == null) {
-        throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
-      }
-    }
+    workspaceResponse.setAccessLevel(
+        firecloudMapper.fcToApiWorkspaceAccessLevel(fcResponse.getAccessLevel()));
     workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
@@ -247,11 +244,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
+    Map<String, RawlsWorkspaceAccessEntry> emailToRole =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
+    for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
       // Filter out groups
       DbUser user = userDao.findUserByUsername(entry.getKey());
       if (user == null) {

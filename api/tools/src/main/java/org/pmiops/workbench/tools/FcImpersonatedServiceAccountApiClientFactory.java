@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.pmiops.workbench.firecloud.ApiClient;
 
-public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory {
+public class FcImpersonatedServiceAccountApiClientFactory extends FirecloudApiClientFactory {
 
-  public ImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
+  public FcImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
       throws IOException {
     super(newApiClient(targetServiceAccount, fcBaseUrl));
   }

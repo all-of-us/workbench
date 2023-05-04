@@ -24,8 +24,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -37,6 +35,8 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -131,11 +131,11 @@ public class WorkspaceAdminControllerTest {
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(WORKSPACE_NAMESPACE))
         .thenReturn(runtimes);
 
-    FirecloudWorkspaceDetails fcWorkspace =
+    RawlsWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME, FIRECLOUD_WORKSPACE_CREATOR_USERNAME);
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
-        new FirecloudWorkspaceResponse().workspace(fcWorkspace);
+    RawlsWorkspaceResponse fcWorkspaceResponse =
+        new RawlsWorkspaceResponse().workspace(fcWorkspace);
     when(mockFirecloudService.getWorkspaceAsService(
             WORKSPACE_NAMESPACE, DB_WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(fcWorkspaceResponse);

@@ -62,8 +62,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.leonardo.ApiException;
@@ -111,9 +109,12 @@ import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -249,6 +250,7 @@ public class RuntimeControllerTest {
   @Autowired AccessTierDao accessTierDao;
   @Autowired RuntimeController runtimeController;
   @Autowired LeonardoMapper leonardoMapper;
+  @Autowired FirecloudMapper firecloudMapper;
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;
@@ -379,9 +381,9 @@ public class RuntimeControllerTest {
         .thenReturn(new ArrayList<>());
   }
 
-  private static FirecloudWorkspaceDetails createFcWorkspace(
+  private static RawlsWorkspaceDetails createFcWorkspace(
       String ns, String googleProject, String name, String creator) {
-    return new FirecloudWorkspaceDetails()
+    return new RawlsWorkspaceDetails()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -413,10 +415,10 @@ public class RuntimeControllerTest {
   }
 
   private void stubGetFcWorkspace(
-      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+      RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel accessLevel) {
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(accessLevel.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(accessLevel));
     when(mockFireCloudService.getWorkspace(any())).thenReturn(Optional.of(fcResponse));
     when(mockFireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))
         .thenReturn(fcResponse);

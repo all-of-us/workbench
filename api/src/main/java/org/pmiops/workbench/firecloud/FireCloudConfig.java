@@ -47,10 +47,8 @@ public class FireCloudConfig {
   public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT =
       "wgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
-  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
-  public static final String END_USER_WORKSPACE_API = "workspacesApi";
-  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API = "lenientTimeoutWorkspacesApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
+  public static final String END_USER_WORKSPACE_API = "workspacesApi";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -119,6 +117,14 @@ public class FireCloudConfig {
     return apiClient;
   }
 
+  @Bean(name = END_USER_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public SubmissionsApi submissionsApi(
@@ -141,32 +147,6 @@ public class FireCloudConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ProfileApi profileApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     ProfileApi api = new ProfileApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = END_USER_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi lenientTimeoutWorkspacesApi(
-      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public WorkspacesApi workspacesApiAcls(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    WorkspacesApi api = new WorkspacesApi();
     api.setApiClient(apiClient);
     return api;
   }

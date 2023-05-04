@@ -23,8 +23,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -33,6 +31,9 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,7 +64,7 @@ public class WorkspaceMapperTest {
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
 
   private DbWorkspace sourceDbWorkspace;
-  private FirecloudWorkspaceDetails sourceFirecloudWorkspace;
+  private RawlsWorkspaceDetails sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
 
@@ -84,7 +85,7 @@ public class WorkspaceMapperTest {
   @BeforeEach
   public void setUp() {
     sourceFirecloudWorkspace =
-        new FirecloudWorkspaceDetails()
+        new RawlsWorkspaceDetails()
             .workspaceId(Long.toString(CREATOR_USER_ID))
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
@@ -176,9 +177,9 @@ public class WorkspaceMapperTest {
     final WorkspaceResponse resp =
         workspaceMapper.toApiWorkspaceResponse(
             sourceDbWorkspace,
-            new FirecloudWorkspaceResponse()
+            new RawlsWorkspaceResponse()
                 .workspace(sourceFirecloudWorkspace)
-                .accessLevel("PROJECT_OWNER"));
+                .accessLevel(RawlsWorkspaceAccessLevel.PROJECT_OWNER));
 
     assertThat(resp.getAccessLevel()).isEqualTo(WorkspaceAccessLevel.OWNER);
 

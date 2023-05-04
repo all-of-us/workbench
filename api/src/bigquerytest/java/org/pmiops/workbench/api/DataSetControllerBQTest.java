@@ -66,7 +66,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -82,9 +81,10 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.DomainWithDomainValues;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -265,8 +265,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 workspaceAuthService,
                 workbenchConfigProvider));
 
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
-    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
+    fcResponse.setAccessLevel(RawlsWorkspaceAccessLevel.OWNER);
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
         .thenReturn(fcResponse)
         .thenReturn(fcResponse);

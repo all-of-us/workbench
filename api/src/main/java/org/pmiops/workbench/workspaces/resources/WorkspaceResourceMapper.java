@@ -19,11 +19,11 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -101,7 +101,7 @@ public interface WorkspaceResourceMapper {
       qualifiedByName = "fcToApiWorkspaceAccessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
       WorkspaceFields workspaceFields,
-      FirecloudWorkspaceResponse fcWorkspace,
+      RawlsWorkspaceResponse fcWorkspace,
       ResourceFields resourceFields);
 
   default WorkspaceResource fromDbCohort(
@@ -130,7 +130,7 @@ public interface WorkspaceResourceMapper {
 
   default WorkspaceResource fromDbUserRecentlyModifiedResource(
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
-      FirecloudWorkspaceResponse fcWorkspace,
+      RawlsWorkspaceResponse fcWorkspace,
       DbWorkspace dbWorkspace,
       CohortService cohortService,
       CohortReviewService cohortReviewService,

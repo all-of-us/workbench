@@ -22,10 +22,10 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -105,7 +105,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
 
       // Get the workspace from firecloud. In order to get the bucket name. To avoid processing
       // other buckets not related to the user actions.
-      final FirecloudWorkspaceResponse fsWorkspace =
+      final RawlsWorkspaceResponse fsWorkspace =
           fireCloudService.getWorkspaceAsService(
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 

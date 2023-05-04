@@ -22,16 +22,20 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
+import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
+import org.pmiops.workbench.firecloud.RawlsConfig;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.rawls.ApiClient;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,7 +52,9 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 @Import({
   FirecloudApiClientFactory.class,
+  RawlsApiClientFactory.class,
   FireCloudServiceImpl.class,
+  FirecloudMapperImpl.class,
   FireCloudConfig.class,
   CloudBillingClientImpl.class
 })
@@ -78,6 +84,7 @@ public class DeleteWorkspaces extends Tool {
       AccessTierService accessTierService,
       BillingProjectAuditor billingProjectAuditor,
       Clock clock,
+      FirecloudMapper firecloudMapper,
       FireCloudService fireCloudService,
       Provider<DbUser> dbUserProvider,
       CloudBillingClient cloudBillingClient,
@@ -90,6 +97,7 @@ public class DeleteWorkspaces extends Tool {
         null,
         null,
         null,
+        firecloudMapper,
         fireCloudService,
         null,
         cloudBillingClient,
@@ -115,12 +123,12 @@ public class DeleteWorkspaces extends Tool {
   @Bean
   @Primary
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(FirecloudApiClientFactory factory) {
+  @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
+  WorkspacesApi workspaceApi(RawlsApiClientFactory factory) {
     if (currentImpersonatedUser == null) {
       return null;
     }
-    return new WorkspacesApi(buildFirecloudServiceAccountApiClient(factory));
+    return new WorkspacesApi(buildRawlsServiceAccountApiClient(factory));
   }
 
   @Bean
@@ -133,9 +141,20 @@ public class DeleteWorkspaces extends Tool {
     return new ProfileApi(buildFirecloudServiceAccountApiClient(factory));
   }
 
-  private static ApiClient buildFirecloudServiceAccountApiClient(
+  private static org.pmiops.workbench.firecloud.ApiClient buildFirecloudServiceAccountApiClient(
       FirecloudApiClientFactory factory) {
-    ApiClient apiClient = factory.newApiClient();
+    org.pmiops.workbench.firecloud.ApiClient apiClient = factory.newApiClient();
+    try {
+      apiClient.setAccessToken(
+          ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));
+    } catch (IOException e) {
+      throw new ServerErrorException(e);
+    }
+    return apiClient;
+  }
+
+  private static ApiClient buildRawlsServiceAccountApiClient(RawlsApiClientFactory factory) {
+    ApiClient apiClient = factory.newRawlsApiClient();
     try {
       apiClient.setAccessToken(
           ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));

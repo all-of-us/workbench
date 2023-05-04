@@ -83,10 +83,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
@@ -116,9 +112,13 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -344,11 +344,11 @@ public class CohortReviewControllerTest {
 
     workspace =
         createTestWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cdrVersion.getCdrVersionId());
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
 
     workspace2 =
         createTestWorkspace(WORKSPACE2_NAMESPACE, WORKSPACE2_NAME, cdrVersion.getCdrVersionId());
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.OWNER);
 
     cbCriteriaDao.save(
         DbCriteria.builder()
@@ -612,7 +612,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReviewAlreadyExists() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     // use existing cohort
     stubBigQueryCreateCohortReview();
     // create a new review
@@ -634,7 +634,7 @@ public class CohortReviewControllerTest {
   @Test
   public void createCohortReviewNoCohortException() {
     Long cohortId = cohort.getCohortId() + 99L;
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     Throwable exception =
         assertThrows(
@@ -649,11 +649,11 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionNoCohort(cohortId, exception);
   }
 
-  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
-  public void createCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void createCohortReviewAllowedAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubBigQueryCreateCohortReview();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -670,12 +670,12 @@ public class CohortReviewControllerTest {
     assertNewlyCreatedCohortReview(Objects.requireNonNull(cohortReview), reviewName);
   }
 
-  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "createCohortReviewAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
   public void createCohortReviewAllowedForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -695,7 +695,7 @@ public class CohortReviewControllerTest {
   ////////// updateCohortReview  //////////
   @Test
   public void updateCohortReviewNoEtag() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -717,7 +717,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReviewEtagDifferent() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -742,7 +742,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReviewWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -764,11 +764,11 @@ public class CohortReviewControllerTest {
         requestCohortReview.getCohortReviewId(), exception);
   }
 
-  @ParameterizedTest(name = "updateCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "updateCohortReviewAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
-  public void updateCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void updateCohortReviewAllowedAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -795,11 +795,12 @@ public class CohortReviewControllerTest {
     assertThat(updated.getLastModifiedTime()).isEqualTo(CLOCK.instant().toEpochMilli());
   }
 
-  @ParameterizedTest(name = "updateCohortReviewForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "updateCohortReviewForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
-  public void updateCohortReviewForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void updateCohortReviewForbiddenAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -827,7 +828,7 @@ public class CohortReviewControllerTest {
   ////////// deleteCohortReview  //////////
   @Test
   public void deleteCohortReviewWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     CohortReview requestCohortReview =
         new CohortReview()
@@ -847,11 +848,11 @@ public class CohortReviewControllerTest {
         requestCohortReview.getCohortReviewId(), exception);
   }
 
-  @ParameterizedTest(name = "deleteCohortReviewAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "deleteCohortReviewAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
-  public void deleteCohortReviewAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void deleteCohortReviewAllowedAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
@@ -865,11 +866,12 @@ public class CohortReviewControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
-  @ParameterizedTest(name = "deleteCohortReviewForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "deleteCohortReviewForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
-  public void deleteCohortReviewForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void deleteCohortReviewForbiddenAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     CohortReview requestCohortReview =
@@ -894,7 +896,7 @@ public class CohortReviewControllerTest {
   public void createParticipantCohortAnnotationNoAnnotationDefinitionFound() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
 
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     Throwable exception =
         assertThrows(
@@ -992,12 +994,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "createParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "createParticipantCohortAnnotationAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
   public void createParticipantCohortAnnotationAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     deleteExistingParticipantCohortAnnotations();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -1022,12 +1024,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "createParticipantCohortAnnotationForbiddenAccessLevels WorkspaceAccessLevel={0}")
+      name = "createParticipantCohortAnnotationForbiddenAccessLevels RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
   public void createParticipantCohortAnnotationForbiddenAccessLevels(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1053,7 +1055,7 @@ public class CohortReviewControllerTest {
   ////////// updateParticipantCohortAnnotation  //////////
   @Test
   public void updateParticipantCohortAnnotationNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     Long wrongCohortReviewId = -1L;
     Throwable exception =
         assertThrows(
@@ -1072,7 +1074,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortAnnotationNoParticipantCohortStatus() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     Long wrongParticipantId = -1L;
     Long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
@@ -1093,7 +1095,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoAnnotation() {
     long wrongAnnotationId = -1L;
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     Throwable exception =
         assertThrows(
@@ -1192,12 +1194,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "updateParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "updateParticipantCohortAnnotationAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
   public void updateParticipantCohortAnnotationAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1217,12 +1219,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "updateParticipantCohortAnnotationForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "updateParticipantCohortAnnotationForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
   public void updateParticipantCohortAnnotationForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1244,7 +1246,7 @@ public class CohortReviewControllerTest {
   ////////// deleteParticipantCohortAnnotation  //////////
   @Test
   public void deleteParticipantCohortAnnotationWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     DbParticipantCohortAnnotation annotation =
         new DbParticipantCohortAnnotation()
@@ -1274,7 +1276,7 @@ public class CohortReviewControllerTest {
     saveTestParticipantCohortAnnotation();
     Long wrongAnnotationId = -1L;
 
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     Throwable exception =
         assertThrows(
@@ -1299,12 +1301,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "deleteParticipantCohortAnnotationAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "deleteParticipantCohortAnnotationAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
   public void deleteParticipantCohortAnnotationAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -1321,12 +1323,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "deleteParticipantCohortAnnotationForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "deleteParticipantCohortAnnotationForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
   public void deleteParticipantCohortAnnotationForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     DbParticipantCohortAnnotation annotation = saveTestParticipantCohortAnnotation();
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -1348,7 +1350,7 @@ public class CohortReviewControllerTest {
   ////////// updateParticipantCohortStatus  //////////
   @Test
   public void updateParticipantCohortStatusWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
 
     Throwable exception =
         assertThrows(
@@ -1366,7 +1368,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortStatusNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     Long wrongCohortReviewId = -1L;
     Throwable exception =
         assertThrows(
@@ -1384,7 +1386,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortStatusNoParticipantId() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     Long cohortReviewId = cohortReview.getCohortReviewId();
     Long wrongParticipantId = -1L;
     Throwable exception =
@@ -1402,12 +1404,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "updateParticipantCohortStatusAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "updateParticipantCohortStatusAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER"})
   public void updateParticipantCohortStatusAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1425,12 +1427,13 @@ public class CohortReviewControllerTest {
         .isEqualTo(CohortStatus.INCLUDED);
   }
 
-  @ParameterizedTest(name = "updateParticipantCohortStatusForbiddenLevels WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "updateParticipantCohortStatusForbiddenLevels RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER", "NO_ACCESS"})
   public void updateParticipantCohortStatusForbiddenLevels(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1451,7 +1454,7 @@ public class CohortReviewControllerTest {
   ////////// getParticipantCohortAnnotations  //////////
   @Test
   public void getParticipantCohortAnnotationsWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -1468,7 +1471,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortAnnotationsNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long wrongCohortReviewId = -1L;
 
     Throwable exception =
@@ -1485,12 +1488,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getParticipantCohortAnnotationsAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "getParticipantCohortAnnotationsAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void getParticipantCohortAnnotationsAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1513,12 +1516,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getParticipantCohortAnnotationsForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getParticipantCohortAnnotationsForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getParticipantCohortAnnotationsForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -1538,7 +1541,7 @@ public class CohortReviewControllerTest {
   ////////// getParticipantCohortStatus  //////////
   @Test
   public void getParticipantCohortStatusWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -1555,7 +1558,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortStatusNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long wrongCohortReviewId = -1L;
 
     Throwable exception =
@@ -1571,12 +1574,13 @@ public class CohortReviewControllerTest {
     assertNotFoundExceptionCohortReview(wrongCohortReviewId, exception);
   }
 
-  @ParameterizedTest(name = "getParticipantCohortStatusAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getParticipantCohortStatusAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void getParticipantCohortStatusAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     ParticipantCohortStatus response =
@@ -1602,12 +1606,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getParticipantCohortStatusForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getParticipantCohortStatusForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getParticipantCohortStatusForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
     Throwable exception =
@@ -1625,7 +1629,7 @@ public class CohortReviewControllerTest {
   ////////// getParticipantCount  //////////
   @Test
   public void getParticipantCountWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -1643,7 +1647,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCountNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long wrongCohortReviewId = -1L;
 
     Throwable exception =
@@ -1662,7 +1666,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCountNullDomain() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
@@ -1695,7 +1699,7 @@ public class CohortReviewControllerTest {
         "VITAL"
       })
   public void getParticipantCountByUnsupportedDomain(Domain domain) {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
@@ -1711,11 +1715,12 @@ public class CohortReviewControllerTest {
     assertThat(exception).hasMessageThat().isEqualTo("Not supported for domain named: " + domain);
   }
 
-  @ParameterizedTest(name = "getParticipantCountAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getParticipantCountAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
-  public void getParticipantCountAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getParticipantCountAllowedAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
@@ -1733,11 +1738,12 @@ public class CohortReviewControllerTest {
     assertThat(Objects.requireNonNull(actual).getCount()).isEqualTo(0L);
   }
 
-  @ParameterizedTest(name = "getParticipantCountForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getParticipantCountForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
-  public void getParticipantCountForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getParticipantCountForbiddenAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
@@ -1758,7 +1764,7 @@ public class CohortReviewControllerTest {
   ////////// getParticipantData  //////////
   @Test
   public void getParticipantDataWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -1776,7 +1782,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantDataNoCohortReview() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long wrongCohortReviewId = -1L;
 
     Throwable exception =
@@ -1795,7 +1801,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantDataNullDomain() {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
@@ -1828,7 +1834,7 @@ public class CohortReviewControllerTest {
         "VITAL"
       })
   public void getParticipantDataByUnsupportedDomain(Domain domain) {
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     long cohortReviewId = cohortReview.getCohortReviewId();
     Throwable exception =
         assertThrows(
@@ -1844,11 +1850,11 @@ public class CohortReviewControllerTest {
     assertThat(exception).hasMessageThat().isEqualTo("Not supported for domain named: " + domain);
   }
 
-  @ParameterizedTest(name = "getParticipantDataAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getParticipantDataAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
-  public void getParticipantDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getParticipantDataAllowedAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
@@ -1865,11 +1871,12 @@ public class CohortReviewControllerTest {
     assertThat(Objects.requireNonNull(actual).getItems().size()).isEqualTo(1);
   }
 
-  @ParameterizedTest(name = "getParticipantDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getParticipantDataForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
-  public void getParticipantDataForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getParticipantDataForbiddenAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     long cohortReviewId = cohortReview.getCohortReviewId();
@@ -1890,7 +1897,7 @@ public class CohortReviewControllerTest {
   ////////// getParticipantCohortStatuses  //////////
   @Test
   public void getParticipantCohortStatusesWrongWorkspace() {
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -1936,12 +1943,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getParticipantCohortStatusesAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "getParticipantCohortStatusesAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void getParticipantCohortStatusesAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     CohortReview expectedReview =
         createCohortReview(
             cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
@@ -1968,12 +1975,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getParticipantCohortStatusesForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getParticipantCohortStatusesForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getParticipantCohortStatusesForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     createCohortReview(
         cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
 
@@ -1995,12 +2002,12 @@ public class CohortReviewControllerTest {
 
   ////////// getCohortReviewsInWorkspace  //////////
   @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "getCohortReviewsInWorkspaceAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void getCohortReviewsInWorkspaceAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     List<CohortReview> expected =
         ImmutableList.of(
             cohortReviewMapper.dbModelToClient(cohortReview),
@@ -2020,12 +2027,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getCohortReviewsInWorkspaceForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getCohortReviewsInWorkspaceForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -2041,12 +2048,13 @@ public class CohortReviewControllerTest {
   }
 
   ////////// getCohortReviewsByCohortId  //////////
-  @ParameterizedTest(name = "getCohortReviewsByCohortIdAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getCohortReviewsByCohortIdAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void getCohortReviewsByCohortIdAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     DbCohortReview cohortReviewMultiple =
         cohortReviewDao.save(
             new DbCohortReview()
@@ -2075,12 +2083,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "getCohortReviewsByCohortIdForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "getCohortReviewsByCohortIdForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getCohortReviewsByCohortIdForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
 
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
@@ -2095,11 +2103,13 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-  @ParameterizedTest(name = "getCohortReviewsByCohortIdWrongWorkspace WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getCohortReviewsByCohortIdWrongWorkspace RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER"})
-  public void getCohortReviewsByCohortIdWrongWorkspace(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getCohortReviewsByCohortIdWrongWorkspace(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
 
@@ -2113,11 +2123,13 @@ public class CohortReviewControllerTest {
   }
 
   ////////// getParticipantChartData - See CohortReviewControllerBQTest   //////////
-  @ParameterizedTest(name = "getParticipantChartDataAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getParticipantChartDataAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
-  public void getParticipantChartDataAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getParticipantChartDataAllowedAccessLevel(
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     stubBigQueryParticipantChartData();
@@ -2137,12 +2149,13 @@ public class CohortReviewControllerTest {
     assertThat(actual.size()).isEqualTo(1);
   }
 
-  @ParameterizedTest(name = "getParticipantChartDataForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "getParticipantChartDataForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void getParticipantChartDataForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -2162,12 +2175,12 @@ public class CohortReviewControllerTest {
 
   ////////// findCohortReviewDemoChartInfo  //////////
   @ParameterizedTest(
-      name = "findCohortReviewDemoChartInfoAllowedAccessLevel WorkspaceAccessLevel={0}")
+      name = "findCohortReviewDemoChartInfoAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
   public void findCohortReviewDemoChartInfoAllowedAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     stubBigQueryDemoChartData();
@@ -2186,12 +2199,12 @@ public class CohortReviewControllerTest {
   }
 
   @ParameterizedTest(
-      name = "findCohortReviewDemoChartInfoForbiddenAccessLevel WorkspaceAccessLevel={0}")
+      name = "findCohortReviewDemoChartInfoForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
   public void findCohortReviewDemoChartInfoForbiddenAccessLevel(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -2205,12 +2218,13 @@ public class CohortReviewControllerTest {
     assertForbiddenException(exception);
   }
 
-  @ParameterizedTest(name = "findCohortReviewDemoChartInfoWrongWorkspace WorkspaceAccessLevel={0}")
+  @ParameterizedTest(
+      name = "findCohortReviewDemoChartInfoWrongWorkspace RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"READER"})
   public void findCohortReviewDemoChartInfoWrongWorkspace(
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace2, workspaceAccessLevel);
 
@@ -2226,11 +2240,11 @@ public class CohortReviewControllerTest {
   }
 
   ////////// getVocabularies - See CohortReviewControllerBQTest   //////////
-  @ParameterizedTest(name = "getVocabulariesAllowedAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getVocabulariesAllowedAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"OWNER", "WRITER", "READER"})
-  public void getVocabulariesAllowedAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getVocabulariesAllowedAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
     stubBigQueryVocabulary();
@@ -2245,11 +2259,11 @@ public class CohortReviewControllerTest {
     assertThat(actual.size()).isEqualTo(1);
   }
 
-  @ParameterizedTest(name = "getVocabulariesForbiddenAccessLevel WorkspaceAccessLevel={0}")
+  @ParameterizedTest(name = "getVocabulariesForbiddenAccessLevel RawlsWorkspaceAccessLevel={0}")
   @EnumSource(
-      value = WorkspaceAccessLevel.class,
+      value = RawlsWorkspaceAccessLevel.class,
       names = {"NO_ACCESS"})
-  public void getVocabulariesForbiddenAccessLevel(WorkspaceAccessLevel workspaceAccessLevel) {
+  public void getVocabulariesForbiddenAccessLevel(RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     // change access, call and check
     stubWorkspaceAccessLevel(workspace, workspaceAccessLevel);
 
@@ -2710,28 +2724,29 @@ public class CohortReviewControllerTest {
   }
 
   private void stubWorkspaceAccessLevel(
-      Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
+      Workspace workspace, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
     stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
   }
 
-  private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
+  private void stubGetWorkspace(
+      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(USER_EMAIL);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(workspaceAccessLevel.toString());
+    fcResponse.setAccessLevel(workspaceAccessLevel);
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
   private void stubGetWorkspaceAcl(
-      String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
@@ -2750,7 +2765,7 @@ public class CohortReviewControllerTest {
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     tmpWorkspace = workspacesController.createWorkspace(tmpWorkspace).getBody();
-    stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(Objects.requireNonNull(tmpWorkspace), RawlsWorkspaceAccessLevel.OWNER);
 
     return tmpWorkspace;
   }

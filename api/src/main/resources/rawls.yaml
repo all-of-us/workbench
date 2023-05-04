@@ -12,7 +12,7 @@ info:
     url: http://opensource.org/licenses/BSD-3-Clause
   version: 1.0.0
 servers:
-  - url: /
+  - url: https://rawls.dsde-prod.broadinstitute.org/
 tags:
   - name: billing_v2
   - name: methodconfigs

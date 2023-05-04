@@ -28,9 +28,7 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.FileDetail;
@@ -44,8 +42,14 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.MockNotebook;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +74,7 @@ public class NotebooksControllerTest {
   @TestConfiguration
   @Import({
     AccessTierServiceImpl.class,
+    FirecloudMapperImpl.class,
     FakeClockConfiguration.class,
     LogsBasedMetricServiceFakeImpl.class,
     NotebooksController.class,
@@ -85,7 +90,7 @@ public class NotebooksControllerTest {
 
   private static DbUser currentUser;
 
-  private FirecloudWorkspaceACL fcWorkspaceAcl;
+  private RawlsWorkspaceACL fcWorkspaceAcl;
 
   @MockBean private NotebooksService mockNotebookService;
   @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
@@ -94,6 +99,8 @@ public class NotebooksControllerTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private NotebooksController notebooksController;
+
+  @Autowired private FirecloudMapper firecloudMapper;
 
   @BeforeEach
   public void setUp() {
@@ -377,7 +384,7 @@ public class NotebooksControllerTest {
   public void testGetNotebookLockingMetadata_knownUser() {
     final String readerOnMyWorkspace = "some-reader@fake-research-aou.org";
 
-    FirecloudWorkspaceACL workspaceACL =
+    RawlsWorkspaceACL workspaceACL =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -593,13 +600,13 @@ public class NotebooksControllerTest {
   private void assertNotebookLockingMetadata(
       Map<String, String> gcsMetadata,
       NotebookLockingMetadataResponse expectedResponse,
-      FirecloudWorkspaceACL acl) {
+      RawlsWorkspaceACL acl) {
 
     final String testWorkspaceNamespace = "test-ns";
     final String testWorkspaceName = "test-ws";
     final String testNotebook = NotebookUtils.withJupyterNotebookExtension("test-notebook");
 
-    FirecloudWorkspaceDetails fcWorkspace =
+    RawlsWorkspaceDetails fcWorkspace =
         TestMockFactory.createFirecloudWorkspace(
             testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(TestMockFactory.WORKSPACE_BUCKET_NAME);
@@ -607,7 +614,7 @@ public class NotebooksControllerTest {
     stubFcGetWorkspaceACL(acl);
 
     when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
-        .thenReturn(acl.getAcl());
+        .thenReturn(FirecloudTransforms.extractAclResponse(acl));
 
     final String testNotebookPath = NotebookUtils.withNotebookPath(testNotebook);
     doReturn(gcsMetadata)
@@ -636,7 +643,7 @@ public class NotebooksControllerTest {
     return user;
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL() {
+  private RawlsWorkspaceACL createWorkspaceACL() {
     return createWorkspaceACL(
         new JSONObject()
             .put(
@@ -647,25 +654,28 @@ public class NotebooksControllerTest {
                     .put("canShare", true)));
   }
 
-  private FirecloudWorkspaceACL createWorkspaceACL(JSONObject acl) {
+  private RawlsWorkspaceACL createWorkspaceACL(JSONObject acl) {
     return new Gson()
-        .fromJson(new JSONObject().put("acl", acl).toString(), FirecloudWorkspaceACL.class);
+        .fromJson(new JSONObject().put("acl", acl).toString(), RawlsWorkspaceACL.class);
   }
 
-  private void stubFcGetWorkspaceACL(FirecloudWorkspaceACL acl) {
+  private void stubFcGetWorkspaceACL(RawlsWorkspaceACL acl) {
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString())).thenReturn(acl);
   }
 
-  private void stubGetWorkspace(
-      FirecloudWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+  private void stubGetWorkspace(RawlsWorkspaceDetails fcWorkspace, WorkspaceAccessLevel access) {
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(access.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
     doReturn(fcResponse)
         .when(mockFireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<FirecloudWorkspaceResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
-    workspaceResponses.add(fcResponse);
+
+    RawlsWorkspaceListResponse fcListResponse = new RawlsWorkspaceListResponse();
+    fcListResponse.setWorkspace(fcWorkspace);
+    fcListResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access));
+    List<RawlsWorkspaceListResponse> workspaceResponses = mockFireCloudService.getWorkspaces();
+    workspaceResponses.add(fcListResponse);
     doReturn(workspaceResponses).when(mockFireCloudService).getWorkspaces();
   }
 }

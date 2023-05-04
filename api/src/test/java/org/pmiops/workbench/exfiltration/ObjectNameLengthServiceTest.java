@@ -33,11 +33,11 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,9 +90,9 @@ public class ObjectNameLengthServiceTest {
         .when(workspaceService)
         .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));
 
-    FirecloudWorkspaceResponse response =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
+    RawlsWorkspaceResponse response =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().bucketName("some-bucket"));
     doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
 
     List<UserRole> userRoles =
@@ -143,9 +143,9 @@ public class ObjectNameLengthServiceTest {
         .when(workspaceService)
         .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));
 
-    FirecloudWorkspaceResponse response =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().bucketName("some-bucket"));
+    RawlsWorkspaceResponse response =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().bucketName("some-bucket"));
 
     doReturn(response).when(fireCloudService).getWorkspaceAsService(NAMESPACE, FIRECLOUD_NAME);
 

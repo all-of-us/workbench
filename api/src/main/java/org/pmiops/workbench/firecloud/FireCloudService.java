@@ -7,11 +7,12 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /**
@@ -72,17 +73,17 @@ public interface FireCloudService {
   }
 
   /** Creates a new FC workspace. */
-  FirecloudWorkspaceDetails createWorkspace(
+  RawlsWorkspaceDetails createWorkspace(
       String workspaceNamespace, String workspaceName, String authDomainName);
 
-  FirecloudWorkspaceDetails cloneWorkspace(
+  RawlsWorkspaceDetails cloneWorkspace(
       String fromWorkspaceNamespace,
       String fromFirecloudName,
       String toWorkspaceNamespace,
       String toFirecloudName,
       String authDomainName);
 
-  FirecloudWorkspaceACL getWorkspaceAclAsService(String workspaceNamespace, String firecloudName);
+  RawlsWorkspaceACL getWorkspaceAclAsService(String workspaceNamespace, String firecloudName);
 
   /**
    * Make a Terra PATCH request with a list of ACL update requests for a specific workspace. Only
@@ -93,22 +94,20 @@ public interface FireCloudService {
    * @param aclUpdates
    * @return
    */
-  FirecloudWorkspaceACLUpdateResponseList updateWorkspaceACL(
-      String workspaceNamespace,
-      String firecloudName,
-      List<FirecloudWorkspaceACLUpdate> aclUpdates);
+  RawlsWorkspaceACLUpdateResponseList updateWorkspaceACL(
+      String workspaceNamespace, String firecloudName, List<RawlsWorkspaceACLUpdate> aclUpdates);
 
-  FirecloudWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
+  RawlsWorkspaceResponse getWorkspaceAsService(String workspaceNamespace, String firecloudName);
 
   /**
    * Requested field options specified here:
    * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
    */
-  FirecloudWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName);
+  RawlsWorkspaceResponse getWorkspace(String workspaceNamespace, String firecloudName);
 
-  Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace);
+  Optional<RawlsWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace);
 
-  List<FirecloudWorkspaceResponse> getWorkspaces();
+  List<RawlsWorkspaceListResponse> getWorkspaces();
 
   void deleteWorkspace(String workspaceNamespace, String firecloudName);
 

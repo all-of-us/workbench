@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
@@ -39,6 +39,8 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -296,11 +298,12 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     // Lookup the owners and disk creators.
-    FirecloudWorkspaceACL acl =
+    RawlsWorkspaceACL acl =
         fireCloudService.getWorkspaceAclAsService(
             workspace.get().getWorkspaceNamespace(), workspace.get().getFirecloudName());
+    Map<String, RawlsWorkspaceAccessEntry> aclMap = FirecloudTransforms.extractAclResponse(acl);
     List<String> notifyUsernames =
-        acl.getAcl().entrySet().stream()
+        aclMap.entrySet().stream()
             .filter(
                 entry ->
                     WorkspaceAccessLevel.OWNER.toString().equals(entry.getValue().getAccessLevel())

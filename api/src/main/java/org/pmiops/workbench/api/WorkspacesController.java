@@ -37,8 +37,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -63,6 +61,8 @@ import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
@@ -172,7 +172,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
     FirecloudWorkspaceId workspaceId = createTerraBillingProject(accessTier, workspace);
-    FirecloudWorkspaceDetails fcWorkspace =
+    RawlsWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
             workspaceId.getWorkspaceNamespace(),
             workspaceId.getWorkspaceName(),
@@ -358,7 +358,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace,
       DbCdrVersion cdrVersion,
       DbUser user,
-      FirecloudWorkspaceDetails fcWorkspace) {
+      RawlsWorkspaceDetails fcWorkspace) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     // The final step in the process is to clone the AoU representation of the
@@ -454,7 +454,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
-    FirecloudWorkspaceDetails fcWorkspace =
+    RawlsWorkspaceDetails fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
@@ -563,7 +563,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
     FirecloudWorkspaceId toFcWorkspaceId = createTerraBillingProject(accessTier, toWorkspace);
-    FirecloudWorkspaceDetails toFcWorkspace =
+    RawlsWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
@@ -586,10 +586,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // committed to the database in an earlier call
     Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
-      Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
+      Map<String, RawlsWorkspaceAccessEntry> fromAclsMap =
           workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-      for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+      for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));

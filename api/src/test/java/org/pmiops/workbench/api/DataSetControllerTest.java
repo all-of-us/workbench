@@ -97,10 +97,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -132,6 +128,11 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -139,6 +140,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
@@ -205,6 +207,8 @@ public class DataSetControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
+
+  @Autowired private FirecloudMapper firecloudMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CloudBillingClient cloudBillingClient;
@@ -503,22 +507,22 @@ public class DataSetControllerTest {
   }
 
   private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(DataSetControllerTest.USER_EMAIL);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(workspaceAccessLevel.toString());
+    fcResponse.setAccessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(workspaceAccessLevel));
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
   private void stubGetWorkspaceAcl(String ns, String name, WorkspaceAccessLevel accessLevel) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(accessLevel.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(accessLevel.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
@@ -1046,7 +1050,7 @@ public class DataSetControllerTest {
 
     // Project Owner ?
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+        .thenReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.OWNER));
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
   }
@@ -1135,7 +1139,7 @@ public class DataSetControllerTest {
     otherWorkspace = workspacesController.createWorkspace(otherWorkspace).getBody();
 
     when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+        .thenReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.OWNER));
 
     Workspace finalOtherWorkspace = otherWorkspace;
     assertThrows(

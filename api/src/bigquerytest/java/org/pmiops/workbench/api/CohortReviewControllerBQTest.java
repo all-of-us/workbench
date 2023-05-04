@@ -57,9 +57,6 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClientImpl;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Domain;
@@ -77,6 +74,10 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -207,11 +208,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     when(mockFireCloudService.getWorkspaceAclAsService(anyString(), anyString()))
         .thenReturn(
-            new FirecloudWorkspaceACL()
+            new RawlsWorkspaceACL()
                 .acl(
                     ImmutableMap.of(
                         currentUser.getUsername(),
-                        new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
+                        new RawlsWorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = createDefaultCdrVersion();
     accessTierDao.save(cdrVersion.getAccessTier());
@@ -672,16 +673,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   private void stubMockFirecloudGetWorkspace() {
-    FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
-    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
+    RawlsWorkspaceResponse workspaceResponse = new RawlsWorkspaceResponse();
+    workspaceResponse.setAccessLevel(RawlsWorkspaceAccessLevel.WRITER);
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }
 
   private void stubMockFirecloudGetWorkspaceAcl() {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(currentUser.getUsername(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(mockFireCloudService.getWorkspaceAclAsService(NAMESPACE, NAME))

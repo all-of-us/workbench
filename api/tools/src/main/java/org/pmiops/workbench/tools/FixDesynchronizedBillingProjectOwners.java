@@ -16,13 +16,14 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.api.BillingV2Api;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMember;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.rawls.ApiException;
+import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
+import org.pmiops.workbench.rawls.model.RawlsProjectRole;
+import org.pmiops.workbench.rawls.model.RawlsRawlsBillingProjectMember;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -42,10 +43,10 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
       ImmutableList.of(
           "accessLevel", "workspace.namespace", "workspace.name", "workspace.createdBy");
 
-  private static Option fcBaseUrlOpt =
+  private static Option rawlsBaseUrlOpt =
       Option.builder()
-          .longOpt("fc-base-url")
-          .desc("Firecloud API base URL")
+          .longOpt("rawls-base-url")
+          .desc("Rawls API base URL")
           .required()
           .hasArg()
           .build();
@@ -68,7 +69,7 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
           .build();
   private static Options options =
       new Options()
-          .addOption(fcBaseUrlOpt)
+          .addOption(rawlsBaseUrlOpt)
           .addOption(billingProjectIdsOpt)
           .addOption(researcherDomain)
           .addOption(dryRunOpt);
@@ -94,7 +95,7 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
     int ownersRemoved = 0;
     int ownersAdded = 0;
 
-    List<FirecloudWorkspaceResponse> workspaces =
+    List<RawlsWorkspaceListResponse> workspaces =
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS);
     log.info(String.format("found %d workspaces", workspaces.size()));
 
@@ -113,8 +114,8 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    for (FirecloudWorkspaceResponse resp : workspaces) {
-      FirecloudWorkspaceDetails w = resp.getWorkspace();
+    for (RawlsWorkspaceListResponse resp : workspaces) {
+      RawlsWorkspaceDetails w = resp.getWorkspace();
       if (!billingProjectIds.isEmpty() && !billingProjectIds.contains(w.getNamespace())) {
         continue;
       }
@@ -133,22 +134,22 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
         continue;
       }
 
-      Map<String, String> billingProjectRoles =
-          billingV2Api.listBillingProjectMembers(w.getNamespace()).stream()
+      Map<String, RawlsProjectRole> billingProjectRoles =
+          billingV2Api.listBillingProjectMembersV2(w.getNamespace()).stream()
               .filter(m -> m.getEmail().endsWith("@" + researcherDomain))
               .collect(
                   Collectors.toMap(
-                      FirecloudBillingProjectMember::getEmail,
-                      FirecloudBillingProjectMember::getRole));
+                      RawlsRawlsBillingProjectMember::getEmail,
+                      RawlsRawlsBillingProjectMember::getRole));
       Set<String> billingProjectOwners =
           billingProjectRoles.entrySet().stream()
-              .filter(e -> "Owner".equals(e.getValue()))
+              .filter(e -> RawlsProjectRole.OWNER.equals(e.getValue()))
               .map(Entry::getKey)
               .collect(Collectors.toSet());
 
       Map<String, String> workspaceRoles =
           FirecloudTransforms.extractAclResponse(
-                  workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()))
+                  workspacesApi.getACL(w.getNamespace(), w.getName()))
               .entrySet()
               .stream()
               .filter(e -> e.getKey().endsWith("@" + researcherDomain))
@@ -172,7 +173,7 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
           // This covers RW-5013, which caused incomplete owner removal.
           if (!dryRun) {
             try {
-              billingV2Api.removeUserFromBillingProject(w.getNamespace(), "owner", user);
+              billingV2Api.removeUserFromBillingProjectV2(w.getNamespace(), "owner", user);
             } catch (ApiException e) {
               log.log(Level.WARNING, "failed to remove user from project", e);
             }
@@ -187,7 +188,7 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
           // appear in the future.
           if (!dryRun) {
             try {
-              billingV2Api.addUserToBillingProject(w.getNamespace(), "owner", user);
+              billingV2Api.addUserToBillingProjectV2(w.getNamespace(), "owner", user);
             } catch (ApiException e) {
               log.log(Level.WARNING, "failed to add user to project", e);
             }
@@ -212,8 +213,9 @@ public class FixDesynchronizedBillingProjectOwners extends Tool {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
-      ServiceAccountAPIClientFactory apiFactory =
-          new ServiceAccountAPIClientFactory(opts.getOptionValue(fcBaseUrlOpt.getLongOpt()));
+      RawlsServiceAccountAPIClientFactory apiFactory =
+          new RawlsServiceAccountAPIClientFactory(
+              opts.getOptionValue(rawlsBaseUrlOpt.getLongOpt()));
 
       // An empty set indicates no billing projects should be filtered.
       Set<String> billingProjectIds =

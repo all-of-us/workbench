@@ -14,8 +14,8 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 
 /** Utility class for holding Leonardo APP environment variables constant and methods. */
 public class LeonardoCustomEnvVarUtils {
@@ -173,7 +173,7 @@ public class LeonardoCustomEnvVarUtils {
   public static Map<String, String> getBaseEnvironmentVariables(
       DbWorkspace workspace, FireCloudService fireCloudService, WorkbenchConfig workbenchConfig) {
     Map<String, String> customEnvironmentVariables = new HashMap<>();
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
+    RawlsWorkspaceResponse fcWorkspaceResponse =
         fireCloudService
             .getWorkspace(workspace)
             .orElseThrow(() -> new NotFoundException("workspace not found"));
@@ -187,7 +187,7 @@ public class LeonardoCustomEnvVarUtils {
     // If this variable is exported (with any value), codegen will use the BQ storage API, which is
     // ~200x faster for loading large dataframes from Bigquery.
     // After CA-952 is complete, this should always be exported.
-    if (WorkspaceAccessLevel.OWNER.toString().equals(fcWorkspaceResponse.getAccessLevel())
+    if (fcWorkspaceResponse.getAccessLevel().equals(RawlsWorkspaceAccessLevel.OWNER)
         || workspace.isTerraV2Workspace()) {
       customEnvironmentVariables.put(BIGQUERY_STORAGE_API_ENABLED_ENV_KEY, "true");
     }

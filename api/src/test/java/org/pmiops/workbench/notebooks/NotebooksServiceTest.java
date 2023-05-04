@@ -41,16 +41,18 @@ import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.MockNotebook;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,11 +90,12 @@ public class NotebooksServiceTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private UserDao userDao;
+  @Autowired private FirecloudMapper firecloudMapper;
 
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
-  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class})
+  @Import({FakeClockConfiguration.class, NotebooksServiceImpl.class, FirecloudMapperImpl.class})
   static class Configuration {
 
     @Bean
@@ -136,10 +139,10 @@ public class NotebooksServiceTest {
       WorkspaceAccessLevel access) {
     when(mockFireCloudService.getWorkspace(workspaceNamespace, workspaceName))
         .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .accessLevel(access.toString())
+            new RawlsWorkspaceResponse()
+                .accessLevel(firecloudMapper.apiToFcWorkspaceAccessLevel(access))
                 .workspace(
-                    new FirecloudWorkspaceDetails()
+                    new RawlsWorkspaceDetails()
                         .namespace(workspaceNamespace)
                         .name(workspaceName)
                         .bucketName(bucketName)));
@@ -148,17 +151,16 @@ public class NotebooksServiceTest {
   private void stubNotebookToJson() {
     when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
-            new FirecloudWorkspaceResponse()
-                .workspace(new FirecloudWorkspaceDetails().bucketName("bkt")));
+            new RawlsWorkspaceResponse().workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 
   @Test
   public void testAdminGetReadOnlyHtml() {
-    FirecloudWorkspaceDetails firecloudWorkspaceDetails = new FirecloudWorkspaceDetails();
+    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
     firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
-    FirecloudWorkspaceResponse firecloudWorkspaceResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
     firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
     when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
         .thenReturn(firecloudWorkspaceResponse);

@@ -61,14 +61,15 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputs;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowOutputsResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.CreatedIssue;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -177,10 +178,9 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionScatterTasksPerSample = 4;
     workbenchConfig.wgsCohortExtraction.extractionDestinationDataset = "extract-proj.extract-ds";
 
-    FirecloudWorkspaceDetails fcWorkspace =
-        new FirecloudWorkspaceDetails().bucketName("user-bucket");
-    FirecloudWorkspaceResponse fcWorkspaceResponse =
-        new FirecloudWorkspaceResponse().workspace(fcWorkspace);
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails().bucketName("user-bucket");
+    RawlsWorkspaceResponse fcWorkspaceResponse =
+        new RawlsWorkspaceResponse().workspace(fcWorkspace);
     doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());
     currentUser = createUser("a@fake-research-aou.org");
 
@@ -214,7 +214,7 @@ public class GenomicExtractionServiceTest {
         CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
+    doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.READER))
         .when(fireCloudService)
         .getWorkspace(anyString(), anyString());
 
@@ -286,7 +286,7 @@ public class GenomicExtractionServiceTest {
             .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
             .submissionDate(OffsetDateTime.now()));
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"))
+    doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.NO_ACCESS))
         .when(fireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
 
@@ -297,7 +297,7 @@ public class GenomicExtractionServiceTest {
               targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
         });
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
+    doReturn(new RawlsWorkspaceResponse().accessLevel(RawlsWorkspaceAccessLevel.READER))
         .when(fireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
     genomicExtractionService.getGenomicExtractionJobs(

@@ -56,10 +56,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exfiltration.ObjectNameLengthServiceImpl;
 import org.pmiops.workbench.exfiltration.impl.EgressObjectLengthsRemediationService;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
@@ -75,9 +71,13 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -304,13 +304,13 @@ public class ConceptSetsControllerTest {
             WORKSPACE_NAMESPACE,
             WORKSPACE_NAME,
             cdrVersion.getCdrVersionId(),
-            WorkspaceAccessLevel.OWNER);
+            RawlsWorkspaceAccessLevel.OWNER);
     workspace2 =
         createTestWorkspace(
             WORKSPACE_NAMESPACE,
             WORKSPACE_NAME_2,
             cdrVersion.getCdrVersionId(),
-            WorkspaceAccessLevel.OWNER);
+            RawlsWorkspaceAccessLevel.OWNER);
     // save different criteria (there is no workspace associated with criteria
     saveAllTestCriteria();
     // create concept set as owner or writer in workspace
@@ -385,7 +385,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void createConceptSetOwner() {
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     ConceptSet conceptSet =
         new ConceptSet()
             .domain(Domain.CONDITION)
@@ -409,7 +409,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void createConceptSetWriter() {
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     ConceptSet conceptSet =
         new ConceptSet()
             .domain(Domain.CONDITION)
@@ -433,7 +433,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void createConceptSetReader() {
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     ConceptSet conceptSet =
         new ConceptSet()
             .domain(Domain.CONDITION)
@@ -456,7 +456,7 @@ public class ConceptSetsControllerTest {
   @Test
   public void createConceptSetNoAccess() {
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
     ConceptSet conceptSet =
         new ConceptSet()
             .domain(Domain.CONDITION)
@@ -482,7 +482,7 @@ public class ConceptSetsControllerTest {
     // use defaultConceptSet
 
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
 
     ResponseEntity<EmptyResponse> response =
         conceptSetsController.deleteConceptSet(
@@ -504,7 +504,7 @@ public class ConceptSetsControllerTest {
   public void deleteConceptSetWriter() {
     // use defaultConceptSet
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     ResponseEntity<EmptyResponse> response =
         conceptSetsController.deleteConceptSet(
@@ -526,7 +526,7 @@ public class ConceptSetsControllerTest {
   public void deleteConceptSetReader() {
     // use defaultConceptSet
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
 
     Throwable exception =
         assertThrows(
@@ -542,7 +542,7 @@ public class ConceptSetsControllerTest {
   public void deleteConceptSetNoAccess() {
     // use defaultConceptSet
     // change access, create and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
 
     Throwable exception =
         assertThrows(
@@ -602,7 +602,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetOwner() {
     // use defaultConceptSet
     // change access, get and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     ConceptSet retrieved =
         conceptSetsController
             .getConceptSet(workspace.getNamespace(), workspace.getId(), defaultConceptSet.getId())
@@ -615,7 +615,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetWriter() {
     // use defaultConceptSet
     // change access, get and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     ConceptSet retrieved =
         conceptSetsController
@@ -630,7 +630,7 @@ public class ConceptSetsControllerTest {
     // create concept set as owner or writer
     // use defaultConceptSet
     // change access, get and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
 
     ConceptSet retrieved =
         conceptSetsController
@@ -644,7 +644,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetNoAccess() {
     // use defaultConceptSet
     // change access, get and chaeck
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
 
     Throwable exception =
         assertThrows(
@@ -753,7 +753,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceOwner() {
     // use defaultConceptSet
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
 
     List<ConceptSet> response =
         conceptSetsController
@@ -769,7 +769,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceWriter() {
     // use defaultConceptSet
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
 
     List<ConceptSet> response =
         conceptSetsController
@@ -785,7 +785,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceReader() {
     // use defaultConceptSet
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
 
     List<ConceptSet> response =
         conceptSetsController
@@ -801,7 +801,7 @@ public class ConceptSetsControllerTest {
   public void getConceptSetsInWorkspaceNoAccess() {
     // use defaultConceptSet
     // change access, call and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
 
     Throwable exception =
         assertThrows(
@@ -899,7 +899,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetOwner() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     fakeClock.increment(1000L);
 
     ConceptSet updatedConceptSet =
@@ -918,7 +918,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetWriter() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     fakeClock.increment(1000L);
 
     ConceptSet updatedConceptSet =
@@ -937,7 +937,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetReader() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     fakeClock.increment(1000L);
 
     Throwable exception =
@@ -957,7 +957,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetNoAccess() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
     fakeClock.increment(1000L);
 
     Throwable exception =
@@ -1123,7 +1123,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetConceptsOwner() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     UpdateConceptSetRequest updateConceptSetRequest =
         buildUpdateConceptsRequest(
             defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
@@ -1149,7 +1149,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetConceptsWriter() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.WRITER);
     UpdateConceptSetRequest updateConceptSetRequest =
         buildUpdateConceptsRequest(
             defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
@@ -1175,7 +1175,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetConceptsReader() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.READER);
     UpdateConceptSetRequest updateConceptSetRequest =
         buildUpdateConceptsRequest(
             defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
@@ -1198,7 +1198,7 @@ public class ConceptSetsControllerTest {
   public void updateConceptSetConceptsNoAccess() {
     // use defaultConceptSet
     // change access, update and check
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.NO_ACCESS);
     UpdateConceptSetRequest updateConceptSetRequest =
         buildUpdateConceptsRequest(
             defaultConceptSet.getEtag(), CRITERIA_CONDITION_2.getConceptId());
@@ -1232,7 +1232,7 @@ public class ConceptSetsControllerTest {
             CRITERIA_CONDITION_2,
             CRITERIA_CONDITION_3);
     // copy to: workspace2 owner
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.OWNER);
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
@@ -1269,7 +1269,7 @@ public class ConceptSetsControllerTest {
             CRITERIA_CONDITION_2,
             CRITERIA_CONDITION_3);
     // copy to: workspace2 writer
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.WRITER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.WRITER);
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(conceptSet.getName() + "_copy")
@@ -1298,7 +1298,7 @@ public class ConceptSetsControllerTest {
     // from: workspace
     // use defaultConceptSet
     // copy to: workspace2 reader
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.READER);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.READER);
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
@@ -1323,7 +1323,7 @@ public class ConceptSetsControllerTest {
     // from: workspace
     // use defaultConceptSet
     // copy to: workspace2 reader
-    stubWorkspaceAccessLevel(workspace2, WorkspaceAccessLevel.NO_ACCESS);
+    stubWorkspaceAccessLevel(workspace2, RawlsWorkspaceAccessLevel.NO_ACCESS);
     CopyRequest copyRequest =
         new CopyRequest()
             .newName(defaultConceptSet.getName() + "_copy")
@@ -1533,7 +1533,7 @@ public class ConceptSetsControllerTest {
       Domain domain,
       Criteria... criteriumsForDomain) {
     // change access to owner and create
-    stubWorkspaceAccessLevel(workspace, WorkspaceAccessLevel.OWNER);
+    stubWorkspaceAccessLevel(workspace, RawlsWorkspaceAccessLevel.OWNER);
     ConceptSet conceptSet = new ConceptSet().domain(domain).description(desc).name(name);
     // use only criteria that matches domain
     Long[] domainConceptIds =
@@ -1570,28 +1570,29 @@ public class ConceptSetsControllerTest {
   }
 
   private void stubWorkspaceAccessLevel(
-      Workspace workspace, WorkspaceAccessLevel workspaceAccessLevel) {
+      Workspace workspace, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
     stubGetWorkspaceAcl(workspace.getNamespace(), workspace.getName(), workspaceAccessLevel);
   }
 
-  private void stubGetWorkspace(String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceDetails fcWorkspace = new FirecloudWorkspaceDetails();
+  private void stubGetWorkspace(
+      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+    RawlsWorkspaceDetails fcWorkspace = new RawlsWorkspaceDetails();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(USER_EMAIL);
-    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    RawlsWorkspaceResponse fcResponse = new RawlsWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
-    fcResponse.setAccessLevel(workspaceAccessLevel.toString());
+    fcResponse.setAccessLevel(workspaceAccessLevel);
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
   private void stubGetWorkspaceAcl(
-      String ns, String name, WorkspaceAccessLevel workspaceAccessLevel) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+      String ns, String name, RawlsWorkspaceAccessLevel workspaceAccessLevel) {
+    RawlsWorkspaceACL workspaceAccessLevelResponse = new RawlsWorkspaceACL();
+    RawlsWorkspaceAccessEntry accessLevelEntry =
+        new RawlsWorkspaceAccessEntry().accessLevel(workspaceAccessLevel.toString());
+    Map<String, RawlsWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAclAsService(ns, name))
@@ -1602,7 +1603,7 @@ public class ConceptSetsControllerTest {
       String workspaceNamespace,
       String workspaceName,
       long cdrVersionId,
-      WorkspaceAccessLevel workspaceAccessLevel) {
+      RawlsWorkspaceAccessLevel workspaceAccessLevel) {
     Workspace tmpWorkspace = new Workspace();
     tmpWorkspace.setName(workspaceName);
     tmpWorkspace.setNamespace(workspaceNamespace);

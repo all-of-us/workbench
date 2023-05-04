@@ -29,17 +29,17 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceDetails;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -102,28 +102,18 @@ public class WorkspaceAuthServiceTest {
         Arguments.of("OWNER", WorkspaceAccessLevel.OWNER),
         Arguments.of("WRITER", WorkspaceAccessLevel.WRITER),
         Arguments.of("READER", WorkspaceAccessLevel.READER),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.NO_ACCESS),
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.NO_ACCESS),
         Arguments.of("PROJECT_OWNER", WorkspaceAccessLevel.OWNER));
   }
 
   @ParameterizedTest(name = "getWorkspaceAccessLevel({0})")
   @MethodSource("accessLevels")
   public void test_getWorkspaceAccessLevel_valid(
-      String accessLevel, WorkspaceAccessLevel expected) {
+      RawlsWorkspaceAccessLevel accessLevel, WorkspaceAccessLevel expected) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubFcGetWorkspace(namespace, fcName, accessLevel);
     assertThat(workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName)).isEqualTo(expected);
-  }
-
-  @Test
-  public void test_getWorkspaceAccessLevel_invalid() {
-    final String namespace = "wsns";
-    final String fcName = "firecloudname";
-    stubFcGetWorkspace(namespace, fcName, "some garbage");
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> workspaceAuthService.getWorkspaceAccessLevel(namespace, fcName));
   }
 
   private static Stream<Arguments> enforcedAccessLevels_valid() {
@@ -139,15 +129,16 @@ public class WorkspaceAuthServiceTest {
     return Stream.of(
         Arguments.of("WRITER", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
         Arguments.of("READER", WorkspaceAccessLevel.WRITER, ForbiddenException.class),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
-        Arguments.of("NO ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class),
-        Arguments.of("invalid status", WorkspaceAccessLevel.READER, ServerErrorException.class));
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.READER, ForbiddenException.class),
+        Arguments.of("NO_ACCESS", WorkspaceAccessLevel.OWNER, ForbiddenException.class));
   }
 
   @ParameterizedTest(name = "enforceWorkspaceAccessLevel({0} user access, {2} required)")
   @MethodSource("enforcedAccessLevels_valid")
   public void test_enforceWorkspaceAccessLevel_valid(
-      String accessLevel, WorkspaceAccessLevel expected, WorkspaceAccessLevel required) {
+      RawlsWorkspaceAccessLevel accessLevel,
+      WorkspaceAccessLevel expected,
+      WorkspaceAccessLevel required) {
     final String namespace = "wsns";
     final String fcName = "firecloudname";
     stubFcGetWorkspace(namespace, fcName, accessLevel);
@@ -159,7 +150,7 @@ public class WorkspaceAuthServiceTest {
       name = "enforceWorkspaceAccessLevel({0} user access, {1} required, expected exception {2})")
   @MethodSource("enforcedAccessLevels_invalid")
   public void test_enforceWorkspaceAccessLevel_invalid(
-      String accessLevel,
+      RawlsWorkspaceAccessLevel accessLevel,
       WorkspaceAccessLevel required,
       Class<? extends Throwable> expectedException) {
     final String namespace = "wsns";
@@ -274,10 +265,11 @@ public class WorkspaceAuthServiceTest {
     return toReturn;
   }
 
-  private void stubFcGetWorkspace(String namespace, String fcName, String accessLevel) {
-    final FirecloudWorkspaceResponse toReturn =
-        new FirecloudWorkspaceResponse()
-            .workspace(new FirecloudWorkspaceDetails().namespace(namespace).name(fcName))
+  private void stubFcGetWorkspace(
+      String namespace, String fcName, RawlsWorkspaceAccessLevel accessLevel) {
+    final RawlsWorkspaceResponse toReturn =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))
             .accessLevel(accessLevel);
     when(mockFireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
   }
@@ -286,14 +278,14 @@ public class WorkspaceAuthServiceTest {
       String namespace, String fcName, Map<String, WorkspaceAccessLevel> acl) {
     when(mockFireCloudService.getWorkspaceAclAsService(namespace, fcName))
         .thenReturn(
-            new FirecloudWorkspaceACL()
+            new RawlsWorkspaceACL()
                 .acl(
                     acl.entrySet().stream()
                         .collect(
                             Collectors.toMap(
                                 Entry::getKey,
                                 e ->
-                                    new FirecloudWorkspaceAccessEntry()
+                                    new RawlsWorkspaceAccessEntry()
                                         .accessLevel(e.getValue().toString())))));
   }
 
@@ -304,11 +296,11 @@ public class WorkspaceAuthServiceTest {
 
   private void stubUpdateAcl(String namespace, String fcName) {
     when(mockFireCloudService.updateWorkspaceACL(eq(namespace), eq(fcName), any()))
-        .thenReturn(new FirecloudWorkspaceACLUpdateResponseList());
+        .thenReturn(new RawlsWorkspaceACLUpdateResponseList());
   }
 
   @NotNull
-  private static List<FirecloudWorkspaceACLUpdate> buildAclUpdates(
+  private static List<RawlsWorkspaceACLUpdate> buildAclUpdates(
       Map<String, WorkspaceAccessLevel> aclUpdates) {
     return aclUpdates.entrySet().stream()
         .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))

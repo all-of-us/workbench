@@ -10,6 +10,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rawls.ApiClient;
 import org.pmiops.workbench.rawls.api.BillingV2Api;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -33,8 +34,12 @@ public class RawlsConfig {
   public static final String END_USER_LENIENT_TIMEOUT_API_CLIENT =
       "rawlsEndUserLenientTimeoutApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "rawlsServiceAccountApiClient";
-  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "serviceAccountBillingV2Api";
-  public static final String END_USER_STATIC_BILLING_V2_API = "endUserBillingV2Api";
+  public static final String SERVICE_ACCOUNT_WORKSPACE_API = "rawlsWorkspaceAclsApi";
+  public static final String END_USER_WORKSPACE_API = "rawlsWorkspacesApi";
+  public static final String END_USER_LENIENT_TIMEOUT_WORKSPACE_API =
+      "rawlsLenientTimeoutWorkspacesApi";
+  public static final String SERVICE_ACCOUNT_BILLING_V2_API = "rawlsServiceAccountBillingV2Api";
+  public static final String END_USER_STATIC_BILLING_V2_API = "rawlsEndUserBillingV2Api";
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -69,6 +74,32 @@ public class RawlsConfig {
       throw new ServerErrorException(e);
     }
     return apiClient;
+  }
+
+  @Bean(name = END_USER_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi workspacesApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = END_USER_LENIENT_TIMEOUT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi lenientTimeoutWorkspacesApi(
+      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean(name = SERVICE_ACCOUNT_WORKSPACE_API)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public WorkspacesApi workspacesApiAcls(
+      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    WorkspacesApi api = new WorkspacesApi();
+    api.setApiClient(apiClient);
+    return api;
   }
 
   @Bean(name = SERVICE_ACCOUNT_BILLING_V2_API)

@@ -9,11 +9,13 @@ import javax.annotation.Nonnull;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
+import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
+import org.pmiops.workbench.firecloud.RawlsRetryHandler;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.iam.SamRetryHandler;
+import org.pmiops.workbench.rawls.api.WorkspacesApi;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.sam.api.ResourcesApi;
 import org.pmiops.workbench.sam.model.SamFullyQualifiedResourceId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,19 +35,25 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   // https://github.com/broadinstitute/sam/blob/30931bde56a6ffcea2040086503ade37378dfffc/src/main/resources/reference.conf#L782
   private static final String SAM_KUBERNETES_RESOURCE_NAME = "kubernetes-app";
   private final FirecloudApiClientFactory firecloudApiClientFactory;
+  private final RawlsApiClientFactory rawlsApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;
   private final FirecloudRetryHandler firecloudRetryHandler;
+  private final RawlsRetryHandler rawlsRetryHandler;
   private final SamRetryHandler samRetryHandler;
 
   @Autowired
   public ImpersonatedFirecloudServiceImpl(
       FirecloudApiClientFactory firecloudApiClientFactory,
+      RawlsApiClientFactory rawlsApiClientFactory,
       SamApiClientFactory samApiClientFactory,
       FirecloudRetryHandler firecloudRetryHandler,
+      RawlsRetryHandler rawlsRetryHandler,
       SamRetryHandler samRetryHandler) {
     this.firecloudApiClientFactory = firecloudApiClientFactory;
+    this.rawlsApiClientFactory = rawlsApiClientFactory;
     this.samApiClientFactory = samApiClientFactory;
     this.firecloudRetryHandler = firecloudRetryHandler;
+    this.rawlsRetryHandler = rawlsRetryHandler;
     this.samRetryHandler = samRetryHandler;
   }
 
@@ -63,9 +71,9 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException {
+  public List<RawlsWorkspaceListResponse> getWorkspaces(@Nonnull DbUser dbUser) throws IOException {
     WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
-    return firecloudRetryHandler.run(
+    return rawlsRetryHandler.run(
         (context) -> workspacesApi.listWorkspaces(FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
@@ -93,7 +101,8 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   @Override
   public void deleteWorkspace(
       @Nonnull DbUser dbUser, String workspaceNamespace, String firecloudName) throws IOException {
-    WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
+    org.pmiops.workbench.firecloud.api.WorkspacesApi workspacesApi =
+        getFcImpersonatedWorkspacesApi(dbUser);
     firecloudRetryHandler.run(
         (context) -> {
           workspacesApi.deleteWorkspace(workspaceNamespace, firecloudName);
@@ -108,6 +117,12 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
 
   private WorkspacesApi getImpersonatedWorkspacesApi(@Nonnull DbUser dbUser) throws IOException {
     return new WorkspacesApi(
+        rawlsApiClientFactory.newImpersonatedRawlsApiClient(dbUser.getUsername()));
+  }
+
+  private org.pmiops.workbench.firecloud.api.WorkspacesApi getFcImpersonatedWorkspacesApi(
+      @Nonnull DbUser dbUser) throws IOException {
+    return new org.pmiops.workbench.firecloud.api.WorkspacesApi(
         firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));
   }
 
