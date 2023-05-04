@@ -1,6 +1,8 @@
 package org.pmiops.workbench.tools;
 
+import com.google.common.primitives.Ints;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -59,15 +61,25 @@ public class DeleteOrphanedWorkspaces extends Tool {
           .hasArg()
           .build();
 
-  private static final Option DRY_RUN_OPT =
+  private static final Option LIMIT_OPT =
       Option.builder()
-          .longOpt("dry-run")
-          .desc("If true, the tool runs in dry run mode; no modifications are made")
+          .longOpt("limit")
+          .desc("The maximum number of workspaces to delete, per step. Optional.")
           .hasArg()
           .build();
 
+  private static final Option DELETE_OPT =
+      Option.builder()
+          .longOpt("delete")
+          .desc("Enable to actually delete the workspaces.  Defaults to count only.")
+          .build();
+
   private static final Options OPTIONS =
-      new Options().addOption(RW_PROJ_OPT).addOption(USERNAME_OPT).addOption(DRY_RUN_OPT);
+      new Options()
+          .addOption(RW_PROJ_OPT)
+          .addOption(USERNAME_OPT)
+          .addOption(LIMIT_OPT)
+          .addOption(DELETE_OPT);
 
   public static void main(String[] args) {
     CommandLineToolConfig.runCommandLine(DeleteOrphanedWorkspaces.class, args);
@@ -82,30 +94,44 @@ public class DeleteOrphanedWorkspaces extends Tool {
         throw new IllegalArgumentException("Unsupported RW environment: " + rwEnvOpt);
       }
       final String usernameOpt = opts.getOptionValue(USERNAME_OPT.getLongOpt());
-      // default to true if missing
-      final boolean dryRunOpt =
-          !"false".equalsIgnoreCase(opts.getOptionValue(DRY_RUN_OPT.getLongOpt()));
-      final String dryRunPrefix = dryRunOpt ? "[DRY RUN] " : "";
+      final Optional<Integer> limitOpt =
+          opts.hasOption(LIMIT_OPT)
+              ? Optional.ofNullable(Ints.tryParse(opts.getOptionValue(LIMIT_OPT.getLongOpt())))
+              : Optional.empty();
+      // default to false
+      final boolean deleteOpt =
+          opts.hasOption(DELETE_OPT)
+              && Boolean.parseBoolean(opts.getOptionValue(DELETE_OPT.getLongOpt()));
 
       var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(usernameOpt);
       LOG.info(
           String.format(
-              "Saw %d Rawls workspaces which are not present in the %s DB",
+              "Found %d Rawls workspaces which are not present in the %s DB",
               workspaces.size(), rwEnvOpt));
-      workspaces.forEach(
-          ws -> {
-            LOG.info(
-                String.format(
-                    "%sDeleting Rawls workspace %s/%s",
-                    dryRunPrefix, ws.getWorkspace().getNamespace(), ws.getWorkspace().getName()));
-            if (!dryRunOpt) {
-              workspaceService.deleteOrphanedRawlsWorkspace(
-                  usernameOpt,
-                  ws.getWorkspace().getNamespace(),
-                  ws.getWorkspace().getGoogleProject(),
-                  ws.getWorkspace().getName());
-            }
-          });
+
+      if (deleteOpt) {
+        limitOpt
+            .map(
+                l -> {
+                  LOG.info(String.format("Limiting to the first %d workspaces.", l));
+                  return workspaces.stream().limit(l);
+                })
+            .orElse(workspaces.stream())
+            .forEach(
+                ws -> {
+                  LOG.info(
+                      String.format(
+                          "Deleting Rawls workspace %s/%s",
+                          ws.getWorkspace().getNamespace(), ws.getWorkspace().getName()));
+                  workspaceService.deleteOrphanedRawlsWorkspace(
+                      usernameOpt,
+                      ws.getWorkspace().getNamespace(),
+                      ws.getWorkspace().getGoogleProject(),
+                      ws.getWorkspace().getName());
+                });
+      } else {
+        LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
+      }
     };
   }
 }

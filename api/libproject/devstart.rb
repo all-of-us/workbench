@@ -2702,11 +2702,17 @@ def delete_orphaned_workspaces(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError.new("Username required") unless opts.username }
 
   op.add_typed_option(
-      '--dry-run [false]',
+      '--limit [limit]',
+      String,
+      ->(opts, v) { opts.limit = v },
+      'The maximum number of workspaces to delete per step.')
+
+  op.add_typed_option(
+      '--delete',
       TrueClass,
-      ->(opts, v) { opts.dry_run = v},
-      "Don't actually delete, but show what would have happened.  Defaults to true.")
-  op.opts.dry_run = true
+      ->(opts, v) { opts.delete = v },
+      'Set to delete. Defaults to count only.')
+  op.opts.delete = false
 
   op.parse.validate
 
@@ -2718,7 +2724,8 @@ def delete_orphaned_workspaces(cmd_name, *args)
   gradle_args = ([
     ["--project", op.opts.project],
     ["--username", op.opts.username],
-    ["--dry-run", op.opts.dry_run],
+    ["--limit", op.opts.limit],
+#    ["--delete", op.opts.delete],
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   # Gradle args need to be single-quote wrapped.
   gradle_args.map! { |f| "'#{f}'" }
