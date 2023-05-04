@@ -29,10 +29,10 @@ public class RawlsImpersonatedServiceAccountApiClientFactory extends RawlsApiCli
     return accessToken;
   }
 
-  private static ApiClient newApiClient(String targetServiceAccount, String fcBaseUrl)
+  private static ApiClient newApiClient(String targetServiceAccount, String rawlsBaseUrl)
       throws IOException {
     ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(fcBaseUrl);
+    apiClient.setBasePath(rawlsBaseUrl);
     apiClient.setAccessToken(getAccessToken(targetServiceAccount));
 
     return apiClient;
