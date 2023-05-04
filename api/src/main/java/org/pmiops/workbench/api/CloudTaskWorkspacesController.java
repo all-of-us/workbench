@@ -34,7 +34,10 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
         workspace -> {
           try {
             impersonatedWorkspaceService.deleteWorkspace(
-                workspace.getUsername(), workspace.getWsNamespace(), workspace.getWsFirecloudId());
+                workspace.getUsername(),
+                workspace.getWsNamespace(),
+                workspace.getWsFirecloudId(),
+                true);
           } catch (NotFoundException e) {
             LOGGER.info(
                 String.format(

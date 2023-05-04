@@ -1,246 +1,196 @@
 package org.pmiops.workbench.tools;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.time.Clock;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+import com.google.common.primitives.Ints;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
-import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
-import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.actionaudit.ActionAuditServiceImpl;
+import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditorImpl;
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.RawlsApiClientFactory;
-import org.pmiops.workbench.firecloud.RawlsConfig;
-import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.google.CloudBillingClientImpl;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.rawls.ApiClient;
-import org.pmiops.workbench.rawls.api.WorkspacesApi;
-import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.google.GoogleConfig;
+import org.pmiops.workbench.iam.SamApiClientFactory;
+import org.pmiops.workbench.iam.SamRetryHandler;
+import org.pmiops.workbench.impersonation.ImpersonatedFirecloudServiceImpl;
+import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
+import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceServiceImpl;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
 
-// TODO(calbach): This Spring configuration in this tool is very brittle. Either delete this tool or
-// refactor it to instead hit the Workbench API directly.
-@Configuration
 @Import({
-  FirecloudApiClientFactory.class,
-  RawlsApiClientFactory.class,
+  ActionAuditServiceImpl.class,
+  ActionAuditSpringConfiguration.class, // injects com.google.cloud.logging.Logging
+  BillingProjectAuditorImpl.class,
+  CommonMappers.class,
   FireCloudServiceImpl.class,
+  FirecloudApiClientFactory.class,
   FirecloudMapperImpl.class,
-  FireCloudConfig.class,
-  CloudBillingClientImpl.class
+  GoogleConfig.class, // injects com.google.cloud.iam.credentials.v1.IamCredentialsClient
+  ImpersonatedFirecloudServiceImpl.class,
+  ImpersonatedWorkspaceServiceImpl.class,
+  RawlsApiClientFactory.class,
+  SamApiClientFactory.class,
+  SamRetryHandler.class,
+  WorkspaceMapperImpl.class,
 })
 public class DeleteWorkspaces extends Tool {
+  private static final Logger LOG = Logger.getLogger(DeleteWorkspaces.class.getName());
 
-  private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
+  private static final List<String> ALLOWED_RW_ENVS = List.of("all-of-us-workbench-test");
 
-  private static Option deleteListFilename =
+  // I have not figured out how to connect the BillingV2Api beans correctly in this tool,
+  // so BP deletion fails
+
+  private static final boolean DELETE_BILLING_PROJECTS = false;
+
+  private static final Option RW_PROJ_OPT =
       Option.builder()
-          .longOpt("delete-list-filename")
-          .desc(
-              "File containing list of workspaces to delete. Each line should contain a single workspace's namespace and firecloud name, separated by a comma"
-                  + "Example: ws-namespace-1,fc-id-1 \n ws-namespace-2,fc-id-2 \n ws-namespace-3, fc-id-3")
+          .longOpt("project")
+          .desc("The AoU project (environment) to access.")
           .required()
           .hasArg()
           .build();
-  private static Option dryRunOpt =
+  private static final Option USERNAME_OPT =
       Option.builder()
-          .longOpt("dry-run")
-          .desc("If specified, the tool runs in dry run mode; no modifications are made")
+          .longOpt("username")
+          .desc("The user whose workspaces we want to delete.")
+          .required()
+          .hasArg()
+          .build();
+  private static final Option LIMIT_OPT =
+      Option.builder()
+          .longOpt("limit")
+          .desc("The maximum number of workspaces to delete, per step. Optional.")
+          .hasArg()
+          .build();
+  private static final Option DELETE_OPT =
+      Option.builder()
+          .longOpt("delete")
+          .desc("Enable to actually delete the workspaces.  Defaults to count only.")
+          .hasArg()
           .build();
 
-  private static Options options = new Options().addOption(deleteListFilename).addOption(dryRunOpt);
+  private static final Options OPTIONS =
+      new Options()
+          .addOption(RW_PROJ_OPT)
+          .addOption(USERNAME_OPT)
+          .addOption(LIMIT_OPT)
+          .addOption(DELETE_OPT);
 
-  @Bean
-  public WorkspaceService workspaceService(
-      AccessTierService accessTierService,
-      BillingProjectAuditor billingProjectAuditor,
-      Clock clock,
-      FirecloudMapper firecloudMapper,
-      FireCloudService fireCloudService,
-      Provider<DbUser> dbUserProvider,
-      CloudBillingClient cloudBillingClient,
-      UserRecentWorkspaceDao userRecentWorkspaceDao,
-      WorkspaceDao workspaceDao) {
-    return new WorkspaceServiceImpl(
-        accessTierService,
-        billingProjectAuditor,
-        clock,
-        null,
-        null,
-        null,
-        firecloudMapper,
-        fireCloudService,
-        null,
-        cloudBillingClient,
-        dbUserProvider,
-        null,
-        null,
-        null,
-        userRecentWorkspaceDao,
-        workspaceDao,
-        null,
-        null);
-  }
-
-  static DbUser currentImpersonatedUser;
-
-  @Bean
-  @Primary
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  DbUser user() {
-    return currentImpersonatedUser;
-  }
-
-  @Bean
-  @Primary
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(RawlsApiClientFactory factory) {
-    if (currentImpersonatedUser == null) {
-      return null;
-    }
-    return new WorkspacesApi(buildRawlsServiceAccountApiClient(factory));
-  }
-
-  @Bean
-  @Primary
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  ProfileApi profileApi(FirecloudApiClientFactory factory) {
-    if (currentImpersonatedUser == null) {
-      return null;
-    }
-    return new ProfileApi(buildFirecloudServiceAccountApiClient(factory));
-  }
-
-  private static org.pmiops.workbench.firecloud.ApiClient buildFirecloudServiceAccountApiClient(
-      FirecloudApiClientFactory factory) {
-    org.pmiops.workbench.firecloud.ApiClient apiClient = factory.newApiClient();
-    try {
-      apiClient.setAccessToken(
-          ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
-    return apiClient;
-  }
-
-  private static ApiClient buildRawlsServiceAccountApiClient(RawlsApiClientFactory factory) {
-    ApiClient apiClient = factory.newRawlsApiClient();
-    try {
-      apiClient.setAccessToken(
-          ServiceAccounts.getScopedServiceAccessToken(FireCloudConfig.BILLING_SCOPES));
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
-    return apiClient;
-  }
-
-  @Bean
-  public CommandLineRunner run(
-      WorkspaceDao workspaceDao, UserDao userDao, WorkspaceService workspaceService) {
-
-    return (args) -> {
-      CommandLine opts = new DefaultParser().parse(options, args);
-      boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
-
-      AtomicInteger successes = new AtomicInteger();
-      AtomicInteger fails = new AtomicInteger();
-      try (BufferedReader reader =
-          new BufferedReader(
-              new FileReader(opts.getOptionValue(deleteListFilename.getLongOpt())))) {
-        reader
-            .lines()
-            .forEach(
-                line -> {
-                  String[] tokens = line.split(",");
-                  String namespace = tokens[0].trim();
-                  String fcName = tokens[1].trim();
-
-                  DbWorkspace dbWorkspace =
-                      workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-                          namespace,
-                          fcName,
-                          DbStorageEnums.workspaceActiveStatusToStorage(
-                              WorkspaceActiveStatus.ACTIVE));
-
-                  if (dbWorkspace == null) {
-                    log.info(
-                        "Could not find active workspace with (namespace, fcId) of ("
-                            + namespace
-                            + ", "
-                            + fcName
-                            + ")");
-                    return;
-                  }
-
-                  try {
-                    currentImpersonatedUser = dbWorkspace.getCreator();
-                    if (!dryRun) {
-                      workspaceService.deleteWorkspace(dbWorkspace);
-                    }
-
-                    successes.getAndIncrement();
-                    dryLog(
-                        dryRun,
-                        "Deleted workspace ("
-                            + dbWorkspace.getWorkspaceNamespace()
-                            + ", "
-                            + dbWorkspace.getFirecloudName()
-                            + ")");
-                  } catch (Exception e) {
-                    fails.getAndIncrement();
-                    log.log(
-                        Level.WARNING,
-                        "Could not delete workspace (" + namespace + ", " + fcName + ")",
-                        e);
-                  }
-                });
-      }
-      dryLog(
-          dryRun,
-          String.format(
-              "Deleted %d workspaces, failed to delete %d", successes.get(), fails.get()));
-    };
-  }
-
-  private static void dryLog(boolean dryRun, String msg) {
-    String prefix = "";
-    if (dryRun) {
-      prefix = "[DRY RUN] Would have... ";
-    }
-    log.info(prefix + msg);
-  }
+  private final ImpersonatedWorkspaceService workspaceService;
 
   public static void main(String[] args) {
     CommandLineToolConfig.runCommandLine(DeleteWorkspaces.class, args);
+  }
+
+  @Autowired
+  DeleteWorkspaces(ImpersonatedWorkspaceService workspaceService) {
+    this.workspaceService = workspaceService;
+  }
+
+  @Bean
+  public CommandLineRunner run() {
+    return (args) -> {
+      final CommandLine opts = new DefaultParser().parse(OPTIONS, args);
+      final String rwEnvOpt = opts.getOptionValue(RW_PROJ_OPT.getLongOpt());
+      if (!ALLOWED_RW_ENVS.contains(rwEnvOpt)) {
+        throw new IllegalArgumentException("Unsupported RW environment: " + rwEnvOpt);
+      }
+      final String usernameOpt = opts.getOptionValue(USERNAME_OPT.getLongOpt());
+      final Optional<Integer> limitOpt =
+          opts.hasOption(LIMIT_OPT)
+              ? Optional.ofNullable(Ints.tryParse(opts.getOptionValue(LIMIT_OPT.getLongOpt())))
+              : Optional.empty();
+      // default to false
+      final boolean deleteOpt =
+          opts.hasOption(DELETE_OPT)
+              && Boolean.parseBoolean(opts.getOptionValue(DELETE_OPT.getLongOpt()));
+
+      // AoU
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listAouWorkspaces,
+          this::deleteAouWorkspace);
+      // Rawls
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listRawlsWorkspaces,
+          this::deleteRawlsWorkspace);
+    };
+  }
+
+  private <T> void deleteWorkspaces(
+      String rwEnvOpt,
+      String usernameOpt,
+      Optional<Integer> limitOpt,
+      boolean deleteOpt,
+      BiFunction<String, String, List<T>> listWorkspaces,
+      BiConsumer<T, String> deleteWorkspace) {
+    List<T> workspaces = listWorkspaces.apply(usernameOpt, rwEnvOpt);
+
+    if (deleteOpt) {
+      limitOpt
+          .map(
+              l -> {
+                LOG.info(String.format("Limiting to the first %d workspaces.", l));
+                return workspaces.stream().limit(l);
+              })
+          .orElse(workspaces.stream())
+          .forEach(ws -> deleteWorkspace.accept(ws, usernameOpt));
+    } else {
+      LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
+    }
+  }
+
+  private List<WorkspaceResponse> listAouWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspaces(username);
+    LOG.info(String.format("Found %d AoU workspaces in %s", workspaces.size(), rwEnv));
+    return workspaces;
+  }
+
+  private List<RawlsWorkspaceListResponse> listRawlsWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(username);
+    LOG.info(
+        String.format(
+            "Found %d Rawls workspaces which are not present in the %s DB",
+            workspaces.size(), rwEnv));
+    return workspaces;
+  }
+
+  private void deleteAouWorkspace(WorkspaceResponse response, String username) {
+    String namespace = response.getWorkspace().getNamespace();
+    String fcName = response.getWorkspace().getId();
+    LOG.info(String.format("Deleting workspace %s/%s", namespace, fcName));
+    workspaceService.deleteWorkspace(username, namespace, fcName, DELETE_BILLING_PROJECTS);
+  }
+
+  private void deleteRawlsWorkspace(RawlsWorkspaceListResponse response, String username) {
+    String namespace = response.getWorkspace().getNamespace();
+    String fcName = response.getWorkspace().getName();
+    String googleProject = response.getWorkspace().getGoogleProject();
+    LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
+    workspaceService.deleteOrphanedRawlsWorkspace(
+        username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
   }
 }

@@ -18,8 +18,13 @@ public interface ImpersonatedWorkspaceService {
   // but not present (or deleted) in the AoU RW DB
   List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username);
 
-  void deleteWorkspace(String username, String wsNamespace, String wsId);
+  void deleteWorkspace(
+      String username, String wsNamespace, String wsId, boolean deleteBillingProjects);
 
   void deleteOrphanedRawlsWorkspace(
-      String username, String wsNamespace, String googleProject, String wsId);
+      String username,
+      String wsNamespace,
+      String googleProject,
+      String wsId,
+      boolean deleteBillingProjects);
 }
