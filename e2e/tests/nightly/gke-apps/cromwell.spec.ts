@@ -16,6 +16,13 @@ const fileBasePath = '../../../../resources/cromwell/';
 const wdlFilePath = path.relative(process.cwd(), __dirname + fileBasePath + wdlFileName);
 const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jsonFileName);
 
+// The use of %s in the following commands is temp, once docker image is updated, we will always use
+// cromshell which will be alias for cromshell-beta
+const cromshellSubmitPythonCmd = (cromshell_version) => `!${cromshell_version} submit ${wdlFileName} ${jsonFileName}`;
+const cromshellSubmitRCmd = (cromshell_version) =>
+  `system2('${cromshell_version}', args = c('submit', ` +
+  `'${wdlFileName}','${jsonFileName}'), stdout = TRUE, stderr = TRUE)`;
+
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -60,7 +67,10 @@ describe('Cromwell GKE App', () => {
     await workspaceDataPage.deleteWorkspace();
   });
 
-  test('Run cromwell using python notebook', async () => {
+  test.each([
+    [Language.Python, 'All of Us Cromwell Setup Python snippets', cromshellSubmitPythonCmd],
+    [Language.R, 'All of Us Cromwell Setup snippets', cromshellSubmitRCmd]
+  ])('Run cromwell using %s notebook', async (language, snippetMenu, cromshellSubmitCommand) => {
     const appsPanel = new AppsPanel(page);
     const cromwellPanel = new CromwellConfigurationPanel(page);
 
@@ -69,14 +79,13 @@ describe('Cromwell GKE App', () => {
 
     // Create and Open notebook
     const workspaceDataPage = new WorkspaceDataPage(page);
-    const notebookName = makeRandomName('cromwell-python');
-    const notebook = await workspaceDataPage.createNotebook(notebookName, Language.Python);
+    const notebookName = makeRandomName(`cromwell-${language}`);
+    const notebook = await workspaceDataPage.createNotebook(notebookName, language);
 
     // Select and run Cromwell Setup snippet from menu
-    await notebook.selectSnippet('All of Us Cromwell Setup Python snippets', '(1) Setup');
+    await notebook.selectSnippet(snippetMenu, '(1) Setup');
     let snippetOutput = await notebook.runCodeCell(1);
 
-    // Confirm Cromwell has not started
     /* The snippet output is usually like
       Scanning for cromshell 2 beta
       Scanning for cromshell 2 alpha...
@@ -84,8 +93,8 @@ describe('Cromwell GKE App', () => {
       Checking status for CROMWELL app....
      */
     // We are trying to find the correct version cromshell-alpha or cromshell-beta
-    // This is temp, once docker image is updated, we will always cromshell which will be alias for cromshell-beta
     const cromshell_version = snippetOutput.split(', please use ')[1].split('\n')[0];
+    // Confirm Cromwell has not started
     expect(snippetOutput.includes('CROMWELL app does not exist. Please create cromwell server from workbench')).toBe(
       true
     );
@@ -120,7 +129,7 @@ describe('Cromwell GKE App', () => {
 
     // Submit wdl to cromwell
     const submitJob = await notebook.runCodeCell(2, {
-      code: `!${cromshell_version} submit ${wdlFileName} ${jsonFileName}`
+      code: cromshellSubmitCommand(cromshell_version)
     });
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
