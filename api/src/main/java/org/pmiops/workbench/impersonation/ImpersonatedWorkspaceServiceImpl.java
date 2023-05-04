@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,10 +15,10 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +81,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getOwnedWorkspacesOrphanedInRawls(String username) {
+  public List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
     if (dbUser == null) {
       logger.warning(String.format("user %s not found", username));
@@ -100,32 +99,32 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
   }
 
-  private boolean isOwner(FirecloudWorkspaceResponse response) {
+  private boolean isOwner(RawlsWorkspaceListResponse response) {
     return firecloudMapper.fcToApiWorkspaceAccessLevel(response.getAccessLevel())
         == WorkspaceAccessLevel.OWNER;
   }
 
-  private List<FirecloudWorkspaceResponse> notInAouDb(
-      List<FirecloudWorkspaceResponse> fcWorkspaces) {
+  private List<RawlsWorkspaceListResponse> notInAouDb(
+      List<RawlsWorkspaceListResponse> rawlsWorkspaces) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
-    Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid =
-        fcWorkspaces.stream()
+    var rawlsWorkspacesByUuid =
+        rawlsWorkspaces.stream()
             .collect(
                 Collectors.toMap(
                     fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
                     fcWorkspace -> fcWorkspace));
 
-    Set<String> fcUuids = fcWorkspacesByUuid.keySet();
+    Set<String> rawlsUuids = rawlsWorkspacesByUuid.keySet();
 
     Set<String> dbWorkspaceUuids =
-        workspaceDao.findActiveByFirecloudUuidIn(fcUuids).stream()
+        workspaceDao.findActiveByFirecloudUuidIn(rawlsUuids).stream()
             .map(DbWorkspace::getFirecloudUuid)
             .collect(Collectors.toSet());
 
     // return FC workspaces which are not in the AoU DB
-    return Sets.difference(fcUuids, dbWorkspaceUuids).stream()
-        .map(fcWorkspacesByUuid::get)
+    return Sets.difference(rawlsUuids, dbWorkspaceUuids).stream()
+        .map(rawlsWorkspacesByUuid::get)
         .collect(Collectors.toList());
   }
 

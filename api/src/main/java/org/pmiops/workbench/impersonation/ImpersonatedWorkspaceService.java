@@ -1,8 +1,8 @@
 package org.pmiops.workbench.impersonation;
 
 import java.util.List;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 
 /**
  * An impersonation-enabled version of {@link org.pmiops.workbench.workspaces.WorkspaceService}
@@ -16,7 +16,7 @@ public interface ImpersonatedWorkspaceService {
 
   // return a list of workspaces which are present in Rawls as owned by the user
   // but not present (or deleted) in the AoU RW DB
-  List<FirecloudWorkspaceResponse> getOwnedWorkspacesOrphanedInRawls(String username);
+  List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username);
 
   void deleteWorkspace(String username, String wsNamespace, String wsId);
 
