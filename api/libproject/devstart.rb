@@ -1504,64 +1504,6 @@ Common.register_command({
     :fn => ->(*args) {load_institutions(LOAD_INSTITUTIONS_CMD, *args)}
 })
 
-def delete_workspaces(cmd_name, *args)
-  common = Common.new
-
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
-  if op.opts.project.to_s.empty?
-    op.opts.project = TEST_PROJECT
-  end
-
-  op.add_typed_option(
-      "--dry_run=[dry_run]",
-      TrueClass,
-      ->(opts, v) { opts.dry_run = v},
-      "When true, print debug lines instead of performing writes. Defaults to true.")
-
-  op.add_typed_option(
-      "--delete-list-filename [delete-list-filename]",
-      String,
-      ->(opts, v) { opts.deleteListFilename = v},
-      "File containing list of workspaces to delete.
-      Each line should contain a single workspace's namespace and firecloud name, separated by a comma
-      Example: ws-namespace-1,fc-id-1 \n ws-namespace-2,fc-id-2 \n ws-namespace-3, fc-id-3")
-
-  # Create a cloud context and apply the DB connection variables to the environment.
-  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate()
-
-  if op.opts.dry_run
-    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
-  end
-
-  flags = ([
-      ["--delete-list-filename", op.opts.deleteListFilename]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  if op.opts.dry_run
-    flags += ["--dry-run"]
-  end
-  # Gradle args need to be single-quote wrapped.
-  flags.map! { |f| "'#{f}'" }
-
-  ENV.update(read_db_vars(gcc))
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
-        ./gradlew deleteWorkspaces
-       -PappArgs=[#{flags.join(',')}]}
-  end
-end
-
-DELETE_WORKSPACES_CMD = "delete-workspaces"
-
-Common.register_command({
-    :invocation => DELETE_WORKSPACES_CMD,
-    :description => "Delete workspaces listed in given file.\n",
-    :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
-})
-
 def invalidate_rdr_export(cmd_name, *args)
   common = Common.new
 
@@ -2681,7 +2623,7 @@ def run_mysql_cmd(cmd)
     cmd
 end
 
-def delete_orphaned_workspaces(cmd_name, *args)
+def delete_workspaces(cmd_name, *args)
   common = Common.new
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -2731,14 +2673,14 @@ def delete_orphaned_workspaces(cmd_name, *args)
 
   ENV.update(read_db_vars(gcc))
   CloudSqlProxyContext.new(gcc.project).run do
-    common.run_inline %W{./gradlew deleteOrphanedWorkspaces -PappArgs=[#{gradle_args.join(',')}]}
+    common.run_inline %W{./gradlew deleteWorkspaces -PappArgs=[#{gradle_args.join(',')}]}
   end
 end
 
-DELETE_ORPHANED_WORKSPACES_CMD = "delete-orphaned-workspaces"
+DELETE_WORKSPACES_CMD = "delete-workspaces"
 
 Common.register_command({
-    :invocation => DELETE_ORPHANED_WORKSPACES_CMD,
-    :description => "Delete a user's workspaces in Rawls which are no longer in AoU",
-    :fn => ->(*args) {delete_orphaned_workspaces(DELETE_ORPHANED_WORKSPACES_CMD, *args)}
+    :invocation => DELETE_WORKSPACES_CMD,
+    :description => "Delete a user's workspaces in AoU as well as any in Terra-Rawls which are no longer in AoU",
+    :fn => ->(*args) {delete_workspaces(DELETE_WORKSPACES_CMD, *args)}
 })

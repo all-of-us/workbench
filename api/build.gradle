@@ -689,15 +689,6 @@ task generateImpersonatedUserTokens(type: JavaExec) {
     }
 }
 
-// See project.rb command: delete-workspaces
-task deleteWorkspaces(type: JavaExec) {
-    classpath = sourceSets.__tools__.runtimeClasspath
-    mainClass = "org.pmiops.workbench.tools.DeleteWorkspaces"
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
-}
-
 // See project.rb command: invalidate-rdr-export
 task invalidateRdrExport(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
@@ -812,10 +803,10 @@ task exportWorkspaceOperations(type: JavaExec) {
     }
 }
 
-// See project.rb command: delete-orphaned-workspaces
-task deleteOrphanedWorkspaces(type: JavaExec) {
+// See project.rb command: delete-workspaces
+task deleteWorkspaces(type: JavaExec) {
     classpath = sourceSets.__tools__.runtimeClasspath
-    mainClass = "org.pmiops.workbench.tools.DeleteOrphanedWorkspaces"
+    mainClass = "org.pmiops.workbench.tools.DeleteWorkspaces"
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
