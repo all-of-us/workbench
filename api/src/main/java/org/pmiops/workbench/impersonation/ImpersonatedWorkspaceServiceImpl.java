@@ -144,7 +144,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(
           dbUser, dbWorkspace.getGoogleProject());
-    } catch (IOException e) {
+    } catch (Exception e) {
       // Ignore exceptions and proceed with workspace deletion.
       // We don't want an error here to stop us from trying to delete the workspace.
       logger.log(
@@ -156,7 +156,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     try {
       impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new ServerErrorException(e);
     }
 
@@ -188,7 +188,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     try {
       impersonatedFirecloudService.deleteSamKubernetesResourcesInWorkspace(dbUser, googleProject);
-    } catch (IOException e) {
+    } catch (Exception e) {
       // Ignore exceptions and proceed with workspace deletion.
       // We don't want an error here to stop us from trying to delete the workspace.
       logger.log(
@@ -200,7 +200,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     try {
       impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new ServerErrorException(e);
     }
 
