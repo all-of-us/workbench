@@ -17,8 +17,8 @@ const wdlFilePath = path.relative(process.cwd(), __dirname + fileBasePath + wdlF
 const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jsonFileName);
 
 const cromshellSubmitPythonCmd = `!%s submit ${wdlFileName} ${jsonFileName}`;
-const cromshellSubmitRCmd = `system2('%s', args = c('submit', 
-                             '${wdlFileName}','${jsonFileName}'), stdout = TRUE, stderr = TRUE)`;
+const cromshellSubmitRCmd =
+  `system2('%s', args = c('submit', '${wdlFileName}','${jsonFileName}'), ` + ' stdout = TRUE, stderr = TRUE)';
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
