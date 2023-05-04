@@ -2740,6 +2740,6 @@ DELETE_ORPHANED_WORKSPACES_CMD = "delete-orphaned-workspaces"
 
 Common.register_command({
     :invocation => DELETE_ORPHANED_WORKSPACES_CMD,
-    :description => "Do something with orphaned projects I guess",
+    :description => "Delete a user's workspaces in Rawls which are no longer in AoU",
     :fn => ->(*args) {delete_orphaned_workspaces(DELETE_ORPHANED_WORKSPACES_CMD, *args)}
 })

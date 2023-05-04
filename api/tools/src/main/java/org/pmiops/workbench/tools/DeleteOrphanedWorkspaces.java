@@ -60,14 +60,12 @@ public class DeleteOrphanedWorkspaces extends Tool {
           .required()
           .hasArg()
           .build();
-
   private static final Option LIMIT_OPT =
       Option.builder()
           .longOpt("limit")
           .desc("The maximum number of workspaces to delete, per step. Optional.")
           .hasArg()
           .build();
-
   private static final Option DELETE_OPT =
       Option.builder()
           .longOpt("delete")
