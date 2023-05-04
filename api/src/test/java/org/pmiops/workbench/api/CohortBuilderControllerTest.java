@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import com.google.apphosting.api.DeadlineExceededException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
@@ -168,7 +167,7 @@ public class CohortBuilderControllerTest {
   public void countParticipantsRaiseDeadlineExceededException() {
     stubBigQueryCallThrowDeadlineExceededException();
     assertThrows(
-        DeadlineExceededException.class,
+        RuntimeException.class,
         () ->
             controller.countParticipants(
                 WORKSPACE_NAMESPACE, WORKSPACE_ID, new CohortDefinition()));
@@ -1718,6 +1717,6 @@ public class CohortBuilderControllerTest {
 
   private void stubBigQueryCallThrowDeadlineExceededException() {
     when(bigQueryService.filterBigQueryConfigAndExecuteQuery(null))
-        .thenThrow(new DeadlineExceededException());
+        .thenThrow(new RuntimeException());
   }
 }
