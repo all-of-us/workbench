@@ -1692,7 +1692,9 @@ Common.register_command({
 
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.authority = ""
   op.opts.remove = false
+  op.opts.remove_all = false
   op.opts.dry_run = false
   op.add_option(
        "--email [EMAIL,...]",
@@ -1702,17 +1704,22 @@ def authority_options(cmd_name, args)
       "--authority [AUTHORITY,...]",
       ->(opts, v) { opts.authority = v},
       "Comma-separated list of user authorities to add or remove for the users. " +
-      "Include keyword ALL to include all authorities; typically that should only " +
-      "be used with removals. When granting authorities, use DEVELOPER to gain full access")
+      "When granting authorities, use DEVELOPER to gain full access. " +
+      "Exactly one of --authority or --remove-all must be passed.")
   op.add_option(
       "--remove",
       ->(opts, _) { opts.remove = "true"},
-      "Remove authorities (rather than adding them.)")
+      "Remove authorities (rather than adding them) when using the --authority argument.")
+  op.add_option(
+    "--remove-all",
+    ->(opts, _) { opts.remove_all = true},
+    "Removes all authorities from user(s). Exactly one of --authority or --remove-all must be passed."
+  )
   op.add_option(
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.email and ((opts.authority != "") ^ opts.remove_all)}
   return op
 end
 
@@ -1722,19 +1729,11 @@ def set_authority(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  if not op.opts.remove and op.opts.authority.upcase.include? "ALL"
-    get_user_confirmation(
-      "Adding ALL authorities is redundant and rarely useful; to transitively " +
-      "grant all authorities, simply add the all-encompassing DEVELOPER authority.\n" +
-      "Do you want to add ALL authorities anyways?"
-    )
-  end
-
   ENV.update(read_db_vars(gcc))
   ServiceAccountContext.new(gcc.project).run do
     Common.new.run_inline %W{
       ./gradlew setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.remove_all}]}
   end
 end
 
@@ -1750,7 +1749,7 @@ def set_authority_local(cmd_name, *args)
   op = authority_options(cmd_name, args)
   op.parse.validate
 
-  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]"]
+  app_args = ["-PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.remove_all}]"]
   common = Common.new
   common.run_inline %W{./gradlew setAuthority} + app_args
 end

@@ -77,7 +77,9 @@ set-authority
 ```
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.authority = ""
   op.opts.remove = false
+  op.opts.remove_all = false
   op.opts.dry_run = false
   op.add_option(
        "--email [EMAIL,...]",
@@ -86,31 +88,37 @@ def authority_options(cmd_name, args)
   op.add_option(
       "--authority [AUTHORITY,...]",
       ->(opts, v) { opts.authority = v},
-      "Comma-separated list of user authorities to add or remove for the users. ")
+      "Comma-separated list of user authorities to add or remove for the users. " +
+      "When granting authorities, use DEVELOPER to gain full access. " +
+      "Exactly one of --authority or --remove-all must be passed.")
   op.add_option(
       "--remove",
       ->(opts, _) { opts.remove = "true"},
-      "Remove authorities (rather than adding them.)")
+      "Remove authorities (rather than adding them) when using the --authority argument.")
+  op.add_option(
+    "--remove-all",
+    ->(opts, _) { opts.remove_all = true},
+    "Removes all authorities from user(s). Exactly one of --authority or --remove-all must be passed."
+  )
   op.add_option(
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.email and ((opts.authority != "") ^ opts.remove_all)}
   return op
 end
 
 def set_authority(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = authority_options(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
 
-  with_cloud_proxy_and_db(gcc) do
-    common = Common.new
-    common.run_inline %W{
-      gradle setAuthority
-     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  ENV.update(read_db_vars(gcc))
+  ServiceAccountContext.new(gcc.project).run do
+    Common.new.run_inline %W{
+      ./gradlew setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run},#{op.opts.remove_all}]}
   end
 end
 
@@ -154,7 +162,7 @@ task manageLeonardoRuntimes(type: JavaExec) {
 - It is actually  possible to run your Java tool using just gradle and without the project.rb wrapper. I
 prefer this while developing because of the faster cycle time.
   - It is also the only way to run your Java tool against your local environment.
-  - ex. `./gradlew setAuthority -PappArgs="['ericsong@fake-research-aou.org','DEVELOPER',false,false]"`
+  - ex. `./gradlew setAuthority -PappArgs="['ericsong@fake-research-aou.org','DEVELOPER',false,false,false]"`
     is the local equivalent of `./project.rb set-authority --project all-of-us-workbench-test --email ericsong@fake-research-aou.org --authority DEVELOPER`
   - It may be necessary to run through the [gradle setup](https://github.com/all-of-us/workbench#api-faster-api-startup-for-macos) 
   for some tasks.

@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 public class SetAuthority extends Tool {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());
-  private static final String ALL_AUTHORITIES = "ALL";
 
   private Set<String> commaDelimitedStringToSet(String str) {
     return new HashSet<>(Arrays.asList(str.split(",")));
@@ -32,9 +31,6 @@ public class SetAuthority extends Tool {
       if (cleanedValue.isEmpty()) {
         continue;
       }
-      if (ALL_AUTHORITIES.equals(cleanedValue)) {
-        return new HashSet<>(Arrays.asList(Authority.values()));
-      }
       auths.add(Authority.valueOf(cleanedValue));
     }
     return auths;
@@ -45,15 +41,22 @@ public class SetAuthority extends Tool {
     return (args) -> {
       // User-friendly command-line parsing is done in devstart.rb, so we do only simple positional
       // argument parsing here.
-      if (args.length != 4) {
+      if (args.length != 5) {
         throw new IllegalArgumentException(
-            "Expected 4 args (email_list, authorities, remove, dry_run). Got "
+            "Expected 5 args (email_list, authorities, remove, dry_run, remove_all). Got "
                 + Arrays.asList(args));
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
-      Set<Authority> authorities = commaDelimitedStringToAuthoritySet(args[1]);
+      String authoritiesArgument = args[1];
       boolean remove = Boolean.valueOf(args[2]);
       boolean dryRun = Boolean.valueOf(args[3]);
+      boolean removeAll = Boolean.valueOf(args[4]);
+
+      Set<Authority> authorities =
+          removeAll
+              ? new HashSet<>(Arrays.asList(Authority.values()))
+              : commaDelimitedStringToAuthoritySet(authoritiesArgument);
+
       int numUsers = 0;
       int numErrors = 0;
       int numChanged = 0;
@@ -71,7 +74,7 @@ public class SetAuthority extends Tool {
 
         Set<Authority> granted = user.getAuthoritiesEnum();
         Set<Authority> updated = new HashSet(granted);
-        if (remove) {
+        if (remove || removeAll) {
           updated.removeAll(authorities);
         } else {
           updated.addAll(authorities);
