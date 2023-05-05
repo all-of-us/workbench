@@ -89,4 +89,9 @@ cron:
   schedule: every day 20:00
   timezone: America/Chicago
   target: api
+- description: Delete all test user workspaces which have been orphaned in Rawls
+  url: /v1/cron/deleteTestUserWorkspacesInRawls
+  schedule: every day 21:00
+  timezone: America/Chicago
+  target: api
 

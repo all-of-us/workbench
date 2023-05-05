@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.CreateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.DuplicateWorkspaceTaskRequest;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;
 import org.pmiops.workbench.model.SynchronizeUserAccessRequest;
+import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class TaskQueueService {
   private static final String CREATE_WORKSPACE_PATH = BASE_PATH + "/createWorkspace";
   private static final String DUPLICATE_WORKSPACE_PATH = BASE_PATH + "/duplicateWorkspace";
   private static final String DELETE_TEST_WORKSPACES_PATH = BASE_PATH + "/deleteTestUserWorkspaces";
+  private static final String DELETE_RAWLS_TEST_WORKSPACES_PATH =
+      BASE_PATH + "/deleteTestUserWorkspacesInRawls";
 
   private static final String AUDIT_PROJECTS_QUEUE_NAME = "auditProjectQueue";
   private static final String SYNCHRONIZE_ACCESS_QUEUE_NAME = "synchronizeAccessQueue";
@@ -46,6 +49,8 @@ public class TaskQueueService {
   private static final String CREATE_WORKSPACE_QUEUE_NAME = "createWorkspaceQueue";
   private static final String DUPLICATE_WORKSPACE_QUEUE_NAME = "duplicateWorkspaceQueue";
   private static final String DELETE_TEST_WORKSPACES_QUEUE_NAME = "deleteTestUserWorkspacesQueue";
+  private static final String DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME =
+      "deleteTestUserRawlsWorkspacesQueue";
 
   private static final Logger LOGGER = Logger.getLogger(TaskQueueService.class.getName());
 
@@ -120,6 +125,25 @@ public class TaskQueueService {
   }
 
   public void groupAndPushDeleteTestWorkspaceTasks(List<TestUserWorkspace> workspacesToDelete) {
+    groupDeleteWorkspaceTasks(workspacesToDelete)
+        .forEach(
+            batch ->
+                createAndPushTask(
+                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, batch));
+  }
+
+  public void groupAndPushDeleteTestWorkspaceInRawlsTasks(
+      List<TestUserRawlsWorkspace> workspacesToDelete) {
+    groupDeleteWorkspaceTasks(workspacesToDelete)
+        .forEach(
+            batch ->
+                createAndPushTask(
+                    DELETE_RAWLS_TEST_WORKSPACES_QUEUE_NAME,
+                    DELETE_RAWLS_TEST_WORKSPACES_PATH,
+                    batch));
+  }
+
+  private <T> List<List<T>> groupDeleteWorkspaceTasks(List<T> workspacesToDelete) {
     int batchSize =
         Optional.ofNullable(workbenchConfigProvider.get().e2eTestUsers)
             .map(conf -> conf.workspaceDeletionBatchSize)
@@ -127,11 +151,7 @@ public class TaskQueueService {
                 () ->
                     new BadRequestException(
                         "Deletion of e2e test user workspaces is not enabled in this environment"));
-    CloudTasksUtils.partitionList(workspacesToDelete, batchSize)
-        .forEach(
-            batch ->
-                createAndPushTask(
-                    DELETE_TEST_WORKSPACES_QUEUE_NAME, DELETE_TEST_WORKSPACES_PATH, batch));
+    return CloudTasksUtils.partitionList(workspacesToDelete, batchSize);
   }
 
   public void pushEgressEventTask(Long eventId) {
