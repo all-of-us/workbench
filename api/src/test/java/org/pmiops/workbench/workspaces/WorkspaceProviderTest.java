@@ -10,7 +10,6 @@ import static org.pmiops.workbench.utils.TestMockFactory.createWorkspace;
 
 import au.com.dius.pact.provider.junit5.HttpTestTarget;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
-import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
@@ -55,13 +54,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.web.servlet.MockMvc;
 
 @Provider("AoURWAPI_Workspaces")
 @PactFolder("src/test/resources/pacts")
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
-public class ProductPactProviderTest {
+public class WorkspaceProviderTest {
   @MockBean private DataSource dataSource;
 @MockBean private DbParams cdrParams;
 @MockBean private CdrDataSource cdrDataSource;
