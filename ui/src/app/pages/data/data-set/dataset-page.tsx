@@ -1133,16 +1133,9 @@ export const DatasetPage = fp.flow(
         });
         // check surveys
         if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYBASICS);
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYLIFESTYLE);
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH);
-          updatedPrepackaged.add(
-            PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION
+          Object.keys(PREPACKAGED_SURVEY_DOMAINS).forEach((prepackagedSurvey) =>
+            updatedPrepackaged.add(prepackagedSurvey)
           );
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYCOPE);
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYSDOH);
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE);
-          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYPFHH);
         } else if (
           prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
           Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
