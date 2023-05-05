@@ -321,8 +321,7 @@ public class DisksControllerTest {
             .size(300)
             .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
             .status(status)
-            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
       label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());
