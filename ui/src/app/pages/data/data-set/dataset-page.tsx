@@ -1152,24 +1152,6 @@ export const DatasetPage = fp.flow(
           updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEY);
         }
       } else {
-        updatedPrepackaged.delete(prepackaged);
-        updatedDomainsWithConceptSetIds.forEach(
-          (domainWithConceptSetId: DomainWithConceptSetId) => {
-            if (
-              (PREPACKAGED_DOMAINS[prepackaged] === Domain.SURVEY &&
-                domainWithConceptSetId.domain === Domain.SURVEY &&
-                !Array.from(updatedPrepackaged).some((domain) =>
-                  domain.toString().includes('SURVEY')
-                )) ||
-              (PREPACKAGED_DOMAINS[prepackaged] !== Domain.SURVEY &&
-                domainWithConceptSetId.conceptSetId === null &&
-                domainWithConceptSetId.domain ===
-                  PREPACKAGED_DOMAINS[prepackaged])
-            ) {
-              updatedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
-            }
-          }
-        );
         // check if unselected is survey
         if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
           updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYBASICS);
@@ -1191,13 +1173,30 @@ export const DatasetPage = fp.flow(
         // code here ...
         if (
           prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
-          !Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
-            updatedPrepackaged.has(key.valueOf())
-          )
+          updatedPrepackaged.has(prepackaged) &&
+          prepackaged.toString().startsWith('SURVEY_')
         ) {
           updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEY);
         }
-
+        updatedPrepackaged.delete(prepackaged);
+        updatedDomainsWithConceptSetIds.forEach(
+          (domainWithConceptSetId: DomainWithConceptSetId) => {
+            if (
+              (PREPACKAGED_DOMAINS[prepackaged] === Domain.SURVEY &&
+                domainWithConceptSetId.domain === Domain.SURVEY &&
+                domainWithConceptSetId.conceptSetId === null &&
+                !Array.from(updatedPrepackaged).some((domain) =>
+                  domain.toString().includes('SURVEY')
+                )) ||
+              (PREPACKAGED_DOMAINS[prepackaged] !== Domain.SURVEY &&
+                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.domain ===
+                  PREPACKAGED_DOMAINS[prepackaged])
+            ) {
+              updatedDomainsWithConceptSetIds.delete(domainWithConceptSetId);
+            }
+          }
+        );
         setSelectedDomains(
           new Set(
             Array.from(updatedDomainsWithConceptSetIds).map(
