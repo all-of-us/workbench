@@ -1492,6 +1492,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + namespace
                 + "df.head(5)");
       case R:
+        // Fix tidyverse read_csv problem. In R notebooks the tidyverse plugin tries
+        // to dynamically determine the column types in a csv file. Sometimes it incorrectly
+        // determines that a string column is a double/integer. This fix will force any
+        // string columns to always be strings, so that merging of csv files won't fail
+        // do to incompatible types. https://precisionmedicineinitiative.atlassian.net/browse/DST-1056
         List<String> columns =
             fieldList.stream()
                 .filter(
