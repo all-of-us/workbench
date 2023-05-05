@@ -34,7 +34,7 @@ describe('Cromwell GKE App', () => {
   });
 
   test('Create and delete a Cromwell GKE app', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName});
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     const configPanel = new CromwellConfigurationPanel(page);
 
@@ -133,17 +133,17 @@ describe('Cromwell GKE App', () => {
     });
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
-    const cromshellJobId = submitJob.split('    "id": "')[1].split('",')[0];
-    console.log(cromshellJobId);
-    const otput = await notebook.runCodeCell(3, {
-      code: cromshellStatusCmd(cromshell_version, cromshellJobId)
+
+    const jobId = submitJob.split('    "id": "')[1].split('",')[0];
+    console.log(jobId);
+
+    const initialStatus = await notebook.runCodeCell(3, {
+      code: cromshellStatusCmd(cromshell_version, jobId)
     });
 
-    expect(otput.includes('{"status":"Running",\n'));
+    expect(initialStatus.includes('{"status":"Running",\n'));
 
-    console.log(otput);
-
-    const jobStatus = await waitForFn(
+    const succeededStatus = await waitForFn(
       async () => {
         const cromshellJobStatus = await notebook.runCodeCell(3);
         return cromshellJobStatus.includes('Succeeded');
@@ -151,22 +151,20 @@ describe('Cromwell GKE App', () => {
       20e3, // every 20 sec
       15 * 60e3 // with a 15 min timeout
     );
-    console.log(jobStatus);
-    expect(jobStatus).toBeTruthy();
-    // In the meantime we will go ahead, delete cromwell and start cleanup
-    const isDeleted = await appsPanel.deleteCromwellGkeApp();
+    console.log(succeededStatus);
 
-    expect(isDeleted).toBeTruthy();
+    expect(succeededStatus).toBeTruthy();
+    // In the meantime we will go ahead, delete cromwell and start cleanup
+    const isCromshellDeleted = await appsPanel.deleteCromwellGkeApp();
+
+    expect(isCromshellDeleted).toBeTruthy();
 
     // Clean up: notebook and workspace
     await notebook.deleteNotebook(notebookName);
-    if (language === Language.R) {
-      await workspaceDataPage.deleteWorkspace();
-    }
   });
   afterAll(async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName});
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     // Create and Open notebook
     const workspaceDataPage = new WorkspaceDataPage(page);
