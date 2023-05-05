@@ -582,6 +582,11 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds) {
+    return cbCriteriaDao.findSurveyQuestionIds(surveyConceptIds);
+  }
+
+  @Override
   public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
     List<String> searchDomains =
         ImmutableList.of(
