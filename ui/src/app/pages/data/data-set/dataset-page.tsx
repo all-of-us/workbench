@@ -1154,20 +1154,9 @@ export const DatasetPage = fp.flow(
       } else {
         // check if unselected is survey
         if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYBASICS);
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYLIFESTYLE);
-          updatedPrepackaged.delete(
-            PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH
+          Object.keys(PREPACKAGED_SURVEY_DOMAINS).forEach((prepackagedSurvey) =>
+            updatedPrepackaged.delete(prepackagedSurvey)
           );
-          updatedPrepackaged.delete(
-            PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION
-          );
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYCOPE);
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYSDOH);
-          updatedPrepackaged.delete(
-            PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE
-          );
-          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYPFHH);
         }
         // if *any* of the individual survey is unselected, unselect all-surveys
         // code here ...
