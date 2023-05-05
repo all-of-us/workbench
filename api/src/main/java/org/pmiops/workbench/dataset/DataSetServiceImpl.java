@@ -1496,7 +1496,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         // to dynamically determine the column types in a csv file. Sometimes it incorrectly
         // determines that a string column is a double/integer. This fix will force any
         // string columns to always be strings, so that merging of csv files won't fail
-        // do to incompatible types. https://precisionmedicineinitiative.atlassian.net/browse/DST-1056
+        // do to incompatible types.
+        // https://precisionmedicineinitiative.atlassian.net/browse/DST-1056
         List<String> columns =
             fieldList.stream()
                 .filter(
@@ -1504,8 +1505,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         field.getType().equals(LegacySQLTypeName.STRING)
                             && StringUtils.containsIgnoreCase(
                                 queryJobConfiguration.getQuery(), field.getName()))
-                .map(
-                    field -> field.getName().toLowerCase() + " = " + getColumnType(field.getType()))
+                .map(field -> field.getName().toLowerCase() + " = col_character()")
                 .collect(Collectors.toList());
         String colTypes =
             columns.isEmpty()
@@ -1587,22 +1587,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "df, 5)");
       default:
         throw new BadRequestException("Language " + kernelTypeEnum + " not supported.");
-    }
-  }
-
-  private static String getColumnType(LegacySQLTypeName type) {
-    if (type.equals(LegacySQLTypeName.DATE)) {
-      return "col_date()";
-    } else if (type.equals(LegacySQLTypeName.DATETIME)) {
-      return "col_date()";
-    } else if (type.equals(LegacySQLTypeName.INTEGER)) {
-      return "col_integer()";
-    } else if (type.equals(LegacySQLTypeName.NUMERIC)) {
-      return "col_integer()";
-    } else if (type.equals(LegacySQLTypeName.FLOAT)) {
-      return "col_double()";
-    } else {
-      return "col_character()";
     }
   }
 

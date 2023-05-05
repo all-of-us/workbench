@@ -226,7 +226,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         "ds_heart_rate_summary",
         "ds_steps_intraday",
         "ds_condition_occurrence",
-        "ds_measurement", "ds_person", "ds_procedure_occurrence");
+        "ds_measurement",
+        "ds_person",
+        "ds_procedure_occurrence");
   }
 
   @Override
