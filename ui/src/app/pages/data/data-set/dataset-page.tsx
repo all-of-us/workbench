@@ -276,23 +276,23 @@ const checkNameWidth = (element: HTMLDivElement) =>
 
 const ImmutableListItem: React.FunctionComponent<{
   name: string;
-  isSublist: boolean;
+  isSubitem: boolean;
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
-}> = ({ name, isSublist, onChange, checked, showSourceConceptIcon }) => {
+}> = ({ name, isSubitem, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
-    <div
-      style={
-        isSublist ? { ...styles.listItem, marginLeft: '12px' } : styles.listItem
-      }
-    >
+    <div style={styles.listItem}>
       <input
         type='checkbox'
         value={name}
         onChange={() => onChange()}
-        style={styles.listItemCheckbox}
+        style={
+          isSubitem
+            ? { ...styles.listItemCheckbox, marginLeft: 30 }
+            : styles.listItemCheckbox
+        }
         checked={checked}
       />
       <TooltipTrigger disabled={!showNameTooltip} content={<div>{name}</div>}>
@@ -1126,33 +1126,32 @@ export const DatasetPage = fp.flow(
         selectedDomainsWithConceptSetIds
       );
       if (selected) {
-        // if all surveys selected -> make all individual surveys selected
-        if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
-          for (const enumKey in Object.keys(PrePackagedConceptSetEnum)) {
-            if (enumKey.includes('SURVEY_')) {
-              updatedPrepackaged.add(enumKey);
-            }
-          }
-        }
-        // if *all* individual surveys are selected, then make all-surveys selected
-        // code here ...
         updatedPrepackaged.add(prepackaged);
         updatedDomainsWithConceptSetIds.add({
           conceptSetId: null,
           domain: PREPACKAGED_DOMAINS[prepackaged],
         });
-      } else {
-        // if All-surveys is unselected -> unselect all individual surveys
+        // check surveys
         if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
-          for (const enumKey in Object.keys(PrePackagedConceptSetEnum)) {
-            if (enumKey.includes('SURVEY_')) {
-              updatedPrepackaged.delete(enumKey);
-            }
-          }
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYBASICS);
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYLIFESTYLE);
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH);
+          updatedPrepackaged.add(
+            PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION
+          );
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYCOPE);
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYSDOH);
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE);
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEYPFHH);
+        } else if (
+          prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
+          Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
+            updatedPrepackaged.has(key.valueOf())
+          )
+        ) {
+          updatedPrepackaged.add(PrePackagedConceptSetEnum.SURVEY);
         }
-        // if *any* of the individual survey is unselected, unselect all-surveys
-        // code here ...
-
+      } else {
         updatedPrepackaged.delete(prepackaged);
         updatedDomainsWithConceptSetIds.forEach(
           (domainWithConceptSetId: DomainWithConceptSetId) => {
@@ -1171,6 +1170,34 @@ export const DatasetPage = fp.flow(
             }
           }
         );
+        // check if unselected is survey
+        if (prepackaged === PrePackagedConceptSetEnum.SURVEY) {
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYBASICS);
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYLIFESTYLE);
+          updatedPrepackaged.delete(
+            PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH
+          );
+          updatedPrepackaged.delete(
+            PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION
+          );
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYCOPE);
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYSDOH);
+          updatedPrepackaged.delete(
+            PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE
+          );
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEYPFHH);
+        }
+        // if *any* of the individual survey is unselected, unselect all-surveys
+        // code here ...
+        if (
+          prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
+          !Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
+            updatedPrepackaged.has(key.valueOf())
+          )
+        ) {
+          updatedPrepackaged.delete(PrePackagedConceptSetEnum.SURVEY);
+        }
+
         setSelectedDomains(
           new Set(
             Array.from(updatedDomainsWithConceptSetIds).map(
@@ -1703,7 +1730,7 @@ export const DatasetPage = fp.flow(
                   <Subheader>Prepackaged Cohorts</Subheader>
                   <ImmutableListItem
                     name='All Participants'
-                    isSublist={false}
+                    isSubitem={false}
                     data-test-id='all-participant'
                     checked={includesAllParticipants}
                     onChange={() => selectPrePackagedCohort()}
@@ -1775,9 +1802,9 @@ export const DatasetPage = fp.flow(
                     return (
                       <ImmutableListItem
                         name={prepackagedConceptSetToString[p] || p}
-                        isSublist={Object.values(
-                          prepackagedSurveyConceptSetToString
-                        ).includes(prepackagedConceptSetToString[p])}
+                        isSubitem={Object.keys(
+                          PREPACKAGED_SURVEY_DOMAINS
+                        ).includes(p)}
                         data-test-id='prePackage-concept-set-item'
                         key={prepackaged}
                         checked={selectedPrepackagedConceptSets.includes(p)}
@@ -1796,7 +1823,7 @@ export const DatasetPage = fp.flow(
                       <ImmutableListItem
                         key={conceptSet.id}
                         name={conceptSet.name}
-                        isSublist={false}
+                        isSubitem={false}
                         data-test-id='concept-set-list-item'
                         checked={selectedConceptSetIds.includes(conceptSet.id)}
                         onChange={() =>
