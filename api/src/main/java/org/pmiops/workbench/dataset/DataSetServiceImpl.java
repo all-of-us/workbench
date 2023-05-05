@@ -410,11 +410,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           List<Long> pfhhSurveyQuestionIds = findPFHHSurveyQuestionIds(questionConceptIds);
           if (!pfhhSurveyQuestionIds.isEmpty()) {
             // need to filter out PFHH survey questions for other survey questions
-            List<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
+            Set<DbConceptSetConceptId> dbNonPFHHSurveyQuestions =
                 dbConceptSetConceptIds.stream()
                     .filter(cid -> !pfhhSurveyQuestionIds.contains(cid.getConceptId()))
-                    .collect(Collectors.toList());
-            dbConceptSetConceptIds.addAll(dbNonPFHHSurveyQuestions);
+                    .collect(Collectors.toSet());
+            dbConceptSetConceptIds = dbNonPFHHSurveyQuestions;
             // find all answers for the questions
             dbCriteriaAnswerIds = findPFHHSurveyAnswerIds(pfhhSurveyQuestionIds);
           }
@@ -792,7 +792,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         dbConceptSetConceptIds.addAll(findDomainConceptIds(domain, dbConceptSetIds));
       }
       // handle prepackaged PFHH
-      if (prePackagedPfhhSurveyConceptSet(dbConceptSets)) {
+      if (workbenchConfigProvider.get().featureFlags.enableDataExplorer
+          && prePackagedPfhhSurveyConceptSet(dbConceptSets)) {
         dbConceptSetConceptIds.addAll(
             findSurveyQuestionConceptIds(
                 ImmutableList.of(
