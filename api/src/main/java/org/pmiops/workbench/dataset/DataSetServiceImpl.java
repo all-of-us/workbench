@@ -844,10 +844,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String standardConceptIds =
           partitionSourceAndStandard.get(true).stream()
               .map(c -> c.getConceptId().toString())
+              .sorted()
               .collect(Collectors.joining(", "));
       String sourceConceptIds =
           partitionSourceAndStandard.get(false).stream()
               .map(c -> c.getConceptId().toString())
+              .sorted()
               .collect(Collectors.joining(", "));
       if (!standardConceptIds.isEmpty()) {
         queryBuilder.append(
