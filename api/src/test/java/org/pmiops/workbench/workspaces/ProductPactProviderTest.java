@@ -14,6 +14,7 @@ import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvide
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import au.com.dius.pact.provider.spring.junit5.PactVerificationSpringProvider;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +57,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.web.servlet.MockMvc;
 
-@Provider("AoURWAPI")
+@Provider("AoURWAPI_Workspaces")
 @PactFolder("src/test/resources/pacts")
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
@@ -103,7 +104,7 @@ public class ProductPactProviderTest {
   @LocalServerPort private int serverPort;
 
   @TestTemplate
-  @ExtendWith(PactVerificationInvocationContextProvider.class)
+  @ExtendWith(PactVerificationSpringProvider.class)
   void verifyPact(PactVerificationContext context) {
     context.verifyInteraction();
   }

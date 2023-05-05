@@ -246,6 +246,6 @@
     }
   },
   "provider": {
-    "name": "AoURWAPI"
+    "name": "AoURWAPI_Workspaces"
   }
 }
