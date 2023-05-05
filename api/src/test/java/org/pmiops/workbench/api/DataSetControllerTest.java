@@ -481,6 +481,8 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    when(mockBigQueryService.getTableFieldsFromDomain(any()))
+            .thenReturn(FieldList.of(Field.newBuilder("person_id", LegacySQLTypeName.INTEGER).build()));
     // Allow access initially for setup, update the mocks after initialization to remove access.
     stubWorkspaceAccessLevel(noAccessWorkspace, WorkspaceAccessLevel.NO_ACCESS);
   }

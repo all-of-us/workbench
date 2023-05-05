@@ -5,6 +5,7 @@ import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHI
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
 import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
@@ -898,7 +899,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                             dataSetExportRequest.getDataSetRequest().getName(),
                             dbWorkspace.getCdrVersion().getName(),
                             qualifier,
-                            dataSetExportRequest.getKernelType())
+                            dataSetExportRequest.getKernelType(),
+                            bigQueryService.getTableFieldsFromDomain(
+                                Domain.fromValue(entry.getKey())))
                             .stream()),
             generateWgsCode(dataSetExportRequest, dbWorkspace, qualifier).stream())
         .collect(Collectors.toList());
@@ -1449,7 +1452,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       String dataSetName,
       String cdrVersionName,
       String qualifier,
-      KernelTypeEnum kernelTypeEnum) {
+      KernelTypeEnum kernelTypeEnum,
+      FieldList fieldList) {
 
     // Define [namespace]_sql, query parameters (as either [namespace]_query_config
     // or [namespace]_query_parameters), and [namespace]_df variables
@@ -1488,6 +1492,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + namespace
                 + "df.head(5)");
       case R:
+        List<String> columns =
+            fieldList.stream()
+                .filter(
+                    field ->
+                        field.getType().equals(LegacySQLTypeName.STRING)
+                            && StringUtils.containsIgnoreCase(
+                                queryJobConfiguration.getQuery(), field.getName()))
+                .map(
+                    field -> field.getName().toLowerCase() + " = " + getColumnType(field.getType()))
+                .collect(Collectors.toList());
+        String colTypes =
+            columns.isEmpty()
+                ? "NULL"
+                : "cols(" + columns.stream().collect(Collectors.joining(", ")) + ")";
         String exportName = domainAsString + "_" + qualifier;
         String exportPathVariable = exportName + "_path";
         return ImmutableList.of(
@@ -1538,7 +1556,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "}` to copy these files\n"
                 + "#       to the Jupyter disk.\n"
                 + "read_bq_export_from_workspace_bucket <- function(export_path) {\n"
-                + "  col_types <- NULL\n"
+                + "  col_types <- "
+                + colTypes
+                + "\n"
                 + "  bind_rows(\n"
                 + "    map(system2('gsutil', args = c('ls', export_path), stdout = TRUE, stderr = TRUE),\n"
                 + "        function(csv) {\n"
@@ -1562,6 +1582,22 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 + "df, 5)");
       default:
         throw new BadRequestException("Language " + kernelTypeEnum + " not supported.");
+    }
+  }
+
+  private static String getColumnType(LegacySQLTypeName type) {
+    if (type.equals(LegacySQLTypeName.DATE)) {
+      return "col_date()";
+    } else if (type.equals(LegacySQLTypeName.DATETIME)) {
+      return "col_date()";
+    } else if (type.equals(LegacySQLTypeName.INTEGER)) {
+      return "col_integer()";
+    } else if (type.equals(LegacySQLTypeName.NUMERIC)) {
+      return "col_integer()";
+    } else if (type.equals(LegacySQLTypeName.FLOAT)) {
+      return "col_double()";
+    } else {
+      return "col_character()";
     }
   }
 
