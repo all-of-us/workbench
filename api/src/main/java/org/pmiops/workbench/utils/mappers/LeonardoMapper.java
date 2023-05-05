@@ -22,7 +22,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
@@ -112,13 +111,14 @@ public interface LeonardoMapper {
     leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
   }
 
-  @Mapping(target = "creator", source = "auditInfo.creator")
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
-  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "isGceRuntime", ignore = true)
-  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
+  //  @Mapping(target = "creator", source = "auditInfo.creator")
+  //  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
+  //  @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
+  //  @Mapping(target = "appType", ignore = true)
+  //  @Mapping(target = "isGceRuntime", ignore = true)
+  //  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
 
+  // need to retain this old-client version because it's used by createApp
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
@@ -126,13 +126,15 @@ public interface LeonardoMapper {
   @Mapping(target = "isGceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
 
-  @SuppressWarnings("unchecked")
-  @AfterMapping
-  default void getDiskAfterMapper(
-      @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
-    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoGetDiskResponse.getLabels());
-  }
+  //  @SuppressWarnings("unchecked")
+  //  @AfterMapping
+  //  default void getDiskAfterMapper(
+  //      @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
+  //    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoGetDiskResponse.getLabels());
+  //  }
+  //
 
+  // need to retain this old-client version because it's used by createApp
   @SuppressWarnings("unchecked")
   @AfterMapping
   default void listDisksAfterMapper(

@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,12 +29,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.ApiException;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -87,7 +83,6 @@ public class DisksControllerTest {
 
   @Captor private ArgumentCaptor<LeonardoUpdateDiskRequest> updateDiskRequestCaptor;
 
-  @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean NewLeonardoApiClient mockNewLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
 
@@ -169,22 +164,22 @@ public class DisksControllerTest {
   @Test
   public void test_listDisksInWorkspace() throws ApiException {
     // RStudio Disk: 3 are active, returns the newest one.
-    LeonardoListPersistentDiskResponse oldRstudioDisk =
+    ListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusSeconds(100).toString(),
             AppType.RSTUDIO);
-    LeonardoListPersistentDiskResponse newestRstudioDisk =
+    ListPersistentDiskResponse newestRstudioDisk =
         newListPdResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.toString(),
             AppType.RSTUDIO);
-    LeonardoListPersistentDiskResponse olderRstudioDisk =
+    ListPersistentDiskResponse olderRstudioDisk =
         newListPdResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusSeconds(200).toString(),
             AppType.RSTUDIO);
     Disk expectedRStudioDisk =
@@ -196,14 +191,24 @@ public class DisksControllerTest {
 
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
     // active ones.
-    LeonardoListPersistentDiskResponse olderGceDisk =
+    ListPersistentDiskResponse olderGceDisk =
         newListPdResponse(
-            user.generatePDName(), LeonardoDiskStatus.READY, NOW.minusMillis(200).toString(), null);
-    LeonardoListPersistentDiskResponse oldGceDisk =
+            user.generatePDName(),
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
+            NOW.minusMillis(200).toString(),
+            null);
+    ListPersistentDiskResponse oldGceDisk =
         newListPdResponse(
-            user.generatePDName(), LeonardoDiskStatus.READY, NOW.minusMillis(100).toString(), null);
-    LeonardoListPersistentDiskResponse newerInactiveGceDisk =
-        newListPdResponse(user.generatePDName(), LeonardoDiskStatus.DELETING, NOW.toString(), null);
+            user.generatePDName(),
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
+            NOW.minusMillis(100).toString(),
+            null);
+    ListPersistentDiskResponse newerInactiveGceDisk =
+        newListPdResponse(
+            user.generatePDName(),
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETING,
+            NOW.toString(),
+            null);
     Disk expectedGceDisk =
         newDisk(
             oldGceDisk.getName(),
@@ -212,20 +217,20 @@ public class DisksControllerTest {
             null);
 
     // Cromwell Disk: both are inactive, nothing to return.
-    LeonardoListPersistentDiskResponse oldInactiveCromwellDisk =
+    ListPersistentDiskResponse oldInactiveCromwellDisk =
         newListPdResponse(
             user.generatePDNameForUserApps(AppType.CROMWELL),
-            LeonardoDiskStatus.DELETING,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
             AppType.CROMWELL);
-    LeonardoListPersistentDiskResponse newerCromwellDisk =
+    ListPersistentDiskResponse newerCromwellDisk =
         newListPdResponse(
             user.generatePDNameForUserApps(AppType.CROMWELL),
-            LeonardoDiskStatus.DELETED,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.DELETED,
             NOW.toString(),
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
+    when(mockNewLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
             GOOGLE_PROJECT_ID, false))
         .thenReturn(
             ImmutableList.of(
@@ -247,7 +252,7 @@ public class DisksControllerTest {
     int diskSize = 200;
     String diskName = user.generatePDName();
     disksController.updateDisk(WORKSPACE_NS, diskName, diskSize);
-    verify(mockLeonardoApiClient).updatePersistentDisk(GOOGLE_PROJECT_ID, diskName, diskSize);
+    verify(mockNewLeonardoApiClient).updatePersistentDisk(GOOGLE_PROJECT_ID, diskName, diskSize);
   }
 
   @Test
@@ -256,7 +261,7 @@ public class DisksControllerTest {
     String diskName = user.generatePDName();
 
     doThrow(new NotFoundException())
-        .when(mockLeonardoApiClient)
+        .when(mockNewLeonardoApiClient)
         .updatePersistentDisk(GOOGLE_PROJECT_ID, diskName, diskSize);
 
     assertThrows(
@@ -281,7 +286,7 @@ public class DisksControllerTest {
   public void deleteDisk() throws ApiException {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
-    verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
+    verify(mockNewLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
   }
 
   @Test
@@ -299,21 +304,24 @@ public class DisksControllerTest {
     String diskName = user.generatePDName();
 
     doThrow(new NotFoundException())
-        .when(mockLeonardoApiClient)
+        .when(mockNewLeonardoApiClient)
         .deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
 
     assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
   }
 
-  private LeonardoListPersistentDiskResponse newListPdResponse(
-      String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
-    LeonardoListPersistentDiskResponse response =
-        new LeonardoListPersistentDiskResponse()
+  private ListPersistentDiskResponse newListPdResponse(
+      String pdName,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
+      String date,
+      @Nullable AppType appType) {
+    ListPersistentDiskResponse response =
+        new ListPersistentDiskResponse()
             .name(pdName)
             .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
             .status(status)
-            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
+            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()))
             .googleProject(GOOGLE_PROJECT_ID);
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
