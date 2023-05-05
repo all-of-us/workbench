@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
-public class NewLeonardoConfig {
+class NewLeonardoConfig {
 
   public static final String USER_DISKS_API = "NEW userDisksApi";
 
