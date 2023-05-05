@@ -172,13 +172,20 @@
   "e2eTestUsers": {
     "workspaceDeletionBatchSize": 15,
     "testUserEmails": [
+      "puppeteer-tester-1@fake-research-aou.org",
+      "puppeteer-tester-2@fake-research-aou.org",
+      "puppeteer-tester-3@fake-research-aou.org",
+      "puppeteer-tester-4@fake-research-aou.org",
+      "puppeteer-tester-5@fake-research-aou.org",
+      "puppeteer-tester-6@fake-research-aou.org",
       "puppeteer-tester-7@fake-research-aou.org",
+      "puppeteer-tester-8@fake-research-aou.org",
       "puppeteer-writer-1@fake-research-aou.org",
+      "puppeteer-reader-1@fake-research-aou.org",
       "puppeteer-reader-2@fake-research-aou.org",
       "puppet-access-tester-1@fake-research-aou.org",
       "puppeteer-admin-1@fake-research-aou.org",
-      "puppeteer-egress-1@fake-research-aou.org",
-      "puppeteer-tester-3@fake-research-aou.org"
+      "puppeteer-egress-1@fake-research-aou.org"
     ]
   },
   "termsOfService": {
