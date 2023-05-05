@@ -22,8 +22,10 @@ const cromshellSubmitPythonCmd = (cromshell_version) => `!${cromshell_version} s
 const cromshellSubmitRCmd = (cromshell_version) =>
   `system2('${cromshell_version}', args = c('submit', ` +
   `'${wdlFileName}','${jsonFileName}'), stdout = TRUE, stderr = TRUE)`;
-const cromshellPython = (cromshell_version, cromshellJobId) => `!${cromshell_version} status ${cromshellJobId}`;
-const cromshellRCmd = (cromshell_version, cromshellJobId) =>
+
+const cromshellStatusPythonCmd = (cromshell_version, cromshellJobId) =>
+  `!${cromshell_version} status ${cromshellJobId}`;
+const cromshellStatusRCmd = (cromshell_version, cromshellJobId) =>
   `system2('${cromshell_version}', args = c('status', '${cromshellJobId}'), stdout = TRUE, stderr = TRUE)`;
 
 const workspaceName = 'e2eCromwellTest';
@@ -69,8 +71,8 @@ describe('Cromwell GKE App', () => {
   });
 
   test.each([
-    [Language.Python, 'All of Us Cromwell Setup Python snippets', cromshellSubmitPythonCmd, cromshellPython],
-    [Language.R, 'All of Us Cromwell Setup snippets', cromshellSubmitRCmd, cromshellRCmd]
+    [Language.Python, 'All of Us Cromwell Setup Python snippets', cromshellSubmitPythonCmd, cromshellStatusPythonCmd],
+    [Language.R, 'All of Us Cromwell Setup snippets', cromshellSubmitRCmd, cromshellStatusRCmd]
   ])('Run cromwell using %s notebook', async (language, snippetMenu, cromshellSubmitCommand, cromshellStatusCmd) => {
     const appsPanel = new AppsPanel(page);
     const cromwellPanel = new CromwellConfigurationPanel(page);
@@ -151,7 +153,6 @@ describe('Cromwell GKE App', () => {
       20e3, // every 20 sec
       15 * 60e3 // with a 15 min timeout
     );
-    console.log(succeededStatus);
 
     expect(succeededStatus).toBeTruthy();
     // In the meantime we will go ahead, delete cromwell and start cleanup
@@ -161,6 +162,7 @@ describe('Cromwell GKE App', () => {
     // Clean up: notebook and workspace
     await notebook.deleteNotebook(notebookName);
   });
+
   afterAll(async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspaceName });
