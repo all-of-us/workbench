@@ -22,6 +22,11 @@ const cromshellSubmitPythonCmd = (cromshell_version) => `!${cromshell_version} s
 const cromshellSubmitRCmd = (cromshell_version) =>
   `system2('${cromshell_version}', args = c('submit', ` +
   `'${wdlFileName}','${jsonFileName}'), stdout = TRUE, stderr = TRUE)`;
+const cromshellPython = (cromshell_version, cromshellJobId) => `!${cromshell_version} status ${cromshellJobId}`;
+const cromshellRCmd = (cromshell_version, cromshellJobId) =>
+  `system2('${cromshell_version}', args = c('status', '${cromshellJobId}'), stdout = TRUE, stderr = TRUE)`;
+
+const workspaceName = 'e2eCromwellTest';
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
@@ -29,7 +34,7 @@ describe('Cromwell GKE App', () => {
   });
 
   test('Create and delete a Cromwell GKE app', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: 'e2eCreateCromwellGkeAppsPanelTest' });
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName});
 
     const configPanel = new CromwellConfigurationPanel(page);
 
@@ -61,21 +66,17 @@ describe('Cromwell GKE App', () => {
     // Cromwell is running, now lets delete it
     const isDeleted = await appsPanel.deleteCromwellGkeApp();
     expect(isDeleted).toBeTruthy();
-
-    // Clean up: Delete workspace
-    const workspaceDataPage = new WorkspaceDataPage(page);
-    await workspaceDataPage.deleteWorkspace();
   });
 
   test.each([
-    [Language.Python, 'All of Us Cromwell Setup Python snippets', cromshellSubmitPythonCmd],
-    [Language.R, 'All of Us Cromwell Setup snippets', cromshellSubmitRCmd]
-  ])('Run cromwell using %s notebook', async (language, snippetMenu, cromshellSubmitCommand) => {
+    [Language.Python, 'All of Us Cromwell Setup Python snippets', cromshellSubmitPythonCmd, cromshellPython],
+    [Language.R, 'All of Us Cromwell Setup snippets', cromshellSubmitRCmd, cromshellRCmd]
+  ])('Run cromwell using %s notebook', async (language, snippetMenu, cromshellSubmitCommand, cromshellStatusCmd) => {
     const appsPanel = new AppsPanel(page);
     const cromwellPanel = new CromwellConfigurationPanel(page);
 
     // Create or re-use workspace
-    await findOrCreateWorkspace(page, { workspaceName: 'e2eSubmitCromwellJobsTest' });
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     // Create and Open notebook
     const workspaceDataPage = new WorkspaceDataPage(page);
@@ -119,7 +120,6 @@ describe('Cromwell GKE App', () => {
       15e3,
       10 * 60e3
     );
-
     expect(success).toBe(true);
 
     // Upload wdl and json files to notebook
@@ -133,8 +133,26 @@ describe('Cromwell GKE App', () => {
     });
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
+    const cromshellJobId = submitJob.split('    "id": "')[1].split('",')[0];
+    console.log(cromshellJobId);
+    const otput = await notebook.runCodeCell(3, {
+      code: cromshellStatusCmd(cromshell_version, cromshellJobId)
+    });
 
-    // TODO: Add more steps for the submitted cromwell jobs like confirm its running etc
+    expect(otput.includes('{"status":"Running",\n'));
+
+    console.log(otput);
+
+    const jobStatus = await waitForFn(
+      async () => {
+        const cromshellJobStatus = await notebook.runCodeCell(3);
+        return cromshellJobStatus.includes('Succeeded');
+      },
+      20e3, // every 20 sec
+      15 * 60e3 // with a 15 min timeout
+    );
+    console.log(jobStatus);
+    expect(jobStatus).toBeTruthy();
     // In the meantime we will go ahead, delete cromwell and start cleanup
     const isDeleted = await appsPanel.deleteCromwellGkeApp();
 
@@ -142,6 +160,16 @@ describe('Cromwell GKE App', () => {
 
     // Clean up: notebook and workspace
     await notebook.deleteNotebook(notebookName);
+    if (language === Language.R) {
+      await workspaceDataPage.deleteWorkspace();
+    }
+  });
+  afterAll(async () => {
+    await signInWithAccessToken(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName});
+
+    // Create and Open notebook
+    const workspaceDataPage = new WorkspaceDataPage(page);
     await workspaceDataPage.deleteWorkspace();
   });
 });
