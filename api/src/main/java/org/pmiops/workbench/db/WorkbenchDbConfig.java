@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db;
 
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Optional;
 import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -75,13 +74,5 @@ public class WorkbenchDbConfig {
   @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   public PoolConfiguration poolConfig() {
     return new PoolProperties();
-  }
-
-  static Optional<String> getEnv(String name) {
-    return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
-  }
-
-  static String getEnvRequired(String name) {
-    return getEnv(name).orElseThrow(() -> new IllegalStateException(name + " not defined"));
   }
 }

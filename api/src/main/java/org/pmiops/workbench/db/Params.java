@@ -4,8 +4,8 @@ import com.zaxxer.hikari.HikariConfig;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
-import java.util.Optional;
 import java.util.logging.Logger;
+import org.pmiops.workbench.config.EnvVars;
 import org.springframework.context.annotation.Configuration;
 
 // @Configuration means, "Provide this as an injectable dependency."
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class Params {
   private static final Logger log = Logger.getLogger(Params.class.getName());
 
+  protected final EnvVars envVars;
   public static final int mysqlDefaultPort = 3306;
   public String hostname;
   public final String username = "workbench"; // consistent across environments
@@ -22,16 +23,17 @@ public class Params {
   public String password;
   private boolean loaded;
 
-  public Params() {
+  public Params(EnvVars envVars) {
+    this.envVars = envVars;
     loadFromEnvironment();
     validate();
     logParams();
   }
 
   public void loadFromEnvironment() {
-    hostname = getEnv("DB_HOST").orElse(null);
-    cloudSqlInstanceName = getEnv("CLOUD_SQL_INSTANCE_NAME").orElse(null);
-    password = getEnv("WORKBENCH_DB_PASSWORD").orElse(null);
+    hostname = envVars.get("DB_HOST").orElse(null);
+    cloudSqlInstanceName = envVars.get("CLOUD_SQL_INSTANCE_NAME").orElse(null);
+    password = envVars.get("WORKBENCH_DB_PASSWORD").orElse(null);
   }
 
   protected void logParams() {
@@ -69,7 +71,8 @@ public class Params {
       }
     } else {
       // assert cloudSqlInstanceName != null
-      if (getEnv("GOOGLE_APPLICATION_CREDENTIALS").isEmpty() && getEnv("GAE_INSTANCE").isEmpty()) {
+      if (envVars.get("GOOGLE_APPLICATION_CREDENTIALS").isEmpty()
+          && envVars.get("GAE_INSTANCE").isEmpty()) {
         throw new IllegalStateException(
             "Google Application Default Credentials are required to connect directly to Cloud SQL."
                 + " Outside of App Engine, they can be provided with the environment variable"
@@ -96,9 +99,5 @@ public class Params {
 
   private static String shadow(int visibleCount, String s) {
     return s.substring(0, visibleCount) + s.substring(visibleCount).replaceAll(".", "*");
-  }
-
-  public static Optional<String> getEnv(String name) {
-    return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
   }
 }

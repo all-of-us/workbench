@@ -1,6 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 import com.google.api.MonitoredResource;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
@@ -8,10 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.config.EnvVars;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -22,6 +25,7 @@ public class StackdriverStatsExporterServiceTest {
   private static final String PROJECT_ID = "fake-project";
   private static final String FOUND_NODE_ID = "node-11001001";
   @Autowired private StackdriverStatsExporterService exporterService;
+  @MockBean private EnvVars envVars;
 
   @TestConfiguration
   @Import({StackdriverStatsExporterService.class, FakeClockConfiguration.class})
@@ -40,7 +44,7 @@ public class StackdriverStatsExporterServiceTest {
 
   @Test
   public void testMakeConfiguration() {
-    exporterService.gaeInstanceId = Optional.of(FOUND_NODE_ID);
+    when(envVars.get("GAE_INSTANCE")).thenReturn(Optional.of(FOUND_NODE_ID));
 
     StackdriverStatsConfiguration statsConfiguration =
         exporterService.makeStackdriverStatsConfiguration();
@@ -57,7 +61,7 @@ public class StackdriverStatsExporterServiceTest {
 
   @Test
   public void testMakeMonitoredResource_noInstanceIdAvailable() {
-    exporterService.gaeInstanceId = Optional.empty();
+    when(envVars.get("GAE_INSTANCE")).thenReturn(Optional.empty());
     final MonitoredResource monitoredResource =
         exporterService.makeStackdriverStatsConfiguration().getMonitoredResource();
     assertThat(monitoredResource.getLabelsMap().get("node_id")).isNotEmpty();

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -84,13 +83,5 @@ public class CdrDataSource extends AbstractRoutingDataSource {
   @Override
   protected Object determineCurrentLookupKey() {
     return CdrVersionContext.getCdrVersion().getCdrVersionId();
-  }
-
-  Optional<String> getEnv(String name) {
-    return Optional.ofNullable(System.getenv(name)).map(s -> s.trim()).filter(s -> s != "");
-  }
-
-  String getEnvRequired(String name) {
-    return getEnv(name).orElseThrow(() -> new IllegalStateException(name + " not defined"));
   }
 }
