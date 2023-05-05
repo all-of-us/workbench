@@ -68,14 +68,11 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableGenomicExtraction",
       source = "config.featureFlags.enableGenomicExtraction")
-  @Mapping(target = "enableGpu", constant = "true")
-  @Mapping(target = "enablePersistentDisk", constant = "true")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
-  @Mapping(target = "enableUpdatedDemographicSurvey", constant = "true")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(
       target = "enableConceptSetsInCohortBuilder",
