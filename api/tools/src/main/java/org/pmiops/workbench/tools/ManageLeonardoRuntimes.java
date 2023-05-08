@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -49,6 +51,13 @@ public class ManageLeonardoRuntimes {
   }
 
   private static final Logger log = Logger.getLogger(ManageLeonardoRuntimes.class.getName());
+
+  private LeonardoMapper leonardoMapper;
+
+  public ManageLeonardoRuntimes(LeonardoMapper leonardoMapper) {
+    this.leonardoMapper = leonardoMapper;
+  }
+
   private static final String[] LEO_SCOPES =
       new String[] {
         "https://www.googleapis.com/auth/userinfo.profile",
@@ -75,11 +84,13 @@ public class ManageLeonardoRuntimes {
     return api;
   }
 
-  private static String runtimeId(LeonardoListRuntimeResponse r) {
-    return r.getGoogleProject() + "/" + r.getRuntimeName();
+  private String runtimeId(LeonardoListRuntimeResponse r) {
+    return leonardoMapper.cloudContextToGoogleProject(r.getCloudContext())
+        + "/"
+        + r.getRuntimeName();
   }
 
-  private static String formatTabular(LeonardoListRuntimeResponse r) {
+  private String formatTabular(LeonardoListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
     String creator = "unknown";
@@ -95,11 +106,13 @@ public class ManageLeonardoRuntimes {
         runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
   }
 
-  private static void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
+  private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
+    Function<LeonardoListRuntimeResponse, String> toGoogle =
+        r -> leonardoMapper.cloudContextToGoogleProject(r.getCloudContext());
     Stream<LeonardoListRuntimeResponse> stream =
         runtimes.stream()
             .sorted(
-                Comparator.comparing(LeonardoListRuntimeResponse::getGoogleProject)
+                Comparator.comparing(toGoogle)
                     .thenComparing(r -> r.getAuditInfo().getCreatedDate()));
 
     switch (fmt) {
@@ -118,7 +131,7 @@ public class ManageLeonardoRuntimes {
     }
   }
 
-  private static void listRuntimes(
+  private void listRuntimes(
       String apiUrl, boolean includeDeleted, Optional<String> projectId, OutputFormat fmt)
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
@@ -170,7 +183,7 @@ public class ManageLeonardoRuntimes {
         "    gsutil -i %s cat ... # inspect or copy logs\n\n", workbenchServiceAccount);
   }
 
-  private static void deleteRuntimes(
+  private void deleteRuntimes(
       String apiUrl, @Nullable Instant oldest, Set<String> ids, boolean dryRun)
       throws IOException, ApiException {
     Set<String> remaining = new HashSet<>(ids);
@@ -197,7 +210,9 @@ public class ManageLeonardoRuntimes {
               if (!dryRun) {
                 try {
                   api.deleteRuntime(
-                      r.getGoogleProject(), r.getRuntimeName(), /* deleteDisk */ false);
+                      leonardoMapper.cloudContextToGoogleProject(r.getCloudContext()),
+                      r.getRuntimeName(), /* deleteDisk */
+                      false);
                 } catch (ApiException e) {
                   log.log(Level.SEVERE, "failed to deleted runtime " + cid, e);
                   return;

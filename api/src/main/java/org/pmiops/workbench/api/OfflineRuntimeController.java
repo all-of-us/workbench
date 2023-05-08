@@ -41,6 +41,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
+import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +74,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
   private final UserDao userDao;
+  private final LeonardoMapper leonardoMapper;
   private final Clock clock;
 
   @Autowired
@@ -85,7 +87,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
       UserDao userDao,
-      Clock clock) {
+      Clock clock,
+      LeonardoMapper leonardoMapper) {
     this.fireCloudService = firecloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.mailService = mailService;
@@ -95,6 +98,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.userDao = userDao;
     this.clock = clock;
     this.configProvider = configProvider;
+    this.leonardoMapper = leonardoMapper;
   }
 
   /**
@@ -134,14 +138,18 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int unusedDeletes = 0;
     for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
       final String runtimeId =
-          listRuntimeResponse.getGoogleProject() + "/" + listRuntimeResponse.getRuntimeName();
+          String.format(
+              "%s/%s",
+              leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext()),
+              listRuntimeResponse.getRuntimeName());
       final LeonardoGetRuntimeResponse runtime;
       try {
         // Refetch the runtime to ensure freshness as this iteration may take
         // some time.
         runtime =
             runtimesApi.getRuntime(
-                listRuntimeResponse.getGoogleProject(), listRuntimeResponse.getRuntimeName());
+                leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext()),
+                listRuntimeResponse.getRuntimeName());
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to refetch runtime '%s'", runtimeId), e);
         errors++;
@@ -184,7 +192,9 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       }
       try {
         runtimesApi.deleteRuntime(
-            runtime.getGoogleProject(), runtime.getRuntimeName(), /* includeDisk */ false);
+            leonardoMapper.cloudContextToGoogleProject(runtime.getCloudContext()),
+            runtime.getRuntimeName(), /* includeDisk */
+            false);
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to delete runtime '%s'", runtimeId), e);
         errors++;
@@ -262,7 +272,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
               Level.WARNING,
               String.format(
                   "failed to send notification for disk '%s/%s'",
-                  disk.getGoogleProject(), disk.getName()),
+                  leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext()),
+                  disk.getName()),
               e);
           lastException = e;
           notifyFail++;
@@ -288,12 +299,14 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // Returns true if an email is sent.
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
-    Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(disk.getGoogleProject());
+    Optional<DbWorkspace> workspace =
+        workspaceDao.getByGoogleProject(
+            leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext()));
     if (workspace.isEmpty()) {
       log.warning(
           String.format(
               "skipping disk '%s' associated with unknown Google project '%s'",
-              disk.getName(), disk.getGoogleProject()));
+              disk.getName(), leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext())));
       return false;
     }
 
