@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
 
 import {
+  MODIFIED_BY_COLUMN_NUMBER,
   MODIFIED_DATE_COLUMN_NUMBER,
   NAME_COLUMN_NUMBER,
   RESOURCE_TYPE_COLUMN_NUMBER,
@@ -58,6 +59,11 @@ describe('NotebookList', () => {
         NotebooksApiStub.stubNotebookList()[0].lastModifiedTime
       )
     );
+
+    // Fifth column of notebook table displays last modified by
+    expect(
+      resourceTableColumns(wrapper).at(MODIFIED_BY_COLUMN_NUMBER).text()
+    ).toMatch(NotebooksApiStub.stubNotebookList()[0].lastModifiedBy);
   });
 
   it('should redirect to notebook playground mode when either resource type or name is clicked', async () => {
