@@ -1606,7 +1606,7 @@ components:
       required:
         - id
         - runtimeName
-        - googleProject
+        - cloudContext
         - serviceAccount
         - auditInfo
         - runtimeConfig
@@ -1624,7 +1624,9 @@ components:
           description: The user-supplied name for the runtime
         googleProject:
           type: string
-          description: The Google Project used to create the runtime
+          description: Deprecated. The Google Project used to create the runtime
+        cloudContext:
+          $ref: '#/components/schemas/CloudContext'
         serviceAccount:
           type: string
           description: The Google Service Account used to create the runtime
@@ -1709,7 +1711,7 @@ components:
       required:
         - id
         - runtimeName
-        - googleProject
+        - cloudContext
         - serviceAccount
         - runtimeConfig
         - status
@@ -1723,7 +1725,9 @@ components:
           description: The user-supplied name for the runtime
         googleProject:
           type: string
-          description: The Google Project used to create the runtime
+          description: Deprecated. The Google Project used to create the runtime
+        cloudContext:
+          $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
           type: object
           description: oneOf GceConfig, GceWithPdConfig, MachineConfig
@@ -1746,7 +1750,7 @@ components:
       description: ""
       required:
         - id
-        - googleProject
+        - cloudContext
         - zone
         - name
         - status
@@ -1760,7 +1764,9 @@ components:
           description: Internal Leonardo ID of the persistent disk
         googleProject:
           type: string
-          description: The google project used to create the persistent disk
+          description: Deprecated. The Google Project used to create the persistent disk
+        cloudContext:
+          $ref: '#/components/schemas/CloudContext'
         zone:
           type: string
           description: The google zone in which the persistent disk was created
@@ -1787,7 +1793,7 @@ components:
       description: ""
       required:
         - id
-        - googleProject
+        - cloudContext
         - zone
         - name
         - googleId
@@ -1804,7 +1810,9 @@ components:
           description: Internal Leonardo ID of the persistent disk
         googleProject:
           type: string
-          description: The google project used to create the persistent disk
+          description: Deprecated. The Google Project used to create the persistent disk
+        cloudContext:
+          $ref: '#/components/schemas/CloudContext'
         zone:
           type: string
           description: The google zone in which the persistent disk was created
