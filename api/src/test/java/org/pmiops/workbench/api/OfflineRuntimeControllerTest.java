@@ -172,8 +172,7 @@ public class OfflineRuntimeControllerTest {
 
     for (LeonardoGetRuntimeResponse runtime : runtimes) {
       when(mockRuntimesApi.getRuntime(
-              leonardoMapper.cloudContextToGoogleProject(runtime.getCloudContext()),
-              runtime.getRuntimeName()))
+              leonardoMapper.toGoogleProject(runtime.getCloudContext()), runtime.getRuntimeName()))
           .thenReturn(runtime);
     }
   }

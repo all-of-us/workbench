@@ -261,7 +261,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     runtimesToDelete.forEach(
         runtime ->
             leonardoNotebooksClient.deleteRuntimeAsService(
-                leonardoMapper.cloudContextToGoogleProject(runtime.getCloudContext()),
+                leonardoMapper.toGoogleProject(runtime.getCloudContext()),
                 runtime.getRuntimeName()));
     List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
         filterByRuntimesInList(
@@ -281,8 +281,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                     Level.SEVERE,
                     String.format(
                         "Runtime %s/%s is not in a deleting state",
-                        leonardoMapper.cloudContextToGoogleProject(
-                            runtimeInBadState.getCloudContext()),
+                        leonardoMapper.toGoogleProject(runtimeInBadState.getCloudContext()),
                         runtimeInBadState.getRuntimeName())));
     leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
         googleProject,

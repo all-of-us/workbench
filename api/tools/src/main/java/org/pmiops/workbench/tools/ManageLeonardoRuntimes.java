@@ -85,9 +85,7 @@ public class ManageLeonardoRuntimes {
   }
 
   private String runtimeId(LeonardoListRuntimeResponse r) {
-    return leonardoMapper.cloudContextToGoogleProject(r.getCloudContext())
-        + "/"
-        + r.getRuntimeName();
+    return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
   private String formatTabular(LeonardoListRuntimeResponse r) {
@@ -108,7 +106,7 @@ public class ManageLeonardoRuntimes {
 
   private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
     Function<LeonardoListRuntimeResponse, String> toGoogle =
-        r -> leonardoMapper.cloudContextToGoogleProject(r.getCloudContext());
+        r -> leonardoMapper.toGoogleProject(r.getCloudContext());
     Stream<LeonardoListRuntimeResponse> stream =
         runtimes.stream()
             .sorted(
@@ -210,7 +208,7 @@ public class ManageLeonardoRuntimes {
               if (!dryRun) {
                 try {
                   api.deleteRuntime(
-                      leonardoMapper.cloudContextToGoogleProject(r.getCloudContext()),
+                      leonardoMapper.toGoogleProject(r.getCloudContext()),
                       r.getRuntimeName(), /* deleteDisk */
                       false);
                 } catch (ApiException e) {

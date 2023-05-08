@@ -137,8 +137,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int activeDeletes = 0;
     int unusedDeletes = 0;
     for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
-      String googleProject =
-          leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext());
+      String googleProject = leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
           String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
       final LeonardoGetRuntimeResponse runtime;
@@ -188,7 +187,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       }
       try {
         runtimesApi.deleteRuntime(
-            leonardoMapper.cloudContextToGoogleProject(runtime.getCloudContext()),
+            leonardoMapper.toGoogleProject(runtime.getCloudContext()),
             runtime.getRuntimeName(), /* includeDisk */
             false);
       } catch (ApiException e) {
@@ -268,8 +267,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
               Level.WARNING,
               String.format(
                   "failed to send notification for disk '%s/%s'",
-                  leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext()),
-                  disk.getName()),
+                  leonardoMapper.toGoogleProject(disk.getCloudContext()), disk.getName()),
               e);
           lastException = e;
           notifyFail++;
@@ -295,7 +293,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // Returns true if an email is sent.
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
-    String googleProject = leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext());
+    String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(

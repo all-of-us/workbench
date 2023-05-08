@@ -334,7 +334,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     log.severe(
                         String.format(
                             "listRuntime query by label returned a runtime not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
-                            leonardoMapper.cloudContextToGoogleProject(r.getCloudContext()),
+                            leonardoMapper.toGoogleProject(r.getCloudContext()),
                             r.getRuntimeName(),
                             r.getAuditInfo().getCreator(),
                             userEmail));
@@ -345,8 +345,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .parallel()
             .map(
                 r -> {
-                  String googleProject =
-                      leonardoMapper.cloudContextToGoogleProject(r.getCloudContext());
+                  String googleProject = leonardoMapper.toGoogleProject(r.getCloudContext());
                   try {
                     leonardoRetryHandler.runAndThrowChecked(
                         (context) -> {

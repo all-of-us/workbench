@@ -159,7 +159,7 @@ public interface LeonardoMapper {
 
   @Nullable
   @Named("cloudContextToGoogleProject")
-  default String cloudContextToGoogleProject(@Nullable LeonardoCloudContext lcc) {
+  default String toGoogleProject(@Nullable LeonardoCloudContext lcc) {
     return Optional.ofNullable(lcc)
         // we don't support LeonardoCloudProvider.AZURE so don't attempt to map it
         .filter(c -> c.getCloudProvider() == LeonardoCloudProvider.GCP)
