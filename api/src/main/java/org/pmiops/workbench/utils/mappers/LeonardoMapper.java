@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -158,9 +159,12 @@ public interface LeonardoMapper {
 
   @Nullable
   @Named("cloudContextToGoogleProject")
-  default String cloudContextToGoogleProject(LeonardoCloudContext lcc) {
-    // we don't support AZURE so don't attempt to map it
-    return lcc.getCloudProvider() == LeonardoCloudProvider.GCP ? lcc.getCloudResource() : null;
+  default String cloudContextToGoogleProject(@Nullable LeonardoCloudContext lcc) {
+    return Optional.ofNullable(lcc)
+        // we don't support LeonardoCloudProvider.AZURE so don't attempt to map it
+        .filter(c -> c.getCloudProvider() == LeonardoCloudProvider.GCP)
+        .map(LeonardoCloudContext::getCloudResource)
+        .orElse(null);
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
