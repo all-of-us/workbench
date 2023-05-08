@@ -193,11 +193,11 @@ public class WorkspaceAdminServiceTest {
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
-            .status(LeonardoRuntimeStatus.DELETING)
             .cloudContext(
                 new LeonardoCloudContext()
                     .cloudProvider(LeonardoCloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
+            .status(LeonardoRuntimeStatus.DELETING)
             .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
     testLeoListRuntimeResponse =
         new LeonardoListRuntimeResponse()
