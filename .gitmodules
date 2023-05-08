@@ -1,3 +1,6 @@
 [submodule "aou-utils"]
 	path = aou-utils
 	url = https://github.com/all-of-us/utils
+[submodule "tanagra"]
+	path = tanagra
+	url = https://github.com/DataBiosphere/tanagra
