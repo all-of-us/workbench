@@ -155,7 +155,8 @@ describe('Cromwell GKE App', () => {
     );
 
     expect(succeededStatus).toBeTruthy();
-    // In the meantime we will go ahead, delete cromwell and start cleanup
+
+    // Delete cromwell and start cleanup
     const isCromshellDeleted = await appsPanel.deleteCromwellGkeApp();
     expect(isCromshellDeleted).toBeTruthy();
 
