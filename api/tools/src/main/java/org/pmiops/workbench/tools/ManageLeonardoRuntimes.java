@@ -31,11 +31,13 @@ import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * ManageLeonardoRuntimes is an operational utility for interacting with the Leonardo Notebook
@@ -43,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
  * authorized as the App Engine default service account for a given environment.
  */
 @Configuration
+@Import(LeonardoMapperImpl.class)
 public class ManageLeonardoRuntimes {
 
   enum OutputFormat {
@@ -144,16 +147,17 @@ public class ManageLeonardoRuntimes {
   }
 
   private static void describeRuntime(
-      String apiUrl, String workbenchProjectId, String workbenchServiceAccount, String runtimeId)
+      String apiUrl, String workbenchServiceAccount, String runtimeId)
       throws IOException, ApiException {
     String[] parts = runtimeId.split("/");
     if (parts.length != 2) {
       System.err.println(
           String.format(
-              "given runtime ID '%s' is invalid, wanted format 'project/runtimeName'", runtimeId));
+              "given runtime ID '%s' is invalid, wanted format 'googleProject/runtimeName'",
+              runtimeId));
       return;
     }
-    String runtimeProject = parts[0];
+    String googleProject = parts[0];
     String runtimeName = parts[1];
 
     // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
@@ -161,7 +165,7 @@ public class ManageLeonardoRuntimes {
     RuntimesApi client = newApiClient(apiUrl);
     com.squareup.okhttp.Call call =
         client.getRuntimeCall(
-            runtimeProject,
+            googleProject,
             runtimeName,
             /* progressListener */ null,
             /* progressRequestListener */ null);
@@ -245,7 +249,7 @@ public class ManageLeonardoRuntimes {
                     "Expected %d args %s. Got: %s",
                     DESCRIBE_ARG_NAMES.size(), DESCRIBE_ARG_NAMES, Arrays.asList(args)));
           }
-          describeRuntime(args[0], args[1], args[2], args[3]);
+          describeRuntime(args[0], args[2], args[3]);
           return;
 
         case "list":
