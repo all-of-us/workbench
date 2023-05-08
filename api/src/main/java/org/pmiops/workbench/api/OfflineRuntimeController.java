@@ -137,19 +137,15 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int activeDeletes = 0;
     int unusedDeletes = 0;
     for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+      String googleProject =
+          leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
-          String.format(
-              "%s/%s",
-              leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext()),
-              listRuntimeResponse.getRuntimeName());
+          String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
       final LeonardoGetRuntimeResponse runtime;
       try {
         // Refetch the runtime to ensure freshness as this iteration may take
         // some time.
-        runtime =
-            runtimesApi.getRuntime(
-                leonardoMapper.cloudContextToGoogleProject(listRuntimeResponse.getCloudContext()),
-                listRuntimeResponse.getRuntimeName());
+        runtime = runtimesApi.getRuntime(googleProject, listRuntimeResponse.getRuntimeName());
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to refetch runtime '%s'", runtimeId), e);
         errors++;
@@ -299,14 +295,13 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // Returns true if an email is sent.
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
-    Optional<DbWorkspace> workspace =
-        workspaceDao.getByGoogleProject(
-            leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext()));
+    String googleProject = leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext());
+    Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(
           String.format(
               "skipping disk '%s' associated with unknown Google project '%s'",
-              disk.getName(), leonardoMapper.cloudContextToGoogleProject(disk.getCloudContext())));
+              disk.getName(), googleProject));
       return false;
     }
 

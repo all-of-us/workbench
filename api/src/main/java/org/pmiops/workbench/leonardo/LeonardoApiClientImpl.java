@@ -345,21 +345,20 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .parallel()
             .map(
                 r -> {
+                  String googleProject =
+                      leonardoMapper.cloudContextToGoogleProject(r.getCloudContext());
                   try {
                     leonardoRetryHandler.runAndThrowChecked(
                         (context) -> {
                           runtimesApiAsImpersonatedUser.stopRuntime(
-                              leonardoMapper.cloudContextToGoogleProject(r.getCloudContext()),
-                              r.getRuntimeName());
+                              googleProject, r.getRuntimeName());
                           return null;
                         });
                   } catch (ApiException e) {
                     log.log(
                         Level.WARNING,
                         String.format(
-                            "failed to stop runtime '%s/%s'",
-                            leonardoMapper.cloudContextToGoogleProject(r.getCloudContext()),
-                            r.getRuntimeName()),
+                            "failed to stop runtime '%s/%s'", googleProject, r.getRuntimeName()),
                         e);
                     return false;
                   }
