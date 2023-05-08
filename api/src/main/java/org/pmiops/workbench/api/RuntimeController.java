@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoApiClient;
+import org.pmiops.workbench.apiclients.leonardo.NewLeonardoMapper;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -74,6 +76,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private static final Logger log = Logger.getLogger(RuntimeController.class.getName());
 
   private final LeonardoApiClient leonardoNotebooksClient;
+  private final NewLeonardoApiClient newLeonardoClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceService workspaceService;
@@ -81,11 +84,13 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final LeonardoMapper leonardoMapper;
+  private final NewLeonardoMapper newLeonardoMapper;
   private final LeonardoApiHelper leonardoApiHelper;
 
   @Autowired
   RuntimeController(
       LeonardoApiClient leonardoNotebooksClient,
+      NewLeonardoApiClient newLeonardoClient,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceService workspaceService,
@@ -93,8 +98,10 @@ public class RuntimeController implements RuntimeApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserRecentResourceService userRecentResourceService,
       LeonardoMapper leonardoMapper,
+      NewLeonardoMapper newLeonardoMapper,
       LeonardoApiHelper leonardoApiHelper) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.newLeonardoClient = newLeonardoClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceService = workspaceService;
@@ -102,6 +109,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.leonardoMapper = leonardoMapper;
+    this.newLeonardoMapper = newLeonardoMapper;
     this.leonardoApiHelper = leonardoApiHelper;
   }
 
@@ -201,11 +209,11 @@ public class RuntimeController implements RuntimeApiDelegate {
         // Check with Leo again see if user have READY disk, if so, block this request or logging
         List<Disk> diskList =
             PersistentDiskUtils.findTheMostRecentActiveDisks(
-                leonardoNotebooksClient
+                newLeonardoClient
                     .listPersistentDiskByProjectCreatedByCreator(
                         dbWorkspace.getGoogleProject(), false)
                     .stream()
-                    .map(leonardoMapper::toApiListDisksResponse)
+                    .map(newLeonardoMapper::toApiListDisksResponse)
                     .collect(Collectors.toList()));
         List<Disk> runtimeDisks =
             diskList.stream().filter(Disk::getIsGceRuntime).collect(Collectors.toList());

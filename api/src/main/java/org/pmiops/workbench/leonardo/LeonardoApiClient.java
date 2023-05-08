@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -61,20 +59,20 @@ public interface LeonardoApiClient {
   /** Create a new data synchronization Welder storage link on a runtime. */
   StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
 
-  /** Gets information about a persistent disk */
-  LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
-      throws WorkbenchException;
-
-  /** Deletes a persistent disk */
-  void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
-
-  /** Update a persistent disk */
-  void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
-      throws WorkbenchException;
-
-  /** List all persistent disks by google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject, boolean includeDeleted);
+  //  /** Gets information about a persistent disk */
+  //  LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
+  //      throws WorkbenchException;
+  //
+  //  /** Deletes a persistent disk */
+  //  void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
+  //
+  //  /** Update a persistent disk */
+  //  void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
+  //      throws WorkbenchException;
+  //
+  //    /** List all persistent disks by google project */
+  //    List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+  //        String googleProject, boolean includeDeleted);
 
   /**
    * Creates Leonardo app owned by the current authenticated user.

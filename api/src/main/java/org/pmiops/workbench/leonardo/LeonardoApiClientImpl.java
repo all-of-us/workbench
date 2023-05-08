@@ -34,7 +34,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -42,7 +41,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.AppType;
@@ -397,44 +395,44 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return notebooksRetryHandler.run(
         (context) -> proxyApi.welderCreateStorageLink(storageLink, googleProject, runtime));
   }
-
-  @Override
-  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
-      throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
-    try {
-      return leonardoRetryHandler.runAndThrowChecked(
-          (context) -> disksApi.getDisk(googleProject, diskName));
-    } catch (ApiException e) {
-      throw ExceptionUtils.convertLeonardoException(e);
-    }
-  }
-
-  @Override
-  public void deletePersistentDisk(String googleProject, String diskName)
-      throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
-    leonardoRetryHandler.run(
-        (context) -> {
-          disksApi.deleteDisk(googleProject, diskName);
-          return null;
-        });
-  }
-
-  @Override
-  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
-      throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
-    leonardoRetryHandler.run(
-        (context) -> {
-          disksApi.updateDisk(
-              googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
-          return null;
-        });
-  }
-
-  @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+  //
+  //  @Override
+  //  public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String
+  // diskName)
+  //      throws WorkbenchException {
+  //    DisksApi disksApi = diskApiProvider.get();
+  //    try {
+  //      return leonardoRetryHandler.runAndThrowChecked(
+  //          (context) -> disksApi.getDisk(googleProject, diskName));
+  //    } catch (ApiException e) {
+  //      throw ExceptionUtils.convertLeonardoException(e);
+  //    }
+  //  }
+  //
+  //  @Override
+  //  public void deletePersistentDisk(String googleProject, String diskName)
+  //      throws WorkbenchException {
+  //    DisksApi disksApi = diskApiProvider.get();
+  //    leonardoRetryHandler.run(
+  //        (context) -> {
+  //          disksApi.deleteDisk(googleProject, diskName);
+  //          return null;
+  //        });
+  //  }
+  //
+  //  @Override
+  //  public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
+  //      throws WorkbenchException {
+  //    DisksApi disksApi = diskApiProvider.get();
+  //    leonardoRetryHandler.run(
+  //        (context) -> {
+  //          disksApi.updateDisk(
+  //              googleProject, diskName, new LeonardoUpdateDiskRequest().size(diskSize));
+  //          return null;
+  //        });
+  //  }
+  //
+  private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
     DisksApi disksApi = diskApiProvider.get();
     return leonardoRetryHandler.run(

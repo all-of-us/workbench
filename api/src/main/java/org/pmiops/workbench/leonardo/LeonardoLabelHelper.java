@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.pmiops.workbench.model.AppType;
+import org.pmiops.workbench.model.Disk;
 
 /** Helper class for setting Leonardo labels. */
 public class LeonardoLabelHelper {
@@ -39,5 +40,14 @@ public class LeonardoLabelHelper {
             Optional.ofNullable(rawLabelObject).orElse(new HashMap<String, String>());
     labels.put(labelKey, labelValue);
     return labels;
+  }
+
+  public static Disk mapDiskLabelsToDiskAppType(Disk disk, Map<String, String> diskLabels) {
+    if (diskLabels != null && diskLabels.containsKey(LEONARDO_LABEL_APP_TYPE)) {
+      disk.appType(labelValueToAppType(diskLabels.get(LEONARDO_LABEL_APP_TYPE)));
+    } else {
+      disk.isGceRuntime(true);
+    }
+    return disk;
   }
 }
