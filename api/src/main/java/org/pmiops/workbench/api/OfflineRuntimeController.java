@@ -137,7 +137,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int activeDeletes = 0;
     int unusedDeletes = 0;
     for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
-      String googleProject = leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
+      final String googleProject =
+          leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
           String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
       final LeonardoGetRuntimeResponse runtime;
@@ -186,10 +187,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         continue;
       }
       try {
-        runtimesApi.deleteRuntime(
-            leonardoMapper.toGoogleProject(runtime.getCloudContext()),
-            runtime.getRuntimeName(), /* includeDisk */
-            false);
+        runtimesApi.deleteRuntime(googleProject, runtime.getRuntimeName(), /* includeDisk */ false);
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to delete runtime '%s'", runtimeId), e);
         errors++;
