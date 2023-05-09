@@ -71,6 +71,8 @@ export const makeOIDC = (config: ConfigResponse): AuthProviderProps => {
     onSigninCallback: (_user: User | void): void => {
       window.history.replaceState({}, document.title, window.location.pathname);
     },
+    // https://github.com/DataBiosphere/terra-ui/blob/356f27342ff44d322b2b52077fa4efb1c5f920ce/src/libs/auth.js#LL49C10-L49C10
+    accessTokenExpiringNotificationTimeInSeconds: 330,
   };
 };
 

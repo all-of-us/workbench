@@ -460,17 +460,6 @@ export const LeonardoAppLauncher = fp.flow(
       return appendNotebookFileSuffix(this.getNotebookName());
     }
 
-    private async initializeNotebookCookies() {
-      return await this.runtimeRetry(() =>
-        leoProxyApi().setCookie({
-          withCredentials: true,
-          crossDomain: true,
-          credentials: 'include',
-          signal: this.pollAborter.signal,
-        })
-      );
-    }
-
     private incrementProgress(p: Progress): void {
       this.setState((state) => ({
         progress: p,
@@ -578,7 +567,6 @@ export const LeonardoAppLauncher = fp.flow(
     private async connectToRunningRuntime(runtime: Runtime) {
       const { namespace, id } = this.props.workspace;
       this.incrementProgress(Progress.Authenticating);
-      await this.initializeNotebookCookies();
 
       const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
