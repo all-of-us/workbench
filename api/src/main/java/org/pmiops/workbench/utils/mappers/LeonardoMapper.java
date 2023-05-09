@@ -154,7 +154,6 @@ public interface LeonardoMapper {
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
-  @Mapping(target = "googleProject", ignore = true) // deprecated in favor of cloudContext
   LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
 
   @Nullable

@@ -220,7 +220,10 @@ public class WorkspaceAdminServiceTest {
     testLeoRuntimeDifferentProject =
         new LeonardoGetRuntimeResponse()
             .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
-            .googleProject(GOOGLE_PROJECT_ID_2)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID_2))
             .status(LeonardoRuntimeStatus.RUNNING)
             .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
   }
