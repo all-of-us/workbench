@@ -177,7 +177,7 @@ const RStudioButtonRow = (props: {
       message: 'Please try again.',
     },
     async () => {
-      await leoProxyApi().setCookie(userApp.googleProject, userApp.appName, {
+      await leoProxyApi().setCookie({
         credentials: 'include',
       });
       window.open(userApp.proxyUrls.rstudio, '_blank').focus();

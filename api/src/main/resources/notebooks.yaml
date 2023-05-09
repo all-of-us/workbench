@@ -111,37 +111,25 @@ paths:
         "500":
           description: Internal Error
 
-  "/proxy/{googleProject}/{runtimeName}/setCookie":
+  "/proxy/setCookie":
     get:
-      summary: Sets a browser cookie needed to authorize connections to a Dataproc
-        runtime
+      summary: Sets a browser cookie needed to authorize connections to a Leonardo runtime
       description: >
         If using Google token-based authorization to a runtime, the Leo proxy
-        accepts a
-
-        Google token passed as a cookie value. This endpoint facilitates setting that cookie.
+        accepts a Google token passed as a cookie value. This endpoint facilitates setting that cookie.
 
         It accepts a bearer token in an Authorization header and responds with a Set-Cookie header.
+
+        If no bearer token is present, it unsets the cookie by returning a Set-Cookie header with a null
+        value and expiration date in the past.
       operationId: setCookie
       tags:
         - proxy
-      parameters:
-        - in: path
-          name: googleProject
-          required: true
-          type: string
-        - in: path
-          name: runtimeName
-          description: runtimeName
-          required: true
-          type: string
       responses:
         "204":
           description: Successfully set a cookie
         "401":
           description: Proxy connection unauthorized
-        "404":
-          description: Runtime not found
         "500":
           description: Internal Error
 

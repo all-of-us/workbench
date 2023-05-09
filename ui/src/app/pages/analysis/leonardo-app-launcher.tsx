@@ -460,9 +460,9 @@ export const LeonardoAppLauncher = fp.flow(
       return appendNotebookFileSuffix(this.getNotebookName());
     }
 
-    private async initializeNotebookCookies(c: Runtime) {
+    private async initializeNotebookCookies() {
       return await this.runtimeRetry(() =>
-        leoProxyApi().setCookie(c.googleProject, c.runtimeName, {
+        leoProxyApi().setCookie({
           withCredentials: true,
           crossDomain: true,
           credentials: 'include',
@@ -578,7 +578,7 @@ export const LeonardoAppLauncher = fp.flow(
     private async connectToRunningRuntime(runtime: Runtime) {
       const { namespace, id } = this.props.workspace;
       this.incrementProgress(Progress.Authenticating);
-      await this.initializeNotebookCookies(runtime);
+      await this.initializeNotebookCookies();
 
       const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {
