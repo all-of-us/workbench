@@ -55,6 +55,8 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -105,7 +107,6 @@ public class WorkspaceAdminServiceTest {
 
   private DbWorkspace dbWorkspace;
   private LeonardoGetRuntimeResponse testLeoRuntime;
-  private LeonardoGetRuntimeResponse testLeoRuntime2;
   private LeonardoGetRuntimeResponse testLeoRuntimeDifferentProject;
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
   private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
@@ -192,25 +193,28 @@ public class WorkspaceAdminServiceTest {
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoRuntimeStatus.DELETING)
             .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
     testLeoListRuntimeResponse =
         new LeonardoListRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoRuntimeStatus.RUNNING);
-    testLeoRuntime2 =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(RUNTIME_NAME_2)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
 
     testLeoListRuntimeResponse2 =
         new LeonardoListRuntimeResponse()
             .runtimeName(RUNTIME_NAME_2)
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoRuntimeStatus.RUNNING);
 
     testLeoRuntimeDifferentProject =

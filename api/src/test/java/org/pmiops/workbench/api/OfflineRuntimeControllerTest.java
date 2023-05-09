@@ -39,6 +39,8 @@ import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -169,7 +171,8 @@ public class OfflineRuntimeControllerTest {
         .thenReturn(toListRuntimeResponseList(runtimes));
 
     for (LeonardoGetRuntimeResponse runtime : runtimes) {
-      when(mockRuntimesApi.getRuntime(runtime.getGoogleProject(), runtime.getRuntimeName()))
+      when(mockRuntimesApi.getRuntime(
+              leonardoMapper.toGoogleProject(runtime.getCloudContext()), runtime.getRuntimeName()))
           .thenReturn(runtime);
     }
   }
@@ -184,7 +187,10 @@ public class OfflineRuntimeControllerTest {
     return new LeonardoListPersistentDiskResponse()
         .diskType(LeonardoDiskType.STANDARD)
         .status(LeonardoDiskStatus.READY)
-        .googleProject(googleProject)
+        .cloudContext(
+            new LeonardoCloudContext()
+                .cloudProvider(LeonardoCloudProvider.GCP)
+                .cloudResource(googleProject))
         .name("my-disk")
         .size(200)
         .auditInfo(

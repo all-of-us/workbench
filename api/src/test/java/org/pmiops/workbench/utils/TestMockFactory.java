@@ -33,6 +33,8 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.DemographicSurveyV2;
@@ -157,7 +159,10 @@ public class TestMockFactory {
   public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
     return new LeonardoListRuntimeResponse()
         .runtimeName("runtime")
-        .googleProject("google-project")
+        .cloudContext(
+            new LeonardoCloudContext()
+                .cloudProvider(LeonardoCloudProvider.GCP)
+                .cloudResource("google-project"))
         .status(LeonardoRuntimeStatus.STOPPED);
   }
 

@@ -27,6 +27,8 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
@@ -311,7 +313,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(status)
             .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
       label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());

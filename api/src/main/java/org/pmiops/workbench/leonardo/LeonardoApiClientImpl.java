@@ -334,7 +334,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     log.severe(
                         String.format(
                             "listRuntime query by label returned a runtime not created by the expected user: '%s/%s' has creator '%s', expected '%s'",
-                            r.getGoogleProject(),
+                            leonardoMapper.toGoogleProject(r.getCloudContext()),
                             r.getRuntimeName(),
                             r.getAuditInfo().getCreator(),
                             userEmail));
@@ -345,19 +345,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             .parallel()
             .map(
                 r -> {
+                  String googleProject = leonardoMapper.toGoogleProject(r.getCloudContext());
                   try {
                     leonardoRetryHandler.runAndThrowChecked(
                         (context) -> {
                           runtimesApiAsImpersonatedUser.stopRuntime(
-                              r.getGoogleProject(), r.getRuntimeName());
+                              googleProject, r.getRuntimeName());
                           return null;
                         });
                   } catch (ApiException e) {
                     log.log(
                         Level.WARNING,
                         String.format(
-                            "failed to stop runtime '%s/%s'",
-                            r.getGoogleProject(), r.getRuntimeName()),
+                            "failed to stop runtime '%s/%s'", googleProject, r.getRuntimeName()),
                         e);
                     return false;
                   }
