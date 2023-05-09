@@ -27,7 +27,7 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
-  appendNotebookFileSuffix,
+  appendJupyterNotebookFileSuffix,
   dropNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
@@ -106,7 +106,7 @@ export const ExportDatasetModal = ({
       kernelType,
       genomicsAnalysisTool,
       generateGenomicsAnalysisCode: hasWgs(),
-      notebookName: appendNotebookFileSuffix(notebookNameWithoutSuffix),
+      notebookName: appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
       newNotebook: creatingNewNotebook,
     };
   }
@@ -125,7 +125,7 @@ export const ExportDatasetModal = ({
       const notebookUrl =
         `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
         encodeURIComponentStrict(
-          appendNotebookFileSuffix(notebookNameWithoutSuffix)
+          appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );
       navigateByUrl(notebookUrl);
     } catch (e) {
@@ -194,7 +194,7 @@ export const ExportDatasetModal = ({
         .getNotebookKernel(
           workspace.namespace,
           workspace.id,
-          appendNotebookFileSuffix(nameWithoutSuffix)
+          appendJupyterNotebookFileSuffix(nameWithoutSuffix)
         )
         .then((resp) => setKernelType(resp.kernelType))
         .catch(() =>

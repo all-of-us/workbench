@@ -154,7 +154,7 @@ export const NotebookList = withCurrentWorkspace()(
           this.setState({
             notebookList,
             notebookNameList: notebookList.map((fd) =>
-              dropNotebookFileSuffix(fd.name)
+              fd.name
             ),
           });
         });

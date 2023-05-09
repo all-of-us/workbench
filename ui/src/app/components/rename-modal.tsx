@@ -13,7 +13,11 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import {
+  appendJupyterNotebookFileSuffix,
+  appendNotebookFileSuffixByOldName,
+  dropNotebookFileSuffix
+} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
@@ -76,7 +80,7 @@ export class RenameModal extends React.Component<Props, States> {
       {
         newName:
           resourceType === ResourceType.NOTEBOOK
-            ? dropNotebookFileSuffix(newName)
+            ? appendNotebookFileSuffixByOldName(newName.trim(), oldName)
             : newName?.trim(),
       },
       {

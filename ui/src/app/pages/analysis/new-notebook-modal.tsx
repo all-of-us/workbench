@@ -25,7 +25,7 @@ import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { nameValidationFormat } from 'app/utils/resources';
 
-import { appendNotebookFileSuffix } from './util';
+import { appendJupyterNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
@@ -67,7 +67,7 @@ export const NewNotebookModal = (props: Props) => {
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: appendNotebookFileSuffix(name),
+      notebookName: appendJupyterNotebookFileSuffix(name),
     });
     navigate(
       [

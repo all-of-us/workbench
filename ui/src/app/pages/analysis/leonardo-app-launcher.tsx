@@ -48,7 +48,7 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage,
 } from './notebook-frame-error';
-import { appendNotebookFileSuffix, dropNotebookFileSuffix } from './util';
+import { appendJupyterNotebookFileSuffix, dropNotebookFileSuffix } from './util';
 
 export enum LeoApplicationType {
   Notebook,
@@ -457,7 +457,7 @@ export const LeonardoAppLauncher = fp.flow(
 
     // get notebook name with file suffix
     private getFullNotebookName() {
-      return appendNotebookFileSuffix(this.getNotebookName());
+      return appendJupyterNotebookFileSuffix(this.getNotebookName());
     }
 
     private async initializeNotebookCookies(c: Runtime) {

@@ -6,7 +6,7 @@ import {
 } from 'generated/fetch';
 
 import {
-  appendNotebookFileSuffix,
+  appendJupyterNotebookFileSuffix,
   dropNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 
@@ -53,7 +53,7 @@ export class NotebooksApiStub extends NotebooksApi {
     notebookName: string
   ): Promise<any> {
     return new Promise<any>((resolve) => {
-      const cloneName = appendNotebookFileSuffix(
+      const cloneName = appendJupyterNotebookFileSuffix(
         dropNotebookFileSuffix(notebookName) + ' Clone'
       );
       this.notebookList.push({
