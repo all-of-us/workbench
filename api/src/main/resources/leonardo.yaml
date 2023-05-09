@@ -1877,9 +1877,6 @@ components:
           description: The labels to be placed on the cluster. Of type Map[String,String]
         userJupyterExtensionConfig:
           $ref: "#/components/schemas/UserJupyterExtensionConfig"
-        jupyterExtensionUri:
-          type: string
-          description: Deprecated. Please use userJupyterExtensionConfig.
         jupyterUserScriptUri:
           type: string
           description: >
@@ -1944,9 +1941,6 @@ components:
         defaultClientId:
           type: string
           description: The default Google Client ID.
-        jupyterDockerImage:
-          type: string
-          description: Deprecated. Please use toolDockerImage.
         toolDockerImage:
           type: string
           description: The tool docker image to install. May be Dockerhub or GCR. If not
