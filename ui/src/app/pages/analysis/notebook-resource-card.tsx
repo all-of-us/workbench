@@ -27,7 +27,6 @@ import {
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
 import {
-  appendJupyterNotebookFileSuffix,
   appendNotebookFileSuffixByOldName,
 } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
