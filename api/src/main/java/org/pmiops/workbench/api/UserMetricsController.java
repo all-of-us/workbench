@@ -279,7 +279,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         cohortService,
         cohortReviewService,
         conceptSetService,
-        dataSetService);
+        dataSetService,
+        cloudStorageClient,
+        workspaceAuthService);
   }
 
   // Retrieves Database workspace ID

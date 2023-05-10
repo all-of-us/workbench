@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaces.resources;
 
 import com.google.common.primitives.Longs;
 import java.sql.Timestamp;
+import java.util.Set;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -27,6 +29,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -85,9 +88,8 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
-  @Mapping(target = "lastModifiedBy", ignore = true)
   ResourceFields fromNotebookNameAndLastModified(
-      String notebook, Timestamp lastModifiedEpochMillis);
+      String notebook, Timestamp lastModifiedEpochMillis, String lastModifiedBy);
 
   @Mapping(target = "permission", source = "accessLevel")
   WorkspaceResource mergeWorkspaceAndResourceFields(
@@ -135,7 +137,15 @@ public interface WorkspaceResourceMapper {
       CohortService cohortService,
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
-      DataSetService dataSetService) {
+      DataSetService dataSetService,
+      CloudStorageClient cloudStorageClient,
+      WorkspaceAuthService workspaceAuthService) {
+    Set<String> workspaceUsers =
+        workspaceAuthService
+            .getFirecloudWorkspaceAcls(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .keySet();
+
     return mergeWorkspaceAndResourceFields(
         fromWorkspace(dbWorkspace),
         fcWorkspace,
@@ -144,7 +154,9 @@ public interface WorkspaceResourceMapper {
             cohortService,
             cohortReviewService,
             conceptSetService,
-            dataSetService));
+            dataSetService,
+            cloudStorageClient,
+            workspaceUsers));
   }
 
   default ResourceFields fromDbUserRecentlyModifiedResource(
@@ -152,7 +164,9 @@ public interface WorkspaceResourceMapper {
       CohortService cohortService,
       CohortReviewService cohortReviewService,
       ConceptSetService conceptSetService,
-      DataSetService dataSetService) {
+      DataSetService dataSetService,
+      CloudStorageClient cloudStorageClient,
+      Set<String> workspaceUsers) {
 
     // null if Notebook, Long id otherwise
     final Long resourceId = Longs.tryParse(dbUserRecentlyModifiedResource.getResourceId());
@@ -169,9 +183,13 @@ public interface WorkspaceResourceMapper {
       case DATA_SET:
         return fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
       case NOTEBOOK:
+        String lastModifiedBy =
+            cloudStorageClient.uriToFileDetail(
+                dbUserRecentlyModifiedResource.getResourceId(), workspaceUsers);
         return fromNotebookNameAndLastModified(
             dbUserRecentlyModifiedResource.getResourceId(),
-            dbUserRecentlyModifiedResource.getLastAccessDate());
+            dbUserRecentlyModifiedResource.getLastAccessDate(),
+            lastModifiedBy);
       default:
         throw new ServerErrorException("Recent resource: bad resource type ");
     }

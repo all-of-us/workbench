@@ -6,8 +6,10 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -176,5 +178,23 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   @Override
   public String getGoogleOAuthClientSecret() {
     return getCredentialsBucketString("google-oauth-client-secret.txt");
+  }
+
+  @Override
+  public String uriToFileDetail(String uri, Set<String> workspaceUsers) {
+    String bucketName = uri.replaceFirst("gs://", "");
+    String[] parts = bucketName.split("/");
+    final String name = Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length));
+    Blob blob = getBlob(parts[0], name);
+    Map<String, String> fileMetadata = blob.getMetadata();
+    if (null != fileMetadata) {
+      String hash = fileMetadata.getOrDefault("lastLockedBy", null);
+      if (hash != null) {
+        String userName =
+            NotebookLockingUtils.findHashedUser(bucketName.split("/")[0], workspaceUsers, hash);
+        return userName;
+      }
+    }
+    return "";
   }
 }
