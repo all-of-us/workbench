@@ -184,7 +184,7 @@ public interface WorkspaceResourceMapper {
         return fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
       case NOTEBOOK:
         String lastModifiedBy =
-            cloudStorageClient.uriToFileDetail(
+            cloudStorageClient.notebookPathToFileDetail(
                 dbUserRecentlyModifiedResource.getResourceId(), workspaceUsers);
         return fromNotebookNameAndLastModified(
             dbUserRecentlyModifiedResource.getResourceId(),

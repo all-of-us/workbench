@@ -181,11 +181,12 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
-  public String uriToFileDetail(String uri, Set<String> workspaceUsers) {
+  public String notebookPathToFileDetail(String uri, Set<String> workspaceUsers) {
     String bucketName = uri.replaceFirst("gs://", "");
-    String[] parts = bucketName.split("/");
-    final String name = Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length));
-    Blob blob = getBlob(parts[0], name);
+    String[] notebookPath = bucketName.split("/");
+    final String name =
+        Joiner.on('/').join(Arrays.copyOfRange(notebookPath, 1, notebookPath.length));
+    Blob blob = getBlob(notebookPath[0], name);
     Map<String, String> fileMetadata = blob.getMetadata();
     if (null != fileMetadata) {
       String hash = fileMetadata.getOrDefault("lastLockedBy", null);
