@@ -529,6 +529,7 @@ export const LeonardoAppLauncher = fp.flow(
       if (this.state.resolveRuntimeInitializer) {
         this.state.resolveRuntimeInitializer(null);
       }
+      this.pollAborter.abort();
     }
 
     // check the runtime's status: if it's Running we can connect the notebook to it
