@@ -26,7 +26,10 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import {appendJupyterNotebookFileSuffix, appendNotebookFileSuffixByOldName} from 'app/pages/analysis/util';
+import {
+  appendJupyterNotebookFileSuffix,
+  appendNotebookFileSuffixByOldName,
+} from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -198,8 +201,7 @@ export const NotebookResourceCard = fp.flow(
             />
           )}
 
-          {
-            this.state.showRenameModal &&
+          {this.state.showRenameModal && (
             <RenameModal
               resourceType={getType(resource)}
               onRename={(newName) => {
@@ -209,10 +211,12 @@ export const NotebookResourceCard = fp.flow(
               onCancel={() => this.setState({ showRenameModal: false })}
               hideDescription={true}
               oldName={oldName}
-              nameFormat={(name) => appendNotebookFileSuffixByOldName(name, oldName)}
+              nameFormat={(name) =>
+                appendNotebookFileSuffixByOldName(name, oldName)
+              }
               existingNames={this.props.existingNameList}
             />
-          }
+          )}
           {menuOnly ? (
             <ResourceActionsMenu
               actions={this.actions}

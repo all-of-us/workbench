@@ -48,7 +48,10 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage,
 } from './notebook-frame-error';
-import { appendJupyterNotebookFileSuffix, dropNotebookFileSuffix } from './util';
+import {
+  appendJupyterNotebookFileSuffix,
+  dropNotebookFileSuffix,
+} from './util';
 
 export enum LeoApplicationType {
   Notebook,

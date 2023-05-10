@@ -187,7 +187,9 @@ describe('ExportDatasetModal', () => {
       .find('[data-test-id="notebook-name-input"]')
       .first()
       .simulate('change', {
-        target: { value: appendJupyterNotebookFileSuffix(existingNotebookName) },
+        target: {
+          value: appendJupyterNotebookFileSuffix(existingNotebookName),
+        },
       });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');

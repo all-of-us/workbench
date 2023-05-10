@@ -3,6 +3,10 @@ import { mount } from 'enzyme';
 
 import { ResourceType } from 'generated/fetch';
 
+import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
+
+import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+
 import { RenameModal } from './rename-modal';
 
 describe('RenameModal', () => {
@@ -36,5 +40,29 @@ describe('RenameModal', () => {
     );
     expect(wrapper.exists()).toBeTruthy();
     expect(wrapper.find('[data-test-id="descriptionLabel"]')).toBeTruthy();
+  });
+
+  it('should show error is new name already exist', async () => {
+    const wrapper = mount(
+      <RenameModal
+        onRename={() => {}}
+        resourceType={ResourceType.NOTEBOOK}
+        onCancel={() => {}}
+        oldName='123.Rmd'
+        existingNames={['123.Rmd']}
+        nameFormat={(name) =>
+          appendNotebookFileSuffixByOldName(name, '123.Rmd')
+        }
+      />
+    );
+    wrapper
+      .find('[data-test-id="new-name-input"]')
+      .first()
+      .simulate('change', { target: { value: '123' } });
+    await waitOneTickAndUpdate(wrapper);
+    // expect(wrapper.find('[data-test-id="new-name-input"]').first().text()).toEqual("123")
+    expect(
+      wrapper.find('[data-test-id="new-name-invalid"]').first().text()
+    ).toEqual('New name already exists');
   });
 });

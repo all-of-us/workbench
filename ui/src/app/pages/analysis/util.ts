@@ -7,7 +7,10 @@ const rstudioNotebookExtension = '.Rmd';
 
 export function dropNotebookFileSuffix(filename: string) {
   if (filename?.endsWith(jupyterNotebookExtension)) {
-    return filename.substring(0, filename.length - jupyterNotebookExtension.length);
+    return filename.substring(
+      0,
+      filename.length - jupyterNotebookExtension.length
+    );
   }
 
   return filename;
@@ -29,14 +32,16 @@ export function appendRstudioNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export function appendNotebookFileSuffixByOldName(filename: string, oldFileName: string) {
-  if(oldFileName.endsWith(jupyterNotebookExtension)) {
-    return appendJupyterNotebookFileSuffix(filename)
+export function appendNotebookFileSuffixByOldName(
+  filename: string,
+  oldFileName: string
+) {
+  if (oldFileName.endsWith(jupyterNotebookExtension)) {
+    return appendJupyterNotebookFileSuffix(filename);
   } else {
-    return appendRstudioNotebookFileSuffix(filename)
+    return appendRstudioNotebookFileSuffix(filename);
   }
 }
-
 
 export const listNotebooks = (workspace): Promise<FileDetail[]> => {
   const { namespace, id } = workspace;

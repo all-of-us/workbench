@@ -153,9 +153,7 @@ export const NotebookList = withCurrentWorkspace()(
         listNotebooks(workspace).then((notebookList) => {
           this.setState({
             notebookList,
-            notebookNameList: notebookList.map((fd) =>
-              fd.name
-            ),
+            notebookNameList: notebookList.map((fd) => fd.name),
           });
         });
       } catch (error) {
