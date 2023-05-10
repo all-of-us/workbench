@@ -1,9 +1,22 @@
 package org.pmiops.workbench.google;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import javax.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,29 +26,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import javax.inject.Provider;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @DataJpaTest
 public class CloudStorageClientTest {
 
   private final String NOTEBOOK_NAME = "testNotebook.ipynb";
   private final String USER_EMAIL = "fakeUser@domain.com";
-
-  // This hash value is calculated using NookLockingUtils.notebookLockingEmailHash for USER_EMAIL
-  // and bucket name
-  private final String USER_HASH =
-      "c46c78e35a9a4434d1071b6c514b91ea0f0c6e738eea80a202473b54f8ab50e0";
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
 
@@ -80,11 +75,12 @@ public class CloudStorageClientTest {
 
     Set<String> workspaceUsers = new HashSet<String>();
     workspaceUsers.add(USER_EMAIL);
+    Blob notebookBlob = mock(Blob.class);
 
     Map<String, String> metaData = new HashMap<String, String>();
-    metaData.put("lastLockedBy", USER_HASH);
-    
-    Blob notebookBlob = mock(Blob.class);
+    metaData.put(
+        "lastLockedBy", NotebookLockingUtils.notebookLockingEmailHash("notebooks", USER_EMAIL));
+
     when(notebookBlob.getMetadata()).thenReturn(metaData);
     when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
 
