@@ -938,7 +938,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
       async () => {
         let gcePersistentDisk: Disk = null;
         try {
-          const availableDisks = await disksApi().listDisksInWorkspace(
+          const availableDisks = await disksApi().listOwnedDisksInWorkspace(
             currentWorkspaceNamespace
           );
           gcePersistentDisk = availableDisks.find(

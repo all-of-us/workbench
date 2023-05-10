@@ -37,7 +37,7 @@ export class DisksApiStub extends DisksApi {
     });
   }
 
-  listDisksInWorkspace(
+  listOwnedDisksInWorkspace(
     _workspaceNamespace: string,
     _options?: any
   ): Promise<ListDisksResponse> {
