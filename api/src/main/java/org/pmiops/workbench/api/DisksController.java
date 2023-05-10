@@ -68,7 +68,7 @@ public class DisksController implements DisksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ListDisksResponse> listDisksInWorkspace(String workspaceNamespace) {
+  public ResponseEntity<ListDisksResponse> listOwnedDisksInWorkspace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
