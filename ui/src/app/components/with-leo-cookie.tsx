@@ -13,7 +13,6 @@ const LeoCookieWrapper = ({ children }) => {
     const pollAborter = new AbortController();
 
     const setLeoCookie = () => {
-      console.log('setting cookie');
       leoProxyApi()
         .setCookie({
           withCredentials: true,
@@ -34,7 +33,6 @@ const LeoCookieWrapper = ({ children }) => {
           });
         })
         .finally(() => {
-          console.log('Done setting cookie.');
           setLoading(false);
         });
     };
@@ -54,7 +52,6 @@ const LeoCookieWrapper = ({ children }) => {
 
     return () => {
       clearTimeout(timer);
-      console.log('aborting');
       pollAborter.abort();
     };
   }, []);
