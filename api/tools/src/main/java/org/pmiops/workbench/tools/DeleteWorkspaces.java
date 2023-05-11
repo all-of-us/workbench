@@ -1,6 +1,7 @@
 package org.pmiops.workbench.tools;
 
 import com.google.common.primitives.Ints;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -137,6 +138,14 @@ public class DeleteWorkspaces extends Tool {
           deleteOpt,
           this::listRawlsWorkspaces,
           this::deleteRawlsWorkspace);
+      // Sam
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listSamWorkspaces,
+          this::deleteSamWorkspace);
     };
   }
 
@@ -178,6 +187,15 @@ public class DeleteWorkspaces extends Tool {
     return workspaces;
   }
 
+  private List<?> listSamWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(username);
+    LOG.info(
+        String.format(
+            "Found %d Sam workspaces which are not present in the %s Rawls DB",
+            workspaces.size(), rwEnv));
+    return Collections.emptyList();
+  }
+
   private void deleteAouWorkspace(WorkspaceResponse response, String username) {
     String namespace = response.getWorkspace().getNamespace();
     String fcName = response.getWorkspace().getId();
@@ -192,5 +210,10 @@ public class DeleteWorkspaces extends Tool {
     LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
     workspaceService.deleteOrphanedRawlsWorkspace(
         username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
+  }
+
+  private <T> void deleteSamWorkspace(T t, String s) {
+    // TODO
+    return;
   }
 }
