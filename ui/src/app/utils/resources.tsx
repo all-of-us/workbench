@@ -159,6 +159,7 @@ export function convertToResource(
         ? (inputResource as FileDetail)
         : null,
     lastModifiedEpochMillis: inputResource.lastModifiedTime,
+    lastModifiedBy: inputResource.lastModifiedBy,
     adminLocked,
   };
 }

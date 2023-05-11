@@ -360,11 +360,7 @@ describe('ExpandedApp', () => {
     const setCookieSpy = jest.spyOn(leoProxyApi(), 'setCookie');
     launchButton.simulate('click');
 
-    expect(setCookieSpy).toHaveBeenCalledWith(
-      workspace.googleProject,
-      appName,
-      { credentials: 'include' }
-    );
+    expect(setCookieSpy).toHaveBeenCalledWith({ credentials: 'include' });
   });
 
   describe('should disable the launch button when the RStudio app status is not RUNNING', () => {

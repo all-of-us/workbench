@@ -9,11 +9,7 @@ export class LeoProxyApiStub extends ProxyApi {
     });
   }
 
-  public setCookie(
-    _googleProject: string,
-    _runtimeName: string,
-    _options?: any
-  ): Promise<Response> {
+  public setCookie(_options?: any): Promise<Response> {
     return new Promise<Response>((resolve) => {
       resolve(new Response());
     });

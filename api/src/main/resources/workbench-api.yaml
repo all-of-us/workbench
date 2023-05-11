@@ -976,7 +976,7 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
       summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
-      operationId: listDisksInWorkspace
+      operationId: listOwnedDisksInWorkspace
       tags:
         - disks
       parameters:

@@ -13,7 +13,7 @@ buildscript {
         JACKSON_VERSION = '2.13.4'
         KOTLIN_VERSION = '1.8.20'
         LIQUIBASE_VERSION = '4.16.1'
-        MAPSTRUCT_VERSION = '1.4.2.Final'
+        MAPSTRUCT_VERSION = '1.5.5.Final'
         MOCKITO_KOTLIN_VERSION = '4.1.0'
         OKHTTP_VERSION = '2.7.5'
         OPENCENSUS_VERSION = '0.31.1'
@@ -140,6 +140,7 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
                     'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
                     'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
                     'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+                    'hideGenerationTimestamp': 'true',
             ]
         }
         // Validation only works for Swagger 2 - skip.
@@ -203,7 +204,8 @@ swaggerSources {
                     // Generates delegate interfaces; used to make method annotations work without
                     // having to copy them to our implementations.
                     'delegatePattern': 'true',
-                    'dateLibrary'    : 'java8'
+                    'dateLibrary'    : 'java8',
+                    'hideGenerationTimestamp': 'true',
             ]
         }
     }

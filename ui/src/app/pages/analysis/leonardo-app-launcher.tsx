@@ -463,9 +463,9 @@ export const LeonardoAppLauncher = fp.flow(
       return appendJupyterNotebookFileSuffix(this.getNotebookName());
     }
 
-    private async initializeNotebookCookies(c: Runtime) {
+    private async initializeNotebookCookies() {
       return await this.runtimeRetry(() =>
-        leoProxyApi().setCookie(c.googleProject, c.runtimeName, {
+        leoProxyApi().setCookie({
           withCredentials: true,
           crossDomain: true,
           credentials: 'include',
@@ -532,6 +532,7 @@ export const LeonardoAppLauncher = fp.flow(
       if (this.state.resolveRuntimeInitializer) {
         this.state.resolveRuntimeInitializer(null);
       }
+      this.pollAborter.abort();
     }
 
     // check the runtime's status: if it's Running we can connect the notebook to it
@@ -581,7 +582,7 @@ export const LeonardoAppLauncher = fp.flow(
     private async connectToRunningRuntime(runtime: Runtime) {
       const { namespace, id } = this.props.workspace;
       this.incrementProgress(Progress.Authenticating);
-      await this.initializeNotebookCookies(runtime);
+      await this.initializeNotebookCookies();
 
       const leoAppLocation = await this.getLeoAppPathAndLocalize(runtime);
       if (this.isCreatingNewNotebook()) {

@@ -33,6 +33,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
@@ -264,7 +266,10 @@ public class LeonardoApiClientTest {
     LeonardoListPersistentDiskResponse rstudioDisk =
         new LeonardoListPersistentDiskResponse()
             .name("123")
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoDiskStatus.READY)
             .labels(diskLabels);
     when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))

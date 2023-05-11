@@ -75,6 +75,8 @@ import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
@@ -254,11 +256,6 @@ public class RuntimeControllerTest {
 
   private DbCdrVersion cdrVersion;
   private LeonardoGetRuntimeResponse testLeoRuntime;
-  private LeonardoGetRuntimeResponse testLeoRuntime2;
-  private LeonardoGetRuntimeResponse testLeoRuntimeDifferentProject;
-  private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
-  private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
-  private LeonardoListRuntimeResponse testLeoListRuntimeResponseDifferentProject;
 
   private Runtime testRuntime;
   private DbWorkspace testWorkspace;
@@ -319,17 +316,16 @@ public class RuntimeControllerTest {
     testLeoRuntime =
         new LeonardoGetRuntimeResponse()
             .runtimeName(getRuntimeName())
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoRuntimeStatus.DELETING)
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
             .runtimeConfig(dataprocConfigObj)
             .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-    testLeoListRuntimeResponse =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(getRuntimeName())
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING);
+
     testRuntime =
         new Runtime()
             .runtimeName(getRuntimeName())
@@ -340,32 +336,6 @@ public class RuntimeControllerTest {
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
             .dataprocConfig(dataprocConfig)
             .createdDate(createdDate);
-
-    testLeoRuntime2 =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-
-    testLeoListRuntimeResponse2 =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME)
-            .googleProject(GOOGLE_PROJECT_ID)
-            .status(LeonardoRuntimeStatus.RUNNING);
-
-    testLeoRuntimeDifferentProject =
-        new LeonardoGetRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
-            .googleProject(GOOGLE_PROJECT_ID_2)
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
-
-    testLeoListRuntimeResponseDifferentProject =
-        new LeonardoListRuntimeResponse()
-            .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
-            .googleProject(GOOGLE_PROJECT_ID_2)
-            .status(LeonardoRuntimeStatus.RUNNING);
 
     testWorkspace =
         new DbWorkspace()
@@ -561,7 +531,10 @@ public class RuntimeControllerTest {
         .thenReturn(
             ImmutableList.of(
                 new LeonardoListRuntimeResponse()
-                    .googleProject("google-project")
+                    .cloudContext(
+                        new LeonardoCloudContext()
+                            .cloudProvider(LeonardoCloudProvider.GCP)
+                            .cloudResource("google-project"))
                     .runtimeName("expected-runtime")
                     .status(LeonardoRuntimeStatus.CREATING)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
@@ -999,7 +972,10 @@ public class RuntimeControllerTest {
     LeonardoListPersistentDiskResponse gceDisk =
         new LeonardoListPersistentDiskResponse()
             .name("123")
-            .googleProject(GOOGLE_PROJECT_ID)
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoDiskStatus.READY);
     when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(ImmutableList.of(gceDisk));

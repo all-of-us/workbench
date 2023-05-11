@@ -29,6 +29,7 @@ export class NotebooksApiStub extends NotebooksApi {
         name: 'mockFile.ipynb',
         path: 'gs://bucket/notebooks/mockFile.ipynb',
         lastModifiedTime: 100,
+        lastModifiedBy: 'stubUser@fake-researcher.aou',
       },
     ];
   }

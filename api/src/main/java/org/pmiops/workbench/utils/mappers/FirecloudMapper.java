@@ -7,7 +7,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", suppressTimestampInGenerated = true)
 public interface FirecloudMapper {
 
   default WorkspaceAccessLevel fcAccessLevelToApiAccessLevel(RawlsWorkspaceAccessEntry acl) {
