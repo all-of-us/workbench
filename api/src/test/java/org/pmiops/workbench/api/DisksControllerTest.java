@@ -249,7 +249,9 @@ public class DisksControllerTest {
 
   @Test
   public void test_listDisksInWorkspaces_invalidRole() throws ApiException {
-assertThrows(BadRequestException.class, () -> disksController.listDisksInWorkspace(WORKSPACE_NS, "invalid"));
+    assertThrows(
+        BadRequestException.class,
+        () -> disksController.listDisksInWorkspace(WORKSPACE_NS, "invalid"));
   }
 
   @Test
