@@ -3,9 +3,12 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -23,15 +26,18 @@ public class DisksController implements DisksApiDelegate {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoMapper leonardoMapper;
   private final WorkspaceService workspaceService;
+  private final DiskService diskService;
 
   @Autowired
   public DisksController(
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoMapper leonardoMapper,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      DiskService diskService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoMapper = leonardoMapper;
     this.workspaceService = workspaceService;
+    this.diskService = diskService;
   }
 
   @Override
@@ -83,6 +89,15 @@ public class DisksController implements DisksApiDelegate {
     ListDisksResponse listDisksResponse = new ListDisksResponse();
     listDisksResponse.addAll(diskList);
 
+    return ResponseEntity.ok(listDisksResponse);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<ListDisksResponse> listDisksInWorkspace(String workspaceNamespace) {
+    List<Disk> diskList = diskService.findByWorkspaceNamespace(workspaceNamespace);
+    ListDisksResponse listDisksResponse = new ListDisksResponse();
+    listDisksResponse.addAll(diskList);
     return ResponseEntity.ok(listDisksResponse);
   }
 }

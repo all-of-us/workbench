@@ -659,9 +659,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject) {
+  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
+      String googleProject) {
     DisksApi disksApi = serviceDiskApiProvider.get();
     return leonardoRetryHandler.run(
-        (context) -> disksApi.listDisksByProject(googleProject,null,false,null,null));
+        (context) -> disksApi.listDisksByProject(googleProject, null, false, null, null));
   }
 }
