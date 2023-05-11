@@ -109,7 +109,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_getDisk() throws ApiException {
+  public void test_getDisk() {
     String createDate = "2021-08-06T16:57:29.827954Z";
     String pdName = "pdName";
     LeonardoGetPersistentDiskResponse getResponse =
@@ -119,7 +119,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
 
     Disk disk =
         new Disk()
@@ -147,7 +150,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
 
     when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
         .thenReturn(getResponse);

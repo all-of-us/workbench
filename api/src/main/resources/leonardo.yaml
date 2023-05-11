@@ -1622,9 +1622,6 @@ components:
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
-        googleProject:
-          type: string
-          description: Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         serviceAccount:
@@ -1723,9 +1720,6 @@ components:
         runtimeName:
           type: string
           description: The user-supplied name for the runtime
-        googleProject:
-          type: string
-          description: Deprecated. The Google Project used to create the runtime
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         runtimeConfig:
@@ -1762,9 +1756,6 @@ components:
         id:
           type: integer
           description: Internal Leonardo ID of the persistent disk
-        googleProject:
-          type: string
-          description: Deprecated. The Google Project used to create the persistent disk
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         zone:
@@ -1808,9 +1799,6 @@ components:
         id:
           type: integer
           description: Internal Leonardo ID of the persistent disk
-        googleProject:
-          type: string
-          description: Deprecated. The Google Project used to create the persistent disk
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         zone:
@@ -1889,9 +1877,6 @@ components:
           description: The labels to be placed on the cluster. Of type Map[String,String]
         userJupyterExtensionConfig:
           $ref: "#/components/schemas/UserJupyterExtensionConfig"
-        jupyterExtensionUri:
-          type: string
-          description: Deprecated. Please use userJupyterExtensionConfig.
         jupyterUserScriptUri:
           type: string
           description: >
@@ -1956,9 +1941,6 @@ components:
         defaultClientId:
           type: string
           description: The default Google Client ID.
-        jupyterDockerImage:
-          type: string
-          description: Deprecated. Please use toolDockerImage.
         toolDockerImage:
           type: string
           description: The tool docker image to install. May be Dockerhub or GCR. If not
@@ -2543,9 +2525,6 @@ components:
         - auditInfo
       type: object
       properties:
-        googleProject:
-          type: string
-          description: Deprecated. The project this app is associated with
         cloudContext:
           $ref: '#/components/schemas/CloudContext'
         kubernetesRuntimeConfig:

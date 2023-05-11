@@ -151,7 +151,10 @@ public class OfflineRuntimeControllerTest {
     // each runtime created per test.
     return new LeonardoGetRuntimeResponse()
         .runtimeName("all-of-us")
-        .googleProject(String.format("proj-%d", runtimeProjectIdIndex++))
+        .cloudContext(
+            new LeonardoCloudContext()
+                .cloudProvider(LeonardoCloudProvider.GCP)
+                .cloudResource(String.format("proj-%d", runtimeProjectIdIndex++)))
         .status(LeonardoRuntimeStatus.RUNNING)
         .auditInfo(
             new LeonardoAuditInfo()
