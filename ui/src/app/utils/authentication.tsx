@@ -71,7 +71,8 @@ export const makeOIDC = (config: ConfigResponse): AuthProviderProps => {
     onSigninCallback: (_user: User | void): void => {
       window.history.replaceState({}, document.title, window.location.pathname);
     },
-    // https://github.com/DataBiosphere/terra-ui/blob/356f27342ff44d322b2b52077fa4efb1c5f920ce/src/libs/auth.js#LL49C10-L49C10
+    // This setting reduces the token refresh interval to 54.5 minutes (= 60 minutes - 330 seconds).
+    // See the use of accessTokenExpiringNotificationTimeInSeconds in the Leo cookie-setting code for why we do this.
     accessTokenExpiringNotificationTimeInSeconds: 330,
   };
 };

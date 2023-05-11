@@ -42,6 +42,12 @@ const LeoCookieWrapper = ({ children }) => {
     setLeoCookie();
     const timer = setInterval(
       setLeoCookie,
+      // The Leo cookie is associated with an access token and expires when the access token expires.
+      // When we refresh a soon-to-expire access token "X" to obtain access token "Y", there is a small window of time
+      // equal to accessTokenExpiringNotificationTimeInSeconds where both tokens are valid.
+      // The Leo refresh interval must be shorter than this window to prevent an edge case where the cookie expires
+      // before we associate the cookie with Y.
+      // This implementation is based on Terra UI's implementation:
       // https://github.com/DataBiosphere/terra-ui/blob/356f27342ff44d322b2b52077fa4efb1c5f920ce/src/libs/auth.js#LL49C10-L49C10
       (auth.settings.accessTokenExpiringNotificationTimeInSeconds - 30) * 1000
     );
