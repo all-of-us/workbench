@@ -363,8 +363,7 @@ describe('ExpandedApp', () => {
     const focusStub = jest.fn();
     const windowOpenSpy = jest
       .spyOn(window, 'open')
-      // @ts-ignore
-      .mockReturnValue({ focus: focusStub });
+      .mockReturnValue({ focus: focusStub } as any as Window);
 
     const launchButton = wrapper.find({
       'data-test-id': 'RStudio-launch-button',
