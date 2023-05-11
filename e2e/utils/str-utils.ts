@@ -55,10 +55,6 @@ export function makeRandomName(prefix?: string, opts: { includeHyphen?: boolean 
   return `${prefix}${includeHyphen ? '-' : ''}${Math.floor(Math.random() * 10000000000)}`;
 }
 
-export function makeRandomJupyterNotebookName(prefix?: string, opts: { includeHyphen?: boolean } = {}): string {
-  return makeRandomName(prefix, opts).concat('.ipynb');
-}
-
 export const extractPageName = async (page: Page): Promise<string> => {
   const title = await page.title();
   // extract page name from page title.

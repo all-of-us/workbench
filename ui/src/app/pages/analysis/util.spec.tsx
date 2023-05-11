@@ -12,4 +12,10 @@ describe('NotebookUtil', () => {
       'test.ipynb'
     );
   });
+
+  it('should not append anything if old file neither ipynb nor Rmd file', () => {
+    expect(appendNotebookFileSuffixByOldName('test', 'old.random')).toEqual(
+      'test'
+    );
+  });
 });

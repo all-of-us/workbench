@@ -40,7 +40,7 @@ describe('Notebook and Runtime UI Test', () => {
 
     const modal = new NewNotebookModal(page);
     await modal.waitForLoad();
-    await modal.name().type(pyNotebookName);
+    await modal.name().type(pyNotebookName.replace('.ipynb', ''));
 
     const errorTextXpath = `${modal.getXpath()}//*[text()="Name already exists"]`;
     const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });

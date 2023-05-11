@@ -459,7 +459,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     // get notebook name with file suffix
-    private getJupyterFullNotebookName() {
+    private getFullJupyterNotebookName() {
       return appendJupyterNotebookFileSuffix(this.getNotebookName());
     }
 
@@ -521,7 +521,7 @@ export const LeonardoAppLauncher = fp.flow(
           // navigate will encode the notebook name automatically
           'notebooks',
           ...(this.props.leoAppType === LeoApplicationType.Notebook
-            ? ['preview', this.getJupyterFullNotebookName()]
+            ? ['preview', this.getFullJupyterNotebookName()]
             : []),
         ]);
       }
@@ -593,7 +593,7 @@ export const LeonardoAppLauncher = fp.flow(
             '/' +
             id +
             '/notebooks/' +
-            encodeURIComponent(this.getJupyterFullNotebookName())
+            encodeURIComponent(this.getFullJupyterNotebookName())
         );
       }
       if (this.isOpeningTerminal()) {
@@ -620,7 +620,7 @@ export const LeonardoAppLauncher = fp.flow(
           return this.createNotebookAndLocalize(runtime);
         } else {
           this.incrementProgress(Progress.Copying);
-          const fullNotebookName = this.getJupyterFullNotebookName();
+          const fullNotebookName = this.getFullJupyterNotebookName();
           const localizedNotebookDir = await this.localizeNotebooks([
             fullNotebookName,
           ]);
@@ -658,7 +658,7 @@ export const LeonardoAppLauncher = fp.flow(
           runtime.googleProject,
           runtime.runtimeName,
           workspaceDir,
-          this.getJupyterFullNotebookName(),
+          this.getFullJupyterNotebookName(),
           {
             type: 'file',
             format: 'text',
