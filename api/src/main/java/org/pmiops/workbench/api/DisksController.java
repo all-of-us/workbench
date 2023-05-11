@@ -1,8 +1,11 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.leonardo.LeonardoApiClientImpl.LEONARDO_CREATOR_ROLE;
+
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -68,8 +71,11 @@ public class DisksController implements DisksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ListDisksResponse> listDisksInWorkspace(String workspaceNamespace,
-      String role) {
+  public ResponseEntity<ListDisksResponse> listDisksInWorkspace(
+      String workspaceNamespace, String role) {
+    if (role != null && !role.equals(LEONARDO_CREATOR_ROLE)) {
+      throw new BadRequestException(String.format("invalid disk role %s", role));
+    }
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 

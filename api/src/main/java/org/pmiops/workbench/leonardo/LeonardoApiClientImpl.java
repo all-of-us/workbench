@@ -66,7 +66,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoApiClientImpl implements LeonardoApiClient {
   // The Leonardo user role who creates Leonardo APP or disks.
-  private static final String LEONARDO_CREATOR_ROLE = "creator";
+  public static final String LEONARDO_CREATOR_ROLE = "creator";
 
   // Keep in sync with
   // https://github.com/DataBiosphere/leonardo/blob/develop/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/runtimeModels.scala#L162
@@ -480,7 +480,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       // that may have a null 'appType', as these disks are associated with Jupyter
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
-              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
+              listPersistentDiskByProject(
+                      dbWorkspace.getGoogleProject(), false, LEONARDO_CREATOR_ROLE)
                   .stream()
                   .map(leonardoMapper::toApiListDisksResponse)
                   .filter(disk -> disk.getAppType() != null)
