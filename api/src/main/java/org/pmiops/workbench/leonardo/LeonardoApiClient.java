@@ -73,8 +73,8 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks by google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject, boolean includeDeleted);
+  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+      String googleProject, boolean includeDeleted, String role);Ï
 
   /**
    * Creates Leonardo app owned by the current authenticated user.

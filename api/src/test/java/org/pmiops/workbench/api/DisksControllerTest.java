@@ -230,8 +230,8 @@ public class DisksControllerTest {
             NOW.toString(),
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
-            GOOGLE_PROJECT_ID, false))
+    when(mockLeonardoApiClient.listPersistentDiskByProject(
+            GOOGLE_PROJECT_ID, false, "creator"))
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
@@ -243,7 +243,7 @@ public class DisksControllerTest {
                 oldInactiveCromwellDisk,
                 newerCromwellDisk));
 
-    assertThat(disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody())
+    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS, "creator").getBody())
         .containsExactly(expectedGceDisk, expectedRStudioDisk);
   }
 

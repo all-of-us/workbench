@@ -976,11 +976,17 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
       summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
-      operationId: listOwnedDisksInWorkspace
+      operationId: listDisksInWorkspace
       tags:
         - disks
       parameters:
         - "$ref": "#/parameters/workspaceNamespace"
+        - in: query
+          name: role
+          description: Optional filter that excludes persistent disks you did not create. Accepts "creator" or nothing.
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: The persistent disk for this user and workspace.
@@ -4891,7 +4897,7 @@ definitions:
         description: True if disk is used by Runtime or being used by GCE runtime
       creator:
         type: string
-        description: The email for the user that created this runtime
+        description: The email for the user that created this disk
       createdDate:
         type: string
         description: timestamp for the date this runtime was created in ISO 8601 format
