@@ -1,11 +1,12 @@
 import { FileDetail } from 'generated/fetch';
 
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
+import { cond } from 'app/utils';
 
 const jupyterNotebookExtension = '.ipynb';
 const rstudioNotebookExtension = '.Rmd';
 
-export function dropNotebookFileSuffix(filename: string) {
+export function dropJupyterNotebookFileSuffix(filename: string) {
   if (filename?.endsWith(jupyterNotebookExtension)) {
     return filename.substring(
       0,
@@ -36,11 +37,17 @@ export function appendNotebookFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
-  if (oldFileName.endsWith(jupyterNotebookExtension)) {
-    return appendJupyterNotebookFileSuffix(filename);
-  } else {
-    return appendRstudioNotebookFileSuffix(filename);
-  }
+  cond(
+    [
+      oldFileName.endsWith(jupyterNotebookExtension),
+      () => appendJupyterNotebookFileSuffix(filename),
+    ],
+    [
+      oldFileName.endsWith(rstudioNotebookExtension),
+      () => appendRstudioNotebookFileSuffix(filename),
+    ],
+    () => filename
+  );
 }
 
 export const listNotebooks = (workspace): Promise<FileDetail[]> => {
@@ -52,5 +59,5 @@ export const getExistingNotebookNames = async (
   workspace
 ): Promise<string[]> => {
   const notebooks = await listNotebooks(workspace);
-  return notebooks.map((fd) => dropNotebookFileSuffix(fd.name));
+  return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
 };

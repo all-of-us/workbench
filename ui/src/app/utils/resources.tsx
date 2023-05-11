@@ -11,8 +11,6 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
-
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';
 

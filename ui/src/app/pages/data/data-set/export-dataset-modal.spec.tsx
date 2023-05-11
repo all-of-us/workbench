@@ -15,7 +15,7 @@ import { Select } from 'app/components/inputs';
 import { Tooltip } from 'app/components/popups';
 import {
   appendJupyterNotebookFileSuffix,
-  dropNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
@@ -162,7 +162,7 @@ describe('ExportDatasetModal', () => {
       .find('[data-test-id="notebook-name-input"]')
       .first()
       .simulate('change', {
-        target: { value: dropNotebookFileSuffix(existingNotebookName) },
+        target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
       });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');

@@ -9,7 +9,7 @@ import {
   ConceptSet,
 } from 'generated/fetch';
 
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { InvalidBillingBanner } from 'app/pages/workspace/invalid-billing-banner';
 import colors from 'app/styles/colors';
 import {
@@ -116,7 +116,7 @@ export const getTrail = (
         ),
         new BreadcrumbData('Notebooks', `${prefix}/notebooks`),
         new BreadcrumbData(
-          nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
+          nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
           `${prefix}/notebooks/${nbName}`
         ),
       ];

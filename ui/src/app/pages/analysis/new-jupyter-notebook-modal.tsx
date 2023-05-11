@@ -15,7 +15,7 @@ import {
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import {
-  dropNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
@@ -34,7 +34,7 @@ interface Props {
   onBack?: Function;
 }
 
-export const NewNotebookModal = (props: Props) => {
+export const NewJupyterNotebookModal = (props: Props) => {
   const { onBack, onClose, workspace } = props;
 
   const [name, setName] = useState('');
@@ -55,7 +55,7 @@ export const NewNotebookModal = (props: Props) => {
   const errors = validate(
     // we expect the notebook name to lack the .ipynb suffix
     // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-    { name: dropNotebookFileSuffix(name), kernel },
+    { name: dropJupyterNotebookFileSuffix(name), kernel },
     {
       kernel: { presence: { allowEmpty: false } },
       name: nameValidationFormat(

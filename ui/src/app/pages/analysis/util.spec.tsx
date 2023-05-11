@@ -15,7 +15,7 @@ describe('NotebookUtil', () => {
     );
   });
 
-  it('should append Rmd if old file is ipynb file', () => {
+  it('should append ipynb if old file is ipynb file', () => {
     expect(appendNotebookFileSuffixByOldName('test', 'old.ipynb')).toEqual(
       'test.ipynb'
     );

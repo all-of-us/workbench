@@ -71,9 +71,9 @@ export class RenameModal extends React.Component<Props, States> {
       newName = this.props.nameFormat(newName);
     }
     const errors = validate(
-      // Append .ipynb or .Rmd file based on the oldName format
       {
         newName:
+          // Append .ipynb or .Rmd file based on the oldName format
           resourceType === ResourceType.NOTEBOOK
             ? appendNotebookFileSuffixByOldName(newName?.trim(), oldName)
             : newName?.trim(),

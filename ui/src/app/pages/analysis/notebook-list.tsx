@@ -16,7 +16,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
+import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
@@ -268,7 +268,7 @@ export const NotebookList = withCurrentWorkspace()(
           </div>
           {loading && <SpinnerOverlay />}
           {creating && (
-            <NewNotebookModal
+            <NewJupyterNotebookModal
               workspace={workspace}
               existingNameList={notebookNameList}
               onClose={() => this.setState({ creating: false })}

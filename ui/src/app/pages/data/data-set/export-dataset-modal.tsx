@@ -28,7 +28,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import {
   appendJupyterNotebookFileSuffix,
-  dropNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
   getExistingNotebookNames,
 } from 'app/pages/analysis/util';
 import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
@@ -243,7 +243,9 @@ export const ExportDatasetModal = ({
     ...validate(
       // we expect the notebook name to lack the .ipynb suffix
       // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-      { notebookName: dropNotebookFileSuffix(notebookNameWithoutSuffix) },
+      {
+        notebookName: dropJupyterNotebookFileSuffix(notebookNameWithoutSuffix),
+      },
       {
         notebookName: nameValidationFormat(
           creatingNewNotebook ? existingNotebooks : [],

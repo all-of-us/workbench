@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { mount } from 'enzyme';
 
-import { NewNotebookModal } from './new-notebook-modal';
+import { NewJupyterNotebookModal } from './new-jupyter-notebook-modal';
 
 describe('NewNotebookModal', () => {
   it('should render', () => {
     const wrapper = mount(
-      <NewNotebookModal
+      <NewJupyterNotebookModal
         onClose={() => {}}
         workspace={{ name: 'a' }}
         existingNameList={[]}

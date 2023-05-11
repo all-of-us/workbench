@@ -4,8 +4,8 @@ import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
 import { Workspace } from 'generated/fetch';
 
-import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
+import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 
 import { AppsPanelButton } from './apps-panel-button';
@@ -20,14 +20,16 @@ export const NewNotebookButton = (props: { workspace: Workspace }) => {
     notebooksApi()
       .getNoteBookList(workspace.namespace, workspace.id)
       .then((nbl) =>
-        setNotebookNameList(nbl.map((fd) => dropNotebookFileSuffix(fd.name)))
+        setNotebookNameList(
+          nbl.map((fd) => dropJupyterNotebookFileSuffix(fd.name))
+        )
       );
   }, []);
 
   return (
     <>
       {showModal && (
-        <NewNotebookModal
+        <NewJupyterNotebookModal
           {...{ workspace }}
           existingNameList={notebookNameList}
           onClose={() => {
