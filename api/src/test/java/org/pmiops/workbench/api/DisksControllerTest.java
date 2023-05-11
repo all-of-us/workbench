@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,10 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_A
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +26,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -87,6 +92,7 @@ public class DisksControllerTest {
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
+  @MockBean DiskService mockDiskService;
 
   @Autowired UserDao userDao;
   @Autowired DisksController disksController;
@@ -310,6 +316,28 @@ public class DisksControllerTest {
     assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
   }
 
+  @Test
+  public void listDisksInWorkspace(){
+    Disk rStudioDisk =
+        newDisk(
+            user.generatePDNameForUserApps(AppType.RSTUDIO),
+            DiskStatus.DELETING,
+            NOW.minusMillis(100).toString(),
+            AppType.RSTUDIO);
+
+    Disk cromwellDisk =
+        newDisk(
+            user.generatePDNameForUserApps(AppType.CROMWELL),
+            DiskStatus.READY,
+            NOW.toString(),
+            AppType.CROMWELL);
+
+    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk,cromwellDisk));
+
+    when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
+    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
+        .containsExactly(rStudioDisk, cromwellDisk);
+  }
   private LeonardoListPersistentDiskResponse newListPdResponse(
       String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
     LeonardoListPersistentDiskResponse response =
