@@ -90,6 +90,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
+  private final Provider<DisksApi> serviceDiskApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
@@ -109,6 +110,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDiskApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
@@ -124,6 +126,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
+    this.serviceDiskApiProvider = serviceDiskApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
@@ -653,5 +656,12 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
 
     return results.size();
+  }
+
+  @Override
+  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject) {
+    DisksApi disksApi = serviceDiskApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) -> disksApi.listDisksByProject(googleProject,null,false,null,null));
   }
 }
