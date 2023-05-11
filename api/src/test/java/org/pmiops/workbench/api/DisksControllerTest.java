@@ -172,7 +172,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_listDisksInWorkspace() throws ApiException {
+  public void test_listOwnedDisksInWorkspace() throws ApiException {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
@@ -243,7 +243,7 @@ public class DisksControllerTest {
                 oldInactiveCromwellDisk,
                 newerCromwellDisk));
 
-    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
+    assertThat(disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody())
         .containsExactly(expectedGceDisk, expectedRStudioDisk);
   }
 
