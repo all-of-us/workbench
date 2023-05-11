@@ -37,7 +37,7 @@ export function appendNotebookFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
-  cond(
+  return cond(
     [
       oldFileName.endsWith(jupyterNotebookExtension),
       () => appendJupyterNotebookFileSuffix(filename),
