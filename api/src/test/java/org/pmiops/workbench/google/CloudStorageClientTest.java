@@ -81,6 +81,7 @@ public class CloudStorageClientTest {
     metaData.put(
         "lastLockedBy", NotebookLockingUtils.notebookLockingEmailHash("notebooks", USER_EMAIL));
 
+    when(notebookBlob.getName()).thenReturn(NOTEBOOK_NAME);
     when(notebookBlob.getMetadata()).thenReturn(metaData);
     when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
 
