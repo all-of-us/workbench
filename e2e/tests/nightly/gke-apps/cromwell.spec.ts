@@ -18,14 +18,15 @@ const jsonFilePath = path.relative(process.cwd(), __dirname + fileBasePath + jso
 
 // The use of %s in the following commands is temp, once docker image is updated, we will always use
 // cromshell which will be alias for cromshell-beta
-const cromshellSubmitPythonCmd = (cromshell_version) => `!${cromshell_version} submit ${wdlFileName} ${jsonFileName}`;
-const cromshellSubmitRCmd = (cromshell_version) =>
+const cromshellSubmitPythonCmd = (cromshell_version: string) =>
+  `!${cromshell_version} submit ${wdlFileName} ${jsonFileName}`;
+const cromshellSubmitRCmd = (cromshell_version: string) =>
   `system2('${cromshell_version}', args = c('submit', ` +
   `'${wdlFileName}','${jsonFileName}'), stdout = TRUE, stderr = TRUE)`;
 
-const cromshellStatusPythonCmd = (cromshell_version, cromshellJobId) =>
+const cromshellStatusPythonCmd = (cromshell_version: string, cromshellJobId: string) =>
   `!${cromshell_version} status ${cromshellJobId}`;
-const cromshellStatusRCmd = (cromshell_version, cromshellJobId) =>
+const cromshellStatusRCmd = (cromshell_version: string, cromshellJobId: string) =>
   `system2('${cromshell_version}', args = c('status', '${cromshellJobId}'), stdout = TRUE, stderr = TRUE)`;
 
 const workspaceName = 'e2eCromwellTest';
@@ -33,11 +34,10 @@ const workspaceName = 'e2eCromwellTest';
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
+    await findOrCreateWorkspace(page, { workspaceName });
   });
 
   test('Create and delete a Cromwell GKE app', async () => {
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-
     const configPanel = new CromwellConfigurationPanel(page);
 
     await configPanel.startCromwellGkeApp();
@@ -76,9 +76,6 @@ describe('Cromwell GKE App', () => {
   ])('Run cromwell using %s notebook', async (language, snippetMenu, cromshellSubmitCommand, cromshellStatusCmd) => {
     const appsPanel = new AppsPanel(page);
     const cromwellPanel = new CromwellConfigurationPanel(page);
-
-    // Create or re-use workspace
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
 
     // Create and Open notebook
     const workspaceDataPage = new WorkspaceDataPage(page);
@@ -136,6 +133,24 @@ describe('Cromwell GKE App', () => {
     expect(submitJob.includes('Submitting job to server'));
     expect(submitJob.includes('"status": "Submitted"'));
 
+    /*
+      Submitting wdl job will result in output like the following:
+      .....
+       INFO     Submitting job to server: <cromwell-url>
+
+                   __
+        .,-;-;-,. /'_\
+      _/_/_/_|_\_\) /
+    '-<_><_><_><_>=/\
+      `/_/====/_/-'\_\
+       ""     ""    ""
+
+      {
+          "id": "some characters",
+          "status": "Submitted"
+      }
+     */
+    // The status for the ID will change from SUBMITTED -> RUNNING -> SUCCESS
     const jobId = submitJob.split('    "id": "')[1].split('",')[0];
     console.log(jobId);
 

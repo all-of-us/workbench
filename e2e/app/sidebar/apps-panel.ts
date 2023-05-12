@@ -56,20 +56,4 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     );
     return isDeleted;
   }
-
-  /*
-    Returns the status for Cromwell APP
-   */
-  async cromwellAppStatus(): Promise<string> {
-    await this.isVisible();
-
-    const expandedCromwellXpath = `${this.getXpath()}//*[@data-test-id="Cromwell-expanded"]`;
-    await page.waitForXPath(expandedCromwellXpath);
-
-    const cromwellText = await BaseElement.asBaseElement(
-      page,
-      await page.waitForXPath(expandedCromwellXpath)
-    ).getTextContent();
-    return cromwellText;
-  }
 }
