@@ -3,12 +3,13 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createAppDisk;
+import static org.pmiops.workbench.utils.TestMockFactory.createRuntimeDisk;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,6 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
 
 @ExtendWith(MockitoExtension.class)
 public class DiskAdminControllerTest {
@@ -44,41 +44,32 @@ public class DiskAdminControllerTest {
   @Test
   public void listDisksInWorkspace() {
     Disk rStudioDisk =
-        newDisk(
+        createAppDisk(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             DiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
+            user,
             AppType.RSTUDIO);
 
     Disk cromwellDisk =
-        newDisk(
+        createAppDisk(
             user.generatePDNameForUserApps(AppType.CROMWELL),
             DiskStatus.READY,
             NOW.toString(),
+            user,
             AppType.CROMWELL);
 
-    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk));
+    Disk jupyerDisk =
+        createRuntimeDisk(
+            user.generatePDNameForUserApps(AppType.CROMWELL),
+            DiskStatus.READY,
+            NOW.toString(),
+            user);
+
+    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
     assertThat(diskAdminController.listDisksInWorkspace(WORKSPACE_NS).getBody())
-        .containsExactly(rStudioDisk, cromwellDisk);
-  }
-
-  private Disk newDisk(String pdName, DiskStatus status, String date, @Nullable AppType appType) {
-
-    Disk disk =
-        new Disk()
-            .name(pdName)
-            .size(300)
-            .diskType(DiskType.STANDARD)
-            .status(status)
-            .createdDate(date)
-            .creator(user.getUsername());
-    if (appType != null) {
-      disk.appType(appType);
-    } else {
-      disk.isGceRuntime(true);
-    }
-    return disk;
+        .containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
   }
 }
