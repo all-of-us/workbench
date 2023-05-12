@@ -27,6 +27,8 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
+import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
@@ -107,7 +109,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_getDisk() throws ApiException {
+  public void test_getDisk() {
     String createDate = "2021-08-06T16:57:29.827954Z";
     String pdName = "pdName";
     LeonardoGetPersistentDiskResponse getResponse =
@@ -117,7 +119,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
 
     Disk disk =
         new Disk()
@@ -145,7 +150,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
 
     when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
         .thenReturn(getResponse);
@@ -164,7 +172,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_listDisksInWorkspace() throws ApiException {
+  public void test_listOwnedDisksInWorkspace() throws ApiException {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         newListPdResponse(
@@ -235,7 +243,7 @@ public class DisksControllerTest {
                 oldInactiveCromwellDisk,
                 newerCromwellDisk));
 
-    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
+    assertThat(disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody())
         .containsExactly(expectedGceDisk, expectedRStudioDisk);
   }
 
@@ -311,7 +319,10 @@ public class DisksControllerTest {
             .diskType(LeonardoDiskType.STANDARD)
             .status(status)
             .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
-            .googleProject(GOOGLE_PROJECT_ID);
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(GOOGLE_PROJECT_ID));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
       label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());

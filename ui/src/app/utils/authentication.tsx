@@ -71,6 +71,9 @@ export const makeOIDC = (config: ConfigResponse): AuthProviderProps => {
     onSigninCallback: (_user: User | void): void => {
       window.history.replaceState({}, document.title, window.location.pathname);
     },
+    // This setting reduces the token refresh interval to 54.5 minutes (= 60 minutes - 330 seconds).
+    // See the use of accessTokenExpiringNotificationTimeInSeconds in the Leo cookie-setting code for why we do this.
+    accessTokenExpiringNotificationTimeInSeconds: 330,
   };
 };
 

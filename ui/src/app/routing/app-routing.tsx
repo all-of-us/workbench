@@ -12,6 +12,7 @@ import { AppRoute, AppRouter, withRouteData } from 'app/components/app-router';
 import { SignedInAouHeaderWithDisplayTag } from 'app/components/headers';
 import { NotificationModal } from 'app/components/modals';
 import { TermsOfService } from 'app/components/terms-of-service';
+import { withLeoCookie } from 'app/components/with-leo-cookie';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { CookiePolicy } from 'app/pages/cookie-policy';
 import { SignIn } from 'app/pages/login/sign-in';
@@ -58,7 +59,11 @@ const SessionExpiredPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(SessionExpired);
-const SignedInPage = fp.flow(withRouteData, withRoutingSpinner)(SignedIn);
+const SignedInPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner,
+  withLeoCookie
+)(SignedIn);
 const SignInAgainPage = fp.flow(withRouteData, withRoutingSpinner)(SignInAgain);
 const SignInPage = fp.flow(withRouteData, withRoutingSpinner)(SignIn);
 const UserDisabledPage = fp.flow(

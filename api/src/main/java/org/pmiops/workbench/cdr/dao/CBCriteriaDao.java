@@ -459,6 +459,22 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
 
   @Query(
       value =
+          "select distinct concept_id "
+              + "from cb_criteria c "
+              + "join ( "
+              + "      select cast(id as char) as id "
+              + "      from cb_criteria "
+              + "      where concept_id in (:surveyConceptIds) "
+              + "      and domain_id = 'SURVEY' "
+              + "      ) a on (c.path like CONCAT('%', a.id, '.%')) "
+              + "where domain_id = 'SURVEY' "
+              + "and type = 'PPI' "
+              + "and subtype = 'QUESTION' ",
+      nativeQuery = true)
+  List<Long> findSurveyQuestionIds(@Param("surveyConceptIds") List<Long> surveyConceptIds);
+
+  @Query(
+      value =
           "select distinct cast(value as signed) "
               + "from cb_criteria c "
               + "join ( "

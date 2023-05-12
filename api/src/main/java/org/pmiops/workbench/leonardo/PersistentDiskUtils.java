@@ -36,14 +36,14 @@ public final class PersistentDiskUtils {
   private PersistentDiskUtils() {}
 
   // Keep in sync with ui/src/app/utils/machines.ts
-  public static double costPerMonth(LeonardoListPersistentDiskResponse disk) {
+  public static double costPerMonth(LeonardoListPersistentDiskResponse disk, String googleProject) {
     Double pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(disk.getDiskType());
     if (pricePerGbMonth == null) {
       pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(LeonardoDiskType.STANDARD);
       log.warning(
           String.format(
               "unknown disk type %s for disk %s/%s, defaulting to standard",
-              disk.getDiskType(), disk.getGoogleProject(), disk.getName()));
+              disk.getDiskType(), googleProject, disk.getName()));
     }
     return pricePerGbMonth * disk.getSize();
   }
