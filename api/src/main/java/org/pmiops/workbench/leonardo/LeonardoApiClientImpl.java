@@ -459,7 +459,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
-    return listPersistentDiskByProject(googleProject, /*includeDeleted*/ true, serviceDiskApiProvider);
+    return listPersistentDiskByProject(
+        googleProject, /*includeDeleted*/ true, serviceDiskApiProvider);
   }
 
   @Override
