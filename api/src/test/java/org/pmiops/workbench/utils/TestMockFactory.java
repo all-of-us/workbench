@@ -408,27 +408,27 @@ public class TestMockFactory {
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
-  public static Disk newDisk(
-      String pdName, DiskStatus status, String date, DbUser user, @Nullable AppType appType) {
+  private static Disk createDisk(String pdName, DiskStatus status, String date, DbUser user) {
+    return new Disk()
+        .name(pdName)
+        .size(300)
+        .diskType(DiskType.STANDARD)
+        .status(status)
+        .createdDate(date)
+        .creator(user.getUsername());
+  }
 
-    Disk disk =
-        new Disk()
-            .name(pdName)
-            .size(300)
-            .diskType(DiskType.STANDARD)
-            .status(status)
-            .createdDate(date)
-            .creator(user.getUsername());
-    if (appType != null) {
-      disk.appType(appType);
-    } else {
-      disk.isGceRuntime(true);
-    }
+  public static Disk createAppDisk(
+      String pdName, DiskStatus status, String date, DbUser user, AppType appType) {
+    Disk disk = createDisk(pdName, status, date, user);
+    disk.appType(appType);
     return disk;
   }
 
-  public static Disk newRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
-    return newDisk(pdName, status, date, user, /*appType*/ null);
+  public static Disk createRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
+    Disk disk = createDisk(pdName, status, date, user);
+    disk.isGceRuntime(true);
+    return disk;
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2

@@ -6,10 +6,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createAppDisk;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
-import static org.pmiops.workbench.utils.TestMockFactory.newDisk;
-import static org.pmiops.workbench.utils.TestMockFactory.newRuntimeDisk;
+import static org.pmiops.workbench.utils.TestMockFactory.createRuntimeDisk;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
@@ -198,7 +198,7 @@ public class DisksControllerTest {
             user,
             AppType.RSTUDIO);
     Disk expectedRStudioDisk =
-        newDisk(
+        createAppDisk(
             newestRstudioDisk.getName(),
             DiskStatus.READY,
             newestRstudioDisk.getAuditInfo().getCreatedDate(),
@@ -229,7 +229,7 @@ public class DisksControllerTest {
             GOOGLE_PROJECT_ID,
             user);
     Disk expectedGceDisk =
-        newRuntimeDisk(
+        createRuntimeDisk(
             oldGceDisk.getName(),
             DiskStatus.READY,
             oldGceDisk.getAuditInfo().getCreatedDate(),
