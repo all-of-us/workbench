@@ -6,12 +6,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -172,25 +170,31 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_listOwnedDisksInWorkspace() throws ApiException {
+  public void test_listOwnedDisksInWorkspace() {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
-        newListPdResponse(
+        createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(100).toString(),
+            GOOGLE_PROJECT_ID,
+            user,
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse newestRstudioDisk =
-        newListPdResponse(
+        createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.toString(),
+            GOOGLE_PROJECT_ID,
+            user,
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse olderRstudioDisk =
-        newListPdResponse(
+        createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(200).toString(),
+            GOOGLE_PROJECT_ID,
+            user,
             AppType.RSTUDIO);
     Disk expectedRStudioDisk =
         newDisk(
@@ -202,13 +206,26 @@ public class DisksControllerTest {
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
     // active ones.
     LeonardoListPersistentDiskResponse olderGceDisk =
-        newListPdResponse(
-            user.generatePDName(), LeonardoDiskStatus.READY, NOW.minusMillis(200).toString(), null);
+        createLeonardoListRuntimePDResponse(
+            user.generatePDName(),
+            LeonardoDiskStatus.READY,
+            NOW.minusMillis(200).toString(),
+            GOOGLE_PROJECT_ID,
+            user);
     LeonardoListPersistentDiskResponse oldGceDisk =
-        newListPdResponse(
-            user.generatePDName(), LeonardoDiskStatus.READY, NOW.minusMillis(100).toString(), null);
+        createLeonardoListRuntimePDResponse(
+            user.generatePDName(),
+            LeonardoDiskStatus.READY,
+            NOW.minusMillis(100).toString(),
+            GOOGLE_PROJECT_ID,
+            user);
     LeonardoListPersistentDiskResponse newerInactiveGceDisk =
-        newListPdResponse(user.generatePDName(), LeonardoDiskStatus.DELETING, NOW.toString(), null);
+        createLeonardoListRuntimePDResponse(
+            user.generatePDName(),
+            LeonardoDiskStatus.DELETING,
+            NOW.toString(),
+            GOOGLE_PROJECT_ID,
+            user);
     Disk expectedGceDisk =
         newDisk(
             oldGceDisk.getName(),
@@ -218,16 +235,20 @@ public class DisksControllerTest {
 
     // Cromwell Disk: both are inactive, nothing to return.
     LeonardoListPersistentDiskResponse oldInactiveCromwellDisk =
-        newListPdResponse(
+        createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
+            GOOGLE_PROJECT_ID,
+            user,
             AppType.CROMWELL);
     LeonardoListPersistentDiskResponse newerCromwellDisk =
-        newListPdResponse(
+        createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETED,
             NOW.toString(),
+            GOOGLE_PROJECT_ID,
+            user,
             AppType.CROMWELL);
 
     when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
@@ -248,7 +269,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void updateDisk() throws ApiException {
+  public void updateDisk() {
     int diskSize = 200;
     String diskName = user.generatePDName();
     disksController.updateDisk(WORKSPACE_NS, diskName, diskSize);
@@ -283,7 +304,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void deleteDisk() throws ApiException {
+  public void deleteDisk() {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
     verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
@@ -308,27 +329,6 @@ public class DisksControllerTest {
         .deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
 
     assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
-  }
-
-  private LeonardoListPersistentDiskResponse newListPdResponse(
-      String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
-    LeonardoListPersistentDiskResponse response =
-        new LeonardoListPersistentDiskResponse()
-            .name(pdName)
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(status)
-            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
-            .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT_ID));
-    if (appType != null) {
-      Map<String, String> label = new HashMap<>();
-      label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());
-      response.labels(label);
-    }
-    return response;
   }
 
   private Disk newDisk(String pdName, DiskStatus status, String date, @Nullable AppType appType) {

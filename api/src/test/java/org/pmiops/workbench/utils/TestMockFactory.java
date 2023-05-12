@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -16,10 +18,13 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -33,10 +38,15 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
+import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
@@ -361,6 +371,38 @@ public class TestMockFactory {
   public static void assertEqualDemographicSurveys(
       DemographicSurveyV2 survey1, DemographicSurveyV2 survey2) {
     assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
+  }
+
+  public static LeonardoListPersistentDiskResponse createLeonardoListPersistentDiskResponse(
+      String pdName,
+      LeonardoDiskStatus status,
+      String date,
+      String googleProjectId,
+      DbUser user,
+      @Nullable AppType appType) {
+    LeonardoListPersistentDiskResponse response =
+        new LeonardoListPersistentDiskResponse()
+            .name(pdName)
+            .size(300)
+            .diskType(LeonardoDiskType.STANDARD)
+            .status(status)
+            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
+            .cloudContext(
+                new LeonardoCloudContext()
+                    .cloudProvider(LeonardoCloudProvider.GCP)
+                    .cloudResource(googleProjectId));
+    if (appType != null) {
+      Map<String, String> label = new HashMap<>();
+      label.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
+      response.labels(label);
+    }
+    return response;
+  }
+
+  public static LeonardoListPersistentDiskResponse createLeonardoListRuntimePDResponse(
+      String pdName, LeonardoDiskStatus status, String date, String googleProjectId, DbUser user) {
+    return createLeonardoListPersistentDiskResponse(
+        pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2
