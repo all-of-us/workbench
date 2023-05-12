@@ -14,10 +14,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import {
-  dropJupyterNotebookFileSuffix,
-  getExistingNotebookNames,
-} from 'app/pages/analysis/util';
+import { getExistingNotebookNames } from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
