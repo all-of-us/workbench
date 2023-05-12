@@ -66,7 +66,8 @@ public class DiskAdminControllerTest {
             NOW.toString(),
             user);
 
-    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
+    List<Disk> serviceResponse =
+        new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
     assertThat(diskAdminController.listDisksInWorkspace(WORKSPACE_NS).getBody())

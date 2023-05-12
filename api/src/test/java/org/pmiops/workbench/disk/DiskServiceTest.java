@@ -98,5 +98,4 @@ public class DiskServiceTest {
     assertThat(diskService.findByWorkspaceNamespace(WORKSPACE_NS))
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }
-
 }
