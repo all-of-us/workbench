@@ -420,13 +420,11 @@ public class TestMockFactory {
 
   public static Disk createAppDisk(
       String pdName, DiskStatus status, String date, DbUser user, AppType appType) {
-    return createDisk(pdName, status, date, user)
-        .appType(appType);
+    return createDisk(pdName, status, date, user).appType(appType);
   }
 
   public static Disk createRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
-    return createDisk(pdName, status, date, user)
-        .isGceRuntime(true);
+    return createDisk(pdName, status, date, user).isGceRuntime(true);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2
