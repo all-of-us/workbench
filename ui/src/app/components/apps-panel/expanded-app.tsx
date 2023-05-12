@@ -18,7 +18,6 @@ import { cromwellConfigIconId } from 'app/components/help-sidebar-icons';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
-import { leoProxyApi } from 'app/services/notebooks-swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
@@ -171,18 +170,9 @@ const RStudioButtonRow = (props: {
     }
   );
 
-  const onClickLaunch = withErrorModal(
-    {
-      title: 'Error Opening RStudio Environment',
-      message: 'Please try again.',
-    },
-    async () => {
-      await leoProxyApi().setCookie({
-        credentials: 'include',
-      });
-      window.open(userApp.proxyUrls.rstudio, '_blank').focus();
-    }
-  );
+  const onClickLaunch = () => {
+    window.open(userApp.proxyUrls.rstudio, '_blank').focus();
+  };
 
   const createButtonDisabled = creating || !canCreateApp(userApp);
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
