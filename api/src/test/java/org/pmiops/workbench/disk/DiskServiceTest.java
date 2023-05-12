@@ -60,25 +60,25 @@ public class DiskServiceTest {
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(200).toString(),
-            AppType.CROMWELL,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.CROMWELL);
     LeonardoListPersistentDiskResponse secondLPDR =
         createLeonardoListPersistentDiskResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(20000).toString(),
-            AppType.RSTUDIO,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse thirdLPDR =
         createLeonardoListPersistentDiskResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(2000000).toString(),
-            AppType.CROMWELL,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.CROMWELL);
     List<LeonardoListPersistentDiskResponse> responseList =
         new ArrayList<>(Arrays.asList(firstLPDR, secondLPDR, thirdLPDR));
     Disk firstDisk = new Disk();
