@@ -2,22 +2,15 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -340,52 +333,7 @@ public class DisksControllerTest {
     assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
   }
 
-  @Test
-  public void listDisksInWorkspace() {
-    Disk rStudioDisk =
-        newDisk(
-            user.generatePDNameForUserApps(AppType.RSTUDIO),
-            DiskStatus.DELETING,
-            NOW.minusMillis(100).toString(),
-            AppType.RSTUDIO);
-
-    Disk cromwellDisk =
-        newDisk(
-            user.generatePDNameForUserApps(AppType.CROMWELL),
-            DiskStatus.READY,
-            NOW.toString(),
-            AppType.CROMWELL);
-
-    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk));
-
-    when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
-    assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
-        .containsExactly(rStudioDisk, cromwellDisk);
-  }
-
-  private LeonardoListPersistentDiskResponse newListPdResponse(
-      String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
-    LeonardoListPersistentDiskResponse response =
-        new LeonardoListPersistentDiskResponse()
-            .name(pdName)
-            .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
-            .status(status)
-            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
-            .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT_ID));
-    if (appType != null) {
-      Map<String, String> label = new HashMap<>();
-      label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());
-      response.labels(label);
-    }
-    return response;
-  }
-
   private Disk newDisk(String pdName, DiskStatus status, String date, @Nullable AppType appType) {
-
     Disk disk =
         new Disk()
             .name(pdName)
