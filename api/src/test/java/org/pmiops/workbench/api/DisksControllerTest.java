@@ -179,7 +179,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void test_listOwnedDisksInWorkspace() throws ApiException {
+  public void test_listOwnedDisksInWorkspace() {
     // RStudio Disk: 3 are active, returns the newest one.
     LeonardoListPersistentDiskResponse oldRstudioDisk =
         createLeonardoListPersistentDiskResponse(
@@ -281,7 +281,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void updateDisk() throws ApiException {
+  public void updateDisk() {
     int diskSize = 200;
     String diskName = user.generatePDName();
     disksController.updateDisk(WORKSPACE_NS, diskName, diskSize);
@@ -316,7 +316,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void deleteDisk() throws ApiException {
+  public void deleteDisk() {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
     verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
@@ -344,7 +344,7 @@ public class DisksControllerTest {
   }
 
   @Test
-  public void listDisksInWorkspace(){
+  public void listDisksInWorkspace() {
     Disk rStudioDisk =
         newDisk(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
@@ -359,12 +359,13 @@ public class DisksControllerTest {
             NOW.toString(),
             AppType.CROMWELL);
 
-    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk,cromwellDisk));
+    List<Disk> serviceResponse = new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
     assertThat(disksController.listDisksInWorkspace(WORKSPACE_NS).getBody())
         .containsExactly(rStudioDisk, cromwellDisk);
   }
+
   private LeonardoListPersistentDiskResponse newListPdResponse(
       String pdName, LeonardoDiskStatus status, String date, @Nullable AppType appType) {
     LeonardoListPersistentDiskResponse response =
