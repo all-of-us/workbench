@@ -10,7 +10,6 @@ import {
 } from 'generated/fetch';
 
 import {
-  leoProxyApi,
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
@@ -81,6 +80,12 @@ describe('ExpandedApp', () => {
       runtime: runtimeStub.runtime,
       runtimeLoaded: true,
     });
+
+    window.open = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should allow pausing when the Jupyter app is Running', async () => {
@@ -345,11 +350,20 @@ describe('ExpandedApp', () => {
 
   it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
     const appName = 'my-app';
+    const proxyUrl = 'https://example.com';
     const wrapper = await component(UIAppType.RSTUDIO, {
       appName,
       googleProject,
       status: AppStatus.RUNNING,
+      proxyUrls: {
+        rstudio: proxyUrl,
+      },
     });
+
+    const focusStub = jest.fn();
+    const windowOpenSpy = jest
+      .spyOn(window, 'open')
+      .mockReturnValue({ focus: focusStub } as any as Window);
 
     const launchButton = wrapper.find({
       'data-test-id': 'RStudio-launch-button',
@@ -357,10 +371,10 @@ describe('ExpandedApp', () => {
     expect(launchButton.exists()).toBeTruthy();
     expect(launchButton.prop('disabled')).toBeFalsy();
 
-    const setCookieSpy = jest.spyOn(leoProxyApi(), 'setCookie');
     launchButton.simulate('click');
 
-    expect(setCookieSpy).toHaveBeenCalledWith({ credentials: 'include' });
+    expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+    expect(focusStub).toHaveBeenCalled();
   });
 
   describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
@@ -378,26 +392,6 @@ describe('ExpandedApp', () => {
         });
         expect(launchButton.prop('disabled')).toBeTruthy();
       }
-    );
-  });
-
-  it('should show an error if launching RStudio fails', async () => {
-    const wrapper = await component(UIAppType.RSTUDIO, {
-      appName: 'my-app',
-      googleProject,
-      status: AppStatus.RUNNING,
-    });
-
-    leoProxyApiStub.setCookie = () => Promise.reject();
-    wrapper
-      .find({
-        'data-test-id': 'RStudio-launch-button',
-      })
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get().title).toEqual(
-      'Error Opening RStudio Environment'
     );
   });
 

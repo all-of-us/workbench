@@ -1,5 +1,6 @@
 const config = require('../src/config')
 const tu = require('../src/test-utils')
+const utils = require('../src/utils')
 
 const browserTest = tu.browserTest(__filename)
 
@@ -18,6 +19,7 @@ browserTest('take the new user satisfaction survey via the relevant notification
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
   await page.goto(config.urlRoot())
+  await utils.dismissLeoAuthErrorModal(page);
 
   const surveyNotification = await page.waitForSelector('[data-test-id="new-user-satisfaction-survey-notification"]');
   await surveyNotification.waitForSelector('[aria-label="take satisfaction survey"]').then(b => b.click());
