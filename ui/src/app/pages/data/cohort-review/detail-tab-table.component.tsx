@@ -63,7 +63,6 @@ const styles = reactStyles({
   },
   graphColumnBody: {
     background: colors.white,
-    display: 'block',
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',
@@ -106,7 +105,6 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '14px',
     fontWeight: 'bold',
-    width: '30rem',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -1123,7 +1121,7 @@ export const DetailTabTable = fp.flow(
       const unitKey = Object.keys(unitsObj);
       let valueArray;
       return (
-        <React.Fragment>
+        <div style={{ display: 'block', width: '100%' }}>
           <div style={styles.headerStyle}>{rowData[`${vocab}Name`]}</div>
           <div style={styles.unitsLabel}>Units:</div>
           <TabView className='unitTab'>
@@ -1144,7 +1142,7 @@ export const DetailTabTable = fp.flow(
               );
             })}
           </TabView>
-        </React.Fragment>
+        </div>
       );
     };
 
