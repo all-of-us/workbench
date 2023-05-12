@@ -48,6 +48,9 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
+import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
 import org.pmiops.workbench.model.EthnicCategory;
@@ -403,6 +406,29 @@ public class TestMockFactory {
       String pdName, LeonardoDiskStatus status, String date, String googleProjectId, DbUser user) {
     return createLeonardoListPersistentDiskResponse(
         pdName, status, date, googleProjectId, user, /*appType*/ null);
+  }
+
+  public static Disk newDisk(
+      String pdName, DiskStatus status, String date, DbUser user, @Nullable AppType appType) {
+
+    Disk disk =
+        new Disk()
+            .name(pdName)
+            .size(300)
+            .diskType(DiskType.STANDARD)
+            .status(status)
+            .createdDate(date)
+            .creator(user.getUsername());
+    if (appType != null) {
+      disk.appType(appType);
+    } else {
+      disk.isGceRuntime(true);
+    }
+    return disk;
+  }
+
+  public static Disk newRuntimeDisk(String pdName, DiskStatus status, String date, DbUser user) {
+    return newDisk(pdName, status, date, user, /*appType*/ null);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2

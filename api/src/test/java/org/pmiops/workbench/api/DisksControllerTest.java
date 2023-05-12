@@ -8,10 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.newDisk;
+import static org.pmiops.workbench.utils.TestMockFactory.newRuntimeDisk;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
-import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -201,6 +202,7 @@ public class DisksControllerTest {
             newestRstudioDisk.getName(),
             DiskStatus.READY,
             newestRstudioDisk.getAuditInfo().getCreatedDate(),
+            user,
             AppType.RSTUDIO);
 
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
@@ -227,11 +229,11 @@ public class DisksControllerTest {
             GOOGLE_PROJECT_ID,
             user);
     Disk expectedGceDisk =
-        newDisk(
+        newRuntimeDisk(
             oldGceDisk.getName(),
             DiskStatus.READY,
             oldGceDisk.getAuditInfo().getCreatedDate(),
-            null);
+            user);
 
     // Cromwell Disk: both are inactive, nothing to return.
     LeonardoListPersistentDiskResponse oldInactiveCromwellDisk =
@@ -329,23 +331,5 @@ public class DisksControllerTest {
         .deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
 
     assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
-  }
-
-  private Disk newDisk(String pdName, DiskStatus status, String date, @Nullable AppType appType) {
-
-    Disk disk =
-        new Disk()
-            .name(pdName)
-            .size(300)
-            .diskType(DiskType.STANDARD)
-            .status(status)
-            .createdDate(date)
-            .creator(user.getUsername());
-    if (appType != null) {
-      disk.appType(appType);
-    } else {
-      disk.isGceRuntime(true);
-    }
-    return disk;
   }
 }
