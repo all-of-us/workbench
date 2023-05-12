@@ -70,7 +70,7 @@ public class CloudStorageClientTest {
   }
 
   @Test
-  public void testUriToFileDetail() {
+  public void testGetNotebookLastModifiedBy() {
     String notebookPath = NotebookUtils.withNotebookPath(NOTEBOOK_NAME);
 
     Set<String> workspaceUsers = new HashSet<String>();
@@ -85,7 +85,7 @@ public class CloudStorageClientTest {
     when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
 
     String actualFileDetail =
-        cloudStorageClient.notebookPathToFileDetail(notebookPath, workspaceUsers);
+        cloudStorageClient.getNotebookLastModifiedBy(notebookPath, workspaceUsers);
     assertThat(actualFileDetail).isEqualTo(USER_EMAIL);
   }
 }

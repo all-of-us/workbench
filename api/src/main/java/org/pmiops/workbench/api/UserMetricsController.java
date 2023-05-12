@@ -272,6 +272,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       DbUserRecentlyModifiedResource dbUserRecentlyModifiedResource,
       RawlsWorkspaceResponse fcWorkspaceResponse,
       DbWorkspace dbWorkspace) {
+    Set<String> workspaceUsers =
+        workspaceAuthService
+            .getFirecloudWorkspaceAcls(
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
+            .keySet();
     return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(
         dbUserRecentlyModifiedResource,
         fcWorkspaceResponse,
@@ -281,7 +286,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         conceptSetService,
         dataSetService,
         cloudStorageClient,
-        workspaceAuthService);
+        workspaceUsers);
   }
 
   // Retrieves Database workspace ID

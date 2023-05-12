@@ -58,5 +58,5 @@ public interface CloudStorageClient {
 
   String getGoogleOAuthClientSecret();
 
-  String notebookPathToFileDetail(String uri, Set<String> workspaceUsers);
+  String getNotebookLastModifiedBy(String notebookUri, Set<String> workspaceUsers);
 }

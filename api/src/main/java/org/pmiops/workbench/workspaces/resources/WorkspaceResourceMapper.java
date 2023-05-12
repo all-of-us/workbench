@@ -29,7 +29,6 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
-import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 
 @Mapper(
     config = MapStructConfig.class,
@@ -139,13 +138,7 @@ public interface WorkspaceResourceMapper {
       ConceptSetService conceptSetService,
       DataSetService dataSetService,
       CloudStorageClient cloudStorageClient,
-      WorkspaceAuthService workspaceAuthService) {
-    Set<String> workspaceUsers =
-        workspaceAuthService
-            .getFirecloudWorkspaceAcls(
-                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-            .keySet();
-
+      Set<String> workspaceUsers) {
     return mergeWorkspaceAndResourceFields(
         fromWorkspace(dbWorkspace),
         fcWorkspace,
@@ -184,7 +177,7 @@ public interface WorkspaceResourceMapper {
         return fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
       case NOTEBOOK:
         String lastModifiedBy =
-            cloudStorageClient.notebookPathToFileDetail(
+            cloudStorageClient.getNotebookLastModifiedBy(
                 dbUserRecentlyModifiedResource.getResourceId(), workspaceUsers);
         return fromNotebookNameAndLastModified(
             dbUserRecentlyModifiedResource.getResourceId(),
