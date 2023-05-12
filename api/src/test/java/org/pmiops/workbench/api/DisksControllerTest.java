@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
@@ -29,7 +30,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -186,25 +186,25 @@ public class DisksControllerTest {
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(100).toString(),
-            AppType.RSTUDIO,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse newestRstudioDisk =
         createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.toString(),
-            AppType.RSTUDIO,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse olderRstudioDisk =
         createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.RSTUDIO),
             LeonardoDiskStatus.READY,
             NOW.minusSeconds(200).toString(),
-            AppType.RSTUDIO,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.RSTUDIO);
     Disk expectedRStudioDisk =
         newDisk(
             newestRstudioDisk.getName(),
@@ -215,27 +215,24 @@ public class DisksControllerTest {
     // GCE Disk: 3 disks in total, 2 are active, newer one is inactive, returns the most recent
     // active ones.
     LeonardoListPersistentDiskResponse olderGceDisk =
-        createLeonardoListPersistentDiskResponse(
+        createLeonardoListRuntimePDResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(200).toString(),
-            null,
             GOOGLE_PROJECT_ID,
             user);
     LeonardoListPersistentDiskResponse oldGceDisk =
-        createLeonardoListPersistentDiskResponse(
+        createLeonardoListRuntimePDResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(100).toString(),
-            null,
             GOOGLE_PROJECT_ID,
             user);
     LeonardoListPersistentDiskResponse newerInactiveGceDisk =
-        createLeonardoListPersistentDiskResponse(
+        createLeonardoListRuntimePDResponse(
             user.generatePDName(),
             LeonardoDiskStatus.DELETING,
             NOW.toString(),
-            null,
             GOOGLE_PROJECT_ID,
             user);
     Disk expectedGceDisk =
@@ -251,17 +248,17 @@ public class DisksControllerTest {
             user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETING,
             NOW.minusMillis(100).toString(),
-            AppType.CROMWELL,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.CROMWELL);
     LeonardoListPersistentDiskResponse newerCromwellDisk =
         createLeonardoListPersistentDiskResponse(
             user.generatePDNameForUserApps(AppType.CROMWELL),
             LeonardoDiskStatus.DELETED,
             NOW.toString(),
-            AppType.CROMWELL,
             GOOGLE_PROJECT_ID,
-            user);
+            user,
+            AppType.CROMWELL);
 
     when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
             GOOGLE_PROJECT_ID, false))

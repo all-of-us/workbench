@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -376,9 +377,9 @@ public class TestMockFactory {
       String pdName,
       LeonardoDiskStatus status,
       String date,
-      @Nullable AppType appType,
       String googleProjectId,
-      DbUser user) {
+      DbUser user,
+      @Nullable AppType appType) {
     LeonardoListPersistentDiskResponse response =
         new LeonardoListPersistentDiskResponse()
             .name(pdName)
@@ -392,10 +393,16 @@ public class TestMockFactory {
                     .cloudResource(googleProjectId));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
-      label.put(LEONARDO_LABEL_APP_TYPE, appType.toString().toLowerCase());
+      label.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
       response.labels(label);
     }
     return response;
+  }
+
+  public static LeonardoListPersistentDiskResponse createLeonardoListRuntimePDResponse(
+      String pdName, LeonardoDiskStatus status, String date, String googleProjectId, DbUser user) {
+    return createLeonardoListPersistentDiskResponse(
+        pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2
