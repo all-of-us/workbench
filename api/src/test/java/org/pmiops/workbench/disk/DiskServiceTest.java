@@ -99,5 +99,4 @@ public class DiskServiceTest {
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }
 
-  // Write test for when workspace is not found.
 }
