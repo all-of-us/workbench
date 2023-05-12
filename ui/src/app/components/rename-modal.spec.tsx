@@ -56,13 +56,13 @@ describe('RenameModal', () => {
       />
     );
     wrapper
-      .find('[data-test-id="new-name-input"]')
+      .find('[data-test-id="rename-new-name-input"]')
       .first()
       .simulate('change', { target: { value: '123' } });
     await waitOneTickAndUpdate(wrapper);
     // expect(wrapper.find('[data-test-id="new-name-input"]').first().text()).toEqual("123")
     expect(
-      wrapper.find('[data-test-id="new-name-invalid"]').first().text()
+      wrapper.find('[data-test-id="rename-new-name-invalid"]').first().text()
     ).toEqual('New name already exists');
   });
 });

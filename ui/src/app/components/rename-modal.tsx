@@ -90,10 +90,10 @@ export class RenameModal extends React.Component<Props, States> {
           <TextInput
             autoFocus
             id='new-name'
-            data-test-id='new-name-input'
+            data-test-id='rename-new-name-input'
             onChange={(v) => this.setState({ newName: v, nameTouched: true })}
           />
-          <ValidationError data-test-id='new-name-invalid'>
+          <ValidationError data-test-id='rename-new-name-invalid'>
             {summarizeErrors(nameTouched && errors && errors.newName)}
           </ValidationError>
           {!hideDescription && (

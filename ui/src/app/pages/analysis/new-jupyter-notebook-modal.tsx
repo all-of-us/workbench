@@ -55,7 +55,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
   const errors = validate(
     // we expect the notebook name to lack the .ipynb suffix
     // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-    { name: dropJupyterNotebookFileSuffix(name), kernel },
+    { name: appendJupyterNotebookFileSuffix(name), kernel },
     {
       kernel: { presence: { allowEmpty: false } },
       name: nameValidationFormat(
@@ -92,6 +92,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
       <ModalBody>
         <div style={headerStyles.formLabel}>Name:</div>
         <TextInput
+          data-test-id='create-jupyter-new-name-input'
           autoFocus
           value={name}
           onChange={(v) => {
@@ -99,7 +100,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
             setNameTouched(true);
           }}
         />
-        <ValidationError>
+        <ValidationError data-test-id='create-jupyter-new-name-invalid'>
           {summarizeErrors(nameTouched && errors && errors.name)}
         </ValidationError>
         <div style={headerStyles.formLabel}>Programming Language:</div>
