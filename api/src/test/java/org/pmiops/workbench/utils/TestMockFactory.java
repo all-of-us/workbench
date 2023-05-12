@@ -376,9 +376,9 @@ public class TestMockFactory {
       String pdName,
       LeonardoDiskStatus status,
       String date,
-      @Nullable AppType appType,
       String googleProjectId,
-      DbUser user) {
+      DbUser user,
+      @Nullable AppType appType) {
     LeonardoListPersistentDiskResponse response =
         new LeonardoListPersistentDiskResponse()
             .name(pdName)
@@ -396,6 +396,16 @@ public class TestMockFactory {
       response.labels(label);
     }
     return response;
+  }
+
+  public static LeonardoListPersistentDiskResponse createLeonardoListRuntimePDResponse(
+      String pdName,
+      LeonardoDiskStatus status,
+      String date,
+      String googleProjectId,
+      DbUser user) {
+    return createLeonardoListPersistentDiskResponse(
+        pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 
   // we make no guarantees about the order of the lists in DemographicSurveyV2
