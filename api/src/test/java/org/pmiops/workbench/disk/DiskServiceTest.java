@@ -126,5 +126,4 @@ public class DiskServiceTest {
 
     assertThrows(NotFoundException.class, () -> diskService.deleteDisk(WORKSPACE_NS, diskName));
   }
-
 }
