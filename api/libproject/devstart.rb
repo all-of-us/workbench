@@ -96,6 +96,63 @@ def start_local_db_service()
   common.status "Database startup complete (#{format_benchmark(bm)})"
 end
 
+def dev_up_tanagra(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.start_db = true
+  op.add_option(
+    "--nostart-db",
+    ->(opts, _) { opts.start_db = false },
+    "If specified, don't start the DB service. This is useful when running " +
+      "within docker, i.e. on CircleCI, as the DB service runs via docker-compose")
+  op.parse.validate
+
+  common = Common.new
+
+  account = get_auth_login_account()
+
+  if account.nil?
+    raise("Please run 'gcloud auth login' before starting the server.")
+  end
+
+  at_exit do
+    common.run_inline %W{docker-compose down} if op.opts.start_db
+  end
+
+  setup_local_environment()
+
+  # start db:
+  overall_bm = Benchmark.measure {
+    start_local_db_service() if op.opts.start_db
+
+    common.status "Database init & migrations..."
+    bm = Benchmark.measure {
+      Dir.chdir('db') do
+        common.run_inline %W{./run-migrations.sh main}
+      end
+      init_new_cdr_db %W{--cdr-db-name cdr}
+    }
+    common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+
+    common.status "Loading configs & data..."
+    bm = Benchmark.measure {
+      common.run_inline %W{./libproject/load_local_data_and_configs.sh}
+    }
+    common.status "Loading configs complete (#{format_benchmark(bm)})"
+  }
+  common.status "Starting tanagra-service"
+  Dir.chdir('../tanagra') do
+    common.run_inline %W{./service/local-dev/run_postgres.sh start}
+    common.run_inline %W{./service/local-dev/run_server.sh -a -v AoU}
+  end
+
+end
+
+Common.register_command({
+  :invocation => "dev-up-tanagra",
+  :description => "Brings up tanagra service environment and connects to db.",
+  :fn => ->(*args) { dev_up_tanagra("dev-up-tanagra", args) }
+})
+
 def dev_up(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.start_db = true
@@ -107,6 +164,15 @@ def dev_up(cmd_name, args)
   op.parse.validate
 
   common = Common.new
+
+  tanagra_pid = fork do
+    Dir.chdir('../tanagra') do
+      common.run_inline %W{./service/local-dev/run_server.sh}
+    end
+  end
+  common.status "Waiting for child process to start tanagra-service..."
+  Process.waitpid(tanagra_pid)
+  common.status "Continuing dev-up..."
 
   account = get_auth_login_account()
   if account.nil?
