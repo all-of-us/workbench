@@ -32,6 +32,12 @@ public class DiskService {
     leonardoNotebooksClient.deletePersistentDisk(googleProject, diskName);
   }
 
+  public void deleteDiskAsService(String workspaceNamespace, String diskName) {
+    String googleProject =
+        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
+    leonardoNotebooksClient.deletePersistentDiskAsService(googleProject, diskName);
+  }
+
   public List<Disk> findByWorkspaceNamespace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
