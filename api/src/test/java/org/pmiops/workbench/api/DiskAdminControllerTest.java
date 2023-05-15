@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createAppDisk;
 import static org.pmiops.workbench.utils.TestMockFactory.createRuntimeDisk;
@@ -64,26 +63,24 @@ public class DiskAdminControllerTest {
             AppType.CROMWELL);
 
     Disk jupyerDisk =
-        createRuntimeDisk(
-            user.generatePDName(),
-            DiskStatus.READY,
-            NOW.toString(),
-            user);
+        createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
 
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
 
-    ResponseEntity<ListDisksResponse> response = diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
-    assertThat(response.getBody())
-        .containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
+    ResponseEntity<ListDisksResponse> response =
+        diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
+    assertThat(response.getBody()).containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 
   @Test
-  public void listDisksInWorkspace_workspaceNotFound(){
-    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenThrow( new NotFoundException("Workspace not found: " + WORKSPACE_NS));
-    assertThrows(NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));
+  public void listDisksInWorkspace_workspaceNotFound() {
+    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS))
+        .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
+    assertThrows(
+        NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));
   }
 }
