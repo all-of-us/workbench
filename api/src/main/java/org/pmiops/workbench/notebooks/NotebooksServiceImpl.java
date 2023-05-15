@@ -333,7 +333,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       return convertJupyterNotebookToHtml(blob.getContent());
     } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
       return convertRstudioNotebookToHtml(blob.getContent());
-    }else {
+    } else {
       throw new NotImplementedException(
           String.format("%s type of file is not implemented yet", notebookName));
     }
@@ -377,6 +377,6 @@ public class NotebooksServiceImpl implements NotebooksService {
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticJupyterNotebooksConvert(notebook));
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticRstudioNotebooksConvert(notebook));
   }
 }

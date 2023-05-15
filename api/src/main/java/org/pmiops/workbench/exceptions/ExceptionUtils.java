@@ -93,7 +93,8 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static WorkbenchException convertCalhounException(org.pmiops.workbench.calhoun.ApiException e) {
+  public static WorkbenchException convertCalhounException(
+      org.pmiops.workbench.calhoun.ApiException e) {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

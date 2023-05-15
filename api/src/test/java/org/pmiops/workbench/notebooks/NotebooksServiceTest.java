@@ -632,9 +632,7 @@ public class NotebooksServiceTest {
     stubNotebookToJson();
     Assertions.assertThrows(
         NotImplementedException.class,
-        () ->
-            notebooksService.getReadOnlyHtml(
-                "", "", "notebook without suffix"));
+        () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
   }
 
   @Test

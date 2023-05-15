@@ -5,9 +5,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
 import com.google.common.hash.Hashing;
-import java.io.FileInputStream;
+import com.google.common.io.Files;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.format.DateTimeFormatter;
@@ -128,7 +127,8 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<BillingV2Api> endUserBillingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
-      Provider<ConvertApi> endUserStaticConvertApiProvider, @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
+      Provider<ConvertApi> endUserStaticConvertApiProvider,
+      @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
           Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi> fcEndUserWorkspacesApiProvider,
@@ -144,7 +144,8 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
-      RawlsRetryHandler rawlsRetryHandler, CalhounRetryHandler calhounRetryHandler) {
+      RawlsRetryHandler rawlsRetryHandler,
+      CalhounRetryHandler calhounRetryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.serviceAccountBillingV2ApiProvider = serviceAccountBillingV2ApiProvider;
@@ -486,7 +487,10 @@ public class FireCloudServiceImpl implements FireCloudService {
     return calhounRetryHandler.run(
         (context) -> {
           try {
-            return Files.asCharSource(endUserStaticConvertApiProvider.get().convertRmd(notebook), Charset.defaultCharset()).read();
+            return Files.asCharSource(
+                    endUserStaticConvertApiProvider.get().convertRmd(notebook),
+                    Charset.defaultCharset())
+                .read();
           } catch (IOException e) {
             throw new WorkbenchException("fail to read RStudio raw content", e);
           }

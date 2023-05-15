@@ -1,14 +1,10 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.common.collect.ImmutableList;
-import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.calhoun.ApiClient;
 import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.calhoun.ApiClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -36,7 +32,8 @@ public class CalhounConfig {
 
   @Bean(name = END_USER_CALHOUN_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ConvertApi endUserCalhounApi(@Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
+  public ConvertApi endUserCalhounApi(
+      @Qualifier(END_USER_LENIENT_TIMEOUT_API_CLIENT) ApiClient apiClient) {
     // Billing calls are made by the user
     ConvertApi api = new ConvertApi();
     api.setApiClient(apiClient);
