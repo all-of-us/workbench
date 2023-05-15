@@ -26,7 +26,7 @@ public class DiskService {
     this.workspaceService = workspaceService;
   }
 
-  public void deleteDisk(String workspaceNamespace, String diskName){
+  public void deleteDisk(String workspaceNamespace, String diskName) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
     leonardoNotebooksClient.deletePersistentDisk(googleProject, diskName);

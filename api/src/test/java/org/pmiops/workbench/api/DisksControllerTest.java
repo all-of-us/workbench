@@ -64,7 +64,7 @@ public class DisksControllerTest {
   @TestConfiguration
   @Import({
     DisksController.class,
-      DiskService.class,
+    DiskService.class,
     FakeClockConfiguration.class,
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,

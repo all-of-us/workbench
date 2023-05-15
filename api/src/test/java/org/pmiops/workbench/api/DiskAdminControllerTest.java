@@ -86,7 +86,7 @@ public class DiskAdminControllerTest {
   }
 
   @Test
-  public void deleteDisk(){
+  public void deleteDisk() {
     Disk diskToDelete =
         createAppDisk(
             user.generatePDNameForUserApps(AppType.CROMWELL),
@@ -94,7 +94,7 @@ public class DiskAdminControllerTest {
             NOW.toString(),
             user,
             AppType.CROMWELL);
-    when(mockDiskService.deleteDiskAsService(WORKSPACE_NS,"disk name")).thenReturn(diskToDelete);
+    when(mockDiskService.deleteDiskAsService(WORKSPACE_NS, "disk name")).thenReturn(diskToDelete);
     ResponseEntity<EmptyResponse> response = diskAdminController.deleteDisk();
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
