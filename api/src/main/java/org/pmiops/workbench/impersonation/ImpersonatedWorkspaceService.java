@@ -32,4 +32,10 @@ public interface ImpersonatedWorkspaceService {
       String googleProject,
       String wsId,
       boolean deleteBillingProjects);
+
+  public void deleteOrphanedSamWorkspace(
+      String username,
+      String wsNamespace,
+      String workspaceResourceId,
+      boolean deleteBillingProjects);
 }

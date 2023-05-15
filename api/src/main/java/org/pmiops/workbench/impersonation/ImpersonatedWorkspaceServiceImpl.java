@@ -159,7 +159,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
               .collect(Collectors.toList());
       var samBillingProjectMap =
           ownedSamResources.stream()
-              .limit(200)
+              .limit(10)
               .flatMap(r -> maybeGetBillingProjectMapEntry(dbUser, r))
               .collect(Collectors.toList());
       var samNotInRawlsMap =
@@ -284,6 +284,33 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
 
     try {
       impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+
+    if (deleteBillingProjects) {
+      try {
+        // use the real FirecloudService here because impersonation is not needed;
+        // billing projects are owned by the App SA
+        firecloudService.deleteBillingProject(wsNamespace);
+      } catch (Exception e) {
+        String msg =
+            String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
+        logger.warning(msg);
+      }
+    }
+  }
+
+  @Override
+  public void deleteOrphanedSamWorkspace(
+      String username,
+      String wsNamespace,
+      String workspaceResourceId,
+      boolean deleteBillingProjects) {
+    final DbUser dbUser = userDao.findUserByUsername(username);
+
+    try {
+      impersonatedFirecloudService.deleteSamWorkspaceResources(dbUser, workspaceResourceId);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
