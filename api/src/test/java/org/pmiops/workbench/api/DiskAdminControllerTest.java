@@ -65,7 +65,7 @@ public class DiskAdminControllerTest {
 
     Disk jupyerDisk =
         createRuntimeDisk(
-            user.generatePDNameForUserApps(AppType.CROMWELL),
+            user.generatePDName(),
             DiskStatus.READY,
             NOW.toString(),
             user);
