@@ -14,8 +14,8 @@ import {
 import { Select } from 'app/components/inputs';
 import { Tooltip } from 'app/components/popups';
 import {
-  appendNotebookFileSuffix,
-  dropNotebookFileSuffix,
+  appendJupyterNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 import { ExportDatasetModal } from 'app/pages/data/data-set/export-dataset-modal';
 import {
@@ -78,7 +78,7 @@ describe('ExportDatasetModal', () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
-    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
+    const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,
@@ -162,7 +162,7 @@ describe('ExportDatasetModal', () => {
       .find('[data-test-id="notebook-name-input"]')
       .first()
       .simulate('change', {
-        target: { value: dropNotebookFileSuffix(existingNotebookName) },
+        target: { value: dropJupyterNotebookFileSuffix(existingNotebookName) },
       });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');
@@ -187,7 +187,9 @@ describe('ExportDatasetModal', () => {
       .find('[data-test-id="notebook-name-input"]')
       .first()
       .simulate('change', {
-        target: { value: appendNotebookFileSuffix(existingNotebookName) },
+        target: {
+          value: appendJupyterNotebookFileSuffix(existingNotebookName),
+        },
       });
     await waitOneTickAndUpdate(wrapper);
     findExportButton(wrapper).simulate('click');
@@ -201,7 +203,7 @@ describe('ExportDatasetModal', () => {
   it('should export to an existing notebook with the correct kernel type', async () => {
     const notebookName = 'existing notebook';
     const datasetName = 'dataset';
-    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
+    const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
     dataset.name = datasetName;
     notebooksApiStub.notebookList = [
       {
@@ -331,7 +333,7 @@ describe('ExportDatasetModal', () => {
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const notebookName = 'Notebook Name';
-    const expectedNotebookName = appendNotebookFileSuffix(notebookName);
+    const expectedNotebookName = appendJupyterNotebookFileSuffix(notebookName);
     const expectedDatasetRequest: DataSetRequest = {
       dataSetId: dataset.id,
       name: dataset.name,

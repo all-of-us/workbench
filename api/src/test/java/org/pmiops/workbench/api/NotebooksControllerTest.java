@@ -131,8 +131,8 @@ public class NotebooksControllerTest {
 
   @Test
   public void testCloneNotebook_rmd() {
-    String fromNotebookName = "starter.rmd";
-    String toNotebookName = "Duplicate of starter.rmd";
+    String fromNotebookName = "starter.Rmd";
+    String toNotebookName = "Duplicate of starter.Rmd";
     String toPath = "/path/to/" + toNotebookName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     FileDetail expectedFileDetail = createFileDetail(toNotebookName, toPath, toLastModifiedTime);
@@ -204,11 +204,11 @@ public class NotebooksControllerTest {
 
   @Test
   public void testCopyNotebook_rmd() {
-    String fromNotebookName = "test.rmd";
+    String fromNotebookName = "test.Rmd";
     String toWorkspaceNamespace = "fromProject";
     String toWorkspaceName = "fromWorkspace_001";
     String newName = "toName";
-    String newNameWithExtension = newName + ".rmd";
+    String newNameWithExtension = newName + ".Rmd";
     String toPath = "/path/to/" + newName;
     long toLastModifiedTime = Instant.now().toEpochMilli();
     CopyRequest copyRequest = new CopyRequest();
@@ -344,7 +344,7 @@ public class NotebooksControllerTest {
         BadRequestException.class,
         () ->
             notebooksController.getNotebookKernel(
-                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file.rmd"));
+                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "file.Rmd"));
   }
 
   @Test
@@ -542,8 +542,8 @@ public class NotebooksControllerTest {
 
   @Test
   public void testRenameNotebook_rmd() {
-    String fromNotebookName = "original.rmd";
-    String toNotebookName = "new.rmd";
+    String fromNotebookName = "original.Rmd";
+    String toNotebookName = "new.Rmd";
     String toPath = "/path/to/" + toNotebookName;
 
     long toLastModifiedTime = Instant.now().toEpochMilli();

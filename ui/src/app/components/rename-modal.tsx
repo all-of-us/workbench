@@ -13,7 +13,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
@@ -71,12 +71,11 @@ export class RenameModal extends React.Component<Props, States> {
       newName = this.props.nameFormat(newName);
     }
     const errors = validate(
-      // we expect the notebook name to lack the .ipynb suffix
-      // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
       {
         newName:
+          // Append .ipynb or .Rmd file based on the oldName format
           resourceType === ResourceType.NOTEBOOK
-            ? dropNotebookFileSuffix(newName)
+            ? appendNotebookFileSuffixByOldName(newName?.trim(), oldName)
             : newName?.trim(),
       },
       {
@@ -91,9 +90,10 @@ export class RenameModal extends React.Component<Props, States> {
           <TextInput
             autoFocus
             id='new-name'
+            data-test-id='rename-new-name-input'
             onChange={(v) => this.setState({ newName: v, nameTouched: true })}
           />
-          <ValidationError>
+          <ValidationError data-test-id='rename-new-name-invalid'>
             {summarizeErrors(nameTouched && errors && errors.newName)}
           </ValidationError>
           {!hideDescription && (
