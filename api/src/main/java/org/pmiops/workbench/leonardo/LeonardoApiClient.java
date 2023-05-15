@@ -69,7 +69,8 @@ public interface LeonardoApiClient {
   void deletePersistentDisk(String googleProject, String diskName) throws WorkbenchException;
 
   /** Deletes a persistent disk as an admin */
-  void deletePersistentDiskAsService(String googleProject, String diskName) throws WorkbenchException;
+  void deletePersistentDiskAsService(String googleProject, String diskName)
+      throws WorkbenchException;
 
   /** Update a persistent disk */
   void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)

@@ -94,7 +94,8 @@ public class DiskAdminControllerTest {
             NOW.toString(),
             user,
             AppType.CROMWELL);
-    ResponseEntity<EmptyResponse> response = diskAdminController.deleteDisk(WORKSPACE_NS, diskToDelete.getName());
+    ResponseEntity<EmptyResponse> response =
+        diskAdminController.deleteDisk(WORKSPACE_NS, diskToDelete.getName());
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 }

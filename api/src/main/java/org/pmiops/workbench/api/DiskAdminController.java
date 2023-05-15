@@ -23,7 +23,7 @@ public class DiskAdminController implements DiskAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace, String diskName){
+  public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace, String diskName) {
     diskService.deleteDiskAsService(workspaceNamespace, diskName);
     return ResponseEntity.ok(new EmptyResponse());
   }
