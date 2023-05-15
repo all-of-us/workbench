@@ -19,7 +19,6 @@ describe('NewNotebookModal', () => {
       .first()
       .simulate('change', { target: { value: '123' } });
     await waitOneTickAndUpdate(wrapper);
-    // expect(wrapper.find('[data-test-id="new-name-input"]').first().text()).toEqual("123")
     expect(
       wrapper
         .find('[data-test-id="create-jupyter-new-name-invalid"]')
