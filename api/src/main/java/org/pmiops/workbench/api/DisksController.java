@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -20,15 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class DisksController implements DisksApiDelegate {
   private static final Logger log = Logger.getLogger(DisksController.class.getName());
 
+  private final DiskService diskService;
   private final LeonardoApiClient leonardoNotebooksClient;
   private final LeonardoMapper leonardoMapper;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public DisksController(
+      DiskService diskService,
       LeonardoApiClient leonardoNotebooksClient,
       LeonardoMapper leonardoMapper,
       WorkspaceService workspaceService) {
+    this.diskService = diskService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.leonardoMapper = leonardoMapper;
     this.workspaceService = workspaceService;
@@ -52,9 +56,7 @@ public class DisksController implements DisksApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace, String diskName) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.deletePersistentDisk(googleProject, diskName);
+    diskService.deleteDisk(workspaceNamespace, diskName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
