@@ -26,12 +26,6 @@ import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 
-// @Import({
-//  DiskService.class,
-//    WorkspaceService.class,
-//    LeonardoApiClient.class,
-//    LeonardoMapper.class
-// })
 @ExtendWith(MockitoExtension.class)
 public class DiskServiceTest {
   private static final String WORKSPACE_NS = "workspace-ns";
