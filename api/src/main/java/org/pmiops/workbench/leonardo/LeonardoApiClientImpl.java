@@ -436,20 +436,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         });
   }
 
-  private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
-      String googleProject, boolean includeDeleted, Provider<DisksApi> apiProvider) {
-
-    DisksApi disksApi = apiProvider.get();
-    return leonardoRetryHandler.run(
-        (context) ->
-            disksApi.listDisksByProject(
-                googleProject,
-                null,
-                includeDeleted,
-                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
-                LEONARDO_CREATOR_ROLE));
-  }
-
   @Override
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
@@ -669,5 +655,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     }
 
     return results.size();
+  }
+
+  private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+      String googleProject, boolean includeDeleted, Provider<DisksApi> apiProvider) {
+
+    DisksApi disksApi = apiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) ->
+            disksApi.listDisksByProject(
+                googleProject,
+                null,
+                includeDeleted,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_CREATOR_ROLE));
   }
 }
