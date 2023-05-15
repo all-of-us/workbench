@@ -6,17 +6,6 @@ import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NewJupyterNotebookModal } from './new-jupyter-notebook-modal';
 
 describe('NewNotebookModal', () => {
-  it('should render', () => {
-    const wrapper = mount(
-      <NewJupyterNotebookModal
-        onClose={() => {}}
-        workspace={{ name: 'a' }}
-        existingNameList={[]}
-      />
-    );
-    expect(wrapper.exists()).toBeTruthy();
-  });
-
   it('should show error is new name already exist', async () => {
     const wrapper = mount(
       <NewJupyterNotebookModal
