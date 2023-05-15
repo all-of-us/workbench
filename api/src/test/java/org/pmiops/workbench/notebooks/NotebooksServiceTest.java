@@ -484,7 +484,7 @@ public class NotebooksServiceTest {
         BUCKET_NAME,
         WorkspaceAccessLevel.OWNER);
     when(mockBlob1.getName()).thenReturn(NotebookUtils.withNotebookPath("f1.ipynb"));
-    when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.rmd"));
+    when(mockBlob2.getName()).thenReturn(NotebookUtils.withNotebookPath("f2.Rmd"));
     when(mockBlob3.getName()).thenReturn(NotebookUtils.withNotebookPath("f3.random"));
     when(mockCloudStorageClient.getBlobPageForPrefix(
             BUCKET_NAME, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY))
@@ -496,7 +496,7 @@ public class NotebooksServiceTest {
     when(mockCloudStorageClient.blobToFileDetail(mockBlob3, BUCKET_NAME, workspaceUsersSet))
         .thenReturn(fileDetail3);
     when(fileDetail1.getName()).thenReturn("f1.ipynb");
-    when(fileDetail2.getName()).thenReturn("f2.rmd");
+    when(fileDetail2.getName()).thenReturn("f2.Rmd");
     when(fileDetail3.getName()).thenReturn("f3.random");
 
     List<FileDetail> body =
@@ -504,7 +504,7 @@ public class NotebooksServiceTest {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     List<String> gotNames = body.stream().map(FileDetail::getName).collect(Collectors.toList());
 
-    assertThat(gotNames).isEqualTo(ImmutableList.of("f1.ipynb", "f2.rmd"));
+    assertThat(gotNames).isEqualTo(ImmutableList.of("f1.ipynb", "f2.Rmd"));
   }
 
   @Test
@@ -692,6 +692,6 @@ public class NotebooksServiceTest {
         NotImplementedException.class,
         () ->
             notebooksService.saveNotebook(
-                BUCKET_NAME, "test.rmd", new JSONObject().put("who", "I'm a notebook!")));
+                BUCKET_NAME, "test.Rmd", new JSONObject().put("who", "I'm a notebook!")));
   }
 }

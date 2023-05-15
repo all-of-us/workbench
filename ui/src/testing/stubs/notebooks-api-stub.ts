@@ -6,8 +6,8 @@ import {
 } from 'generated/fetch';
 
 import {
-  appendNotebookFileSuffix,
-  dropNotebookFileSuffix,
+  appendJupyterNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
@@ -54,8 +54,8 @@ export class NotebooksApiStub extends NotebooksApi {
     notebookName: string
   ): Promise<any> {
     return new Promise<any>((resolve) => {
-      const cloneName = appendNotebookFileSuffix(
-        dropNotebookFileSuffix(notebookName) + ' Clone'
+      const cloneName = appendJupyterNotebookFileSuffix(
+        dropJupyterNotebookFileSuffix(notebookName) + ' Clone'
       );
       this.notebookList.push({
         name: cloneName,

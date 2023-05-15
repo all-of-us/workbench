@@ -47,7 +47,7 @@ const DATA_SET_DESCRIPTION = 'this is a data set';
 const DATA_SET_ID = 300;
 
 const NOTEBOOK_NAME = 'testNotebook1.ipynb';
-const NOTEBOOK_DISPLAY_NAME = 'testNotebook1';
+const NOTEBOOK_DISPLAY_NAME = 'testNotebook1.ipynb';
 
 const testCohort = {
   ...stubResource,
