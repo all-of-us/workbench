@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createAppDisk;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.disks.DiskService;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -71,11 +73,17 @@ public class DiskAdminControllerTest {
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
 
-    when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
+    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
 
     ResponseEntity<ListDisksResponse> response = diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
     assertThat(response.getBody())
         .containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
+  }
+
+  @Test
+  public void listDisksInWorkspace_workspaceNotFound(){
+    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenThrow( new NotFoundException("Workspace not found: " + WORKSPACE_NS));
+    assertThrows(NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));
   }
 }
