@@ -1,7 +1,10 @@
 package org.pmiops.workbench.disk;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
 
@@ -18,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.disks.DiskService;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -92,4 +96,35 @@ public class DiskServiceTest {
     assertThat(diskService.findByWorkspaceNamespace(WORKSPACE_NS))
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }
+
+  @Test
+  public void deleteDisk() {
+    String diskName = user.generatePDName();
+    DbWorkspace workspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS)).thenReturn(workspace);
+    diskService.deleteDisk(WORKSPACE_NS, diskName);
+    verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
+  }
+
+  @Test
+  public void deleteDisk_notFound() {
+    String diskName = user.generatePDName();
+
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS))
+        .thenThrow(new NotFoundException());
+
+    assertThrows(NotFoundException.class, () -> diskService.deleteDisk(WORKSPACE_NS, diskName));
+  }
+
+  @Test
+  public void deleteDisk_workspaceNotFound() {
+    String diskName = user.generatePDName();
+
+    doThrow(new NotFoundException())
+        .when(mockWorkspaceService)
+        .lookupWorkspaceByNamespace(WORKSPACE_NS);
+
+    assertThrows(NotFoundException.class, () -> diskService.deleteDisk(WORKSPACE_NS, diskName));
+  }
+
 }
