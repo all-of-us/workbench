@@ -89,8 +89,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<ServiceInfoApi> serviceInfoApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
-  private final Provider<DisksApi> diskApiProvider;
-  private final Provider<DisksApi> serviceDiskApiProvider;
+  private final Provider<DisksApi> disksApiProvider;
+  private final Provider<DisksApi> serviceDisksApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
@@ -109,8 +109,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<ServiceInfoApi> serviceInfoApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
-      @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
-      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDiskApiProvider,
+      @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> disksApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDisksApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
@@ -125,8 +125,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.serviceInfoApiProvider = serviceInfoApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
-    this.diskApiProvider = diskApiProvider;
-    this.serviceDiskApiProvider = serviceDiskApiProvider;
+    this.disksApiProvider = disksApiProvider;
+    this.serviceDisksApiProvider = serviceDisksApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
@@ -404,7 +404,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
       throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
+    DisksApi disksApi = disksApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
           (context) -> disksApi.getDisk(googleProject, diskName));
@@ -416,7 +416,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void deletePersistentDisk(String googleProject, String diskName)
       throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
+    DisksApi disksApi = disksApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
           disksApi.deleteDisk(googleProject, diskName);
@@ -427,7 +427,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
       throws WorkbenchException {
-    DisksApi disksApi = diskApiProvider.get();
+    DisksApi disksApi = disksApiProvider.get();
     leonardoRetryHandler.run(
         (context) -> {
           disksApi.updateDisk(
@@ -453,14 +453,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
-    return listPersistentDiskByProject(googleProject, includeDeleted, diskApiProvider);
+    return listPersistentDiskByProject(googleProject, includeDeleted, disksApiProvider);
   }
 
   @Override
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
     return listPersistentDiskByProject(
-        googleProject, /*includeDeleted*/ true, serviceDiskApiProvider);
+        googleProject, /*includeDeleted*/ true, serviceDisksApiProvider);
   }
 
   @Override
