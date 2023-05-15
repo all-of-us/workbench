@@ -310,12 +310,12 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
-  public String convertNotebookToHtml(byte[] notebook) {
+  public String convertJupyterNotebookToHtml(byte[] notebook) {
     // We need to send a byte array so the ApiClient attaches the body as is instead
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
     // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(notebook));
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticJupyterNotebooksConvert(notebook));
   }
 
   @Override
@@ -328,7 +328,15 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return convertNotebookToHtml(blob.getContent());
+
+    if (NotebookUtils.isJupyterNotebook(notebookName)) {
+      return convertJupyterNotebookToHtml(blob.getContent());
+    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
+      return convertRstudioNotebookToHtml(blob.getContent());
+    }else {
+      throw new NotImplementedException(
+          String.format("%s type of file is not implemented yet", notebookName));
+    }
   }
 
   @Override
@@ -347,7 +355,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
-    return convertNotebookToHtml(blob.getContent());
+    return convertJupyterNotebookToHtml(blob.getContent());
   }
 
   private GoogleCloudLocators getNotebookLocators(
@@ -362,5 +370,13 @@ public class NotebooksServiceImpl implements NotebooksService {
     String fullPath = pathStart + blobPath;
     BlobId blobId = BlobId.of(bucket, blobPath);
     return new GoogleCloudLocators(blobId, fullPath);
+  }
+
+  private String convertRstudioNotebookToHtml(byte[] notebook) {
+    // We need to send a byte array so the ApiClient attaches the body as is instead
+    // of serializing it through Gson which it will do for Strings.
+    // The default Gson serializer does not work since it strips out some null fields
+    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticJupyterNotebooksConvert(notebook));
   }
 }

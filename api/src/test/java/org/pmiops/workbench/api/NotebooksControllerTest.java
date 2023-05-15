@@ -503,15 +503,6 @@ public class NotebooksControllerTest {
   }
 
   @Test
-  public void testReadOnlyNotebook_requiresSuffix() {
-    assertThrows(
-        NotImplementedException.class,
-        () ->
-            notebooksController.readOnlyNotebook(
-                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "notebook without suffix"));
-  }
-
-  @Test
   public void testRenameNotebook() {
     String toPath = "/path/to/" + TO_NOTEBOOK_NAME;
 

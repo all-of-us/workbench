@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.notebooks.NotebookUtils.isRMarkdownNotebook;
+import static org.pmiops.workbench.notebooks.NotebookUtils.isRstudioNotebook;
 
 import java.time.Clock;
 import java.util.List;
@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.CopyRequest;
@@ -77,7 +76,7 @@ public class NotebooksController implements NotebooksApiDelegate {
       // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       String newNameWithExtension =
-          isRMarkdownNotebook(fromNotebookNameWithExtension)
+          isRstudioNotebook(fromNotebookNameWithExtension)
               ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
               : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
 
@@ -112,11 +111,6 @@ public class NotebooksController implements NotebooksApiDelegate {
   @Override
   public ResponseEntity<ReadOnlyNotebookResponse> readOnlyNotebook(
       String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
-    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
-      throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookNameWithFileExtension));
-    }
-
     ReadOnlyNotebookResponse response =
         new ReadOnlyNotebookResponse()
             .html(
