@@ -4268,6 +4268,25 @@ paths:
             "$ref": "#/definitions/ListDisksResponse"
         404:
           description: Workspace not found
+  "/v1/admin/workspaces/{workspaceNamespace}/disks/{diskName}":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    - in: path
+      name: diskName
+      description: diskName
+      type: string
+      required: true
+    get:
+      tags:
+      - diskAdmin
+      description:  Deletes a disk as an admin. Requires the
+        RESEARCHER_DATA_VIEW authority.
+      operationId: deleteDisk
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
 definitions:
   ArchivalStatus:
     type: string
