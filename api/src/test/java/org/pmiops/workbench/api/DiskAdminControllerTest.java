@@ -21,6 +21,8 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.ListDisksResponse;
+import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class DiskAdminControllerTest {
@@ -70,7 +72,10 @@ public class DiskAdminControllerTest {
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(anyString())).thenReturn(serviceResponse);
-    assertThat(diskAdminController.listDisksInWorkspace(WORKSPACE_NS).getBody())
+
+    ResponseEntity<ListDisksResponse> response = diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
+    assertThat(response.getBody())
         .containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
+    assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 }
