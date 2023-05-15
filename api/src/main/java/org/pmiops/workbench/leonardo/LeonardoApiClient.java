@@ -72,7 +72,7 @@ public interface LeonardoApiClient {
   void updatePersistentDisk(String googleProject, String diskName, Integer diskSize)
       throws WorkbenchException;
 
-  /** List all persistent disks by google project */
+  /** List all persistent disks owned by authenticated user in google project */
   List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted);
 
@@ -116,4 +116,7 @@ public interface LeonardoApiClient {
   boolean getLeonardoStatus();
 
   int stopAllUserAppsAsService(String userEmail);
+
+  /** List all persistent disks in google project */
+  List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
 }

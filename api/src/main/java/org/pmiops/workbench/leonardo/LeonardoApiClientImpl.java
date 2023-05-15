@@ -90,6 +90,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
   private final Provider<DisksApi> diskApiProvider;
+  private final Provider<DisksApi> serviceDiskApiProvider;
   private final Provider<AppsApi> appsApiProvider;
   private final Provider<AppsApi> serviceAppsApiProvider;
   private final FireCloudService fireCloudService;
@@ -109,6 +110,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       @Qualifier(LeonardoConfig.USER_DISKS_API) Provider<DisksApi> diskApiProvider,
+      @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> serviceDiskApiProvider,
       @Qualifier(LeonardoConfig.USER_APPS_API) Provider<AppsApi> appsApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_APPS_API) Provider<AppsApi> serviceAppsApiProvider,
       FireCloudService fireCloudService,
@@ -124,6 +126,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.diskApiProvider = diskApiProvider;
+    this.serviceDiskApiProvider = serviceDiskApiProvider;
     this.appsApiProvider = appsApiProvider;
     this.serviceAppsApiProvider = serviceAppsApiProvider;
     this.fireCloudService = fireCloudService;
@@ -433,10 +436,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         });
   }
 
-  @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject, boolean includeDeleted) {
-    DisksApi disksApi = diskApiProvider.get();
+  private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
+      String googleProject, boolean includeDeleted, Provider<DisksApi> apiProvider) {
+
+    DisksApi disksApi = apiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
@@ -445,6 +448,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 includeDeleted,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
+  }
+
+  @Override
+  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+      String googleProject, boolean includeDeleted) {
+    return listPersistentDiskByProject(googleProject, includeDeleted, diskApiProvider);
+  }
+
+  @Override
+  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
+      String googleProject) {
+    return listPersistentDiskByProject(
+        googleProject, /*includeDeleted*/ true, serviceDiskApiProvider);
   }
 
   @Override
