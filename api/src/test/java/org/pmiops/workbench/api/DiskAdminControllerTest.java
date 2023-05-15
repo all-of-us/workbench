@@ -22,6 +22,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListDisksResponse;
 import org.springframework.http.ResponseEntity;
 
@@ -82,5 +83,19 @@ public class DiskAdminControllerTest {
         .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
     assertThrows(
         NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));
+  }
+
+  @Test
+  public void deleteDisk(){
+    Disk diskToDelete =
+        createAppDisk(
+            user.generatePDNameForUserApps(AppType.CROMWELL),
+            DiskStatus.READY,
+            NOW.toString(),
+            user,
+            AppType.CROMWELL);
+    when(mockDiskService.deleteDiskAsService(WORKSPACE_NS,"disk name")).thenReturn(diskToDelete);
+    ResponseEntity<EmptyResponse> response = diskAdminController.deleteDisk();
+    assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 }
