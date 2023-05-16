@@ -4267,7 +4267,7 @@ paths:
           schema:
             "$ref": "#/definitions/ListDisksResponse"
         404:
-          description: Workspace found
+          description: Workspace not found
 definitions:
   ArchivalStatus:
     type: string
