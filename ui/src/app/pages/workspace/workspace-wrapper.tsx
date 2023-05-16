@@ -22,9 +22,9 @@ import {
   useNavigation,
 } from 'app/utils/navigation';
 import {
-  diskStore,
   MatchParams,
   routeDataStore,
+  runtimeDiskStore,
   runtimeStore,
   userAppsStore,
   useStore,
@@ -137,7 +137,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
 
     useEffect(() => {
       const updateStores = async (namespace) => {
-        diskStore.set({
+        runtimeDiskStore.set({
           workspaceNamespace: namespace,
           gcePersistentDisk: undefined,
         });
