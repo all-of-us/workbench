@@ -7,7 +7,6 @@ import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { WarningMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
@@ -62,7 +61,7 @@ export interface CromwellConfigurationPanelProps {
   gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
 }
 
-export const BaseCromwellConfigurationPanel = ({
+export const CromwellConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
@@ -164,7 +163,3 @@ export const BaseCromwellConfigurationPanel = ({
     </FlexColumn>
   );
 };
-
-export const CromwellConfigurationPanel = withWorkspaceGkeApps(
-  BaseCromwellConfigurationPanel
-);
