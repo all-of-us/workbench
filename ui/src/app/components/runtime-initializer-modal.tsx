@@ -7,7 +7,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { toAnalysisConfig } from 'app/utils/runtime-utils';
-import { diskStore, useStore } from 'app/utils/stores';
+import { runtimeDiskStore, useStore } from 'app/utils/stores';
 
 import { Button, Clickable } from './buttons';
 import { EnvironmentCostEstimator } from './environment-cost-estimator';
@@ -40,7 +40,7 @@ export const RuntimeInitializerModal = ({
   defaultRuntime,
 }: Props) => {
   const [showDetails, setShowDetails] = useState(false);
-  const { gcePersistentDisk } = useStore(diskStore);
+  const { gcePersistentDisk } = useStore(runtimeDiskStore);
 
   const defaultAnalysisConfig = toAnalysisConfig(
     defaultRuntime,

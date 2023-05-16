@@ -69,8 +69,8 @@ import {
   withAnalysisConfigDefaults,
 } from 'app/utils/runtime-utils';
 import {
-  diskStore,
   ProfileStore,
+  runtimeDiskStore,
   runtimeStore,
   serverConfigStore,
   useStore,
@@ -192,7 +192,7 @@ const PanelMain = fp.flow(
       cdrVersionTiersResponse
     ) || { hasWgsData: false };
 
-    const { gcePersistentDisk } = useStore(diskStore);
+    const { gcePersistentDisk } = useStore(runtimeDiskStore);
     let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
       useCustomRuntime(namespace, gcePersistentDisk);
 
