@@ -107,16 +107,6 @@ public class DiskServiceTest {
   }
 
   @Test
-  public void deleteDisk_notFound() {
-    String diskName = user.generatePDName();
-
-    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS))
-        .thenThrow(new NotFoundException());
-
-    assertThrows(NotFoundException.class, () -> diskService.deleteDisk(WORKSPACE_NS, diskName));
-  }
-
-  @Test
   public void deleteDisk_workspaceNotFound() {
     String diskName = user.generatePDName();
 
