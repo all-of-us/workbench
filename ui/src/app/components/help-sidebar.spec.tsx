@@ -20,7 +20,6 @@ import {
 
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
-import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
 import {
   profileApi,
   registerApiClient,
@@ -613,7 +612,7 @@ describe('HelpSidebar', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
+    expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
 
     wrapper
       .find({ 'data-test-id': `Cromwell-unexpanded` })
@@ -622,7 +621,7 @@ describe('HelpSidebar', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell settings button', async () => {
@@ -638,7 +637,7 @@ describe('HelpSidebar', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeTruthy();
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
+    expect(wrapper.text()).not.toContain('Cromwell Cloud Environment');
 
     wrapper
       .find({ 'data-test-id': `Cromwell-expanded` })
@@ -647,7 +646,7 @@ describe('HelpSidebar', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find(AppsPanel).exists()).toBeFalsy();
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
   });
 
   it('should not show the Cromwell icon if Cromwell is disabled', async () => {
@@ -677,7 +676,7 @@ describe('HelpSidebar', () => {
     cromwellIcon.simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+    expect(wrapper.text()).toContain('Cromwell Cloud Environment');
   });
 
   it('should not show the RStudio icon if RStudio is disabled', async () => {
@@ -701,12 +700,12 @@ describe('HelpSidebar', () => {
 
     expect(wrapper.text()).not.toContain('RStudio Cloud Environment');
 
-    const cromwellIcon = wrapper.find({
+    const rstudioIcon = wrapper.find({
       'data-test-id': 'help-sidebar-icon-rstudioConfig',
     });
-    expect(cromwellIcon.exists()).toBeTruthy();
+    expect(rstudioIcon.exists()).toBeTruthy();
 
-    cromwellIcon.simulate('click');
+    rstudioIcon.simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.text()).toContain('RStudio Cloud Environment');
