@@ -68,7 +68,7 @@ public class DiskAdminControllerTest {
     List<Disk> serviceResponse =
         new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
 
-    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
+    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
 
     ResponseEntity<ListDisksResponse> response =
         diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
@@ -78,7 +78,7 @@ public class DiskAdminControllerTest {
 
   @Test
   public void listDisksInWorkspace_workspaceNotFound() {
-    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS))
+    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
         .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
     assertThrows(
         NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));

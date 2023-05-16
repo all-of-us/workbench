@@ -52,7 +52,7 @@ public class DiskServiceTest {
   }
 
   @Test
-  public void test_findByWorkspaceNamespace() {
+  public void test_getAllDisksInWorkspaceNamespace() {
     DbWorkspace dbWorkspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
     LeonardoListPersistentDiskResponse firstLPDR =
         createLeonardoListPersistentDiskResponse(
@@ -93,7 +93,7 @@ public class DiskServiceTest {
     when(mockLeonardoMapper.toApiListDisksResponse(firstLPDR)).thenReturn(firstDisk);
     when(mockLeonardoMapper.toApiListDisksResponse(secondLPDR)).thenReturn(secondDisk);
     when(mockLeonardoMapper.toApiListDisksResponse(thirdLPDR)).thenReturn(thirdDisk);
-    assertThat(diskService.findByWorkspaceNamespace(WORKSPACE_NS))
+    assertThat(diskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }
 
