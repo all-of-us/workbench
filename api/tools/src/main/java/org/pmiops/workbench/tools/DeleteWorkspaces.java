@@ -2,7 +2,6 @@ package org.pmiops.workbench.tools;
 
 import com.google.common.primitives.Ints;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -184,13 +183,16 @@ public class DeleteWorkspaces extends Tool {
                 return workspaceMap.entrySet().stream().limit(l);
               })
           .orElse(workspaceMap.entrySet().stream())
-          .forEach(ws -> {
-            String billingProject = ws.getKey();
-            String workspaceResourceId = ws.getValue();
-            LOG.info(String.format("Deleting Sam workspace %s/%s", billingProject, workspaceResourceId));
-            workspaceService.deleteOrphanedSamWorkspace(
-                usernameOpt, billingProject, workspaceResourceId, DELETE_BILLING_PROJECTS);
-          });
+          .forEach(
+              ws -> {
+                String billingProject = ws.getKey();
+                String workspaceResourceId = ws.getValue();
+                LOG.info(
+                    String.format(
+                        "Deleting Sam workspace %s/%s", billingProject, workspaceResourceId));
+                workspaceService.deleteOrphanedSamWorkspace(
+                    usernameOpt, billingProject, workspaceResourceId, DELETE_BILLING_PROJECTS);
+              });
     } else {
       LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
     }
