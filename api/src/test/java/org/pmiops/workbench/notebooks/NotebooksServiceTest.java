@@ -553,7 +553,7 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains(dataUri);
   }
 
@@ -563,7 +563,7 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
   }
@@ -574,7 +574,7 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
   }
 
@@ -584,7 +584,7 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).doesNotContain("script");
     assertThat(html).doesNotContain("alert");
   }
@@ -596,7 +596,7 @@ public class NotebooksServiceTest {
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains("style");
     assertThat(html).contains("color");
     // This behavior is not desired, but this test is in place to enshrine current expected
@@ -612,7 +612,7 @@ public class NotebooksServiceTest {
     stubNotebookToJson();
 
     try {
-      notebooksService.getReadOnlyHtml("", "", "").getBytes();
+      notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes();
       fail("expected 412 exception");
     } catch (FailedPreconditionException e) {
       // expected
