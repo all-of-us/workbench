@@ -445,8 +445,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
-    return listPersistentDiskByProject(
-        googleProject, /*includeDeleted*/ true, /*asAdmin*/ true);
+    return listPersistentDiskByProject(googleProject, /*includeDeleted*/ true, /*asAdmin*/ true);
   }
 
   @Override
@@ -667,6 +666,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 null,
                 includeDeleted,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
-                asAdmin?null:LEONARDO_CREATOR_ROLE));
+                asAdmin ? null : LEONARDO_CREATOR_ROLE));
   }
 }
