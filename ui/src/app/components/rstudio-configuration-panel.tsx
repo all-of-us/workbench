@@ -6,7 +6,6 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { withWorkspaceGkeApps } from 'app/components/with-workspace-gke-apps';
 import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
@@ -43,7 +42,7 @@ export interface RStudioConfigurationPanelProps {
   gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
 }
 
-export const BaseRStudioConfigurationPanel = ({
+export const RStudioConfigurationPanel = ({
   onClose,
   creatorFreeCreditsRemaining,
   workspace,
@@ -108,7 +107,3 @@ export const BaseRStudioConfigurationPanel = ({
     </FlexColumn>
   );
 };
-
-export const RStudioConfigurationPanel = withWorkspaceGkeApps(
-  BaseRStudioConfigurationPanel
-);
