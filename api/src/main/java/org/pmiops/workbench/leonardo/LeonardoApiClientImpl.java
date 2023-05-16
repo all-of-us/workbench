@@ -439,13 +439,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
-    return listPersistentDiskByProject(googleProject, includeDeleted, /*asAdmin*/ false);
+    return listPersistentDiskByProject(googleProject, includeDeleted, disksApiProvider, LEONARDO_CREATOR_ROLE);
   }
 
   @Override
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
-    return listPersistentDiskByProject(googleProject, /*includeDeleted*/ true, /*asAdmin*/ true);
+    return listPersistentDiskByProject(googleProject, /*includeDeleted*/ true, serviceDisksApiProvider, /* Leonardo Role */ null);
   }
 
   @Override
@@ -657,8 +657,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
-      String googleProject, boolean includeDeleted, boolean asAdmin) {
-    DisksApi disksApi = (asAdmin ? serviceDisksApiProvider : disksApiProvider).get();
+      String googleProject, boolean includeDeleted, Provider<DisksApi> apiProvider, String leonardoRole) {
+    DisksApi disksApi = apiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
@@ -666,6 +666,6 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                 null,
                 includeDeleted,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
-                asAdmin ? null : LEONARDO_CREATOR_ROLE));
+                leonardoRole));
   }
 }
