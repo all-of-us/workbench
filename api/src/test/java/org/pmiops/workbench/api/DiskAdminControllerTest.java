@@ -62,17 +62,17 @@ public class DiskAdminControllerTest {
             user,
             AppType.CROMWELL);
 
-    Disk jupyerDisk =
+    Disk jupyterDisk =
         createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
 
     List<Disk> serviceResponse =
-        new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
+        new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
 
     when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
 
     ResponseEntity<ListDisksResponse> response =
         diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
-    assertThat(response.getBody()).containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
+    assertThat(response.getBody()).containsExactly(rStudioDisk, cromwellDisk, jupyterDisk);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 
