@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -66,13 +67,12 @@ public class DiskServiceTest {
             user,
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse thirdLPDR =
-        createLeonardoListPersistentDiskResponse(
+        createLeonardoListRuntimePDResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(2000000).toString(),
             GOOGLE_PROJECT_ID,
-            user,
-            AppType.CROMWELL);
+            user);
     List<LeonardoListPersistentDiskResponse> responseList =
         new ArrayList<>(Arrays.asList(firstLPDR, secondLPDR, thirdLPDR));
     Disk firstDisk = new Disk();
