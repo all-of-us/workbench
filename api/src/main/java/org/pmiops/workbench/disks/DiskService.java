@@ -55,4 +55,10 @@ public class DiskService {
             .map(leonardoMapper::toApiListDisksResponse)
             .collect(Collectors.toList()));
   }
+
+  public void updateDisk(String workspaceNamespace, String diskName, Integer diskSize) {
+    String googleProject =
+        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
+    leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
+  }
 }

@@ -63,9 +63,7 @@ public class DisksController implements DisksApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> updateDisk(
       String workspaceNamespace, String diskName, Integer diskSize) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
+    diskService.updateDisk(workspaceNamespace, diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
