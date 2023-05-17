@@ -88,7 +88,6 @@ public class DisksControllerTest {
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
-  @MockBean DiskService mockDiskService;
 
   @Autowired UserDao userDao;
   @Autowired DisksController disksController;
@@ -311,6 +310,6 @@ public class DisksControllerTest {
   public void deleteDisk() {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
-    verify(mockDiskService).deleteDisk(WORKSPACE_NS, diskName);
+    verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
   }
 }
