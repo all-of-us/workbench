@@ -4276,7 +4276,7 @@ paths:
       description: diskName
       type: string
       required: true
-    get:
+    delete:
       tags:
       - diskAdmin
       description:  Deletes a disk as an admin. Requires the
