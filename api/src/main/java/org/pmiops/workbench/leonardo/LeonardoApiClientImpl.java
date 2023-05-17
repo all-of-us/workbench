@@ -500,8 +500,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       // that may have a null 'appType', as these disks are associated with Jupyter
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
-              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
-                  .stream()
+              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject()).stream()
                   .map(leonardoMapper::toApiListDisksResponse)
                   .filter(disk -> disk.getAppType() != null)
                   .collect(Collectors.toList()));
