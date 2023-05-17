@@ -75,7 +75,7 @@ public class DisksController implements DisksApiDelegate {
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
     List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false);
+        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
 
     List<Disk> diskList =
         PersistentDiskUtils.findTheMostRecentActiveDisks(
