@@ -683,15 +683,4 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     return results.size();
   }
-
-  private void deletePersistentDisk(
-      String googleProject, String diskName, Provider<DisksApi> apiProvider)
-      throws WorkbenchException {
-    DisksApi disksApi = apiProvider.get();
-    leonardoRetryHandler.run(
-        (context) -> {
-          disksApi.deleteDisk(googleProject, diskName);
-          return null;
-        });
-  }
 }
