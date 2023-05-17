@@ -416,13 +416,23 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public void deletePersistentDisk(String googleProject, String diskName)
       throws WorkbenchException {
-    deletePersistentDisk(googleProject, diskName, disksApiProvider);
+    DisksApi disksApi = disksApiProvider.get();
+    leonardoRetryHandler.run(
+        (context) -> {
+          disksApi.deleteDisk(googleProject, diskName);
+          return null;
+        });
   }
 
   @Override
   public void deletePersistentDiskAsService(String googleProject, String diskName)
       throws WorkbenchException {
-    deletePersistentDisk(googleProject, diskName, serviceDisksApiProvider);
+    DisksApi disksApi = serviceDisksApiProvider.get();
+    leonardoRetryHandler.run(
+        (context) -> {
+          disksApi.deleteDisk(googleProject, diskName);
+          return null;
+        });
   }
 
   @Override
@@ -683,21 +693,5 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           disksApi.deleteDisk(googleProject, diskName);
           return null;
         });
-  }
-
-  private List<LeonardoListPersistentDiskResponse> listPersistentDiskByProject(
-      String googleProject,
-      boolean includeDeleted,
-      Provider<DisksApi> apiProvider,
-      String leonardoRole) {
-    DisksApi disksApi = apiProvider.get();
-    return leonardoRetryHandler.run(
-        (context) ->
-            disksApi.listDisksByProject(
-                googleProject,
-                null,
-                includeDeleted,
-                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
-                leonardoRole));
   }
 }
