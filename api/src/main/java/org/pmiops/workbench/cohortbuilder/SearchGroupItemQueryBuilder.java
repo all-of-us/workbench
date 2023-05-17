@@ -614,12 +614,12 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams, Attribute attribute) {
     String operandsParam1 =
         QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
+            queryParams, QueryParameterValue.float64(Double.valueOf(attribute.getOperands().get(0))));
     String valueExpression;
     if (attribute.getOperator().equals(Operator.BETWEEN)) {
       String operandsParam2 =
           QueryParameterUtil.addQueryParameterValue(
-              queryParams, QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
+              queryParams, QueryParameterValue.float64(Double.valueOf(attribute.getOperands().get(1))));
       valueExpression = operandsParam1 + AND + operandsParam2;
     } else {
       valueExpression = operandsParam1;
