@@ -4287,6 +4287,10 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/EmptyResponse"
+        409:
+          description: This disk is attached to a running app or runtime.
+          schema:
+            "$ref": "#/definitions/EmptyResponse"
 definitions:
   ArchivalStatus:
     type: string
