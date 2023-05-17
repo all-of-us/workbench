@@ -71,17 +71,8 @@ public class DisksController implements DisksApiDelegate {
 
   @Override
   public ResponseEntity<ListDisksResponse> listOwnedDisksInWorkspace(String workspaceNamespace) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-
-    List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
-
     List<Disk> diskList =
-        PersistentDiskUtils.findTheMostRecentActiveDisks(
-            responseList.stream()
-                .map(leonardoMapper::toApiListDisksResponse)
-                .collect(Collectors.toList()));
+        diskService.getOwnedDisksInWorkspace(workspaceNamespace);
     ListDisksResponse listDisksResponse = new ListDisksResponse();
     listDisksResponse.addAll(diskList);
 

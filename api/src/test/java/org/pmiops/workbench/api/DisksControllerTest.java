@@ -88,7 +88,7 @@ public class DisksControllerTest {
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
-  @MockBean DiskService mockDiskService;
+//  @MockBean DiskService mockDiskService;
 
   @Autowired UserDao userDao;
   @Autowired DisksController disksController;
@@ -306,11 +306,10 @@ public class DisksControllerTest {
         NotFoundException.class,
         () -> disksController.updateDisk(WORKSPACE_NS, diskName, diskSize));
   }
-
-  @Test
+@Test
   public void deleteDisk() {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
-    verify(mockDiskService).deleteDisk(WORKSPACE_NS, diskName);
+    verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
   }
 }
