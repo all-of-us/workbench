@@ -8,7 +8,7 @@ import {
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
-export const stubDisk = () => ({
+export const stubDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.Standard,
   isGceRuntime: true,

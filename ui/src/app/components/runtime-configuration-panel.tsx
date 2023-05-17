@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
+import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
@@ -852,28 +853,18 @@ const PanelMain = fp.flow(
                     {getWarningMessageContent()}
                   </WarningMessage>
                 )}
-                {unattachedPdExists && !runtimeExists ? (
+                {unattachedPdExists ? (
                   <FlexRow
                     style={{
                       justifyContent: 'space-between',
                       marginTop: '1.125rem',
                     }}
                   >
-                    <LinkButton
-                      style={{
-                        ...styles.deleteLink,
-                        ...(disableControls
-                          ? { color: colorWithWhiteness(colors.dark, 0.4) }
-                          : {}),
-                      }}
-                      aria-label='Delete Persistent Disk'
-                      disabled={disableControls}
+                    <DeletePersistentDiskButton
                       onClick={() =>
                         setPanelContent(PanelContent.DeleteUnattachedPd)
                       }
-                    >
-                      Delete Persistent Disk
-                    </LinkButton>
+                    />
                     {unattachedDiskNeedsRecreate
                       ? renderNextWithDiskDeleteButton()
                       : renderCreateButton()}

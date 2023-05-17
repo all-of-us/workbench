@@ -8,6 +8,7 @@ import {
   CohortAnnotationDefinitionApi,
   CohortReviewApi,
   DataSetApi,
+  DisksApi,
   ErrorCode,
   NotebooksApi,
   ProfileApi,
@@ -62,6 +63,7 @@ import {
   cohortReviewStubs,
 } from 'testing/stubs/cohort-review-service-stub';
 import { DataSetApiStub } from 'testing/stubs/data-set-api-stub';
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
@@ -202,6 +204,7 @@ describe('HelpSidebar', () => {
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(AppsApi, appsStub);
+    registerApiClient(DisksApi, new DisksApiStub());
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);

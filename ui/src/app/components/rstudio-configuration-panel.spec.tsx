@@ -11,9 +11,12 @@ import {
   mountWithRouter,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
-import { AppsApiStub } from 'testing/stubs/apps-api-stub';
+import {
+  AppsApiStub,
+  createListAppsRStudioResponse,
+} from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   workspaceStubs,
@@ -44,6 +47,8 @@ export const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
     updateCache: jest.fn(),
   },
   gkeAppsInWorkspace: [],
+  disk: undefined,
+  onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
 describe('RStudioConfigurationPanel', () => {
@@ -115,5 +120,40 @@ describe('RStudioConfigurationPanel', () => {
     expect(costEstimator(wrapper).exists()).toBeTruthy();
     expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
     expect(pausedCost(wrapper).text()).toEqual('$0.21 per hour');
+  });
+
+  it('should render a DeletePersistentDiskButton when a disk is present but no app', async () => {
+    const disk = stubDisk();
+    const onClickDeleteUnattachedPersistentDisk = jest.fn();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+      disk,
+      onClickDeleteUnattachedPersistentDisk,
+    });
+    const deleteButton = wrapper.find('DeletePersistentDiskButton');
+    expect(deleteButton.exists()).toBeTruthy();
+
+    // validate that onClickDeleteUnattachedPersistentDisk is passed correctly
+    deleteButton.simulate('click');
+    expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not render a DeletePersistentDiskButton when an app is present', async () => {
+    const disk = stubDisk();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [createListAppsRStudioResponse()],
+      disk,
+    });
+    const deleteButton = wrapper.find('DeletePersistentDiskButton');
+    expect(deleteButton.exists()).toBeFalsy();
+  });
+
+  it('should not render a DeletePersistentDiskButton no disk is present', async () => {
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+      disk: undefined,
+    });
+    const deleteButton = wrapper.find('DeletePersistentDiskButton');
+    expect(deleteButton.exists()).toBeFalsy();
   });
 });
