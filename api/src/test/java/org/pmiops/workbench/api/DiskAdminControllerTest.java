@@ -63,23 +63,23 @@ public class DiskAdminControllerTest {
             user,
             AppType.CROMWELL);
 
-    Disk jupyerDisk =
+    Disk jupyterDisk =
         createRuntimeDisk(user.generatePDName(), DiskStatus.READY, NOW.toString(), user);
 
     List<Disk> serviceResponse =
-        new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyerDisk));
+        new ArrayList<>(Arrays.asList(rStudioDisk, cromwellDisk, jupyterDisk));
 
-    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
+    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS)).thenReturn(serviceResponse);
 
     ResponseEntity<ListDisksResponse> response =
         diskAdminController.listDisksInWorkspace(WORKSPACE_NS);
-    assertThat(response.getBody()).containsExactly(rStudioDisk, cromwellDisk, jupyerDisk);
+    assertThat(response.getBody()).containsExactly(rStudioDisk, cromwellDisk, jupyterDisk);
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 
   @Test
   public void listDisksInWorkspace_workspaceNotFound() {
-    when(mockDiskService.findByWorkspaceNamespace(WORKSPACE_NS))
+    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
         .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
     assertThrows(
         NotFoundException.class, () -> diskAdminController.listDisksInWorkspace(WORKSPACE_NS));

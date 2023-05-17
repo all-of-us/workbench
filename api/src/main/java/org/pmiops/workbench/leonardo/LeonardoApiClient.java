@@ -78,7 +78,7 @@ public interface LeonardoApiClient {
 
   /** List all persistent disks owned by authenticated user in google project */
   List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject, boolean includeDeleted);
+      String googleProject);
 
   /**
    * Creates Leonardo app owned by the current authenticated user.

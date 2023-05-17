@@ -88,7 +88,6 @@ public class DisksControllerTest {
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;
-  @MockBean DiskService mockDiskService;
 
   @Autowired UserDao userDao;
   @Autowired DisksController disksController;
@@ -256,8 +255,7 @@ public class DisksControllerTest {
             user,
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
-            GOOGLE_PROJECT_ID, false))
+    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(GOOGLE_PROJECT_ID))
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
@@ -312,6 +310,6 @@ public class DisksControllerTest {
   public void deleteDisk() {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
-    verify(mockDiskService).deleteDisk(WORKSPACE_NS, diskName);
+    verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
   }
 }

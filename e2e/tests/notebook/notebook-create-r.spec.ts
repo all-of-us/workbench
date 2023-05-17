@@ -73,7 +73,7 @@ describe('Create R kernel notebook', () => {
       newNotebookName,
       ResourceCard.Notebook
     );
-    expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}`);
+    expect(modalTextContents).toContain(`Enter new name for ${cloneNotebookName}.ipynb`);
 
     // Notebook card with new name is found.
     const dataResourceCard = new DataResourceCard(page);

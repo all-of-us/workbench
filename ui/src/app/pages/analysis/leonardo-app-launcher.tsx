@@ -48,7 +48,10 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage,
 } from './notebook-frame-error';
-import { appendNotebookFileSuffix, dropNotebookFileSuffix } from './util';
+import {
+  appendJupyterNotebookFileSuffix,
+  dropJupyterNotebookFileSuffix,
+} from './util';
 
 export enum LeoApplicationType {
   Notebook,
@@ -430,7 +433,7 @@ export const LeonardoAppLauncher = fp.flow(
     private getNotebookName() {
       const { nbName } = this.props.match.params;
       // safe whether nbName has the standard notebook suffix or not
-      return dropNotebookFileSuffix(decodeURIComponent(nbName));
+      return dropJupyterNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
     private getSparkConsolePath(): string {
@@ -456,8 +459,8 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     // get notebook name with file suffix
-    private getFullNotebookName() {
-      return appendNotebookFileSuffix(this.getNotebookName());
+    private getFullJupyterNotebookName() {
+      return appendJupyterNotebookFileSuffix(this.getNotebookName());
     }
 
     private incrementProgress(p: Progress): void {
@@ -507,7 +510,7 @@ export const LeonardoAppLauncher = fp.flow(
           // navigate will encode the notebook name automatically
           'notebooks',
           ...(this.props.leoAppType === LeoApplicationType.Notebook
-            ? ['preview', this.getFullNotebookName()]
+            ? ['preview', this.getFullJupyterNotebookName()]
             : []),
         ]);
       }
@@ -579,7 +582,7 @@ export const LeonardoAppLauncher = fp.flow(
             '/' +
             id +
             '/notebooks/' +
-            encodeURIComponent(this.getFullNotebookName())
+            encodeURIComponent(this.getFullJupyterNotebookName())
         );
       }
       if (this.isOpeningTerminal()) {
@@ -606,7 +609,7 @@ export const LeonardoAppLauncher = fp.flow(
           return this.createNotebookAndLocalize(runtime);
         } else {
           this.incrementProgress(Progress.Copying);
-          const fullNotebookName = this.getFullNotebookName();
+          const fullNotebookName = this.getFullJupyterNotebookName();
           const localizedNotebookDir = await this.localizeNotebooks([
             fullNotebookName,
           ]);
@@ -644,7 +647,7 @@ export const LeonardoAppLauncher = fp.flow(
           runtime.googleProject,
           runtime.runtimeName,
           workspaceDir,
-          this.getFullNotebookName(),
+          this.getFullJupyterNotebookName(),
           {
             type: 'file',
             format: 'text',

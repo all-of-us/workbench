@@ -6,11 +6,11 @@ import { switchCase } from 'app/utils';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { isVisible, toAnalysisConfig } from 'app/utils/runtime-utils';
-import { diskStore, runtimeStore, useStore } from 'app/utils/stores';
+import { runtimeDiskStore, runtimeStore, useStore } from 'app/utils/stores';
 
 export const RuntimeCost = () => {
   const { runtime } = useStore(runtimeStore);
-  const { gcePersistentDisk } = useStore(diskStore);
+  const { gcePersistentDisk } = useStore(runtimeDiskStore);
 
   if (!isVisible(runtime?.status)) {
     return null;

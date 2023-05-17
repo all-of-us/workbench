@@ -16,7 +16,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { NewNotebookModal } from 'app/pages/analysis/new-notebook-modal';
+import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import { profileApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
@@ -26,7 +26,7 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
-import { dropNotebookFileSuffix, listNotebooks } from './util';
+import { listNotebooks } from './util';
 
 const styles = {
   heading: {
@@ -153,9 +153,7 @@ export const NotebookList = withCurrentWorkspace()(
         listNotebooks(workspace).then((notebookList) => {
           this.setState({
             notebookList,
-            notebookNameList: notebookList.map((fd) =>
-              dropNotebookFileSuffix(fd.name)
-            ),
+            notebookNameList: notebookList.map((fd) => fd.name),
           });
         });
       } catch (error) {
@@ -270,7 +268,7 @@ export const NotebookList = withCurrentWorkspace()(
           </div>
           {loading && <SpinnerOverlay />}
           {creating && (
-            <NewNotebookModal
+            <NewJupyterNotebookModal
               workspace={workspace}
               existingNameList={notebookNameList}
               onClose={() => this.setState({ creating: false })}

@@ -26,7 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import { appendNotebookFileSuffix } from 'app/pages/analysis/util';
+import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -113,7 +113,7 @@ export const NotebookResourceCard = fp.flow(
       ];
     }
 
-    renameNotebook(newName) {
+    renameNotebook(newName, oldName) {
       const { resource } = this.props;
       return notebooksApi()
         .renameNotebook(
@@ -121,7 +121,7 @@ export const NotebookResourceCard = fp.flow(
           resource.workspaceFirecloudName,
           {
             name: resource.notebook.name,
-            newName: appendNotebookFileSuffix(newName),
+            newName: appendNotebookFileSuffixByOldName(newName, oldName),
           }
         )
         .then(() => this.props.onUpdate())
@@ -179,6 +179,7 @@ export const NotebookResourceCard = fp.flow(
 
     render() {
       const { resource, menuOnly } = this.props;
+      const oldName = getDisplayName(resource);
       return (
         <React.Fragment>
           {this.state.showCopyNotebookModal && (
@@ -202,12 +203,14 @@ export const NotebookResourceCard = fp.flow(
               resourceType={getType(resource)}
               onRename={(newName) => {
                 AnalyticsTracker.Notebooks.Rename();
-                this.renameNotebook(newName);
+                this.renameNotebook(newName, oldName);
               }}
               onCancel={() => this.setState({ showRenameModal: false })}
               hideDescription={true}
-              oldName={getDisplayName(resource)}
-              nameFormat={(name) => appendNotebookFileSuffix(name)}
+              oldName={oldName}
+              nameFormat={(name) =>
+                appendNotebookFileSuffixByOldName(name, oldName)
+              }
               existingNames={this.props.existingNameList}
             />
           )}

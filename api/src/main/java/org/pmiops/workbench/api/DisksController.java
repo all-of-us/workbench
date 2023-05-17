@@ -2,17 +2,10 @@ package org.pmiops.workbench.api;
 
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.disks.DiskService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListDisksResponse;
-import org.pmiops.workbench.utils.mappers.LeonardoMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,36 +15,15 @@ public class DisksController implements DisksApiDelegate {
   private static final Logger log = Logger.getLogger(DisksController.class.getName());
 
   private final DiskService diskService;
-  private final LeonardoApiClient leonardoNotebooksClient;
-  private final LeonardoMapper leonardoMapper;
-  private final WorkspaceService workspaceService;
 
   @Autowired
-  public DisksController(
-      DiskService diskService,
-      LeonardoApiClient leonardoNotebooksClient,
-      LeonardoMapper leonardoMapper,
-      WorkspaceService workspaceService) {
+  public DisksController(DiskService diskService) {
     this.diskService = diskService;
-    this.leonardoNotebooksClient = leonardoNotebooksClient;
-    this.leonardoMapper = leonardoMapper;
-    this.workspaceService = workspaceService;
   }
 
   @Override
   public ResponseEntity<Disk> getDisk(String workspaceNamespace, String diskName) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    Disk disk =
-        leonardoMapper.toApiGetDiskResponse(
-            leonardoNotebooksClient.getPersistentDisk(googleProject, diskName));
-
-    if (DiskStatus.FAILED.equals(disk.getStatus())) {
-      log.warning(
-          String.format("Observed failed PD %s in workspace %s", diskName, workspaceNamespace));
-    }
-
-    return ResponseEntity.ok(disk);
+    return ResponseEntity.ok(diskService.getDisk(workspaceNamespace, diskName));
   }
 
   @Override
@@ -63,25 +35,13 @@ public class DisksController implements DisksApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> updateDisk(
       String workspaceNamespace, String diskName, Integer diskSize) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
+    diskService.updateDisk(workspaceNamespace, diskName, diskSize);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<ListDisksResponse> listOwnedDisksInWorkspace(String workspaceNamespace) {
-    String googleProject =
-        workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-
-    List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject, false);
-
-    List<Disk> diskList =
-        PersistentDiskUtils.findTheMostRecentActiveDisks(
-            responseList.stream()
-                .map(leonardoMapper::toApiListDisksResponse)
-                .collect(Collectors.toList()));
+    List<Disk> diskList = diskService.getOwnedDisksInWorkspace(workspaceNamespace);
     ListDisksResponse listDisksResponse = new ListDisksResponse();
     listDisksResponse.addAll(diskList);
 
