@@ -439,15 +439,31 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject, boolean includeDeleted) {
-    return listPersistentDiskByProject(
-        googleProject, includeDeleted, disksApiProvider, LEONARDO_CREATOR_ROLE);
+
+    DisksApi disksApi = disksApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) ->
+            disksApi.listDisksByProject(
+                googleProject,
+                null,
+                includeDeleted,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                LEONARDO_CREATOR_ROLE));
   }
 
   @Override
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
-    return listPersistentDiskByProject(
-        googleProject, /*includeDeleted*/ true, serviceDisksApiProvider, /* Leonardo Role */ null);
+
+    DisksApi disksApi = disksApiProvider.get();
+    return leonardoRetryHandler.run(
+        (context) ->
+            disksApi.listDisksByProject(
+                googleProject,
+                null,
+                /*includeDeleted*/ true,
+                LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
+                /* Leonardo Role */ null));
   }
 
   @Override
