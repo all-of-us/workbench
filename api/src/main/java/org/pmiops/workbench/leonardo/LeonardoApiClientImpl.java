@@ -438,7 +438,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
   @Override
   public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
-      String googleProject, boolean includeDeleted) {
+      String googleProject) {
 
     DisksApi disksApi = disksApiProvider.get();
     return leonardoRetryHandler.run(
@@ -446,7 +446,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
             disksApi.listDisksByProject(
                 googleProject,
                 null,
-                includeDeleted,
+                /* includeDeleted */ false,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 LEONARDO_CREATOR_ROLE));
   }
@@ -500,7 +500,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       // that may have a null 'appType', as these disks are associated with Jupyter
       List<Disk> diskList =
           PersistentDiskUtils.findTheMostRecentActiveDisks(
-              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject(), false)
+              listPersistentDiskByProjectCreatedByCreator(dbWorkspace.getGoogleProject())
                   .stream()
                   .map(leonardoMapper::toApiListDisksResponse)
                   .filter(disk -> disk.getAppType() != null)
