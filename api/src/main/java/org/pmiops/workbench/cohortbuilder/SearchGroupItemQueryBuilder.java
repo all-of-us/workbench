@@ -773,7 +773,7 @@ public final class SearchGroupItemQueryBuilder {
                 .flatMap(param -> param.getAttributes().stream())
                 .flatMap(attribute -> attribute.getOperands().stream())
                 .filter(conceptId -> !conceptId.equals("1740639"))
-                .map(Long::new)
+                .map(Long::valueOf)
                 .toArray(Long[]::new);
         String conceptIdsParam =
             QueryParameterUtil.addQueryParameterValue(
