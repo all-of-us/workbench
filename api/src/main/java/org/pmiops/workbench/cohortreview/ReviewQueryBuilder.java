@@ -286,7 +286,7 @@ public class ReviewQueryBuilder {
 
   private QueryParameterValue buildQueryParameterValue(Filter filter, int index) {
     if (LONG_NUMBERS.contains(filter.getProperty())) {
-      return QueryParameterValue.int64(new Long(filter.getValues().get(index)));
+      return QueryParameterValue.int64(Long.valueOf(filter.getValues().get(index)));
     } else if (DOUBLE_NUMBERS.contains(filter.getProperty())) {
       return QueryParameterValue.float64(new Double(filter.getValues().get(index)));
     }

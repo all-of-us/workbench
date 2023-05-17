@@ -1381,15 +1381,18 @@ public class CohortBuilderControllerTest {
             .findSurveyVersionByQuestionConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 715713L)
             .getBody();
     assert response != null;
-    assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(new Long("100"));
+    assertThat(response.getItems().get(0).getSurveyVersionConceptId())
+        .isEqualTo(Long.valueOf("100"));
     assertThat(response.getItems().get(0).getDisplayName()).isEqualTo("May 2020");
-    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(new Long("291"));
-    assertThat(response.getItems().get(1).getSurveyVersionConceptId()).isEqualTo(new Long("101"));
+    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(Long.valueOf("291"));
+    assertThat(response.getItems().get(1).getSurveyVersionConceptId())
+        .isEqualTo(Long.valueOf("101"));
     assertThat(response.getItems().get(1).getDisplayName()).isEqualTo("June 2020");
-    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(new Long("148"));
-    assertThat(response.getItems().get(2).getSurveyVersionConceptId()).isEqualTo(new Long("102"));
+    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(Long.valueOf("148"));
+    assertThat(response.getItems().get(2).getSurveyVersionConceptId())
+        .isEqualTo(Long.valueOf("102"));
     assertThat(response.getItems().get(2).getDisplayName()).isEqualTo("July 2020");
-    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
+    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(Long.valueOf("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
@@ -1685,7 +1688,8 @@ public class CohortBuilderControllerTest {
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {
     return new Criteria()
         .code(dbCriteria.getCode())
-        .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
+        .conceptId(
+            dbCriteria.getConceptId() == null ? null : Long.valueOf(dbCriteria.getConceptId()))
         .count(dbCriteria.getCount())
         .parentCount(dbCriteria.getParentCount())
         .childCount(dbCriteria.getChildCount())
