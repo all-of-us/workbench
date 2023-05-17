@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class DiskServiceTest {
   }
 
   @Test
-  public void test_findByWorkspaceNamespace() {
+  public void test_getAllDisksInWorkspaceNamespace() {
     DbWorkspace dbWorkspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
     LeonardoListPersistentDiskResponse firstLPDR =
         createLeonardoListPersistentDiskResponse(
@@ -70,13 +71,12 @@ public class DiskServiceTest {
             user,
             AppType.RSTUDIO);
     LeonardoListPersistentDiskResponse thirdLPDR =
-        createLeonardoListPersistentDiskResponse(
+        createLeonardoListRuntimePDResponse(
             user.generatePDName(),
             LeonardoDiskStatus.READY,
             NOW.minusMillis(2000000).toString(),
             GOOGLE_PROJECT_ID,
-            user,
-            AppType.CROMWELL);
+            user);
     List<LeonardoListPersistentDiskResponse> responseList =
         new ArrayList<>(Arrays.asList(firstLPDR, secondLPDR, thirdLPDR));
     Disk firstDisk = new Disk();
@@ -93,7 +93,7 @@ public class DiskServiceTest {
     when(mockLeonardoMapper.toApiListDisksResponse(firstLPDR)).thenReturn(firstDisk);
     when(mockLeonardoMapper.toApiListDisksResponse(secondLPDR)).thenReturn(secondDisk);
     when(mockLeonardoMapper.toApiListDisksResponse(thirdLPDR)).thenReturn(thirdDisk);
-    assertThat(diskService.findByWorkspaceNamespace(WORKSPACE_NS))
+    assertThat(diskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
         .containsExactly(firstDisk, secondDisk, thirdDisk);
   }
 

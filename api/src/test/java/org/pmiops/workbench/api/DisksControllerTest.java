@@ -256,8 +256,7 @@ public class DisksControllerTest {
             user,
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
-            GOOGLE_PROJECT_ID, false))
+    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(GOOGLE_PROJECT_ID))
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
