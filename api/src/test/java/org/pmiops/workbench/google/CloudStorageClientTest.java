@@ -85,8 +85,8 @@ public class CloudStorageClientTest {
     when(notebookBlob.getMetadata()).thenReturn(metaData);
     when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
 
-    String actualFileDetail =
+    String lastModifiedBy =
         cloudStorageClient.getNotebookLastModifiedBy(notebookPath, workspaceUsers);
-    assertThat(actualFileDetail).isEqualTo(USER_EMAIL);
+    assertThat(lastModifiedBy).isEqualTo(USER_EMAIL);
   }
 }
