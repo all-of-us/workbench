@@ -4273,7 +4273,7 @@ paths:
     - "$ref": "#/parameters/workspaceNamespace"
     - in: path
       name: diskName
-      description: diskName
+      description: name of the disk admin wants to delete
       type: string
       required: true
     delete:

@@ -128,7 +128,7 @@ public class DiskServiceTest {
   }
 
   @Test
-  public void deleteDiskAsService_leoException() {
+  public void deleteDiskAsService_leonardoWorkbenchException() {
     String diskName = user.generatePDName();
     DbWorkspace workspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
     when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS)).thenReturn(workspace);
