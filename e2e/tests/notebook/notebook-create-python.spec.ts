@@ -7,6 +7,7 @@ import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import { getPropValue } from 'utils/element-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import expect from 'expect';
+import { JupyterKernels } from 'app/text-labels';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
@@ -52,7 +53,7 @@ describe('Python Kernel Notebook Test', () => {
 
     // Verify kernel name.
     const kernelName = await notebook.getKernelName();
-    expect(kernelName).toBe('Python 3 (ipykernel)');
+    expect(kernelName).toBe(JupyterKernels.Python);
 
     let cellIndex = 1;
     const cell1OutputText = await notebook.runCodeCell(cellIndex, {
