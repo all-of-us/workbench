@@ -335,7 +335,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       return convertRstudioNotebookToHtml(blob.getContent());
     } else {
       throw new NotImplementedException(
-          String.format("%s type of file is not implemented yet", notebookName));
+          String.format("Converting %s to read-only HTML is not supported", notebookName));
     }
   }
 
