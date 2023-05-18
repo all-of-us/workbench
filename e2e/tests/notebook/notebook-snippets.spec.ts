@@ -15,7 +15,7 @@ describe('Notebook Snippets Tests', () => {
   test.each([
     [
       Language.Python,
-      'Python 3',
+      'Python 3 (ipykernel)',
       // more exist, but these are the all-of-us-specific ones
       [
         'All of Us Dataset Builder Python snippets',
