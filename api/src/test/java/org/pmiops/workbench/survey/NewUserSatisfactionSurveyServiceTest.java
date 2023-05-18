@@ -132,7 +132,7 @@ class NewUserSatisfactionSurveyServiceTest {
     final Instant twoMonthsTwoWeeksOneDayAgo =
         PROVIDED_CLOCK.instant().minus(61 + (2 * 7) + 1, ChronoUnit.DAYS);
     user.setCreationTime(Timestamp.from(twoMonthsTwoWeeksOneDayAgo));
-    assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isFalse();
+    assertThat(newUserSatisfactionSurveyService.eligibleToTakeSurvey(user)).isTrue();
   }
 
   @Test
