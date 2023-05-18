@@ -152,8 +152,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private static final String NAMESPACE = "aou-test";
   private static final String NAME = "test";
-  private static final Long PARTICIPANT_ID = 102246L;
-  private static final Long PARTICIPANT_ID2 = 102247L;
+  private static final long PARTICIPANT_ID = 102246L;
+  private static final long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
@@ -641,7 +641,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"));
   }
 
-  private void saveParticipantCohortStatus(Long participantId, Long reviewId) {
+  private void saveParticipantCohortStatus(long participantId, long reviewId) {
     participantCohortStatusDao.save(
         new DbParticipantCohortStatus()
             .participantKey(

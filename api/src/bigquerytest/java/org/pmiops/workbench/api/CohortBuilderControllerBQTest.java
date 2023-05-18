@@ -2421,10 +2421,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return new CohortDefinition().includes(groups);
   }
 
-  private void assertParticipants(ResponseEntity response, Integer expectedCount) {
+  private void assertParticipants(ResponseEntity<Long> response, Integer expectedCount) {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    Long participantCount = (Long) response.getBody();
+    Long participantCount = response.getBody();
     assertThat(participantCount).isEqualTo(expectedCount);
   }
 
