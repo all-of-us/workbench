@@ -123,7 +123,7 @@ public class ParticipantCohortStatusDaoTest {
 
     String sql = "select count(*) from participant_cohort_status where cohort_review_id = ?";
     final Object[] sqlParams = {key1.getCohortReviewId()};
-    final int expectedCount = 2;
+    final Integer expectedCount = 2;
 
     assertThat(jdbcTemplate.queryForObject(sql, sqlParams, Integer.class)).isEqualTo(expectedCount);
   }
