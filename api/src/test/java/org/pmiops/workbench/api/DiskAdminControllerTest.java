@@ -98,4 +98,12 @@ public class DiskAdminControllerTest {
         diskAdminController.deleteDisk(WORKSPACE_NS, diskToDelete.getName());
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
+
+  @Test
+  public void deleteDisk_workspaceNotFound() {
+    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
+        .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
+    assertThrows(
+        NotFoundException.class, () -> diskAdminController.deleteDisk(WORKSPACE_NS, "disk name"));
+  }
 }
