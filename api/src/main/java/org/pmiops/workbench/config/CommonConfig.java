@@ -1,7 +1,8 @@
 package org.pmiops.workbench.config;
 
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Random;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class CommonConfig {
   @Bean
   JsonFactory jsonFactory() {
-    return new JacksonFactory();
+    return getDefaultJsonFactory();
   }
 
   @Bean

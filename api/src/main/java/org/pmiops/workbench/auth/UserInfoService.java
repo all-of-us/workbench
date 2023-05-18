@@ -1,6 +1,7 @@
 package org.pmiops.workbench.auth;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.oauth2.Oauth2;
@@ -27,9 +28,15 @@ public class UserInfoService {
   }
 
   public Userinfo getUserInfo(String token) {
-    GoogleCredential credential = new GoogleCredential().setAccessToken(token);
     Oauth2 oauth2 =
-        new Oauth2.Builder(httpTransport, jsonFactory, credential)
+        new Oauth2.Builder(
+                httpTransport,
+                jsonFactory,
+                new HttpRequestInitializer() {
+                  public void initialize(HttpRequest request) {
+                    request.getHeaders().setAuthorization("Bearer " + token);
+                  }
+                })
             .setApplicationName(APPLICATION_NAME)
             .build();
     return retryHandler.run((context) -> oauth2.userinfo().get().execute());

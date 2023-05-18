@@ -1,5 +1,6 @@
 package org.pmiops.workbench.ras;
 
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.auth0.jwt.JWT;
@@ -16,7 +17,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import java.io.IOException;
 import java.util.Set;
@@ -26,7 +26,6 @@ import java.util.Set;
  * Connect call</a> using Google OAuth Library.
  */
 public class OpenIdConnectClient {
-  private static final JacksonFactory DEFAULT_JACKSON_FACTORY = new JacksonFactory();
 
   private final AuthorizationCodeFlow codeFlow;
   private final String userInfoUrl;
@@ -83,7 +82,7 @@ public class OpenIdConnectClient {
     return new AuthorizationCodeFlow.Builder(
             BearerToken.queryParameterAccessMethod(),
             httpTransport,
-            DEFAULT_JACKSON_FACTORY,
+            getDefaultJsonFactory(),
             new GenericUrl(tokenUrl),
             new BasicAuthentication(clientId, clientSecret),
             clientId,
