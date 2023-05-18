@@ -52,7 +52,7 @@ describe('Python Kernel Notebook Test', () => {
 
     // Verify kernel name.
     const kernelName = await notebook.getKernelName();
-    expect(kernelName).toBe('Python 3');
+    expect(kernelName).toBe('Python 3 (ipykernel)');
 
     let cellIndex = 1;
     const cell1OutputText = await notebook.runCodeCell(cellIndex, {
