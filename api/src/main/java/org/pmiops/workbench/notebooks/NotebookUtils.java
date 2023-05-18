@@ -8,14 +8,14 @@ public class NotebookUtils {
 
   public static String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
   public static String JUPYTER_NOTEBOOK_EXTENSION = ".ipynb";
-  public static String R_MARKDOWN_NOTEBOOK_EXTENSION = ".rmd";
+  public static String R_MARKDOWN_NOTEBOOK_EXTENSION = ".Rmd";
 
   // Pattern matches directory and the file type, e.g. notebooks/file.ipynb
   public static final Pattern JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
-  // Pattern matches directory and the file type, e.g. notebooks/file.rmd
+  // Pattern matches directory and the file type, e.g. notebooks/file.Rmd
   public static final Pattern R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN =
-      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(rmd))$");
+      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(Rmd))$");
 
   public static boolean isJupyterNotebookWithDirectory(String nameWithFileExtension) {
     return JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();

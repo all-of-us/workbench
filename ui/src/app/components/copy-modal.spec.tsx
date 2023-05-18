@@ -11,7 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { TextInput } from 'app/components/inputs';
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
+import { dropJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import {
   conceptSetsApi,
   notebooksApi,
@@ -129,7 +129,7 @@ describe('CopyModal', () => {
     return notebooksApi().copyNotebook(
       fromWorkspaceNamespace,
       fromWorkspaceFirecloudName,
-      dropNotebookFileSuffix(fromResourceName),
+      dropJupyterNotebookFileSuffix(fromResourceName),
       copyRequest
     );
   };

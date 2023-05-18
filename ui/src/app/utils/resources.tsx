@@ -11,8 +11,6 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { dropNotebookFileSuffix } from 'app/pages/analysis/util';
-
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';
 
@@ -57,7 +55,7 @@ export function getDisplayName(resource: WorkspaceResource): string {
     [isCohortReview, (r) => r.cohortReview.cohortName],
     [isConceptSet, (r) => r.conceptSet.name],
     [isDataSet, (r) => r.dataSet.name],
-    [isNotebook, (r) => dropNotebookFileSuffix(r.notebook.name)],
+    [isNotebook, (r) => r.notebook.name],
   ])(resource);
 }
 

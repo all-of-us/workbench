@@ -14,10 +14,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import {
-  dropNotebookFileSuffix,
-  getExistingNotebookNames,
-} from 'app/pages/analysis/util';
+import { getExistingNotebookNames } from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
@@ -25,7 +22,7 @@ import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { nameValidationFormat } from 'app/utils/resources';
 
-import { appendNotebookFileSuffix } from './util';
+import { appendJupyterNotebookFileSuffix } from './util';
 
 interface Props {
   onClose: Function;
@@ -34,7 +31,7 @@ interface Props {
   onBack?: Function;
 }
 
-export const NewNotebookModal = (props: Props) => {
+export const NewJupyterNotebookModal = (props: Props) => {
   const { onBack, onClose, workspace } = props;
 
   const [name, setName] = useState('');
@@ -55,7 +52,7 @@ export const NewNotebookModal = (props: Props) => {
   const errors = validate(
     // we expect the notebook name to lack the .ipynb suffix
     // but we pass it through drop-suffix to also catch the case where the user has explicitly typed it in
-    { name: dropNotebookFileSuffix(name), kernel },
+    { name: appendJupyterNotebookFileSuffix(name), kernel },
     {
       kernel: { presence: { allowEmpty: false } },
       name: nameValidationFormat(
@@ -67,7 +64,7 @@ export const NewNotebookModal = (props: Props) => {
 
   const create = () => {
     userMetricsApi().updateRecentResource(workspace.namespace, workspace.id, {
-      notebookName: appendNotebookFileSuffix(name),
+      notebookName: appendJupyterNotebookFileSuffix(name),
     });
     navigate(
       [
@@ -92,6 +89,7 @@ export const NewNotebookModal = (props: Props) => {
       <ModalBody>
         <div style={headerStyles.formLabel}>Name:</div>
         <TextInput
+          data-test-id='create-jupyter-new-name-input'
           autoFocus
           value={name}
           onChange={(v) => {
@@ -99,7 +97,7 @@ export const NewNotebookModal = (props: Props) => {
             setNameTouched(true);
           }}
         />
-        <ValidationError>
+        <ValidationError data-test-id='create-jupyter-new-name-invalid'>
           {summarizeErrors(nameTouched && errors && errors.name)}
         </ValidationError>
         <div style={headerStyles.formLabel}>Programming Language:</div>

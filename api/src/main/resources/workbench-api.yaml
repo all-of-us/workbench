@@ -976,7 +976,7 @@ paths:
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
       summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
-      operationId: listDisksInWorkspace
+      operationId: listOwnedDisksInWorkspace
       tags:
         - disks
       parameters:
@@ -4251,6 +4251,23 @@ paths:
       responses:
         200:
           description: 'The survey responses were successfully stored.'
+
+  "/v1/admin/workspaces/{workspaceNamespace}/disks":
+    parameters:
+    - "$ref": "#/parameters/workspaceNamespace"
+    get:
+      tags:
+      - diskAdmin
+      description:  Lists persistent disks in a workspace. Requires the
+        RESEARCHER_DATA_VIEW authority.
+      operationId: listDisksInWorkspace
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/ListDisksResponse"
+        404:
+          description: Workspace not found
 definitions:
   ArchivalStatus:
     type: string

@@ -38,7 +38,7 @@ import { diskTypeLabels, isActionable } from 'app/utils/runtime-utils';
 import {
   cdrVersionStore,
   clearCompoundRuntimeOperations,
-  diskStore,
+  runtimeDiskStore,
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
@@ -127,11 +127,11 @@ describe('RuntimeConfigurationPanel', () => {
   };
 
   let runtimeStoreStub;
-  let diskStoreStub;
+  let runtimeDiskStoreStub;
 
   const setCurrentDisk = (d: Disk) => {
     disksApiStub.disk = d;
-    diskStoreStub.gcePersistentDisk = d;
+    runtimeDiskStoreStub.gcePersistentDisk = d;
   };
 
   const setCurrentRuntime = (r: Runtime) => {
@@ -171,11 +171,11 @@ describe('RuntimeConfigurationPanel', () => {
     };
     runtimeStore.set(runtimeStoreStub);
 
-    diskStoreStub = {
+    runtimeDiskStoreStub = {
       workspaceNamespace: workspaceStubs[0].namespace,
       gcePersistentDisk: null,
     };
-    diskStore.set(diskStoreStub);
+    runtimeDiskStore.set(runtimeDiskStoreStub);
 
     jest.useFakeTimers();
   });

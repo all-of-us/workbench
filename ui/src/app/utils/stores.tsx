@@ -195,12 +195,12 @@ export const runtimeStore = atom<RuntimeStore>({
 });
 
 // runtime store states: undefined(initial state) -> Runtime (user selected) <--> null (delete only - no recreate)
-export interface DiskStore {
+export interface RuntimeDiskStore {
   workspaceNamespace: string | null | undefined;
   gcePersistentDisk: Disk | null | undefined;
 }
 
-export const diskStore = atom<DiskStore>({
+export const runtimeDiskStore = atom<RuntimeDiskStore>({
   workspaceNamespace: undefined,
   gcePersistentDisk: undefined,
 });

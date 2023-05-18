@@ -22,39 +22,38 @@ import {
 
 import { defaultRStudioConfig } from './apps-panel/utils';
 import {
-  BaseRStudioConfigurationPanel,
+  RStudioConfigurationPanel,
   RStudioConfigurationPanelProps,
 } from './rstudio-configuration-panel';
 
+const onClose = jest.fn();
+const freeTierBillingAccountId = 'freetier';
+export const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
+  onClose,
+  creatorFreeCreditsRemaining: null,
+  workspace: {
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.WRITER,
+    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+  },
+  profileState: {
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load: jest.fn(),
+    reload: jest.fn(),
+    updateCache: jest.fn(),
+  },
+  gkeAppsInWorkspace: [],
+};
+
 describe('RStudioConfigurationPanel', () => {
-  const onClose = jest.fn();
-  const freeTierBillingAccountId = 'freetier';
-
-  const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
-    onClose,
-    creatorFreeCreditsRemaining: null,
-    workspace: {
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    },
-    profileState: {
-      profile: ProfileStubVariables.PROFILE_STUB,
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    },
-    gkeAppsInWorkspace: [],
-  };
-
   let disksApiStub: DisksApiStub;
 
   const component = async (
     propOverrides?: Partial<RStudioConfigurationPanelProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<BaseRStudioConfigurationPanel {...allProps} />);
+    const c = mountWithRouter(<RStudioConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };

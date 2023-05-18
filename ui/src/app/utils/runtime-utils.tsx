@@ -36,9 +36,9 @@ import {
 } from 'app/utils/machines';
 import {
   compoundRuntimeOpStore,
-  diskStore,
   markCompoundRuntimeOperationCompleted,
   registerCompoundRuntimeOperation,
+  runtimeDiskStore,
   runtimeStore,
   useStore,
 } from 'app/utils/stores';
@@ -934,11 +934,14 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
     }
     const getDisk = withAsyncErrorHandling(
       () =>
-        diskStore.set({ workspaceNamespace: null, gcePersistentDisk: null }),
+        runtimeDiskStore.set({
+          workspaceNamespace: null,
+          gcePersistentDisk: null,
+        }),
       async () => {
         let gcePersistentDisk: Disk = null;
         try {
-          const availableDisks = await disksApi().listDisksInWorkspace(
+          const availableDisks = await disksApi().listOwnedDisksInWorkspace(
             currentWorkspaceNamespace
           );
           gcePersistentDisk = availableDisks.find(
@@ -949,8 +952,11 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
             throw e;
           }
         }
-        if (currentWorkspaceNamespace === diskStore.get().workspaceNamespace) {
-          diskStore.set({
+        if (
+          currentWorkspaceNamespace ===
+          runtimeDiskStore.get().workspaceNamespace
+        ) {
+          runtimeDiskStore.set({
             workspaceNamespace: currentWorkspaceNamespace,
             gcePersistentDisk,
           });
@@ -1047,7 +1053,7 @@ export const useRuntimeStatus = (
         () => {
           return disksApi().deleteDisk(
             currentWorkspaceNamespace,
-            diskStore.get().gcePersistentDisk.name
+            runtimeDiskStore.get().gcePersistentDisk.name
           );
         },
       ],
@@ -1106,7 +1112,7 @@ export const useCustomRuntime = (
   useEffect(() => {
     let mounted = true;
     const aborter = new AbortController();
-    const existingDisk = diskStore.get().gcePersistentDisk;
+    const existingDisk = runtimeDiskStore.get().gcePersistentDisk;
     const requestedDisk = request?.runtime?.gceWithPdConfig?.persistentDisk;
     const runAction = async () => {
       const applyRuntimeUpdate = async () => {

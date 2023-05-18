@@ -1,5 +1,6 @@
 const config = require('../src/config')
 const tu = require('../src/test-utils')
+const utils = require("../src/utils");
 
 const browserTest = tu.browserTest(__filename)
 

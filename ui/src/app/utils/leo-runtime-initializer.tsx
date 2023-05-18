@@ -4,7 +4,7 @@ import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
-import { diskStore, runtimeStore } from 'app/utils/stores';
+import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
 import { maybeWithExistingDisk } from './runtime-utils';
 
@@ -204,7 +204,7 @@ export class LeoRuntimeInitializer {
   }
 
   private async createRuntime(): Promise<void> {
-    const { gcePersistentDisk } = diskStore.get();
+    const { gcePersistentDisk } = runtimeDiskStore.get();
 
     if (!this.targetRuntime) {
       // Automatic lazy creation is not supported; the caller must specify a target.

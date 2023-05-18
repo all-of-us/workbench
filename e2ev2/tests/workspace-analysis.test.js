@@ -1,5 +1,6 @@
 const config = require('../src/config')
 const tu = require('../src/test-utils')
+const utils = require("../src/utils");
 
 const browserTest = tu.browserTest(__filename)
 
@@ -7,7 +8,9 @@ const navigateToNewAnalysisPage = async (browser) => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
+  await utils.dismissLeoAuthErrorModal(page);
   await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data')
+  await utils.dismissLeoAuthErrorModal(page);
   const newAnalysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis (New)"]')
   await newAnalysisTab.click()
   return page

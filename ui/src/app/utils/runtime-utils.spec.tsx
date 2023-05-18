@@ -10,7 +10,11 @@ import {
   findMostSevereDiffState,
   useCustomRuntime,
 } from 'app/utils/runtime-utils';
-import { diskStore, runtimeStore, serverConfigStore } from 'app/utils/stores';
+import {
+  runtimeDiskStore,
+  runtimeStore,
+  serverConfigStore,
+} from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
@@ -24,7 +28,7 @@ const WORKSPACE_NS = 'test';
 const Runtime = ({ id }) => {
   const [{ currentRuntime }] = useCustomRuntime(
     WORKSPACE_NS,
-    diskStore.get().gcePersistentDisk
+    runtimeDiskStore.get().gcePersistentDisk
   );
   const { runtimeName = '' } = currentRuntime || {};
   return <div id={id}>{runtimeName}</div>;
@@ -56,7 +60,7 @@ describe('runtime-utils', () => {
       runtime: undefined,
       runtimeLoaded: true,
     });
-    diskStore.set({
+    runtimeDiskStore.set({
       workspaceNamespace: WORKSPACE_NS,
       gcePersistentDisk: undefined,
     });

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="yonghao" id="db.changelog-214-drop-unused-columns-user-table">
+    <dropColumn columnName="data_access_level" tableName="user"/>
+    <dropColumn columnName="first_registration_completion_time" tableName="user"/>
+    <dropColumn columnName="last_free_tier_credits_time_check" tableName="user"/>
+    <dropColumn columnName="billing_project_retries" tableName="user"/>
+    <dropColumn columnName="id_verification_is_valid" tableName="user"/>
+    <dropColumn columnName="free_tier_credits_limit_days_override" tableName="user"/>
+    <dropColumn columnName="about_you" tableName="user"/>
+    <dropColumn columnName="current_position" tableName="user"/>
+    <dropColumn columnName="organization" tableName="user"/>
+    <dropColumn columnName="phone_number" tableName="user"/>
+    <dropColumn columnName="beta_access_request_time" tableName="user"/>
+    <dropColumn columnName="beta_access_bypass_time" tableName="user"/>
+    <dropColumn columnName="email_verification_completion_time" tableName="user"/>
+    <dropColumn columnName="email_verification_bypass_time" tableName="user"/>
+    <dropColumn columnName="email_verification_status" tableName="user"/>
+    <dropColumn columnName="id_verification_completion_time" tableName="user"/>
+    <dropColumn columnName="id_verification_bypass_time" tableName="user"/>
+    <dropColumn columnName="moodle_id" tableName="user"/>
+  </changeSet>
+</databaseChangeLog>

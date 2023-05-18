@@ -4,7 +4,7 @@ import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
 import {
-  BaseCromwellConfigurationPanel,
+  CromwellConfigurationPanel,
   CromwellConfigurationPanelProps,
 } from 'app/components/cromwell-configuration-panel';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
@@ -54,7 +54,7 @@ describe('CromwellConfigurationPanel', () => {
     propOverrides?: Partial<CromwellConfigurationPanelProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<BaseCromwellConfigurationPanel {...allProps} />);
+    const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);
     return c;
   };

@@ -1,23 +1,53 @@
 import { FileDetail } from 'generated/fetch';
 
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
+import { cond } from 'app/utils';
 
-const notebookExtension = '.ipynb';
+const jupyterNotebookExtension = '.ipynb';
+const rstudioNotebookExtension = '.Rmd';
 
-export function dropNotebookFileSuffix(filename: string) {
-  if (filename?.endsWith(notebookExtension)) {
-    return filename.substring(0, filename.length - notebookExtension.length);
+export function dropJupyterNotebookFileSuffix(filename: string) {
+  if (filename?.endsWith(jupyterNotebookExtension)) {
+    return filename.substring(
+      0,
+      filename.length - jupyterNotebookExtension.length
+    );
   }
 
   return filename;
 }
 
-export function appendNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(notebookExtension)) {
-    return filename + notebookExtension;
+export function appendJupyterNotebookFileSuffix(filename: string) {
+  if (filename && !filename.endsWith(jupyterNotebookExtension)) {
+    return filename + jupyterNotebookExtension;
   }
 
   return filename;
+}
+
+export function appendRstudioNotebookFileSuffix(filename: string) {
+  if (filename && !filename.endsWith(rstudioNotebookExtension)) {
+    return filename + rstudioNotebookExtension;
+  }
+
+  return filename;
+}
+
+export function appendNotebookFileSuffixByOldName(
+  filename: string,
+  oldFileName: string
+) {
+  return cond(
+    [
+      oldFileName.endsWith(jupyterNotebookExtension),
+      () => appendJupyterNotebookFileSuffix(filename),
+    ],
+    [
+      oldFileName.endsWith(rstudioNotebookExtension),
+      () => appendRstudioNotebookFileSuffix(filename),
+    ],
+    () => filename
+  );
 }
 
 export const listNotebooks = (workspace): Promise<FileDetail[]> => {
@@ -29,5 +59,5 @@ export const getExistingNotebookNames = async (
   workspace
 ): Promise<string[]> => {
   const notebooks = await listNotebooks(workspace);
-  return notebooks.map((fd) => dropNotebookFileSuffix(fd.name));
+  return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
 };
