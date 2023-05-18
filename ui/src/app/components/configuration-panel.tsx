@@ -4,9 +4,8 @@ import * as fp from 'lodash/fp';
 
 import { BillingStatus } from 'generated/fetch';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
-import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
-import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
+import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
+import { GKEAppConfigurationPanel } from 'app/components/gke-app-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
@@ -80,24 +79,10 @@ export const ConfigurationPanel = fp.flow(
               </div>
             ),
           ],
-          [
-            type === UIAppType.CROMWELL,
-            () => (
-              <CromwellConfigurationPanel
-                {...{
-                  onClose,
-                  creatorFreeCreditsRemaining,
-                  workspace,
-                  profileState,
-                  workspaceNamespace: workspace.namespace,
-                }}
-              />
-            ),
-          ],
-          // UIAppType.RStudio
           () => (
-            <RStudioConfigurationPanel
+            <GKEAppConfigurationPanel
               {...{
+                type: toAppType(type),
                 onClose,
                 creatorFreeCreditsRemaining,
                 workspace,

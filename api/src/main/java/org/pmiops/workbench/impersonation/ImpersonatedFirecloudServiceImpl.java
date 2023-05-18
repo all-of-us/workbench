@@ -6,6 +6,7 @@ import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.TERMS_OF_SERVI
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
@@ -16,8 +17,6 @@ import org.pmiops.workbench.iam.SamApiClientFactory;
 import org.pmiops.workbench.iam.SamRetryHandler;
 import org.pmiops.workbench.rawls.api.WorkspacesApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
-import org.pmiops.workbench.sam.api.ResourcesApi;
-import org.pmiops.workbench.sam.model.SamFullyQualifiedResourceId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -81,12 +80,12 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   public void deleteSamKubernetesResourcesInWorkspace(
       @Nonnull DbUser dbUser, String googleProjectId) throws IOException {
     ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
-    List<SamFullyQualifiedResourceId> resourceIds =
-        samRetryHandler.run(
+    samRetryHandler
+        .run(
             (context) ->
                 resourcesApi.listResourceChildren(
-                    SAM_GOOGLE_PROJECT_RESOURCE_NAME, googleProjectId));
-    resourceIds.stream()
+                    SAM_GOOGLE_PROJECT_RESOURCE_NAME, googleProjectId))
+        .stream()
         .filter(r -> r.getResourceTypeName().equals(SAM_KUBERNETES_RESOURCE_NAME))
         .forEach(
             r ->

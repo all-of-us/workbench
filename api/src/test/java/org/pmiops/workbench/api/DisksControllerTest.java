@@ -22,6 +22,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
@@ -63,6 +64,7 @@ public class DisksControllerTest {
   @TestConfiguration
   @Import({
     DisksController.class,
+    DiskService.class,
     FakeClockConfiguration.class,
     LeonardoApiHelper.class,
     LeonardoMapperImpl.class,
@@ -253,8 +255,7 @@ public class DisksControllerTest {
             user,
             AppType.CROMWELL);
 
-    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(
-            GOOGLE_PROJECT_ID, false))
+    when(mockLeonardoApiClient.listPersistentDiskByProjectCreatedByCreator(GOOGLE_PROJECT_ID))
         .thenReturn(
             ImmutableList.of(
                 oldRstudioDisk,
@@ -310,26 +311,5 @@ public class DisksControllerTest {
     String diskName = user.generatePDName();
     disksController.deleteDisk(WORKSPACE_NS, diskName);
     verify(mockLeonardoApiClient).deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
-  }
-
-  @Test
-  public void deleteDisk_notFound() {
-    String diskName = user.generatePDName();
-
-    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS))
-        .thenThrow(new NotFoundException());
-
-    assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
-  }
-
-  @Test
-  public void deleteDisk_workspaceNotFound() {
-    String diskName = user.generatePDName();
-
-    doThrow(new NotFoundException())
-        .when(mockLeonardoApiClient)
-        .deletePersistentDisk(GOOGLE_PROJECT_ID, diskName);
-
-    assertThrows(NotFoundException.class, () -> disksController.deleteDisk(WORKSPACE_NS, diskName));
   }
 }

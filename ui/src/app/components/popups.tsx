@@ -66,14 +66,18 @@ const computeNewDimensions = (el, target) =>
 
 interface WithDynamicPositionProps {
   target: string;
+  handleClickOutside?: () => void;
+  outsideClickIgnoreClass?: string;
+  onClick?: () => void;
 }
 
 export const withDynamicPosition = () => (WrappedComponent) => {
-  const Wrapper = class WithDynamicPosition extends React.Component {
+  const Wrapper = class WithDynamicPosition extends React.Component<
+    WithDynamicPositionProps,
+    any
+  > {
     static displayName = 'withDynamicPosition()';
 
-    props: WithDynamicPositionProps;
-    state: any;
     element: any;
     animation: number;
 
@@ -243,12 +247,10 @@ export const PopupPortal = ({ children }) => {
 };
 
 export const Tooltip = withDynamicPosition()(
-  class TooltipComponent extends React.Component {
+  class TooltipComponent extends React.Component<any> {
     static readonly defaultProps = {
       side: 'bottom',
     };
-
-    props: any;
 
     render() {
       const {
@@ -308,9 +310,7 @@ export const Tooltip = withDynamicPosition()(
   }
 );
 
-export class TooltipTrigger extends React.Component {
-  props: any;
-  state: any;
+export class TooltipTrigger extends React.Component<any, any> {
   id: string;
 
   constructor(props) {
@@ -325,7 +325,7 @@ export class TooltipTrigger extends React.Component {
     if (!content) {
       return children;
     }
-    const child = React.Children.only(children);
+    const child = React.Children.only(children) as React.ReactElement;
     return (
       <React.Fragment>
         {React.cloneElement(child, {
@@ -357,14 +357,12 @@ export const Popup = fp.flow(
   onClickOutside,
   withDynamicPosition()
 )(
-  class PopupComponent extends React.Component {
+  class PopupComponent extends React.Component<any> {
     static displayName = 'Popup';
 
     static readonly defaultProps = {
       side: 'right',
     };
-
-    props: any;
 
     render() {
       const {
@@ -412,15 +410,13 @@ interface PopupTriggerProps {
 }
 
 // to test PopupTrigger using Enzyme simulate a click on the child element
-export class PopupTrigger extends React.Component<PopupTriggerProps> {
+export class PopupTrigger extends React.Component<PopupTriggerProps, any> {
   static readonly defaultProps = {
     closeOnClick: false,
     onOpen: () => {},
     onClose: () => {},
   };
 
-  props: any;
-  state: any;
   id: string;
 
   constructor(props: any) {

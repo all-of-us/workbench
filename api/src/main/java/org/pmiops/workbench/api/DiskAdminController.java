@@ -23,7 +23,7 @@ public class DiskAdminController implements DiskAdminApiDelegate {
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<ListDisksResponse> listDisksInWorkspace(String workspaceNamespace) {
-    List<Disk> diskList = diskService.findByWorkspaceNamespace(workspaceNamespace);
+    List<Disk> diskList = diskService.getAllDisksInWorkspaceNamespace(workspaceNamespace);
     ListDisksResponse listDisksResponse = new ListDisksResponse();
     listDisksResponse.addAll(diskList);
     return ResponseEntity.ok(listDisksResponse);

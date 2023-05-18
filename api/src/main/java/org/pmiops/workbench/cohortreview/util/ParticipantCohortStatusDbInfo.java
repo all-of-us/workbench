@@ -14,14 +14,14 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public enum ParticipantCohortStatusDbInfo {
-  PARTICIPANT_ID(FilterColumns.PARTICIPANTID, "participant_id", Long::new),
+  PARTICIPANT_ID(FilterColumns.PARTICIPANTID, "participant_id", Long::valueOf),
   STATUS(FilterColumns.STATUS, "status", ParticipantCohortStatusDbInfo::parseShort),
-  GENDER(FilterColumns.GENDER, "gender_concept_id", Long::new),
+  GENDER(FilterColumns.GENDER, "gender_concept_id", Long::valueOf),
   BIRTH_DATE(FilterColumns.BIRTHDATE, "birth_date", ParticipantCohortStatusDbInfo::parseDate),
-  RACE(FilterColumns.RACE, "race_concept_id", Long::new),
-  ETHNICITY(FilterColumns.ETHNICITY, "ethnicity_concept_id", Long::new),
-  SEX_AT_BIRTH(FilterColumns.SEXATBIRTH, "sex_at_birth_concept_id", Long::new),
-  DECEASED(FilterColumns.DECEASED, "deceased", Long::new);
+  RACE(FilterColumns.RACE, "race_concept_id", Long::valueOf),
+  ETHNICITY(FilterColumns.ETHNICITY, "ethnicity_concept_id", Long::valueOf),
+  SEX_AT_BIRTH(FilterColumns.SEXATBIRTH, "sex_at_birth_concept_id", Long::valueOf),
+  DECEASED(FilterColumns.DECEASED, "deceased", Long::valueOf);
 
   private final FilterColumns name;
   private final String dbName;

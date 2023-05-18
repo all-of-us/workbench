@@ -536,7 +536,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList = cbCriteriaDao.findByDomainIdAndType(domainId, sortColumn, sort);
     return criteriaList.stream()
         .map(
-            c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
+            c ->
+                new ConceptIdName()
+                    .conceptId(Long.valueOf(c.getConceptId()))
+                    .conceptName(c.getName()))
         .sorted(Comparator.comparing(ConceptIdName::getConceptName))
         .map(c -> c.getConceptId().toString())
         .collect(Collectors.toList());
@@ -694,7 +697,10 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return criteriaList.stream()
         .filter(c -> columnName.toString().startsWith(c.getType()))
         .map(
-            c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
+            c ->
+                new ConceptIdName()
+                    .conceptId(Long.valueOf(c.getConceptId()))
+                    .conceptName(c.getName()))
         .collect(Collectors.toList());
   }
 
