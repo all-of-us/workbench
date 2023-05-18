@@ -106,10 +106,6 @@ const cohortChartDataStub = {
 };
 
 export class CohortReviewServiceStub extends CohortReviewApi {
-  configuration;
-  basePath;
-  fetch;
-
   constructor() {
     super(undefined, undefined, (..._: any[]) => {
       throw stubNotImplementedError;
