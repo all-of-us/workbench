@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createAppDisk;
 import static org.pmiops.workbench.utils.TestMockFactory.createRuntimeDisk;
@@ -101,8 +102,9 @@ public class DiskAdminControllerTest {
 
   @Test
   public void deleteDisk_workspaceNotFound() {
-    when(mockDiskService.getAllDisksInWorkspaceNamespace(WORKSPACE_NS))
-        .thenThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS));
+    doThrow(new NotFoundException("Workspace not found: " + WORKSPACE_NS))
+        .when(mockDiskService)
+        .deleteDiskAsService(WORKSPACE_NS, "disk name");
     assertThrows(
         NotFoundException.class, () -> diskAdminController.deleteDisk(WORKSPACE_NS, "disk name"));
   }
