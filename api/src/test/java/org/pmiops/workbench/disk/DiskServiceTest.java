@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
@@ -115,5 +116,26 @@ public class DiskServiceTest {
         .lookupWorkspaceByNamespace(WORKSPACE_NS);
 
     assertThrows(NotFoundException.class, () -> diskService.deleteDisk(WORKSPACE_NS, diskName));
+  }
+
+  @Test
+  public void deleteDiskAsService() {
+    String diskName = user.generatePDName();
+    DbWorkspace workspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS)).thenReturn(workspace);
+    diskService.deleteDiskAsService(WORKSPACE_NS, diskName);
+    verify(mockLeonardoApiClient).deletePersistentDiskAsService(GOOGLE_PROJECT_ID, diskName);
+  }
+
+  @Test
+  public void deleteDiskAsService_leonardoWorkbenchException() {
+    String diskName = user.generatePDName();
+    DbWorkspace workspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
+    when(mockWorkspaceService.lookupWorkspaceByNamespace(WORKSPACE_NS)).thenReturn(workspace);
+    doThrow(new WorkbenchException())
+        .when(mockLeonardoApiClient)
+        .deletePersistentDiskAsService(GOOGLE_PROJECT_ID, diskName);
+    assertThrows(
+        WorkbenchException.class, () -> diskService.deleteDiskAsService(WORKSPACE_NS, diskName));
   }
 }

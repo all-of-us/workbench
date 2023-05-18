@@ -5,6 +5,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListDisksResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,13 @@ public class DiskAdminController implements DiskAdminApiDelegate {
   @Autowired
   public DiskAdminController(DiskService diskService) {
     this.diskService = diskService;
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<EmptyResponse> deleteDisk(String workspaceNamespace, String diskName) {
+    diskService.deleteDiskAsService(workspaceNamespace, diskName);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
