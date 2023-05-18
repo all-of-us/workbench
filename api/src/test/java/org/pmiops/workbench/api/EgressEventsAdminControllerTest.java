@@ -459,7 +459,7 @@ public class EgressEventsAdminControllerTest {
     assertThat(gotEntries).containsExactlyElementsIn(expected);
   }
 
-  private Instant timeMinusHours(Integer h) {
+  private Instant timeMinusHours(long h) {
     return TIME0.minus(Duration.ofHours(h));
   }
 
