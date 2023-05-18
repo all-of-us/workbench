@@ -49,7 +49,7 @@ public interface NotebooksService {
   void saveNotebook(
       String bucketName, String notebookNameWithFileExtension, JSONObject notebookContents);
 
-  public String convertNotebookToHtml(byte[] notebook);
+  public String convertJupyterNotebookToHtml(byte[] notebook);
 
   String getReadOnlyHtml(String workspaceNamespace, String workspaceName, String notebookName);
 

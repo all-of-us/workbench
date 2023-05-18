@@ -6,6 +6,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +21,7 @@ import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.calhoun.api.ConvertApi;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -76,6 +80,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   // and others with the app's Service Account credentials
 
   private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
+  private final Provider<ConvertApi> endUserStaticConvertApiProvider;
 
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<org.pmiops.workbench.firecloud.api.WorkspacesApi>
@@ -85,6 +90,8 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private final FirecloudRetryHandler retryHandler;
   private final RawlsRetryHandler rawlsRetryHandler;
+
+  private final CalhounRetryHandler calhounRetryHandler;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -120,6 +127,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<BillingV2Api> endUserBillingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
+      Provider<ConvertApi> endUserStaticConvertApiProvider,
       @Qualifier(RawlsConfig.END_USER_WORKSPACE_API)
           Provider<WorkspacesApi> endUserWorkspacesApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
@@ -136,13 +144,15 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<LoadingCache<String, FirecloudManagedGroupWithMembers>>
               requestScopedGroupCacheProvider,
       FirecloudRetryHandler retryHandler,
-      RawlsRetryHandler rawlsRetryHandler) {
+      RawlsRetryHandler rawlsRetryHandler,
+      CalhounRetryHandler calhounRetryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.serviceAccountBillingV2ApiProvider = serviceAccountBillingV2ApiProvider;
     this.endUserBillingV2ApiProvider = endUserBillingV2ApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
+    this.endUserStaticConvertApiProvider = endUserStaticConvertApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
     this.fcEndUserWorkspacesApiProvider = fcEndUserWorkspacesApiProvider;
     this.endUserLenientTimeoutWorkspacesApiProvider = endUserLenientTimeoutWorkspacesApiProvider;
@@ -153,6 +163,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.requestScopedGroupCacheProvider = requestScopedGroupCacheProvider;
     this.retryHandler = retryHandler;
     this.rawlsRetryHandler = rawlsRetryHandler;
+    this.calhounRetryHandler = calhounRetryHandler;
   }
 
   @Override
@@ -466,9 +477,24 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public String staticNotebooksConvert(byte[] notebook) {
+  public String staticJupyterNotebooksConvert(byte[] notebook) {
     return retryHandler.run(
         (context) -> endUserStaticNotebooksApiProvider.get().convertNotebook(notebook));
+  }
+
+  @Override
+  public String staticRstudioNotebooksConvert(byte[] notebook) {
+    return calhounRetryHandler.run(
+        (context) -> {
+          try {
+            return Files.asCharSource(
+                    endUserStaticConvertApiProvider.get().convertRmd(notebook),
+                    Charset.defaultCharset())
+                .read();
+          } catch (IOException e) {
+            throw new WorkbenchException("fail to read RStudio raw content", e);
+          }
+        });
   }
 
   @Override

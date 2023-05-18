@@ -29,7 +29,7 @@ public class NotebookUtils {
     return nameWithFileExtension.endsWith(JUPYTER_NOTEBOOK_EXTENSION);
   }
 
-  public static boolean isRMarkdownNotebook(String nameWithFileExtension) {
+  public static boolean isRstudioNotebook(String nameWithFileExtension) {
     return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 

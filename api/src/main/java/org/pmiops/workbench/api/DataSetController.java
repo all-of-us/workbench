@@ -261,7 +261,7 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(
         new ReadOnlyNotebookResponse()
             .html(
-                notebooksService.convertNotebookToHtml(
+                notebooksService.convertJupyterNotebookToHtml(
                     notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
   }
 

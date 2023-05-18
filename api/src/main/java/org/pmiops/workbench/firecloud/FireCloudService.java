@@ -121,7 +121,9 @@ public interface FireCloudService {
 
   boolean isUserMemberOfGroupWithCache(String email, String groupName);
 
-  String staticNotebooksConvert(byte[] notebook);
+  String staticJupyterNotebooksConvert(byte[] notebook);
+
+  String staticRstudioNotebooksConvert(byte[] notebook);
 
   /** Update billing account using end user credential. */
   void updateBillingAccount(String billingProjectName, String billingAccount);

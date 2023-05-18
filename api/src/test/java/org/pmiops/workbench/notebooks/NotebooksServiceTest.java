@@ -169,7 +169,7 @@ public class NotebooksServiceTest {
 
     String htmlDocument = "<body><div>test</div></body>";
 
-    when(mockFireCloudService.staticNotebooksConvert(any())).thenReturn(htmlDocument);
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any())).thenReturn(htmlDocument);
 
     when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
     when(mockBlob.getSize()).thenReturn(1l);
@@ -550,20 +550,20 @@ public class NotebooksServiceTest {
   public void testGetReadOnlyHtml_allowsDataImage() {
     stubNotebookToJson();
     String dataUri = "data:image/png;base64,MTIz";
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains(dataUri);
   }
 
   @Test
   public void testGetReadOnlyHtml_basicContent() {
     stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
   }
@@ -571,20 +571,20 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
   }
 
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
     stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).doesNotContain("script");
     assertThat(html).doesNotContain("alert");
   }
@@ -592,11 +592,11 @@ public class NotebooksServiceTest {
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
     stubNotebookToJson();
-    when(mockFireCloudService.staticNotebooksConvert(any()))
+    when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
     assertThat(html).contains("style");
     assertThat(html).contains("color");
     // This behavior is not desired, but this test is in place to enshrine current expected
@@ -612,12 +612,27 @@ public class NotebooksServiceTest {
     stubNotebookToJson();
 
     try {
-      notebooksService.getReadOnlyHtml("", "", "").getBytes();
+      notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes();
       fail("expected 412 exception");
     } catch (FailedPreconditionException e) {
       // expected
     }
-    verify(mockFireCloudService, never()).staticNotebooksConvert(any());
+    verify(mockFireCloudService, never()).staticJupyterNotebooksConvert(any());
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_rstudioFile() {
+    stubNotebookToJson();
+    notebooksService.getReadOnlyHtml("", "", "test.Rmd");
+    verify(mockFireCloudService).staticRstudioNotebooksConvert(any());
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_unSupportFileFormat() {
+    stubNotebookToJson();
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
   }
 
   @Test

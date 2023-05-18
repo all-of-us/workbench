@@ -26,7 +26,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.BlobAlreadyExistsException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -500,15 +499,6 @@ public class NotebooksControllerTest {
         .getReadOnlyHtml(FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, FROM_NOTEBOOK_NAME);
 
     assertThat(actualResponse).isEqualTo(expectedResponse);
-  }
-
-  @Test
-  public void testReadOnlyNotebook_requiresSuffix() {
-    assertThrows(
-        NotImplementedException.class,
-        () ->
-            notebooksController.readOnlyNotebook(
-                FROM_WORKSPACE_NAMESPACE, FROM_WORKSPACE_NAME, "notebook without suffix"));
   }
 
   @Test
