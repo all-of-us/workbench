@@ -122,8 +122,8 @@ public class DbCohortAnnotationEnumValue implements Comparable {
 
   @Override
   public int compareTo(Object o) {
-    Integer thisOrder = new Integer(this.getOrder());
-    Integer otherOrder = new Integer(((DbCohortAnnotationEnumValue) o).getOrder());
+    Integer thisOrder = this.getOrder();
+    Integer otherOrder = ((DbCohortAnnotationEnumValue) o).getOrder();
     return thisOrder.compareTo(otherOrder);
   }
 }

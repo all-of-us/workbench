@@ -57,7 +57,7 @@ public class CohortReviewMapperTest {
                     .cohortName("name")
                     .version(1)
                     .reviewSize(10L)
-                    .reviewStatus(new Short("1"))
+                    .reviewStatus(Short.valueOf("1"))
                     .reviewedCount(10L)
                     .cdrVersionId(1L)
                     .creationTime(timestamp)
