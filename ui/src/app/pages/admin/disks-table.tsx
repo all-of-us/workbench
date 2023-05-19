@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+
+import { Spinner } from 'app/components/spinners';
 
 interface Props {
   sourceUserEmail?: string;
@@ -10,20 +11,12 @@ interface Props {
 }
 
 export const DisksTable = ({}: Props) => {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     console.log('Initial load');
+    setLoading(false);
   }, []);
 
-  return (
-    <DataTable loading={loading}>
-      <Column
-        field='creationTime'
-        header='Time'
-        headerStyle={{ width: '150px' }}
-        body={({ creationTime }) => new Date(creationTime).toLocaleString()}
-      />
-    </DataTable>
-  );
+  return loading ? <Spinner data-testid='disks spinner' /> : <DataTable />;
 };
