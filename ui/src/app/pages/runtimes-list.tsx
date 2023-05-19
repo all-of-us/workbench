@@ -14,7 +14,6 @@ import { ajaxContext, Environments } from 'terraui/out/Environments';
 const workspace = 2;
 const deleteCloudEnvironment = 11;
 const pdStatus = 5;
-const pdDelete = 10;
 
 const hiddenTableColumns = [
   {
@@ -23,14 +22,15 @@ const hiddenTableColumns = [
   },
   {
     tableName: 'persistent disks',
-    columnIndexesToHide: [workspace, pdStatus, pdDelete],
+    columnIndexesToHide: [workspace, pdStatus],
   },
 ];
 
 const ajax = (signal) => {
-  const jsonLeoFetch = (path) =>
+  const jsonLeoFetch = (path, method = 'get') =>
     fetch(environment.leoApiUrl + path, {
       signal,
+      method,
       headers: { authorization: 'bearer ' + getAccessToken() },
     }).then((r) => r.json());
   return {
@@ -38,7 +38,7 @@ const ajax = (signal) => {
       list: () => workspacesApi().getWorkspaces(),
     },
     Runtimes: {
-      listV2: () => jsonLeoFetch('/api/v2/runtimes?includeDeleted=false'),
+      listV2: () => jsonLeoFetch('/api/v2/runtimes?role=creator'),
     },
     Apps: {
       listWithoutProject: () =>
@@ -46,7 +46,18 @@ const ajax = (signal) => {
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
-      list: () => jsonLeoFetch('/api/google/v1/disks?includeDeleted=false'),
+      disksV1: () => ({
+        list: () => jsonLeoFetch('/api/google/v1/disks'),
+        disk: (googleProject, name) => ({
+          delete: () =>
+            jsonLeoFetch(
+              `/api/google/v1/disks/${googleProject}/${name}`,
+              'delete'
+            ).catch(() => {
+              window.location.reload();
+            }),
+        }),
+      }),
     },
   };
 };

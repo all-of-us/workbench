@@ -4,7 +4,7 @@
 set -euo pipefail
 set -v
 
-TERRA_UI_GIT_HASH=0cfd092effbc6427ee15c8c1f05e48b03d168532
+TERRA_UI_GIT_HASH=4333c7b94d6ce10a6fe079361e98c2b6cc71f83a
 
 WD="$(dirname "$0")"
 cd "$WD"
@@ -26,7 +26,7 @@ fi
 yarn install
 
 # The date specified here must be early-enough to contain the specified hash.
-git clone -n --shallow-since='2023-01-01T00:00' \
+git clone -n --shallow-since='2023-05-01T00:00' \
   https://github.com/DataBiosphere/terra-ui.git \
   $REPODIR
 
