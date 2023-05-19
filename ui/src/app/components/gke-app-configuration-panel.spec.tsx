@@ -278,6 +278,9 @@ describe(GKEAppConfigurationPanel.name, () => {
       disk.name
     );
     expect(onCloseStub).toHaveBeenCalled();
+
+    // Validate there is no error modal if the call succeeds
+    expect(notificationStore.get()).toBeNull();
   });
 
   it('should show an error modal if the delete PD API call fails', async () => {
@@ -304,39 +307,6 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     expect(notificationStore.get().title).toBeTruthy();
     expect(notificationStore.get().message).toBeTruthy();
-  });
-
-  it('should not show an error modal if the delete PD API call succeeds', async () => {
-    jest
-      .spyOn(disksApi(), 'deleteDisk')
-      .mockImplementation((): Promise<any> => Promise.resolve());
-    const onCloseStub = jest.fn();
-
-    // Setup: A Cromwell disk exists and the current app is Cromwell
-    const workspaceNamespace = 'aou-rw-1234';
-    const disk = stubDisk();
-    disk.appType = AppType.CROMWELL;
-    jest
-      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.resolve([disk]));
-    const wrapper = createWrapper({
-      onClose: onCloseStub,
-      type: AppType.CROMWELL,
-      workspaceNamespace,
-    });
-    await waitOneTickAndUpdate(wrapper);
-    // Start with the DELETE_UNATTACHED_PD panel
-    act(() => {
-      wrapper
-        .find(CromwellConfigurationPanel)
-        .prop('onClickDeleteUnattachedPersistentDisk')();
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper.find(ConfirmDeleteUnattachedPD).prop('onConfirm')();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get()).toBeNull();
   });
 
   it('should change panels from DELETE_UNATTACHED_PD to CREATE after cancelling delete PD', async () => {
