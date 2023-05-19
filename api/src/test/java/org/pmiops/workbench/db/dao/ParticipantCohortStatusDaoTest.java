@@ -35,7 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @SpringJUnitConfig
 public class ParticipantCohortStatusDaoTest {
-  private static final Long COHORT_REVIEW_ID = 1L;
+  private static final long COHORT_REVIEW_ID = 1L;
   private static final Date birthDate = new Date(System.currentTimeMillis());
   private static final int PAGE = 0;
   private static final int PAGE_SIZE = 25;
@@ -123,7 +123,7 @@ public class ParticipantCohortStatusDaoTest {
 
     String sql = "select count(*) from participant_cohort_status where cohort_review_id = ?";
     final Object[] sqlParams = {key1.getCohortReviewId()};
-    final Integer expectedCount = Integer.valueOf("2");
+    final Integer expectedCount = 2;
 
     assertThat(jdbcTemplate.queryForObject(sql, sqlParams, Integer.class)).isEqualTo(expectedCount);
   }

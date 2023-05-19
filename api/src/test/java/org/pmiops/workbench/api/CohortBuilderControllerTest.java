@@ -1381,18 +1381,15 @@ public class CohortBuilderControllerTest {
             .findSurveyVersionByQuestionConceptId(WORKSPACE_NAMESPACE, WORKSPACE_ID, 715713L)
             .getBody();
     assert response != null;
-    assertThat(response.getItems().get(0).getSurveyVersionConceptId())
-        .isEqualTo(Long.valueOf("100"));
+    assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(100);
     assertThat(response.getItems().get(0).getDisplayName()).isEqualTo("May 2020");
-    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(Long.valueOf("291"));
-    assertThat(response.getItems().get(1).getSurveyVersionConceptId())
-        .isEqualTo(Long.valueOf("101"));
+    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(291);
+    assertThat(response.getItems().get(1).getSurveyVersionConceptId()).isEqualTo(101);
     assertThat(response.getItems().get(1).getDisplayName()).isEqualTo("June 2020");
-    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(Long.valueOf("148"));
-    assertThat(response.getItems().get(2).getSurveyVersionConceptId())
-        .isEqualTo(Long.valueOf("102"));
+    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(148);
+    assertThat(response.getItems().get(2).getSurveyVersionConceptId()).isEqualTo(102);
     assertThat(response.getItems().get(2).getDisplayName()).isEqualTo("July 2020");
-    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(Long.valueOf("150"));
+    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(150);
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }

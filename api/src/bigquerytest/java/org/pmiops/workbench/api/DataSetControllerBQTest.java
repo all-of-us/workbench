@@ -983,7 +983,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                     new DataSetPreviewValueList().addQueryValueItem("1").value("person_id")));
   }
 
-  private void assertAndExecutePythonQuery(String code, int index, Domain domain, Long count) {
+  private void assertAndExecutePythonQuery(String code, int index, Domain domain, long count) {
     String expected =
         String.format(
             "import pandas\n"
