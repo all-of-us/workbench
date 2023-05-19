@@ -13,14 +13,19 @@ interface Props {
 
 export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [disks, setDisks] = useState([]);
 
+  const isDeletable = (diskStatus) => !['DELETED'].includes(diskStatus);
+
   useEffect(() => {
-    disksAdminApi()
-      .listDisksInWorkspace(sourceWorkspaceNamespace)
-      .then((value) => setDisks(value));
-    setLoading(false);
-  }, []);
+    if (loading) {
+      disksAdminApi()
+        .listDisksInWorkspace(sourceWorkspaceNamespace)
+        .then((value) => setDisks(value))
+        .finally(() => setLoading(false));
+    }
+  }, [loading]);
 
   useEffect(() => console.log('What are disks? ', disks), [disks]);
 
@@ -30,9 +35,22 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     <DataTable value={disks}>
       <Column field='name' header='Name' />
       <Column field='creator' header='Creator' />
+      <Column field='createdDate' header='Date Created' />
       <Column field='status' header='Status' />
       <Column field='size' header='Size (GB)' />
-      <Column body={() => <Button>Delete</Button>} />
+      <Column
+        body={(x) => (
+          <Button
+            disabled={isDeletable(x.status) || deleting}
+            onClick={() => {
+              setDeleting(true);
+              console.log('Taco');
+            }}
+          >
+            Delete
+          </Button>
+        )}
+      />
     </DataTable>
   );
 };
