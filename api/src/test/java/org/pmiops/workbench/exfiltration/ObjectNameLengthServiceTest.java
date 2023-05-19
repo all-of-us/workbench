@@ -85,7 +85,7 @@ public class ObjectNameLengthServiceTest {
             .setGoogleProject(GOOGLE_PROJECT)
             .setWorkspaceNamespace(NAMESPACE)
             .setFirecloudName(FIRECLOUD_NAME);
-    Map<String, DbWorkspace> workspaces = Maps.of(GOOGLE_PROJECT, dbWorkspace);
+    Map<String, DbWorkspace> workspaces = Map.of(GOOGLE_PROJECT, dbWorkspace);
     doReturn(workspaces)
         .when(workspaceService)
         .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));
@@ -138,7 +138,7 @@ public class ObjectNameLengthServiceTest {
             .setGoogleProject(GOOGLE_PROJECT)
             .setWorkspaceNamespace(NAMESPACE)
             .setFirecloudName(FIRECLOUD_NAME);
-    Map<String, DbWorkspace> workspaces = Maps.of(GOOGLE_PROJECT, dbWorkspace);
+    Map<String, DbWorkspace> workspaces = Map.of(GOOGLE_PROJECT, dbWorkspace);
     doReturn(workspaces)
         .when(workspaceService)
         .getWorkspacesByGoogleProject(Sets.newHashSet(GOOGLE_PROJECT));

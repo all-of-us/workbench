@@ -48,10 +48,13 @@ public class CloudStorageClientTest {
     }
   }
 
+  // for mocking purposes
+  interface StringSet extends Set<String> {}
+
   @Test
   public void testBlobToFileDetail() {
     String notebookPath = NotebookUtils.withNotebookPath("nb1.ipynb");
-    Long notebookSize = 500l;
+    Long notebookSize = 500L;
     Long updateTime = Instant.now().getEpochSecond();
     String bucketName = "bucket";
 
@@ -60,7 +63,7 @@ public class CloudStorageClientTest {
     when(notebookBlob.getSize()).thenReturn(notebookSize);
     when(notebookBlob.getUpdateTime()).thenReturn(updateTime);
     FileDetail actualFileDetail =
-        cloudStorageClient.blobToFileDetail(notebookBlob, bucketName, mock(Set.class));
+        cloudStorageClient.blobToFileDetail(notebookBlob, bucketName, mock(StringSet.class));
 
     assertThat(actualFileDetail.getName()).isEqualTo("nb1.ipynb");
     assertThat(actualFileDetail.getPath())
@@ -73,11 +76,11 @@ public class CloudStorageClientTest {
   public void testGetNotebookLastModifiedBy() {
     String notebookPath = NotebookUtils.withNotebookPath(NOTEBOOK_NAME);
 
-    Set<String> workspaceUsers = new HashSet<String>();
+    Set<String> workspaceUsers = new HashSet<>();
     workspaceUsers.add(USER_EMAIL);
     Blob notebookBlob = mock(Blob.class);
 
-    Map<String, String> metaData = new HashMap<String, String>();
+    Map<String, String> metaData = new HashMap<>();
     metaData.put(
         "lastLockedBy", NotebookLockingUtils.notebookLockingEmailHash("notebooks", USER_EMAIL));
 
