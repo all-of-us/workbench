@@ -1,12 +1,12 @@
 package org.pmiops.workbench.tools;
 
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -60,11 +60,10 @@ public class GenerateImpersonatedUserTokens {
       Logger.getLogger(GenerateImpersonatedUserTokens.class.getName());
 
   private void writeTokens(String projectId, String[] usernames, String[] filenames)
-      throws IOException {
+      throws GeneralSecurityException, IOException {
     final String saEmail =
         ServiceAccounts.getServiceAccountEmail(ADMIN_SERVICE_ACCOUNT_NAME, projectId);
     final IamCredentialsClient credsClient = IamCredentialsClient.create();
-    final HttpTransport transport = new ApacheHttpTransport();
 
     final Gson gson = new Gson();
     for (int i = 0; i < usernames.length; i++) {
@@ -76,7 +75,11 @@ public class GenerateImpersonatedUserTokens {
 
       final DelegatedUserCredentials creds =
           new DelegatedUserCredentials(
-              saEmail, username, FireCloudConfig.BILLING_SCOPES, credsClient, transport);
+              saEmail,
+              username,
+              FireCloudConfig.BILLING_SCOPES,
+              credsClient,
+              GoogleNetHttpTransport.newTrustedTransport());
       creds.refresh();
       final String token = creds.getAccessToken().getTokenValue();
 

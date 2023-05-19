@@ -1,12 +1,13 @@
 package org.pmiops.workbench.auth;
 
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+
 import com.google.api.client.auth.oauth2.TokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.webtoken.JsonWebToken;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2Credentials;
@@ -58,7 +59,7 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
   public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
   static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
   static final String SERVICE_ACCOUNT_NAME_FORMAT = "projects/-/serviceAccounts/%s";
-  static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+  static final JsonFactory JSON_FACTORY = getDefaultJsonFactory();
 
   // The email of the service account whose system-managed key should be used to sign the JWT
   // assertion which is exchanged for an access token. This service account:

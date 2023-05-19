@@ -1,5 +1,6 @@
 package org.pmiops.workbench.auth;
 
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -7,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.googleapis.testing.auth.oauth2.MockTokenServerTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
 import com.google.api.client.util.PemReader;
@@ -116,10 +116,7 @@ public class DelegatedUserCredentialsTest {
     header.setKeyId(SA_PRIVATE_KEY_ID);
 
     return JsonWebSignature.signUsingRsaSha256(
-        privateKeyFromPkcs8(SA_PRIVATE_KEY_PKCS8),
-        JacksonFactory.getDefaultInstance(),
-        header,
-        payload);
+        privateKeyFromPkcs8(SA_PRIVATE_KEY_PKCS8), getDefaultJsonFactory(), header, payload);
   }
 
   @Test

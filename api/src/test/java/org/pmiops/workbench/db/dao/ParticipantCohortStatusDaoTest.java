@@ -125,7 +125,7 @@ public class ParticipantCohortStatusDaoTest {
     final Object[] sqlParams = {key1.getCohortReviewId()};
     final Integer expectedCount = 2;
 
-    assertThat(jdbcTemplate.queryForObject(sql, sqlParams, Integer.class)).isEqualTo(expectedCount);
+    assertThat(jdbcTemplate.queryForObject(sql, Integer.class, sqlParams)).isEqualTo(expectedCount);
   }
 
   @Test

@@ -1,7 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
@@ -52,15 +50,6 @@ public class CommandLineToolConfig {
 
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
-  }
-
-  /**
-   * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine HTTP
-   * transport.
-   */
-  @Bean
-  HttpTransport httpTransport() {
-    return new ApacheHttpTransport();
   }
 
   @Bean
