@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { AppsApi, AppType, DisksApi } from 'generated/fetch';
 
@@ -27,6 +27,14 @@ import {
   createListAppsCromwellResponse,
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
+
+async function validateInitialLoadingSpinner(wrapper: ReactWrapper) {
+  expect(wrapper.childAt(0).is(Spinner)).toBeTruthy();
+
+  await waitOneTickAndUpdate(wrapper);
+
+  expect(wrapper.childAt(0).is(Spinner)).toBeFalsy();
+}
 
 describe(GKEAppConfigurationPanel.name, () => {
   beforeEach(() => {
@@ -75,26 +83,14 @@ describe(GKEAppConfigurationPanel.name, () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([]));
-    const wrapper = createWrapper();
-
-    expect(wrapper.childAt(0).is(Spinner)).toBeTruthy();
-
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.childAt(0).is(Spinner)).toBeFalsy();
+    await validateInitialLoadingSpinner(createWrapper());
   });
 
   it('should show a loading spinner while waiting for the list disks API call to return', async () => {
     jest
       .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([]));
-    const wrapper = createWrapper();
-
-    expect(wrapper.childAt(0).is(Spinner)).toBeTruthy();
-
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.childAt(0).is(Spinner)).toBeFalsy();
+    await validateInitialLoadingSpinner(createWrapper());
   });
 
   it('should show an error if the list apps API call fails', async () => {
