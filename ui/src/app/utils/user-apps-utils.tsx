@@ -1,4 +1,10 @@
-import { AppStatus, AppType, CreateAppRequest } from 'generated/fetch';
+import {
+  AppStatus,
+  AppType,
+  CreateAppRequest,
+  Disk,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
@@ -73,3 +79,13 @@ export const resumeUserApp = (googleProject, appName, namespace) => {
     .startApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
 };
+
+export const findDisk = (disks: Disk[], appType: AppType): Disk | undefined =>
+  disks.find((disk) => disk.appType === appType);
+
+export function unattachedDiskExists(
+  app: UserAppEnvironment | null | undefined,
+  disk: Disk | undefined
+) {
+  return !app && disk !== undefined;
+}

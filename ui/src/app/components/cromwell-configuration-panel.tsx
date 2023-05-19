@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { AppType, UserAppEnvironment } from 'generated/fetch';
+import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
 
+import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
@@ -16,6 +17,7 @@ import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
+import { unattachedDiskExists } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
@@ -59,6 +61,8 @@ export interface CromwellConfigurationPanelProps {
   workspace: WorkspaceData;
   profileState: ProfileStore;
   gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
+  disk: Disk | undefined;
+  onClickDeleteUnattachedPersistentDisk: () => void;
 }
 
 export const CromwellConfigurationPanel = ({
@@ -67,6 +71,8 @@ export const CromwellConfigurationPanel = ({
   workspace,
   profileState,
   gkeAppsInWorkspace,
+  disk,
+  onClickDeleteUnattachedPersistentDisk,
 }: CromwellConfigurationPanelProps) => {
   const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
   const { profile } = profileState;
@@ -144,9 +150,17 @@ export const CromwellConfigurationPanel = ({
       <FlexRow
         style={{
           alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '2rem',
         }}
       >
-        <div style={{ margin: '0rem 1rem 1rem 0rem ' }}>
+        {unattachedDiskExists(app, disk) && (
+          <DeletePersistentDiskButton
+            onClick={onClickDeleteUnattachedPersistentDisk}
+            style={{ flexShrink: 0 }}
+          />
+        )}
+        <div style={{ flexGrow: 1 }}>
           <div style={{ fontWeight: 'bold' }}>Next Steps:</div>
           <div>
             You can interact with the workflow by using the Cromshell in Jupyter
