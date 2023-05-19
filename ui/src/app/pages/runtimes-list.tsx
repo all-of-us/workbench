@@ -53,7 +53,9 @@ const ajax = (signal) => {
             jsonLeoFetch(
               `/api/google/v1/disks/${googleProject}/${name}`,
               'delete'
-            ),
+            ).catch(() => {
+              window.location.reload();
+            }),
         }),
       }),
     },
