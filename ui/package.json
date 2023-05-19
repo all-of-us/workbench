@@ -32,8 +32,6 @@
     "@fortawesome/pro-regular-svg-icons": "^6.1.2",
     "@fortawesome/pro-solid-svg-icons": "^6.1.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
     "@types/color": "^3.0.2",
     "@types/enzyme": "^3.10.10",
     "@types/jest": "^27.5.1",
@@ -85,6 +83,8 @@
     "yarn": "^1.22.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "12.1.4",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
