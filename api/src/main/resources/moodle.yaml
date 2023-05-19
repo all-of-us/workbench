@@ -8,8 +8,14 @@ info:
   description: |
     Service for Moodle Interactions.
   version: "0.1"
+
+# We use aoudev.nnlm.gov for Test, Local, and Staging
 servers:
   - url: https://aou.nnlm.gov/webservice/rest
+
+##########################################################################################
+## PATHS
+##########################################################################################
 paths:
   /server.php?wsfunction=local_workbenchapiv2_check_user_badge:
     get:
@@ -49,6 +55,10 @@ paths:
           content: {}
       security:
         - AdminSecurity: []
+
+##########################################################################################
+## COMPONENTS
+##########################################################################################
 components:
   schemas:
     UserBadgeResponseV2:
