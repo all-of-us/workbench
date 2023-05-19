@@ -5,29 +5,41 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Storage;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import javax.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.notebooks.NotebookLockingUtils;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 public class CloudStorageClientTest {
 
+  private final String NOTEBOOK_NAME = "testNotebook.ipynb";
+  private final String USER_EMAIL = "fakeUser@domain.com";
+
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
 
   @Autowired private CloudStorageClient cloudStorageClient;
+  @Autowired private Provider<Storage> storageProvider;
 
   @TestConfiguration
   @Import({CloudStorageClientImpl.class})
+  @MockBean({Storage.class})
   static class Configuration {
 
     @Bean
@@ -55,5 +67,26 @@ public class CloudStorageClientTest {
         .isEqualTo("gs://" + bucketName + "/" + notebookBlob.getName());
     assertThat(actualFileDetail.getLastModifiedTime()).isEqualTo(updateTime);
     assertThat(actualFileDetail.getSizeInBytes()).isEqualTo(notebookSize);
+  }
+
+  @Test
+  public void testGetNotebookLastModifiedBy() {
+    String notebookPath = NotebookUtils.withNotebookPath(NOTEBOOK_NAME);
+
+    Set<String> workspaceUsers = new HashSet<String>();
+    workspaceUsers.add(USER_EMAIL);
+    Blob notebookBlob = mock(Blob.class);
+
+    Map<String, String> metaData = new HashMap<String, String>();
+    metaData.put(
+        "lastLockedBy", NotebookLockingUtils.notebookLockingEmailHash("notebooks", USER_EMAIL));
+
+    when(notebookBlob.getName()).thenReturn(NOTEBOOK_NAME);
+    when(notebookBlob.getMetadata()).thenReturn(metaData);
+    when(storageProvider.get().get("notebooks", NOTEBOOK_NAME)).thenReturn(notebookBlob);
+
+    String lastModifiedBy =
+        cloudStorageClient.getNotebookLastModifiedBy(notebookPath, workspaceUsers);
+    assertThat(lastModifiedBy).isEqualTo(USER_EMAIL);
   }
 }
