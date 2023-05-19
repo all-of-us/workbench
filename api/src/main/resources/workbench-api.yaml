@@ -1015,7 +1015,7 @@ paths:
             "$ref": "#/definitions/ErrorResponse"
     delete:
       summary: Delete a persistent disk.
-      description: Delete a persistent disk
+      description: Delete a persistent disk by name.
       operationId: deleteDisk
       tags:
         - disks
