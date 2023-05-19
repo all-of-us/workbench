@@ -140,6 +140,12 @@ export enum Language {
   R = 'R'
 }
 
+// Displayed text for Jupyter kernels, by language
+export enum JupyterKernels {
+  Python = 'Python 3 (ipykernel)',
+  R = 'R'
+}
+
 export enum AnalysisTool {
   Hail = 'Hail',
   Plink = 'PLINK',

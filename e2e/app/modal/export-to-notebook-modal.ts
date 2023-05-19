@@ -26,12 +26,12 @@ export default class ExportToNotebookModal extends Modal {
   }
 
   getPythonRadioButton(): RadioButton {
-    const selector = this.getRadioButtonXpath('Python');
+    const selector = this.getRadioButtonXpath(Language.Python);
     return new RadioButton(this.page, selector);
   }
 
   getRRadioButton(): RadioButton {
-    const selector = this.getRadioButtonXpath('R');
+    const selector = this.getRadioButtonXpath(Language.R);
     return new RadioButton(this.page, selector);
   }
 

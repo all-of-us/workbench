@@ -2,7 +2,7 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
-import { Language } from 'app/text-labels';
+import { JupyterKernels, Language } from 'app/text-labels';
 
 describe('Notebook Snippets Tests', () => {
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('Notebook Snippets Tests', () => {
   test.each([
     [
       Language.Python,
-      'Python 3',
+      JupyterKernels.Python,
       // more exist, but these are the all-of-us-specific ones
       [
         'All of Us Dataset Builder Python snippets',
@@ -26,7 +26,7 @@ describe('Notebook Snippets Tests', () => {
     ],
     [
       Language.R,
-      'R', // more exist, but these are the all-of-us-specific ones
+      JupyterKernels.R, // more exist, but these are the all-of-us-specific ones
       [
         'All of Us Dataset Builder R snippets',
         'All of Us R and Cloud Storage snippets',
