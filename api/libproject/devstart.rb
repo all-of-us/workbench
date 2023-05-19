@@ -1897,10 +1897,6 @@ def describe_runtime(cmd_name, *args)
       "--id [RUNTIME_ID]",
       ->(opts, v) { opts.runtime_id = v},
       "Required runtime ID to describe, e.g. 'aou-test-f1-1/all-of-us'")
-  op.add_option(
-      "--project [project]",
-      ->(opts, v) { opts.project = v},
-      "Required project ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
 
   # Add the GcloudContext after setting up the project parameter to avoid
@@ -1914,7 +1910,7 @@ def describe_runtime(cmd_name, *args)
     common = Common.new
     common.run_inline %W{
        ./gradlew manageLeonardoRuntimes
-      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.runtime_id}']}
+      -PappArgs=['describe','#{api_url}','#{ctx.service_account}','#{op.opts.runtime_id}']}
   end
 end
 
@@ -1929,19 +1925,19 @@ def list_runtimes(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.add_option(
-      "--runtime-project [project]",
-      ->(opts, v) { opts.runtime_project = v},
-      "Optionally filter by runtime project")
+      "--google-project [project]",
+      ->(opts, v) { opts.google_project = v},
+      "Optionally filter by google project")
   op.add_option(
       "--include-deleted",
       ->(opts, _) { opts.include_deleted = true },
       "Whether to include deleted runtimes in the results; typically should only be used in " +
-      "combination with --runtime-project, otherwise this could be very slow")
+      "combination with --google-project, otherwise this could be very slow")
   op.add_option(
       "--format [format]",
       ->(opts, v) { opts.format = v },
       "JSON or TABULAR, defaults to TABULAR (summary)")
-  op.opts.runtime_project = ""
+  op.opts.google_project = ""
   op.opts.include_deleted = false
   op.opts.format = "TABULAR"
 
@@ -1958,7 +1954,7 @@ def list_runtimes(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}','#{op.opts.include_deleted}','#{op.opts.runtime_project}','#{op.opts.format}']
+      ./gradlew manageLeonardoRuntimes -PappArgs=['list','#{api_url}','#{op.opts.include_deleted}','#{op.opts.google_project}','#{op.opts.format}']
     }
   end
 end

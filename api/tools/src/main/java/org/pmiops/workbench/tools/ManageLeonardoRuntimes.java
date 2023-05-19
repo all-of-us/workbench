@@ -67,7 +67,7 @@ public class ManageLeonardoRuntimes {
         "https://www.googleapis.com/auth/userinfo.email"
       };
   private static final List<String> DESCRIBE_ARG_NAMES =
-      ImmutableList.of("api_url", "project", "service_account", "runtime_id");
+      ImmutableList.of("api_url", "service_account", "runtime_id");
   private static final List<String> DELETE_ARG_NAMES =
       ImmutableList.of("api_url", "min_age", "ids", "dry_run");
   private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -133,13 +133,13 @@ public class ManageLeonardoRuntimes {
   }
 
   private void listRuntimes(
-      String apiUrl, boolean includeDeleted, Optional<String> projectId, OutputFormat fmt)
+      String apiUrl, boolean includeDeleted, Optional<String> googleProjectId, OutputFormat fmt)
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
 
     List<LeonardoListRuntimeResponse> runtimes;
-    if (projectId.isPresent()) {
-      runtimes = api.listRuntimesByProject(projectId.get(), null, includeDeleted);
+    if (googleProjectId.isPresent()) {
+      runtimes = api.listRuntimesByProject(googleProjectId.get(), null, includeDeleted);
     } else {
       runtimes = api.listRuntimes(null, includeDeleted);
     }
@@ -249,7 +249,7 @@ public class ManageLeonardoRuntimes {
                     "Expected %d args %s. Got: %s",
                     DESCRIBE_ARG_NAMES.size(), DESCRIBE_ARG_NAMES, Arrays.asList(args)));
           }
-          describeRuntime(args[0], args[2], args[3]);
+          describeRuntime(args[0], args[1], args[2]);
           return;
 
         case "list":
