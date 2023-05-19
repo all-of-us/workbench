@@ -729,7 +729,9 @@ task loadConfig(type: JavaExec) {
 }
 
 // Called by devs from the command-line:
-// - devstart.rb > list_runtimes
+// ./project.rb list-runtimes
+// ./project.rb delete-runtimes
+// ./project.rb describe-runtime
 task manageLeonardoRuntimes(type: JavaExec) {
     classpath sourceSets.__tools__.runtimeClasspath
     mainClass = "org.pmiops.workbench.tools.ManageLeonardoRuntimes"
