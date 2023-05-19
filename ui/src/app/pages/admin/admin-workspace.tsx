@@ -709,10 +709,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               sourceWorkspaceNamespace={workspace.namespace}
             />
             <h2>Disks</h2>
-            <DisksTable
-              displayPageSize={10}
-              sourceWorkspaceNamespace={workspace.namespace}
-            />
+            <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
           </>
         )}
         {confirmDeleteRuntime && (

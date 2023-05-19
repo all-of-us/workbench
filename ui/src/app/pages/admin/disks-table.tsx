@@ -3,20 +3,24 @@ import { useEffect, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 
 import { Spinner } from 'app/components/spinners';
+import { disksAdminApi } from 'app/services/swagger-fetch-clients';
 
 interface Props {
-  sourceUserEmail?: string;
   sourceWorkspaceNamespace?: string;
-  displayPageSize?: number;
 }
 
-export const DisksTable = ({}: Props) => {
+export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [loading, setLoading] = useState(true);
+  const [disks, setDisks] = useState([]);
 
   useEffect(() => {
-    console.log('Initial load');
+    disksAdminApi()
+      .listDisksInWorkspace(sourceWorkspaceNamespace)
+      .then((value) => setDisks(value));
     setLoading(false);
   }, []);
+
+  useEffect(() => console.log('What are disks? ', disks), [disks]);
 
   return loading ? <Spinner data-testid='disks spinner' /> : <DataTable />;
 };
