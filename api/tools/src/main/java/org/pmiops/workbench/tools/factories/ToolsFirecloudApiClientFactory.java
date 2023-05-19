@@ -5,20 +5,13 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.api.MethodRepositoryApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 
-public abstract class ToolsFirecloudApiClientFactory {
+public abstract class ToolsFirecloudApiClientFactory extends ToolsApiClientFactory {
 
   protected ApiClient apiClient;
 
   protected ToolsFirecloudApiClientFactory(ApiClient apiClient) {
     this.apiClient = apiClient;
   }
-
-  protected static final String[] FC_SCOPES =
-      new String[] {
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/cloud-billing"
-      };
 
   public ProfileApi profileApi() throws IOException {
     ProfileApi api = new ProfileApi();

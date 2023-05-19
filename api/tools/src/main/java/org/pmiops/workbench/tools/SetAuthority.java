@@ -25,7 +25,7 @@ public class SetAuthority extends Tool {
   }
 
   private Set<Authority> commaDelimitedStringToAuthoritySet(String str) {
-    Set<Authority> auths = new HashSet();
+    Set<Authority> auths = new HashSet<>();
     for (String value : commaDelimitedStringToSet(str)) {
       String cleanedValue = value.trim().toUpperCase();
       if (cleanedValue.isEmpty()) {
@@ -73,7 +73,7 @@ public class SetAuthority extends Tool {
         user = userDao.findUserWithAuthorities(user.getUserId());
 
         Set<Authority> granted = user.getAuthoritiesEnum();
-        Set<Authority> updated = new HashSet(granted);
+        Set<Authority> updated = new HashSet<>(granted);
         if (remove || removeAll) {
           updated.removeAll(authorities);
         } else {

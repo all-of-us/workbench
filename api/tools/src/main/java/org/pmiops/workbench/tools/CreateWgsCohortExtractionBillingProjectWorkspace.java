@@ -28,6 +28,7 @@ import org.pmiops.workbench.rawls.model.RawlsCreateRawlsV2BillingProjectFullRequ
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceRequest;
+import org.pmiops.workbench.tools.factories.ToolsApiClientFactory;
 import org.pmiops.workbench.tools.factories.ToolsFirecloudApiClientFactory;
 import org.pmiops.workbench.tools.factories.ToolsFirecloudImpersonatedServiceAccountApiClientFactory;
 import org.pmiops.workbench.tools.factories.ToolsRawlsApiClientFactory;
@@ -91,8 +92,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
   private String getExtractionPetSa(String googleProject, WorkbenchConfig workbenchConfig)
       throws IOException, InterruptedException {
     String accessToken =
-        ToolsFirecloudImpersonatedServiceAccountApiClientFactory.getAccessToken(
-            workbenchConfig.wgsCohortExtraction.serviceAccount);
+        ToolsApiClientFactory.getAccessToken(workbenchConfig.wgsCohortExtraction.serviceAccount);
     log.info("Extraction SA Access Token: " + accessToken);
 
     Request request =
