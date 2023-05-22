@@ -543,7 +543,7 @@ components:
         - HISPANIC_DOMINICAN
         - HISPANIC_ECUADORIAN
         - HISPANIC_HONDURAN
-        - HISPANIC_MEXICAN
+        - HISPANIC_MEXICAN      # Hispanic / Mexican or Mexican American
         - HISPANIC_PUERTO_RICAN
         - HISPANIC_SALVADORAN
         - HISPANIC_SPANISH
@@ -630,24 +630,24 @@ components:
         - FEMALE
         - INTERSEX
         - MALE
-        - OTHER
+        - OTHER                 # None of these fully describe me, and I want to specify
         - PREFER_NOT_TO_ANSWER
     EducationV2:
       type: string
       description: Highest Level of Education Completed
       enum:
-        - NO_EDUCATION
-        - GRADES_1_12
-        - UNDERGRADUATE
-        - COLLEGE_GRADUATE
+        - NO_EDUCATION          # Never attended school/No formal education
+        - GRADES_1_12           # Primary/Middle School/High School (Grades 1 through 12/GED)
+        - UNDERGRADUATE         # Some college, Associate Degree or Technical School (1 to 3 years) or current undergraduate student
+        - COLLEGE_GRADUATE      # College graduate (4 years or more) or current post-graduate trainee
         - MASTER
         - DOCTORATE
         - PREFER_NOT_TO_ANSWER
     YesNoPreferNot:
       type: string
       enum:
-        - "YES"
-        - "NO"
+        - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
+        - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
         - PREFER_NOT_TO_ANSWER
   securitySchemes:
     googleoauth:
