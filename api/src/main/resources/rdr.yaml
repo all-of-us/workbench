@@ -504,11 +504,12 @@ components:
       description: Which categories describe you? (Select all that apply). Note, you
         may select more than one group.
       enum:
-        - AI_AN
-        - AI_AN_AMERICAN_INDIAN
-        - AI_AN_ALASKA_NATIVE
-        - AI_AN_CENTRAL_SOUTH
-        - AI_AN_OTHER
+        - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
+        - AI_AN_AMERICAN_INDIAN # American Indian or Alaska Native / American Indian
+        - AI_AN_ALASKA_NATIVE   # American Indian or Alaska Native / Alaska Native
+        - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
+        - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
+
         - ASIAN
         - ASIAN_INDIAN
         - ASIAN_CAMBODIAN
@@ -520,9 +521,10 @@ components:
         - ASIAN_LAO
         - ASIAN_PAKISTANI
         - ASIAN_VIETNAMESE
-        - ASIAN_OTHER
-        - BLACK
-        - BLACK_AA
+        - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
+
+        - BLACK                 # Black, African American, or of African descent
+        - BLACK_AA              # Black / African American
         - BLACK_BARBADIAN
         - BLACK_CARIBBEAN
         - BLACK_ETHIOPIAN
@@ -533,8 +535,9 @@ components:
         - BLACK_NIGERIAN
         - BLACK_SOMALI
         - BLACK_SOUTH_AFRICAN
-        - BLACK_OTHER
-        - HISPANIC
+        - BLACK_OTHER           # Black / None of these fully describe me, and I want to specify
+
+        - HISPANIC              # Hispanic, Latino, or Spanish descent
         - HISPANIC_COLOMBIAN
         - HISPANIC_CUBAN
         - HISPANIC_DOMINICAN
@@ -544,8 +547,9 @@ components:
         - HISPANIC_PUERTO_RICAN
         - HISPANIC_SALVADORAN
         - HISPANIC_SPANISH
-        - HISPANIC_OTHER
-        - MENA
+        - HISPANIC_OTHER        # Hispanic / None of these fully describe me, and I want to specify
+
+        - MENA                  # Middle Eastern or North African
         - MENA_AFGHAN
         - MENA_ALGERIAN
         - MENA_EGYPTIAN
@@ -556,19 +560,21 @@ components:
         - MENA_MOROCCAN
         - MENA_SYRIAN
         - MENA_TUNISIAN
-        - MENA_OTHER
-        - NHPI
+        - MENA_OTHER            # Middle Eastern or North African / None of these fully describe me, and I want to specify
+
+        - NHPI                  # Native Hawaiian or other Pacific Islander
         - NHPI_CHAMORRO
         - NHPI_CHUUKESE
         - NHPI_FIJIAN
         - NHPI_MARSHALLESE
-        - NHPI_HAWAIIAN
+        - NHPI_HAWAIIAN         # Native Hawaiian
         - NHPI_PALAUAN
         - NHPI_SAMOAN
         - NHPI_TAHITIAN
         - NHPI_TONGAN
-        - NHPI_OTHER
-        - WHITE
+        - NHPI_OTHER            # Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify
+
+        - WHITE                 # White, or of European descent
         - WHITE_DUTCH
         - WHITE_ENGLISH
         - WHITE_EUROPEAN
@@ -580,8 +586,9 @@ components:
         - WHITE_POLISH
         - WHITE_SCOTTISH
         - WHITE_SPANISH
-        - WHITE_OTHER
-        - OTHER
+        - WHITE_OTHER           # White / None of these fully describe me, and I want to specify
+
+        - OTHER                 # None of these fully describe me, and I want to specify
         - PREFER_NOT_TO_ANSWER
     GenderIdentityV2:
       type: string
@@ -591,12 +598,12 @@ components:
         - GENDERQUEER
         - MAN
         - NON_BINARY
-        - QUESTIONING
-        - TRANS_MAN
-        - TRANS_WOMAN
+        - QUESTIONING           # Questioning or unsure of my gender identity
+        - TRANS_MAN             # Trans man/Transgender man
+        - TRANS_WOMAN           # Trans woman/Transgender woman
         - TWO_SPIRIT
         - WOMAN
-        - OTHER
+        - OTHER                 # None of these fully describe me, and I want to specify
         - PREFER_NOT_TO_ANSWER
     SexualOrientationV2:
       type: string
@@ -607,13 +614,13 @@ components:
         - BISEXUAL
         - GAY
         - LESBIAN
-        - POLYSEXUAL
+        - POLYSEXUAL            # Polysexual, omnisexual, or pansexual
         - QUEER
-        - QUESTIONING
-        - SAME_GENDER
-        - STRAIGHT
+        - QUESTIONING           # Questioning or unsure of my sexual orientation
+        - SAME_GENDER           # Same-gender loving
+        - STRAIGHT              # Straight or heterosexual
         - TWO_SPIRIT
-        - OTHER
+        - OTHER                 # None of these fully describe me, and I want to specify
         - PREFER_NOT_TO_ANSWER
     SexAtBirthV2:
       type: string
