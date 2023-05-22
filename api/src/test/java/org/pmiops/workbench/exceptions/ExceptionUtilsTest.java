@@ -15,15 +15,4 @@ public class ExceptionUtilsTest {
     assertThrows(
         GatewayTimeoutException.class, () -> ExceptionUtils.convertNotebookException(cause));
   }
-
-  @Test
-  public void convertLeonardoConflictException() throws Exception {
-    org.pmiops.workbench.leonardo.ApiException cause =
-        new org.pmiops.workbench.leonardo.ApiException(409, "Conflict exception");
-    WorkbenchException leonardoException =
-        assertThrows(ConflictException.class, () -> ExceptionUtils.convertLeonardoException(cause));
-    Assertions.assertEquals(
-        leonardoException.getMessage(),
-        "Please wait a few minutes and try to create your environment again.");
-  }
 }

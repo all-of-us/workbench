@@ -71,10 +71,6 @@ public class ExceptionUtils {
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
-    if (e.getCode() == HttpServletResponse.SC_CONFLICT) {
-      throw new ConflictException(
-          "Please wait a few minutes and try to create your environment again.");
-    }
     throw codeToException(e.getCode());
   }
 
