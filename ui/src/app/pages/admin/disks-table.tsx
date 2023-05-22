@@ -8,6 +8,7 @@ import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksAdminApi } from 'app/services/swagger-fetch-clients';
+import { fetchWithErrorModal } from 'app/utils/errors';
 import moment from 'moment';
 
 interface Props {
@@ -19,8 +20,6 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [disks, setDisks] = useState([]);
 
-  const isDeletable = (diskStatus) => !['DELETED'].includes(diskStatus);
-
   useEffect(() => {
     if (loading) {
       disksAdminApi()
@@ -31,6 +30,11 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   }, [loading]);
 
   useEffect(() => console.log('What are disks? ', disks), [disks]);
+
+  const onClickDelete = (disk) =>
+    fetchWithErrorModal(() =>
+      disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name)
+    );
 
   return loading && disks ? (
     <Spinner data-testid='disks spinner' />
@@ -53,12 +57,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       <Column field='size' header='Size (GB)' />
       <Column
         body={(disk) => (
-          <Button
-            disabled={isDeletable(disk.status) || deleting}
-            onClick={() => {
-              setDeleting(true);
-            }}
-          >
+          <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
             Delete
           </Button>
         )}
