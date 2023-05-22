@@ -297,7 +297,7 @@ components:
         education:
           $ref: '#/components/schemas/Education'
         disability:
-          $ref: '#/components/schemas/Disability'
+          $ref: '#/components/schemas/YesNoPreferNot'
         degrees:
           type: array
           items:
@@ -387,12 +387,6 @@ components:
         - UNDERGRADUATE
         - MASTER
         - DOCTORATE
-        - PREFER_NOT_TO_ANSWER
-    Disability:
-      type: string
-      enum:
-        - YES
-        - NO
         - PREFER_NOT_TO_ANSWER
     Degree:
       type: string
@@ -645,8 +639,8 @@ components:
     YesNoPreferNot:
       type: string
       enum:
-        - YES
-        - NO
+        - "YES"
+        - "NO"
         - PREFER_NOT_TO_ANSWER
   securitySchemes:
     googleoauth:
