@@ -101,15 +101,24 @@ describe('RAS Test', () => {
     });
     await submitButton.click();
 
-    // Could show up
+    // The test user needs to periodically re-consent.  This won't happen every test run.
+
     try {
       const maybeAgreeAndContinueButton = await newPage.waitForXPath(
-        '//input[@value="Agree and continue" and @type="submit"]',
+        '////button[contains(text(),"Agree and continue") and @type="submit"]',
         {
           visible: true
         }
       );
       await maybeAgreeAndContinueButton.click();
+    } catch (err) {
+      // Blank
+    }
+    try {
+      const maybeGrantButton = await newPage.waitForXPath('//input[@value="Grant" and @type="submit"]', {
+        visible: true
+      });
+      await maybeGrantButton.click();
     } catch (err) {
       // Blank
     }
