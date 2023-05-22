@@ -1,69 +1,68 @@
 #This file provide the end points for moodle interactions
-# MOodle API information can be found at :
+# Moodle API information can be found at :
 # https://docs.moodle.org/dev/Web_service_API_functions
 
-
-swagger: '2.0'
-
+openapi: 3.0.1
 info:
   title: Moodle
   description: |
     Service for Moodle Interactions.
   version: "0.1"
-#The host will get updated as per the environment it will be aoudev.nnlm.gov for dev and test
-host: "aou.nnlm.gov"
-schemes:
-  - "https"
-basePath: /webservice/rest
 
-produces:
-  - application/json
+# We use aoudev.nnlm.gov for Test, Local, and Staging
+servers:
+  - url: https://aou.nnlm.gov/webservice/rest
 
 ##########################################################################################
 ## PATHS
 ##########################################################################################
-
 paths:
   /server.php?wsfunction=local_workbenchapiv2_check_user_badge:
     get:
-      summary: Get information of badges earned/completed by user.
       tags:
         - Moodle
-      consumes:
-        - application/json
+      summary: Get information of badges earned/completed by user.
       operationId: getMoodleBadgeV2
       parameters:
         - name: moodlewsrestformat
           in: query
           description: Format of the response which will be json for AoU
-          type: string
           required: true
+          schema:
+            type: string
         - name: email
           in: query
-          type: string
+          schema:
+            type: string
         - name: wstoken
           in: query
           description: Secret Token associated with All of us
-          type: string
           required: true
-
+          schema:
+            type: string
       responses:
         200:
           description: Badge /error response
-          schema:
-            $ref: '#/definitions/UserBadgeResponseV2'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBadgeResponseV2'
         400:
           description: Bad request
+          content: {}
         500:
           description: Moodle Internal Error
+          content: {}
       security:
         - AdminSecurity: []
 
 ##########################################################################################
-## DEFINITIONS
+## COMPONENTS
 ##########################################################################################
-definitions:
+components:
+  schemas:
     UserBadgeResponseV2:
+      type: object
       properties:
         id:
           type: integer
@@ -72,11 +71,9 @@ definitions:
           type: string
           description: Moodle username
         ret:
-          type: object
-          $ref: '#/definitions/BadgeDetailsV2'
+          $ref: '#/components/schemas/BadgeDetailsV2'
         dua:
-          type: object
-          $ref: '#/definitions/BadgeDetailsV2'
+          $ref: '#/components/schemas/BadgeDetailsV2'
         exception:
           type: string
         errorcode:
@@ -84,24 +81,26 @@ definitions:
         message:
           type: string
           description: A message describing the error
-
     BadgeDetailsV2:
+      type: object
       properties:
         valid:
           type: boolean
           description: Whether the badge is valid
         lastissued:
           type: integer
-          format: int64
           description: Date of latest issued badge. As a stringy epoch in SECONDS.
+          format: int64
         dateexpire:
           type: integer
+          description: Latest expiration of obtained badge. As a stringy epoch in
+            SECONDS.
           format: int64
-          description: Latest expiration of obtained badge. As a stringy epoch in SECONDS.
         message:
           type: string
           description: General API message
         globalexpiration:
           type: integer
+          description: Global expiration, overrides badge expiration date. As a stringy
+            epoch in SECONDS.
           format: int64
-          description: Global expiration, overrides badge expiration date. As a stringy epoch in SECONDS.
