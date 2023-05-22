@@ -6,6 +6,7 @@ import { DataTable } from 'primereact/datatable';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
 import { disksAdminApi } from 'app/services/swagger-fetch-clients';
+import moment from 'moment';
 
 interface Props {
   sourceWorkspaceNamespace?: string;
@@ -35,16 +36,19 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     <DataTable value={disks}>
       <Column field='name' header='Name' />
       <Column field='creator' header='Creator' />
-      <Column field='createdDate' header='Date Created' />
+      <Column
+        field='createdDate'
+        header='Date Created'
+        body={(disk) => moment(disk.createdDate).format('YYYY-MM-DD HH:MM')}
+      />
       <Column field='status' header='Status' />
       <Column field='size' header='Size (GB)' />
       <Column
-        body={(x) => (
+        body={(disk) => (
           <Button
-            disabled={isDeletable(x.status) || deleting}
+            disabled={isDeletable(disk.status) || deleting}
             onClick={() => {
               setDeleting(true);
-              console.log('Taco');
             }}
           >
             Delete
