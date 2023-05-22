@@ -1,694 +1,660 @@
-#This file provide the end points for interaction with RDR
+# This file defines the interface we share with the RDR team for the "RDR Export" process
+# which ultimately populates the Researcher Directory.
+# See https://github.com/all-of-us/workbench/wiki/Researcher-Directory-(RDR-export) for more detail.
 
-
-swagger: '2.0'
-
+openapi: 3.0.1
 info:
   title: RDR
   description: |
     Service for RDR Interactions.
   version: "0.1"
-#The host will get updated as per the environment it will be pmi-drc-api-test for dev and test
-host: "pmi-drc-api-test.appspot.com"
-schemes:
-  - "https"
-basePath: /
-
-securityDefinitions:
-  googleoauth:
-    type: oauth2
-    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
-    flow: implicit
-    scopes:
-      openid: open id authorization
-      email: email authorization
-      profile: profile authorization
-
+servers:
+  - url: https://pmi-drc-api-test.appspot.com/
 security:
   - googleoauth:
-    - openid
-    - email
-    - profile
-    - https://www.googleapis.com/auth/devstorage.full_control
-
-produces:
-  - application/json
+      - openid
+      - email
+      - profile
+      - https://www.googleapis.com/auth/devstorage.full_control
 
 ##########################################################################################
 ## PATHS
 ##########################################################################################
-
 paths:
   /rdr/v1/workbench/directory/workspaces:
     post:
-      description: Submits one or more workspace snapshots for storage in the RDR.
       tags:
         - Rdr
-      consumes:
-        - application/json
+      description: Submits one or more workspace snapshots for storage in the RDR.
       operationId: exportWorkspaces
       parameters:
-        - in: query
-          name: backfill
-          type: boolean
-          required: false
-        - in: body
-          required: true
-          name: workspaces
+        - name: backfill
+          in: query
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Workspace"
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Workspace'
+        required: true
       responses:
         200:
           description: successful operation
-
+          content: {}
+      x-codegen-request-body-name: workspaces
   /rdr/v1/workbench/directory/researchers:
     post:
-      description: Submits one or more researcher snapshots for storage in the RDR.
       tags:
         - Rdr
+      description: Submits one or more researcher snapshots for storage in the RDR.
       operationId: exportResearchers
-      consumes:
-        - application/json
       parameters:
-        - in: query
-          name: backfill
-          type: boolean
-          required: false
-        - in: body
-          required: true
-          name: researchers
+        - name: backfill
+          in: query
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Researcher"
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Researcher'
+        required: true
       responses:
         200:
           description: successful operation
+          content: {}
+      x-codegen-request-body-name: researchers
 
-
-
-definitions:
-  Workspace:
-    type: object
-    properties:
-      workspaceId:
-        type: integer
-      name:
-        type: string
-      creator:
-        description: Information about the creator of the workspace
-        $ref: "#/definitions/WorkspaceCreator"
-      creationTime:
-        type: string
-        format: date-time
-      modifiedTime:
-        type: string
-        format: date-time
-      status:
-        type: string
-        description: INACTIVE Represents the workspace is deleted or Pending Deletion
-        enum:
-          - ACTIVE
-          - INACTIVE
-      workspaceUsers:
-        type: array
-        items:
-          $ref: '#/definitions/WorkspaceUser'
-      excludeFromPublicDirectory:
-        type: boolean
-        description: Set to true if the creator of the workspace is an Operational User
-      diseaseFocusedResearch:
-        type: boolean
-      diseaseFocusedResearchName:
-        type: string
-      methodsDevelopment:
-        type: boolean
-      controlSet:
-        type: boolean
-      ancestry:
-        type: boolean
-      socialBehavioral:
-        type: boolean
-      populationHealth:
-        type: boolean
-      drugDevelopment:
-        type: boolean
-      commercialPurpose:
-        type: boolean
-      educational:
-        type: boolean
-      ethicalLegalSocialImplications:
-        type: boolean
-      otherPurpose:
-        type: boolean
-      otherPurposeDetails:
-        type: string
-      scientificApproaches:
-        type: string
-      intendToStudy:
-        type: string
-      findingsFromStudy:
-        type: string
-      focusOnUnderrepresentedPopulations:
-        description: Represents if researchers has selected YES for question Will your study focus
-          on any historically underrepresented populations
-        type: boolean
-      reviewRequested:
-        type: boolean
-      workspaceDemographic:
-        $ref: '#/definitions/WorkspaceDemographic'
-      cdrVersionName:
-        type: string
-      accessTier:
-        $ref: '#/definitions/AccessTier'
-
-  WorkspaceDemographic:
-    type: object
-    properties:
-      raceEthnicity:
-        type: array
-        items:
+##########################################################################################
+## COMPONENTS
+##########################################################################################
+components:
+  schemas:
+    Workspace:
+      type: object
+      properties:
+        workspaceId:
+          type: integer
+        name:
+          type: string
+        creator:
+          $ref: '#/components/schemas/WorkspaceCreator'
+        creationTime:
+          type: string
+          format: date-time
+        modifiedTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: INACTIVE Represents the workspace is deleted or Pending Deletion
+          enum:
+            - ACTIVE
+            - INACTIVE
+        workspaceUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceUser'
+        excludeFromPublicDirectory:
+          type: boolean
+          description: Set to true if the creator of the workspace is an Operational
+            User
+        diseaseFocusedResearch:
+          type: boolean
+        diseaseFocusedResearchName:
+          type: string
+        methodsDevelopment:
+          type: boolean
+        controlSet:
+          type: boolean
+        ancestry:
+          type: boolean
+        socialBehavioral:
+          type: boolean
+        populationHealth:
+          type: boolean
+        drugDevelopment:
+          type: boolean
+        commercialPurpose:
+          type: boolean
+        educational:
+          type: boolean
+        ethicalLegalSocialImplications:
+          type: boolean
+        otherPurpose:
+          type: boolean
+        otherPurposeDetails:
+          type: string
+        scientificApproaches:
+          type: string
+        intendToStudy:
+          type: string
+        findingsFromStudy:
+          type: string
+        focusOnUnderrepresentedPopulations:
+          type: boolean
+          description: Represents if researchers has selected YES for question Will
+            your study focus on any historically underrepresented populations
+        reviewRequested:
+          type: boolean
+        workspaceDemographic:
+          $ref: '#/components/schemas/WorkspaceDemographic'
+        cdrVersionName:
+          type: string
+        accessTier:
+          $ref: '#/components/schemas/AccessTier'
+    WorkspaceDemographic:
+      type: object
+      properties:
+        raceEthnicity:
+          type: array
+          items:
+            type: string
+            enum:
+              - UNSET
+              - AIAN
+              - ASIAN
+              - HISPANIC
+              - NHPI
+              - MENA
+              - AA
+              - MULTI
+        age:
+          type: array
+          items:
+            type: string
+            enum:
+              - UNSET
+              - AGE_0_11
+              - AGE_12_17
+              - AGE_65_74
+              - AGE_75_AND_MORE
+        sexAtBirth:
           type: string
           enum:
             - UNSET
-            - AIAN
-            - ASIAN
-            - HISPANIC
-            - NHPI
-            - MENA
-            - AA
-            - MULTI
-      age:
-        type: array
-        items:
+            - INTERSEX
+        genderIdentity:
           type: string
           enum:
             - UNSET
-            - AGE_0_11
-            - AGE_12_17
-            - AGE_65_74
-            - AGE_75_AND_MORE
-      sexAtBirth:
-        type: string
-        enum:
-          - UNSET
-          - INTERSEX
-      genderIdentity:
-        type: string
-        enum:
-          - UNSET
-          - OTHER_THAN_MAN_WOMAN
-      sexualOrientation:
-        type: string
-        enum:
-          - UNSET
-          - OTHER_THAN_STRAIGHT
-      geography:
-        type: string
-        enum:
-          - UNSET
-          - RURAL
-      disabilityStatus:
-        type: string
-        enum:
-          - UNSET
-          - DISABILITY
-      accessToCare:
-        type: string
-        enum:
-          - UNSET
-          - NOT_EASILY_ACCESS_CARE
-      educationLevel:
-        type: string
-        enum:
-          - UNSET
-          - LESS_THAN_HIGH_SCHOOL
-      incomeLevel:
-        type: string
-        enum:
-          - UNSET
-          - BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
-      others:
-        type: string
-
-  WorkspaceUser:
-    type: object
-    properties:
-      userId:
-        type: integer
-      role:
-        type: string
-        enum:
-          - READER
-          - WRITER
-          - OWNER
-      status:
-        type: string
-        description: Workspace User Status
-        enum:
-          - ACTIVE
-          - INACTIVE
-
-  WorkspaceCreator:
-    type: object
-    description: Details for workspace creator
-    required:
-      - userId
-      - givenName
-      - familyName
-    properties:
-      userId:
-        description: Database ID from Table User for creator
-        type: integer
-        format: int64
-      givenName:
-        type: string
-      familyName:
-        type: string
-
-  Researcher:
-    type: object
-    properties:
-      userId:
-        type: integer
-      creationTime:
-        type: string
-        format: date-time
-      modifiedTime:
-        type: string
-        format: date-time
-      givenName:
-        type: string
-      familyName:
-        type: string
-      streetAddress1:
-        type: string
-      streetAddress2:
-        type: string
-      city:
-        type: string
-      state:
-        type: string
-      zipCode:
-        type: string
-      country:
-        type: string
-      ethnicity:
-        $ref: '#/definitions/Ethnicity'
-      gender:
-        type: array
-        items:
-          $ref: '#/definitions/Gender'
-      race:
-        type: array
-        items:
-          $ref: '#/definitions/Race'
-      sexAtBirth:
-        type: array
-        items:
-          $ref: '#/definitions/SexAtBirth'
-      identifiesAsLgbtq:
-        type: boolean
-      lgbtqIdentity:
-        type: string
-      education:
-        $ref: '#/definitions/Education'
-      disability:
-        $ref: '#/definitions/Disability'
-      degrees:
-        type: array
-        items:
-          $ref: '#/definitions/Degree'
-      verifiedInstitutionalAffiliation:
-        $ref: '#/definitions/ResearcherVerifiedInstitutionalAffiliation'
-      email:
-        type: string
-      accessTierShortNames:
-        type: array
-        items:
-          $ref: '#/definitions/AccessTier'
-      demographicSurveyV2:
-        $ref: '#/definitions/DemographicSurveyV2'
-
-  ResearcherVerifiedInstitutionalAffiliation:
-    type: object
-    required:
-      - institutionShortName
-      - institutionDisplayName
-      - institutionalRole
-    properties:
-      institutionShortName:
-        type: string
-        description: The unique Short Name of the Institution where the user has a Verified Affiliation, such as 'Broad'
-      institutionDisplayName:
-        type: string
-        description: The Display Name of the Institution where the user has a Verified Affiliation, such as 'Broad Institute'
-      institutionalRole:
-        type: string
-        description: The user's Institutional Role at this Institution, as text
-
-  AccessTier:
-    type: string
-    enum:
-      - UNSET
-      - REGISTERED
-      - CONTROLLED
-
-  Ethnicity:
-    type: string
-    enum:
-      - HISPANIC
-      - NOT_HISPANIC
-      - PREFER_NOT_TO_ANSWER
-
-  Gender:
-    type: string
-    enum:
-      - MAN
-      - WOMAN
-      - NON_BINARY
-      - TRANSGENDER
-      - NONE_DESCRIBE_ME
-      - PREFER_NOT_TO_ANSWER
-
-  Race:
-    type: string
-    enum:
-      - AIAN
-      - ASIAN
-      - AA
-      - NHOPI
-      - WHITE
-      - NONE
-      - PREFER_NOT_TO_ANSWER
-
-  SexAtBirth:
-    type: string
-    enum:
-      - FEMALE
-      - INTERSEX
-      - MALE
-      - NONE_OF_THESE_DESCRIBE_ME
-      - PREFER_NOT_TO_ANSWER
-
-  SexualOrientation:
-    type: string
-    enum:
-      - BISEXUAL
-      - GAY
-      - LESBIAN
-      - STRAIGHT
-      - NONE_OF_THESE_DESCRIBE_ME
-      - PREFER_NOT_TO_ANSWER
-
-  Education:
-    type: string
-    enum:
-      - NO_EDUCATION
-      - GRADES_1_12
-      - COLLEGE_GRADUATE
-      - UNDERGRADUATE
-      - MASTER
-      - DOCTORATE
-      - PREFER_NOT_TO_ANSWER
-
-  Disability:
-    type: string
-    enum:
-      - "YES"
-      - "NO"
-      - PREFER_NOT_TO_ANSWER
-
-  Degree:
-    type: string
-    enum:
-      - UNSET
-      - PHD
-      - MD
-      - JD
-      - EDD
-      - MSN
-      - MS
-      - MA
-      - MBA
-      - ME
-      - MSW
-      - MPH
-      - BA
-      - BS
-      - BSN
-
-  DemographicSurveyV2:
-    type: object
-    properties:
-      completionTime:
-        type: string
-        format: date-time
-        description: The time the user most recently completed the survey
-      ethnicCategories:
-        type: array
-        items:
-          "$ref": "#/definitions/EthnicCategory"
-      ethnicityAiAnOtherText:
-        type: string
-        description: American Indian or Alaska Native /  None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityAsianOtherText:
-        type: string
-        description: Asian / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityBlackOtherText:
-        type: string
-        description: Black / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityHispanicOtherText:
-        type: string
-        description: Hispanic / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityMeNaOtherText:
-        type: string
-        description: Middle Eastern or North African / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityNhPiOtherText:
-        type: string
-        description: Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityWhiteOtherText:
-        type: string
-        description: White / None of these fully describe me, and I want to specify.  Max length 200.
-      ethnicityOtherText:
-        type: string
-        description: None of these fully describe me, and I want to specify.  Max length 200.
-      genderIdentities:
-        type: array
-        items:
-          "$ref": "#/definitions/GenderIdentityV2"
-      genderOtherText:
-        type: string
-        description: None of these fully describe me, and I want to specify.  Max length 200.
-      sexualOrientations:
-        type: array
-        items:
-          "$ref": "#/definitions/SexualOrientationV2"
-      orientationOtherText:
-        type: string
-        description: None of these fully describe me, and I want to specify.  Max length 200.
-      sexAtBirth:
-        "$ref": "#/definitions/SexAtBirthV2"
-      sexAtBirthOtherText:
-        type: string
-        description: None of these fully describe me, and I want to specify.  Max length 200.
-      yearOfBirth:
-        type: integer
-      yearOfBirthPreferNot:
-        type: boolean
-      disabilityHearing:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: Are you deaf or do you have serious difficulty hearing?
-      disabilitySeeing:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: Are you blind or do you have serious difficulty seeing, even when wearing glasses?
-      disabilityConcentrating:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Because of a physical, cognitive, or emotional condition,
-          do you have serious difficulty concentrating, remembering, or making decisions?
-      disabilityWalking:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: Do you have serious difficulty walking or climbing stairs?
-      disabilityDressing:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: Do you have difficulty dressing or bathing?
-      disabilityErrands:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Because of a physical, mental, or emotional condition,
-          do you have difficulty doing errands alone such as visiting
-          a doctor’s office or shopping?
-      disabilityOtherText:
-        type: string
-        description: >
-          Do you have a physical, cognitive, and/or emotional condition that
-          substantially inhibits one or more life activities not specified
-          through the above questions, and want to share more? Please describe.
-      education:
-        "$ref": "#/definitions/EducationV2"
-      disadvantaged:
-        "$ref": "#/definitions/YesNoPreferNot"
-        description: >
-          Are you an individual from a disadvantaged background,
-          as defined by NIH Diversity in Extramural Programs?
-      surveyComments:
-        type: string
-        description: >
-          Is there any aspect of your identity that we have not covered in the
-          preceding questions that we may want to consider including in future
-          surveys?
-
-  EthnicCategory:
-    type: string
-    description: 'Which categories describe you? (Select all that apply). Note, you may select more than one group.'
-    enum:
-      - AI_AN                 # American Indian or Alaska Native (no additional qualifier)
-      - AI_AN_AMERICAN_INDIAN # American Indian or Alaska Native / American Indian
-      - AI_AN_ALASKA_NATIVE   # American Indian or Alaska Native / Alaska Native
-      - AI_AN_CENTRAL_SOUTH   # American Indian or Alaska Native / Central or South American Indian
-      - AI_AN_OTHER           # American Indian or Alaska Native / None of these fully describe me, and I want to specify
-
-      - ASIAN
-      - ASIAN_INDIAN
-      - ASIAN_CAMBODIAN
-      - ASIAN_CHINESE
-      - ASIAN_FILIPINO
-      - ASIAN_HMONG
-      - ASIAN_JAPANESE
-      - ASIAN_KOREAN
-      - ASIAN_LAO
-      - ASIAN_PAKISTANI
-      - ASIAN_VIETNAMESE
-      - ASIAN_OTHER           # Asian / None of these fully describe me, and I want to specify
-
-      - BLACK                 # Black, African American, or of African descent
-      - BLACK_AA              # Black / African American
-      - BLACK_BARBADIAN
-      - BLACK_CARIBBEAN
-      - BLACK_ETHIOPIAN
-      - BLACK_GHANAIAN
-      - BLACK_HAITIAN
-      - BLACK_JAMAICAN
-      - BLACK_LIBERIAN
-      - BLACK_NIGERIAN
-      - BLACK_SOMALI
-      - BLACK_SOUTH_AFRICAN
-      - BLACK_OTHER           # Black / None of these fully describe me, and I want to specify
-
-      - HISPANIC              # Hispanic, Latino, or Spanish descent
-      - HISPANIC_COLOMBIAN
-      - HISPANIC_CUBAN
-      - HISPANIC_DOMINICAN
-      - HISPANIC_ECUADORIAN
-      - HISPANIC_HONDURAN
-      - HISPANIC_MEXICAN      # Hispanic / Mexican or Mexican American
-      - HISPANIC_PUERTO_RICAN
-      - HISPANIC_SALVADORAN
-      - HISPANIC_SPANISH
-      - HISPANIC_OTHER        # Hispanic / None of these fully describe me, and I want to specify
-
-      - MENA                  # Middle Eastern or North African
-      - MENA_AFGHAN
-      - MENA_ALGERIAN
-      - MENA_EGYPTIAN
-      - MENA_IRANIAN
-      - MENA_IRAQI
-      - MENA_ISRAELI
-      - MENA_LEBANESE
-      - MENA_MOROCCAN
-      - MENA_SYRIAN
-      - MENA_TUNISIAN
-      - MENA_OTHER            # Middle Eastern or North African / None of these fully describe me, and I want to specify
-
-      - NHPI                  # Native Hawaiian or other Pacific Islander
-      - NHPI_CHAMORRO
-      - NHPI_CHUUKESE
-      - NHPI_FIJIAN
-      - NHPI_MARSHALLESE
-      - NHPI_HAWAIIAN         # Native Hawaiian
-      - NHPI_PALAUAN
-      - NHPI_SAMOAN
-      - NHPI_TAHITIAN
-      - NHPI_TONGAN
-      - NHPI_OTHER            # Native Hawaiian or other Pacific Islander / None of these fully describe me, and I want to specify
-
-      - WHITE                 # White, or of European descent
-      - WHITE_DUTCH
-      - WHITE_ENGLISH
-      - WHITE_EUROPEAN
-      - WHITE_FRENCH
-      - WHITE_GERMAN
-      - WHITE_IRISH
-      - WHITE_ITALIAN
-      - WHITE_NORWEGIAN
-      - WHITE_POLISH
-      - WHITE_SCOTTISH
-      - WHITE_SPANISH
-      - WHITE_OTHER           # White / None of these fully describe me, and I want to specify
-
-      - OTHER                 # None of these fully describe me, and I want to specify
-      - PREFER_NOT_TO_ANSWER
-
-  GenderIdentityV2:
-    type: string
-    description: 'Which terms best express how you describe your current gender identity? (Select all that apply)'
-    enum:
-      - GENDERQUEER
-      - MAN
-      - NON_BINARY
-      - QUESTIONING           # Questioning or unsure of my gender identity
-      - TRANS_MAN             # Trans man/Transgender man
-      - TRANS_WOMAN           # Trans woman/Transgender woman
-      - TWO_SPIRIT
-      - WOMAN
-      - OTHER                 # None of these fully describe me, and I want to specify
-      - PREFER_NOT_TO_ANSWER
-
-  SexualOrientationV2:
-    type: string
-    description: 'Which terms best express how you describe your current sexual orientation? (Select all that apply)'
-    enum:
-      - ASEXUAL
-      - BISEXUAL
-      - GAY
-      - LESBIAN
-      - POLYSEXUAL            # Polysexual, omnisexual, or pansexual
-      - QUEER
-      - QUESTIONING           # Questioning or unsure of my sexual orientation
-      - SAME_GENDER           # Same-gender loving
-      - STRAIGHT              # Straight or heterosexual
-      - TWO_SPIRIT
-      - OTHER                 # None of these fully describe me, and I want to specify
-      - PREFER_NOT_TO_ANSWER
-
-  SexAtBirthV2:
-    type: string
-    description: 'What was the sex assigned to you at birth, such as on your original birth certificate?'
-    enum:
-      - FEMALE
-      - INTERSEX
-      - MALE
-      - OTHER                 # None of these fully describe me, and I want to specify
-      - PREFER_NOT_TO_ANSWER
-
-  EducationV2:
-    type: string
-    description: 'Highest Level of Education Completed'
-    enum:
-      - NO_EDUCATION          # Never attended school/No formal education
-      - GRADES_1_12           # Primary/Middle School/High School (Grades 1 through 12/GED)
-      - UNDERGRADUATE         # Some college, Associate Degree or Technical School (1 to 3 years) or current undergraduate student
-      - COLLEGE_GRADUATE      # College graduate (4 years or more) or current post-graduate trainee
-      - MASTER
-      - DOCTORATE
-      - PREFER_NOT_TO_ANSWER
-
-  YesNoPreferNot:
-    type: string
-    enum:
-      - 'YES'   # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
-      - 'NO'    # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
-      - PREFER_NOT_TO_ANSWER
+            - OTHER_THAN_MAN_WOMAN
+        sexualOrientation:
+          type: string
+          enum:
+            - UNSET
+            - OTHER_THAN_STRAIGHT
+        geography:
+          type: string
+          enum:
+            - UNSET
+            - RURAL
+        disabilityStatus:
+          type: string
+          enum:
+            - UNSET
+            - DISABILITY
+        accessToCare:
+          type: string
+          enum:
+            - UNSET
+            - NOT_EASILY_ACCESS_CARE
+        educationLevel:
+          type: string
+          enum:
+            - UNSET
+            - LESS_THAN_HIGH_SCHOOL
+        incomeLevel:
+          type: string
+          enum:
+            - UNSET
+            - BELOW_FEDERAL_POVERTY_LEVEL_200_PERCENT
+        others:
+          type: string
+    WorkspaceUser:
+      type: object
+      properties:
+        userId:
+          type: integer
+        role:
+          type: string
+          enum:
+            - READER
+            - WRITER
+            - OWNER
+        status:
+          type: string
+          description: Workspace User Status
+          enum:
+            - ACTIVE
+            - INACTIVE
+    WorkspaceCreator:
+      required:
+        - familyName
+        - givenName
+        - userId
+      type: object
+      properties:
+        userId:
+          type: integer
+          description: Database ID from Table User for creator
+          format: int64
+        givenName:
+          type: string
+        familyName:
+          type: string
+      description: Details for workspace creator
+    Researcher:
+      type: object
+      properties:
+        userId:
+          type: integer
+        creationTime:
+          type: string
+          format: date-time
+        modifiedTime:
+          type: string
+          format: date-time
+        givenName:
+          type: string
+        familyName:
+          type: string
+        streetAddress1:
+          type: string
+        streetAddress2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        ethnicity:
+          $ref: '#/components/schemas/Ethnicity'
+        gender:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gender'
+        race:
+          type: array
+          items:
+            $ref: '#/components/schemas/Race'
+        sexAtBirth:
+          type: array
+          items:
+            $ref: '#/components/schemas/SexAtBirth'
+        identifiesAsLgbtq:
+          type: boolean
+        lgbtqIdentity:
+          type: string
+        education:
+          $ref: '#/components/schemas/Education'
+        disability:
+          $ref: '#/components/schemas/Disability'
+        degrees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Degree'
+        verifiedInstitutionalAffiliation:
+          $ref: '#/components/schemas/ResearcherVerifiedInstitutionalAffiliation'
+        email:
+          type: string
+        accessTierShortNames:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessTier'
+        demographicSurveyV2:
+          $ref: '#/components/schemas/DemographicSurveyV2'
+    ResearcherVerifiedInstitutionalAffiliation:
+      required:
+        - institutionDisplayName
+        - institutionShortName
+        - institutionalRole
+      type: object
+      properties:
+        institutionShortName:
+          type: string
+          description: The unique Short Name of the Institution where the user has
+            a Verified Affiliation, such as 'Broad'
+        institutionDisplayName:
+          type: string
+          description: The Display Name of the Institution where the user has a Verified
+            Affiliation, such as 'Broad Institute'
+        institutionalRole:
+          type: string
+          description: The user's Institutional Role at this Institution, as text
+    AccessTier:
+      type: string
+      enum:
+        - UNSET
+        - REGISTERED
+        - CONTROLLED
+    Ethnicity:
+      type: string
+      enum:
+        - HISPANIC
+        - NOT_HISPANIC
+        - PREFER_NOT_TO_ANSWER
+    Gender:
+      type: string
+      enum:
+        - MAN
+        - WOMAN
+        - NON_BINARY
+        - TRANSGENDER
+        - NONE_DESCRIBE_ME
+        - PREFER_NOT_TO_ANSWER
+    Race:
+      type: string
+      enum:
+        - AIAN
+        - ASIAN
+        - AA
+        - NHOPI
+        - WHITE
+        - NONE
+        - PREFER_NOT_TO_ANSWER
+    SexAtBirth:
+      type: string
+      enum:
+        - FEMALE
+        - INTERSEX
+        - MALE
+        - NONE_OF_THESE_DESCRIBE_ME
+        - PREFER_NOT_TO_ANSWER
+    SexualOrientation:
+      type: string
+      enum:
+        - BISEXUAL
+        - GAY
+        - LESBIAN
+        - STRAIGHT
+        - NONE_OF_THESE_DESCRIBE_ME
+        - PREFER_NOT_TO_ANSWER
+    Education:
+      type: string
+      enum:
+        - NO_EDUCATION
+        - GRADES_1_12
+        - COLLEGE_GRADUATE
+        - UNDERGRADUATE
+        - MASTER
+        - DOCTORATE
+        - PREFER_NOT_TO_ANSWER
+    Disability:
+      type: string
+      enum:
+        - YES
+        - NO
+        - PREFER_NOT_TO_ANSWER
+    Degree:
+      type: string
+      enum:
+        - UNSET
+        - PHD
+        - MD
+        - JD
+        - EDD
+        - MSN
+        - MS
+        - MA
+        - MBA
+        - ME
+        - MSW
+        - MPH
+        - BA
+        - BS
+        - BSN
+    DemographicSurveyV2:
+      type: object
+      properties:
+        completionTime:
+          type: string
+          description: The time the user most recently completed the survey
+          format: date-time
+        ethnicCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/EthnicCategory'
+        ethnicityAiAnOtherText:
+          type: string
+          description: American Indian or Alaska Native /  None of these fully describe
+            me, and I want to specify.  Max length 200.
+        ethnicityAsianOtherText:
+          type: string
+          description: Asian / None of these fully describe me, and I want to specify.  Max
+            length 200.
+        ethnicityBlackOtherText:
+          type: string
+          description: Black / None of these fully describe me, and I want to specify.  Max
+            length 200.
+        ethnicityHispanicOtherText:
+          type: string
+          description: Hispanic / None of these fully describe me, and I want to specify.  Max
+            length 200.
+        ethnicityMeNaOtherText:
+          type: string
+          description: Middle Eastern or North African / None of these fully describe
+            me, and I want to specify.  Max length 200.
+        ethnicityNhPiOtherText:
+          type: string
+          description: Native Hawaiian or other Pacific Islander / None of these fully
+            describe me, and I want to specify.  Max length 200.
+        ethnicityWhiteOtherText:
+          type: string
+          description: White / None of these fully describe me, and I want to specify.  Max
+            length 200.
+        ethnicityOtherText:
+          type: string
+          description: None of these fully describe me, and I want to specify.  Max
+            length 200.
+        genderIdentities:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenderIdentityV2'
+        genderOtherText:
+          type: string
+          description: None of these fully describe me, and I want to specify.  Max
+            length 200.
+        sexualOrientations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SexualOrientationV2'
+        orientationOtherText:
+          type: string
+          description: None of these fully describe me, and I want to specify.  Max
+            length 200.
+        sexAtBirth:
+          $ref: '#/components/schemas/SexAtBirthV2'
+        sexAtBirthOtherText:
+          type: string
+          description: None of these fully describe me, and I want to specify.  Max
+            length 200.
+        yearOfBirth:
+          type: integer
+        yearOfBirthPreferNot:
+          type: boolean
+        disabilityHearing:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilitySeeing:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilityConcentrating:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilityWalking:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilityDressing:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilityErrands:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        disabilityOtherText:
+          type: string
+          description: |
+            Do you have a physical, cognitive, and/or emotional condition that substantially inhibits one or more life activities not specified through the above questions, and want to share more? Please describe.
+        education:
+          $ref: '#/components/schemas/EducationV2'
+        disadvantaged:
+          $ref: '#/components/schemas/YesNoPreferNot'
+        surveyComments:
+          type: string
+          description: |
+            Is there any aspect of your identity that we have not covered in the preceding questions that we may want to consider including in future surveys?
+    EthnicCategory:
+      type: string
+      description: Which categories describe you? (Select all that apply). Note, you
+        may select more than one group.
+      enum:
+        - AI_AN
+        - AI_AN_AMERICAN_INDIAN
+        - AI_AN_ALASKA_NATIVE
+        - AI_AN_CENTRAL_SOUTH
+        - AI_AN_OTHER
+        - ASIAN
+        - ASIAN_INDIAN
+        - ASIAN_CAMBODIAN
+        - ASIAN_CHINESE
+        - ASIAN_FILIPINO
+        - ASIAN_HMONG
+        - ASIAN_JAPANESE
+        - ASIAN_KOREAN
+        - ASIAN_LAO
+        - ASIAN_PAKISTANI
+        - ASIAN_VIETNAMESE
+        - ASIAN_OTHER
+        - BLACK
+        - BLACK_AA
+        - BLACK_BARBADIAN
+        - BLACK_CARIBBEAN
+        - BLACK_ETHIOPIAN
+        - BLACK_GHANAIAN
+        - BLACK_HAITIAN
+        - BLACK_JAMAICAN
+        - BLACK_LIBERIAN
+        - BLACK_NIGERIAN
+        - BLACK_SOMALI
+        - BLACK_SOUTH_AFRICAN
+        - BLACK_OTHER
+        - HISPANIC
+        - HISPANIC_COLOMBIAN
+        - HISPANIC_CUBAN
+        - HISPANIC_DOMINICAN
+        - HISPANIC_ECUADORIAN
+        - HISPANIC_HONDURAN
+        - HISPANIC_MEXICAN
+        - HISPANIC_PUERTO_RICAN
+        - HISPANIC_SALVADORAN
+        - HISPANIC_SPANISH
+        - HISPANIC_OTHER
+        - MENA
+        - MENA_AFGHAN
+        - MENA_ALGERIAN
+        - MENA_EGYPTIAN
+        - MENA_IRANIAN
+        - MENA_IRAQI
+        - MENA_ISRAELI
+        - MENA_LEBANESE
+        - MENA_MOROCCAN
+        - MENA_SYRIAN
+        - MENA_TUNISIAN
+        - MENA_OTHER
+        - NHPI
+        - NHPI_CHAMORRO
+        - NHPI_CHUUKESE
+        - NHPI_FIJIAN
+        - NHPI_MARSHALLESE
+        - NHPI_HAWAIIAN
+        - NHPI_PALAUAN
+        - NHPI_SAMOAN
+        - NHPI_TAHITIAN
+        - NHPI_TONGAN
+        - NHPI_OTHER
+        - WHITE
+        - WHITE_DUTCH
+        - WHITE_ENGLISH
+        - WHITE_EUROPEAN
+        - WHITE_FRENCH
+        - WHITE_GERMAN
+        - WHITE_IRISH
+        - WHITE_ITALIAN
+        - WHITE_NORWEGIAN
+        - WHITE_POLISH
+        - WHITE_SCOTTISH
+        - WHITE_SPANISH
+        - WHITE_OTHER
+        - OTHER
+        - PREFER_NOT_TO_ANSWER
+    GenderIdentityV2:
+      type: string
+      description: Which terms best express how you describe your current gender identity?
+        (Select all that apply)
+      enum:
+        - GENDERQUEER
+        - MAN
+        - NON_BINARY
+        - QUESTIONING
+        - TRANS_MAN
+        - TRANS_WOMAN
+        - TWO_SPIRIT
+        - WOMAN
+        - OTHER
+        - PREFER_NOT_TO_ANSWER
+    SexualOrientationV2:
+      type: string
+      description: Which terms best express how you describe your current sexual orientation?
+        (Select all that apply)
+      enum:
+        - ASEXUAL
+        - BISEXUAL
+        - GAY
+        - LESBIAN
+        - POLYSEXUAL
+        - QUEER
+        - QUESTIONING
+        - SAME_GENDER
+        - STRAIGHT
+        - TWO_SPIRIT
+        - OTHER
+        - PREFER_NOT_TO_ANSWER
+    SexAtBirthV2:
+      type: string
+      description: What was the sex assigned to you at birth, such as on your original
+        birth certificate?
+      enum:
+        - FEMALE
+        - INTERSEX
+        - MALE
+        - OTHER
+        - PREFER_NOT_TO_ANSWER
+    EducationV2:
+      type: string
+      description: Highest Level of Education Completed
+      enum:
+        - NO_EDUCATION
+        - GRADES_1_12
+        - UNDERGRADUATE
+        - COLLEGE_GRADUATE
+        - MASTER
+        - DOCTORATE
+        - PREFER_NOT_TO_ANSWER
+    YesNoPreferNot:
+      type: string
+      enum:
+        - YES
+        - NO
+        - PREFER_NOT_TO_ANSWER
+  securitySchemes:
+    googleoauth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://accounts.google.com/o/oauth2/auth
+          scopes:
+            openid: open id authorization
+            email: email authorization
+            profile: profile authorization
