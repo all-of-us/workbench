@@ -1,125 +1,105 @@
-#A subset of the Mandrill Api
-#the part we need
-# https://mandrillapp.com/api/docs/
-
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: Mandrill
-  version: '0.1'
-
-host: 'mandrillapp.com'
-schemes:
-  - 'https'
-basePath: '/api/1.0'
-
-produces:
-  - application/json
-
+  version: "0.1"
+servers:
+  - url: https://mandrillapp.com/api/1.0
 paths:
   /messages/send.json:
     post:
       tags:
         - mandrill
-      consumes:
-        - application/json
-      operationId: send
       summary: Send an email via mandrill
+      operationId: send
+      requestBody:
+        description: API key and message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MandrillApiKeyAndMessage'
+        required: true
       responses:
         200:
           description: Email sent successfully
-          schema:
-            $ref: '#/definitions/MandrillMessageStatuses'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MandrillMessageStatuses'
         500:
           description: There was an error, please see response for details
-      parameters:
-        - in: body
-          description: API key and message
-          name: apiKeyAndMessage
-          required: true
-          schema:
-            $ref: '#/definitions/MandrillApiKeyAndMessage'
-
-parameters:
-  {}
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
-definitions:
-  MandrillApiKeyAndMessage:
-    required:
-      - key
-      - message
-    type: object
-    properties:
-      key:
-        type: string
-        description: API key
-      message:
-        type: object
-        description: Mandrill Message
-        items:
-          '$ref': '#/definitions/MandrillMessage'
-
-  MandrillMessage:
-    required:
-      - html
-      - subject
-      - from_email
-      - to
-    type: object
-    properties:
-      html:
-        type: string
-        description: html that makes up email message
-      subject:
-        type: string
-        description: subject of email
-      from_email:
-        type: string
-        description: the from address
-      to:
-        type: array
-        items:
-          '$ref': '#/definitions/RecipientAddress'
-      preserve_recipients:
-        type: boolean
-        description: whether or not to expose all recipients in to "To" header for each email
-
-
-  RecipientAddress:
-    required:
-      - email
-    type: object
-    properties:
-      email:
-        type: string
-        description: recipient address
-      type:
-        '$ref': '#/definitions/RecipientType'
-
-  MandrillMessageStatuses:
-    type: array
-    items:
-      '$ref': '#/definitions/MandrillMessageStatus'
-
-  MandrillMessageStatus:
-    type: object
-    properties:
-      email:
-        type: string
-        description: recipient email
-      status:
-        type: string
-        description: status of email
-      reject_reason:
-        type: string
-        description: why email was rejected if it was
-
-  RecipientType:
-    type: string
-    description: the header type to use for the recipient. Possible values "to", "cc", or "bcc".
-    enum:
-      - to
-      - cc
-      - bcc
-
+          content: {}
+      x-codegen-request-body-name: apiKeyAndMessage
+components:
+  schemas:
+    MandrillApiKeyAndMessage:
+      required:
+        - key
+        - message
+      type: object
+      properties:
+        key:
+          type: string
+          description: API key
+        message:
+          type: object
+          properties: {}
+          description: Mandrill Message
+    MandrillMessage:
+      required:
+        - from_email
+        - html
+        - subject
+        - to
+      type: object
+      properties:
+        html:
+          type: string
+          description: html that makes up email message
+        subject:
+          type: string
+          description: subject of email
+        from_email:
+          type: string
+          description: the from address
+        to:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientAddress'
+        preserve_recipients:
+          type: boolean
+          description: whether or not to expose all recipients in to "To" header for
+            each email
+    RecipientAddress:
+      required:
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: recipient address
+        type:
+          $ref: '#/components/schemas/RecipientType'
+    MandrillMessageStatuses:
+      type: array
+      items:
+        $ref: '#/components/schemas/MandrillMessageStatus'
+    MandrillMessageStatus:
+      type: object
+      properties:
+        email:
+          type: string
+          description: recipient email
+        status:
+          type: string
+          description: status of email
+        reject_reason:
+          type: string
+          description: why email was rejected if it was
+    RecipientType:
+      type: string
+      description: the header type to use for the recipient. Possible values "to",
+        "cc", or "bcc".
+      enum:
+        - to
+        - cc
+        - bcc
