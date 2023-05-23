@@ -34,11 +34,11 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 public class DbWorkspace {
   private String firecloudUuid;
 
-  public static class FirecloudWorkspaceId {
+  public static class TerraWorkspaceNamePair {
     private final String workspaceNamespace;
     private final String workspaceName;
 
-    public FirecloudWorkspaceId(String workspaceNamespace, String workspaceName) {
+    public TerraWorkspaceNamePair(String workspaceNamespace, String workspaceName) {
       this.workspaceNamespace = workspaceNamespace;
       this.workspaceName = workspaceName;
     }
@@ -58,10 +58,10 @@ public class DbWorkspace {
 
     @Override
     public boolean equals(Object obj) {
-      if (!(obj instanceof FirecloudWorkspaceId)) {
+      if (!(obj instanceof TerraWorkspaceNamePair)) {
         return false;
       }
-      FirecloudWorkspaceId that = (FirecloudWorkspaceId) obj;
+      TerraWorkspaceNamePair that = (TerraWorkspaceNamePair) obj;
       return this.workspaceNamespace.equals(that.workspaceNamespace)
           && this.workspaceName.equals(that.workspaceName);
     }
@@ -633,11 +633,6 @@ public class DbWorkspace {
 
   public void addDataSet(DbDataset dataSet) {
     this.dataSets.add(dataSet);
-  }
-
-  @Transient
-  public FirecloudWorkspaceId getFirecloudWorkspaceId() {
-    return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 
   @Column(name = "firecloud_uuid")
