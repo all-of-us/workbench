@@ -40,8 +40,7 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
   },
   tableHeader: {
-    borderLeft: 'none',
-    borderRight: 'none',
+    paddingTop: '1.5rem',
   },
   columns: {
     borderLeft: 'none',
@@ -149,11 +148,13 @@ export const AppFilesList = withCurrentWorkspace()(
           {workspace && filesList && (
             <DataTable filterDisplay='row' value={filesList}>
               <Column
+                headerStyle={styles.tableHeader}
                 style={styles.columns}
                 body={displayMenu}
                 bodyStyle={styles.rows}
               />
               <Column
+                headerStyle={styles.tableHeader}
                 header='Application'
                 body={displayAppLogo}
                 style={styles.columns}
@@ -161,6 +162,7 @@ export const AppFilesList = withCurrentWorkspace()(
               />
               <Column
                 style={styles.columns}
+                headerStyle={styles.tableHeader}
                 header='Name'
                 field={'name'}
                 body={displayName}
@@ -170,12 +172,14 @@ export const AppFilesList = withCurrentWorkspace()(
                 sortable
               />
               <Column
+                headerStyle={styles.tableHeader}
                 style={styles.columns}
                 bodyStyle={styles.rows}
                 header='Last Modified Time'
                 body={displayLastModifiedTime}
               />
               <Column
+                headerStyle={styles.tableHeader}
                 style={styles.columns}
                 bodyStyle={styles.rows}
                 field='lastModifiedBy'
