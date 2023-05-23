@@ -146,7 +146,11 @@ export const AppFilesList = withCurrentWorkspace()(
             <AppSelector {...{ workspace }} />
           </FlexRow>
           {workspace && filesList && (
-            <DataTable filterDisplay='row' value={filesList}>
+            <DataTable
+              data-test-id='apps-file-list'
+              filterDisplay='row'
+              value={filesList}
+            >
               <Column
                 headerStyle={styles.tableHeader}
                 style={styles.columns}
