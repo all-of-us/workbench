@@ -63,13 +63,19 @@ export const getExistingNotebookNames = async (
   return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
 };
 
-export const appsExtensionMap = [
+const appsExtensionMap = [
   {
     extension: jupyterNotebookExtension,
     appType: UIAppType.JUPYTER,
+    path: 'notebooks/preview',
   },
   {
     extension: rstudioNotebookExtension,
     appType: UIAppType.RSTUDIO,
+    path: '',
   },
 ];
+
+export const getAppInfoFromFileName = (name: string) => {
+  return appsExtensionMap.find((app) => name.endsWith(app.extension));
+};

@@ -14,7 +14,7 @@ import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
-import { appsExtensionMap, listNotebooks } from 'app/pages/analysis/util';
+import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
@@ -84,7 +84,7 @@ export const AppFilesList = withCurrentWorkspace()(
       if (workspace) {
         loadNotebooks();
       }
-    }, []);
+    }, [workspace]);
 
     const displayMenu = (row) => {
       return (
@@ -101,31 +101,28 @@ export const AppFilesList = withCurrentWorkspace()(
 
     const displayAppLogo = (row) => {
       // Find App Type on the basis of file name extension
-      const fileName = row.name;
-      const application = appsExtensionMap.find((app) =>
-        fileName.endsWith(app.extension)
-      );
-      return (
-        application && (
-          <AppLogo
-            appType={application.appType}
-            style={{ marginRight: '1em' }}
-          />
-        )
-      );
+      const { name } = row;
+      const appType = getAppInfoFromFileName(name).appType;
+      return <AppLogo appType={appType} style={{ marginRight: '1em' }} />;
     };
 
     const displayName = (row) => {
       const {
         workspace: { namespace, id },
       } = props;
-      const url = `/workspaces/${namespace}/${id}/notebooks/preview/${row.name}`;
-      return (
+      const { name } = row;
+      const appPath = getAppInfoFromFileName(name).path;
+      const url = `/workspaces/${namespace}/${id}/${appPath}/${name}`;
+      // Currently, RStudio files are not linked with the appropriate app, hence they are shown as
+      // labels instead of links.
+      return appPath ? (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>
             {row.name}
           </RouterLink>
         </Clickable>
+      ) : (
+        <label>{row.name}</label>
       );
     };
 
@@ -150,7 +147,7 @@ export const AppFilesList = withCurrentWorkspace()(
             <AppSelector {...{ workspace }} />
           </FlexRow>
           {workspace && filesList && (
-            <DataTable filterDisplay='menu' value={filesList}>
+            <DataTable filterDisplay='row' value={filesList}>
               <Column
                 style={styles.columns}
                 body={displayMenu}
@@ -165,6 +162,7 @@ export const AppFilesList = withCurrentWorkspace()(
               <Column
                 style={styles.columns}
                 header='Name'
+                field={'name'}
                 body={displayName}
                 bodyStyle={styles.rows}
                 filter
