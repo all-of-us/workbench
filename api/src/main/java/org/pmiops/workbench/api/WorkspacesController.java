@@ -63,7 +63,6 @@ import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
-import org.pmiops.workbench.workspaces.TerraWorkspaceNamePair;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -167,12 +166,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    TerraWorkspaceNamePair workspaceNamePair = createTerraBillingProject(accessTier, workspace);
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
+
     RawlsWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
-            workspaceNamePair.getWorkspaceNamespace(),
-            workspaceNamePair.getWorkspaceName(),
-            accessTier.getAuthDomainName());
+            billingProject, firecloudName, accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -558,13 +557,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    TerraWorkspaceNamePair terraNamePair = createTerraBillingProject(accessTier, toWorkspace);
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
     RawlsWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
-            terraNamePair.getWorkspaceNamespace(),
-            terraNamePair.getWorkspaceName(),
+            billingProject,
+            firecloudName,
             accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
     try {
@@ -606,8 +606,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
-  private TerraWorkspaceNamePair createTerraBillingProject(
-      DbAccessTier accessTier, Workspace workspace) {
+  private String createTerraBillingProject(DbAccessTier accessTier) {
     DbUser user = userProvider.get();
     String billingProject = fireCloudService.createBillingProjectName();
     fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
@@ -616,8 +615,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
     // all billing projects.
     fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    return new TerraWorkspaceNamePair(
-        billingProject, FireCloudService.toFirecloudName(workspace.getName()));
+    return billingProject;
   }
 
   @Override
