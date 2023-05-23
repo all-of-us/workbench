@@ -7,7 +7,6 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppLogo } from 'app/components/apps-panel/app-logo';
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -15,7 +14,7 @@ import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
-import { listNotebooks } from 'app/pages/analysis/util';
+import { appsExtensionMap, listNotebooks } from 'app/pages/analysis/util';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { displayDateWithoutHours } from 'app/utils/dates';
@@ -68,13 +67,6 @@ export const AppFilesList = withCurrentWorkspace()(
 
     const [filesList, setFilesList] = useState<FileDetail[]>();
 
-    const appsExtensionMap = [
-      {
-        ext: 'ipynb',
-        appType: UIAppType.JUPYTER,
-      },
-    ];
-
     const loadNotebooks = withErrorModal(
       {
         title: 'Error Loading Files',
@@ -108,9 +100,10 @@ export const AppFilesList = withCurrentWorkspace()(
     };
 
     const displayAppLogo = (row) => {
-      const fileNameExt = row.name.split('.')[1];
-      const application = appsExtensionMap.find(
-        (app) => app.ext === fileNameExt
+      // Find App Type on the basis of file name extension
+      const fileName = row.name;
+      const application = appsExtensionMap.find((app) =>
+        fileName.endsWith(app.extension)
       );
       return (
         application && (
@@ -175,6 +168,7 @@ export const AppFilesList = withCurrentWorkspace()(
                 body={displayName}
                 bodyStyle={styles.rows}
                 filter
+                filterPlaceholder={'Search Name'}
                 sortable
               />
               <Column
