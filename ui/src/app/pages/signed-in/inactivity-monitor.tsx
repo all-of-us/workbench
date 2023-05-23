@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { environment } from 'environments/environment';
-import { AnalyticsTracker } from 'app/utils/analytics';
 import { withErrorModal } from 'app/components/modals';
 import { TextModal } from 'app/components/text-modal';
 import { debouncer } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
 
 const { useState, useEffect } = React;
