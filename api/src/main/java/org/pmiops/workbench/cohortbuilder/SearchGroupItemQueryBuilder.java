@@ -885,7 +885,7 @@ public final class SearchGroupItemQueryBuilder {
 
   private static boolean hasDataDomains(SearchGroupItem searchGroupItem) {
     Domain domain = Domain.fromValue(searchGroupItem.getType());
-    return (HAS_DATA_DOMAINS.containsKey(domain) && !Domain.PHYSICAL_MEASUREMENT.equals(domain))
+    return HAS_DATA_DOMAINS.containsKey(domain)
         || (searchGroupItem.getSearchParameters().size() == 1
             && searchGroupItem.getSearchParameters().stream()
                 .allMatch(

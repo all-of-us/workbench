@@ -131,7 +131,7 @@ then
   PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
   SORT_ORDER=0
-  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT','FITBIT','Any Fitbit Data',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT','FITBIT','Has Any Fitbit Data',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_ACTIVITY','FITBIT_ACTIVITY','Fitbit Activity Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_SUMMARY','FITBIT_HEART_RATE_SUMMARY','Fitbit Heart Rate Summary',0,$((++SORT_ORDER)))"
   insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_LEVEL','FITBIT_HEART_RATE_LEVEL','Fitbit Heart Rate Minute Level',0,$((++SORT_ORDER)))"
