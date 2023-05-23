@@ -8,7 +8,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
-import { ClrIcon, SnowmanIcon } from 'app/components/icons';
+import {
+  ClrIcon,
+  KebabCircleMenuIcon,
+  SnowmanIcon,
+} from 'app/components/icons';
 import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -445,6 +449,10 @@ export const IconButton = ({
 
 export const SnowmanButton = ({ ...props }) => (
   <IconButton icon={SnowmanIcon} {...props} />
+);
+
+export const KebabCircleButton = ({ ...props }) => (
+  <IconButton icon={KebabCircleMenuIcon} {...props} />
 );
 
 const cardButtonBase = {

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
-import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { BillingStatus } from 'generated/fetch';
 
@@ -77,8 +75,7 @@ export const AppSelector = (props: AppSelectorProps) => {
         }}
         disabled={!canCreateApps}
       >
-        <div style={{ paddingRight: '0.75rem' }}>Start</div>
-        <FontAwesomeIcon icon={faPlusCircle} />
+        <div style={{ width: '9rem', paddingLeft: '1rem' }}>Choose an App</div>
       </Button>
       {showSelectAppModal && (
         <Modal

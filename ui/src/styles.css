@@ -417,6 +417,9 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even) {
 .p-paginator .p-dropdown.p-component.p-inputwrapper-filled {
   height: 2.25rem;
 }
+.p-column-filter-menu {
+  margin-left: 4rem;
+}
 
 body .p-paginator .p-paginator-pages {
   height: auto;
