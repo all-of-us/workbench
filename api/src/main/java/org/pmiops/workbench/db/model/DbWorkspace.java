@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -33,39 +32,6 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 @Table(name = "workspace")
 public class DbWorkspace {
   private String firecloudUuid;
-
-  public static class TerraWorkspaceNamePair {
-    private final String workspaceNamespace;
-    private final String workspaceName;
-
-    public TerraWorkspaceNamePair(String workspaceNamespace, String workspaceName) {
-      this.workspaceNamespace = workspaceNamespace;
-      this.workspaceName = workspaceName;
-    }
-
-    public String getWorkspaceNamespace() {
-      return workspaceNamespace;
-    }
-
-    public String getWorkspaceName() {
-      return workspaceName;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(workspaceNamespace, workspaceName);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof TerraWorkspaceNamePair)) {
-        return false;
-      }
-      TerraWorkspaceNamePair that = (TerraWorkspaceNamePair) obj;
-      return this.workspaceNamespace.equals(that.workspaceNamespace)
-          && this.workspaceName.equals(that.workspaceName);
-    }
-  }
 
   private long workspaceId;
   private int version;
