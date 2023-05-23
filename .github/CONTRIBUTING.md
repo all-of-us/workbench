@@ -7,7 +7,8 @@ Typical naming convention is `username/feature`. Username could be
 your initials or some other similar identifier. Feature could be a short 
 description of the feature or a reference to the jira ticket number
 
-Preface the PR title with JIRA issue number and security risk (e.g. `[RW-123][risk=no]`)
+Preface the PR title with the security risk, then any JIRA ticket numbers if applicable 
+(e.g. `[risk=low][RW-123]`, `[risk=no][no ticket]`, `[risk=low][RW-123][RW-456]`)
 to the PR title. This will allow automated deployment processes to generate appropriate 
 documentation. 
 
