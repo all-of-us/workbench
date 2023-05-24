@@ -175,7 +175,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace())(
 
     launchSearch(criteria: any, searchTerms?: string) {
       const { role } = this.props;
-      const { domain, selectedSurvey, type, standard } = criteria;
+      const { domain, selectedSurvey, type, standard, name } = criteria;
       // If domain is PERSON, list the type as well as the domain in the label
       const label = `Enter ${domainToTitle(domain)}${
         domain === Domain.PERSON ? ' - ' + typeToTitle(type) : ''
@@ -194,6 +194,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace())(
         role,
         groupId,
         selectedSurvey,
+        name,
       };
       this.props.setSearchContext(context);
     }
