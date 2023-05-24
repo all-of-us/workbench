@@ -12,7 +12,9 @@ import {
 
 import { screen } from '@testing-library/dom';
 import {
+  fireEvent,
   render,
+  waitFor,
   waitForElementToBeRemoved,
   within,
 } from '@testing-library/react';
@@ -129,4 +131,38 @@ test('show spinner while disks are loading', async () => {
   render(<DisksTable sourceWorkspaceNamespace='123' />);
 
   expect(screen.getByTitle('disks loading spinner')).toBeInTheDocument();
+});
+
+test('delete disk', async () => {
+  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+  const mockDisks: ListDisksResponse = [
+    mockJupyterDisk,
+    mockCromwellDisk,
+    mockRStudioDisk,
+  ];
+  const mockDeleteFunction = jest.fn(() => Promise.resolve({}));
+  const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
+  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
+  mockdisksAdminApi.mockImplementation(() => ({
+    deleteDisk: mockDeleteFunction,
+    listDisksInWorkspace: mockListFunction,
+  }));
+
+  render(<DisksTable sourceWorkspaceNamespace='123' />);
+  await waitForElementToBeRemoved(() =>
+    screen.getByTitle('disks loading spinner')
+  );
+
+  const row = screen.getByText(mockJupyterDisk.name).closest('tr');
+  const rowScope = within(row);
+  const jupyterDeleteButton = rowScope
+    .getByText('Delete')
+    .closest('div[role="button"]');
+
+  expect(mockListFunction).toHaveBeenCalledTimes(1);
+  fireEvent.click(jupyterDeleteButton);
+  await waitFor(() => {
+    expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
+    expect(mockListFunction).toHaveBeenCalledTimes(2);
+  });
 });
