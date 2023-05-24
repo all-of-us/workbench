@@ -350,8 +350,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.has_fitbit_activity_summary = y.has_fitbit_activity_summary,
     x.has_fitbit_heart_rate_level = y.has_fitbit_heart_rate_level,
-    x.has_fitbit_activity_summary = y.has_fitbit_activity_summary,
-    x.has_fitbit_intra_day_steps = y.has_fitbit_intra_day_steps
+    x.has_fitbit_heart_rate_summary = y.has_fitbit_heart_rate_summary,
+    x.has_fitbit_steps_intraday = y.has_fitbit_steps_intraday,
     x.has_fitbit_sleep_daily_summary = y.has_fitbit_sleep_daily_summary,
     x.has_fitbit_sleep_level = y.has_fitbit_sleep_level
 FROM
@@ -373,7 +373,7 @@ FROM
             , CASE
                 WHEN si.person_id is null THEN 0
                 ELSE 1
-              END has_fitbit_intra_day_steps
+              END has_fitbit_steps_intraday
             , CASE
                 WHEN sds.person_id is null THEN 0
                 ELSE 1
