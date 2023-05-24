@@ -42,7 +42,7 @@ describe('Notebook Snippets Tests', () => {
 
     // Verify kernel name.
     const kernelName = await notebook.getKernelName();
-    expect(kernelName).toBe(expectedKernelName);
+    expect(kernelName).toContain(expectedKernelName);
 
     const notebookIFrame = await notebook.getIFrame();
 

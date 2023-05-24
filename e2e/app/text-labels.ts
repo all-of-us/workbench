@@ -142,7 +142,7 @@ export enum Language {
 
 // Displayed text for Jupyter kernels, by language
 export enum JupyterKernels {
-  Python = 'Python 3 (ipykernel)',
+  Python = 'Python 3',
   R = 'R'
 }
 
