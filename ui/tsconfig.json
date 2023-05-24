@@ -22,7 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "noEmit": true,
     "strict": false,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": ["node", "jest", "@testing-library/jest-dom"]
   },
   "include": [
     "src"
