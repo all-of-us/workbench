@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
 
-import { NotebooksApi, ProfileApi, WorkspacesApi } from 'generated/fetch';
+import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
