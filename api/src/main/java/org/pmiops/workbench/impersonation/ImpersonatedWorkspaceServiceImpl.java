@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
+import org.javers.common.collections.Lists;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -131,25 +132,25 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public Set<String> getOwnedWorkspacesOrphanedInSam(String username) {
+  public List<String> getOwnedWorkspacesOrphanedInSam(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
     if (dbUser == null) {
       logger.warning(String.format("user %s not found", username));
-      return Collections.emptySet();
+      return Collections.emptyList();
     }
 
     try {
-      Set<String> rawlsIds =
+      var rawlsIds =
           impersonatedFirecloudService.getWorkspaces(dbUser).stream()
               .filter(this::isOwner)
               .map(RawlsWorkspaceListResponse::getWorkspace)
               .map(RawlsWorkspaceDetails::getWorkspaceId)
-              .collect(Collectors.toSet());
-      Set<String> samResources =
+              .collect(Collectors.toList());
+      var samResources =
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
               .map(UserResourcesResponse::getResourceId)
-              .collect(Collectors.toSet());
-      Set<String> samNotInRawls = Sets.difference(samResources, rawlsIds);
+              .collect(Collectors.toList());
+      var samNotInRawls = Lists.difference(samResources, rawlsIds);
 
       logger.info(
           String.format(
@@ -255,9 +256,9 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     final DbUser dbUser = userDao.findUserByUsername(username);
 
     try {
-      impersonatedFirecloudService.deleteWorkspaceByUuid(dbUser, wsUuid);
+      impersonatedFirecloudService.deleteSamWorkspaceResource(dbUser, wsUuid);
     } catch (Exception e) {
-      logger.severe("Could not delete workspace " + wsUuid);
+      logger.severe(String.format("Could not delete workspace %s: %s", wsUuid, e.getMessage()));
       throw new ServerErrorException(e);
     }
   }

@@ -124,12 +124,14 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public void deleteWorkspaceByUuid(DbUser dbUser, String wsUuid) throws IOException {
-    WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
-    var foo =
-        rawlsRetryHandler.run(
-            (context) ->
-                workspacesApi.getWorkspaceById(wsUuid, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
+  public void deleteSamWorkspaceResource(@Nonnull DbUser dbUser, String workspaceResourceId)
+      throws IOException {
+    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    samRetryHandler.run(
+        (context) -> {
+          resourcesApi.deleteResourceV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId);
+          return null;
+        });
   }
 
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {

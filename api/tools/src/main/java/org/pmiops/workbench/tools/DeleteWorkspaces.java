@@ -137,8 +137,14 @@ public class DeleteWorkspaces extends Tool {
           deleteOpt,
           this::listRawlsWorkspaces,
           this::deleteRawlsWorkspace);
-
-      deleteSamWorkspaces(rwEnvOpt, usernameOpt, limitOpt, deleteOpt);
+      // Sam
+      deleteWorkspaces(
+          rwEnvOpt,
+          usernameOpt,
+          limitOpt,
+          deleteOpt,
+          this::listSamWorkspaces,
+          this::deleteSamWorkspace);
     };
   }
 
@@ -150,6 +156,9 @@ public class DeleteWorkspaces extends Tool {
       BiFunction<String, String, List<T>> listWorkspaces,
       BiConsumer<T, String> deleteWorkspace) {
     List<T> workspaces = listWorkspaces.apply(usernameOpt, rwEnvOpt);
+    if (workspaces.isEmpty()) {
+      return;
+    }
 
     if (deleteOpt) {
       limitOpt
@@ -165,39 +174,9 @@ public class DeleteWorkspaces extends Tool {
     }
   }
 
-  // can't reuse the above for Sam, because it operates on a Map rather than a List
-  private void deleteSamWorkspaces(
-      String rwEnvOpt, String usernameOpt, Optional<Integer> limitOpt, boolean deleteOpt) {
-    // map of [Billing Project Resource ID : Workspace Resource ID]
-    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(usernameOpt);
-    LOG.info(
-        String.format(
-            "Found %d Sam workspaces which are not present in the %s Rawls DB",
-            workspaces.size(), rwEnvOpt));
-
-    if (deleteOpt) {
-      limitOpt
-          .map(
-              l -> {
-                LOG.info(String.format("Limiting to the first %d workspaces.", l));
-                return workspaces.stream().limit(l);
-              })
-          .orElse(workspaces.stream())
-          .forEach(
-              ws -> {
-                // String billingProject = ws.getKey();
-                // String workspaceResourceId = ws.getValue();
-                LOG.info(String.format("Deleting Sam workspace %s", ws));
-                workspaceService.deleteOrphanedSamWorkspace(usernameOpt, ws);
-              });
-    } else {
-      LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
-    }
-  }
-
   private List<WorkspaceResponse> listAouWorkspaces(String username, String rwEnv) {
     var workspaces = workspaceService.getOwnedWorkspaces(username);
-    LOG.info(String.format("Found %d AoU workspaces in %s", workspaces.size(), rwEnv));
+    LOG.info(String.format("Found %d AoU workspace(s) in %s", workspaces.size(), rwEnv));
     return workspaces;
   }
 
@@ -205,7 +184,16 @@ public class DeleteWorkspaces extends Tool {
     var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(username);
     LOG.info(
         String.format(
-            "Found %d Rawls workspaces which are not present in the %s DB",
+            "Found %d Rawls workspace(s) which are not present in the %s DB",
+            workspaces.size(), rwEnv));
+    return workspaces;
+  }
+
+  private List<String> listSamWorkspaces(String username, String rwEnv) {
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(username);
+    LOG.info(
+        String.format(
+            "Found %d Sam workspace(s) which are not present in the %s Rawls DB",
             workspaces.size(), rwEnv));
     return workspaces;
   }
@@ -224,5 +212,10 @@ public class DeleteWorkspaces extends Tool {
     LOG.info(String.format("Deleting Rawls workspace %s/%s", namespace, fcName));
     workspaceService.deleteOrphanedRawlsWorkspace(
         username, namespace, googleProject, fcName, DELETE_BILLING_PROJECTS);
+  }
+
+  private void deleteSamWorkspace(String resourceId, String username) {
+    LOG.info(String.format("Deleting Sam workspace resource %s", resourceId));
+    workspaceService.deleteOrphanedSamWorkspace(username, resourceId);
   }
 }
