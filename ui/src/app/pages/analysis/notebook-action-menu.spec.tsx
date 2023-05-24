@@ -4,9 +4,9 @@ import { mount } from 'enzyme';
 
 import { WorkspaceAccessLevel } from 'generated/fetch';
 
-import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
+import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 
-describe('NotebookResourceCard', () => {
+describe('NotebookActionMenu', () => {
   const component = () => {
     const props = {
       notebook: {
@@ -17,7 +17,7 @@ describe('NotebookResourceCard', () => {
 
     return mount(
       <MemoryRouter>
-        <NotebookResourceCard
+        <NotebookActionMenu
           resource={props}
           existingNameList={[]}
           onUpdate={() => {}}

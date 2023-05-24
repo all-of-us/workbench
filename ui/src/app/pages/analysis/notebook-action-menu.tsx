@@ -9,11 +9,7 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import {
-  canDelete,
-  canWrite,
-  ResourceCard,
-} from 'app/components/resource-card';
+import { canDelete, canWrite } from 'app/components/resource-card';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -40,7 +36,6 @@ interface Props
   existingNameList: string[];
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
-  menuOnly: boolean;
 }
 
 interface State {
@@ -48,7 +43,7 @@ interface State {
   showRenameModal: boolean;
 }
 
-export const NotebookResourceCard = fp.flow(
+export const NotebookActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()
@@ -178,7 +173,7 @@ export const NotebookResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const { resource } = this.props;
       const oldName = getDisplayName(resource);
       return (
         <React.Fragment>
@@ -214,14 +209,10 @@ export const NotebookResourceCard = fp.flow(
               existingNames={this.props.existingNameList}
             />
           )}
-          {menuOnly ? (
-            <ResourceActionsMenu
-              actions={this.actions}
-              disabled={resource.adminLocked}
-            />
-          ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
-          )}
+          <ResourceActionsMenu
+            actions={this.actions}
+            disabled={resource.adminLocked}
+          />
         </React.Fragment>
       );
     }
