@@ -101,3 +101,18 @@ test('loads and displays table', async () => {
     ).not.toBeDisabled();
   });
 });
+
+test('loads and displays empty table', async () => {
+  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+  const mockDisks: ListDisksResponse = [];
+  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
+  mockdisksAdminApi.mockImplementation(() => ({
+    listDisksInWorkspace: () => Promise.resolve(mockDisks),
+  }));
+  render(<DisksTable sourceWorkspaceNamespace='123' />);
+  await waitFor(() => {
+    expect(screen.queryByTestId('disks spinner')).not.toBeInTheDocument();
+  });
+
+  expect(screen.getByText('No disks found')).toBeInTheDocument();
+});

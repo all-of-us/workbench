@@ -39,7 +39,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   return loading && disks ? (
     <Spinner data-testid='disks spinner' />
   ) : (
-    <DataTable value={disks}>
+    <DataTable value={disks} emptyMessage='No disks found'>
       <Column field='name' header='Name' />
       <Column field='creator' header='Creator' />
       <Column
