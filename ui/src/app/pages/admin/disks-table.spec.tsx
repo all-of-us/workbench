@@ -31,21 +31,49 @@ const getEnvironmentType = (isGceRuntime: boolean, appType: AppType) => {
   return isGceRuntime ? 'Jupyter' : fp.capitalize(appType.toString());
 };
 
+const mockJupyterDisk: Disk = {
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: true,
+  name: 'mock-disk1',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: null,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
+};
+
+const mockCromwellDisk: Disk = {
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: false,
+  name: 'mock-disk2',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: AppType.CROMWELL,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
+};
+
+const mockRStudioDisk: Disk = {
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: false,
+  name: 'mock-disk3',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: AppType.RSTUDIO,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
+};
+
 test('loads and displays table', async () => {
   const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
-
-  const mockDisk: Disk = {
-    size: 1000,
-    diskType: DiskType.Standard,
-    isGceRuntime: true,
-    name: 'mock-disk',
-    blockSize: 1,
-    status: DiskStatus.Ready,
-    appType: null,
-    creator: '"evrii@fake-research-aou.org"',
-    createdDate: '2023-05-22T18:55:10.108838Z',
-  };
-  const mockDisks: ListDisksResponse = [mockDisk];
+  const mockDisks: ListDisksResponse = [
+    mockJupyterDisk,
+    mockCromwellDisk,
+    mockRStudioDisk,
+  ];
   // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
   mockdisksAdminApi.mockImplementation(() => ({
     listDisksInWorkspace: () => Promise.resolve(mockDisks),
