@@ -37,8 +37,6 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   // https://github.com/broadinstitute/sam/blob/30931bde56a6ffcea2040086503ade37378dfffc/src/main/resources/reference.conf#L49
   private static final String SAM_WORKSPACE_RESOURCE_NAME = "workspace";
   public static final String SAM_RESOURCE_OWNER_NAME = "owner";
-  public static final String SAM_PROJECT_OWNER_NAME = "project-owner";
-  public static final String SAM_BILLING_PROJECT_NAME = "billing-project";
   private final FirecloudApiClientFactory firecloudApiClientFactory;
   private final RawlsApiClientFactory rawlsApiClientFactory;
   private final SamApiClientFactory samApiClientFactory;

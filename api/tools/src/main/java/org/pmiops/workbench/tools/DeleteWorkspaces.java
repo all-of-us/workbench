@@ -176,7 +176,7 @@ public class DeleteWorkspaces extends Tool {
 
   private List<WorkspaceResponse> listAouWorkspaces(String username, String rwEnv) {
     var workspaces = workspaceService.getOwnedWorkspaces(username);
-    LOG.info(String.format("Found %d AoU workspace(s) in %s", workspaces.size(), rwEnv));
+    LOG.info(String.format("Found %d owned AoU workspace(s) in %s", workspaces.size(), rwEnv));
     return workspaces;
   }
 
@@ -184,7 +184,7 @@ public class DeleteWorkspaces extends Tool {
     var workspaces = workspaceService.getOwnedWorkspacesOrphanedInRawls(username);
     LOG.info(
         String.format(
-            "Found %d Rawls workspace(s) which are not present in the %s DB",
+            "Found %d owned Rawls workspace(s) which are not present in the %s AoU DB",
             workspaces.size(), rwEnv));
     return workspaces;
   }
@@ -193,7 +193,7 @@ public class DeleteWorkspaces extends Tool {
     var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(username);
     LOG.info(
         String.format(
-            "Found %d Sam workspace(s) which are not present in the %s Rawls DB",
+            "Found %d owned Sam workspace(s) which are not present in the %s Rawls DB",
             workspaces.size(), rwEnv));
     return workspaces;
   }

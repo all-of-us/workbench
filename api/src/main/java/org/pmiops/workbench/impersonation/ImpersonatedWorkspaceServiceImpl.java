@@ -1,9 +1,12 @@
 package org.pmiops.workbench.impersonation;
 
+import static org.pmiops.workbench.impersonation.ImpersonatedFirecloudServiceImpl.SAM_RESOURCE_OWNER_NAME;
+
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,6 +86,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
   }
 
+  private boolean isRawlsOwner(RawlsWorkspaceListResponse response) {
+    return firecloudMapper.fcToApiWorkspaceAccessLevel(response.getAccessLevel())
+        == WorkspaceAccessLevel.OWNER;
+  }
+
   @Override
   public List<RawlsWorkspaceListResponse> getOwnedWorkspacesOrphanedInRawls(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
@@ -95,16 +103,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       // return all Rawls workspaces which are NOT in the AoU DB (or deleted)
       // see WorkspaceMapper.toApiWorkspaceResponses() for the more typical case (active in AoU DB)
       return notInAouDb(impersonatedFirecloudService.getWorkspaces(dbUser)).stream()
-          .filter(this::isOwner)
+          .filter(this::isRawlsOwner)
           .collect(Collectors.toList());
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
-  }
-
-  private boolean isOwner(RawlsWorkspaceListResponse response) {
-    return firecloudMapper.fcToApiWorkspaceAccessLevel(response.getAccessLevel())
-        == WorkspaceAccessLevel.OWNER;
   }
 
   private List<RawlsWorkspaceListResponse> notInAouDb(
@@ -131,6 +134,12 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
         .collect(Collectors.toList());
   }
 
+  private boolean isSamOwner(UserResourcesResponse response) {
+    return Optional.ofNullable(response.getDirect())
+        .map(r -> r.getRoles().contains(SAM_RESOURCE_OWNER_NAME))
+        .orElse(false);
+  }
+
   @Override
   public List<String> getOwnedWorkspacesOrphanedInSam(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
@@ -142,19 +151,20 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       var rawlsIds =
           impersonatedFirecloudService.getWorkspaces(dbUser).stream()
-              .filter(this::isOwner)
+              .filter(this::isRawlsOwner)
               .map(RawlsWorkspaceListResponse::getWorkspace)
               .map(RawlsWorkspaceDetails::getWorkspaceId)
               .collect(Collectors.toList());
       var samResources =
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
+              .filter(this::isSamOwner)
               .map(UserResourcesResponse::getResourceId)
               .collect(Collectors.toList());
       var samNotInRawls = Lists.difference(samResources, rawlsIds);
 
       logger.info(
           String.format(
-              "Found %d rawls workspace IDs and %d sam resources, of which %d were not present in Rawls",
+              "Found %d owned Rawls workspace IDs and %d owned Sam resources, of which %d were not present in Rawls",
               rawlsIds.size(), samResources.size(), samNotInRawls.size()));
       return samNotInRawls;
     } catch (IOException e) {
@@ -258,7 +268,10 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       impersonatedFirecloudService.deleteSamWorkspaceResource(dbUser, wsUuid);
     } catch (Exception e) {
-      logger.severe(String.format("Could not delete workspace %s: %s", wsUuid, e.getMessage()));
+      logger.severe(
+          String.format(
+              "Could not delete workspace %s: %s[%s]",
+              wsUuid, e.getClass().getName(), e.getMessage()));
       throw new ServerErrorException(e);
     }
   }
