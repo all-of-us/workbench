@@ -11,7 +11,11 @@ import {
 } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
-import { render, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 
@@ -79,9 +83,9 @@ test('loads and displays table', async () => {
     listDisksInWorkspace: () => Promise.resolve(mockDisks),
   }));
   render(<DisksTable sourceWorkspaceNamespace='123' />);
-  await waitFor(() => {
-    expect(screen.queryByTestId('disks spinner')).not.toBeInTheDocument();
-  });
+  await waitForElementToBeRemoved(() =>
+    screen.getByTitle('disks loading spinner')
+  );
 
   mockDisks.forEach((disk) => {
     const row = screen.getByText(disk.name).closest('tr');
@@ -110,9 +114,19 @@ test('loads and displays empty table', async () => {
     listDisksInWorkspace: () => Promise.resolve(mockDisks),
   }));
   render(<DisksTable sourceWorkspaceNamespace='123' />);
-  await waitFor(() => {
-    expect(screen.queryByTestId('disks spinner')).not.toBeInTheDocument();
-  });
-
+  await waitForElementToBeRemoved(() =>
+    screen.getByTitle('disks loading spinner')
+  );
   expect(screen.getByText('No disks found')).toBeInTheDocument();
+});
+
+test('show spinner while disks are loading', async () => {
+  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
+  mockdisksAdminApi.mockImplementation(() => ({
+    listDisksInWorkspace: () => new Promise(() => {}),
+  }));
+  render(<DisksTable sourceWorkspaceNamespace='123' />);
+
+  expect(screen.getByTitle('disks loading spinner')).toBeInTheDocument();
 });
