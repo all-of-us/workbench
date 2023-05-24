@@ -60,6 +60,36 @@
     "mode": "nullable"
   },
   {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_activity_summary",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_heart_rate_summary",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_heart_rate_level",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_steps_intraday",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_sleep_daily_summary",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_fitbit_sleep_level",
+    "type": "INTEGER"
+  },
+  {
     "type": "integer",
     "name": "has_whole_genome_variant",
     "mode": "nullable"

@@ -664,9 +664,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .ancestorData(false);
   }
 
-  private static SearchParameter fitbit() {
+  private static SearchParameter fitbit(Domain domain) {
     return new SearchParameter()
-        .domain(Domain.FITBIT.toString())
+        .domain(domain.toString())
         .group(false)
         .standard(true)
         .ancestorData(false);
@@ -1529,7 +1529,73 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countParticipantsFitbit() {
     CohortDefinition cohortDefinition =
         createCohortDefinition(
-            Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
+            Domain.FITBIT.toString(), ImmutableList.of(fitbit(Domain.FITBIT)), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitActivity() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_ACTIVITY.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_ACTIVITY)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitHeartRateLevel() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_HEART_RATE_LEVEL.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_HEART_RATE_LEVEL)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitHeartRateSummary() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_HEART_RATE_SUMMARY)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitSleepDailySummary() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_SLEEP_DAILY_SUMMARY)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitIntradaySteps() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_INTRADAY_STEPS.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_INTRADAY_STEPS)),
+            new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
+  }
+
+  @Test
+  public void countParticipantsFitbitSleepLevel() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.FITBIT_SLEEP_LEVEL.toString(),
+            ImmutableList.of(fitbit(Domain.FITBIT_SLEEP_LEVEL)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
