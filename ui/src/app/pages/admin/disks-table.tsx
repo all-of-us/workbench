@@ -32,9 +32,10 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   useEffect(() => console.log('What are disks? ', disks), [disks]);
 
   const onClickDelete = (disk) =>
-    fetchWithErrorModal(() =>
-      disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name)
-    );
+    fetchWithErrorModal(() => {
+      setDeleting(true);
+      return disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name);
+    }).finally(() => setDeleting(false));
 
   return loading && disks ? (
     <Spinner title='disks loading spinner' />
