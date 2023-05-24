@@ -52,7 +52,7 @@ insertCriteriaMenu "
 if [[ $fitbitCount > 0 ]];
 then
   echo "Insert fitbit into cb_criteria_menu"
-  insertCriteriaMenu "($((++ID)),0,'Program Data','FITBIT','FITBIT','Fitbit',0,$ID)"
+  insertCriteriaMenu "($((++ID)),0,'Program Data','FITBIT','FITBIT','Fitbit',1,$ID)"
 fi
 
 if [[ $wgvCount > 0 ]];
@@ -105,22 +105,37 @@ and parent_id = 0
 order by id"
 surveyNames=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
 
-echo "Getting max id"
-query="select max(id) as id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`"
-maxId=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+echo "Getting parent id"
+query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'SURVEY'"
+PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
-sortOrder=1
+SORT_ORDER=0
 
 while IFS= read -r line
 do
   if [[ "$line" != "name" ]]; then
-    maxId=$((maxId+1))
-    sortOrder=$((sortOrder+1))
-    echo "$maxId $line"
     bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
       "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\`
           (id,parent_id,category,domain_id,type,name,is_group,sort_order)
       VALUES
-      ($maxId,2,'Program Data','SURVEY','PPI','$line',0,$sortOrder)"
+      ($((++ID)),$PARENT_ID,'Program Data','SURVEY','PPI','$line',0,$((++SORT_ORDER)))"
   fi
 done <<< "$surveyNames"
+
+if [[ $fitbitCount > 0 ]];
+then
+  echo "Insert fitbit into cb_criteria_menu"
+
+  echo "Getting parent id"
+  query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'FITBIT'"
+  PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
+
+  SORT_ORDER=0
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT','FITBIT','Has Any Fitbit Data',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_ACTIVITY','FITBIT_ACTIVITY','Fitbit Activity Summary',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_SUMMARY','FITBIT_HEART_RATE_SUMMARY','Fitbit Heart Rate Summary',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_HEART_RATE_LEVEL','FITBIT_HEART_RATE_LEVEL','Fitbit Heart Rate Minute Level',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_INTRADAY_STEPS','FITBIT_INTRADAY_STEPS','Fitbit Steps Intraday',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_DAILY_SUMMARY','FITBIT_SLEEP_DAILY_SUMMARY','Fitbit Sleep Daily Summary',0,$((++SORT_ORDER)))"
+  insertCriteriaMenu "($((++ID)),$PARENT_ID,'Program Data','FITBIT_SLEEP_LEVEL','FITBIT_SLEEP_LEVEL','Fitbit Sleep Level',0,$((++SORT_ORDER)))"
+fi
