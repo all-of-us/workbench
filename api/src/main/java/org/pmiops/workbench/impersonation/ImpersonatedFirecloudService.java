@@ -34,7 +34,4 @@ public interface ImpersonatedFirecloudService {
 
   List<AccessPolicyResponseEntryV2> getSamWorkspacePolicies(
       @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException;
-
-  void deleteSamWorkspaceResources(@Nonnull DbUser dbUser, String workspaceResourceId)
-      throws IOException;
 }

@@ -27,7 +27,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -139,43 +138,42 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public Map<String, String> getOwnedWorkspacesOrphanedInSam(String username) {
+  public Set<String> getOwnedWorkspacesOrphanedInSam(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
     if (dbUser == null) {
       logger.warning(String.format("user %s not found", username));
-      return Collections.emptyMap();
+      return Collections.emptySet();
     }
 
     try {
-      Set<String> rawlsNamespaces =
+      Set<String> rawlsIds =
           impersonatedFirecloudService.getWorkspaces(dbUser).stream()
               .map(RawlsWorkspaceListResponse::getWorkspace)
-              .map(RawlsWorkspaceDetails::getNamespace)
+              .map(
+                  w -> {
+                    logger.severe(
+                        String.format(
+                            "Rawls Workspace has workflow-collection %s and ID %s",
+                            w.getWorkflowCollectionName(), w.getWorkspaceId()));
+                    return w.getWorkspaceId();
+                  })
               .collect(Collectors.toSet());
-      var ownedSamResources =
+      Set<String> samResources =
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
-              .filter(this::isProjectOwner)
               .map(UserResourcesResponse::getResourceId)
-              .collect(Collectors.toList());
-      var samBillingProjectMap =
-          ownedSamResources.stream()
-              .limit(10)
-              .flatMap(r -> maybeGetBillingProjectMapEntry(dbUser, r))
-              .collect(Collectors.toList());
-      var samNotInRawlsMap =
-          samBillingProjectMap.stream()
-              .filter(e -> !rawlsNamespaces.contains(e.getKey()))
-              .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+              .collect(Collectors.toSet());
+      //      var samBillingProjectMap =
+      //          ownedSamResources.stream()
+      //              .limit(10)
+      //              .flatMap(r -> maybeGetBillingProjectMapEntry(dbUser, r))
+      //              .collect(Collectors.toList());
+      var samNotInRawls = Sets.difference(samResources, rawlsIds);
 
       logger.info(
           String.format(
-              "Found %d rawls namespaces and %d sam resources, "
-                  + "of which %d were resolved to billing projects and %d were not present in Rawls",
-              rawlsNamespaces.size(),
-              ownedSamResources.size(),
-              samBillingProjectMap.size(),
-              samNotInRawlsMap.size()));
-      return samNotInRawlsMap;
+              "Found %d rawls IDs and %d sam resources, of which %d were not present in Rawls",
+              rawlsIds.size(), samResources.size(), samNotInRawls.size()));
+      return samNotInRawls;
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
@@ -302,29 +300,13 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   }
 
   @Override
-  public void deleteOrphanedSamWorkspace(
-      String username,
-      String wsNamespace,
-      String workspaceResourceId,
-      boolean deleteBillingProjects) {
+  public void deleteOrphanedSamWorkspace(String username, String wsUuid) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
-    try {
-      impersonatedFirecloudService.deleteSamWorkspaceResources(dbUser, workspaceResourceId);
-    } catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
-
-    if (deleteBillingProjects) {
-      try {
-        // use the real FirecloudService here because impersonation is not needed;
-        // billing projects are owned by the App SA
-        firecloudService.deleteBillingProject(wsNamespace);
-      } catch (Exception e) {
-        String msg =
-            String.format("Error deleting billing project %s: %s", wsNamespace, e.getMessage());
-        logger.warning(msg);
-      }
-    }
+    //    try {
+    //      impersonatedFirecloudService.deleteWorkspaceByUuid(dbUser, wsUuid);
+    //    } catch (Exception e) {
+    //      throw new ServerErrorException(e);
+    //    }
   }
 }

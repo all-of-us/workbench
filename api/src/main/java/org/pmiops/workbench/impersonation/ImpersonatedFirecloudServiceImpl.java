@@ -133,17 +133,6 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
             resourcesApi.listResourcePoliciesV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
   }
 
-  @Override
-  public void deleteSamWorkspaceResources(@Nonnull DbUser dbUser, String workspaceResourceId)
-      throws IOException {
-    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
-    samRetryHandler.run(
-        (context) -> {
-          resourcesApi.deleteResourceV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId);
-          return null;
-        });
-  }
-
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {
     return new TermsOfServiceApi(
         firecloudApiClientFactory.newImpersonatedApiClient(dbUser.getUsername()));

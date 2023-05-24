@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import com.google.api.client.http.HttpTransport;
 import com.google.common.primitives.Ints;
 import java.util.List;
 import java.util.Optional;
@@ -169,29 +170,26 @@ public class DeleteWorkspaces extends Tool {
   private void deleteSamWorkspaces(
       String rwEnvOpt, String usernameOpt, Optional<Integer> limitOpt, boolean deleteOpt) {
     // map of [Billing Project Resource ID : Workspace Resource ID]
-    var workspaceMap = workspaceService.getOwnedWorkspacesOrphanedInSam(usernameOpt);
+    var workspaces = workspaceService.getOwnedWorkspacesOrphanedInSam(usernameOpt);
     LOG.info(
         String.format(
             "Found %d Sam workspaces which are not present in the %s Rawls DB",
-            workspaceMap.size(), rwEnvOpt));
+            workspaces.size(), rwEnvOpt));
 
     if (deleteOpt) {
       limitOpt
           .map(
               l -> {
                 LOG.info(String.format("Limiting to the first %d workspaces.", l));
-                return workspaceMap.entrySet().stream().limit(l);
+                return workspaces.stream().limit(l);
               })
-          .orElse(workspaceMap.entrySet().stream())
+          .orElse(workspaces.stream())
           .forEach(
               ws -> {
-                String billingProject = ws.getKey();
-                String workspaceResourceId = ws.getValue();
-                LOG.info(
-                    String.format(
-                        "Deleting Sam workspace %s/%s", billingProject, workspaceResourceId));
-                workspaceService.deleteOrphanedSamWorkspace(
-                    usernameOpt, billingProject, workspaceResourceId, DELETE_BILLING_PROJECTS);
+                // String billingProject = ws.getKey();
+                // String workspaceResourceId = ws.getValue();
+                LOG.info(String.format("Deleting Sam workspace %s", ws));
+                workspaceService.deleteOrphanedSamWorkspace(usernameOpt, ws);
               });
     } else {
       LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
