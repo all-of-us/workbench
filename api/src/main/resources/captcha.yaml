@@ -1,16 +1,9 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: Captcha
-  version: '0.1'
-
-host: 'google.com'
-schemes:
-  - 'https'
-basePath: /recaptcha/api
-
-produces:
-  - application/json
-
+  version: "0.1"
+servers:
+  - url: https://google.com/recaptcha/api
 paths:
   /siteverify?secret={secret}&response={responseToken}:
     get:
@@ -18,38 +11,42 @@ paths:
         - captcha
       operationId: verify
       parameters:
-        - in: path
-          name: secret
+        - name: secret
+          in: path
           description: secret server key
           required: true
-          type: string
-        - in: path
-          name: responseToken
+          schema:
+            type: string
+        - name: responseToken
+          in: path
           description: Token generated from Captcha
           required: true
-          type: string
+          schema:
+            type: string
       responses:
         200:
           description: Email sent successfully
-          schema:
-            $ref: '#/definitions/CaptchaVerificationResponse'
-
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
-definitions:
-  CaptchaVerificationResponse:
-    type: object
-    properties:
-      success:
-        type: boolean
-      hostname:
-        type: string
-      error-codes:
-        type: array
-        items:
-          $ref: '#/definitions/ErrorCodes'
-
-  ErrorCodes:
-    type: string
-    enum: [MissingSecret,InvalidSecret,MissingResponse,InvalidResponse]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptchaVerificationResponse'
+components:
+  schemas:
+    CaptchaVerificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        hostname:
+          type: string
+        error-codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorCodes'
+    ErrorCodes:
+      type: string
+      enum:
+        - MissingSecret
+        - InvalidSecret
+        - MissingResponse
+        - InvalidResponse

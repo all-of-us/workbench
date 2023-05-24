@@ -34,7 +34,6 @@ import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
-import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
 import org.pmiops.workbench.rdr.model.RdrEthnicity;
 import org.pmiops.workbench.rdr.model.RdrGender;
@@ -55,6 +54,7 @@ import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.IncomeLevelEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.SexAtBirthEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.SexualOrientationEnum;
+import org.pmiops.workbench.rdr.model.RdrYesNoPreferNot;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -209,7 +209,7 @@ public class RdrMapperTest {
                 .identifiesAsLgbtq(false)
                 .lgbtqIdentity("n/a")
                 .education(RdrEducation.NO_EDUCATION)
-                .disability(RdrDisability.YES)
+                .disability(RdrYesNoPreferNot.YES)
                 .degrees(ImmutableList.of(RdrDegree.MD))
                 .email("contact@asdf.com")
                 .accessTierShortNames(
