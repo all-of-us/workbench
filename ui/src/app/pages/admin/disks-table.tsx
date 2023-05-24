@@ -35,7 +35,10 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     fetchWithErrorModal(() => {
       setDeleting(true);
       return disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name);
-    }).finally(() => setDeleting(false));
+    }).finally(() => {
+      setDeleting(false);
+      setLoading(true);
+    });
 
   return loading && disks ? (
     <Spinner title='disks loading spinner' />
