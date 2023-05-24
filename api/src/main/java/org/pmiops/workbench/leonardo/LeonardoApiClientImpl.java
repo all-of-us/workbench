@@ -530,14 +530,19 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 
+    Map<String, String> appCustomEnvVars =
+        LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+            dbWorkspace, fireCloudService, workbenchConfigProvider.get());
+    appCustomEnvVars.put("WORKSPACE_NAME", dbWorkspace.getFirecloudName());
+    appCustomEnvVars.put("GOOGLE_PROJECT", dbWorkspace.getGoogleProject());
+    appCustomEnvVars.put("OWNER_EMAIL", userProvider.get().getUsername());
+
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
-        .customEnvironmentVariables(
-            LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
-                dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
+        .customEnvironmentVariables(appCustomEnvVars)
         .labels(appLabels);
 
     if (appType.equals(AppType.RSTUDIO)) {

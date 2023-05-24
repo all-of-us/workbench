@@ -225,7 +225,9 @@ public class LeonardoApiClientTest {
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
-
+    customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
+    customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
+    customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
     LeonardoCreateAppRequest expectedAppRequest =
         new LeonardoCreateAppRequest()
             .appType(LeonardoAppType.CUSTOM)
