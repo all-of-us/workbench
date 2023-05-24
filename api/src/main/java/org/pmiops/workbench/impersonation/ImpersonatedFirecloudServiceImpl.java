@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
-import org.broadinstitute.dsde.workbench.client.sam.model.AccessPolicyResponseEntryV2;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
@@ -125,12 +124,12 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public List<AccessPolicyResponseEntryV2> getSamWorkspacePolicies(
-      @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException {
-    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
-    return samRetryHandler.run(
-        (context) ->
-            resourcesApi.listResourcePoliciesV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
+  public void deleteWorkspaceByUuid(DbUser dbUser, String wsUuid) throws IOException {
+    WorkspacesApi workspacesApi = getImpersonatedWorkspacesApi(dbUser);
+    var foo =
+        rawlsRetryHandler.run(
+            (context) ->
+                workspacesApi.getWorkspaceById(wsUuid, FIRECLOUD_WORKSPACE_REQUIRED_FIELDS));
   }
 
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {

@@ -1,21 +1,13 @@
 package org.pmiops.workbench.impersonation;
 
-import static org.pmiops.workbench.impersonation.ImpersonatedFirecloudServiceImpl.SAM_BILLING_PROJECT_NAME;
-import static org.pmiops.workbench.impersonation.ImpersonatedFirecloudServiceImpl.SAM_PROJECT_OWNER_NAME;
-
 import com.google.common.collect.Sets;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -27,6 +19,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -148,30 +141,19 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     try {
       Set<String> rawlsIds =
           impersonatedFirecloudService.getWorkspaces(dbUser).stream()
+              .filter(this::isOwner)
               .map(RawlsWorkspaceListResponse::getWorkspace)
-              .map(
-                  w -> {
-                    logger.severe(
-                        String.format(
-                            "Rawls Workspace has workflow-collection %s and ID %s",
-                            w.getWorkflowCollectionName(), w.getWorkspaceId()));
-                    return w.getWorkspaceId();
-                  })
+              .map(RawlsWorkspaceDetails::getWorkspaceId)
               .collect(Collectors.toSet());
       Set<String> samResources =
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
               .map(UserResourcesResponse::getResourceId)
               .collect(Collectors.toSet());
-      //      var samBillingProjectMap =
-      //          ownedSamResources.stream()
-      //              .limit(10)
-      //              .flatMap(r -> maybeGetBillingProjectMapEntry(dbUser, r))
-      //              .collect(Collectors.toList());
-      var samNotInRawls = Sets.difference(samResources, rawlsIds);
+      Set<String> samNotInRawls = Sets.difference(samResources, rawlsIds);
 
       logger.info(
           String.format(
-              "Found %d rawls IDs and %d sam resources, of which %d were not present in Rawls",
+              "Found %d rawls workspace IDs and %d sam resources, of which %d were not present in Rawls",
               rawlsIds.size(), samResources.size(), samNotInRawls.size()));
       return samNotInRawls;
     } catch (IOException e) {
@@ -179,44 +161,13 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
   }
 
-  private boolean isProjectOwner(UserResourcesResponse response) {
-    return Optional.ofNullable(response.getDirect())
-        .map(r -> r.getRoles().contains(SAM_PROJECT_OWNER_NAME))
-        .orElse(false);
-  }
-
-  // attempt to resolve a Billing Project for a Workspace ID:
-  // success -> return a streamed Map.Entry of <Billing Project, Workspace Resource ID>
-  // failure -> Stream.empty()
-  private Stream<Entry<String, String>> maybeGetBillingProjectMapEntry(
-      DbUser dbUser, String workspaceResourceId) {
-    try {
-      return impersonatedFirecloudService
-          .getSamWorkspacePolicies(dbUser, workspaceResourceId)
-          .stream()
-          // filter to the project-owner policy (policies?)
-          .filter(e -> e.getPolicyName().equals(SAM_PROJECT_OWNER_NAME))
-          // map to member policies, if any exist
-          .flatMap(e -> Stream.ofNullable(e.getPolicy().getMemberPolicies()))
-          .flatMap(Collection::stream)
-          // filter to the M.P. corresponding to the billing project resource type
-          .filter(pi -> pi.getResourceTypeName().equals(SAM_BILLING_PROJECT_NAME))
-          .map(pi -> Map.entry(pi.getResourceId(), workspaceResourceId));
-    } catch (IOException e) {
-      logger.severe(
-          String.format(
-              "Exception retrieving policies for %s: %s", workspaceResourceId, e.getMessage()));
-      return Stream.empty();
-    }
-  }
-
   @Override
   public void deleteWorkspace(
-      String username, String wsNamespace, String wsId, boolean deleteBillingProjects) {
+      String username, String wsNamespace, String firecloudName, boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
     // also confirms that the workspace exists in the DB
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, wsId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(wsNamespace, firecloudName);
 
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
@@ -237,7 +188,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, firecloudName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -264,7 +215,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
       String username,
       String wsNamespace,
       String googleProject,
-      String wsId,
+      String firecloudName,
       boolean deleteBillingProjects) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
@@ -281,7 +232,7 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
     }
 
     try {
-      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, wsId);
+      impersonatedFirecloudService.deleteWorkspace(dbUser, wsNamespace, firecloudName);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -303,10 +254,11 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
   public void deleteOrphanedSamWorkspace(String username, String wsUuid) {
     final DbUser dbUser = userDao.findUserByUsername(username);
 
-    //    try {
-    //      impersonatedFirecloudService.deleteWorkspaceByUuid(dbUser, wsUuid);
-    //    } catch (Exception e) {
-    //      throw new ServerErrorException(e);
-    //    }
+    try {
+      impersonatedFirecloudService.deleteWorkspaceByUuid(dbUser, wsUuid);
+    } catch (Exception e) {
+      logger.severe("Could not delete workspace " + wsUuid);
+      throw new ServerErrorException(e);
+    }
   }
 }

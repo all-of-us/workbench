@@ -24,13 +24,13 @@ public interface ImpersonatedWorkspaceService {
   Set<String> getOwnedWorkspacesOrphanedInSam(String username);
 
   void deleteWorkspace(
-      String username, String wsNamespace, String wsId, boolean deleteBillingProjects);
+      String username, String wsNamespace, String firecloudName, boolean deleteBillingProjects);
 
   void deleteOrphanedRawlsWorkspace(
       String username,
       String wsNamespace,
       String googleProject,
-      String wsId,
+      String firecloudName,
       boolean deleteBillingProjects);
 
   void deleteOrphanedSamWorkspace(String username, String wsUuid);
