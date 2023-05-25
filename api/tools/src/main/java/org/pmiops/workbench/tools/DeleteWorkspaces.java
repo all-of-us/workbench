@@ -1,6 +1,7 @@
 package org.pmiops.workbench.tools;
 
 import com.google.common.primitives.Ints;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -161,14 +162,27 @@ public class DeleteWorkspaces extends Tool {
     }
 
     if (deleteOpt) {
-      limitOpt
-          .map(
-              l -> {
-                LOG.info(String.format("Limiting to the first %d workspaces.", l));
-                return workspaces.stream().limit(l);
-              })
-          .orElse(workspaces.stream())
-          .forEach(ws -> deleteWorkspace.accept(ws, usernameOpt));
+      List<T> toDelete =
+          limitOpt
+              .map(
+                  l -> {
+                    LOG.info(String.format("Limiting to a random sample of %d workspaces.", l));
+                    Collections.shuffle(workspaces);
+                    return workspaces.subList(0, l);
+                  })
+              .orElse(workspaces);
+
+      int deleted = 0, failed = 0;
+      for (T workspace : toDelete) {
+        try {
+          deleteWorkspace.accept(workspace, usernameOpt);
+          deleted++;
+        } catch (Exception ignored) {
+          failed++;
+        }
+      }
+
+      LOG.info(String.format("Successful deletions: %d, failed deletions: %d", deleted, failed));
     } else {
       LOG.info("Not deleting. Enable deletion by passing the --delete argument.");
     }
