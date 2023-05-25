@@ -96,7 +96,7 @@ def start_local_db_service()
   common.status "Database startup complete (#{format_benchmark(bm)})"
 end
 
-def dev_up_tanagra(cmd_name,args)
+def dev_up_tanagra()
   common = Common.new
   common.status "Setting up local environment for tanagra API"
   setup_local_environment()
@@ -110,7 +110,7 @@ end
 Common.register_command({
   :invocation => "dev-up-tanagra",
   :description => "Brings up tanagra service environment and connects to db.",
-  :fn => ->(*args) { dev_up_tanagra("dev-up-tanagra",args) }
+  :fn => ->(*args) { dev_up_tanagra() }
 })
 
 def dev_up(cmd_name, args)
