@@ -1,6 +1,6 @@
 cron:
-- description: 'Periodic notebook runtime checks'
-  url: /v1/cron/checkRuntimes
+- description: Periodic notebook runtime deletion due to age
+  url: "/v1/cron/deleteOldRuntimes"
   schedule: every 3 hours
   timezone: UTC
   target: api

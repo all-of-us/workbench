@@ -1832,16 +1832,16 @@ paths:
       responses:
         204:
           description: The egress event was successfully handled.
-  "/v1/cron/checkRuntimes":
+  "/v1/cron/deleteOldRuntimes":
     get:
       security: []
       tags:
       - offlineRuntime
       - cron
       description: 'Endpoint meant to be called offline to trigger runtime checks
-        and cleanup. Enforces upgrades for older runtime deployments. May be slow
-        to execute. Only executable via App Engine cronjob.'
-      operationId: checkRuntimes
+        and cleanup. Enforces upgrade by deletion and recreation for older runtime 
+        deployments. May be slow to execute. Only executable via App Engine cronjob.'
+      operationId: deleteOldRuntimes
       responses:
         204:
           description: Runtimes were checked and handled successfully.
