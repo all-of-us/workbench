@@ -38,7 +38,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       setLoading(true);
     });
 
-  return loading && disks ? (
+  return loading ? (
     <Spinner title='disks loading spinner' />
   ) : (
     <DataTable value={disks} emptyMessage='No disks found'>
