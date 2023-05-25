@@ -42,6 +42,13 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     <Spinner title='disks loading spinner' />
   ) : (
     <DataTable value={disks} emptyMessage='No disks found'>
+      <Column
+        body={(disk) => (
+          <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
+            Delete
+          </Button>
+        )}
+      />
       <Column field='name' header='Name' />
       <Column field='creator' header='Creator' />
       <Column
@@ -57,13 +64,6 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
         }
       />
       <Column field='size' header='Size (GB)' />
-      <Column
-        body={(disk) => (
-          <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
-            Delete
-          </Button>
-        )}
-      />
     </DataTable>
   );
 };
