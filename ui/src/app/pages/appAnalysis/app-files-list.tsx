@@ -41,6 +41,7 @@ const styles = reactStyles({
   },
   tableHeader: {
     paddingTop: '1.5rem',
+    paddingBottom: '0.5rem',
   },
   columns: {
     borderLeft: 'none',
@@ -173,6 +174,7 @@ export const AppFilesList = withCurrentWorkspace()(
                 bodyStyle={styles.rows}
                 filter
                 filterPlaceholder={'Search Name'}
+                filterHeaderStyle={{ paddingTop: '0rem' }}
                 sortable
               />
               <Column
