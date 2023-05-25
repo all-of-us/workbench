@@ -23,12 +23,11 @@ import moment from 'moment';
 
 import { DisksTable } from './disks-table';
 
-const convertDate = (originalDate: String) => {
-  const date = originalDate.substring(0, 10);
-  const hour =
-    parseInt(originalDate.substring(11, 13), 10) + moment().utcOffset() / 60;
-  const minutes = originalDate.substring(14, 16);
-  return `${date} ${hour}:${minutes}`;
+const convertDate = (originalDate: string) => {
+  let date = moment(originalDate).utc();
+  date = date.local();
+
+  return date.format('YYYY-MM-DD HH:mm');
 };
 
 const getEnvironmentType = (isGceRuntime: boolean, appType: AppType) => {
