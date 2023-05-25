@@ -1839,7 +1839,7 @@ paths:
       - offlineRuntime
       - cron
       description: 'Endpoint meant to be called offline to trigger runtime checks
-        and cleanup. Enforces upgrade by deletion and recreation for older runtime 
+        and cleanup. Enforces upgrade by deletion and re-creation for older runtime 
         deployments. May be slow to execute. Only executable via App Engine cronjob.'
       operationId: deleteOldRuntimes
       responses:
