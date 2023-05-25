@@ -29,8 +29,6 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     }
   }, [loading]);
 
-  useEffect(() => console.log('What are disks? ', disks), [disks]);
-
   const onClickDelete = (disk) =>
     fetchWithErrorModal(() => {
       setDeleting(true);
