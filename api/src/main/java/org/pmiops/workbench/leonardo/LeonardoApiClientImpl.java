@@ -1,5 +1,8 @@
 package org.pmiops.workbench.leonardo;
 
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.GOOGLE_PROJECT_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.OWNER_EMAIL_ENV_KEY;
+import static org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils.WORKSPACE_NAME_ENV_KEY;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
@@ -530,14 +533,22 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
       diskRequest.setName(userProvider.get().generatePDNameForUserApps(appType));
     }
 
+    Map<String, String> appCustomEnvVars =
+        LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
+            dbWorkspace, fireCloudService, workbenchConfigProvider.get());
+    // Required by Leo to validate one App per user per workspace (namespace with workspace name)
+    appCustomEnvVars.put(WORKSPACE_NAME_ENV_KEY, dbWorkspace.getFirecloudName());
+
+    // Used by AoU RW and but not set by Leo for GKE APP.
+    appCustomEnvVars.put(GOOGLE_PROJECT_ENV_KEY, dbWorkspace.getGoogleProject());
+    appCustomEnvVars.put(OWNER_EMAIL_ENV_KEY, userProvider.get().getUsername());
+
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)
-        .customEnvironmentVariables(
-            LeonardoCustomEnvVarUtils.getBaseEnvironmentVariables(
-                dbWorkspace, fireCloudService, workbenchConfigProvider.get()))
+        .customEnvironmentVariables(appCustomEnvVars)
         .labels(appLabels);
 
     if (appType.equals(AppType.RSTUDIO)) {
