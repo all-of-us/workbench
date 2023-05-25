@@ -96,29 +96,12 @@ def start_local_db_service()
   common.status "Database startup complete (#{format_benchmark(bm)})"
 end
 
-def dev_up_tanagra_postgres(cmd_name,args)
-  op = WbOptionsParser.new(cmd_name,args)
-  common = Common.new
-  common.status "Starting tanagra-service with postgresql"
-  Dir.chdir('../tanagra') do
-    common.run_inline %W(./service/local-dev/run_postgres.sh start)
-    common.run_inline %W{./service/local-dev/run_server.sh -a -v AoU}
-  end
-end
-
-Common.register_command({
-  :invocation => "dev-up-tanagra-postgres",
-  :description => "Brings up tanagra service environment and connects to db.",
-  :fn => ->(*args) { dev_up_tanagra_postgres("dev-up-tanagra-postgres",args) }
-})
-
 def dev_up_tanagra(cmd_name,args)
-  op = WbOptionsParser.new(cmd_name,args)
   common = Common.new
-  common.status "Setting up local environment"
+  common.status "Setting up local environment for tanagra API"
   setup_local_environment()
   start_local_db_service()
-  common.status "Starting tanagra-service"
+  common.status "Starting tanagra-servicem- using mariadb no authentication"
   Dir.chdir('../aou-tanagra-utils') do
     common.run_inline %W{./run_tanagra_server.sh -a}
   end
@@ -141,14 +124,6 @@ def dev_up(cmd_name, args)
   op.parse.validate
 
   common = Common.new
-
-  # common.status "Running dev-up PID (#{Process.pid})"
-  # spin up tanagra service use-postgresql?
-  # fork do
-  #   common.status "Running dev-up-tanagra in child PID (#{Process.pid})"
-  #   dev_up_tanagra(cmd_name,args)
-  # end
-  # common.status "Continuing dev-up PID (#{Process.pid})...."
 
   account = get_auth_login_account()
   if account.nil?

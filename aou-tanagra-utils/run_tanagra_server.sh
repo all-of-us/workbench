@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-usage() { echo "$0 usage flags:" && grep " .)\ #" $0; }
-
-usage
-echo
-
 while getopts ":a" arg; do
   case $arg in
     a) # Disable authentication.

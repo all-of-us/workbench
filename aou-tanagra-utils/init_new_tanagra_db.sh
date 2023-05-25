@@ -7,15 +7,11 @@ IFS=$'\n\t'
 
 USAGE="./init-new-tanagra-db.sh [--drop-if-exists]>"
 DROP_IF_EXISTS="N"
-RUN_LIST="schema"
-CONTEXT=
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
     --drop-if-exists) DROP_IF_EXISTS="Y"; shift 1;;
-    --run-list) RUN_LIST=$2; shift 2;;
-    --context) CONTEXT="-Pcontexts=$2"; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
   esac
@@ -30,7 +26,7 @@ fi
 CREATE_DB_FILE=/tmp/create_tanagra_db.sql
 
 function finish {
-  rm -f ${CREATE_DB_FILE}
+  rm -f "${CREATE_DB_FILE}"
 }
 trap finish EXIT
 
