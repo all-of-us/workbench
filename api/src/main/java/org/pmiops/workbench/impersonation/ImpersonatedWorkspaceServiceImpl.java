@@ -159,13 +159,23 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
               .filter(this::isSamOwner)
               .map(UserResourcesResponse::getResourceId)
+              .limit(10)
               .collect(Collectors.toList());
-      var samNotInRawls = Lists.difference(samResources, rawlsIds);
+      var samNoChildren = samResources.stream().filter(r ->
+      {
+        try {
+          return impersonatedFirecloudService.getSamWorkspaceResourceChildren(dbUser, r).isEmpty();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }).collect(Collectors.toList());
+
+      var samNotInRawls = Lists.difference(samNoChildren, rawlsIds);
 
       logger.info(
           String.format(
-              "Found %d owned Rawls workspace IDs and %d owned Sam resources, of which %d were not present in Rawls",
-              rawlsIds.size(), samResources.size(), samNotInRawls.size()));
+              "Found %d owned Rawls workspace IDs and %d/%d owned Sam resources, of which %d were not present in Rawls",
+              rawlsIds.size(), samNoChildren.size(), samResources.size(), samNotInRawls.size()));
       return samNotInRawls;
     } catch (IOException e) {
       throw new ServerErrorException(e);

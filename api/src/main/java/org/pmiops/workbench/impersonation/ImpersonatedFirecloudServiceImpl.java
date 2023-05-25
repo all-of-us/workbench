@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.broadinstitute.dsde.workbench.client.sam.api.ResourcesApi;
+import org.broadinstitute.dsde.workbench.client.sam.model.FullyQualifiedResourceId;
 import org.broadinstitute.dsde.workbench.client.sam.model.UserResourcesResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
@@ -130,6 +131,14 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
           resourcesApi.deleteResourceV2(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId);
           return null;
         });
+  }
+
+  @Override
+  public List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(@Nonnull DbUser dbUser, String workspaceResourceId)
+      throws IOException {
+    ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
+    return samRetryHandler.run(
+        (context) -> resourcesApi.listResourceChildren(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
   }
 
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {
