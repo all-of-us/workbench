@@ -23,8 +23,6 @@ import moment from 'moment';
 
 import { DisksTable } from './disks-table';
 
-jest.mock('app/services/swagger-fetch-clients');
-
 const convertDate = (originalDate: String) => {
   const date = originalDate.substring(0, 10);
   const hour =
@@ -73,17 +71,31 @@ const mockRStudioDisk: Disk = {
   createdDate: '2023-05-22T18:55:10.108838Z',
 };
 
-test('loads and displays table', async () => {
-  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
-  const mockDisks: ListDisksResponse = [
-    mockJupyterDisk,
-    mockCromwellDisk,
-    mockRStudioDisk,
-  ];
-  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
+const mockDisks: ListDisksResponse = [
+  mockJupyterDisk,
+  mockCromwellDisk,
+  mockRStudioDisk,
+];
+
+let mockdisksAdminApi;
+
+beforeEach(() => {
+  jest.mock('app/services/swagger-fetch-clients');
+  mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+const setup = (mockOverrides) => {
   mockdisksAdminApi.mockImplementation(() => ({
-    listDisksInWorkspace: () => Promise.resolve(mockDisks),
+    ...mockOverrides,
   }));
+};
+
+test('loads and displays table', async () => {
+  setup({ listDisksInWorkspace: () => Promise.resolve(mockDisks) });
   render(<DisksTable sourceWorkspaceNamespace='123' />);
   await waitForElementToBeRemoved(() =>
     screen.getByTitle('disks loading spinner')
@@ -104,17 +116,12 @@ test('loads and displays table', async () => {
     expect(rowScope.getByText(disk.size)).toBeInTheDocument();
     expect(
       rowScope.getByText('Delete').closest('div[role="button"]')
-    ).not.toBeDisabled();
+    ).not.toHaveStyle(`cursor: not-allowed`);
   });
 });
 
 test('loads and displays empty table', async () => {
-  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
-  const mockDisks: ListDisksResponse = [];
-  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
-  mockdisksAdminApi.mockImplementation(() => ({
-    listDisksInWorkspace: () => Promise.resolve(mockDisks),
-  }));
+  setup({ listDisksInWorkspace: () => Promise.resolve([]) });
   render(<DisksTable sourceWorkspaceNamespace='123' />);
   await waitForElementToBeRemoved(() =>
     screen.getByTitle('disks loading spinner')
@@ -123,30 +130,22 @@ test('loads and displays empty table', async () => {
 });
 
 test('show spinner while disks are loading', async () => {
-  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
-  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
-  mockdisksAdminApi.mockImplementation(() => ({
+  setup({
     listDisksInWorkspace: () => new Promise(() => {}),
-  }));
+  });
   render(<DisksTable sourceWorkspaceNamespace='123' />);
 
   expect(screen.getByTitle('disks loading spinner')).toBeInTheDocument();
 });
 
 test('delete disk', async () => {
-  const mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
-  const mockDisks: ListDisksResponse = [
-    mockJupyterDisk,
-    mockCromwellDisk,
-    mockRStudioDisk,
-  ];
   const mockDeleteFunction = jest.fn(() => Promise.resolve({}));
   const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
-  // @ts-ignore: Expects full implementation which includes a protected property(configuration) which is hard to mock
-  mockdisksAdminApi.mockImplementation(() => ({
+
+  setup({
     deleteDisk: mockDeleteFunction,
     listDisksInWorkspace: mockListFunction,
-  }));
+  });
 
   render(<DisksTable sourceWorkspaceNamespace='123' />);
   await waitForElementToBeRemoved(() =>
@@ -164,5 +163,38 @@ test('delete disk', async () => {
   await waitFor(() => {
     expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
     expect(mockListFunction).toHaveBeenCalledTimes(2);
+  });
+});
+
+test('disable delete buttons while deleting a disk', async () => {
+  const mockDeleteFunction = jest.fn(() => new Promise(() => {}));
+  const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
+
+  setup({
+    deleteDisk: mockDeleteFunction,
+    listDisksInWorkspace: mockListFunction,
+  });
+
+  render(<DisksTable sourceWorkspaceNamespace='123' />);
+  await waitForElementToBeRemoved(() =>
+    screen.getByTitle('disks loading spinner')
+  );
+
+  const jupyterRow = screen.getByText(mockJupyterDisk.name).closest('tr');
+  const jupyterRowScope = within(jupyterRow);
+  const jupyterDeleteButton = jupyterRowScope
+    .getByText('Delete')
+    .closest('div[role="button"]');
+
+  fireEvent.click(jupyterDeleteButton);
+  await waitFor(() => {
+    expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
+  });
+  mockDisks.forEach((disk) => {
+    const row = screen.getByText(disk.name).closest('tr');
+    const rowScope = within(row);
+    expect(
+      rowScope.getByText('Delete').closest('div[role="button"]')
+    ).toHaveStyle(`cursor: not-allowed`);
   });
 });
