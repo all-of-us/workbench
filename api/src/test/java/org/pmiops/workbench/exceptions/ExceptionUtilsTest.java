@@ -3,7 +3,6 @@ package org.pmiops.workbench.exceptions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.SocketTimeoutException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class ExceptionUtilsTest {

@@ -61,7 +61,11 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       <Column field='size' header='Size (GB)' />
       <Column
         body={(disk) => (
-          <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
+          <Button
+            disabled={deleting}
+            onClick={() => onClickDelete(disk)}
+            as='button'
+          >
             Delete
           </Button>
         )}
