@@ -222,7 +222,7 @@
   <include file="changelog/db.changelog-212-2023q1-cdr-env-vars.xml"/>
   <include file="changelog/db.changelog-213-alter-cdr-env-vars-datatype.xml"/>
   <include file="changelog/db.changelog-214-drop-unused-columns-user-table.xml"/>
-  <include file="changelog/db.changelog-215-add-egress-bypass-table"/>
+  <include file="changelog/db.changelog-215-add-egress-bypass-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

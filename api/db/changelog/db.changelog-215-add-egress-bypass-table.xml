@@ -10,7 +10,7 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="user_id" type="bigint">
-        <constraints nullable="true" foreignKeyName="fk_egress_event_user_id" references="user(user_id)"/>
+        <constraints nullable="true" foreignKeyName="fk_egress_bypass_window_user_id" references="user(user_id)"/>
       </column>
       <column name="start_time" type="datetime">
         <constraints nullable="false"/>
