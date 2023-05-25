@@ -96,21 +96,38 @@ def start_local_db_service()
   common.status "Database startup complete (#{format_benchmark(bm)})"
 end
 
-def dev_up_tanagra()
+def dev_up_tanagra(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.disable_auth_checks = false
+  op.add_option(
+    "--disable-auth-checks",
+    ->(opts, _) { opts.disable_auth_checks = true },
+    "If specified, disable authorization checks " +
+      " not yet tested cor what auth token to pass...")
+  op.parse.validate
+
   common = Common.new
   common.status "Setting up local environment for tanagra API"
   setup_local_environment()
+
+  common.status "starting local database - mariadb"
   start_local_db_service()
-  common.status "Starting tanagra-servicem- using mariadb no authentication"
+
   Dir.chdir('../aou-tanagra-utils') do
-    common.run_inline %W{./run_tanagra_server.sh -a}
+    if op.opts.disable_auth_checks
+      common.status "Starting tanagra-service authorization checks disabled"
+      common.run_inline %W{./run_tanagra_server.sh -a}
+    else
+      common.status "Starting tanagra-service authorization checks enabled"
+      common.run_inline %W{./run_tanagra_server.sh}
+    end
   end
 end
 
 Common.register_command({
   :invocation => "dev-up-tanagra",
   :description => "Brings up tanagra service environment and connects to db.",
-  :fn => ->(*args) { dev_up_tanagra() }
+  :fn => ->(*args) { dev_up_tanagra("dev-up-tanagra",args) }
 })
 
 def dev_up(cmd_name, args)
