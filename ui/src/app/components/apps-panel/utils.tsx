@@ -12,8 +12,9 @@ import {
 } from 'generated/fetch';
 
 import { cond, switchCase } from 'app/utils';
-import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
 import * as runtimeUitils from 'app/utils/runtime-utils';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
@@ -76,6 +77,23 @@ export const defaultRStudioConfig: CreateAppRequest = {
     size: 100,
     diskType: DiskType.Standard,
   },
+};
+
+export const createAppRequestToAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): Partial<AnalysisConfig> => {
+  return {
+    machine: findMachineByName(
+      createAppRequest.kubernetesRuntimeConfig.machineType
+    ),
+    diskConfig: {
+      size: createAppRequest.persistentDiskRequest.size,
+      detachable: true,
+      detachableType: createAppRequest.persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: createAppRequest.kubernetesRuntimeConfig.numNodes,
+  };
 };
 
 const isVisible = (status: AppStatus): boolean =>
