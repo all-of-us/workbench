@@ -35,5 +35,6 @@ public interface ImpersonatedFirecloudService {
   void deleteSamWorkspaceResource(@Nonnull DbUser dbUser, String workspaceResourceId)
       throws IOException;
 
-  List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(@Nonnull DbUser dbUser, String workspaceResourceId) throws IOException ;
+  List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(
+      @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException;
 }

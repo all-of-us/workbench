@@ -140,6 +140,16 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
         .orElse(false);
   }
 
+  private boolean hasNoChildren(DbUser dbUser, String workspaceResourceId) {
+    try {
+      return impersonatedFirecloudService
+          .getSamWorkspaceResourceChildren(dbUser, workspaceResourceId)
+          .isEmpty();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Override
   public List<String> getOwnedWorkspacesOrphanedInSam(String username) {
     final DbUser dbUser = userDao.findUserByUsername(username);
@@ -159,23 +169,16 @@ public class ImpersonatedWorkspaceServiceImpl implements ImpersonatedWorkspaceSe
           impersonatedFirecloudService.getSamWorkspaceResources(dbUser).stream()
               .filter(this::isSamOwner)
               .map(UserResourcesResponse::getResourceId)
-              .limit(10)
+              .limit(100) // TEMP to avoid spamming sam
+              .filter(r -> hasNoChildren(dbUser, r))
               .collect(Collectors.toList());
-      var samNoChildren = samResources.stream().filter(r ->
-      {
-        try {
-          return impersonatedFirecloudService.getSamWorkspaceResourceChildren(dbUser, r).isEmpty();
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      }).collect(Collectors.toList());
 
-      var samNotInRawls = Lists.difference(samNoChildren, rawlsIds);
+      var samNotInRawls = Lists.difference(samResources, rawlsIds);
 
       logger.info(
           String.format(
-              "Found %d owned Rawls workspace IDs and %d/%d owned Sam resources, of which %d were not present in Rawls",
-              rawlsIds.size(), samNoChildren.size(), samResources.size(), samNotInRawls.size()));
+              "Found %d owned Rawls workspace IDs and %d owned Sam resources, of which %d were not present in Rawls",
+              rawlsIds.size(), samResources.size(), samNotInRawls.size()));
       return samNotInRawls;
     } catch (IOException e) {
       throw new ServerErrorException(e);

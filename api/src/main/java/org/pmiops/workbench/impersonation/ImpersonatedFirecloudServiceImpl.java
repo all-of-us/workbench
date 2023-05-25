@@ -134,11 +134,12 @@ public class ImpersonatedFirecloudServiceImpl implements ImpersonatedFirecloudSe
   }
 
   @Override
-  public List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(@Nonnull DbUser dbUser, String workspaceResourceId)
-      throws IOException {
+  public List<FullyQualifiedResourceId> getSamWorkspaceResourceChildren(
+      @Nonnull DbUser dbUser, String workspaceResourceId) throws IOException {
     ResourcesApi resourcesApi = getImpersonatedResourceApi(dbUser);
     return samRetryHandler.run(
-        (context) -> resourcesApi.listResourceChildren(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
+        (context) ->
+            resourcesApi.listResourceChildren(SAM_WORKSPACE_RESOURCE_NAME, workspaceResourceId));
   }
 
   private TermsOfServiceApi getImpersonatedTosApi(@Nonnull DbUser dbUser) throws IOException {
