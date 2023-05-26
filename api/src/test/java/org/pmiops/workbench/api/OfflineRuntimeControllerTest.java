@@ -223,68 +223,68 @@ public class OfflineRuntimeControllerTest {
   }
 
   @Test
-  public void testCheckRuntimesNoResults() throws Exception {
+  public void testDeleteOldRuntimesNoResults() throws Exception {
     stubRuntimes(ImmutableList.of());
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesActiveRuntime() throws Exception {
+  public void testDeleteOldRuntimesActiveRuntime() throws Exception {
     stubRuntimes(ImmutableList.of(runtimeWithAge(Duration.ofHours(10))));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesActiveTooOld() throws Exception {
+  public void testDeleteOldRuntimesActiveTooOld() throws Exception {
     stubRuntimes(ImmutableList.of(runtimeWithAge(RUNTIME_MAX_AGE.plusMinutes(5))));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesIdleYoung() throws Exception {
+  public void testDeleteOldRuntimesIdleYoung() throws Exception {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         ImmutableList.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesIdleOld() throws Exception {
+  public void testDeleteOldRuntimesIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
     stubRuntimes(
         ImmutableList.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesBrieflyIdleOld() throws Exception {
+  public void testDeleteOldRuntimesBrieflyIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
     stubRuntimes(
         ImmutableList.of(
             runtimeWithAgeAndIdle(RUNTIME_IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
   }
 
   @Test
-  public void testCheckRuntimesOtherStatusFiltered() throws Exception {
+  public void testDeleteOldRuntimesOtherStatusFiltered() throws Exception {
     stubRuntimes(
         ImmutableList.of(
             runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
-    assertThat(controller.checkRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
   }
