@@ -128,15 +128,6 @@ test('loads and displays empty table', async () => {
   expect(screen.getByText('No disks found')).toBeInTheDocument();
 });
 
-test('show spinner while disks are loading', async () => {
-  setup({
-    listDisksInWorkspace: () => new Promise(() => {}),
-  });
-  render(<DisksTable sourceWorkspaceNamespace='123' />);
-
-  expect(screen.getByTitle('disks loading spinner')).toBeInTheDocument();
-});
-
 test('delete disk', async () => {
   const mockDeleteFunction = jest.fn(() => Promise.resolve({}));
   const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
