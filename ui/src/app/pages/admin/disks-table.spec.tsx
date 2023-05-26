@@ -183,6 +183,7 @@ test('disable delete buttons while deleting a disk', async () => {
   mockDisks.forEach((disk) => {
     const row = screen.getByText(disk.name).closest('tr');
     const rowScope = within(row);
+    // Deletion not allowed because a disk is being updated, so we do not want to allow for duplicate delete requests
     expect(
       rowScope.getByText('Delete').closest('div[role="button"]')
     ).toHaveStyle(`cursor: not-allowed`);
