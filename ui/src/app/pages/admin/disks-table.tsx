@@ -4,6 +4,8 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
+import { Disk } from 'generated/fetch';
+
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { Spinner } from 'app/components/spinners';
@@ -39,6 +41,29 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       refreshDisks();
     });
 
+  const getEnvironmentType = (disk: Disk) =>
+    fp.capitalize(
+      (disk.isGceRuntime ? UIAppType.JUPYTER : disk.appType).toString()
+    );
+
+  const compareByEnvironmentType = fp.curry(
+    (sortOrder, firstDisk, secondDisk) => {
+      console.log(sortOrder);
+      return (
+        sortOrder *
+        getEnvironmentType(firstDisk).localeCompare(
+          getEnvironmentType(secondDisk)
+        )
+      );
+    }
+  );
+
+  const onSortEnvironmentType = (sortEvent) => {
+    console.log('What is event? ', sortEvent);
+    // @ts-ignore
+    return disks.sort(compareByEnvironmentType(sortEvent.order));
+  };
+
   return loading ? (
     <Spinner title='disks loading spinner' />
   ) : (
@@ -59,10 +84,11 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       />
       <Column field='status' header='Status' />
       <Column
+        field='appType'
         header='Environment Type'
-        body={(disk) =>
-          fp.capitalize(disk.isGceRuntime ? UIAppType.JUPYTER : disk.appType)
-        }
+        body={getEnvironmentType}
+        sortable={true}
+        sortFunction={onSortEnvironmentType}
       />
       <Column field='size' header='Size (GB)' />
     </DataTable>
