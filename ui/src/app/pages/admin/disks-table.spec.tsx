@@ -36,11 +36,11 @@ const getEnvironmentType = (isGceRuntime: boolean, appType: AppType) => {
 
 let mockDisks: ListDisksResponse;
 
-let mockdisksAdminApi;
+let mockDisksAdminApi;
 
 beforeEach(() => {
   jest.mock('app/services/swagger-fetch-clients');
-  mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+  mockDisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
   mockDisks = [mockJupyterDisk(), mockCromwellDisk(), mockRStudioDisk()];
 });
 
@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 const setup = (mockOverrides) => {
-  mockdisksAdminApi.mockImplementation(() => ({
+  mockDisksAdminApi.mockImplementation(() => ({
     ...mockOverrides,
   }));
 };
