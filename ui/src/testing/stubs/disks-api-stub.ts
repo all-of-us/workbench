@@ -1,6 +1,8 @@
 import {
+  AppType,
   Disk,
   DisksApi,
+  DiskStatus,
   DiskType,
   EmptyResponse,
   ListDisksResponse,
@@ -14,6 +16,42 @@ export const stubDisk = () => ({
   isGceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
+});
+
+export const mockJupyterDisk = (): Disk => ({
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: true,
+  name: 'mock-disk1',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: null,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
+});
+
+export const mockCromwellDisk = (): Disk => ({
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: false,
+  name: 'mock-disk2',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: AppType.CROMWELL,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
+});
+
+export const mockRStudioDisk = (): Disk => ({
+  size: 1000,
+  diskType: DiskType.Standard,
+  isGceRuntime: false,
+  name: 'mock-disk3',
+  blockSize: 1,
+  status: DiskStatus.Ready,
+  appType: AppType.RSTUDIO,
+  creator: '"evrii@fake-research-aou.org"',
+  createdDate: '2023-05-22T18:55:10.108838Z',
 });
 
 export class DisksApiStub extends DisksApi {

@@ -2,13 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as fp from 'lodash/fp';
 
-import {
-  AppType,
-  Disk,
-  DiskStatus,
-  DiskType,
-  ListDisksResponse,
-} from 'generated/fetch';
+import { AppType, ListDisksResponse } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import {
@@ -20,6 +14,12 @@ import {
 } from '@testing-library/react';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
+
+import {
+  mockCromwellDisk,
+  mockJupyterDisk,
+  mockRStudioDisk,
+} from 'testing/stubs/disks-api-stub';
 
 import { DisksTable } from './disks-table';
 
@@ -34,53 +34,14 @@ const getEnvironmentType = (isGceRuntime: boolean, appType: AppType) => {
   return isGceRuntime ? 'Jupyter' : fp.capitalize(appType.toString());
 };
 
-const mockJupyterDisk: Disk = {
-  size: 1000,
-  diskType: DiskType.Standard,
-  isGceRuntime: true,
-  name: 'mock-disk1',
-  blockSize: 1,
-  status: DiskStatus.Ready,
-  appType: null,
-  creator: '"evrii@fake-research-aou.org"',
-  createdDate: '2023-05-22T18:55:10.108838Z',
-};
-
-const mockCromwellDisk: Disk = {
-  size: 1000,
-  diskType: DiskType.Standard,
-  isGceRuntime: false,
-  name: 'mock-disk2',
-  blockSize: 1,
-  status: DiskStatus.Ready,
-  appType: AppType.CROMWELL,
-  creator: '"evrii@fake-research-aou.org"',
-  createdDate: '2023-05-22T18:55:10.108838Z',
-};
-
-const mockRStudioDisk: Disk = {
-  size: 1000,
-  diskType: DiskType.Standard,
-  isGceRuntime: false,
-  name: 'mock-disk3',
-  blockSize: 1,
-  status: DiskStatus.Ready,
-  appType: AppType.RSTUDIO,
-  creator: '"evrii@fake-research-aou.org"',
-  createdDate: '2023-05-22T18:55:10.108838Z',
-};
-
-const mockDisks: ListDisksResponse = [
-  mockJupyterDisk,
-  mockCromwellDisk,
-  mockRStudioDisk,
-];
+let mockDisks: ListDisksResponse;
 
 let mockdisksAdminApi;
 
 beforeEach(() => {
   jest.mock('app/services/swagger-fetch-clients');
   mockdisksAdminApi = jest.spyOn(swaggerClients, 'disksAdminApi');
+  mockDisks = [mockJupyterDisk(), mockCromwellDisk(), mockRStudioDisk()];
 });
 
 afterEach(() => {
@@ -142,7 +103,7 @@ test('delete disk', async () => {
     screen.getByTitle('disks loading spinner')
   );
 
-  const row = screen.getByText(mockJupyterDisk.name).closest('tr');
+  const row = screen.getByText(mockJupyterDisk().name).closest('tr');
   const rowScope = within(row);
   const jupyterDeleteButton = rowScope
     .getByText('Delete')
@@ -171,7 +132,7 @@ test('disable delete buttons while deleting a disk', async () => {
     screen.getByTitle('disks loading spinner')
   );
 
-  const jupyterRow = screen.getByText(mockJupyterDisk.name).closest('tr');
+  const jupyterRow = screen.getByText(mockJupyterDisk().name).closest('tr');
   const jupyterRowScope = within(jupyterRow);
   const jupyterDeleteButton = jupyterRowScope
     .getByText('Delete')
