@@ -24,7 +24,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     setLoading(true);
     disksAdminApi()
       .listDisksInWorkspace(sourceWorkspaceNamespace)
-      .then((value) => setDisks(value))
+      .then(setDisks)
       .finally(() => setLoading(false));
   };
 
