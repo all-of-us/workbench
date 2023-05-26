@@ -22,7 +22,7 @@
     "noFallthroughCasesInSwitch": true,
     "noEmit": true,
     "strict": false,
-    "isolatedModules": true
+    "isolatedModules": true,
   },
   "include": [
     "src"

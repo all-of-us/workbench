@@ -22,7 +22,7 @@
 
 import {
   AppsApi,
-  BaseAPI, // internal
+  BaseAPI,
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
@@ -32,9 +32,10 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
+  DiskAdminApi,
   DisksApi,
   EgressEventsAdminApi,
-  FeaturedWorkspacesConfigApi, // internal
+  FeaturedWorkspacesConfigApi,
   InstitutionApi,
   NotebooksApi,
   ProfileApi,
@@ -109,6 +110,7 @@ export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const disksApi = bindCtor(DisksApi);
+export const disksAdminApi = bindCtor(DiskAdminApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspacesConfigApi = bindCtor(
   FeaturedWorkspacesConfigApi

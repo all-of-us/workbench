@@ -83,6 +83,8 @@
     "yarn": "^1.22.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "12.1.4",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
