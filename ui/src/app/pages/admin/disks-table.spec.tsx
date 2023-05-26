@@ -152,6 +152,7 @@ test('delete disk', async () => {
   fireEvent.click(jupyterDeleteButton);
   await waitFor(() => {
     expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
+    // The list function is called once for the initial component load and another as an update after a delete.
     expect(mockListFunction).toHaveBeenCalledTimes(2);
   });
 });
