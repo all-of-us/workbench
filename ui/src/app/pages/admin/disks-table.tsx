@@ -20,14 +20,15 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [disks, setDisks] = useState([]);
 
-  useEffect(() => {
-    if (loading) {
-      disksAdminApi()
-        .listDisksInWorkspace(sourceWorkspaceNamespace)
-        .then((value) => setDisks(value))
-        .finally(() => setLoading(false));
-    }
-  }, [loading]);
+  const refreshDisks = () => {
+    setLoading(true);
+    disksAdminApi()
+      .listDisksInWorkspace(sourceWorkspaceNamespace)
+      .then((value) => setDisks(value))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => refreshDisks(), []);
 
   const onClickDelete = (disk) =>
     fetchWithErrorModal(() => {
@@ -35,7 +36,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       return disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name);
     }).finally(() => {
       setDeleting(false);
-      setLoading(true);
+      refreshDisks();
     });
 
   return loading ? (
