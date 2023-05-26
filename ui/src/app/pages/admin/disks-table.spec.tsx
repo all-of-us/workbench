@@ -90,7 +90,14 @@ test('loads and displays empty table', async () => {
 });
 
 test('delete disk', async () => {
-  const mockDeleteFunction = jest.fn(() => Promise.resolve({}));
+  // Allows the mockDeleteFunction to remain unresolved until resolveDeleteFunction is called.
+  let resolveDeleteFunction;
+  const mockDeleteFunction = jest.fn(
+    () =>
+      new Promise((resolve) => {
+        resolveDeleteFunction = resolve;
+      })
+  );
   const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
 
   setup({
@@ -103,9 +110,9 @@ test('delete disk', async () => {
     screen.getByTitle('disks loading spinner')
   );
 
-  const row = screen.getByText(mockJupyterDisk().name).closest('tr');
-  const rowScope = within(row);
-  const jupyterDeleteButton = rowScope
+  const jupyterDiskRow = screen.getByText(mockJupyterDisk().name).closest('tr');
+  const jupyterDiskRowScope = within(jupyterDiskRow);
+  const jupyterDeleteButton = jupyterDiskRowScope
     .getByText('Delete')
     .closest('div[role="button"]');
 
@@ -113,41 +120,21 @@ test('delete disk', async () => {
   fireEvent.click(jupyterDeleteButton);
   await waitFor(() => {
     expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
-    // The list function is called once for the initial component load and another as an update after a delete.
-    expect(mockListFunction).toHaveBeenCalledTimes(2);
-  });
-});
-
-test('disable delete buttons while deleting a disk', async () => {
-  const mockDeleteFunction = jest.fn(() => new Promise(() => {}));
-  const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
-
-  setup({
-    deleteDisk: mockDeleteFunction,
-    listDisksInWorkspace: mockListFunction,
   });
 
-  render(<DisksTable sourceWorkspaceNamespace='123' />);
-  await waitForElementToBeRemoved(() =>
-    screen.getByTitle('disks loading spinner')
-  );
-
-  const jupyterRow = screen.getByText(mockJupyterDisk().name).closest('tr');
-  const jupyterRowScope = within(jupyterRow);
-  const jupyterDeleteButton = jupyterRowScope
-    .getByText('Delete')
-    .closest('div[role="button"]');
-
-  fireEvent.click(jupyterDeleteButton);
-  await waitFor(() => {
-    expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
-  });
   mockDisks.forEach((disk) => {
-    const row = screen.getByText(disk.name).closest('tr');
-    const rowScope = within(row);
+    const mockDiskRow = screen.getByText(disk.name).closest('tr');
+    const mockDiskRowScope = within(mockDiskRow);
     // Deletion not allowed because a disk is being updated, so we do not want to allow for duplicate delete requests
     expect(
-      rowScope.getByText('Delete').closest('div[role="button"]')
+      mockDiskRowScope.getByText('Delete').closest('div[role="button"]')
     ).toHaveStyle(`cursor: not-allowed`);
+  });
+
+  resolveDeleteFunction();
+
+  await waitFor(() => {
+    // The list function is called once for the initial component load and another as an update after a delete.
+    expect(mockListFunction).toHaveBeenCalledTimes(2);
   });
 });
