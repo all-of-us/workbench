@@ -250,11 +250,10 @@ public interface LeonardoMapper {
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  @ValueMapping(source = "RSTUDIO", target = "CUSTOM")
   LeonardoAppType toLeonardoAppType(AppType appType);
 
-  @ValueMapping(source = "CUSTOM", target = "RSTUDIO")
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
+  @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support Galaxy
   AppType toApiAppType(LeonardoAppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
