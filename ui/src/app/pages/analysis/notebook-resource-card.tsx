@@ -41,6 +41,7 @@ interface Props
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
   menuOnly: boolean;
+  appsAnalysis?: boolean;
 }
 
 interface State {
@@ -216,6 +217,7 @@ export const NotebookResourceCard = fp.flow(
           )}
           {menuOnly ? (
             <ResourceActionsMenu
+              appsAnalysis={this.props.appsAnalysis}
               actions={this.actions}
               disabled={resource.adminLocked}
             />

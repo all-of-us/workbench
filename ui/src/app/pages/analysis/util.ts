@@ -1,5 +1,6 @@
 import { FileDetail } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { cond } from 'app/utils';
 
@@ -60,4 +61,21 @@ export const getExistingNotebookNames = async (
 ): Promise<string[]> => {
   const notebooks = await listNotebooks(workspace);
   return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
+};
+
+const appsExtensionMap = [
+  {
+    extension: jupyterNotebookExtension,
+    appType: UIAppType.JUPYTER,
+    path: 'notebooks/preview',
+  },
+  {
+    extension: rstudioNotebookExtension,
+    appType: UIAppType.RSTUDIO,
+    path: '',
+  },
+];
+
+export const getAppInfoFromFileName = (name: string) => {
+  return appsExtensionMap.find((app) => name.endsWith(app.extension));
 };

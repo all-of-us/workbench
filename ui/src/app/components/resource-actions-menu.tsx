@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-import { MenuItem, SnowmanButton } from './buttons';
+import { KebabCircleButton, MenuItem, SnowmanButton } from './buttons';
 import { PopupTrigger, TooltipTrigger } from './popups';
 
 export interface Action {
@@ -16,6 +16,7 @@ export interface Action {
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
+  appsAnalysis?: boolean;
 }) => {
   const { actions, disabled } = props;
   return (
@@ -44,7 +45,11 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      <SnowmanButton data-test-id='resource-menu' disabled={disabled} />
+      {props.appsAnalysis ? (
+        <KebabCircleButton data-test-id='resource-menu' disabled={disabled} />
+      ) : (
+        <SnowmanButton data-test-id='resource-menu' disabled={disabled} />
+      )}
     </PopupTrigger>
   );
 };
