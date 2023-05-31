@@ -327,7 +327,7 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), eq(14), eq(null));
+            eq(ImmutableList.of(user1)), eq(workspace), any(), anyString(), eq(14), eq(null));
   }
 
   @Test
@@ -342,7 +342,7 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService, times(3))
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), anyInt(), any());
+            eq(ImmutableList.of(user1)), eq(workspace), any(), anyString(), anyInt(), any());
   }
 
   @Test
@@ -353,7 +353,7 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService, times(1))
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1, user2)), eq(workspace), any(), anyInt(), any());
+            eq(ImmutableList.of(user1, user2)), eq(workspace), any(), anyString(), anyInt(), any());
   }
 
   @Test
@@ -369,7 +369,7 @@ public class OfflineRuntimeControllerTest {
     // Skips the unknown user, but still sends the rest.
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), eq(30), any());
+            eq(ImmutableList.of(user1)), eq(workspace), any(), anyString(), eq(30), any());
   }
 
   @Test
@@ -385,13 +385,13 @@ public class OfflineRuntimeControllerTest {
         // Throw on the first call only.
         .doNothing()
         .when(mockMailService)
-        .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyInt(), any());
+        .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyString(), anyInt(), any());
 
     assertThrows(ServerErrorException.class, () -> controller.checkPersistentDisks());
 
     // 3 calls, including the initial throwing call.
     verify(mockMailService, times(3))
-        .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyInt(), any());
+        .alertUsersUnusedDiskWarningThreshold(any(), any(), any(), anyString(), anyInt(), any());
   }
 
   @Test
@@ -407,6 +407,6 @@ public class OfflineRuntimeControllerTest {
 
     verify(mockMailService)
         .alertUsersUnusedDiskWarningThreshold(
-            eq(ImmutableList.of(user1)), eq(workspace), any(), eq(14), eq(123.0));
+            eq(ImmutableList.of(user1)), eq(workspace), any(), anyString(), eq(14), eq(123.0));
   }
 }

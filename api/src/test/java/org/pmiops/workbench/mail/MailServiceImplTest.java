@@ -11,7 +11,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -273,11 +275,14 @@ public class MailServiceImplTest {
   @Test
   public void testAlertUsersUnusedDiskWarning() throws Exception {
     DbUser user = createDbUser();
+    Map<String, String> labelsMap = new HashMap<String, String>();
+    labelsMap.put("is-runtime", "true");
     mailService.alertUsersUnusedDiskWarningThreshold(
         ImmutableList.of(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
         new LeonardoListPersistentDiskResponse()
             .diskType(LeonardoDiskType.SSD)
+            .labels(labelsMap)
             .size(123)
             .auditInfo(
                 new LeonardoAuditInfo()
@@ -287,6 +292,7 @@ public class MailServiceImplTest {
                             .minus(Duration.ofDays(20))
                             .toString())
                     .creator(user.getUsername())),
+        "Running",
         14,
         20.0);
 
@@ -302,6 +308,7 @@ public class MailServiceImplTest {
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
     assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
+    assertThat(gotHtml).contains("Running");
     assertThat(gotHtml).doesNotContain("${");
   }
 
