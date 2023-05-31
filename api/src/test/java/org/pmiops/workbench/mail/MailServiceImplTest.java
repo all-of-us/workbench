@@ -308,6 +308,7 @@ public class MailServiceImplTest {
     assertThat(gotHtml).contains("123 GB");
     assertThat(gotHtml).contains("$20.91 per month");
     assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
+    assertThat(gotHtml).contains("Jupyter");
     assertThat(gotHtml).contains("Running");
     assertThat(gotHtml).doesNotContain("${");
   }
