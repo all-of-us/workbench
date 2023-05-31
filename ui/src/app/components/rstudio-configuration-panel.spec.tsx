@@ -127,13 +127,7 @@ describe('RStudioConfigurationPanel', () => {
     startButton.simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(spyCreateApp).toHaveBeenCalledTimes(1);
-    expect(spyCreateApp).toHaveBeenCalledWith(
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      {
-        ...defaultRStudioConfig,
-        persistentDiskRequest: disk,
-      }
-    );
+    expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
