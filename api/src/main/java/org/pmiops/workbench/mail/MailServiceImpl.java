@@ -97,6 +97,9 @@ public class MailServiceImpl implements MailService {
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
+  private static final String UNUSED_DISK_DELETE_HELP =
+      "https://support.researchallofus.org/hc/en-us/articles/5140493753620#h_01H0NEWRR4DRJ8JJAE7HW5NRR3";
+
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
 
@@ -292,7 +295,7 @@ public class MailServiceImpl implements MailService {
       List<DbUser> users,
       DbWorkspace diskWorkspace,
       LeonardoListPersistentDiskResponse disk,
-      String status,
+      String appStatus,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
@@ -315,7 +318,9 @@ public class MailServiceImpl implements MailService {
                     EmailSubstitutionField.DISK_CREATION_DATE,
                     formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
                 .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
-                .put(EmailSubstitutionField.DISK_STATUS, CaseUtils.toCamelCase(status, true, null))
+                .put(
+                    EmailSubstitutionField.DISK_STATUS,
+                    CaseUtils.toCamelCase(appStatus, true, null))
                 .put(
                     EmailSubstitutionField.APP_NAME,
                     CaseUtils.toCamelCase(getAppType((Map) disk.getLabels()), true, null))
@@ -323,9 +328,7 @@ public class MailServiceImpl implements MailService {
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
                 .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(diskWorkspace))
-                .put(
-                    EmailSubstitutionField.DISK_DELETE_INSTRUCTION,
-                    "https://support.researchallofus.org/hc/en-us/articles/5140493753620#h_01H0NEWRR4DRJ8JJAE7HW5NRR3")
+                .put(EmailSubstitutionField.DISK_DELETE_INSTRUCTION, UNUSED_DISK_DELETE_HELP)
                 .build());
     sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,

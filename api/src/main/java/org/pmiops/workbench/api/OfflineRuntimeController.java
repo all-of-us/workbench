@@ -301,8 +301,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     StringBuilder status = new StringBuilder();
     try {
       // If Label contains key aou-app-type it is either cromwell or Rstudio else its Jupyter
+      // runtime
       if (((Map) disk.getLabels()).containsKey(LEONARDO_LABEL_APP_TYPE)) {
-        // if its an app get the list of Apps in the google Project and get the status
         List<UserAppEnvironment> appEnviornments =
             leonardoApiClient.listAppsInProjectAsService(googleProject);
         if (appEnviornments != null && appEnviornments.size() > 0) {
@@ -323,6 +323,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
           status.append(runtimes.get(0).getStatus().toString());
         }
       }
+      // If there are no Apps or runtime associated with the disk add status as  Detached
       if (status.length() == 0) {
         status.append("Detached");
       }
@@ -342,7 +343,6 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     RawlsWorkspaceACL acl =
         fireCloudService.getWorkspaceAclAsService(
             workspace.get().getWorkspaceNamespace(), workspace.get().getFirecloudName());
-
     Map<String, RawlsWorkspaceAccessEntry> aclMap = FirecloudTransforms.extractAclResponse(acl);
     List<String> notifyUsernames =
         aclMap.entrySet().stream()
