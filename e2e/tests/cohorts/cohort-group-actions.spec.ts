@@ -193,7 +193,7 @@ describe('Build cohort page actions', () => {
     await page.waitForXPath(group1.getCriteriaXpath(newCriteriaName), { visible: true });
 
     // Suppress Criteria from total count: Suppress "Has any Fitbit data" criteria.
-    const fitbitName = 'Has any Fitbit data';
+    const fitbitName = 'Has Any Fitbit Data';
     await group1.suppressCriteriaFromTotalCount(fitbitName);
     const suppressedTotalCount = await cohortBuildPage.getTotalCount();
 
