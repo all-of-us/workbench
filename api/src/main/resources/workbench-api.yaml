@@ -1832,6 +1832,26 @@ paths:
       responses:
         204:
           description: The egress event was successfully handled.
+
+  "/v1/admin/egressBypass":
+    post:
+      tags:
+        - egressBypassAdmin
+      description: >
+        Administrative API to add egress bypass windwo to allow user download files without 
+        triggering egress alerts.
+      operationId: createEgressBypass
+      parameters:
+        - in: body
+          name: request
+          schema:
+            "$ref": "#/definitions/createEgressBypassRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EgressBypass"
+
   "/v1/cron/deleteOldRuntimes":
     get:
       security: []
