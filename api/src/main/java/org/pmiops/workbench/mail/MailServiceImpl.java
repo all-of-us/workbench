@@ -2,6 +2,8 @@ package org.pmiops.workbench.mail;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -31,6 +33,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -278,11 +281,18 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
+  private String getAppType(Map labels) {
+    return labels.containsKey("aou-app-type")
+        ? labelValueToAppType((String) labels.get(LEONARDO_LABEL_APP_TYPE)).toString()
+        : "Jupyter";
+  }
+
   @Override
   public void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
       LeonardoListPersistentDiskResponse disk,
+      String status,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
@@ -305,10 +315,17 @@ public class MailServiceImpl implements MailService {
                     EmailSubstitutionField.DISK_CREATION_DATE,
                     formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
                 .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
+                .put(EmailSubstitutionField.DISK_STATUS, CaseUtils.toCamelCase(status, true, null))
+                .put(
+                    EmailSubstitutionField.APP_NAME,
+                    CaseUtils.toCamelCase(getAppType((Map) disk.getLabels()), true, null))
                 .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
                 .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(diskWorkspace))
+                .put(
+                    EmailSubstitutionField.DISK_DELETE_INSTRUCTION,
+                    "https://support.researchallofus.org/hc/en-us/articles/5140493753620#h_01H0NEWRR4DRJ8JJAE7HW5NRR3")
                 .build());
     sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,

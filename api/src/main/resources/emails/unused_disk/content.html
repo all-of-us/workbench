@@ -36,14 +36,16 @@
   This is a courtesy reminder that a <span class="variable">${DISK_SIZE}</span> persistent
   disk created in the workspace "<span class="variable">${WORKSPACE_NAME}</span>"
   has been unused for <span class="variable">${DISK_UNUSED_DAYS} days</span>, and
-  continues to cost <span class="variable">${DISK_COST_PER_MONTH} per month</span>. This disk was created on <span class="variable">${DISK_CREATION_DATE}</span> by
-  user <span class="variable">${DISK_CREATOR_USERNAME}</span>. These charges are billed
-  according to the workspace's billing account, which is currently <span class="variable">${BILLING_ACCOUNT_DETAILS}</span>.
+  continues to cost <span class="variable">${DISK_COST_PER_MONTH} per month</span>.
+  This disk was created on <span class="variable">${DISK_CREATION_DATE}</span> by
+  user <span class="variable">${DISK_CREATOR_USERNAME}</span> and it is associated with the
+  <span class="variable">${APP_NAME}</span> environment which is in <span class="variable">${DISK_STATUS} </span> state.
+  These charges are billed according to the workspace's billing account, which is currently
+  <span class="variable">${BILLING_ACCOUNT_DETAILS}</span>.
 </div>
 <div>
   If this disk is no longer needed, <span class="variable">${DISK_CREATOR_USERNAME}</span> can
-  delete it via the cloud analysis environment panel from
-  the <a href="${WORKSPACE_URL}">workspace page</a>.
+  delete it via the instructions found in <a href=${DISK_DELETE_INSTRUCTION}>this article</a>
 </div>
 <div>
   If you'd like to delete the disk but the disk creator is not available, or if

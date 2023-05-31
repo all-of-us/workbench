@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -38,6 +40,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -71,6 +74,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final MailService mailService;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<DisksApi> disksApiProvider;
+  private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
   private final UserDao userDao;
@@ -84,6 +88,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       MailService mailService,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
+      LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
       UserDao userDao,
@@ -93,6 +98,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.freeTierBillingService = freeTierBillingService;
     this.mailService = mailService;
     this.runtimesApiProvider = runtimesApiProvider;
+    this.leonardoApiClient = leonardoApiClient;
     this.disksApiProvider = disksApiProvider;
     this.workspaceDao = workspaceDao;
     this.userDao = userDao;
@@ -292,6 +298,37 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
+    StringBuilder status = new StringBuilder();
+    try {
+      // If Label contains key aou-app-type it is either cromwell or Rstudio else its Jupyter
+      if (((Map) disk.getLabels()).containsKey(LEONARDO_LABEL_APP_TYPE)) {
+        // if its an app get the list of Apps in the google Project and get the status
+        List<UserAppEnvironment> appEnviornments =
+            leonardoApiClient.listAppsInProjectAsService(googleProject);
+        if (appEnviornments != null && appEnviornments.size() > 0) {
+          // Some apps in list especially  in error state can have no disk
+          appEnviornments.stream()
+              .filter(
+                  userAppEnvironment ->
+                      userAppEnvironment.getDiskName() != null
+                          && userAppEnvironment.getDiskName().equals(disk.getName()))
+              .findFirst()
+              .ifPresent(
+                  userAppEnvironment -> status.append(userAppEnvironment.getStatus().toString()));
+        }
+      } else {
+        List<LeonardoListRuntimeResponse> runtimes =
+            runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
+        if (!runtimes.isEmpty()) {
+          status.append(runtimes.get(0).getStatus().toString());
+        }
+      }
+      if (status.length() == 0) {
+        status.append("Detached");
+      }
+    } catch (ApiException | NullPointerException e) {
+      e.printStackTrace();
+    }
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(
@@ -305,6 +342,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     RawlsWorkspaceACL acl =
         fireCloudService.getWorkspaceAclAsService(
             workspace.get().getWorkspaceNamespace(), workspace.get().getFirecloudName());
+
     Map<String, RawlsWorkspaceAccessEntry> aclMap = FirecloudTransforms.extractAclResponse(acl);
     List<String> notifyUsernames =
         aclMap.entrySet().stream()
@@ -338,7 +376,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, status.toString(), daysUnused, initialCreditsRemaining);
     return true;
   }
 }
