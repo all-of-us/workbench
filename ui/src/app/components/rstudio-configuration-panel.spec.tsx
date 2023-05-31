@@ -88,6 +88,7 @@ describe('RStudioConfigurationPanel', () => {
   it('start button should create rstudio and close panel', async () => {
     const wrapper = await component({
       gkeAppsInWorkspace: [],
+      disk: undefined,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -105,6 +106,28 @@ describe('RStudioConfigurationPanel', () => {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultRStudioConfig
     );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should use the existing PD when creating', async () => {
+    const disk = stubDisk();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+      disk,
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+    const startButton = wrapper
+      .find('#RStudio-cloud-environment-create-button')
+      .first();
+
+    startButton.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(spyCreateApp).toHaveBeenCalledTimes(1);
+    expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

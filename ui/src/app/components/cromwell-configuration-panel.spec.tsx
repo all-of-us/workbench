@@ -49,7 +49,7 @@ describe('CromwellConfigurationPanel', () => {
       updateCache: jest.fn(),
     },
     gkeAppsInWorkspace: [],
-    disk: stubDisk(),
+    disk: undefined,
     onClickDeleteUnattachedPersistentDisk: jest.fn(),
   };
 
@@ -89,6 +89,7 @@ describe('CromwellConfigurationPanel', () => {
   it('start button should create cromwell and close panel', async () => {
     const wrapper = await component({
       gkeAppsInWorkspace: [],
+      disk: undefined,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -106,6 +107,28 @@ describe('CromwellConfigurationPanel', () => {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultCromwellConfig
     );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should use the existing PD when creating', async () => {
+    const disk = stubDisk();
+    const wrapper = await component({
+      gkeAppsInWorkspace: [],
+      disk,
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+    const startButton = wrapper
+      .find('#Cromwell-cloud-environment-create-button')
+      .first();
+
+    startButton.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(spyCreateApp).toHaveBeenCalledTimes(1);
+    expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
