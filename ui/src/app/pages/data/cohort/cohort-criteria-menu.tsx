@@ -194,8 +194,6 @@ const searchTooltip = (
   </div>
 );
 
-// UI code change to trigger CircleCI e2e tests
-
 export const CohortCriteriaMenu = withCurrentWorkspace()(
   ({ launchSearch, menuOptions, workspace, temporalGroup, isTemporal }) => {
     const [domainCounts, setDomainCounts] = useState(null);
