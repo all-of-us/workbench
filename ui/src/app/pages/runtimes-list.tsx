@@ -42,12 +42,12 @@ const ajax = (signal) => {
     },
     Apps: {
       listWithoutProject: () =>
-        jsonLeoFetch('/api/google/v1/apps?includeDeleted=false'),
+        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false'),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
       disksV1: () => ({
-        list: () => jsonLeoFetch('/api/google/v1/disks'),
+        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator'),
         disk: (googleProject, name) => ({
           delete: () =>
             jsonLeoFetch(
