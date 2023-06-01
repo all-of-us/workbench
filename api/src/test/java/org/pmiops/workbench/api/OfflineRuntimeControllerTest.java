@@ -35,6 +35,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -93,6 +94,10 @@ public class OfflineRuntimeControllerTest {
   @Qualifier(LeonardoConfig.SERVICE_DISKS_API)
   @MockBean
   private DisksApi mockDisksApi;
+
+  @Qualifier(LeonardoConfig.SERVICE_DISKS_API)
+  @MockBean
+  private LeonardoApiClient leonardoApiClient;
 
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private FreeTierBillingService mockFreeTierBillingService;
