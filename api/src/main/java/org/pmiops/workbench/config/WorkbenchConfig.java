@@ -55,6 +55,7 @@ public class WorkbenchConfig {
     config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
+    config.firecloud.userApps = new UserApps();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
@@ -170,11 +171,18 @@ public class WorkbenchConfig {
 
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
     public String gceVmZone;
+
+    public UserApps userApps;
   }
 
   public static class RuntimeImages {
     public List<String> gce;
     public List<String> dataproc;
+  }
+
+  public static class UserApps {
+    /** The descriptor path which defines RStudio application configuration. */
+    public String rStudioDescriptorPath;
   }
 
   public static class AuthConfig {

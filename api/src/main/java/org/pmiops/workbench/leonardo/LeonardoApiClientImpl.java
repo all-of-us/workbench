@@ -551,6 +551,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .customEnvironmentVariables(appCustomEnvVars)
         .labels(appLabels);
 
+    if (appType.equals(AppType.RSTUDIO)) {
+      leonardoCreateAppRequest.descriptorPath(
+          workbenchConfigProvider.get().firecloud.userApps.rStudioDescriptorPath);
+    }
+
     leonardoRetryHandler.run(
         (context) -> {
           appsApi.createApp(

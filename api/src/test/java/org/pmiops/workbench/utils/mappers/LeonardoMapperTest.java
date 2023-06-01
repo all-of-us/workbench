@@ -128,14 +128,13 @@ public class LeonardoMapperTest {
   @Test
   public void testToApiAppType() {
     assertThat(mapper.toApiAppType(LeonardoAppType.CROMWELL)).isEqualTo(AppType.CROMWELL);
-    assertThat(mapper.toApiAppType(LeonardoAppType.RSTUDIO)).isEqualTo(AppType.RSTUDIO);
+    assertThat(mapper.toApiAppType(LeonardoAppType.CUSTOM)).isEqualTo(AppType.RSTUDIO);
     assertThat(mapper.toApiAppType(LeonardoAppType.GALAXY)).isNull();
-    assertThat(mapper.toApiAppType(LeonardoAppType.CUSTOM)).isNull();
   }
 
   @Test
   public void testToLeonardoAppType() {
-    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.RSTUDIO);
+    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.CUSTOM);
     assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(LeonardoAppType.CROMWELL);
   }
 
