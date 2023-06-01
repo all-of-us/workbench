@@ -52,7 +52,7 @@ import {
 
 import { environment } from 'environments/environment';
 import {
-  cookiesEnabled,
+  firstPartyCookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
 } from 'app/utils/cookies';
 import * as portableFetch from 'portable-fetch';
@@ -129,7 +129,7 @@ export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 
 export const getApiBaseUrl = () => {
-  if (cookiesEnabled()) {
+  if (firstPartyCookiesEnabled()) {
     return (
       localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) ||
       environment.allOfUsApiUrl

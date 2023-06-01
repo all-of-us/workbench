@@ -39,7 +39,7 @@ import {
 import { initializeAnalytics } from 'app/utils/analytics';
 import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
-  cookiesEnabled,
+  firstPartyCookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
 } from 'app/utils/cookies';
 import {
@@ -118,7 +118,7 @@ const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
   useEffect(() => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -167,7 +167,6 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
     initializeAnalytics();
   }, []);
 
-  const firstPartyCookiesEnabled = cookiesEnabled();
   // TODO is third-party cookie logic still necessary? See RW-9484.
   const thirdPartyCookiesEnabled = true;
 
@@ -177,7 +176,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
         <React.Fragment>
           {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
           <NotificationModal />
-          {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
+          {firstPartyCookiesEnabled() && thirdPartyCookiesEnabled && (
             <AppRouter>
               <ScrollToTop />
               {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
@@ -242,7 +241,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
           )}
         </React.Fragment>
       )}
-      {!firstPartyCookiesEnabled ||
+      {!firstPartyCookiesEnabled() ||
         (!thirdPartyCookiesEnabled && (
           <div>
             <div
