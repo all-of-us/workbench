@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class DbUserEgressBypassWindow {
   private long egressBypassId;
-  private DbUser user;
+  private long userId;
 
   private Timestamp startTime;
   private Timestamp endTime;
@@ -38,14 +38,13 @@ public class DbUserEgressBypassWindow {
     return this;
   }
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  public DbUser getUser() {
-    return user;
+  @Column(name = "user_id", nullable = false)
+  public long getUserId() {
+    return userId;
   }
 
-  public DbUserEgressBypassWindow setUser(DbUser user) {
-    this.user = user;
+  public DbUserEgressBypassWindow setUserId(long userId) {
+    this.userId = userId;
     return this;
   }
 

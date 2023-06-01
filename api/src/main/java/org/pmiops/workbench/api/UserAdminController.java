@@ -20,10 +20,13 @@ import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
+import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
+import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -120,4 +123,28 @@ public class UserAdminController implements UserAdminApiDelegate {
                         .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
   }
+
+  @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<EgressBypassWindow> createEgressBypassWindow(Long userId,
+      CreateEgressBypassWindowRequest request) {
+    DbUser user= userService.getByDatabaseId(userId).get();
+
+    return new ResponseEntity<EgressBypassWindow>(HttpStatus.OK);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<Void> deleteEgressBypassWindow() {
+    // do some magic!
+    return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<EgressBypassWindow> getEgressBypassWindow() {
+    // do some magic!
+    return new ResponseEntity<EgressBypassWindow>(HttpStatus.OK);
+  }
+
 }

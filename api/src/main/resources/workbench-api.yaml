@@ -1833,25 +1833,43 @@ paths:
         204:
           description: The egress event was successfully handled.
 
-  "/v1/admin/egressBypass":
+  "/v1/admin/users/{userId}/egressBypassWindow":
     post:
       tags:
-        - egressBypassAdmin
+        - userAdmin
       description: >
         Administrative API to add egress bypass windwo to allow user download files without 
         triggering egress alerts.
-      operationId: createEgressBypass
+      operationId: createEgressBypassWindow
       parameters:
+        - "$ref": "#/parameters/userId"
         - in: body
           name: request
           schema:
-            "$ref": "#/definitions/createEgressBypassRequest"
+            "$ref": "#/definitions/CreateEgressBypassWindowRequest"
       responses:
         200:
           description: success
           schema:
-            "$ref": "#/definitions/EgressBypass"
-
+            "$ref": "#/definitions/EgressBypassWindow"
+    get:
+      tags:
+        - userAdmin
+      description: Get the user's active egress bypass window. Returns null if user does not have actove
+      operationId: getEgressBypassWindow
+      responses:
+        200:
+          description: success
+          schema:
+            "$ref": "#/definitions/EgressBypassWindow"
+    delete:
+      tags:
+        - userAdmin
+      description: Deletes the user's egress bypass window
+      operationId: deleteEgressBypassWindow
+      responses:
+        204:
+          description: success.
   "/v1/cron/deleteOldRuntimes":
     get:
       security: []
@@ -7155,6 +7173,33 @@ definitions:
         description: >
           Pagination token used to receive the next page of results. Provide this
           value from the nextPageToken of a prior response.
+  CreateEgressBypassWindowRequest:
+    type: object
+    properties:
+      startTime:
+        type: integer
+        format: int64
+        description: >
+          Timestamp when user egress bypass window begins in milliseconds in milliseconds
+          since the UNIX epoch
+      byPassDescription:
+        type: string
+        description: Brief description of this bypass request.
+  EgressBypassWindow:
+    type: object
+    properties:
+      startTime:
+        type: integer
+        format: int64
+        description: >
+          Timestamp when user egress bypass window begins in milliseconds in milliseconds
+          since the UNIX epoch
+      endTime:
+        type: integer
+        format: int64
+        description: >
+          Timestamp when user egress bypass window ends in milliseconds in milliseconds
+          since the UNIX epoch
   ListEgressEventsResponse:
     type: object
     properties:

@@ -7,5 +7,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UserEgressBypassWindowDao extends CrudRepository<DbUserEgressBypassWindow, Long> {
   // The extra "By" infix is necessary in combination with OrderBy...
-  Set<DbUserEgressBypassWindow> getByUserOrderByStartTimeDesc(DbUser user);
+  Set<DbUserEgressBypassWindow> getByUserUserIdOrderByStartTimeDesc(long userId);
 }
