@@ -5,7 +5,7 @@ export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 export const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
 
 /**
- * See feature-detects/cookies.js in https://github.com/Modernizr
+ * Copied from https://github.com/Modernizr/Modernizr/blob/f1b57789747767db3eca410a7c7334f1904f4f37/feature-detects/storage/cookies.js
  *
  * navigator.cookieEnabled cannot detect custom or nuanced cookie blocking
  * configurations. For example, when blocking cookies via the Advanced
@@ -17,7 +17,7 @@ export const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
  * SecurityError if you try to access it; e.g. documents created from data URIs
  * or in sandboxed iframes (depending on flags/context)
  */
-export function cookiesEnabled(): boolean {
+export function firstPartyCookiesEnabled(): boolean {
   try {
     // Create cookie
     document.cookie = 'cookietest=1';
