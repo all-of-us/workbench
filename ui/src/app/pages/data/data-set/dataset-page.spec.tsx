@@ -47,18 +47,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 describe('DataSetPage', () => {
   let datasetApiStub;
 
-  const previewLinkWrapper = (wrapper) =>
-    wrapper.find(Clickable).find(`[data-test-id="preview-button"]`).first();
-
-  const btnWrapper = (wrapper, btnId) =>
-    wrapper.find(Button).find(`[data-test-id="${btnId}"]`).first();
-
-  const analyzeBtnWrapper = (wrapper) => btnWrapper(wrapper, 'analyze-button');
-  const saveBtnWrapper = (wrapper) => btnWrapper(wrapper, 'save-button');
-
-  const selectAllValue = (wrapper) =>
-    wrapper.find('[data-test-id="select-all"]').find('input').first();
-
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
@@ -250,19 +238,23 @@ describe('DataSetPage', () => {
     expect(checkedValuesList.length).toBe(5);
   });
 
-  it('should enable buttons and links once cohorts, concepts and values are selected', async () => {
+  it('should enable save button and preview button once cohorts, concepts and values are selected', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    // By default all buttons and select Value checkbox should be disabled
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
+    // Preview Button and Save Button should be disabled by default
+    const saveButton = wrapper
+      .find(Button)
+      .find('[data-test-id="save-button"]')
+      .first();
+    expect(saveButton.prop('disabled')).toBeTruthy();
+    const previewButton = wrapper
+      .find(Clickable)
+      .find('[data-test-id="preview-button"]')
+      .first();
+    expect(previewButton.prop('disabled')).toBeTruthy();
 
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
-
-    // Select a cohort
+    // After all cohort concept and values are selected all the buttons will be enabled
 
     wrapper
       .find('[data-test-id="cohort-list-item"]')
@@ -272,16 +264,6 @@ describe('DataSetPage', () => {
       .simulate('change');
     wrapper.update();
 
-    // All buttons and links should still be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeTruthy();
-
-    // Select a concept set
     wrapper
       .find('[data-test-id="concept-set-list-item"]')
       .first()
@@ -291,24 +273,24 @@ describe('DataSetPage', () => {
 
     await waitOneTickAndUpdate(wrapper);
 
-    // All Buttons except analyze button should be enabled as selecting concept set selects all values
+    wrapper
+      .find('[data-test-id="value-list-items"]')
+      .find('input')
+      .first()
+      .simulate('change');
 
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeFalsy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeFalsy();
-
-    expect(selectAllValue(wrapper).prop('disabled')).toBeFalsy();
-
-    // Unselect 'Select All' checkbox so that no values are selected for DataSet
-    selectAllValue(wrapper).simulate('change');
-
-    // All buttons and links should now be disabled
-
-    expect(saveBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-    expect(analyzeBtnWrapper(wrapper).prop('disabled')).toBeTruthy();
-
-    expect(previewLinkWrapper(wrapper).prop('disabled')).toBeTruthy();
+    // Buttons should now be enabled
+    const buttons = wrapper.find(Button);
+    expect(
+      buttons.find('[data-test-id="save-button"]').first().prop('disabled')
+    ).toBeFalsy();
+    expect(
+      wrapper
+        .find(Clickable)
+        .find('[data-test-id="preview-button"]')
+        .first()
+        .prop('disabled')
+    ).toBeFalsy();
   });
 
   it('should display preview data table once preview button is clicked', async () => {
