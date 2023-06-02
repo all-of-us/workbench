@@ -972,10 +972,11 @@ paths:
           description: Compute is temporarily suspended for security reasons.
           schema:
             "$ref": "#/definitions/ErrorResponse"
+
   "/v1/workspaces/{workspaceNamespace}/apps/{appName}/localize":
     post:
       summary: Localize files to the user's GKE App.
-      description: 'Localize files to the user's GKE App.'
+      description: Localize files to the user's GKE App.
       operationId: localizeApp
       tags:
         - apps
