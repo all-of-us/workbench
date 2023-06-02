@@ -120,7 +120,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
         header='Date Created'
         body={(disk) => moment(disk.createdDate).format('YYYY-MM-DD HH:mm')}
       />
-      <Column field='status' header='Status' />
+      <Column field='status' header='Status' sortable={true} filter />
       <Column
         field='appType'
         header='Environment Type'
