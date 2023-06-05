@@ -41,7 +41,7 @@ interface Props
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
   menuOnly: boolean;
-  onAnalysisAppsPage?: boolean;
+  menuButtonComponentOverride?: ({ ...props }) => JSX.Element;
 }
 
 interface State {
@@ -184,7 +184,7 @@ export const NotebookResourceCard = fp.flow(
         menuOnly,
         onUpdate,
         existingNameList,
-        onAnalysisAppsPage,
+        menuButtonComponentOverride,
       } = this.props;
       const actions = this.actions;
       const oldName = getDisplayName(resource);
@@ -224,7 +224,7 @@ export const NotebookResourceCard = fp.flow(
           )}
           {menuOnly ? (
             <ResourceActionsMenu
-              {...{ onAnalysisAppsPage, actions }}
+              {...{ menuButtonComponentOverride, actions }}
               disabled={resource.adminLocked}
             />
           ) : (

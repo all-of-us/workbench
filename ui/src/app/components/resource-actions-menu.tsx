@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-import { KebabCircleButton, MenuItem, SnowmanButton } from './buttons';
+import { MenuItem, SnowmanButton } from './buttons';
 import { PopupTrigger, TooltipTrigger } from './popups';
 
 export interface Action {
@@ -16,9 +16,13 @@ export interface Action {
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
-  onAnalysisAppsPage?: boolean;
+  menuButtonComponentOverride?: ({ ...props }) => JSX.Element;
 }) => {
-  const { actions, disabled } = props;
+  const { actions, disabled, menuButtonComponentOverride } = props;
+
+  const menuButtonComponent: ({ ...props }) => JSX.Element =
+    menuButtonComponentOverride ?? SnowmanButton;
+
   return (
     <PopupTrigger
       data-test-id='resource-card-menu'
@@ -45,11 +49,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {props.onAnalysisAppsPage ? (
-        <KebabCircleButton data-test-id='resource-menu' disabled={disabled} />
-      ) : (
-        <SnowmanButton data-test-id='resource-menu' disabled={disabled} />
-      )}
+      {menuButtonComponent({ ...{ disabled, dataTestId: 'resource-menu' } })}
     </PopupTrigger>
   );
 };

@@ -7,7 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppLogo } from 'app/components/apps-panel/app-logo';
-import { Clickable } from 'app/components/buttons';
+import { Clickable, KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -92,7 +92,7 @@ export const AppFilesList = withCurrentWorkspace()(
           resource={convertToResources([row], props.workspace)[0]}
           workspace
           menuOnly
-          onAnalysisAppsPage
+          menuButtonComponentOverride={KebabCircleButton}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />
