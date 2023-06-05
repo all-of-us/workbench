@@ -72,7 +72,7 @@ const appsExtensionMap = [
   {
     extension: rstudioNotebookExtension,
     appType: UIAppType.RSTUDIO,
-    path: '',
+    path: 'notebooks/preview',
   },
 ];
 
