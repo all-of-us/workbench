@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-while getopts ":a" arg; do
+while getopts ":ad" arg; do
   case $arg in
     a) # Disable authentication.
       disableAuthChecks=1
+      ;;
+    d) # Drop database if exists.
+      dropDbIfExists=1
       ;;
     h | *) # Display help.
       usage
@@ -15,7 +18,7 @@ done
 export TANAGRA_DB_NAME=tanagra_db
 
 export TANAGRA_DB_URI=jdbc:mariadb://${DB_HOST}:${DB_PORT}/${TANAGRA_DB_NAME}
-export TANAGRA_DB_INITIALIZE_ON_START=true
+export TANAGRA_DB_INITIALIZE_ON_START=false
 export TANAGRA_DB_USERNAME=workbench
 export TANAGRA_DB_PASSWORD=wb-notasecret
 
@@ -37,10 +40,13 @@ else
 fi
 
 # always init mariadb with tanagra db - fix this later
-source init_new_tanagra_db.sh --drop-if-exists &
+if [[ ${dropDbIfExists} ]]; then
+  source init_new_tanagra_db.sh --drop-if-exists &
+else
+  source init_new_tanagra_db.sh &
+fi
+
 # run from tanagra sub-module under workbench
 cd ../tanagra
-# start postgresql
-# ./service/local-dev/run_postgres.sh start
 # deploy service
 ./gradlew service:bootRun
