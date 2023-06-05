@@ -4,8 +4,8 @@ import { Cohorts, ConceptSets, LinkText, MenuOption, ResourceCard, Tabs } from '
 import { makeRandomName } from 'utils/str-utils';
 import { createDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
-import { waitForText } from 'utils/waits-utils';
 import DatasetBuildPage from 'app/page/dataset-build-page';
+import { waitForText } from '../../utils/waits-utils';
 
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);
@@ -15,22 +15,20 @@ describe('Dataset rename', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eDatasetRenameTest';
+  const workspaceName = 'e2eDatasetActionTest';
 
-  test('Via snowman menu', async () => {
+  test('Can edit dataSet via snowman menu', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const datasetName = await createDataset(page, {
       cohorts: [Cohorts.AllParticipants],
       conceptSets: [ConceptSets.Demographics]
     });
-
     const resourceCard = new DataResourceCard(page);
     const datasetNameCell = await resourceCard.findNameCellLinkFromTable({
       name: datasetName
     });
     expect(datasetNameCell).toBeTruthy();
-
     // Verify Dataset Build or Edit page renders correctly.
     await resourceCard.selectSnowmanMenu(MenuOption.Edit, { name: datasetName, waitForNav: true });
 
@@ -45,7 +43,7 @@ describe('Dataset rename', () => {
     const cohortCheckBox = datasetEditPage.getCohortCheckBox(Cohorts.AllParticipants);
     expect(await cohortCheckBox.isChecked()).toBe(true);
 
-    // Verify Cohort checkbox is checked.
+    // Verify Concept set checkbox is checked.
     const conceptSetCheckBox = datasetEditPage.getConceptSetCheckBox(ConceptSets.Demographics);
     expect(await conceptSetCheckBox.isChecked()).toBe(true);
 
@@ -57,10 +55,36 @@ describe('Dataset rename', () => {
     const saveButton = datasetEditPage.getSaveButton();
     expect(await saveButton.isCursorNotAllowed()).toBe(true);
 
-    // Exit out Dataset Build page.
+    await datasetEditPage.selectConceptSets([ConceptSets.AllSurveys]);
+
+    await datasetEditPage.getSaveButton().clickAndWait();
+
     const dataPage = new WorkspaceDataPage(page);
     await openTab(page, Tabs.Data, dataPage);
-    await openTab(page, Tabs.Datasets, dataPage);
+
+    // Verify Dataset Build or Edit page renders correctly.
+    await resourceCard.selectSnowmanMenu(MenuOption.Edit, { name: datasetName, waitForNav: true });
+
+    await datasetEditPage.waitForLoad();
+    const conceptSetCheckBox1 = datasetEditPage.getConceptSetCheckBox(ConceptSets.AllSurveys);
+    const conceptSetCheckBox2 = datasetEditPage.getConceptSetCheckBox(ConceptSets.Demographics);
+    expect(await conceptSetCheckBox1.isChecked()).toBe(true);
+    expect(await conceptSetCheckBox2.isChecked()).toBe(true);
+  });
+
+  test('Can rename dataSet Via snowman menu', async () => {
+    await findOrCreateWorkspace(page, { workspaceName });
+
+    const datasetName = await createDataset(page, {
+      cohorts: [Cohorts.AllParticipants],
+      conceptSets: [ConceptSets.Demographics]
+    });
+
+    const resourceCard = new DataResourceCard(page);
+    const datasetNameCell = await resourceCard.findNameCellLinkFromTable({
+      name: datasetName
+    });
+    expect(datasetNameCell).toBeTruthy();
 
     // Rename Dataset.
     await resourceCard.selectSnowmanMenu(MenuOption.RenameDataset, { name: datasetName, waitForNav: false });
@@ -76,6 +100,7 @@ describe('Dataset rename', () => {
     await waitForText(page, 'New name already exists', { container: renameModal });
     expect(await renameModal.waitForButton(LinkText.RenameDataset).isCursorNotAllowed()).toBe(true);
 
+    // lets add a new name
     const newDatasetName = makeRandomName();
     await renameModal.typeNewName(newDatasetName);
     await renameModal.typeDescription('rename dataset test');
@@ -88,6 +113,17 @@ describe('Dataset rename', () => {
     const oldDatasetExists = await resourceCard.findNameCellLinkFromTable({ name: datasetName });
     expect(oldDatasetExists).toBeNull();
 
+    const dataPage = new WorkspaceDataPage(page);
+    await openTab(page, Tabs.Data, dataPage);
     await dataPage.deleteResourceFromTable(newDatasetName, ResourceCard.Dataset);
+  });
+
+  afterAll(async () => {
+    await signInWithAccessToken(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
+
+    // Create and Open notebook
+    const workspaceDataPage = new WorkspaceDataPage(page);
+    await workspaceDataPage.deleteWorkspace();
   });
 });
