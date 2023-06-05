@@ -67,14 +67,12 @@ const appsExtensionMap = [
   {
     extension: jupyterNotebookExtension,
     appType: UIAppType.JUPYTER,
-    path: 'notebooks/preview',
     canEdit: true,
     canPlayground: true,
   },
   {
     extension: rstudioNotebookExtension,
     appType: UIAppType.RSTUDIO,
-    path: 'notebooks/preview',
     canEdit: false,
     canPlayground: false,
   },
