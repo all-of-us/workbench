@@ -30,6 +30,7 @@ import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   createUserApp,
   deleteUserApp,
+  localizeUserApp,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -170,7 +171,8 @@ const RStudioButtonRow = (props: {
     }
   );
 
-  const onClickLaunch = () => {
+  const onClickLaunch = async () => {
+    await localizeUserApp(workspaceNamespace, userApp.appName, userApp.appType, [], false);
     window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
   };
 

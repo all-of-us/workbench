@@ -5,28 +5,21 @@ import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_I
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.upsertLeonardoLabel;
 
 import com.google.common.base.Strings;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
@@ -45,8 +38,6 @@ import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.model.StorageLink;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -82,6 +73,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final UserRecentResourceService userRecentResourceService;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoApiHelper leonardoApiHelper;
+  private final InteractiveAnalysisService interactiveAnalysisService;
 
   @Autowired
   RuntimeController(
@@ -93,7 +85,8 @@ public class RuntimeController implements RuntimeApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserRecentResourceService userRecentResourceService,
       LeonardoMapper leonardoMapper,
-      LeonardoApiHelper leonardoApiHelper) {
+      LeonardoApiHelper leonardoApiHelper,
+      InteractiveAnalysisService interactiveAnalysisService) {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -103,6 +96,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.leonardoMapper = leonardoMapper;
     this.leonardoApiHelper = leonardoApiHelper;
+    this.interactiveAnalysisService = interactiveAnalysisService;
   }
 
   @Override
@@ -296,107 +290,19 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
     DbUser user = userProvider.get();
-    leonardoApiHelper.enforceComputeSecuritySuspension(user);
-
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName(),
-        WorkspaceAccessLevel.WRITER);
+    leonardoApiHelper.enforceComputeSecuritySuspension(user);
     workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    final RawlsWorkspaceDetails firecloudWorkspace;
-    try {
-      firecloudWorkspace =
-          fireCloudService
-              .getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
-              .getWorkspace();
-    } catch (NotFoundException e) {
-      throw new NotFoundException(
-          String.format(
-              "workspace %s/%s not found or not accessible",
-              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
-    }
-    DbCdrVersion cdrVersion = dbWorkspace.getCdrVersion();
-
-    // For the common case where the notebook cluster matches the workspace
-    // namespace, simply name the directory as the workspace ID; else we
-    // include the namespace in the directory name to avoid possible conflicts
-    // in workspace IDs.
-    String gcsNotebooksDir = "gs://" + firecloudWorkspace.getBucketName() + "/notebooks";
-    long workspaceId = dbWorkspace.getWorkspaceId();
-
-    body.getNotebookNames()
-        .forEach(
-            notebookName ->
-                userRecentResourceService.updateNotebookEntry(
-                    workspaceId,
-                    userProvider.get().getUserId(),
-                    gcsNotebooksDir + "/" + notebookName));
-
-    String workspacePath = dbWorkspace.getFirecloudName();
-    String googleProjectId = dbWorkspace.getGoogleProject();
-    String editDir = "workspaces/" + workspacePath;
-    String playgroundDir = "workspaces_playground/" + workspacePath;
-    String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
-
-    leonardoNotebooksClient.createStorageLink(
-        googleProjectId,
-        user.getRuntimeName(),
-        new StorageLink()
-            .cloudStorageDirectory(gcsNotebooksDir)
-            .localBaseDirectory(editDir)
-            .localSafeModeBaseDirectory(playgroundDir)
-            .pattern(DELOC_PATTERN));
-
-    // Always localize config files; usually a no-op after the first call.
-    Map<String, String> localizeMap = new HashMap<>();
-
-    // The Welder extension offers direct links to/from playground mode; write the AoU config file
-    // to both locations so notebooks will work in either directory.
-    String aouConfigUri = aouConfigDataUri(firecloudWorkspace, cdrVersion, workspaceNamespace);
-    localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
-    localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
-
-    // Localize the requested notebooks, if any.
-    if (body.getNotebookNames() != null) {
-      localizeMap.putAll(
-          body.getNotebookNames().stream()
-              .collect(
-                  Collectors.toMap(
-                      name -> targetDir + "/" + name, name -> gcsNotebooksDir + "/" + name)));
-    }
-    log.info(localizeMap.toString());
-    leonardoNotebooksClient.localize(
-        googleProjectId, userProvider.get().getRuntimeName(), localizeMap);
-
-    // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
-    return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
-  }
-
-  private String jsonToDataUri(JSONObject json) {
-    return DATA_URI_PREFIX + Base64.getUrlEncoder().encodeToString(json.toString().getBytes());
-  }
-
-  private String aouConfigDataUri(
-      RawlsWorkspaceDetails fcWorkspace, DbCdrVersion cdrVersion, String cdrBillingCloudProject) {
-    JSONObject config = new JSONObject();
-
-    String host = null;
-    try {
-      host = new URL(workbenchConfigProvider.get().server.apiBaseUrl).getHost();
-    } catch (MalformedURLException e) {
-      log.log(Level.SEVERE, "bad apiBaseUrl config value; failing", e);
-      throw new ServerErrorException("Failed to generate AoU notebook config");
-    }
-    config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
-    config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
-    config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
-    config.put(API_HOST_KEY, host);
-    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
-    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
-    config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
-    return jsonToDataUri(config);
+    return ResponseEntity.ok(
+        new RuntimeLocalizeResponse()
+            .runtimeLocalDirectory(
+                interactiveAnalysisService.localize(
+                    workspaceNamespace,
+                    userProvider.get().getRuntimeName(),
+                    body.getNotebookNames(),
+                    body.getPlaygroundMode(),
+                    true)));
   }
 }

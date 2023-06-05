@@ -74,6 +74,21 @@ export const pauseUserApp = (googleProject, appName, namespace) => {
     .then(() => maybeStartPollingForUserApps(namespace));
 };
 
+export const localizeUserApp = (
+  namespace,
+  appName,
+  appType: AppType,
+  fileNames: Array<string>,
+  playgroundMode: boolean
+) => {
+  appsApi()
+      .localizeApp(namespace, appName, {
+        fileNames,
+        playgroundMode,
+        appType
+      })
+};
+
 export const resumeUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
     .startApp(googleProject, appName)

@@ -3,13 +3,11 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_IS_RUNTIME;
@@ -31,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +61,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
@@ -103,14 +101,11 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeError;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
-import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
-import org.pmiops.workbench.notebooks.model.LocalizationEntry;
-import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -196,6 +191,7 @@ public class RuntimeControllerTest {
     ConceptSetService.class,
     CohortService.class,
     MailService.class,
+    InteractiveAnalysisService.class,
   })
   static class Configuration {
 
@@ -217,7 +213,6 @@ public class RuntimeControllerTest {
     }
   }
 
-  @Captor private ArgumentCaptor<Localize> welderReqCaptor;
   @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
   @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
@@ -1315,168 +1310,6 @@ public class RuntimeControllerTest {
   public void testDeleteRuntime() throws ApiException {
     runtimeController.deleteRuntime(WORKSPACE_NS, false);
     verify(userRuntimesApi).deleteRuntime(GOOGLE_PROJECT_ID, getRuntimeName(), false);
-  }
-
-  @Test
-  public void testLocalize() throws org.pmiops.workbench.notebooks.ApiException {
-    RuntimeLocalizeRequest req =
-        new RuntimeLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
-    assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
-
-    verify(proxyApi)
-        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
-
-    Localize welderReq = welderReqCaptor.getValue();
-    assertThat(
-            welderReq.getEntries().stream()
-                .map(e -> e.getLocalDestinationPath())
-                .collect(Collectors.toList()))
-        .containsExactly(
-            "workspaces/myfirstworkspace/foo.ipynb",
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .filter(
-                    e ->
-                        e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb")
-                            && e.getLocalDestinationPath()
-                                .equals("workspaces/myfirstworkspace/foo.ipynb"))
-                .count())
-        .isAtLeast(1L);
-
-    JSONObject aouJson =
-        dataUriToJson(
-            welderReq.getEntries().stream()
-                .filter(
-                    e ->
-                        e.getLocalDestinationPath()
-                            .equals("workspaces/myfirstworkspace/.all_of_us_config.json"))
-                .findFirst()
-                .get()
-                .getSourceUri());
-
-    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
-    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
-    verify(mockUserRecentResourceService, times(1))
-        .updateNotebookEntry(anyLong(), anyLong(), anyString());
-  }
-
-  @Test
-  public void testLocalize_playgroundMode() throws org.pmiops.workbench.notebooks.ApiException {
-    RuntimeLocalizeRequest req =
-        new RuntimeLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(true);
-    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
-    assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
-    verify(proxyApi)
-        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
-
-    Localize welderReq = welderReqCaptor.getValue();
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .map(e -> e.getLocalDestinationPath())
-                .collect(Collectors.toList()))
-        .containsExactly(
-            "workspaces_playground/myfirstworkspace/foo.ipynb",
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .filter(
-                    e ->
-                        e.getLocalDestinationPath()
-                                .equals("workspaces_playground/myfirstworkspace/foo.ipynb")
-                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
-                .count())
-        .isAtLeast(1L);
-  }
-
-  @Test
-  public void testLocalize_differentNamespace() throws org.pmiops.workbench.notebooks.ApiException {
-    DbWorkspace otherWorkspace =
-        new DbWorkspace()
-            .setWorkspaceNamespace("other-proj")
-            .setGoogleProject(GOOGLE_PROJECT_ID_2)
-            .setFirecloudName("myotherworkspace")
-            .setCreator(user)
-            .setCdrVersion(cdrVersion);
-    doReturn(otherWorkspace).when(workspaceService).lookupWorkspaceByNamespace("other-proj");
-    RuntimeLocalizeRequest req =
-        new RuntimeLocalizeRequest()
-            .notebookNames(ImmutableList.of("foo.ipynb"))
-            .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    stubGetWorkspace("other-proj", GOOGLE_PROJECT_ID_2, "myotherworkspace", LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp = runtimeController.localize("other-proj", req).getBody();
-    verify(proxyApi)
-        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID_2), eq(getRuntimeName()));
-
-    Localize welderReq = welderReqCaptor.getValue();
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .map(e -> e.getLocalDestinationPath())
-                .collect(Collectors.toList()))
-        .containsExactly(
-            "workspaces/myotherworkspace/foo.ipynb",
-            "workspaces/myotherworkspace/.all_of_us_config.json",
-            "workspaces_playground/myotherworkspace/.all_of_us_config.json");
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .filter(
-                    e ->
-                        e.getLocalDestinationPath().equals("workspaces/myotherworkspace/foo.ipynb")
-                            && e.getSourceUri().equals("gs://workspace-bucket/notebooks/foo.ipynb"))
-                .count())
-        .isAtLeast(1L);
-
-    assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myotherworkspace");
-    JSONObject aouJson =
-        dataUriToJson(
-            welderReq.getEntries().stream()
-                .filter(
-                    e ->
-                        e.getLocalDestinationPath()
-                            .equals("workspaces/myotherworkspace/.all_of_us_config.json"))
-                .findFirst()
-                .get()
-                .getSourceUri());
-    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
-  }
-
-  @Test
-  public void testLocalize_noNotebooks() throws org.pmiops.workbench.notebooks.ApiException {
-    RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
-    req.setPlaygroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    RuntimeLocalizeResponse resp = runtimeController.localize(WORKSPACE_NS, req).getBody();
-    verify(proxyApi)
-        .welderLocalize(welderReqCaptor.capture(), eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()));
-
-    // Config files only.
-    Localize welderReq = welderReqCaptor.getValue();
-
-    assertThat(
-            welderReq.getEntries().stream()
-                .map(LocalizationEntry::getLocalDestinationPath)
-                .collect(Collectors.toList()))
-        .containsExactly(
-            "workspaces_playground/myfirstworkspace/.all_of_us_config.json",
-            "workspaces/myfirstworkspace/.all_of_us_config.json");
-
-    assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
   }
 
   @Test

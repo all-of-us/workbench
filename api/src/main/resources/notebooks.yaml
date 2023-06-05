@@ -310,7 +310,7 @@ paths:
           schema:
             $ref: '#/definitions/StorageLink'
 
-  '/proxy/{googleProject}/{appName}/welder-service/objects':
+  '/proxy/google/v1/apps/{googleProject}/{appName}/welder-service/objects':
     parameters:
       - in: path
         name: googleProject
@@ -342,7 +342,7 @@ paths:
           schema:
             $ref: '#/definitions/WelderErrorReport'
 
-  '/proxy/{googleProject}/{appName}/welder-service/storageLinks':
+  '/proxy/google/v1/apps/{googleProject}/{appName}/welder-service/storageLinks':
     parameters:
       - in: path
         name: googleProject
@@ -350,7 +350,7 @@ paths:
         required: true
         type: string
       - in: path
-        name: runtimeName
+        name: appName
         description: appName
         required: true
         type: string
