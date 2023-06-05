@@ -13,19 +13,14 @@ export interface Action {
   hoverText?: string;
 }
 
-export interface ResourceMenuButtonProps {
-  disabled: boolean;
-  dataTestId: string;
-}
-
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
-  menuButtonComponentOverride?: (props: ResourceMenuButtonProps) => JSX.Element;
+  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
 }) => {
   const { actions, disabled, menuButtonComponentOverride } = props;
 
-  const menuButtonComponent: (props: ResourceMenuButtonProps) => JSX.Element =
+  const menuButtonComponent: (props: { disabled: boolean }) => JSX.Element =
     menuButtonComponentOverride ?? SnowmanButton;
 
   return (
@@ -37,16 +32,10 @@ export const ResourceActionsMenu = (props: {
         !disabled && (
           <React.Fragment>
             {actions.map((action, i) => {
+              const { hoverText, displayName } = action;
               return (
-                <TooltipTrigger key={i} content={action.hoverText}>
-                  <MenuItem
-                    icon={action.icon}
-                    faIcon={action.faIcon}
-                    onClick={() => action.onClick()}
-                    disabled={action.disabled}
-                  >
-                    {action.displayName}
-                  </MenuItem>
+                <TooltipTrigger key={i} content={hoverText}>
+                  <MenuItem {...action}>{displayName}</MenuItem>
                 </TooltipTrigger>
               );
             })}
@@ -54,7 +43,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {menuButtonComponent({ ...{ disabled, dataTestId: 'resource-menu' } })}
+      {menuButtonComponent({ ...{ disabled } })}
     </PopupTrigger>
   );
 };
