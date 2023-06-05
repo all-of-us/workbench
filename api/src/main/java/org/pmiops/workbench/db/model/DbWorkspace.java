@@ -43,7 +43,6 @@ public class DbWorkspace {
   private String lastModifiedBy;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Timestamp lastAccessedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
   private Set<DbConceptSet> conceptSets = new HashSet<>();
   private Set<DbDataset> dataSets = new HashSet<>();
@@ -197,16 +196,6 @@ public class DbWorkspace {
 
   public DbWorkspace setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
-    return this;
-  }
-
-  @Column(name = "last_accessed_time")
-  public Timestamp getLastAccessedTime() {
-    return lastAccessedTime;
-  }
-
-  public DbWorkspace setLastAccessedTime(Timestamp lastAccessedTime) {
-    this.lastAccessedTime = lastAccessedTime;
     return this;
   }
 
