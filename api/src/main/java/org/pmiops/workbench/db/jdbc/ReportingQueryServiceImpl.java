@@ -443,7 +443,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
-                + "  last_accessed_time,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
                 + "  needs_rp_review_prompt,\n"
