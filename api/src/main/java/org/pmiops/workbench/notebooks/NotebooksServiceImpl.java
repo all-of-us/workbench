@@ -283,8 +283,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     Blob blob =
         cloudStorageClient.getBlob(
             bucketName,
-            NotebookUtils.withNotebookPath(
-                NotebookUtils.withJupyterNotebookExtension(notebookName)));
+            NotebookUtils.withNotebookPath(notebookName));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
