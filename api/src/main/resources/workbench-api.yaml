@@ -9840,8 +9840,8 @@ definitions:
       rpDiseaseOfFocus:
         type: string
         description: |-
-          For workspaces that include Disease-focused Research, the user-supplied name of the diseas
-          of focus (in the Name of Disease field).
+          For workspaces that include Disease-focused Research, the user-supplied name of the 
+          disease of focus (in the Name of Disease field).
       rpDrugDevelopment:
         type: boolean
         description: |-
