@@ -13,14 +13,19 @@ export interface Action {
   hoverText?: string;
 }
 
+export interface ResourceMenuButtonProps {
+  disabled: boolean;
+  dataTestId: string;
+}
+
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
-  menuButtonComponentOverride?: ({ ...props }) => JSX.Element;
+  menuButtonComponentOverride?: (props: ResourceMenuButtonProps) => JSX.Element;
 }) => {
   const { actions, disabled, menuButtonComponentOverride } = props;
 
-  const menuButtonComponent: ({ ...props }) => JSX.Element =
+  const menuButtonComponent: (props: ResourceMenuButtonProps) => JSX.Element =
     menuButtonComponentOverride ?? SnowmanButton;
 
   return (

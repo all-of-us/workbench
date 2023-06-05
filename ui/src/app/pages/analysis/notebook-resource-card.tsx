@@ -8,6 +8,7 @@ import { RenameModal } from 'app/components/rename-modal';
 import {
   Action,
   ResourceActionsMenu,
+  ResourceMenuButtonProps,
 } from 'app/components/resource-actions-menu';
 import {
   canDelete,
@@ -41,7 +42,7 @@ interface Props
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
   menuOnly: boolean;
-  menuButtonComponentOverride?: ({ ...props }) => JSX.Element;
+  menuButtonComponentOverride?: (props: ResourceMenuButtonProps) => JSX.Element;
 }
 
 interface State {
