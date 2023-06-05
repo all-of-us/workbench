@@ -16,7 +16,7 @@ export interface Action {
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
-  appsAnalysis?: boolean;
+  onAnalysisAppsPage?: boolean;
 }) => {
   const { actions, disabled } = props;
   return (
@@ -45,7 +45,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      {props.appsAnalysis ? (
+      {props.onAnalysisAppsPage ? (
         <KebabCircleButton data-test-id='resource-menu' disabled={disabled} />
       ) : (
         <SnowmanButton data-test-id='resource-menu' disabled={disabled} />

@@ -92,7 +92,7 @@ export const AppFilesList = withCurrentWorkspace()(
           resource={convertToResources([row], props.workspace)[0]}
           workspace
           menuOnly
-          appsAnalysis
+          onAnalysisAppsPage
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />
