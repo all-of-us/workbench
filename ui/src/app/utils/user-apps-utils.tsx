@@ -81,12 +81,11 @@ export const localizeUserApp = (
   fileNames: Array<string>,
   playgroundMode: boolean
 ) => {
-  appsApi()
-      .localizeApp(namespace, appName, {
-        fileNames,
-        playgroundMode,
-        appType
-      })
+  appsApi().localizeApp(namespace, appName, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
 };
 
 export const resumeUserApp = (googleProject, appName, namespace) => {

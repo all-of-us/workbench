@@ -1,4 +1,6 @@
 import {
+  AppLocalizeRequest,
+  AppLocalizeResponse,
   AppsApi,
   AppStatus,
   AppType,
@@ -85,5 +87,13 @@ export class AppsApiStub extends AppsApi {
 
   public deleteApp(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(() => {});
+  }
+  public localizeApp(
+    _workspaceNamespace: string,
+    _appName: string,
+    _body: AppLocalizeRequest,
+    _options: any
+  ): Promise<AppLocalizeResponse> {
+    return new Promise<AppLocalizeResponse>(() => {});
   }
 }

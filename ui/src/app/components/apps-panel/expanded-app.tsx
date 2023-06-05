@@ -172,7 +172,13 @@ const RStudioButtonRow = (props: {
   );
 
   const onClickLaunch = async () => {
-    await localizeUserApp(workspaceNamespace, userApp.appName, userApp.appType, [], false);
+    await localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      [],
+      false
+    );
     window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
   };
 
