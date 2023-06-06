@@ -133,7 +133,6 @@ public class WorkspaceAuditorTest {
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
-    dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
     dbWorkspace1.setCreationTime(new Timestamp(now));
 
