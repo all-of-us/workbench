@@ -111,18 +111,15 @@ export const AppFilesList = withCurrentWorkspace()(
         workspace: { namespace, id },
       } = props;
       const { name } = row;
-      const appPath = getAppInfoFromFileName(name).path;
-      const url = `/workspaces/${namespace}/${id}/${appPath}/${name}`;
+      const url = `/workspaces/${namespace}/${id}/notebooks/preview/${name}`;
       // Currently, RStudio files are not linked with the appropriate app, hence they are shown as
       // labels instead of links.
-      return appPath ? (
+      return (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>
             {row.name}
           </RouterLink>
         </Clickable>
-      ) : (
-        <label>{row.name}</label>
       );
     };
 
