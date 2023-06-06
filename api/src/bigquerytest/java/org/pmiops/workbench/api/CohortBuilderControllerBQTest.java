@@ -124,7 +124,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.featureFlags.enableConceptSetsInCohortBuilder = true;
       return workbenchConfig;
     }
   }
