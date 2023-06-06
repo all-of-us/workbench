@@ -392,7 +392,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
-    // Note: keep in sync with WorkspaceAuthService.updateWorkspaceAcl.
+    // Note: keep in sync with WorkspaceAuthService.patchWorkspaceAcl.
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final String registeredTierGroupEmail = dbAccessTier.getAuthDomainGroupEmail();
 
