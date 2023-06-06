@@ -153,7 +153,7 @@ public class NotebooksServiceTest {
         .thenReturn(
             new RawlsWorkspaceResponse().workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(mockCloudStorageClient.getBlob("bkt", "notebooks/"+notebookName)).thenReturn(mockBlob);
+    when(mockCloudStorageClient.getBlob("bkt", "notebooks/" + notebookName)).thenReturn(mockBlob);
   }
 
   @Test
@@ -553,9 +553,11 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test_allowsDataImage.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_allowsDataImage.ipynb").getBytes());
     assertThat(html).contains(dataUri);
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_allowsDataImage.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_allowsDataImage.ipynb");
   }
 
   @Test
@@ -564,10 +566,11 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test_basicContent.ipynb").getBytes());
+    String html =
+        new String(notebooksService.getReadOnlyHtml("", "", "test_basicContent.ipynb").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_basicContent.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_basicContent.ipynb");
   }
 
   @Test
@@ -576,9 +579,11 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test_disallowsRemoteImage.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_disallowsRemoteImage.ipynb").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_disallowsRemoteImage.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_disallowsRemoteImage.ipynb");
   }
 
   @Test
@@ -587,10 +592,12 @@ public class NotebooksServiceTest {
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test_scriptSanitization.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_scriptSanitization.ipynb").getBytes());
     assertThat(html).doesNotContain("script");
     assertThat(html).doesNotContain("alert");
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_scriptSanitization.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_scriptSanitization.ipynb");
   }
 
   @Test
@@ -600,7 +607,9 @@ public class NotebooksServiceTest {
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test_styleSanitization.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_styleSanitization.ipynb").getBytes());
     assertThat(html).contains("style");
     assertThat(html).contains("color");
     // This behavior is not desired, but this test is in place to enshrine current expected
@@ -608,7 +617,7 @@ public class NotebooksServiceTest {
     // expect that the only style tags produced in the preview are produced by nbconvert, and are
     // therefore safe. Ideally we would keep the style tag, but sanitize the contents.
     assertThat(html).contains("XSS");
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_styleSanitization.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_styleSanitization.ipynb");
   }
 
   @Test
@@ -623,7 +632,7 @@ public class NotebooksServiceTest {
       // expected
     }
     verify(mockFireCloudService, never()).staticJupyterNotebooksConvert(any());
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test_tooBig.ipynb");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_tooBig.ipynb");
   }
 
   @Test
@@ -631,7 +640,7 @@ public class NotebooksServiceTest {
     stubNotebookToJson("test.Rmd");
     notebooksService.getReadOnlyHtml("", "", "test.Rmd");
     verify(mockFireCloudService).staticRstudioNotebooksConvert(any());
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/test.Rmd");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test.Rmd");
   }
 
   @Test
@@ -640,7 +649,7 @@ public class NotebooksServiceTest {
     Assertions.assertThrows(
         NotImplementedException.class,
         () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
-    verify(mockCloudStorageClient).getBlob("bkt","notebooks/notebook without suffix");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/notebook without suffix");
   }
 
   @Test
