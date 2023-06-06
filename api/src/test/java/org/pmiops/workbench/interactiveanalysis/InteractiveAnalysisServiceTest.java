@@ -56,7 +56,6 @@ public class InteractiveAnalysisServiceTest {
 
   private static WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static DbUser user;
-  private DbWorkspace dbWorkspace;
   private String aouConfigDataUri;
 
   private static final String WORKSPACE_NS = "workspace-ns";
@@ -84,7 +83,7 @@ public class InteractiveAnalysisServiceTest {
         new DbCdrVersion()
             .setBigqueryProject(CDR_BIGQUERY_PROJECT)
             .setBigqueryDataset(CDR_BIGQUERY_DATASET);
-    dbWorkspace =
+    DbWorkspace dbWorkspace =
         new DbWorkspace()
             .setWorkspaceNamespace(WORKSPACE_NS)
             .setGoogleProject(GOOGLE_PROJECT_ID)
