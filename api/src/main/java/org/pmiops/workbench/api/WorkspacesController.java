@@ -580,19 +580,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
     if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
-      var fcAcls =
-          workspaceAuthService.getFirecloudWorkspaceAcls(
+      var fromAcl =
+          workspaceAuthService.getFirecloudWorkspaceAcl(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
-      var collaborators =
+      var toAcl =
           Maps.transformEntries(
-              fcAcls,
+              fromAcl,
               (username, accessEntry) ->
                   username.equals(user.getUsername())
                       ? WorkspaceAccessLevel.OWNER
                       : WorkspaceAccessLevel.fromValue(accessEntry.getAccessLevel()));
 
-      dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, collaborators);
+      dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, toAcl);
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
@@ -701,7 +701,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, aclsByEmail);
+    dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =
