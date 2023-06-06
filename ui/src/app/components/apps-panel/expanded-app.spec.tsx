@@ -377,7 +377,7 @@ describe('ExpandedApp', () => {
     expect(launchButton.exists()).toBeTruthy();
     expect(launchButton.prop('disabled')).toBeFalsy();
 
-    launchButton.simulate('click');
+    await launchButton.simulate('click');
 
     expect(localizeSpy).toHaveBeenCalledWith(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
