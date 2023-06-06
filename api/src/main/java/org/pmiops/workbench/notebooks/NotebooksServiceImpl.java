@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -318,6 +319,17 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+
+    final Function<byte[], String> conversion;
+    if (NotebookUtils.isJupyterNotebook(notebookName)) {
+      conversion = this::convertJupyterNotebookToHtml;
+    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
+      conversion = this::convertRstudioNotebookToHtml;
+    } else {
+      throw new NotImplementedException(
+          String.format("Converting %s to read-only HTML is not supported", notebookName));
+    }
+
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
@@ -326,14 +338,7 @@ public class NotebooksServiceImpl implements NotebooksService {
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
 
-    if (NotebookUtils.isJupyterNotebook(notebookName)) {
-      return convertJupyterNotebookToHtml(blob.getContent());
-    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
-      return convertRstudioNotebookToHtml(blob.getContent());
-    } else {
-      throw new NotImplementedException(
-          String.format("Converting %s to read-only HTML is not supported", notebookName));
-    }
+    return conversion.apply(blob.getContent());
   }
 
   @Override
