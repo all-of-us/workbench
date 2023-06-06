@@ -4,6 +4,7 @@ import { mount } from 'enzyme';
 import {
   AppsApi,
   AppStatus,
+  AppType,
   NotebooksApi,
   RuntimeStatus,
   UserAppEnvironment,
@@ -33,7 +34,10 @@ import { LeoProxyApiStub } from 'testing/stubs/leo-proxy-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 import { RuntimesApiStub } from 'testing/stubs/runtimes-api-stub';
-import { workspaceDataStub } from 'testing/stubs/workspaces';
+import {
+  workspaceDataStub,
+  WorkspaceStubVariables,
+} from 'testing/stubs/workspaces';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
@@ -354,11 +358,13 @@ describe('ExpandedApp', () => {
     const wrapper = await component(UIAppType.RSTUDIO, {
       appName,
       googleProject,
+      appType: AppType.RSTUDIO,
       status: AppStatus.RUNNING,
       proxyUrls: {
         'rstudio-service': proxyUrl,
       },
     });
+    const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
 
     const focusStub = jest.fn();
     const windowOpenSpy = jest
@@ -372,6 +378,12 @@ describe('ExpandedApp', () => {
     expect(launchButton.prop('disabled')).toBeFalsy();
 
     launchButton.simulate('click');
+
+    expect(localizeSpy).toHaveBeenCalledWith(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      appName,
+      { appType: 'RSTUDIO', fileNames: [], playgroundMode: false }
+    );
 
     expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
     expect(focusStub).toHaveBeenCalled();
