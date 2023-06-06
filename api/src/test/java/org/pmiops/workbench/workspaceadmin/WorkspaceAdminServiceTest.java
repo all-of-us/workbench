@@ -326,6 +326,14 @@ public class WorkspaceAdminServiceTest {
                 "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
     when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
+    blobs.stream()
+        .forEach(
+            (blob) -> {
+              boolean isJupyterFile =
+                  !blob.getName().equals(NotebookUtils.withNotebookPath("scratch.txt"));
+              when(mockNotebooksService.isNotebookBlob(blob)).thenReturn(isJupyterFile);
+            });
+
     final List<FileDetail> expectedFiles =
         ImmutableList.of(
             new FileDetail()
@@ -339,19 +347,13 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(2000L)
                 .lastModifiedTime(dummyTime),
             new FileDetail()
-                .name("scratch.txt")
-                .path("gs://bucket/notebooks/scratch.txt")
-                .sizeInBytes(123L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
                 .name("sneaky.ipynb")
                 .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
     when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
-        .thenReturn(
-            expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
+        .thenReturn(expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2));
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
     assertThat(files).containsExactlyElementsIn(expectedFiles);
   }
