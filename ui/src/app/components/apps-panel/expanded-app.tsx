@@ -171,7 +171,7 @@ const RStudioButtonRow = (props: {
   );
 
   const onClickLaunch = () => {
-    window.open(userApp.proxyUrls.rstudio, '_blank').focus();
+    window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
   };
 
   const createButtonDisabled = creating || !canCreateApp(userApp);

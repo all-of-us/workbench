@@ -5,8 +5,7 @@ import * as fp from 'lodash/fp';
 import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { IconButton } from 'app/components/buttons';
-import { ClrIcon } from 'app/components/icons';
-import { PlaygroundIcon } from 'app/components/icons';
+import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
 import { SpinnerOverlay } from 'app/components/spinners';
@@ -44,6 +43,7 @@ import {
   NotebookFrameError,
   SecuritySuspendedMessage,
 } from './notebook-frame-error';
+import { getAppInfoFromFileName } from './util';
 
 const styles = reactStyles({
   navBar: {
@@ -113,6 +113,8 @@ interface State {
   runtimeInitializerDefault: Runtime;
   resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
+  canEdit: boolean;
+  canPlayground: boolean;
 }
 
 export const InteractiveNotebook = fp.flow(
@@ -136,6 +138,8 @@ export const InteractiveNotebook = fp.flow(
         runtimeInitializerDefault: null,
         resolveRuntimeInitializer: null,
         error: null,
+        canEdit: false,
+        canPlayground: false,
       };
     }
 
@@ -179,7 +183,8 @@ export const InteractiveNotebook = fp.flow(
           wsid,
           nbName
         );
-        this.setState({ html: html });
+        const { canEdit, canPlayground } = getAppInfoFromFileName(nbName);
+        this.setState({ html, canEdit, canPlayground });
       } catch (e) {
         this.setState({ error: e });
       }
@@ -412,6 +417,8 @@ export const InteractiveNotebook = fp.flow(
         runtimeInitializerDefault,
         resolveRuntimeInitializer,
         error,
+        canEdit,
+        canPlayground,
       } = this.state;
       const closeRuntimeInitializerModal = (r?: Runtime) => {
         resolveRuntimeInitializer(r);
@@ -448,46 +455,50 @@ export const InteractiveNotebook = fp.flow(
               ],
               () => (
                 <div style={{ display: 'flex' }}>
-                  <TooltipTrigger
-                    content={
-                      this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                    }
-                  >
-                    <div
-                      style={this.buttonStyleObj}
-                      onClick={() => {
-                        AnalyticsTracker.Notebooks.Edit();
-                        this.startEditMode();
-                      }}
+                  {canEdit && (
+                    <TooltipTrigger
+                      content={
+                        this.billingLocked && ACTION_DISABLED_INVALID_BILLING
+                      }
                     >
-                      <EditComponentReact
-                        enableHoverEffect={false}
-                        disabled={!this.canStartRuntimes}
-                        style={styles.navBarIcon}
-                      />
-                      Edit {this.notebookInUse && '(In Use)'}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipTrigger
-                    content={
-                      this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                    }
-                  >
-                    <div
-                      style={this.buttonStyleObj}
-                      onClick={() => {
-                        AnalyticsTracker.Notebooks.Run();
-                        this.onPlaygroundModeClick();
-                      }}
+                      <div
+                        style={this.buttonStyleObj}
+                        onClick={() => {
+                          AnalyticsTracker.Notebooks.Edit();
+                          this.startEditMode();
+                        }}
+                      >
+                        <EditComponentReact
+                          enableHoverEffect={false}
+                          disabled={!this.canStartRuntimes}
+                          style={styles.navBarIcon}
+                        />
+                        Edit {this.notebookInUse && '(In Use)'}
+                      </div>
+                    </TooltipTrigger>
+                  )}
+                  {canPlayground && (
+                    <TooltipTrigger
+                      content={
+                        this.billingLocked && ACTION_DISABLED_INVALID_BILLING
+                      }
                     >
-                      <IconButton
-                        icon={PlaygroundIcon}
-                        disabled={!this.canStartRuntimes}
-                        style={styles.navBarIcon}
-                      />
-                      Run (Playground Mode)
-                    </div>
-                  </TooltipTrigger>
+                      <div
+                        style={this.buttonStyleObj}
+                        onClick={() => {
+                          AnalyticsTracker.Notebooks.Run();
+                          this.onPlaygroundModeClick();
+                        }}
+                      >
+                        <IconButton
+                          icon={PlaygroundIcon}
+                          disabled={!this.canStartRuntimes}
+                          style={styles.navBarIcon}
+                        />
+                        Run (Playground Mode)
+                      </div>
+                    </TooltipTrigger>
+                  )}
                 </div>
               )
             )}
@@ -517,7 +528,7 @@ export const InteractiveNotebook = fp.flow(
                 this.setState({ showInUseModal: false });
                 this.startPlaygroundMode();
               }}
-            ></NotebookInUseModal>
+            />
           )}
           {resolveRuntimeInitializer && (
             <RuntimeInitializerModal

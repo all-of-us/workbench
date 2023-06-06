@@ -18,7 +18,6 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other", ReportingWorkspace::getDisseminateResearchOther),
-  LAST_ACCESSED_TIME("last_accessed_time", w -> toInsertRowString(w.getLastAccessedTime())),
   LAST_MODIFIED_TIME("last_modified_time", w -> toInsertRowString(w.getLastModifiedTime())),
   NAME("name", ReportingWorkspace::getName),
   NEEDS_RP_REVIEW_PROMPT("needs_rp_review_prompt", ReportingWorkspace::getNeedsRpReviewPrompt),

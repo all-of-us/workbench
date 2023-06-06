@@ -106,7 +106,7 @@ order by id"
 surveyNames=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql --format csv "$query")
 
 echo "Getting parent id"
-query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'SURVEY'"
+query="select id from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_menu\` where domain_id = 'SURVEY' and is_group = 1"
 PARENT_ID=$(bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql "$query" | tr -dc '0-9')
 
 SORT_ORDER=0

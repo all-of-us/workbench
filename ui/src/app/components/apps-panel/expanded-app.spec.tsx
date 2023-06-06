@@ -356,7 +356,7 @@ describe('ExpandedApp', () => {
       googleProject,
       status: AppStatus.RUNNING,
       proxyUrls: {
-        rstudio: proxyUrl,
+        'rstudio-service': proxyUrl,
       },
     });
 

@@ -7,7 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppLogo } from 'app/components/apps-panel/app-logo';
-import { Clickable } from 'app/components/buttons';
+import { Clickable, KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -92,7 +92,7 @@ export const AppFilesList = withCurrentWorkspace()(
           resource={convertToResources([row], props.workspace)[0]}
           workspace
           menuOnly
-          appsAnalysis
+          menuButtonComponentOverride={KebabCircleButton}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />
@@ -111,18 +111,15 @@ export const AppFilesList = withCurrentWorkspace()(
         workspace: { namespace, id },
       } = props;
       const { name } = row;
-      const appPath = getAppInfoFromFileName(name).path;
-      const url = `/workspaces/${namespace}/${id}/${appPath}/${name}`;
+      const url = `/workspaces/${namespace}/${id}/notebooks/preview/${name}`;
       // Currently, RStudio files are not linked with the appropriate app, hence they are shown as
       // labels instead of links.
-      return appPath ? (
+      return (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>
             {row.name}
           </RouterLink>
         </Clickable>
-      ) : (
-        <label>{row.name}</label>
       );
     };
 
