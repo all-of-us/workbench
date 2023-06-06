@@ -329,14 +329,6 @@ public class NotebooksServiceImpl implements NotebooksService {
           String.format("Converting %s to read-only HTML is not supported", notebookName));
     }
 
-    return convertToHtml(workspaceNamespace, workspaceName, notebookName, converter);
-  }
-
-  private String convertToHtml(
-      String workspaceNamespace,
-      String workspaceName,
-      String notebookName,
-      Function<byte[], String> converter) {
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
@@ -344,7 +336,6 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-
     return converter.apply(blob.getContent());
   }
 
@@ -357,11 +348,14 @@ public class NotebooksServiceImpl implements NotebooksService {
               "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
     }
 
-    return convertToHtml(
-        workspaceNamespace,
-        workspaceName,
-        notebookNameWithFileExtension,
-        this::convertJupyterNotebookToHtml);
+    String bucketName =
+        fireCloudService
+            .getWorkspaceAsService(workspaceNamespace, workspaceName)
+            .getWorkspace()
+            .getBucketName();
+
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
+    return convertJupyterNotebookToHtml(blob.getContent());
   }
 
   private GoogleCloudLocators getNotebookLocators(
