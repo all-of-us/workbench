@@ -12,7 +12,6 @@ import {
   validateInputForMySQL,
   withCurrentWorkspace,
 } from 'app/utils';
-import { serverConfigStore } from 'app/utils/stores';
 
 const { useEffect, useRef, useState } = React;
 
