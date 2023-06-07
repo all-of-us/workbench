@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Disk } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -99,7 +100,7 @@ export const OfferDeleteDiskWithUpdate = ({
           </p>
         </div>
       </div>
-      <BackupFilesHelpSection />
+      <BackupFilesHelpSection appType={UIAppType.JUPYTER} />
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button
           type='secondaryLight'

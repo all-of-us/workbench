@@ -1,29 +1,48 @@
 import * as React from 'react';
 
+import { Disk } from 'generated/fetch';
+
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import { ComputeType, detachableDiskPricePerMonth } from 'app/utils/machines';
+import { DEFAULT, switchCase } from 'app/utils';
+import { detachableDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
-import { RuntimeStatusRequest } from 'app/utils/runtime-utils';
 
 import { BackupFilesHelpSection } from './backup-files-help-section';
 import { styles } from './styles';
 
 const { useState, Fragment } = React;
 
+interface ConfirmDeleteRuntimeWithPDProps {
+  onCancel: () => void;
+  onConfirm: (deletePDSelected: boolean) => Promise<void>;
+  appType: UIAppType;
+  // assumption: usingDataproc is always false for GKE apps
+  usingDataproc: boolean;
+  disk: Disk;
+}
+
 export const ConfirmDeleteRuntimeWithPD = ({
   onCancel,
   onConfirm,
-  computeType,
+  appType,
+  usingDataproc,
   disk,
-}) => {
+}: ConfirmDeleteRuntimeWithPDProps) => {
   const [deleting, setDeleting] = useState(false);
-  const [runtimeStatusReq, setRuntimeStatusReq] = useState(
-    RuntimeStatusRequest.DeleteRuntime
+  const [deletePDSelected, setDeletePDSelected] = useState(false);
+
+  const volumeHome = switchCase(
+    appType,
+    [UIAppType.JUPYTER, () => '/home/jupyter'],
+    [UIAppType.RSTUDIO, () => '/home/rstudio'],
+    [DEFAULT, () => null]
   );
+
   const standardvmDeleteOption = (
     <div>
       <div style={styles.confirmWarning}>
@@ -35,24 +54,23 @@ export const ConfirmDeleteRuntimeWithPD = ({
             gridRow: 1,
           }}
         >
-          <div
-            data-test-id='delete-runtime'
-            style={{ display: 'inline-block', marginRight: '0.75rem' }}
-          >
+          <div style={{ display: 'inline-block', marginRight: '0.75rem' }}>
             <RadioButton
               style={{ marginRight: '0.375rem' }}
-              onChange={() =>
-                setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)
-              }
-              checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
+              onChange={() => setDeletePDSelected(false)}
+              checked={!deletePDSelected}
             />
             <label>Keep persistent disk, delete environment</label>
           </div>
         </h3>
-        <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}>
-          Please save your analysis data in the directory
-          /home/jupyter/notebooks to ensure it’s stored on your disk.
-        </p>
+        {appType !== UIAppType.CROMWELL && (
+          <p
+            style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}
+          >
+            Please save your analysis data in the directory {volumeHome} to
+            ensure it’s stored on your disk.
+          </p>
+        )}
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 3 }}>
           Deletes your analysis environment, but detaches your persistent disk
           and saves it for later. The disk will be automatically reattached the
@@ -74,18 +92,12 @@ export const ConfirmDeleteRuntimeWithPD = ({
             gridRow: 1,
           }}
         >
-          <div
-            data-test-id='delete-runtime-and-pd'
-            style={{ display: 'inline-block', marginRight: '0.75rem' }}
-          >
+          <div style={{ display: 'inline-block', marginRight: '0.75rem' }}>
             <RadioButton
+              data-test-id='delete-environment-and-pd'
               style={{ marginRight: '0.375rem' }}
-              onChange={() =>
-                setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntimeAndPD)
-              }
-              checked={
-                runtimeStatusReq === RuntimeStatusRequest.DeleteRuntimeAndPD
-              }
+              onChange={() => setDeletePDSelected(true)}
+              checked={deletePDSelected}
             />
             <label>Delete persistent disk and environment</label>
           </div>
@@ -114,10 +126,8 @@ export const ConfirmDeleteRuntimeWithPD = ({
           >
             <RadioButton
               style={{ marginRight: '0.375rem' }}
-              onChange={() =>
-                setRuntimeStatusReq(RuntimeStatusRequest.DeleteRuntime)
-              }
-              checked={runtimeStatusReq === RuntimeStatusRequest.DeleteRuntime}
+              onChange={() => setDeletePDSelected(false)}
+              checked={!deletePDSelected}
             />
             <label>
               Delete application configuration and cloud compute profile
@@ -147,10 +157,8 @@ export const ConfirmDeleteRuntimeWithPD = ({
           >
             <RadioButton
               style={{ marginRight: '0.375rem' }}
-              onChange={() =>
-                setRuntimeStatusReq(RuntimeStatusRequest.DeletePD)
-              }
-              checked={runtimeStatusReq === RuntimeStatusRequest.DeletePD}
+              onChange={() => setDeletePDSelected(true)}
+              checked={deletePDSelected}
             />
             <label>Delete unattached persistent disk</label>
           </div>
@@ -171,7 +179,7 @@ export const ConfirmDeleteRuntimeWithPD = ({
     </div>
   );
   return (
-    <Fragment>
+    <div id='confirm-delete-environment-with-pd-panel'>
       <div style={{ display: 'flex', marginRight: '0.75rem' }}>
         <ClrIcon
           style={{ color: colors.warning, marginRight: '0.375rem' }}
@@ -183,10 +191,8 @@ export const ConfirmDeleteRuntimeWithPD = ({
           Delete environment options
         </h3>
       </div>
-      {computeType === ComputeType.Standard
-        ? standardvmDeleteOption
-        : dataprocDeleteOption}
-      <BackupFilesHelpSection />
+      {usingDataproc ? dataprocDeleteOption : standardvmDeleteOption}
+      <BackupFilesHelpSection appType={appType} />
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button
           type='secondaryLight'
@@ -203,7 +209,7 @@ export const ConfirmDeleteRuntimeWithPD = ({
           onClick={async () => {
             setDeleting(true);
             try {
-              await onConfirm(runtimeStatusReq);
+              await onConfirm(deletePDSelected);
             } catch (err) {
               setDeleting(false);
               throw err;
@@ -213,6 +219,6 @@ export const ConfirmDeleteRuntimeWithPD = ({
           Delete
         </Button>
       </FlexRow>
-    </Fragment>
+    </div>
   );
 };

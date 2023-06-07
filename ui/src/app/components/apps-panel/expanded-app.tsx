@@ -14,12 +14,16 @@ import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { cromwellConfigIconId } from 'app/components/help-sidebar-icons';
+import {
+  cromwellConfigIconId,
+  rstudioConfigIconId,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
 import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { cond, reactStyles } from 'app/utils';
+import { cond, reactStyles, switchCase } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,
@@ -29,7 +33,6 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   createUserApp,
-  deleteUserApp,
   localizeUserApp,
   pauseUserApp,
   resumeUserApp,
@@ -228,6 +231,7 @@ interface ExpandedAppProps {
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
+  onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
 }
 export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
@@ -237,35 +241,24 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     workspace,
     onClickRuntimeConf,
     onClickDeleteRuntime,
+    onClickDeleteGkeApp,
   } = props;
-  const [deletingApp, setDeletingApp] = useState(false);
   const [showCromwellDeleteModal, setShowCromwellDeleteModal] = useState(false);
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
-      : !deletingApp && canDeleteApp(initialUserAppInfo);
-
-  // TODO allow configuration
-  const deleteDiskWithUserApp = true;
-
-  const deleteGkeApp = async () => {
-    setDeletingApp(true);
-    await deleteUserApp(
-      workspace.namespace,
-      initialUserAppInfo.appName,
-      deleteDiskWithUserApp
-    );
-  };
+      : canDeleteApp(initialUserAppInfo);
 
   const displayCromwellDeleteModal = () => {
     setShowCromwellDeleteModal(true);
   };
 
-  const onClickDelete = cond(
-    [appType === UIAppType.JUPYTER, () => onClickDeleteRuntime],
-    [appType === UIAppType.CROMWELL, () => displayCromwellDeleteModal],
-    () => deleteGkeApp
+  const onClickDelete = switchCase(
+    appType,
+    [UIAppType.JUPYTER, () => onClickDeleteRuntime],
+    [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
+    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)]
   );
 
   return (
@@ -348,7 +341,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <DeleteCromwellConfirmationModal
           clickYes={() => {
             setShowCromwellDeleteModal(false);
-            deleteGkeApp();
+            onClickDeleteGkeApp(cromwellConfigIconId);
           }}
           clickNo={() => setShowCromwellDeleteModal(false)}
         />

@@ -535,6 +535,8 @@ const PanelMain = fp.flow(
       );
     };
 
+    const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
+
     return (
       <div id='runtime-panel'>
         {cond(
@@ -583,12 +585,29 @@ const PanelMain = fp.flow(
               if (attachedPdExists) {
                 return (
                   <ConfirmDeleteRuntimeWithPD
-                    onConfirm={async (runtimeStatusReq) => {
+                    onConfirm={async (deletePDSelected) => {
+                      const runtimeStatusReq = switchCase(
+                        [usingDataproc, deletePDSelected],
+                        [[true, true], () => RuntimeStatusRequest.DeletePD],
+                        [
+                          [true, false],
+                          () => RuntimeStatusRequest.DeleteRuntime,
+                        ],
+                        [
+                          [false, true],
+                          () => RuntimeStatusRequest.DeleteRuntimeAndPD,
+                        ],
+                        [
+                          [false, false],
+                          () => RuntimeStatusRequest.DeleteRuntime,
+                        ]
+                      );
                       await setRuntimeStatus(runtimeStatusReq);
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
-                    computeType={existingAnalysisConfig.computeType}
+                    appType={UIAppType.JUPYTER}
+                    usingDataproc={usingDataproc}
                     disk={gcePersistentDisk}
                   />
                 );

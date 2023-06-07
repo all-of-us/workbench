@@ -125,10 +125,15 @@ export const toAppType = (type: UIAppType): AppType =>
     [UIAppType.RSTUDIO, () => AppType.RSTUDIO]
   );
 
+export const toUIAppType: Record<AppType, UIAppType> = {
+  [AppType.CROMWELL]: UIAppType.CROMWELL,
+  [AppType.RSTUDIO]: UIAppType.RSTUDIO,
+};
+
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType
-): UserAppEnvironment =>
+): UserAppEnvironment | undefined =>
   apps?.find((app) => app.appType === toAppType(appType));
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
