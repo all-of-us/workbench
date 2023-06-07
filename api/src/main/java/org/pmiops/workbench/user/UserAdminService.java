@@ -4,15 +4,14 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
 import org.pmiops.workbench.model.EgressBypassWindow;
+import org.pmiops.workbench.utils.mappers.EgressBypassWindowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,39 +21,36 @@ import org.springframework.stereotype.Service;
 public class UserAdminService {
   private final UserService userService;
   private final UserEgressBypassWindowDao userEgressBypassWindowDao;
+  private final EgressBypassWindowMapper egressBypassWindowMapper;
   private final Clock clock;
 
 
   @Autowired
   public UserAdminService(UserService userService,
-      UserEgressBypassWindowDao userEgressBypassWindowDao, Clock clock) {
+      UserEgressBypassWindowDao userEgressBypassWindowDao,
+      EgressBypassWindowMapper egressBypassWindowMapper, Clock clock) {
     this.userService = userService;
     this.userEgressBypassWindowDao = userEgressBypassWindowDao;
+    this.egressBypassWindowMapper = egressBypassWindowMapper;
     this.clock = clock;
   }
 
-  public ResponseEntity<EgressBypassWindow> createEgressBypassWindow(Long userId,
-      CreateEgressBypassWindowRequest request) {
+  public void createEgressBypassWindow(Long userId,
+     Instant startTime, String description) {
     Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows = userEgressBypassWindowDao.getByUserUserIdOrderByStartTimeDesc(userId);
-    if(!hasActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant())) {
-      Timestamp startTime = new Timestamp(request.getStartTime());
-      Timestamp endTime = Timestamp.from(startTime.toInstant().plus(2, ChronoUnit.DAYS));
-      userEgressBypassWindowDao.save(new DbUserEgressBypassWindow().setUserId(userId).setStartTime(startTime).setEndTime(endTime).setDescription();
+    if(getActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant()).isEmpty()) {
+      Instant endTime = startTime.plus(2, ChronoUnit.DAYS);
+      userEgressBypassWindowDao.save(new DbUserEgressBypassWindow().setUserId(userId).setStartTime(Timestamp.from(startTime)).setEndTime(Timestamp.from(endTime)).setDescription(description));
     } else {
       throw new ForbiddenException("User already has an active bypass session.");
     }
-
-    return new ResponseEntity<EgressBypassWindow>(HttpStatus.OK);
+    
   }
 
-  public ResponseEntity<Void> deleteEgressBypassWindow() {
-    // do some magic!
-    return new ResponseEntity<Void>(HttpStatus.OK);
-  }
-
-  public ResponseEntity<EgressBypassWindow> getEgressBypassWindow() {
-    // do some magic!
-    return new ResponseEntity<EgressBypassWindow>(HttpStatus.OK);
+  public ResponseEntity<EgressBypassWindow> getCurrentEgressBypassWindow(Long userId) {
+    Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows = userEgressBypassWindowDao.getByUserUserIdOrderByStartTimeDesc(userId);
+    getActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant());
+    return ResponseEntity.ok(egressBypassWindowMapper.toApiEgressBypassWindow(getActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant()).orElse(null)));
   }
 
   /**
@@ -63,8 +59,8 @@ public class UserAdminService {
    * if user have active one.
    *
    */
-  private Boolean hasActiveEgressBypassWindow(Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows, Instant now) {
+  private Optional<DbUserEgressBypassWindow> getActiveEgressBypassWindow(Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows, Instant now) {
     Timestamp timestampNow = Timestamp.from(now);
-    return dbUserEgressBypassWindows.stream().anyMatch(t -> t.getStartTime().after(timestampNow) && t.getEndTime().before(timestampNow));
+    return dbUserEgressBypassWindows.stream().filter(t -> t.getStartTime().after(timestampNow) && t.getEndTime().before(timestampNow)).findFirst();
   }
 }

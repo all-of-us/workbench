@@ -7200,6 +7200,9 @@ definitions:
         description: >
           Timestamp when user egress bypass window ends in milliseconds in milliseconds
           since the UNIX epoch
+      description:
+        type: string
+        description: Brief description of this bypass request.
   ListEgressEventsResponse:
     type: object
     properties:
