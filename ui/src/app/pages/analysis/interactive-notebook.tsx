@@ -2,10 +2,16 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
+import {
+  AppStatus,
+  BillingStatus,
+  Runtime,
+  RuntimeStatus,
+} from 'generated/fetch';
 
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { IconButton } from 'app/components/buttons';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
@@ -24,7 +30,10 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
-import { NavigationProps } from 'app/utils/navigation';
+import {
+  NavigationProps,
+  setSidebarActiveIconStore,
+} from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
@@ -544,7 +553,13 @@ export const InteractiveNotebook = fp.flow(
           if (appType === UIAppType.RSTUDIO) {
             const { userApps } = this.props.userAppsStore;
             const userApp = findApp(userApps, UIAppType.RSTUDIO);
-            window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+            if (userApp && userApp.status === AppStatus.RUNNING) {
+              window
+                .open(userApp.proxyUrls['rstudio-service'], '_blank')
+                .focus();
+            } else {
+              setSidebarActiveIconStore.next(rstudioConfigIconId);
+            }
           } else {
             this.runRuntime(() => {
               this.navigateEditMode();
