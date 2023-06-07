@@ -2,6 +2,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
+import { makeWorkspaceName } from 'utils/str-utils';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DatasetBuildPage from 'app/page/dataset-build-page';
@@ -12,7 +13,7 @@ describe('Export Dataset to Notebook Test', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspaceName = 'e2eDatasetExportToRNotebookTest';
+  const workspace = makeWorkspaceName();
 
   /**
    * Test:
