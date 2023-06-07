@@ -6817,7 +6817,7 @@ definitions:
   AppLocalizeRequest:
     type: object
     required:
-    - notebookNames
+    - fileNames
     - playgroundMode
     properties:
       fileNames:

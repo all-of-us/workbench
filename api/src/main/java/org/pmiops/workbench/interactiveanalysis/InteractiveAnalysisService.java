@@ -162,7 +162,6 @@ public class InteractiveAnalysisService {
             .collect(
                 Collectors.toMap(
                     name -> localizeTargetDir + name, name -> gcsNotebooksDir + "/" + name)));
-    log.info(localizeMap.toString());
 
     if (isGceRuntime) {
       leonardoNotebooksClient.localizeForRuntime(googleProjectId, appName, localizeMap);
