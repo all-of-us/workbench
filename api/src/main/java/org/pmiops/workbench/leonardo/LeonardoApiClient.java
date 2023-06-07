@@ -55,11 +55,20 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** Send files over to notebook runtime */
-  void localize(String googleProject, String runtimeName, Map<String, String> fileList)
+  void localizeForRuntime(String googleProject, String runtimeName, Map<String, String> fileList)
       throws WorkbenchException;
 
   /** Create a new data synchronization Welder storage link on a runtime. */
-  StorageLink createStorageLink(String googleProject, String runtime, StorageLink storageLink);
+  StorageLink createStorageLinkForRuntime(
+      String googleProject, String runtime, StorageLink storageLink);
+
+  /** Send files over to Gke APP */
+  void localizeForApp(String googleProject, String appName, Map<String, String> fileList)
+      throws WorkbenchException;
+
+  /** Create a new data synchronization Welder storage link on a Gke APP. */
+  StorageLink createStorageLinkForApp(
+      String googleProject, String appName, StorageLink storageLink);
 
   /** Gets information about a persistent disk */
   LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)

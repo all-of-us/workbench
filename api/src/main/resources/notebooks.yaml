@@ -279,6 +279,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/WelderErrorReport'
+
   '/proxy/{googleProject}/{runtimeName}/welder/storageLinks':
     parameters:
       - in: path
@@ -294,6 +295,68 @@ paths:
     post:
       summary: 'creates the specified storage link configuration for the runtime'
       operationId: welderCreateStorageLink
+      tags:
+        - proxy
+      parameters:
+        - in: body
+          description: ''
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/StorageLink'
+      responses:
+        '200':
+          description: 'storage link successfully created'
+          schema:
+            $ref: '#/definitions/StorageLink'
+
+  '/proxy/google/v1/apps/{googleProject}/{appName}/welder-service/objects':
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: appName
+        description: appName
+        required: true
+        type: string
+    post:
+      summary: ''
+      operationId: welderLocalizeForApp
+      tags:
+        - proxy
+      parameters:
+        - in: body
+          description: ''
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/Localize'
+      responses:
+        '204':
+          description: ''
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/WelderErrorReport'
+
+  '/proxy/google/v1/apps/{googleProject}/{appName}/welder-service/storageLinks':
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: appName
+        description: appName
+        required: true
+        type: string
+    post:
+      summary: 'creates the specified storage link configuration for the app'
+      operationId: welderCreateStorageLinkForApp
       tags:
         - proxy
       parameters:
