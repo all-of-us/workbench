@@ -120,7 +120,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public List<FileDetail> getNotebooksAsService(
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()

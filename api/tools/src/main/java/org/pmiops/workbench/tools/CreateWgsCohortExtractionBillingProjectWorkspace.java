@@ -156,7 +156,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
           rawlsApiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       log.info("Updating Workspace ACL");
-      List<RawlsWorkspaceACLUpdate> acls =
+      List<RawlsWorkspaceACLUpdate> acl =
           Stream.concat(
                   Arrays.stream(opts.getOptionValue(ownersOpt.getLongOpt()).split(",")),
                   Arrays.stream(new String[] {workspace.getCreatedBy()}))
@@ -164,7 +164,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
               .collect(Collectors.toList());
       rawlsApiClientFactory
           .workspacesApi()
-          .updateACL(acls, workspace.getNamespace(), workspace.getName(), false);
+          .updateACL(acl, workspace.getNamespace(), workspace.getName(), false);
 
       String proxyGroup =
           firecloudApiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());

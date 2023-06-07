@@ -342,7 +342,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient.getBlobPage(bucketName).stream()
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
@@ -392,7 +392,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
-    // Note: keep in sync with WorkspaceAuthService.updateWorkspaceAcls.
     final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
     final String registeredTierGroupEmail = dbAccessTier.getAuthDomainGroupEmail();
 
