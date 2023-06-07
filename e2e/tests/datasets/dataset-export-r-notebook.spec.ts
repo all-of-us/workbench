@@ -1,6 +1,6 @@
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, findOrCreateDataset, openTab, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { getPropValue } from 'utils/element-utils';
@@ -13,12 +13,14 @@ describe('Export Dataset to Notebook Test', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspaceName = makeWorkspaceName();
+  
   /**
    * Test:
    * - Export dataset to a notebook. Run the notebook code and verify run results.
    */
   test('Export to R kernel notebook in Build Dataset page', async () => {
-    await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
     await findOrCreateDataset(page, { openEditPage: true });
 
     const buildPage = new DatasetBuildPage(page);
