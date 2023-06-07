@@ -13,7 +13,7 @@ import {
 import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
 import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from 'app/components/rstudio-configuration-panel.spec';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-environment-delete-with-pd';
 import { Spinner } from 'app/components/spinners';
 import {
   appsApi,
@@ -232,7 +232,7 @@ describe(GKEAppConfigurationPanel.name, () => {
     });
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(ConfirmDeleteRuntimeWithPD).exists()).toBeTruthy();
+    expect(wrapper.find(ConfirmDeleteEnvironmentWithPD).exists()).toBeTruthy();
   });
 
   it('should display the Cromwell panel when the type is Cromwell', async () => {
@@ -304,7 +304,7 @@ describe(GKEAppConfigurationPanel.name, () => {
     await waitOneTickAndUpdate(wrapper);
 
     const deletePDSelected = true;
-    wrapper.find(ConfirmDeleteRuntimeWithPD).prop('onConfirm')(
+    wrapper.find(ConfirmDeleteEnvironmentWithPD).prop('onConfirm')(
       deletePDSelected
     );
     await waitOneTickAndUpdate(wrapper);
@@ -339,7 +339,7 @@ describe(GKEAppConfigurationPanel.name, () => {
     });
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find(ConfirmDeleteRuntimeWithPD).prop('onCancel')();
+    wrapper.find(ConfirmDeleteEnvironmentWithPD).prop('onCancel')();
     await waitOneTickAndUpdate(wrapper);
 
     expect(onCloseStub).toHaveBeenCalled();

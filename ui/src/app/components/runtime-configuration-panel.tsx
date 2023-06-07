@@ -18,7 +18,7 @@ import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-environment-delete-with-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
@@ -584,7 +584,7 @@ const PanelMain = fp.flow(
             () => {
               if (attachedPdExists) {
                 return (
-                  <ConfirmDeleteRuntimeWithPD
+                  <ConfirmDeleteEnvironmentWithPD
                     onConfirm={async (deletePDSelected) => {
                       const runtimeStatusReq = switchCase(
                         [usingDataproc, deletePDSelected],

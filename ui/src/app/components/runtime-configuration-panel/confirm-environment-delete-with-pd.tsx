@@ -15,9 +15,9 @@ import { formatUsd } from 'app/utils/numbers';
 import { BackupFilesHelpSection } from './backup-files-help-section';
 import { styles } from './styles';
 
-const { useState, Fragment } = React;
+const { useState } = React;
 
-interface ConfirmDeleteRuntimeWithPDProps {
+interface ConfirmDeleteEnvironmentWithPDProps {
   onCancel: () => void;
   onConfirm: (deletePDSelected: boolean) => Promise<void>;
   appType: UIAppType;
@@ -26,13 +26,13 @@ interface ConfirmDeleteRuntimeWithPDProps {
   disk: Disk;
 }
 
-export const ConfirmDeleteRuntimeWithPD = ({
+export const ConfirmDeleteEnvironmentWithPD = ({
   onCancel,
   onConfirm,
   appType,
   usingDataproc,
   disk,
-}: ConfirmDeleteRuntimeWithPDProps) => {
+}: ConfirmDeleteEnvironmentWithPDProps) => {
   const [deleting, setDeleting] = useState(false);
   const [deletePDSelected, setDeletePDSelected] = useState(false);
 

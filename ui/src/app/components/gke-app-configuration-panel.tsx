@@ -13,7 +13,7 @@ import {
   RStudioConfigurationPanelProps,
 } from 'app/components/rstudio-configuration-panel';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-environment-delete-with-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
@@ -166,7 +166,7 @@ export const GKEAppConfigurationPanel = ({
     [
       GKEAppPanelContent.DELETE_GKE_APP,
       () => (
-        <ConfirmDeleteRuntimeWithPD
+        <ConfirmDeleteEnvironmentWithPD
           onConfirm={onConfirmDeleteGKEApp}
           onCancel={onClose}
           appType={toUIAppType[app.appType]}
