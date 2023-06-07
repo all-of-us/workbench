@@ -13,7 +13,7 @@ describe('Export Dataset to Notebook Test', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = makeWorkspaceName();
+  const workspaceName = makeWorkspaceName();
 
   /**
    * Test:
