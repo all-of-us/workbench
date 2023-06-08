@@ -67,7 +67,7 @@ export const GKEAppConfigurationPanel = ({
     useState<Error>();
 
   const [panelContent, setPanelContent] = useState<GKEAppPanelContent>(
-    initialPanelContent || GKEAppPanelContent.CREATE
+    initialPanelContent ?? GKEAppPanelContent.CREATE
   );
 
   useEffect(() => {
