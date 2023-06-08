@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserAdminService {
+  private static final Integer BYPASS_PERIOD_IN_DAY = 2;
   private final UserEgressBypassWindowDao userEgressBypassWindowDao;
   private final EgressBypassWindowMapper egressBypassWindowMapper;
   private final Clock clock;
@@ -30,7 +31,7 @@ public class UserAdminService {
   }
 
   public void createEgressBypassWindow(Long userId, Instant startTime, String description) {
-    Instant endTime = startTime.plus(2, ChronoUnit.DAYS);
+    Instant endTime = startTime.plus(BYPASS_PERIOD_IN_DAY, ChronoUnit.DAYS);
     userEgressBypassWindowDao.save(
         new DbUserEgressBypassWindow()
             .setUserId(userId)
@@ -48,8 +49,8 @@ public class UserAdminService {
   }
 
   /**
-   * Returns {@code true} if current timestamp is between any {@code DbUserEgressBypassWindow} start
-   * time and end time.
+   * Returns Optional {@code DbUserEgressBypassWindow} if current timestamp is between any {@code
+   * DbUserEgressBypassWindow} start time and end time.
    */
   private static Optional<DbUserEgressBypassWindow> getActiveEgressBypassWindow(
       Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows, Instant now) {
