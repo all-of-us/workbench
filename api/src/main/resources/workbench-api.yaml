@@ -1838,8 +1838,8 @@ paths:
       tags:
         - userAdmin
       description: >
-        Administrative API to add egress bypass windwo to allow user download files without 
-        triggering egress alerts.
+        Administrative API to add egress bypass window to allow user download files without 
+        triggering egress alerts. Require SECURITY_ADMIN authority
       operationId: createEgressBypassWindow
       parameters:
         - "$ref": "#/parameters/userId"
@@ -1848,28 +1848,23 @@ paths:
           schema:
             "$ref": "#/definitions/CreateEgressBypassWindowRequest"
       responses:
-        200:
+        204:
           description: success
-          schema:
-            "$ref": "#/definitions/EgressBypassWindow"
     get:
       tags:
         - userAdmin
-      description: Get the user's active egress bypass window. Returns null if user does not have actove
+      description: >
+        Get the user's active egress bypass window. Returns null if user does not have active. 
+        Require RESEARCHER_DATA_VIEW authority
+      parameters:
+        - "$ref": "#/parameters/userId"
       operationId: getEgressBypassWindow
       responses:
         200:
           description: success
           schema:
             "$ref": "#/definitions/EgressBypassWindow"
-    delete:
-      tags:
-        - userAdmin
-      description: Deletes the user's egress bypass window
-      operationId: deleteEgressBypassWindow
-      responses:
-        204:
-          description: success.
+
   "/v1/cron/deleteOldRuntimes":
     get:
       security: []

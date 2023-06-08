@@ -20,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @Import({FakeClockConfiguration.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserEgressBypassWindwoDaoTest {
+public class UserEgressBypassWindowDaoTest {
 
   @Autowired UserEgressBypassWindowDao userEgressBypassWindowDao;
   @Autowired UserDao userDao;
@@ -32,6 +32,12 @@ public class UserEgressBypassWindwoDaoTest {
   @BeforeEach
   public void setUp() {
     userDao.save(user);
+  }
+
+  @Test
+  public void test_getEmptyResult() {
+    assertThat(userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(user.getUserId()))
+        .isEmpty();
   }
 
   @Test
@@ -60,7 +66,7 @@ public class UserEgressBypassWindwoDaoTest {
     userEgressBypassWindowDao.save(dbUserEgressBypassWindow2);
     userEgressBypassWindowDao.save(dbUserEgressBypassWindow3);
 
-    assertThat(userEgressBypassWindowDao.getByUserUserIdOrderByStartTimeDesc(user.getUserId()))
+    assertThat(userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(user.getUserId()))
         .containsExactly(
             dbUserEgressBypassWindow3, dbUserEgressBypassWindow2, dbUserEgressBypassWindow1);
   }

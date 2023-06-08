@@ -7,8 +7,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -87,7 +85,7 @@ public class DbUserEgressBypassWindow {
     DbUserEgressBypassWindow dbUserEgressBypassWindow = (DbUserEgressBypassWindow) o;
 
     return new EqualsBuilder()
-        .append(user, dbUserEgressBypassWindow.user)
+        .append(userId, dbUserEgressBypassWindow.userId)
         .append(egressBypassId, dbUserEgressBypassWindow.egressBypassId)
         .append(startTime, dbUserEgressBypassWindow.startTime)
         .append(endTime, dbUserEgressBypassWindow.endTime)
@@ -98,7 +96,7 @@ public class DbUserEgressBypassWindow {
   @Override
   public int hashCode() {
     return new HashCodeBuilder(17, 37)
-        .append(user)
+        .append(userId)
         .append(startTime)
         .append(endTime)
         .append(egressBypassId)
