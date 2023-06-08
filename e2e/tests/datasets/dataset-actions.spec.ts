@@ -2,7 +2,14 @@ import DataResourceCard from 'app/component/card/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Cohorts, ConceptSets, LinkText, MenuOption, ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
+import {
+  cleanupWorkspace,
+  createDataset,
+  findOrCreateWorkspace,
+  findWorkspaceCard,
+  openTab,
+  signInWithAccessToken
+} from 'utils/test-utils';
 import DatasetRenameModal from 'app/modal/dataset-rename-modal';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import { waitForText } from '../../utils/waits-utils';
@@ -17,7 +24,7 @@ describe('Dataset rename', () => {
 
   const workspaceName = 'e2eDatasetActionTest';
 
-  test('Can edit dataSet via snowman menu', async () => {
+  test('Can edit dataset via snowman menu', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
 
     const datasetName = await createDataset(page, {
@@ -120,10 +127,6 @@ describe('Dataset rename', () => {
 
   afterAll(async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-
-    // Create and Open notebook
-    const workspaceDataPage = new WorkspaceDataPage(page);
-    await workspaceDataPage.deleteWorkspace();
+    await cleanupWorkspace(page, workspaceName);
   });
 });

@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { cleanupWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import AppsPanel from 'app/sidebar/apps-panel';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
@@ -181,10 +181,6 @@ describe('Cromwell GKE App', () => {
 
   afterAll(async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-
-    // Create and Open notebook
-    const workspaceDataPage = new WorkspaceDataPage(page);
-    await workspaceDataPage.deleteWorkspace();
+    await cleanupWorkspace(page, workspaceName);
   });
 });
