@@ -245,7 +245,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, RawlsWorkspaceAccessEntry> emailToRole =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {

@@ -11,6 +11,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
+import { logger } from 'libs/logger';
 
 describe('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
@@ -124,6 +125,11 @@ describe('Workspace Admin lock-workspace', () => {
     await workspaceEdit.waitForLoad();
     await workspaceEdit.clickCancelButton();
     // cleanup
-    await dataPage.deleteWorkspace();
+    try {
+      await dataPage.deleteWorkspace();
+    } catch (error) {
+      // we'll proceed, but let's report it
+      logger.warn('fail to delete workspace');
+    }
   });
 });

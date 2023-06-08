@@ -53,4 +53,9 @@ fi
 echo "Creating database ..."
 run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" < "${CREATE_DB_FILE}"
 
+# If not set you get exception when running both dev-up and dev-up-tanagra
+# Caused by: java.sql.SQLNonTransientConnectionException: (conn=208) Too many connections
+echo "Setting global max_connections variable to 300"
+run_mysql -h "${DB_HOST}" --port "${DB_PORT}" -u root -p"${MYSQL_ROOT_PASSWORD}" -e "SET GLOBAL max_connections=300;"
+
 exit 0

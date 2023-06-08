@@ -2198,7 +2198,7 @@ public class WorkspacesControllerTest {
                 new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
-    RawlsWorkspaceACL workspaceAclsFromCloned =
+    RawlsWorkspaceACL workspaceAclFromCloned =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2208,7 +2208,7 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
-    RawlsWorkspaceACL workspaceAclsFromOriginal =
+    RawlsWorkspaceACL workspaceAclFromOriginal =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2237,9 +2237,9 @@ public class WorkspacesControllerTest {
                         .put("canShare", true)));
 
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
-        .thenReturn(workspaceAclsFromCloned);
+        .thenReturn(workspaceAclFromCloned);
     when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(workspaceAclsFromOriginal);
+        .thenReturn(workspaceAclFromOriginal);
 
     currentUser = cloner;
 
@@ -2551,8 +2551,8 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    // Mock firecloud ACLs
-    RawlsWorkspaceACL workspaceACLs =
+    // Mock firecloud ACL
+    RawlsWorkspaceACL workspaceACL =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2573,7 +2573,7 @@ public class WorkspacesControllerTest {
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
                         .put("canShare", false)));
-    when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACLs);
+    when(fireCloudService.getWorkspaceAclAsService(any(), any())).thenReturn(workspaceACL);
 
     fakeClock.increment(1000);
     stubFcUpdateWorkspaceACL();

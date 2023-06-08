@@ -105,7 +105,7 @@ public class WorkspaceAuthService {
     return workspace;
   }
 
-  public Map<String, RawlsWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+  public Map<String, RawlsWorkspaceAccessEntry> getFirecloudWorkspaceAcl(
       String workspaceNamespace, String firecloudName) {
     return FirecloudTransforms.extractAclResponse(
         fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName));
@@ -127,10 +127,10 @@ public class WorkspaceAuthService {
     }
   }
 
-  private void updateAcl(DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+  private void updateAcl(DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclMap) {
     updateAcl(
         workspace,
-        updatedAclsMap.entrySet().stream()
+        updatedAclMap.entrySet().stream()
             .map(e -> FirecloudTransforms.buildAclUpdate(e.getKey(), e.getValue()))
             .collect(Collectors.toList()));
   }
@@ -138,16 +138,16 @@ public class WorkspaceAuthService {
   private void synchronizeOwnerBillingProjects(
       String billingProjectName,
       Set<String> usersToSynchronize,
-      Map<String, WorkspaceAccessLevel> updatedAclsMap,
-      Map<String, RawlsWorkspaceAccessEntry> existingAclsMap) {
+      Map<String, WorkspaceAccessLevel> updatedAclMap,
+      Map<String, RawlsWorkspaceAccessEntry> existingAclMap) {
 
     for (String email : usersToSynchronize) {
       String fromAccess =
-          existingAclsMap
+          existingAclMap
               .getOrDefault(email, new RawlsWorkspaceAccessEntry().accessLevel("NO ACCESS"))
               .getAccessLevel();
       WorkspaceAccessLevel toAccess =
-          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
+          updatedAclMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
 
       if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
         log.info(
@@ -162,19 +162,19 @@ public class WorkspaceAuthService {
     }
   }
 
-  public DbWorkspace patchWorkspaceAcls(
-      DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
+  public DbWorkspace patchWorkspaceAcl(
+      DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclMap) {
 
-    updateAcl(workspace, updatedAclsMap);
+    updateAcl(workspace, updatedAclMap);
 
     // Keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
     // canCompute on the workspace / billing project, nor does it grant the ability to grant
     // canCompute to other users. See RW-3009 for details.
     synchronizeOwnerBillingProjects(
         workspace.getWorkspaceNamespace(),
-        updatedAclsMap.keySet(),
-        updatedAclsMap,
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
+        updatedAclMap.keySet(),
+        updatedAclMap,
+        getFirecloudWorkspaceAcl(workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
 
     return workspaceDao.saveWithLastModified(workspace, userProvider.get());
   }

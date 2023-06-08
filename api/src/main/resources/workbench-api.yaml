@@ -973,6 +973,33 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
+  "/v1/workspaces/{workspaceNamespace}/apps/{appName}/localize":
+    post:
+      summary: Localize files to the user's GKE App.
+      description: Localize files to the user's GKE App.
+      operationId: localizeApp
+      tags:
+        - apps
+      consumes:
+        - application/json
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: appName
+          description: The name of the user app.
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Localization request.
+          schema:
+            "$ref": "#/definitions/AppLocalizeRequest"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/AppLocalizeResponse"
+
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
       summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
@@ -6787,6 +6814,38 @@ definitions:
           which means it is a relative path in the Jupyter user-facing file system,
           e.g. "foo/bar.ipynb".'
 
+  AppLocalizeRequest:
+    type: object
+    required:
+    - fileNames
+    - playgroundMode
+    properties:
+      fileNames:
+        type: array
+        description: 'Names of notebooks to localize. This is just the basename (no
+          gs:// needed). This is interpreted as relative to the /notebooks directory
+          within the provided workspace''s Google Cloud Storage bucket.'
+        items:
+          type: string
+      playgroundMode:
+        type: boolean
+        default: false
+        description: Set to true if playgroundMode needed
+      appType:
+        $ref: "#/definitions/AppType"
+
+  AppLocalizeResponse:
+    type: object
+    required:
+    - appLocalDirectory
+    properties:
+      appLocalDirectory:
+        type: string
+        description: 'The directory on the notebook runtime file system where the
+          requested files were localized. This is the "API" directory in Jupyter terms,
+          which means it is a relative path in the Jupyter user-facing file system,
+          e.g. "foo/bar.ipynb".'
+
   ListAppsResponse:
     type: array
     items:
@@ -8033,7 +8092,7 @@ definitions:
       cohortReviewId:
         type: integer
         format: int64
-        description: the cohort reivew id.
+        description: the cohort review id.
       participantId:
         type: integer
         format: int64
@@ -9783,10 +9842,6 @@ definitions:
         type: string
         description: Description of user-defined research dissemination option (when
           "Other" is selected).
-      lastAccessedTime:
-        type: string
-        format: date-time
-        description: No longer in use. Column should be ignored.
       lastModifiedTime:
         type: string
         format: date-time
@@ -9831,7 +9886,7 @@ definitions:
       rpControlSet:
         type: boolean
         description: |-
-          Reserch Control selected. All of Us data will be used as a reference or control
+          Research Control selected. All of Us data will be used as a reference or control
           dataset for comparison with another dataset from a different resource (e.g.
           Case-control studies).
       rpDiseaseFocusedResearch:
@@ -9844,8 +9899,8 @@ definitions:
       rpDiseaseOfFocus:
         type: string
         description: |-
-          For workspaces that include Disese-focused Research, the user-supplied name of the diseas
-          of focus (in the Name of Disease field).
+          For workspaces that include Disease-focused Research, the user-supplied name of the 
+          disease of focus (in the Name of Disease field).
       rpDrugDevelopment:
         type: boolean
         description: |-
@@ -9896,7 +9951,7 @@ definitions:
       rpReviewRequested:
         type: boolean
         description: |-
-          If true, a reivew has been requested by the Resource Access Board. This
+          If true, a review has been requested by the Resource Access Board. This
           flag is currently not reset when a review is completed.
       rpScientificApproach:
         type: string
@@ -9916,12 +9971,12 @@ definitions:
         type: integer
         format: int64
         description: |-
-          Prirmary key of the workspace table in Workrbench application database. Along with
+          Primary key of the workspace table in Workbench application database. Along with
           snapshot_timestamp, serves as a pseudo-primary key for this table.
       workspaceNamespace:
         type: string
         description: |-
-          The workspace "namespace", which corresponds to the Google Cloud Project ID associated with
+          The workspace "namespace", which corresponds to the Terra Billing Project ID associated with
           the workspace.
   ReportingWorkspaceFreeTierUsage:
     x-aou-note: |-

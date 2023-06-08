@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__LAST_ACCESSED_TIME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -133,10 +131,5 @@ public class InsertAllRequestBuilderTest {
     assertThat(contentMap.get("cdr_version_id")).isEqualTo(WORKSPACE__CDR_VERSION_ID);
     assertThat(contentMap.get("name")).isEqualTo(WORKSPACE__NAME);
     assertThat(contentMap.get("published")).isEqualTo(WORKSPACE__PUBLISHED);
-
-    final String timeString = (String) contentMap.get("last_accessed_time");
-    final OffsetDateTime offsetDateTime =
-        QueryParameterValues.rowToInsertStringToOffsetTimestamp(timeString).get();
-    assertTimeApprox(offsetDateTime, WORKSPACE__LAST_ACCESSED_TIME);
   }
 }
