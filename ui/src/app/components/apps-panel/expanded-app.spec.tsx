@@ -370,7 +370,7 @@ describe('ExpandedApp', () => {
       .mockReturnValue({ focus: focusStub } as any as Window);
 
     const launchButton = wrapper.find({
-      'data-test-id': 'RStudio-launch-button',
+      'data-test-id': 'open-RStudio-button',
     });
     expect(launchButton.exists()).toBeTruthy();
     expect(launchButton.prop('disabled')).toBeFalsy();
@@ -398,7 +398,7 @@ describe('ExpandedApp', () => {
         });
 
         const launchButton = wrapper.find({
-          'data-test-id': 'RStudio-launch-button',
+          'data-test-id': 'open-RStudio-button',
         });
         expect(launchButton.prop('disabled')).toBeTruthy();
       }

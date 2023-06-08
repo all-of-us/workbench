@@ -216,8 +216,8 @@ const RStudioButtonRow = (props: {
             onClick={onClickLaunch}
             disabled={launchButtonDisabled}
             icon={faRocket}
-            buttonText='Launch'
-            data-test-id='RStudio-launch-button'
+            buttonText='Open RStudio'
+            data-test-id='open-RStudio-button'
           />
         </div>
       </TooltipTrigger>

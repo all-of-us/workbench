@@ -34,7 +34,7 @@ describe('RStudio GKE App', () => {
     const expandedRStudioXpath = `${appsPanel.getXpath()}//*[@data-test-id="RStudio-expanded"]`;
     await page.waitForXPath(expandedRStudioXpath);
 
-    const createXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Create"]`;
+    const createXPath = `${expandedRStudioXpath}//*[@data-test-id="apps-panel-button-Open-RStudio"]`;
     const createButton = new Button(page, createXPath);
     expect(await createButton.exists()).toBeTruthy();
 
