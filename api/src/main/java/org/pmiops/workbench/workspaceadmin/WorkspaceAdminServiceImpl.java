@@ -10,7 +10,6 @@ import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +59,6 @@ import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -386,14 +384,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    final RawlsWorkspaceACLUpdate aclUpdate =
+    var aclUpdate =
         FirecloudTransforms.buildAclUpdate(
             workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
 
     fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName(),
-        Collections.singletonList(aclUpdate));
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
