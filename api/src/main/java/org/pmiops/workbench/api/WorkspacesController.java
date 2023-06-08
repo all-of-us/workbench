@@ -584,13 +584,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceAuthService.getFirecloudWorkspaceAcl(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
+      final String cloningUser = user.getUsername();
+      final String publishedGroup = workspaceService.getPublishedWorkspacesGroupEmail();
       var toAcl =
           Maps.transformEntries(
               fromAcl,
-              (username, accessEntry) ->
-                  username.equals(user.getUsername())
-                      ? WorkspaceAccessLevel.OWNER
-                      : WorkspaceAccessLevel.fromValue(accessEntry.getAccessLevel()));
+              (username, accessEntry) -> {
+                // RW-9501: cloned workspaces should not be published
+                if (username.equals(publishedGroup)) return WorkspaceAccessLevel.NO_ACCESS;
+                // the cloning user is the creator of the new workspace (hence also an OWNER)
+                if (username.equals(cloningUser)) return WorkspaceAccessLevel.OWNER;
+                // all other users retain the same access
+                return WorkspaceAccessLevel.fromValue(accessEntry.getAccessLevel());
+              });
 
       dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, toAcl);
     }

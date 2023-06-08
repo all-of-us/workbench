@@ -156,6 +156,16 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(Collectors.toList());
   }
 
+  @Override
+  public String getPublishedWorkspacesGroupEmail() {
+    // All users with CT access also have RT access.  This means that all users who have access to
+    // workspaces (in both tiers) are members of the RT, and hence its Auth Domain Group.  Assigning
+    // workspace access to this group thus means we are assigning this access to all users.
+    //
+    // We implement the concept of a "Published" workspace by assigning READER access to this group
+    return accessTierService.getRegisteredTierOrThrow().getAuthDomainGroupEmail();
+  }
+
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
