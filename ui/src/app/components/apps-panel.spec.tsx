@@ -37,6 +37,7 @@ const component = async () =>
       onClose={stubFunction}
       onClickRuntimeConf={stubFunction}
       onClickDeleteRuntime={stubFunction}
+      onClickDeleteGkeApp={stubFunction}
     />
   );
 

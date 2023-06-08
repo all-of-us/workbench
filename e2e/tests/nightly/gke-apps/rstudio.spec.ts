@@ -2,6 +2,8 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import AppsPanel from 'app/sidebar/apps-panel';
 import Button from 'app/element/button';
 import { waitForFn } from 'utils/waits-utils';
+import ConfirmDeleteEnvironmentWithPdPanel from 'app/sidebar/confirm-delete-environment-with-pd-panel';
+import { SideBarLink } from 'app/text-labels';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
@@ -55,6 +57,13 @@ describe('RStudio GKE App', () => {
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
 
+    const confirmDeleteEnvironmentWithPdPanel = new ConfirmDeleteEnvironmentWithPdPanel(
+      page,
+      SideBarLink.RStudioConfiguration
+    );
+    await confirmDeleteEnvironmentWithPdPanel.confirmDeleteGkeAppWithDisk();
+
+    await appsPanel.open();
     await appsPanel.pollForStatus(expandedRStudioXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening

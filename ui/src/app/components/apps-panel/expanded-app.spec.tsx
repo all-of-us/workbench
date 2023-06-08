@@ -11,6 +11,10 @@ import {
 } from 'generated/fetch';
 
 import {
+  cromwellConfigIconId,
+  rstudioConfigIconId,
+} from 'app/components/help-sidebar-icons';
+import {
   leoRuntimesApi,
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
@@ -50,6 +54,7 @@ const workspace = {
 };
 const onClickRuntimeConf = jest.fn();
 const onClickDeleteRuntime = jest.fn();
+const onClickDeleteGkeApp = jest.fn();
 
 const component = async (
   appType: UIAppType,
@@ -63,6 +68,7 @@ const component = async (
         workspace,
         onClickRuntimeConf,
         onClickDeleteRuntime,
+        onClickDeleteGkeApp,
       }}
     />
   );
@@ -272,7 +278,6 @@ describe('ExpandedApp', () => {
       AppStatus.STATUSUNSPECIFIED,
     ])('should allow deletion when the app status is %s', async (status) => {
       const appName = 'my-app';
-      const deleteDiskWithUserApp = true; // always true currently
 
       const wrapper = await component(appType, {
         appName,
@@ -289,12 +294,7 @@ describe('ExpandedApp', () => {
       const { disabled } = deletion.props();
       expect(disabled).toBeFalsy();
 
-      const deleteSpy = jest
-        .spyOn(appsApi(), 'deleteApp')
-        .mockImplementation(() => Promise.resolve({}));
-      const { onClick } = deletion.props();
-      await onClick();
-      await waitOneTickAndUpdate(wrapper);
+      deletion.simulate('click');
       if (appType === UIAppType.CROMWELL) {
         /* For Cromwell, on delete we show user a modal asking them to confirm manually that there are
             no cromwell Jobs running. Only after user confirming YES we close the modal and start the delete process */
@@ -314,13 +314,11 @@ describe('ExpandedApp', () => {
           'data-test-id': 'delete-cromwell-modal',
         });
         expect(cromwell_delete_modal.length).toBe(0);
-      }
 
-      expect(deleteSpy).toHaveBeenCalledWith(
-        workspace.namespace,
-        appName,
-        deleteDiskWithUserApp
-      );
+        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(cromwellConfigIconId);
+      } else {
+        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(rstudioConfigIconId);
+      }
     });
 
     test.each([

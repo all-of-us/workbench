@@ -26,8 +26,6 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   createAppRequestToAnalysisConfig,
   defaultCromwellConfig,
-  findApp,
-  UIAppType,
 } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
@@ -51,7 +49,7 @@ export interface CromwellConfigurationPanelProps {
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
+  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteUnattachedPersistentDisk: () => void;
 }
@@ -61,11 +59,10 @@ export const CromwellConfigurationPanel = ({
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  gkeAppsInWorkspace,
+  app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
 }: CromwellConfigurationPanelProps) => {
-  const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
   const { profile } = profileState;
 
   const onDismiss = () => {

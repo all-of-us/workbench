@@ -20,8 +20,6 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import {
   createAppRequestToAnalysisConfig,
   defaultRStudioConfig,
-  findApp,
-  UIAppType,
 } from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
@@ -30,7 +28,7 @@ export interface RStudioConfigurationPanelProps {
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
+  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteUnattachedPersistentDisk: () => void;
 }
@@ -40,11 +38,10 @@ export const RStudioConfigurationPanel = ({
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  gkeAppsInWorkspace,
+  app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
 }: RStudioConfigurationPanelProps) => {
-  const app = findApp(gkeAppsInWorkspace, UIAppType.RSTUDIO);
   const { profile } = profileState;
 
   const onDismiss = () => {
