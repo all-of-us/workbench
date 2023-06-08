@@ -87,7 +87,7 @@ export const ConfigurationPanel = fp.flow(
           () => (
             <GKEAppConfigurationPanel
               {...{
-                type: toAppType(type),
+                type: toAppType[type],
                 onClose,
                 creatorFreeCreditsRemaining,
                 workspace,

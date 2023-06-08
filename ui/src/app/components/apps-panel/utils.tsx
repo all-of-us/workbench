@@ -11,7 +11,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { cond, switchCase } from 'app/utils';
+import { cond } from 'app/utils';
 import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
 import * as runtimeUitils from 'app/utils/runtime-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
@@ -118,12 +118,11 @@ export const canDeleteApp = (app: UserAppEnvironment): boolean =>
 
 // TODO reconcile with API AppType and LeonardoMapper
 
-export const toAppType = (type: UIAppType): AppType =>
-  switchCase(
-    type,
-    [UIAppType.CROMWELL, () => AppType.CROMWELL],
-    [UIAppType.RSTUDIO, () => AppType.RSTUDIO]
-  );
+export const toAppType: Record<UIAppType, AppType | null> = {
+  [UIAppType.CROMWELL]: AppType.CROMWELL,
+  [UIAppType.RSTUDIO]: AppType.RSTUDIO,
+  [UIAppType.JUPYTER]: null,
+};
 
 export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.CROMWELL]: UIAppType.CROMWELL,
@@ -134,7 +133,7 @@ export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType
 ): UserAppEnvironment | undefined =>
-  apps?.find((app) => app.appType === toAppType(appType));
+  apps?.find((app) => app.appType === toAppType[appType]);
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
 export enum UserEnvironmentStatus {
