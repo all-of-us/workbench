@@ -30,8 +30,6 @@ public class UserAdminService {
   }
 
   public void createEgressBypassWindow(Long userId, Instant startTime, String description) {
-    Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows =
-        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId);
     Instant endTime = startTime.plus(2, ChronoUnit.DAYS);
     userEgressBypassWindowDao.save(
         new DbUserEgressBypassWindow()
@@ -51,10 +49,9 @@ public class UserAdminService {
 
   /**
    * Returns {@code true} if current timestamp is between any {@code DbUserEgressBypassWindow} start
-   * time and end time. There should be no overlap because we don't allow creating new one if user
-   * have active one.
+   * time and end time.
    */
-  private Optional<DbUserEgressBypassWindow> getActiveEgressBypassWindow(
+  private static Optional<DbUserEgressBypassWindow> getActiveEgressBypassWindow(
       Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows, Instant now) {
     Timestamp timestampNow = Timestamp.from(now);
     return dbUserEgressBypassWindows.stream()
