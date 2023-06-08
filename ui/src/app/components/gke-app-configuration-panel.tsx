@@ -12,8 +12,8 @@ import {
   RStudioConfigurationPanel,
   RStudioConfigurationPanelProps,
 } from 'app/components/rstudio-configuration-panel';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-environment-delete-with-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
