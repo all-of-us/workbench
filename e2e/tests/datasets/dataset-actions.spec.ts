@@ -6,7 +6,6 @@ import {
   cleanupWorkspace,
   createDataset,
   findOrCreateWorkspace,
-  findWorkspaceCard,
   openTab,
   signInWithAccessToken
 } from 'utils/test-utils';
