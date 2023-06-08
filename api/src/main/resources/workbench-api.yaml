@@ -973,6 +973,33 @@ paths:
           schema:
             "$ref": "#/definitions/ErrorResponse"
 
+  "/v1/workspaces/{workspaceNamespace}/apps/{appName}/localize":
+    post:
+      summary: Localize files to the user's GKE App.
+      description: Localize files to the user's GKE App.
+      operationId: localizeApp
+      tags:
+        - apps
+      consumes:
+        - application/json
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - in: path
+          name: appName
+          description: The name of the user app.
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Localization request.
+          schema:
+            "$ref": "#/definitions/AppLocalizeRequest"
+      responses:
+        200:
+          description: Success
+          schema:
+            "$ref": "#/definitions/AppLocalizeResponse"
+
   "/v1/workspaces/{workspaceNamespace}/disks":
     get:
       summary: Lists persistent disks in the user's workspace. Only disks in READY/CREATING/RESTORING state will be returned.
@@ -6814,6 +6841,38 @@ definitions:
     - runtimeLocalDirectory
     properties:
       runtimeLocalDirectory:
+        type: string
+        description: 'The directory on the notebook runtime file system where the
+          requested files were localized. This is the "API" directory in Jupyter terms,
+          which means it is a relative path in the Jupyter user-facing file system,
+          e.g. "foo/bar.ipynb".'
+
+  AppLocalizeRequest:
+    type: object
+    required:
+    - fileNames
+    - playgroundMode
+    properties:
+      fileNames:
+        type: array
+        description: 'Names of notebooks to localize. This is just the basename (no
+          gs:// needed). This is interpreted as relative to the /notebooks directory
+          within the provided workspace''s Google Cloud Storage bucket.'
+        items:
+          type: string
+      playgroundMode:
+        type: boolean
+        default: false
+        description: Set to true if playgroundMode needed
+      appType:
+        $ref: "#/definitions/AppType"
+
+  AppLocalizeResponse:
+    type: object
+    required:
+    - appLocalDirectory
+    properties:
+      appLocalDirectory:
         type: string
         description: 'The directory on the notebook runtime file system where the
           requested files were localized. This is the "API" directory in Jupyter terms,

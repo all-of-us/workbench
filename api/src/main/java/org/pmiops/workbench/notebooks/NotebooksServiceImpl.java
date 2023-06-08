@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -120,7 +121,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public List<FileDetail> getNotebooksAsService(
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
@@ -275,8 +276,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return getNotebookKernel(cloudStorageClient.readBlobAsJson(blob));
+    return getNotebookKernel(getNotebookContents(bucketName, notebookName));
   }
 
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
@@ -318,6 +318,17 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+
+    final Function<byte[], String> converter;
+    if (NotebookUtils.isJupyterNotebook(notebookName)) {
+      converter = this::convertJupyterNotebookToHtml;
+    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
+      converter = this::convertRstudioNotebookToHtml;
+    } else {
+      throw new NotImplementedException(
+          String.format("Converting %s to read-only HTML is not supported", notebookName));
+    }
+
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
@@ -325,15 +336,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-
-    if (NotebookUtils.isJupyterNotebook(notebookName)) {
-      return convertJupyterNotebookToHtml(blob.getContent());
-    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
-      return convertRstudioNotebookToHtml(blob.getContent());
-    } else {
-      throw new NotImplementedException(
-          String.format("Converting %s to read-only HTML is not supported", notebookName));
-    }
+    return converter.apply(blob.getContent());
   }
 
   @Override

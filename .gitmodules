@@ -4,3 +4,4 @@
 [submodule "tanagra"]
 	path = tanagra
 	url = https://github.com/DataBiosphere/tanagra
+	branch = chenchals/DT-412-Revisit-common-schema-files

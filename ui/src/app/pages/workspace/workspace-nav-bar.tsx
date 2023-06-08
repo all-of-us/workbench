@@ -167,7 +167,8 @@ export const WorkspaceNavBar = fp.flow(
   withCdrVersions()
 )((props) => {
   const { tabPath, workspace, cdrVersionTiersResponse } = props;
-  const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+  // default to Data tab if the tabPath is not set
+  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], tabs);
   const [navigate] = useNavigation();
   const { ns, wsid } = useParams<MatchParams>();
 
@@ -191,9 +192,10 @@ export const WorkspaceNavBar = fp.flow(
 
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;
-    const selected = tabPath === link;
-    const hideSeparator =
-      selected || activeTabIndex === tabs.indexOf(currentTab) + 1;
+    const currentTabIndex = tabs.indexOf(currentTab);
+    const selected = activeTabIndex === currentTabIndex;
+    const hideSeparator = selected || activeTabIndex === currentTabIndex + 1;
+
     return (
       <React.Fragment key={name}>
         <Clickable
