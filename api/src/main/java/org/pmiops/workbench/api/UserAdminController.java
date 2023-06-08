@@ -20,10 +20,14 @@ import org.pmiops.workbench.model.AdminUserListResponse;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BatchSyncAccessRequest;
 import org.pmiops.workbench.model.BatchSyncAccessResponse;
+import org.pmiops.workbench.model.CreateEgressBypassWindowRequest;
+import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.user.UserAdminService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +42,7 @@ public class UserAdminController implements UserAdminApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final TaskQueueService taskQueueService;
   private final UserService userService;
+  private final UserAdminService userAdminService;
 
   public UserAdminController(
       AccessModuleService accessModuleService,
@@ -47,7 +52,8 @@ public class UserAdminController implements UserAdminApiDelegate {
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       TaskQueueService taskQueueService,
-      UserService userService) {
+      UserService userService,
+      UserAdminService userAdminService) {
     this.accessModuleService = accessModuleService;
     this.accessSyncService = accessSyncService;
     this.actionAuditQueryService = actionAuditQueryService;
@@ -56,6 +62,7 @@ public class UserAdminController implements UserAdminApiDelegate {
     this.userProvider = userProvider;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.userAdminService = userAdminService;
   }
 
   @Override
@@ -119,5 +126,21 @@ public class UserAdminController implements UserAdminApiDelegate {
                     userService.findUsersByUsernames(request.getUsernames()).stream()
                         .map(DbUser::getUserId)
                         .collect(Collectors.toList()))));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.SECURITY_ADMIN})
+  public ResponseEntity<Void> createEgressBypassWindow(
+      Long userId, CreateEgressBypassWindowRequest request) {
+    userAdminService.createEgressBypassWindow(
+        userId, Instant.ofEpochMilli(request.getStartTime()), request.getByPassDescription());
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<EgressBypassWindow> getEgressBypassWindow(Long userId) {
+    return ResponseEntity.ok(userAdminService.getCurrentEgressBypassWindow(userId));
   }
 }
