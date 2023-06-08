@@ -170,6 +170,11 @@ const RStudioButtonRow = (props: {
 
   return (
     <FlexRow>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(rstudioConfigIconId);
+        }}
+      />
       <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
