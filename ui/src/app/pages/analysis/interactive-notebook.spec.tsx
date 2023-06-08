@@ -31,7 +31,20 @@ const setup = (mockOverrides) => {
   }));
 };
 
-test('Edit Rmd file', async () => {
+const renderInteractiveNotebook = (pathParameters) =>
+  render(
+    <MemoryRouter
+      initialEntries={[
+        '/workspaces/sampleNameSpace/sampleWorkspace/notebooks/preview/example.Rmd',
+      ]}
+    >
+      <Route path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'>
+        <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
+      </Route>
+    </MemoryRouter>
+  );
+
+test('Edit Rmd file with running RStudio', async () => {
   setup({
     getNotebookLockingMetadata: () => Promise.resolve({}),
   });
@@ -44,17 +57,7 @@ test('Edit Rmd file', async () => {
   const pathParameters = { params: { nbName: 'test.Rmd' } };
   const spyWindowOpen = jest.spyOn(window, 'open');
   spyWindowOpen.mockImplementation(jest.fn(() => window));
-  render(
-    <MemoryRouter
-      initialEntries={[
-        '/workspaces/sampleNameSpace/sampleWorkspace/notebooks/preview/example.Rmd',
-      ]}
-    >
-      <Route path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'>
-        <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
-      </Route>
-    </MemoryRouter>
-  );
+  renderInteractiveNotebook(pathParameters);
   const editButton = screen.getByTitle('Edit');
   fireEvent.click(editButton);
   await waitFor(() => {
@@ -64,4 +67,21 @@ test('Edit Rmd file', async () => {
       '_blank'
     );
   });
+});
+
+test('Edit Rmd file with no running RStudio', async () => {
+  setup({
+    getNotebookLockingMetadata: () => Promise.resolve({}),
+  });
+
+  userAppsStore.set({
+    userApps: [],
+  });
+  const pathParameters = { params: { nbName: 'test.Rmd' } };
+  const spyWindowOpen = jest.spyOn(window, 'open');
+  spyWindowOpen.mockImplementation(jest.fn(() => window));
+  renderInteractiveNotebook(pathParameters);
+  const editButton = screen.getByTitle('Edit');
+  fireEvent.click(editButton);
+  expect(spyWindowOpen).toHaveBeenCalledTimes(0);
 });
