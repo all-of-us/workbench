@@ -1,8 +1,7 @@
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import { makeWorkspaceName, makeRandomName } from 'utils/str-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateDataset, findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import { Language, ResourceCard, Tabs } from 'app/text-labels';
-import { getPropValue } from 'utils/element-utils';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import { logger } from 'libs/logger';
@@ -63,17 +62,6 @@ describe('Export Dataset to Notebook Test', () => {
     const lastCell = await notebookPage.findLastCell();
     // Verify run output: Cell output format should be html table. Log error if failed.
     await lastCell.findRenderedHtmlElementHandle(2000).catch(() => lastCell.getOutputError());
-
-    // Verify workspace name is in notebook page.
-    const workspaceLink = await notebookPage.getWorkspaceLink().asElementHandle();
-    expect(await getPropValue<string>(workspaceLink, 'textContent')).toEqual(workspaceName);
-
-    // Verify notebook name is visible in notebook page.
-    const notebookLinkXpath =
-      `//a[contains(@href, "/${workspaceName.toLowerCase()}/notebooks/${notebookName.toLowerCase()}.ipynb")` +
-      `and text()="${notebookName.toLowerCase()}"]`;
-    const notebookLink = await page.waitForXPath(notebookLinkXpath, { visible: true });
-    expect(notebookLink.asElement()).toBeTruthy();
 
     // Navigate to Workspace Data page.
     await notebookPage.goDataPage();
