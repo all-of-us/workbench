@@ -13,6 +13,7 @@ import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { InteractiveNotebook } from './interactive-notebook';
 
+let mockAppsApi;
 let mockNotebooksApi;
 
 beforeEach(async () => {
@@ -22,12 +23,16 @@ beforeEach(async () => {
   });
 
   jest.mock('app/services/swagger-fetch-clients');
+  mockAppsApi = jest.spyOn(swaggerClients, 'appsApi');
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
 });
 
-const setup = (mockOverrides) => {
+const setup = (mockAppOverrides, mockNotebookOverrides) => {
+  mockAppsApi.mockImplementation(() => ({
+    ...mockAppOverrides,
+  }));
   mockNotebooksApi.mockImplementation(() => ({
-    ...mockOverrides,
+    ...mockNotebookOverrides,
   }));
 };
 
@@ -45,9 +50,12 @@ const renderInteractiveNotebook = (pathParameters) =>
   );
 
 test('Edit Rmd file with running RStudio', async () => {
-  setup({
-    getNotebookLockingMetadata: () => Promise.resolve({}),
-  });
+  setup(
+    { localizeApp: () => Promise.resolve({}) },
+    {
+      getNotebookLockingMetadata: () => Promise.resolve({}),
+    }
+  );
   const rStudioApp = createListAppsRStudioResponse({
     status: AppStatus.RUNNING,
   });
@@ -70,9 +78,12 @@ test('Edit Rmd file with running RStudio', async () => {
 });
 
 test('Edit Rmd file with no running RStudio', async () => {
-  setup({
-    getNotebookLockingMetadata: () => Promise.resolve({}),
-  });
+  setup(
+    { localizeApp: () => Promise.resolve({}) },
+    {
+      getNotebookLockingMetadata: () => Promise.resolve({}),
+    }
+  );
 
   userAppsStore.set({
     userApps: [],
