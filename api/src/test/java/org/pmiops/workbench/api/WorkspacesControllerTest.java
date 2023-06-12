@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -414,7 +415,7 @@ public class WorkspacesControllerTest {
     when(cohortBuilderService.findAllDemographicsMap()).thenReturn(HashBasedTable.create());
 
     when(accessTierService.getAccessTierShortNamesForUser(currentUser))
-        .thenReturn(Arrays.asList(AccessTierService.REGISTERED_TIER_SHORT_NAME));
+        .thenReturn(List.of(AccessTierService.REGISTERED_TIER_SHORT_NAME));
     when(accessTierService.getRegisteredTierOrThrow()).thenReturn(registeredTier);
 
     cdrVersion = createDefaultCdrVersion(1);
@@ -2183,8 +2184,9 @@ public class WorkspacesControllerTest {
     // The original Workspace has "cloner" as READER, LOGGED_IN_USER_EMAIL as OWNER, and an
     // additional READER and WRITER.
 
-    // We show that these are retained in the new Workspace, with the exception of the "cloner"
-    // user who called this method - they get upgraded to OWNER.
+    // We show that these are retained in the new Workspace, with the exception of:
+    // a. the "cloner" user who called this method - they get upgraded to OWNER.
+    // b. the "published" group - it is removed
 
     RawlsWorkspaceACL originalAcl =
         createWorkspaceACL(
@@ -2197,6 +2199,13 @@ public class WorkspacesControllerTest {
                         .put("canShare", false))
                 .put(
                     "reader@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "READER")
+                        .put("canCompute", false)
+                        .put("canShare", false))
+                // this is how we indicate that a workspace has been published
+                .put(
+                    registeredTier.getAuthDomainGroupEmail(),
                     new JSONObject()
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
@@ -2233,6 +2242,7 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(clonedAclBeforeUpdate);
 
+    // does not contain an entry for the "published" group
     List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
         convertUserRolesToUpdateAclRequestList(
             List.of(
@@ -2270,8 +2280,9 @@ public class WorkspacesControllerTest {
             eq("cloned-ns"),
             eq("cloned"),
             // Accept the ACL update list in any order.
-            argThat(
-                arg -> new HashSet<>(expectedCollaboratorsAfterUpdate).equals(new HashSet<>(arg))));
+            assertArg(
+                arg ->
+                    assertThat(arg).containsExactlyElementsIn(expectedCollaboratorsAfterUpdate)));
   }
 
   @Test
