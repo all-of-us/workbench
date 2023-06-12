@@ -603,7 +603,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // RW-9501: cloned workspaces should not be published
     dbWorkspace = dbWorkspace.setPublished(false);
-    
+
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
