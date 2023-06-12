@@ -14,12 +14,7 @@ export default class CromwellConfigurationPanel extends BaseEnvironmentPanel {
   async startCromwellGkeApp(): Promise<void> {
     // Cromwell is not running, so it appears in unexpanded mode
     const appsPanel = new AppsPanel(page);
-    await appsPanel.open();
-    const unexpandedCromwellXPath = `${appsPanel.getXpath()}//*[@data-test-id="Cromwell-unexpanded"]`;
-    const unexpandedCromwell = new Button(page, unexpandedCromwellXPath);
-
-    expect(await unexpandedCromwell.exists()).toBeTruthy();
-    await unexpandedCromwell.click();
+    await appsPanel.clickUnexpandedApp('Cromwell');
 
     const configPanel = new CromwellConfigurationPanel(page);
     await configPanel.isVisible();

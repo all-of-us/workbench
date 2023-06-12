@@ -5,6 +5,7 @@ import { CreateAppRequest, UserAppEnvironment } from 'generated/fetch';
 
 import { canCreateApp } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
+import { TooltipTrigger } from 'app/components/popups';
 import { ApiErrorResponse, fetchWithErrorModal } from 'app/utils/errors';
 import { appTypeToString, createUserApp } from 'app/utils/user-apps-utils';
 
@@ -42,13 +43,21 @@ export function CreateGKEAppButton({
   };
 
   return (
-    <Button
-      id={`${appTypeString}-cloud-environment-create-button`}
-      aria-label={`${appTypeString} cloud environment create button`}
-      onClick={onCreate}
-      disabled={!createEnabled}
+    <TooltipTrigger
+      disabled={createEnabled}
+      content={`An ${appTypeString} app exists or is being created`}
     >
-      Start
-    </Button>
+      {/* tooltip trigger needs a div for some reason */}
+      <div>
+        <Button
+          id={`${appTypeString}-cloud-environment-create-button`}
+          aria-label={`${appTypeString} cloud environment create button`}
+          onClick={onCreate}
+          disabled={!createEnabled}
+        >
+          Start
+        </Button>
+      </div>
+    </TooltipTrigger>
   );
 }
