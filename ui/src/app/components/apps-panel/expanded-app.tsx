@@ -33,7 +33,7 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   createUserApp,
-  localizeUserApp,
+  openRStudio,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -175,14 +175,7 @@ const RStudioButtonRow = (props: {
   );
 
   const onClickLaunch = async () => {
-    await localizeUserApp(
-      workspaceNamespace,
-      userApp.appName,
-      userApp.appType,
-      [],
-      false
-    );
-    window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+    openRStudio(workspaceNamespace, userApp);
   };
 
   const createButtonDisabled = creating || !canCreateApp(userApp);

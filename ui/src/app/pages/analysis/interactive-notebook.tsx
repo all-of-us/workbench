@@ -49,6 +49,7 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
+import { openRStudio } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -546,7 +547,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private startEditMode() {
-      const { nbName } = this.props.match.params;
+      const { ns, nbName } = this.props.match.params;
       const { appType } = getAppInfoFromFileName(nbName);
       if (this.canStartRuntimes) {
         if (!this.notebookInUse) {
@@ -554,9 +555,7 @@ export const InteractiveNotebook = fp.flow(
             const { userApps } = this.props.userAppsStore;
             const userApp = findApp(userApps, UIAppType.RSTUDIO);
             if (userApp && userApp.status === AppStatus.RUNNING) {
-              window
-                .open(userApp.proxyUrls['rstudio-service'], '_blank')
-                .focus();
+              openRStudio(ns, userApp);
             } else {
               setSidebarActiveIconStore.next(rstudioConfigIconId);
             }
