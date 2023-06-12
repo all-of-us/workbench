@@ -4,8 +4,12 @@ import { AppStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  setSidebarActiveIconStore,
+} from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
 
 import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
@@ -77,7 +81,7 @@ test('Edit Rmd file with running RStudio', async () => {
   });
 });
 
-test('Edit Rmd file with no running RStudio', async () => {
+test('Should open the RStudio configuration panel when you click edit on an Rmd file without a running RStudio instance.', async () => {
   setup(
     { localizeApp: () => Promise.resolve({}) },
     {
@@ -95,4 +99,5 @@ test('Edit Rmd file with no running RStudio', async () => {
   const editButton = screen.getByTitle('Edit');
   fireEvent.click(editButton);
   expect(spyWindowOpen).toHaveBeenCalledTimes(0);
+  expect(setSidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
 });
