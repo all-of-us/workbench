@@ -2205,7 +2205,7 @@ public class WorkspacesControllerTest {
                         .put("canShare", false))
                 // this is how we indicate that a workspace has been published
                 .put(
-                    registeredTier.getAuthDomainGroupEmail(),
+                    workspaceService.getPublishedWorkspacesGroupEmail(),
                     new JSONObject()
                         .put("accessLevel", "READER")
                         .put("canCompute", false)
@@ -2242,14 +2242,17 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(clonedAclBeforeUpdate);
 
-    // does not contain an entry for the "published" group
+    // cloner is now OWNER, and it does not contain an entry for the "published" group
     List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
         convertUserRolesToUpdateAclRequestList(
             List.of(
                 new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
                 new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
                 new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
-                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
+                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER),
+                new UserRole()
+                    .email(workspaceService.getPublishedWorkspacesGroupEmail())
+                    .role(WorkspaceAccessLevel.NO_ACCESS)));
 
     currentUser = cloner;
 
