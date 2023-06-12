@@ -274,7 +274,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       DbWorkspace dbWorkspace) {
     Set<String> workspaceUsers =
         workspaceAuthService
-            .getFirecloudWorkspaceAcls(
+            .getFirecloudWorkspaceAcl(
                 dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())
             .keySet();
     return workspaceResourceMapper.fromDbUserRecentlyModifiedResource(

@@ -20,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 @Import({FakeClockConfiguration.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserEgressBypassWindwoDaoTest {
+public class UserEgressBypassWindowDaoTest {
 
   @Autowired UserEgressBypassWindowDao userEgressBypassWindowDao;
   @Autowired UserDao userDao;
@@ -35,22 +35,28 @@ public class UserEgressBypassWindwoDaoTest {
   }
 
   @Test
+  public void test_getEmptyResult() {
+    assertThat(userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(user.getUserId()))
+        .isEmpty();
+  }
+
+  @Test
   public void test_getByUserOrderByStartTimeDesc() {
     DbUserEgressBypassWindow dbUserEgressBypassWindow1 =
         new DbUserEgressBypassWindow()
-            .setUser(user)
+            .setUserId(user.getUserId())
             .setStartTime(new Timestamp(NOW.plus(1, ChronoUnit.MINUTES).toEpochMilli()))
             .setEndTime(new Timestamp(NOW.plus(2, ChronoUnit.MINUTES).toEpochMilli()))
             .setDescription("I am 1st");
     DbUserEgressBypassWindow dbUserEgressBypassWindow2 =
         new DbUserEgressBypassWindow()
-            .setUser(user)
+            .setUserId(user.getUserId())
             .setStartTime(new Timestamp(NOW.plus(3, ChronoUnit.MINUTES).toEpochMilli()))
             .setEndTime(new Timestamp(NOW.plus(4, ChronoUnit.MINUTES).toEpochMilli()))
             .setDescription("I am 2nd");
     DbUserEgressBypassWindow dbUserEgressBypassWindow3 =
         new DbUserEgressBypassWindow()
-            .setUser(user)
+            .setUserId(user.getUserId())
             .setStartTime(new Timestamp(NOW.plus(5, ChronoUnit.MINUTES).toEpochMilli()))
             .setEndTime(new Timestamp(NOW.plus(6, ChronoUnit.MINUTES).toEpochMilli()))
             .setDescription("I am 3rd");
@@ -60,7 +66,7 @@ public class UserEgressBypassWindwoDaoTest {
     userEgressBypassWindowDao.save(dbUserEgressBypassWindow2);
     userEgressBypassWindowDao.save(dbUserEgressBypassWindow3);
 
-    assertThat(userEgressBypassWindowDao.getByUserOrderByStartTimeDesc(user))
+    assertThat(userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(user.getUserId()))
         .containsExactly(
             dbUserEgressBypassWindow3, dbUserEgressBypassWindow2, dbUserEgressBypassWindow1);
   }

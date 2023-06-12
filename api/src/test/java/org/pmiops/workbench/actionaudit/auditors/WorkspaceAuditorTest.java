@@ -200,7 +200,7 @@ public class WorkspaceAuditorTest {
 
   @Test
   public void testFiresCollaborateAction() {
-    final ImmutableMap<Long, String> aclsByUserId =
+    final ImmutableMap<Long, String> aclByUserId =
         ImmutableMap.of(
             ActionAuditTestConfig.ADMINISTRATOR_USER_ID,
             WorkspaceAccessLevel.OWNER.toString(),
@@ -208,12 +208,12 @@ public class WorkspaceAuditorTest {
             WorkspaceAccessLevel.NO_ACCESS.toString(),
             ADDED_USER_ID,
             WorkspaceAccessLevel.READER.toString());
-    workspaceAuditor.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
+    workspaceAuditor.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclByUserId);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
 
     // 1 workspace + N user COLLABORATE events
-    final int expectedEvents = 1 + aclsByUserId.size();
+    final int expectedEvents = 1 + aclByUserId.size();
     assertThat(eventsSent).hasSize(expectedEvents);
 
     Map<String, Long> countByTargetType =

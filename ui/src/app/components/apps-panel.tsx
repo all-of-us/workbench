@@ -5,7 +5,10 @@ import { BillingStatus, Workspace } from 'generated/fetch';
 
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { cromwellConfigIconId } from 'app/components/help-sidebar-icons';
+import {
+  cromwellConfigIconId,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -65,6 +68,7 @@ export const AppsPanel = (props: {
   onClose: Function;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
+  onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
 }) => {
   const { onClose, workspace } = props;
   const { runtime } = useStore(runtimeStore);

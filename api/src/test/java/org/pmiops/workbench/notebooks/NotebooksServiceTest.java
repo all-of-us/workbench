@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -644,12 +645,12 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testGetReadOnlyHtml_unSupportFileFormat() {
+  public void testGetReadOnlyHtml_unsupportedFileFormat() {
     stubNotebookToJson("notebook without suffix");
     Assertions.assertThrows(
         NotImplementedException.class,
         () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
-    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/notebook without suffix");
+    verifyNoInteractions(mockCloudStorageClient);
   }
 
   @Test

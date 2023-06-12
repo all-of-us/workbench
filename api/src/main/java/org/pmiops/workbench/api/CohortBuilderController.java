@@ -348,14 +348,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    if (workbenchConfigProvider.get().featureFlags.enableConceptSetsInCohortBuilder) {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaByConceptIdsOrConceptCodes(
-                      request.getConceptKeys())));
-    }
-    return ResponseEntity.ok(new CriteriaListResponse());
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(
+                cohortBuilderService.findCriteriaByConceptIdsOrConceptCodes(
+                    request.getConceptKeys())));
   }
 
   protected void validateDomain(String domain) {

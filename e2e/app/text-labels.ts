@@ -171,6 +171,7 @@ export enum ResourceCard {
 export enum SideBarLink {
   RuntimeConfiguration,
   CromwellConfiguration,
+  RStudioConfiguration,
   DataDictionary,
   HelpTips,
   WorkspaceMenu,
