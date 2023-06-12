@@ -2242,10 +2242,10 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(clonedAclBeforeUpdate);
 
-    // cloner is now OWNER, and it does not contain an entry for the "published" group
+    // cloner is now OWNER, and the "published" group has NO_ACCESS
     List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
         convertUserRolesToUpdateAclRequestList(
-            List.of(
+            Set.of(
                 new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
                 new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
                 new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
