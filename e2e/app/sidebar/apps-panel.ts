@@ -63,4 +63,13 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     );
     return isDeleted;
   }
+
+  async clickUnexpandedApp(appNameSelector: string): Promise<void> {
+    await this.open();
+    const unexpandedXPath = `${this.getXpath()}//*[@data-test-id="${appNameSelector}-unexpanded"]`;
+    const unexpanded = new Button(page, unexpandedXPath);
+
+    expect(await unexpanded.exists()).toBeTruthy();
+    await unexpanded.click();
+  }
 }

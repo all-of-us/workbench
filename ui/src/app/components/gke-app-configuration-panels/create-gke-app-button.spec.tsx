@@ -9,6 +9,7 @@ import {
   CreateGKEAppButton,
   CreateGKEAppButtonProps,
 } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
+import { TooltipTrigger } from 'app/components/popups';
 
 import { createListAppsCromwellResponse } from 'testing/stubs/apps-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
@@ -40,6 +41,7 @@ describe(CreateGKEAppButton.name, () => {
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
+      expect(wrapper.find(TooltipTrigger).prop('disabled')).toBeTruthy();
       expect(wrapper.find(Button).prop('disabled')).toBeFalsy();
     });
   });
@@ -50,6 +52,7 @@ describe(CreateGKEAppButton.name, () => {
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
+      expect(wrapper.find(TooltipTrigger).prop('disabled')).toBeFalsy();
       expect(wrapper.find(Button).prop('disabled')).toBeTruthy();
     });
   });
