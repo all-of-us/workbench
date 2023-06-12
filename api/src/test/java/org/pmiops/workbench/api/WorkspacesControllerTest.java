@@ -732,21 +732,14 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     assertThrows(
-        FailedPreconditionException.class,
-        () -> {
-          workspacesController.createWorkspace(workspace);
-        });
+        FailedPreconditionException.class, () -> workspacesController.createWorkspace(workspace));
   }
 
   @Test
   public void testCreateWorkspace_noResearchPurposeThrows() {
     Workspace workspace = createWorkspace();
     workspace.setResearchPurpose(null);
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          workspacesController.createWorkspace(workspace);
-        });
+    assertThrows(BadRequestException.class, () -> workspacesController.createWorkspace(workspace));
   }
 
   // we do not actually use the accessTierShortName of the Workspace passed to
@@ -778,9 +771,7 @@ public class WorkspacesControllerTest {
     workspace.setCdrVersionId(archivedCdrVersionId);
     assertThrows(
         FailedPreconditionException.class,
-        () -> {
-          workspacesController.createWorkspaceAsync(workspace);
-        });
+        () -> workspacesController.createWorkspaceAsync(workspace));
   }
 
   @Test
@@ -788,10 +779,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace.setResearchPurpose(null);
     assertThrows(
-        BadRequestException.class,
-        () -> {
-          workspacesController.createWorkspaceAsync(workspace);
-        });
+        BadRequestException.class, () -> workspacesController.createWorkspaceAsync(workspace));
   }
 
   @Test
@@ -824,9 +812,7 @@ public class WorkspacesControllerTest {
     workspace.setCdrVersionId(archivedCdrVersionId);
     assertThrows(
         FailedPreconditionException.class,
-        () -> {
-          workspacesController.duplicateWorkspaceAsync("foo", "bar", request);
-        });
+        () -> workspacesController.duplicateWorkspaceAsync("foo", "bar", request));
   }
 
   @Test
@@ -837,9 +823,7 @@ public class WorkspacesControllerTest {
     workspace.setResearchPurpose(null);
     assertThrows(
         BadRequestException.class,
-        () -> {
-          workspacesController.duplicateWorkspaceAsync("foo", "bar", request);
-        });
+        () -> workspacesController.duplicateWorkspaceAsync("foo", "bar", request));
   }
 
   @Test
@@ -2645,10 +2629,9 @@ public class WorkspacesControllerTest {
 
     assertThrows(
         BadRequestException.class,
-        () -> {
-          workspacesController.shareWorkspacePatch(
-              workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
-        });
+        () ->
+            workspacesController.shareWorkspacePatch(
+                workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest));
   }
 
   @Test
