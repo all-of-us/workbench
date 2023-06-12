@@ -40,6 +40,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -588,7 +589,7 @@ public class WorkspacesControllerTest {
   }
 
   private List<RawlsWorkspaceACLUpdate> convertUserRolesToUpdateAclRequestList(
-      List<UserRole> collaborators) {
+      Collection<UserRole> collaborators) {
     return collaborators.stream()
         .map(c -> FirecloudTransforms.buildAclUpdate(c.getEmail(), c.getRole()))
         .collect(Collectors.toList());
@@ -2168,31 +2169,24 @@ public class WorkspacesControllerTest {
     accessTierDao.save(controlledTierCdr.getAccessTier());
     cdrVersionDao.save(controlledTierCdr);
 
-    Workspace workspace =
+    Workspace originalWorkspace =
         workspacesController
             .createWorkspace(
                 createWorkspace().cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId())))
             .getBody();
-    List<UserRole> collaborators =
-        new ArrayList<>(
-            Arrays.asList(
-                new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
-                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
-    RawlsWorkspaceACL workspaceAclFromCloned =
-        createWorkspaceACL(
-            new JSONObject()
-                .put(
-                    "cloner@gmail.com",
-                    new JSONObject()
-                        .put("accessLevel", "OWNER")
-                        .put("canCompute", true)
-                        .put("canShare", true)));
 
-    RawlsWorkspaceACL workspaceAclFromOriginal =
+    // setting the "include user roles" flag will update the list of workspace collaborators after
+    // cloning/duplication.
+
+    // The original Workspace has "cloner" as READER, LOGGED_IN_USER_EMAIL as OWNER, and an
+    // additional READER and WRITER.
+
+    // We show that these are retained in the new Workspace, with the exception of the "cloner"
+    // user who called this method - they get upgraded to OWNER.
+
+    RawlsWorkspaceACL originalAcl =
         createWorkspaceACL(
             new JSONObject()
                 .put(
@@ -2220,42 +2214,67 @@ public class WorkspacesControllerTest {
                         .put("canCompute", true)
                         .put("canShare", true)));
 
+    // cloning/duplication is not atomic. When the workspace is first created, it will only have
+    // creator=OWNER access, like a newly-created workspace.  We add other permissions later.
+
+    RawlsWorkspaceACL clonedAclBeforeUpdate =
+        createWorkspaceACL(
+            new JSONObject()
+                .put(
+                    "cloner@gmail.com",
+                    new JSONObject()
+                        .put("accessLevel", "OWNER")
+                        .put("canCompute", true)
+                        .put("canShare", true)));
+
+    when(fireCloudService.getWorkspaceAclAsService(
+            originalWorkspace.getNamespace(), originalWorkspace.getName()))
+        .thenReturn(originalAcl);
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
-        .thenReturn(workspaceAclFromCloned);
-    when(fireCloudService.getWorkspaceAclAsService(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(workspaceAclFromOriginal);
+        .thenReturn(clonedAclBeforeUpdate);
+
+    List<UserRole> expectedCollaboratorsAfterUpdate =
+        List.of(
+            new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
+            new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+            new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
+            new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER));
 
     currentUser = cloner;
 
-    Workspace modWorkspace =
-        new Workspace()
-            .namespace("cloned-ns")
-            .name("cloned")
-            .researchPurpose(workspace.getResearchPurpose())
-            .billingAccountName("billing-account")
-            .cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
-
     stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
 
-    Workspace workspace2 =
+    CloneWorkspaceRequest cloneRequest =
+        new CloneWorkspaceRequest()
+            .includeUserRoles(true)
+            .workspace(
+                new Workspace()
+                    .namespace("cloned-ns")
+                    .name("cloned")
+                    .researchPurpose(originalWorkspace.getResearchPurpose())
+                    .billingAccountName("billing-account")
+                    .cdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId())));
+
+    Workspace clonedWorkspace =
         workspacesController
             .cloneWorkspace(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+                originalWorkspace.getNamespace(), originalWorkspace.getId(), cloneRequest)
             .getBody()
             .getWorkspace();
 
-    assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
-    List<RawlsWorkspaceACLUpdate> updateACLRequestList =
-        convertUserRolesToUpdateAclRequestList(collaborators);
+    assertThat(clonedWorkspace.getCreator()).isEqualTo(cloner.getUsername());
 
     verify(fireCloudService)
         .updateWorkspaceACL(
             eq("cloned-ns"),
             eq("cloned"),
             // Accept the ACL update list in any order.
-            argThat(arg -> new HashSet<>(updateACLRequestList).equals(new HashSet<>(arg))));
+            argThat(
+                arg ->
+                    new HashSet<>(
+                            convertUserRolesToUpdateAclRequestList(
+                                expectedCollaboratorsAfterUpdate))
+                        .equals(new HashSet<>(arg))));
   }
 
   @Test
