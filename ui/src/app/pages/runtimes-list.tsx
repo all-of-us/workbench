@@ -81,12 +81,22 @@ const css =
       .join(',\n')
   ) +
   ` {
-         display: none !important
-        }
-      
-       div[style*="z-index: 2"]:has(>div>svg) {
-          display: none !important
-        }`;
+        display: none !important
+    }
+    
+    div[style*="z-index: 2"]:has(>div>svg) {
+        display: none !important
+    }
+    
+    /* hides the "Hide resources you did not create" checkbox, which does not do anything */
+    [role=checkbox] {
+        display: none !important
+    }
+
+    /* hides the text after the checkbox above */
+    [role=checkbox] ~ span {
+        display: none !important
+    }`;
 
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,
