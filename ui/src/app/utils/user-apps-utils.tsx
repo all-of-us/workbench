@@ -74,7 +74,7 @@ export const pauseUserApp = (googleProject, appName, namespace) => {
     .then(() => maybeStartPollingForUserApps(namespace));
 };
 
-export const localizeUserApp = (
+const localizeUserApp = (
   namespace,
   appName,
   appType: AppType,
@@ -103,3 +103,14 @@ export function unattachedDiskExists(
 ) {
   return !app && disk !== undefined;
 }
+
+export const openRStudio = (workspaceNamespace, userApp) => {
+  localizeUserApp(
+    workspaceNamespace,
+    userApp.appName,
+    userApp.appType,
+    [],
+    false
+  );
+  window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+};

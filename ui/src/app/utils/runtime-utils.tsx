@@ -40,6 +40,7 @@ import {
   registerCompoundRuntimeOperation,
   runtimeDiskStore,
   runtimeStore,
+  userAppsStore,
   useStore,
 } from 'app/utils/stores';
 
@@ -1240,6 +1241,14 @@ export const withRuntimeStore = () => (WrappedComponent) => {
     useDisk(value.workspaceNamespace);
 
     return <WrappedComponent {...props} runtimeStore={value} />;
+  };
+};
+
+export const withUserAppsStore = () => (WrappedComponent) => {
+  return (props) => {
+    const value = useStore(userAppsStore);
+
+    return <WrappedComponent {...props} userAppsStore={value} />;
   };
 };
 
