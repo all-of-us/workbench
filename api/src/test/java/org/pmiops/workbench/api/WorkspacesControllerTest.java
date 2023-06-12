@@ -2233,12 +2233,13 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAclAsService("cloned-ns", "cloned"))
         .thenReturn(clonedAclBeforeUpdate);
 
-    List<UserRole> expectedCollaboratorsAfterUpdate =
-        List.of(
-            new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
-            new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-            new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
-            new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER));
+    List<RawlsWorkspaceACLUpdate> expectedCollaboratorsAfterUpdate =
+        convertUserRolesToUpdateAclRequestList(
+            List.of(
+                new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
+                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     currentUser = cloner;
 
@@ -2270,11 +2271,7 @@ public class WorkspacesControllerTest {
             eq("cloned"),
             // Accept the ACL update list in any order.
             argThat(
-                arg ->
-                    new HashSet<>(
-                            convertUserRolesToUpdateAclRequestList(
-                                expectedCollaboratorsAfterUpdate))
-                        .equals(new HashSet<>(arg))));
+                arg -> new HashSet<>(expectedCollaboratorsAfterUpdate).equals(new HashSet<>(arg))));
   }
 
   @Test
