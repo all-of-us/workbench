@@ -2193,8 +2193,8 @@ public class WorkspacesControllerTest {
                     "cloner@gmail.com",
                     new JSONObject()
                         .put("accessLevel", "READER")
-                        .put("canCompute", true)
-                        .put("canShare", true))
+                        .put("canCompute", false)
+                        .put("canShare", false))
                 .put(
                     "reader@gmail.com",
                     new JSONObject()
