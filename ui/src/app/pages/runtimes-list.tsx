@@ -84,6 +84,7 @@ const css =
         display: none !important
     }
     
+    /* hides a warning banner which is only appropriate for Terra UI */
     div[style*="z-index: 2"]:has(>div>svg) {
         display: none !important
     }
