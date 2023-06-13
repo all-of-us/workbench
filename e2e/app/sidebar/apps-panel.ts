@@ -36,12 +36,16 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
+
+    // Show Delete Modal asking user to confirm no cromwell jobs are running
     const warningDeleteCromwellModal = new WarningDeleteCromwellModal(page);
     expect(warningDeleteCromwellModal.isLoaded());
     await warningDeleteCromwellModal.clickYesDeleteButton();
+
+    // Open the panel To select PD options
     const confirmDeleteEnvironmentWithPdPanel = new ConfirmDeleteEnvironmentWithPdPanel(
       page,
-      SideBarLink.RStudioConfiguration
+      SideBarLink.CromwellConfiguration
     );
     await confirmDeleteEnvironmentWithPdPanel.confirmDeleteGkeAppWithDisk();
 

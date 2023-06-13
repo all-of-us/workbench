@@ -29,7 +29,7 @@ const cromshellStatusPythonCmd = (cromshell_version: string, cromshellJobId: str
 const cromshellStatusRCmd = (cromshell_version: string, cromshellJobId: string) =>
   `system2('${cromshell_version}', args = c('status', '${cromshellJobId}'), stdout = TRUE, stderr = TRUE)`;
 
-const workspaceName = 'e2eCromwellTest';
+const workspaceName = makeRandomName('e2eCromwellTest');
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
