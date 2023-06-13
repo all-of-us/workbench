@@ -506,6 +506,10 @@ export function parseForNumericalStrings(text: string): RegExpMatchArray | null 
 export async function cleanupWorkspace(page: Page, workspaceName: string) {
   const workspaceCard = await findWorkspaceCard(page, workspaceName);
   if (workspaceCard != null) {
-    await workspaceCard.delete();
+    try {
+      await workspaceCard.delete();
+    } catch (e) {
+      logger.info(`Workspace "${workspaceName}" could not be deleted`);
+    }
   }
 }
