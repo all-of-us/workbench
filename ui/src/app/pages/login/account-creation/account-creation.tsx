@@ -99,7 +99,7 @@ export const MultiSelectWithLabel = (props) => {
           onChange={props.onChange}
           options={props.options}
           data-test-id={props.dataTestId}
-          style={{ ...styles.sectionInput, overflowY: 'none' }}
+          style={{ ...styles.sectionInput, overflowY: 'hidden' }}
         />
         {props.children}
       </FlexRow>
