@@ -27,6 +27,11 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
+  public String getPublishedWorkspacesGroupEmail() {
+    return null;
+  }
+
+  @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {}
 
   @Override
