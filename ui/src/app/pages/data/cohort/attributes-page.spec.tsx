@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+import { Dropdown } from 'primereact/dropdown';
 
 import { CohortBuilderApi, Operator } from 'generated/fetch';
 
@@ -37,8 +38,11 @@ function component(): ReactWrapper {
   return mount(<AttributesPage {...props} />);
 }
 
-function getNumericalDropdown(wrapper: AnyWrapper, index: string) {
-  return wrapper.find(`Dropdown[id="numerical-dropdown-${index}"]`);
+function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
+  const elements = wrapper
+    .find(`Dropdown[id="numerical-dropdown-${index}"]`)
+    ?.getElements();
+  return elements?.length ? (elements[0] as unknown as Dropdown) : undefined;
 }
 
 function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {
@@ -191,7 +195,7 @@ describe('AttributesPageV2', () => {
   it('should render a single input for EQUAL operator and disable calculate button when empty', async () => {
     const wrapper = component();
     const numericalDropdown = getNumericalDropdown(wrapper, '0');
-    numericalDropdown.props().onChange({
+    numericalDropdown.props.onChange({
       originalEvent: undefined,
       value: Operator.EQUAL,
       target: { id: '', name: '', value: Operator.EQUAL },
