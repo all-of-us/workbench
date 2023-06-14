@@ -96,6 +96,7 @@ export const simulateComponentChange = async (
     { onChange: (e: PrimeReactChangeEvent) => void },
     any
   >;
+  // @ts-ignore
   primeReactComponent.props().onChange({
     originalEvent: undefined,
     value,

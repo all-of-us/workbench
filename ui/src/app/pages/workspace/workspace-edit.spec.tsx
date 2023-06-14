@@ -1028,9 +1028,11 @@ describe('WorkspaceEdit', () => {
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     expect(billingDropDown.props().value).toEqual('billingAccounts/freetier');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'billingAccounts/freetier',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
     ]);
@@ -1048,10 +1050,12 @@ describe('WorkspaceEdit', () => {
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').first();
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props().value).toEqual('free-tier');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'free-tier',
       'user-billing',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
       'User Billing',
@@ -1069,10 +1073,12 @@ describe('WorkspaceEdit', () => {
       .first();
 
     expect(billingDropDown.props().value).toEqual('free-tier');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'free-tier',
       'user-billing',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
       'User Billing',
@@ -1091,10 +1097,12 @@ describe('WorkspaceEdit', () => {
 
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(0);
     expect(billingDropDown.props().value).toEqual('free-tier');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'free-tier',
       'user-billing',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
       'User Billing',
@@ -1115,11 +1123,13 @@ describe('WorkspaceEdit', () => {
     // 'billing-account' is workspace's current billing account.
     // There would be 3 options: Free tier, user's billing account, workspace billing account
     expect(billingDropDown.props().value).toEqual('billing-account');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'free-tier',
       'user-billing',
       'billing-account',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
       'User Billing',
@@ -1140,9 +1150,11 @@ describe('WorkspaceEdit', () => {
     // 'billing-account' is workspace's current billing account.
     // There would be 4 options: Free tier, user's billing account, workspace billing account
     expect(billingDropDown.props().value).toEqual('billing-account');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'billing-account',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'User Provided Billing Account',
     ]);
@@ -1159,11 +1171,13 @@ describe('WorkspaceEdit', () => {
     billingDropDown = wrapper.find('[data-test-id="billing-dropdown"]').first();
     expect(mockEnsureBillingScope).toHaveBeenCalledTimes(1);
     expect(billingDropDown.props().value).toEqual('billing-account');
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.value)).toEqual([
       'free-tier',
       'user-billing',
       'billing-account',
     ]);
+    // @ts-ignore
     expect(billingDropDown.props().options.map((o) => o.label)).toEqual([
       'Use All of Us initial credits - $33.33 left',
       'User Billing',
