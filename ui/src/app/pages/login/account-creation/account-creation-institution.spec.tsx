@@ -42,7 +42,6 @@ function component(): ReactWrapper {
 function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
   return wrapper
     .find(AccountCreationInstitution)
-    .root()
     .instance() as AccountCreationInstitution;
 }
 
