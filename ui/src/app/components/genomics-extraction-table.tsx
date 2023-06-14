@@ -221,7 +221,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
         <div className='slim-scroll-bar'>
           <SwitchTransition>
             <CSSTransition<undefined>
-              key={jobs.toString()}
+              key={jobs.toString() ?? 'noJobs'}
               classNames='switch-transition'
               addEndListener={(node, done) => {
                 node.addEventListener('transitionend', done, false);
