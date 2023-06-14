@@ -33,7 +33,7 @@ import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 import { zendeskBaseUrl } from 'app/utils/zendesk';
 
 const styles = reactStyles({
-  newCtNotification: {
+  bannerNotification: {
     padding: 16,
     marginTop: 16,
     marginLeft: '3rem',
@@ -50,6 +50,18 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
   },
 });
+
+// Workspaces created before this date use multi-region buckets which incur additional costs compared to
+// single-region buckets.
+const MULTI_REGION_BUCKET_END_DATE = new Date(2022, 5, 15); // June 15th, 2022. Months are 0-indexed.
+
+const BannerNotification = ({ children }) => {
+  return (
+    <div style={styles.bannerNotification}>
+      <FlexRow style={{ justifyContent: 'space-between' }}>{children}</FlexRow>
+    </div>
+  );
+};
 
 interface NotificationProps {
   onCancel: () => void;
@@ -86,25 +98,38 @@ const NewCtNotification = (props: NotificationProps) => {
   );
 
   return (
-    <div style={styles.newCtNotification}>
-      <FlexRow style={{ justifyContent: 'space-between' }}>
-        <FlexColumn>
-          <div>
-            These resources will get you started using the genomic data:{' '}
-            {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
-          </div>
-          <div>
-            You can always learn more in the {supportHubLink} section on
-            Genomics.
-          </div>
-        </FlexColumn>
-        <FontAwesomeIcon
-          icon={faXmark}
-          style={{ fontSize: '21px', marginLeft: '1em' }}
-          onClick={() => props.onCancel()}
-        />
-      </FlexRow>
-    </div>
+    <BannerNotification>
+      <FlexColumn>
+        <div>
+          These resources will get you started using the genomic data:{' '}
+          {dataPathsLink}, {dataFilesLink}, and {cohortBuilderLink}.
+        </div>
+        <div>
+          You can always learn more in the {supportHubLink} section on Genomics.
+        </div>
+      </FlexColumn>
+      <FontAwesomeIcon
+        icon={faXmark}
+        style={{ fontSize: '21px', marginLeft: '1em' }}
+        onClick={() => props.onCancel()}
+      />
+    </BannerNotification>
+  );
+};
+
+const MultiRegionWorkspaceNotification = () => {
+  return (
+    <BannerNotification>
+      <FlexColumn>
+        <div>
+          Workspaces created before{' '}
+          {MULTI_REGION_BUCKET_END_DATE.toLocaleDateString()} use multi-region
+          buckets, which incur additional costs. To prevent this, we recommend
+          duplicating the workspace (using single-region buckets) to save costs.
+          Contact support for assistance.
+        </div>
+      </FlexColumn>
+    </BannerNotification>
   );
 };
 
@@ -134,6 +159,10 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
     const { ns, wsid } = params;
 
     const [showNewCtNotification, setShowNewCtNotification] = useState(false);
+
+    const showMultiRegionWorkspaceNotification =
+      workspace &&
+      new Date(workspace.creationTime) < MULTI_REGION_BUCKET_END_DATE;
 
     useEffect(() => {
       const updateStores = async (namespace) => {
@@ -227,6 +256,9 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
                 onCancel={() => setShowNewCtNotification(false)}
               />
             )}
+            {showMultiRegionWorkspaceNotification && (
+              <MultiRegionWorkspaceNotification />
+            )}
             <HelpSidebar pageKey={routeData.pageKey} />
             <div
               style={{
@@ -247,7 +279,7 @@ export const WorkspaceWrapper = fp.flow(withCurrentWorkspace())(
               alignItems: 'center',
             }}
           >
-            <Spinner />
+            <Spinner title='loading workspaces spinner' />
           </div>
         )}
       </>
