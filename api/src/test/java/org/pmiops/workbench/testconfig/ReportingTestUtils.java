@@ -43,8 +43,6 @@ public class ReportingTestUtils {
       Timestamp.from(Instant.parse("2015-05-08T00:00:00.00Z"));
   public static final Long WORKSPACE__CREATOR_ID = 4L;
   public static final String WORKSPACE__DISSEMINATE_RESEARCH_OTHER = "foo_6";
-  public static final Timestamp WORKSPACE__LAST_ACCESSED_TIME =
-      Timestamp.from(Instant.parse("2015-05-12T00:00:00.00Z"));
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
@@ -130,7 +128,6 @@ public class ReportingTestUtils {
         .creationTime(offsetDateTimeUtc(WORKSPACE__CREATION_TIME))
         .creatorId(WORKSPACE__CREATOR_ID)
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
-        .lastAccessedTime(offsetDateTimeUtc(WORKSPACE__LAST_ACCESSED_TIME))
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
         .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT.intValue()) // manual adjustment
@@ -167,7 +164,6 @@ public class ReportingTestUtils {
     workspace.setCreationTime(WORKSPACE__CREATION_TIME);
     workspace.setCreator(creator);
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    workspace.setLastAccessedTime(WORKSPACE__LAST_ACCESSED_TIME);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
     workspace.setNeedsResearchPurposeReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);

@@ -17,8 +17,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ErrorMessage, WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
 import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { ConfirmDeleteRuntimeWithPD } from 'app/components/runtime-configuration-panel/confirm-runtime-delete-with-pd';
 import { ConfirmUpdatePanel } from 'app/components/runtime-configuration-panel/confirm-update-panel';
 import { DataProcConfigSelector } from 'app/components/runtime-configuration-panel/dataproc-config-selector';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
@@ -535,6 +535,8 @@ const PanelMain = fp.flow(
       );
     };
 
+    const usingDataproc = analysisConfig.computeType === ComputeType.Dataproc;
+
     return (
       <div id='runtime-panel'>
         {cond(
@@ -582,13 +584,30 @@ const PanelMain = fp.flow(
             () => {
               if (attachedPdExists) {
                 return (
-                  <ConfirmDeleteRuntimeWithPD
-                    onConfirm={async (runtimeStatusReq) => {
+                  <ConfirmDeleteEnvironmentWithPD
+                    onConfirm={async (deletePDSelected) => {
+                      const runtimeStatusReq = switchCase(
+                        [usingDataproc, deletePDSelected],
+                        [[true, true], () => RuntimeStatusRequest.DeletePD],
+                        [
+                          [true, false],
+                          () => RuntimeStatusRequest.DeleteRuntime,
+                        ],
+                        [
+                          [false, true],
+                          () => RuntimeStatusRequest.DeleteRuntimeAndPD,
+                        ],
+                        [
+                          [false, false],
+                          () => RuntimeStatusRequest.DeleteRuntime,
+                        ]
+                      );
                       await setRuntimeStatus(runtimeStatusReq);
                       onClose();
                     }}
                     onCancel={() => setPanelContent(PanelContent.Customize)}
-                    computeType={existingAnalysisConfig.computeType}
+                    appType={UIAppType.JUPYTER}
+                    usingDataproc={usingDataproc}
                     disk={gcePersistentDisk}
                   />
                 );

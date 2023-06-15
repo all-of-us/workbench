@@ -48,7 +48,7 @@ describe('CromwellConfigurationPanel', () => {
       reload: jest.fn(),
       updateCache: jest.fn(),
     },
-    gkeAppsInWorkspace: [],
+    app: undefined,
     disk: undefined,
     onClickDeleteUnattachedPersistentDisk: jest.fn(),
   };
@@ -88,7 +88,7 @@ describe('CromwellConfigurationPanel', () => {
 
   it('start button should create cromwell and close panel', async () => {
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk: undefined,
     });
     await waitOneTickAndUpdate(wrapper);
@@ -113,7 +113,7 @@ describe('CromwellConfigurationPanel', () => {
   it('should use the existing PD when creating', async () => {
     const disk = stubDisk();
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk,
     });
     await waitOneTickAndUpdate(wrapper);
@@ -150,7 +150,7 @@ describe('CromwellConfigurationPanel', () => {
     const disk = stubDisk();
     const onClickDeleteUnattachedPersistentDisk = jest.fn();
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk,
       onClickDeleteUnattachedPersistentDisk,
     });
@@ -165,7 +165,7 @@ describe('CromwellConfigurationPanel', () => {
   it('should not render a DeletePersistentDiskButton when an app is present', async () => {
     const disk = stubDisk();
     const wrapper = await component({
-      gkeAppsInWorkspace: [createListAppsCromwellResponse()],
+      app: createListAppsCromwellResponse(),
       disk,
     });
     const deleteButton = wrapper.find('DeletePersistentDiskButton');
@@ -174,7 +174,7 @@ describe('CromwellConfigurationPanel', () => {
 
   it('should not render a DeletePersistentDiskButton no disk is present', async () => {
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk: undefined,
     });
     const deleteButton = wrapper.find('DeletePersistentDiskButton');

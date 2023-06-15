@@ -501,3 +501,15 @@ export async function createDatasetNotebook(page: Page, pyNotebookName: string):
 export function parseForNumericalStrings(text: string): RegExpMatchArray | null {
   return text.match(/(\d|\.)+/g);
 }
+
+// Find and delete the workspace
+export async function cleanupWorkspace(page: Page, workspaceName: string) {
+  const workspaceCard = await findWorkspaceCard(page, workspaceName);
+  if (workspaceCard != null) {
+    try {
+      await workspaceCard.delete();
+    } catch (e) {
+      logger.info(`Workspace "${workspaceName}" could not be deleted`);
+    }
+  }
+}

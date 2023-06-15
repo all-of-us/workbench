@@ -7,7 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { FileDetail } from 'generated/fetch';
 
 import { AppLogo } from 'app/components/apps-panel/app-logo';
-import { Clickable } from 'app/components/buttons';
+import { Clickable, KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
@@ -28,7 +28,6 @@ const styles = reactStyles({
     margin: 'auto',
     marginTop: '1.5rem',
     width: '95.7%',
-    height: 8,
     border: `solid ${colorWithWhiteness(colors.disabled, 0.6)}`,
     borderWidth: '1px 1px 0 1px',
     borderRadius: '8px 8px 0 0',
@@ -92,7 +91,7 @@ export const AppFilesList = withCurrentWorkspace()(
           resource={convertToResources([row], props.workspace)[0]}
           workspace
           menuOnly
-          appsAnalysis
+          menuButtonComponentOverride={KebabCircleButton}
           existingNameList={filesList.map((file) => file.name)}
           onUpdate={loadNotebooks}
         />
@@ -111,18 +110,13 @@ export const AppFilesList = withCurrentWorkspace()(
         workspace: { namespace, id },
       } = props;
       const { name } = row;
-      const appPath = getAppInfoFromFileName(name).path;
-      const url = `/workspaces/${namespace}/${id}/${appPath}/${name}`;
-      // Currently, RStudio files are not linked with the appropriate app, hence they are shown as
-      // labels instead of links.
-      return appPath ? (
+      const url = `/workspaces/${namespace}/${id}/notebooks/preview/${name}`;
+      return (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>
             {row.name}
           </RouterLink>
         </Clickable>
-      ) : (
-        <label>{row.name}</label>
       );
     };
 
@@ -151,6 +145,9 @@ export const AppFilesList = withCurrentWorkspace()(
               data-test-id='apps-file-list'
               filterDisplay='row'
               value={filesList}
+              paginator
+              rows={5}
+              style={{ paddingBottom: '10rem' }}
             >
               <Column
                 headerStyle={styles.tableHeader}

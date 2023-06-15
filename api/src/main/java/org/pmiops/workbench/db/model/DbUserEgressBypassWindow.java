@@ -7,8 +7,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -19,7 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class DbUserEgressBypassWindow {
   private long egressBypassId;
-  private DbUser user;
+  private long userId;
 
   private Timestamp startTime;
   private Timestamp endTime;
@@ -38,14 +36,13 @@ public class DbUserEgressBypassWindow {
     return this;
   }
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  public DbUser getUser() {
-    return user;
+  @Column(name = "user_id", nullable = false)
+  public long getUserId() {
+    return userId;
   }
 
-  public DbUserEgressBypassWindow setUser(DbUser user) {
-    this.user = user;
+  public DbUserEgressBypassWindow setUserId(long userId) {
+    this.userId = userId;
     return this;
   }
 
@@ -88,7 +85,7 @@ public class DbUserEgressBypassWindow {
     DbUserEgressBypassWindow dbUserEgressBypassWindow = (DbUserEgressBypassWindow) o;
 
     return new EqualsBuilder()
-        .append(user, dbUserEgressBypassWindow.user)
+        .append(userId, dbUserEgressBypassWindow.userId)
         .append(egressBypassId, dbUserEgressBypassWindow.egressBypassId)
         .append(startTime, dbUserEgressBypassWindow.startTime)
         .append(endTime, dbUserEgressBypassWindow.endTime)
@@ -99,7 +96,7 @@ public class DbUserEgressBypassWindow {
   @Override
   public int hashCode() {
     return new HashCodeBuilder(17, 37)
-        .append(user)
+        .append(userId)
         .append(startTime)
         .append(endTime)
         .append(egressBypassId)

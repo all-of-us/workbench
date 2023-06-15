@@ -74,6 +74,20 @@ export const pauseUserApp = (googleProject, appName, namespace) => {
     .then(() => maybeStartPollingForUserApps(namespace));
 };
 
+const localizeUserApp = (
+  namespace,
+  appName,
+  appType: AppType,
+  fileNames: Array<string>,
+  playgroundMode: boolean
+) => {
+  appsApi().localizeApp(namespace, appName, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
+};
+
 export const resumeUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
     .startApp(googleProject, appName)
@@ -89,3 +103,14 @@ export function unattachedDiskExists(
 ) {
   return !app && disk !== undefined;
 }
+
+export const openRStudio = (workspaceNamespace, userApp) => {
+  localizeUserApp(
+    workspaceNamespace,
+    userApp.appName,
+    userApp.appType,
+    [],
+    false
+  );
+  window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+};

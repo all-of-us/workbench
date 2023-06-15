@@ -190,7 +190,7 @@ public class NotebooksController implements NotebooksApiDelegate {
 
         Set<String> workspaceUsers =
             workspaceAuthService
-                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
+                .getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName)
                 .keySet();
 
         response.lastLockedBy(

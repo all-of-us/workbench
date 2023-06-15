@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { cleanupWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import AppsPanel from 'app/sidebar/apps-panel';
 import CromwellConfigurationPanel from 'app/sidebar/cromwell-configuration-panel';
 import BaseElement from 'app/element/base-element';
@@ -29,7 +29,7 @@ const cromshellStatusPythonCmd = (cromshell_version: string, cromshellJobId: str
 const cromshellStatusRCmd = (cromshell_version: string, cromshellJobId: string) =>
   `system2('${cromshell_version}', args = c('status', '${cromshellJobId}'), stdout = TRUE, stderr = TRUE)`;
 
-const workspaceName = 'e2eCromwellTest';
+const workspaceName = makeRandomName('e2eCromwellTest');
 
 describe('Cromwell GKE App', () => {
   beforeEach(async () => {
@@ -181,10 +181,6 @@ describe('Cromwell GKE App', () => {
 
   afterAll(async () => {
     await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName: workspaceName });
-
-    // Create and Open notebook
-    const workspaceDataPage = new WorkspaceDataPage(page);
-    await workspaceDataPage.deleteWorkspace();
+    await cleanupWorkspace(page, workspaceName);
   });
 });

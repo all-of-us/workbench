@@ -5,6 +5,7 @@ import { waitForFn } from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 import WarningDeleteCromwellModal from '../modal/warning-delete-cromwell-modal';
+import ConfirmDeleteEnvironmentWithPdPanel from 'app/sidebar/confirm-delete-environment-with-pd-panel';
 
 const defaultXpath = '//*[@data-test-id="apps-panel"]';
 
@@ -35,10 +36,20 @@ export default class AppsPanel extends BaseEnvironmentPanel {
     const deleteButton = new Button(page, deleteXPath);
     expect(await deleteButton.exists()).toBeTruthy();
     await deleteButton.click();
+
+    // Show Delete Modal asking user to confirm no cromwell jobs are running
     const warningDeleteCromwellModal = new WarningDeleteCromwellModal(page);
     expect(warningDeleteCromwellModal.isLoaded());
     await warningDeleteCromwellModal.clickYesDeleteButton();
 
+    // Open the panel To select PD options
+    const confirmDeleteEnvironmentWithPdPanel = new ConfirmDeleteEnvironmentWithPdPanel(
+      page,
+      SideBarLink.CromwellConfiguration
+    );
+    await confirmDeleteEnvironmentWithPdPanel.confirmDeleteGkeAppWithDisk();
+
+    await this.open();
     await this.pollForStatus(expandedCromwellXpath, 'DELETING');
 
     // poll for deleted (unexpanded) by repeatedly closing and opening
@@ -55,5 +66,14 @@ export default class AppsPanel extends BaseEnvironmentPanel {
       2 * 60e3 // with a 2 min timeout
     );
     return isDeleted;
+  }
+
+  async clickUnexpandedApp(appNameSelector: string): Promise<void> {
+    await this.open();
+    const unexpandedXPath = `${this.getXpath()}//*[@data-test-id="${appNameSelector}-unexpanded"]`;
+    const unexpanded = new Button(page, unexpandedXPath);
+
+    expect(await unexpanded.exists()).toBeTruthy();
+    await unexpanded.click();
   }
 }
