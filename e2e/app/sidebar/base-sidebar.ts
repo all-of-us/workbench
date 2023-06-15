@@ -37,6 +37,9 @@ export default abstract class BaseSidebar extends Container {
       case SideBarLink.CromwellConfiguration:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-cromwellConfig"]`;
         break;
+      case SideBarLink.RStudioConfiguration:
+        xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-rstudioConfig"]`;
+        break;
       case SideBarLink.DataDictionary:
         xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-dataDictionary"]`;
         break;

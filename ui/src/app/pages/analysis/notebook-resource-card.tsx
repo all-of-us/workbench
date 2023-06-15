@@ -41,6 +41,7 @@ interface Props
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
   menuOnly: boolean;
+  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
 }
 
 interface State {
@@ -178,7 +179,14 @@ export const NotebookResourceCard = fp.flow(
     }
 
     render() {
-      const { resource, menuOnly } = this.props;
+      const {
+        resource,
+        menuOnly,
+        onUpdate,
+        existingNameList,
+        menuButtonComponentOverride,
+      } = this.props;
+      const actions = this.actions;
       const oldName = getDisplayName(resource);
       return (
         <React.Fragment>
@@ -191,7 +199,7 @@ export const NotebookResourceCard = fp.flow(
               fromAccessTierShortName={resource.accessTierShortName}
               resourceType={getType(resource)}
               onClose={() => this.setState({ showCopyNotebookModal: false })}
-              onCopy={() => this.props.onUpdate()}
+              onCopy={() => onUpdate()}
               saveFunction={(copyRequest: CopyRequest) =>
                 this.copyNotebook(copyRequest)
               }
@@ -211,16 +219,16 @@ export const NotebookResourceCard = fp.flow(
               nameFormat={(name) =>
                 appendNotebookFileSuffixByOldName(name, oldName)
               }
-              existingNames={this.props.existingNameList}
+              existingNames={existingNameList}
             />
           )}
           {menuOnly ? (
             <ResourceActionsMenu
-              actions={this.actions}
+              {...{ menuButtonComponentOverride, actions }}
               disabled={resource.adminLocked}
             />
           ) : (
-            <ResourceCard resource={resource} actions={this.actions} />
+            <ResourceCard {...{ resource, actions }} />
           )}
         </React.Fragment>
       );

@@ -124,7 +124,6 @@ public class LeonardoApiClientTest {
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
   private static final String MACHINE_TYPE = "n1-standard-1";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
-  private static final String RSTUDIO_DESCRIPTOR_PATH = "rstudio/path";
   private static final String CDR_BUCKET = "gs://cdr-bucket";
   private static final String CDR_STORAGE_BASE_PATH = "v99";
   private static final String WGS_PATH = "wgs/cram/manifest.csv";
@@ -145,7 +144,6 @@ public class LeonardoApiClientTest {
   @BeforeEach
   public void setUp() throws Exception {
     config = WorkbenchConfig.createEmptyConfig();
-    config.firecloud.userApps.rStudioDescriptorPath = RSTUDIO_DESCRIPTOR_PATH;
     config.firecloud.leoBaseUrl = LEONARDO_BASE_URL;
 
     user = new DbUser().setUsername(LOGGED_IN_USER_EMAIL).setUserId(123L);
@@ -225,12 +223,13 @@ public class LeonardoApiClientTest {
     LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
-
+    customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
+    customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
+    customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
     LeonardoCreateAppRequest expectedAppRequest =
         new LeonardoCreateAppRequest()
-            .appType(LeonardoAppType.CUSTOM)
+            .appType(LeonardoAppType.RSTUDIO)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .descriptorPath(RSTUDIO_DESCRIPTOR_PATH)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .customEnvironmentVariables(customEnvironmentVariables);

@@ -443,7 +443,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
-                + "  last_accessed_time,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
                 + "  needs_rp_review_prompt,\n"
@@ -491,7 +490,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .creatorId(rs.getLong("creator_id"))
                 .disseminateResearchOther(rs.getString("disseminate_research_other"))
-                .lastAccessedTime(offsetDateTimeUtc(rs.getTimestamp("last_accessed_time")))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
                 .needsRpReviewPrompt((int) rs.getShort("needs_rp_review_prompt"))

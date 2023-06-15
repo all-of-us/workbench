@@ -156,6 +156,22 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(Collectors.toList());
   }
 
+  @Override
+  public String getPublishedWorkspacesGroupEmail() {
+    // All users with CT access also have RT access, so we know that any user with access to
+    // workspaces will be a member of the RT Auth Domain Group.  Therefore, we can use this group
+    // to assign access to all relevant users at once.
+    //
+    // We implement the "Publishing" of workspaces by assigning READER access to this group.
+    //
+    // Controlled Tier note: our intention for RT-only users is that they have -*awareness of*- but
+    // not -*access to*- Published workspaces in the CT.  Our UI special-cases Published workspaces
+    // to make this possible, and any user attempting to gain access to these will find that they
+    // are blocked.  Despite having nominal "READER" access, their level is actually "NO ACCESS"
+    // specifically because they are not members of the Controlled Tier Auth Domain.
+    return accessTierService.getRegisteredTierOrThrow().getAuthDomainGroupEmail();
+  }
+
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
@@ -245,7 +261,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, RawlsWorkspaceAccessEntry> emailToRole =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : emailToRole.entrySet()) {

@@ -11,9 +11,10 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { cond, switchCase } from 'app/utils';
-import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
+import { cond } from 'app/utils';
+import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
 import * as runtimeUitils from 'app/utils/runtime-utils';
+import { AnalysisConfig } from 'app/utils/runtime-utils';
 import cromwellLogo from 'assets/images/Cromwell.png';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterLogo from 'assets/images/Jupyter.png';
@@ -78,6 +79,23 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
 };
 
+export const createAppRequestToAnalysisConfig = (
+  createAppRequest: CreateAppRequest
+): Partial<AnalysisConfig> => {
+  return {
+    machine: findMachineByName(
+      createAppRequest.kubernetesRuntimeConfig.machineType
+    ),
+    diskConfig: {
+      size: createAppRequest.persistentDiskRequest.size,
+      detachable: true,
+      detachableType: createAppRequest.persistentDiskRequest.diskType,
+      existingDiskName: null,
+    },
+    numNodes: createAppRequest.kubernetesRuntimeConfig.numNodes,
+  };
+};
+
 const isVisible = (status: AppStatus): boolean =>
   status && status !== AppStatus.DELETED;
 
@@ -100,18 +118,22 @@ export const canDeleteApp = (app: UserAppEnvironment): boolean =>
 
 // TODO reconcile with API AppType and LeonardoMapper
 
-export const toAppType = (type: UIAppType): AppType =>
-  switchCase(
-    type,
-    [UIAppType.CROMWELL, () => AppType.CROMWELL],
-    [UIAppType.RSTUDIO, () => AppType.RSTUDIO]
-  );
+export const toAppType: Record<UIAppType, AppType | null> = {
+  [UIAppType.CROMWELL]: AppType.CROMWELL,
+  [UIAppType.RSTUDIO]: AppType.RSTUDIO,
+  [UIAppType.JUPYTER]: null,
+};
+
+export const toUIAppType: Record<AppType, UIAppType> = {
+  [AppType.CROMWELL]: UIAppType.CROMWELL,
+  [AppType.RSTUDIO]: UIAppType.RSTUDIO,
+};
 
 export const findApp = (
   apps: UserAppEnvironment[] | null | undefined,
   appType: UIAppType
-): UserAppEnvironment =>
-  apps?.find((app) => app.appType === toAppType(appType));
+): UserAppEnvironment | undefined =>
+  apps?.find((app) => app.appType === toAppType[appType]);
 
 // used as a generic equivalence for certain states of RuntimeStatus and AppStatus
 export enum UserEnvironmentStatus {

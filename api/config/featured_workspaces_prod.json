@@ -245,6 +245,12 @@
       "namespace": "aou-rw-808a79c0",
       "id": "demogeographicvariationinobesityv4",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "All of Us v6 GWAS on LDL Cholesterol with Regenie and dsub",
+      "namespace": "aou-rw-5981f9dc",
+      "id": "aouldlgwasregeniedsubctv6duplicate",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

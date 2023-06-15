@@ -10,7 +10,6 @@ import jakarta.mail.MessagingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -32,7 +30,6 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -62,7 +59,6 @@ import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 import org.pmiops.workbench.model.WorkspaceUserAdminView;
 import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceACLUpdate;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
@@ -77,7 +73,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private static final Logger log = Logger.getLogger(WorkspaceAdminServiceImpl.class.getName());
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
-  private final AccessTierService accessTierService;
   private final ActionAuditQueryService actionAuditQueryService;
   private final AdminAuditor adminAuditor;
   private final CloudMonitoringService cloudMonitoringService;
@@ -101,7 +96,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   @Autowired
   public WorkspaceAdminServiceImpl(
-      AccessTierService accessTierService,
       ActionAuditQueryService actionAuditQueryService,
       AdminAuditor adminAuditor,
       CloudMonitoringService cloudMonitoringService,
@@ -122,7 +116,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceMapper workspaceMapper,
       WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService) {
-    this.accessTierService = accessTierService;
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
     this.cloudMonitoringService = cloudMonitoringService;
@@ -342,7 +335,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient.getBlobPage(bucketName).stream()
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
@@ -391,18 +384,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    // Enable all users in RT or higher tiers to see all published workspaces regardless of tier
-    // Note: keep in sync with WorkspaceAuthService.updateWorkspaceAcls.
-    final DbAccessTier dbAccessTier = accessTierService.getRegisteredTierOrThrow();
-    final String registeredTierGroupEmail = dbAccessTier.getAuthDomainGroupEmail();
-
-    final RawlsWorkspaceACLUpdate aclUpdate =
-        FirecloudTransforms.buildAclUpdate(registeredTierGroupEmail, accessLevel);
+    var aclUpdate =
+        FirecloudTransforms.buildAclUpdate(
+            workspaceService.getPublishedWorkspacesGroupEmail(), accessLevel);
 
     fireCloudService.updateWorkspaceACL(
-        dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName(),
-        Collections.singletonList(aclUpdate));
+        dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName(), List.of(aclUpdate));
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());

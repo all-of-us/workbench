@@ -38,6 +38,7 @@ import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import moment from 'moment';
 
 import { AdminLockRequest } from './admin-lock-request';
+import { DisksTable } from './disks-table';
 import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
@@ -707,6 +708,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
               displayPageSize={10}
               sourceWorkspaceNamespace={workspace.namespace}
             />
+            <h2>Disks</h2>
+            <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
           </>
         )}
         {confirmDeleteRuntime && (

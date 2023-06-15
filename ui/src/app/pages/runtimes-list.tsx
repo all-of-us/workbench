@@ -42,12 +42,12 @@ const ajax = (signal) => {
     },
     Apps: {
       listWithoutProject: () =>
-        jsonLeoFetch('/api/google/v1/apps?includeDeleted=false'),
+        jsonLeoFetch('/api/google/v1/apps?role=creator&includeDeleted=false'),
     },
     Metrics: { captureEvent: () => undefined },
     Disks: {
       disksV1: () => ({
-        list: () => jsonLeoFetch('/api/google/v1/disks'),
+        list: () => jsonLeoFetch('/api/google/v1/disks?role=creator'),
         disk: (googleProject, name) => ({
           delete: () =>
             jsonLeoFetch(
@@ -81,12 +81,23 @@ const css =
       .join(',\n')
   ) +
   ` {
-         display: none !important
-        }
-      
-       div[style*="z-index: 2"]:has(>div>svg) {
-          display: none !important
-        }`;
+        display: none !important
+    }
+    
+    /* hides a warning banner which is only appropriate for Terra UI */
+    div[style*="z-index: 2"]:has(>div>svg) {
+        display: none !important
+    }
+    
+    /* hides the "Hide resources you did not create" checkbox, which does not do anything */
+    [role=checkbox] {
+        display: none !important
+    }
+
+    /* hides the text after the checkbox above */
+    [role=checkbox] ~ span {
+        display: none !important
+    }`;
 
 interface RuntimesListProps
   extends WithSpinnerOverlayProps,

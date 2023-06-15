@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,8 +111,6 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setCreator(creatorUser);
     sourceDbWorkspace.setCreationTime(DB_CREATION_TIMESTAMP);
     sourceDbWorkspace.setLastModifiedTime(DB_CREATION_TIMESTAMP);
-    sourceDbWorkspace.setLastAccessedTime(
-        Timestamp.from(DB_CREATION_TIMESTAMP.toInstant().plus(Duration.ofMinutes(15))));
     sourceDbWorkspace.setCohorts(Collections.emptySet());
     sourceDbWorkspace.setConceptSets(Collections.emptySet());
     sourceDbWorkspace.setDataSets(Collections.emptySet());

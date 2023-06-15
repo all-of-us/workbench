@@ -108,8 +108,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   /**
-   * checkRuntimes deletes older runtimes in order to force an upgrade on the next researcher login.
-   * This method is meant to be restricted to invocation by App Engine cron.
+   * deleteOldRuntimes deletes older runtimes in order to force an upgrade on the next researcher
+   * login. This method is meant to be restricted to invocation by App Engine cron.
    *
    * <p>The runtime deletion policy here aims to strike a balance between enforcing upgrades, cost
    * savings, and minimizing user disruption. To this point, our goal is to only upgrade idle
@@ -124,7 +124,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
    * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
    */
   @Override
-  public ResponseEntity<Void> checkRuntimes() {
+  public ResponseEntity<Void> deleteOldRuntimes() {
     final Instant now = clock.instant();
     final WorkbenchConfig config = configProvider.get();
     final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);

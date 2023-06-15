@@ -22,7 +22,7 @@
 
 import {
   AppsApi,
-  BaseAPI, // internal
+  BaseAPI,
   CdrVersionsApi,
   CohortAnnotationDefinitionApi,
   CohortBuilderApi,
@@ -32,9 +32,10 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
+  DiskAdminApi,
   DisksApi,
   EgressEventsAdminApi,
-  FeaturedWorkspacesConfigApi, // internal
+  FeaturedWorkspacesConfigApi,
   InstitutionApi,
   NotebooksApi,
   ProfileApi,
@@ -51,7 +52,7 @@ import {
 
 import { environment } from 'environments/environment';
 import {
-  cookiesEnabled,
+  firstPartyCookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
 } from 'app/utils/cookies';
 import * as portableFetch from 'portable-fetch';
@@ -109,6 +110,7 @@ export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const disksApi = bindCtor(DisksApi);
+export const disksAdminApi = bindCtor(DiskAdminApi);
 export const egressEventsAdminApi = bindCtor(EgressEventsAdminApi);
 export const featuredWorkspacesConfigApi = bindCtor(
   FeaturedWorkspacesConfigApi
@@ -127,7 +129,7 @@ export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 
 export const getApiBaseUrl = () => {
-  if (cookiesEnabled()) {
+  if (firstPartyCookiesEnabled()) {
     return (
       localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) ||
       environment.allOfUsApiUrl

@@ -1,47 +1,34 @@
 import * as React from 'react';
 
-import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
+import {
+  AppType,
+  CreateAppRequest,
+  Disk,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
 import { unattachedDiskExists } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { defaultRStudioConfig, findApp, UIAppType } from './apps-panel/utils';
+import {
+  createAppRequestToAnalysisConfig,
+  defaultRStudioConfig,
+} from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
-
-const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
-  defaultRStudioConfig.kubernetesRuntimeConfig.machineType
-);
-
-const { cpu, memory } = DEFAULT_MACHINE_TYPE;
-
-const analysisConfig: Partial<AnalysisConfig> = {
-  machine: findMachineByName(
-    defaultRStudioConfig.kubernetesRuntimeConfig.machineType
-  ),
-  diskConfig: {
-    size: defaultRStudioConfig.persistentDiskRequest.size,
-    detachable: true,
-    detachableType: defaultRStudioConfig.persistentDiskRequest.diskType,
-    existingDiskName: null,
-  },
-  numNodes: defaultRStudioConfig.kubernetesRuntimeConfig.numNodes,
-};
 
 export interface RStudioConfigurationPanelProps {
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
+  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteUnattachedPersistentDisk: () => void;
 }
@@ -51,17 +38,23 @@ export const RStudioConfigurationPanel = ({
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  gkeAppsInWorkspace,
+  app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
 }: RStudioConfigurationPanelProps) => {
-  const app = findApp(gkeAppsInWorkspace, UIAppType.RSTUDIO);
   const { profile } = profileState;
 
   const onDismiss = () => {
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
   };
+
+  const rstudioConfig: CreateAppRequest = {
+    ...defaultRStudioConfig,
+    persistentDiskRequest:
+      disk !== undefined ? disk : defaultRStudioConfig.persistentDiskRequest,
+  };
+  const analysisConfig = createAppRequestToAnalysisConfig(rstudioConfig);
 
   return (
     <FlexColumn
@@ -89,11 +82,9 @@ export const RStudioConfigurationPanel = ({
       </div>
       <div style={{ ...styles.controlSection }}>
         <DisabledCloudComputeProfile
-          cpu={cpu}
-          memory={memory}
-          persistentDiskRequestSize={
-            defaultRStudioConfig.persistentDiskRequest.size
-          }
+          cpu={analysisConfig.machine.cpu}
+          memory={analysisConfig.machine.memory}
+          persistentDiskRequestSize={rstudioConfig.persistentDiskRequest.size}
           appType={AppType.RSTUDIO}
         />
       </div>
@@ -110,7 +101,7 @@ export const RStudioConfigurationPanel = ({
           />
         )}
         <CreateGKEAppButton
-          createAppRequest={defaultRStudioConfig}
+          createAppRequest={rstudioConfig}
           existingApp={app}
           workspaceNamespace={workspace.namespace}
           onDismiss={onDismiss}
