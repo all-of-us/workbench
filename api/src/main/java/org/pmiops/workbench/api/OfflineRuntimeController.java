@@ -29,6 +29,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -38,6 +39,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -61,6 +63,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // Every n'th day of inactivity on a PD (not including 0), a notification is sent.
   private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 30;
 
+  private static final String ATTACHED_DISK_STATUS = "attached to";
+
+  private static final String DETACHED_DISK_STATUS = "detached from";
+
   // This is temporary while we wait for Leonardo autopause to rollout. Once
   // available, we should instead take a runtime status of STOPPED to trigger
   // idle deletion.
@@ -71,6 +77,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final MailService mailService;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<DisksApi> disksApiProvider;
+  private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
   private final UserDao userDao;
@@ -84,6 +91,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       MailService mailService,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
+      LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
       UserDao userDao,
@@ -93,6 +101,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.freeTierBillingService = freeTierBillingService;
     this.mailService = mailService;
     this.runtimesApiProvider = runtimesApiProvider;
+    this.leonardoApiClient = leonardoApiClient;
     this.disksApiProvider = disksApiProvider;
     this.workspaceDao = workspaceDao;
     this.userDao = userDao;
@@ -292,6 +301,16 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
+    String diskStatus = "";
+    try {
+      diskStatus = getDiskStatus(disk, googleProject);
+    } catch (ApiException | NullPointerException ex) {
+      log.warning(
+          String.format(
+              "skipping disk '%s' error while getting disk status", disk.getName(), googleProject));
+      return false;
+    }
+
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(
@@ -338,7 +357,29 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, diskStatus, daysUnused, initialCreditsRemaining);
     return true;
+  }
+
+  private String getDiskStatus(
+      LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+    if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
+      // There could be just one runtime per google project, so set disk status as Attached if
+      // runtime exist else its detached
+      List<LeonardoListRuntimeResponse> runtimes =
+          runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
+      return runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS;
+    } else {
+      List<UserAppEnvironment> appEnvironments =
+          leonardoApiClient.listAppsInProjectAsService(googleProject);
+      Optional<UserAppEnvironment> userApps =
+          appEnvironments.stream()
+              .filter(
+                  userAppEnvironment ->
+                      userAppEnvironment.getDiskName() != null
+                          && userAppEnvironment.getDiskName().equals(diskResponse.getName()))
+              .findFirst();
+      return userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS;
+    }
   }
 }
