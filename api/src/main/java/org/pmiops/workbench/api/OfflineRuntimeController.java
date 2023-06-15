@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -304,25 +303,23 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
     StringBuilder diskStatus = new StringBuilder();
     try {
-      // If Label contains key aou-app-type it is either cromwell or Rstudio else its Jupyter
-      // runtime
-      if (((Map) disk.getLabels()).containsKey(LEONARDO_LABEL_APP_TYPE)) {
-        List<UserAppEnvironment> appEnviornments =
+      if (leonardoMapper.toApiListDisksResponse(disk).getIsGceRuntime()) {
+        // There could be just one runtime per google project, so set disk status as Attached if
+        // runtime exist else its detached
+        List<LeonardoListRuntimeResponse> runtimes =
+            runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
+        diskStatus.append(runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS);
+      } else {
+        List<UserAppEnvironment> appEnvironments =
             leonardoApiClient.listAppsInProjectAsService(googleProject);
         Optional<UserAppEnvironment> userApps =
-            appEnviornments.stream()
+            appEnvironments.stream()
                 .filter(
                     userAppEnvironment ->
                         userAppEnvironment.getDiskName() != null
                             && userAppEnvironment.getDiskName().equals(disk.getName()))
                 .findFirst();
         diskStatus.append(userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS);
-      } else {
-        // There could be just one runtime per google project, so set disk status as Attached if
-        // runtime exist else its detached
-        List<LeonardoListRuntimeResponse> runtimes =
-            runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
-        diskStatus.append(runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS);
       }
     } catch (ApiException | NullPointerException e) {
       e.printStackTrace();
