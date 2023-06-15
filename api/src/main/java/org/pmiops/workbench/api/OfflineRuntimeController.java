@@ -252,15 +252,15 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int notifyFail = 0;
     Exception lastException = null;
     for (int daysUnused : disksByDaysUnused.keySet()) {
-      if (daysUnused <= 0) {
-        // Our periodic notifications should not trigger on day 0.
-        continue;
-      }
-
-      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
-          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
-        continue;
-      }
+      //      if (daysUnused <= 0) {
+      //        // Our periodic notifications should not trigger on day 0.
+      //        continue;
+      //      }
+      //
+      //      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+      //          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
+      //        continue;
+      //      }
 
       for (LeonardoListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
         try {
@@ -301,29 +301,16 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
-    StringBuilder diskStatus = new StringBuilder();
+    String diskStatus = "";
     try {
-      if (leonardoMapper.toApiListDisksResponse(disk).getIsGceRuntime()) {
-        // There could be just one runtime per google project, so set disk status as Attached if
-        // runtime exist else its detached
-        List<LeonardoListRuntimeResponse> runtimes =
-            runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
-        diskStatus.append(runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS);
-      } else {
-        List<UserAppEnvironment> appEnvironments =
-            leonardoApiClient.listAppsInProjectAsService(googleProject);
-        Optional<UserAppEnvironment> userApps =
-            appEnvironments.stream()
-                .filter(
-                    userAppEnvironment ->
-                        userAppEnvironment.getDiskName() != null
-                            && userAppEnvironment.getDiskName().equals(disk.getName()))
-                .findFirst();
-        diskStatus.append(userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS);
-      }
-    } catch (ApiException | NullPointerException e) {
-      e.printStackTrace();
+      diskStatus = getDiskStatus(disk, googleProject);
+    } catch (ApiException | NullPointerException ex) {
+      log.warning(
+          String.format(
+              "skipping disk '%s' error while getting disk status", disk.getName(), googleProject));
+      return false;
     }
+
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(
@@ -370,7 +357,29 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, diskStatus.toString(), daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, diskStatus, daysUnused, initialCreditsRemaining);
     return true;
+  }
+
+  private String getDiskStatus(
+      LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+    if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
+      // There could be just one runtime per google project, so set disk status as Attached if
+      // runtime exist else its detached
+      List<LeonardoListRuntimeResponse> runtimes =
+          runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
+      return runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS;
+    } else {
+      List<UserAppEnvironment> appEnvironments =
+          leonardoApiClient.listAppsInProjectAsService(googleProject);
+      Optional<UserAppEnvironment> userApps =
+          appEnvironments.stream()
+              .filter(
+                  userAppEnvironment ->
+                      userAppEnvironment.getDiskName() != null
+                          && userAppEnvironment.getDiskName().equals(diskResponse.getName()))
+              .findFirst();
+      return userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS;
+    }
   }
 }
