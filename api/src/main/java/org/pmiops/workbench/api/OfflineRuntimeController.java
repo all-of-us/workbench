@@ -252,15 +252,15 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int notifyFail = 0;
     Exception lastException = null;
     for (int daysUnused : disksByDaysUnused.keySet()) {
-      //      if (daysUnused <= 0) {
-      //        // Our periodic notifications should not trigger on day 0.
-      //        continue;
-      //      }
-      //
-      //      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
-      //          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
-      //        continue;
-      //      }
+      if (daysUnused <= 0) {
+        // Our periodic notifications should not trigger on day 0.
+        continue;
+      }
+
+      if (!INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS.contains(daysUnused)
+          && daysUnused % INACTIVE_DISK_NOTIFY_PERIOD_DAYS != 0) {
+        continue;
+      }
 
       for (LeonardoListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
         try {
