@@ -295,7 +295,7 @@ public class MailServiceImpl implements MailService {
       List<DbUser> users,
       DbWorkspace diskWorkspace,
       LeonardoListPersistentDiskResponse disk,
-      String appStatus,
+      String diskStatus,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
@@ -318,9 +318,7 @@ public class MailServiceImpl implements MailService {
                     EmailSubstitutionField.DISK_CREATION_DATE,
                     formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
                 .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
-                .put(
-                    EmailSubstitutionField.DISK_STATUS,
-                    CaseUtils.toCamelCase(appStatus, true, null))
+                .put(EmailSubstitutionField.DISK_STATUS, diskStatus)
                 .put(
                     EmailSubstitutionField.APP_NAME,
                     CaseUtils.toCamelCase(getAppType((Map) disk.getLabels()), true, null))

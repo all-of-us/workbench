@@ -64,6 +64,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   // Every n'th day of inactivity on a PD (not including 0), a notification is sent.
   private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 30;
 
+  private static final String ATTACHED_DISK_STATUS = "attached to";
+
+  private static final String DETACHED_DISK_STATUS = "detached from";
+
   // This is temporary while we wait for Leonardo autopause to rollout. Once
   // available, we should instead take a runtime status of STOPPED to trigger
   // idle deletion.
@@ -298,34 +302,27 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
-    StringBuilder status = new StringBuilder();
+    StringBuilder diskStatus = new StringBuilder();
     try {
       // If Label contains key aou-app-type it is either cromwell or Rstudio else its Jupyter
       // runtime
       if (((Map) disk.getLabels()).containsKey(LEONARDO_LABEL_APP_TYPE)) {
         List<UserAppEnvironment> appEnviornments =
             leonardoApiClient.listAppsInProjectAsService(googleProject);
-        if (appEnviornments != null && appEnviornments.size() > 0) {
-          // Some apps in list especially  in error state can have no disk
-          appEnviornments.stream()
-              .filter(
-                  userAppEnvironment ->
-                      userAppEnvironment.getDiskName() != null
-                          && userAppEnvironment.getDiskName().equals(disk.getName()))
-              .findFirst()
-              .ifPresent(
-                  userAppEnvironment -> status.append(userAppEnvironment.getStatus().toString()));
-        }
+        Optional<UserAppEnvironment> userApps =
+            appEnviornments.stream()
+                .filter(
+                    userAppEnvironment ->
+                        userAppEnvironment.getDiskName() != null
+                            && userAppEnvironment.getDiskName().equals(disk.getName()))
+                .findFirst();
+        diskStatus.append(userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS);
       } else {
+        // There could be just one runtime per google project, so set disk status as Attached if
+        // runtime exist else its detached
         List<LeonardoListRuntimeResponse> runtimes =
             runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
-        if (!runtimes.isEmpty()) {
-          status.append(runtimes.get(0).getStatus().toString());
-        }
-      }
-      // If there are no Apps or runtime associated with the disk add status as  Detached
-      if (status.length() == 0) {
-        status.append("Detached");
+        diskStatus.append(runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS);
       }
     } catch (ApiException | NullPointerException e) {
       e.printStackTrace();
@@ -376,7 +373,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, status.toString(), daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, diskStatus.toString(), daysUnused, initialCreditsRemaining);
     return true;
   }
 }
