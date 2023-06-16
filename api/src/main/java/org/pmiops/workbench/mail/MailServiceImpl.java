@@ -5,6 +5,7 @@ import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHOR
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -102,6 +103,10 @@ public class MailServiceImpl implements MailService {
 
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
+
+  @VisibleForTesting static final String ATTACHED_DISK_STATUS = "attached to";
+
+  @VisibleForTesting static final String DETACHED_DISK_STATUS = "detached from";
 
   // RT Steps
   private static final String TWO_STEP_VERIFICATION = "Turn on Google 2-Step Verification";
@@ -320,7 +325,7 @@ public class MailServiceImpl implements MailService {
                 .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
                 .put(
                     EmailSubstitutionField.DISK_STATUS,
-                    isDiskAttached ? "attached to" : "detached from")
+                    isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
                 .put(
                     EmailSubstitutionField.APP_NAME,
                     CaseUtils.toCamelCase(getAppType((Map) disk.getLabels()), true, null))
