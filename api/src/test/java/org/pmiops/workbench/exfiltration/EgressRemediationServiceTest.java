@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
@@ -59,8 +60,10 @@ import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.user.UserAdminService;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.EgressEventMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +87,8 @@ public class EgressRemediationServiceTest {
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
   @MockBean private MailService mockMailService;
   @MockBean private JiraApi mockJiraApi;
+
+  @MockBean private UserAdminService mockUserAdminService;
 
   @Autowired private FakeClock fakeClock;
   @Autowired private WorkspaceDao workspaceDao;
@@ -160,6 +165,8 @@ public class EgressRemediationServiceTest {
               u.setDisabled(disabled);
               return userDao.save(u);
             });
+
+    when(mockUserAdminService.getCurrentEgressBypassWindow(anyLong())).thenReturn(null);
   }
 
   @AfterEach
@@ -206,6 +213,31 @@ public class EgressRemediationServiceTest {
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
     verifyNoInteractions(mockLeonardoNotebooksClient);
+  }
+
+  @Test
+  public void testRemediateEgressEvent_activeBypassWindow() {
+    when(mockUserAdminService.getCurrentEgressBypassWindow(userId))
+        .thenReturn(new EgressBypassWindow());
+
+    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    assertThat(getDbUser().getDisabled()).isFalse();
+    assertComputeNotSuspended();
+    verifyNoInteractions(mockLeonardoNotebooksClient);
+  }
+
+  @Test
+  public void testRemediateEgressEvent_activeBypassWindowButExeceedHardLimit() {
+    workbenchConfig.egressAlertRemediationPolicy = suspendXMinutesOnXIncidentsPolicy();
+    when(mockUserAdminService.getCurrentEgressBypassWindow(userId))
+        .thenReturn(new EgressBypassWindow());
+
+    long eventId = saveNewEvent(newGCEEvent().setEgressMegabytes((float) (110 * 1024)));
+
+    egressRemediationService.remediateEgressEvent(eventId);
+
+    assertComputeSuspended(Duration.ofMinutes(1));
   }
 
   @Test

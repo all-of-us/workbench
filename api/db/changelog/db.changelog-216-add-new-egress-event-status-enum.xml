@@ -5,22 +5,9 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
   <changeSet author="yonghao" id="db.changelog-216-add-new-egress-event-status-enum">
-    <createTable tableName="egress_event">
-      <column name="egress_event" type="bigint" autoIncrement="true">
-        <constraints primaryKey="true" nullable="false"/>
-      </column>
-      <column name="user_id" type="bigint">
-        <constraints nullable="true" foreignKeyName="fk_egress_bypass_window_user_id" references="user(user_id)"/>
-      </column>
-      <column name="start_time" type="datetime">
-        <constraints nullable="false"/>
-      </column>
-      <column name="end_time" type="datetime">
-        <constraints nullable="false"/>
-      </column>
-      <column name="description" type="varchar(255)">
-        <constraints nullable="true"/>
-      </column>
-    </createTable>
+    <sql>ALTER TABLE egress_event
+         MODIFY COLUMN status
+         ENUM ('PENDING', 'REMEDIATED', 'VERIFIED_FALSE_POSITIVE', 'BYPASSED')
+    </sql>
   </changeSet>
 </databaseChangeLog>
