@@ -2,8 +2,6 @@ package org.pmiops.workbench.mail;
 
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -43,6 +41,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
@@ -289,10 +288,10 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private String getAppType(Map labels) {
-    return labels.containsKey("aou-app-type")
-        ? labelValueToAppType((String) labels.get(LEONARDO_LABEL_APP_TYPE)).toString()
-        : "Jupyter";
+  private String getAppType(Object labels) {
+    return LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(labels)
+        .map(appType -> CaseUtils.toCamelCase(appType.toString(), true))
+        .orElse("Jupyter");
   }
 
   @Override
@@ -326,9 +325,7 @@ public class MailServiceImpl implements MailService {
                 .put(
                     EmailSubstitutionField.DISK_STATUS,
                     isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
-                .put(
-                    EmailSubstitutionField.APP_NAME,
-                    CaseUtils.toCamelCase(getAppType((Map) disk.getLabels()), true, null))
+                .put(EmailSubstitutionField.APP_NAME, getAppType(disk.getLabels()))
                 .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))

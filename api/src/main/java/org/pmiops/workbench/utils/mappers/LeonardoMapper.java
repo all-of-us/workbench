@@ -1,8 +1,5 @@
 package org.pmiops.workbench.utils.mappers;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
@@ -131,26 +128,21 @@ public interface LeonardoMapper {
   @Mapping(target = "isGceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
 
-  @SuppressWarnings("unchecked")
   @AfterMapping
   default void getDiskAfterMapper(
       @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
-    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoGetDiskResponse.getLabels());
+    mapDiskLabelsToEnvironmentType(disk, leoGetDiskResponse.getLabels());
   }
 
-  @SuppressWarnings("unchecked")
   @AfterMapping
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
-    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoListDisksResponse.getLabels());
+    mapDiskLabelsToEnvironmentType(disk, leoListDisksResponse.getLabels());
   }
 
-  default void mapDiskLabelsToDiskAppType(Disk disk, Map<String, String> diskLabels) {
-    if (diskLabels != null && diskLabels.containsKey(LEONARDO_LABEL_APP_TYPE)) {
-      disk.appType(labelValueToAppType(diskLabels.get(LEONARDO_LABEL_APP_TYPE)));
-    } else {
-      disk.isGceRuntime(true);
-    }
+  default void mapDiskLabelsToEnvironmentType(Disk disk, @Nullable Object diskLabels) {
+    LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(diskLabels)
+        .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
