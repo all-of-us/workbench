@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -39,7 +40,6 @@ import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.UserAppEnvironment;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -62,10 +62,6 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private static final Set<Integer> INACTIVE_DISK_NOTIFY_THRESHOLDS_DAYS = ImmutableSet.of(14);
   // Every n'th day of inactivity on a PD (not including 0), a notification is sent.
   private static final int INACTIVE_DISK_NOTIFY_PERIOD_DAYS = 30;
-
-  private static final String ATTACHED_DISK_STATUS = "attached to";
-
-  private static final String DETACHED_DISK_STATUS = "detached from";
 
   // This is temporary while we wait for Leonardo autopause to rollout. Once
   // available, we should instead take a runtime status of STOPPED to trigger
@@ -301,9 +297,9 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
-    String diskStatus = "";
+    final boolean attached;
     try {
-      diskStatus = getDiskStatus(disk, googleProject);
+      attached = isDiskAttached(disk, googleProject);
     } catch (ApiException | NullPointerException ex) {
       log.warning(
           String.format(
@@ -357,29 +353,21 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, diskStatus, daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, attached, daysUnused, initialCreditsRemaining);
     return true;
   }
 
-  private String getDiskStatus(
+  private boolean isDiskAttached(
       LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+    final String diskName = diskResponse.getName();
+
     if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
-      // There could be just one runtime per google project, so set disk status as Attached if
-      // runtime exist else its detached
-      List<LeonardoListRuntimeResponse> runtimes =
-          runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false);
-      return runtimes.isEmpty() ? DETACHED_DISK_STATUS : ATTACHED_DISK_STATUS;
+      return runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false).stream()
+          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
+          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
     } else {
-      List<UserAppEnvironment> appEnvironments =
-          leonardoApiClient.listAppsInProjectAsService(googleProject);
-      Optional<UserAppEnvironment> userApps =
-          appEnvironments.stream()
-              .filter(
-                  userAppEnvironment ->
-                      userAppEnvironment.getDiskName() != null
-                          && userAppEnvironment.getDiskName().equals(diskResponse.getName()))
-              .findFirst();
-      return userApps.isPresent() ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS;
+      return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
+          .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));
     }
   }
 }
