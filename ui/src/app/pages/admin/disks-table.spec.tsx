@@ -6,12 +6,12 @@ import { AppType, ListDisksResponse } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import {
-  fireEvent,
   render,
   waitFor,
   waitForElementToBeRemoved,
   within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 
@@ -90,6 +90,7 @@ test('loads and displays empty table', async () => {
 });
 
 test('delete disk', async () => {
+  const user = userEvent.setup();
   // Allows the mockDeleteFunction to remain unresolved until resolveDeleteFunction is called.
   let resolveDeleteFunction;
   const mockDeleteFunction = jest.fn(
@@ -117,7 +118,7 @@ test('delete disk', async () => {
     .closest('div[role="button"]');
 
   expect(mockListFunction).toHaveBeenCalledTimes(1);
-  fireEvent.click(jupyterDeleteButton);
+  await user.click(jupyterDeleteButton);
   await waitFor(() => {
     expect(mockDeleteFunction).toHaveBeenCalledTimes(1);
   });
