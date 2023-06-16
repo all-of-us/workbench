@@ -6417,6 +6417,11 @@ definitions:
     - Deleting
     - Deleted
     - Unknown
+  RuntimeAppType:
+    type: string
+    enum:
+      - JUPYTER
+      - RSTUDIO
   AppStatus:
     type: string
     enum:
@@ -6465,6 +6470,8 @@ definitions:
       runtimeName:
         type: string
         description: The user-supplied name for the runtime. Read only.
+      runtimeAppType:
+        "$ref": "#/definitions/RuntimeAppType"
       createdDate:
         type: string
         description: The date and time the runtime was created, in ISO-8601 format. Read only.
