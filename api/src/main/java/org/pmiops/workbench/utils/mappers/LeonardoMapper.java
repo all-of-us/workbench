@@ -131,16 +131,16 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getDiskAfterMapper(
       @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
-    mapDiskLabelsToEnvironmentType(disk, leoGetDiskResponse.getLabels());
+    setDiskEnvironmentType(disk, leoGetDiskResponse.getLabels());
   }
 
   @AfterMapping
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
-    mapDiskLabelsToEnvironmentType(disk, leoListDisksResponse.getLabels());
+    setDiskEnvironmentType(disk, leoListDisksResponse.getLabels());
   }
 
-  default void mapDiskLabelsToEnvironmentType(Disk disk, @Nullable Object diskLabels) {
+  default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
     LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(diskLabels)
         .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
   }
