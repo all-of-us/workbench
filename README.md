@@ -146,6 +146,21 @@ yarn
 yarn lint --fix
 ```
 
+### Tanagra Integration
+
+There are two commands for deploying the Tanagra app locally along with the Workbench
+
+To deploy the Tanagra api locally:
+```
+./project.rb dev-up-tanagra --disable-auth
+```
+The normal `./project.rb dev-up` will still need to be run to deploy the Workbench api
+
+To deploy the Tanagra UI and the Workbench UI together:
+```
+yarn dev-up-tanagra-local
+```
+
 ## Deploying
 
 To deploy your local workbench API code to a given AppEngine project, in the api
