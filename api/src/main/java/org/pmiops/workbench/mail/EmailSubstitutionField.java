@@ -3,7 +3,6 @@ package org.pmiops.workbench.mail;
 // used by MailServiceImpl to make template substitutions
 public enum EmailSubstitutionField {
   ACTION("ACTION"),
-  APP_NAME("APP_NAME"),
   ALL_OF_US("ALL_OF_US"),
   BADGE_URL("BADGE_URL"),
   BILLING_ACCOUNT_DETAILS("BILLING_ACCOUNT_DETAILS"),
@@ -20,6 +19,7 @@ public enum EmailSubstitutionField {
   DISK_STATUS("DISK_STATUS"),
   DISK_UNUSED_DAYS("DISK_UNUSED_DAYS"),
   EGRESS_REMEDIATION_DESCRIPTION("EGRESS_REMEDIATION_DESCRIPTION"),
+  ENVIRONMENT_TYPE("ENVIRONMENT_TYPE"),
   EXPIRATION_DATE("EXPIRATION_DATE"),
   FIRST_NAME("FIRST_NAME"),
   FROM_EMAIL("FROM_EMAIL"),

@@ -288,7 +288,7 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
-  private String getAppType(Object labels) {
+  private String getEnvironmentType(Object labels) {
     return LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(labels)
         .map(appType -> CaseUtils.toCamelCase(appType.toString(), true))
         .orElse("Jupyter");
@@ -325,7 +325,7 @@ public class MailServiceImpl implements MailService {
                 .put(
                     EmailSubstitutionField.DISK_STATUS,
                     isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
-                .put(EmailSubstitutionField.APP_NAME, getAppType(disk.getLabels()))
+                .put(EmailSubstitutionField.ENVIRONMENT_TYPE, getEnvironmentType(disk.getLabels()))
                 .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
