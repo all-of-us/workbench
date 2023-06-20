@@ -1755,6 +1755,10 @@ paths:
   "/v1/admin/workspaces/{workspaceNamespace}/files":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
+      - in: query
+        name: allFiles
+        type: boolean
+        required: false
     get:
       tags:
         - workspaceAdmin

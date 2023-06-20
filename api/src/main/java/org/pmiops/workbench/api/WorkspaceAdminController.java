@@ -76,8 +76,10 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<List<FileDetail>> listFiles(String workspaceNamespace) {
-    return ResponseEntity.ok(workspaceAdminService.listFiles(workspaceNamespace));
+  public ResponseEntity<List<FileDetail>> listFiles(String workspaceNamespace, Boolean allFiles) {
+    return ResponseEntity.ok(
+        workspaceAdminService.listFiles(
+            workspaceNamespace, Boolean.TRUE.equals(allFiles)));
   }
 
   @Override

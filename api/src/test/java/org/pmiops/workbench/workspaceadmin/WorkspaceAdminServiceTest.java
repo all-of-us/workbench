@@ -1,18 +1,5 @@
 package org.pmiops.workbench.workspaceadmin;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
-import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
-
 import com.google.cloud.Date;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -22,11 +9,6 @@ import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.util.Timestamps;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -92,6 +74,25 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 @DataJpaTest
 public class WorkspaceAdminServiceTest {
@@ -316,7 +317,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testlistFiles() {
+  public void testListFilesJustNotebook() {
     final List<Blob> blobs =
         ImmutableList.of(
             mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
@@ -326,15 +327,7 @@ public class WorkspaceAdminServiceTest {
                 "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
     when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
-    blobs.stream()
-        .forEach(
-            (blob) -> {
-              boolean isJupyterFile =
-                  !blob.getName().equals(NotebookUtils.withNotebookPath("scratch.txt"));
-              when(mockNotebooksService.isNotebookBlob(blob)).thenReturn(isJupyterFile);
-            });
-
-    final List<FileDetail> expectedFiles =
+    final List<FileDetail> expectedNotebookFiles =
         ImmutableList.of(
             new FileDetail()
                 .name("test.ipynb")
@@ -352,10 +345,56 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
+    when(mockNotebooksService.getNotebooks(anyString(), anyString()))
+        .thenReturn(expectedNotebookFiles);
+
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, false);
+    assertThat(files).containsExactlyElementsIn(expectedNotebookFiles);
+  }
+
+  @Test
+  public void testListFilesAllFilesInBucket() {
+    final List<Blob> blobs =
+        ImmutableList.of(
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
+            mockBlob(
+                "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
+    when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
+
+    final List<FileDetail> expectedAllfiles =
+        ImmutableList.of(
+            new FileDetail()
+                .name("test.ipynb")
+                .path("gs://bucket/notebooks/test.ipynb")
+                .sizeInBytes(1000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("test2.ipynb")
+                .path("gs://bucket/notebooks/test2.ipynb")
+                .sizeInBytes(2000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("sneaky.ipynb")
+                .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
+                .sizeInBytes(1000L * 1000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("scratch.txt")
+                .path("gs://bucket/notebooks/hidden/scratch.txt")
+                .sizeInBytes(1000L * 1000L)
+                .lastModifiedTime(dummyTime));
+
     when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
-        .thenReturn(expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2));
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
-    assertThat(files).containsExactlyElementsIn(expectedFiles);
+        .thenReturn(
+            expectedAllfiles.get(0),
+            expectedAllfiles.get(1),
+            expectedAllfiles.get(2),
+            expectedAllfiles.get(3));
+
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
+    assertThat(files).containsExactlyElementsIn(expectedAllfiles);
   }
 
   @Test
