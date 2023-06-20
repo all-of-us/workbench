@@ -2,6 +2,7 @@ package org.pmiops.workbench.exfiltration.jirahandler;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraContent;
+import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +95,12 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
                 workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))),
         JiraContent.text(
             String.format("Google project ID: %s\n\n", event.getWorkspace().getGoogleProject())),
+        JiraContent.text(
+            String.format(
+                "Detected between %s and %s\n",
+                JiraService.detailedDateFormat.format(event.getCreationTime().toInstant()),
+                JiraService.detailedDateFormat.format(
+                    event.getCreationTime().toInstant().minus(6, ChronoUnit.HOURS)))),
         JiraContent.text(
             String.format("Total egress detected: %.2f MiB\n", event.getEgressMegabytes())),
         JiraContent.text("Workspace admin console (as RW admin):"),

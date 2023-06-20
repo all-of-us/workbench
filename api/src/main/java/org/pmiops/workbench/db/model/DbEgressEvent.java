@@ -40,6 +40,8 @@ public class DbEgressEvent {
   private DbEgressEventStatus status;
   private String sumologicEvent;
 
+  private String bucketAuditEvent;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "egress_event_id", nullable = false)
@@ -123,6 +125,16 @@ public class DbEgressEvent {
 
   public DbEgressEvent setSumologicEvent(String sumologicEvent) {
     this.sumologicEvent = sumologicEvent;
+    return this;
+  }
+
+  @Column(name = "bucket_audit_event")
+  public String getBucketAuditEvent() {
+    return bucketAuditEvent;
+  }
+
+  public DbEgressEvent setBucketAuditEvent(String bucketAuditEvent) {
+    this.bucketAuditEvent = bucketAuditEvent;
     return this;
   }
 

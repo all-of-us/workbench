@@ -1,9 +1,10 @@
 package org.pmiops.workbench.actionaudit.bucket;
 
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 
-public class BucketAuditEntry {
+public class BucketAuditEntry implements Serializable {
 
   private String petAccount;
   private long fileLengths;

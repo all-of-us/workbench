@@ -2,6 +2,7 @@ package org.pmiops.workbench.exfiltration;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -196,6 +197,7 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
             .setUser(dbUser)
             .setWorkspace(dbWorkspace)
             .setSumologicEvent("{}")
+            .setBucketAuditEvent(new Gson().toJson(bucketAuditEntry))
             .setEgressMegabytes((float) (bucketAuditEntry.getFileLengths() / (1024.0 * 1024.0)))
             .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDurationInSeconds())
             .setStatus(DbEgressEventStatus.PENDING));
