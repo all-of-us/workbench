@@ -7,6 +7,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.mail.MailServiceImpl.ATTACHED_DISK_STATUS;
+import static org.pmiops.workbench.mail.MailServiceImpl.DETACHED_DISK_STATUS;
 
 import com.google.common.collect.ImmutableList;
 import jakarta.mail.MessagingException;
@@ -273,7 +275,7 @@ public class MailServiceImplTest {
   }
 
   @Test
-  public void testAlertUsersUnusedDiskWarning() throws Exception {
+  public void testAlertUsersUnusedDiskWarning_attached() throws Exception {
     DbUser user = createDbUser();
     Map<String, String> labelsMap = new HashMap<String, String>();
     labelsMap.put("is-runtime", "true");
@@ -292,7 +294,7 @@ public class MailServiceImplTest {
                             .minus(Duration.ofDays(20))
                             .toString())
                     .creator(user.getUsername())),
-        "Running",
+        true,
         14,
         20.0);
 
@@ -309,7 +311,48 @@ public class MailServiceImplTest {
     assertThat(gotHtml).contains("$20.91 per month");
     assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
     assertThat(gotHtml).contains("Jupyter");
-    assertThat(gotHtml).contains("Running");
+    assertThat(gotHtml).contains(ATTACHED_DISK_STATUS);
+    assertThat(gotHtml).doesNotContain("${");
+  }
+
+  @Test
+  public void testAlertUsersUnusedDiskWarning_detached() throws Exception {
+    DbUser user = createDbUser();
+    Map<String, String> labelsMap = new HashMap<String, String>();
+    labelsMap.put("is-runtime", "true");
+    mailService.alertUsersUnusedDiskWarningThreshold(
+        ImmutableList.of(user),
+        new DbWorkspace().setName("my workspace").setCreator(user),
+        new LeonardoListPersistentDiskResponse()
+            .diskType(LeonardoDiskType.SSD)
+            .labels(labelsMap)
+            .size(123)
+            .auditInfo(
+                new LeonardoAuditInfo()
+                    .createdDate(
+                        FakeClockConfiguration.NOW
+                            .toInstant()
+                            .minus(Duration.ofDays(20))
+                            .toString())
+                    .creator(user.getUsername())),
+        false,
+        14,
+        20.0);
+
+    verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
+    MandrillApiKeyAndMessage got = mandrillCaptor.getValue();
+
+    List<RecipientAddress> bcc = ((MandrillMessage) got.getMessage()).getTo();
+    assertThat(bcc)
+        .containsExactly(
+            new RecipientAddress().email(user.getContactEmail()).type(RecipientType.BCC));
+
+    String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+    assertThat(gotHtml).contains("123 GB");
+    assertThat(gotHtml).contains("$20.91 per month");
+    assertThat(gotHtml).contains("username@research.org's initial credits ($20.00 remaining)");
+    assertThat(gotHtml).contains("Jupyter");
+    assertThat(gotHtml).contains(DETACHED_DISK_STATUS);
     assertThat(gotHtml).doesNotContain("${");
   }
 
