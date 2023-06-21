@@ -28,6 +28,11 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { cond, hasNewValidProps, reactStyles } from 'app/utils';
+import {
+  JUPYTER_FILE_EXT,
+  R_FILE_EXT,
+  RMD_FILE_EXT,
+} from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import {
   getSelectedPopulations,
@@ -110,7 +115,7 @@ const parseLocation = (file: FileDetail, bucket: string): string => {
 };
 
 const NOTEBOOKS_DIRECTORY = 'notebooks';
-const NOTEBOOKS_SUFFIX = '.ipynb';
+
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
 interface NameCellProps {
@@ -168,8 +173,10 @@ const NameCell = (props: NameCellProps) => {
 
   // remove first check after RW-5626
   const isNotebook =
-    NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
-    filename.endsWith(NOTEBOOKS_SUFFIX);
+    (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
+      filename.endsWith(JUPYTER_FILE_EXT)) ||
+    filename.endsWith(RMD_FILE_EXT) ||
+    filename.endsWith(R_FILE_EXT);
   const isTooLargeNotebook =
     isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
