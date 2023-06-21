@@ -6,6 +6,7 @@ import { cond } from 'app/utils';
 
 const jupyterNotebookExtension = '.ipynb';
 const rstudioNotebookExtension = '.Rmd';
+const rFileExtension = '.R';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
   if (filename?.endsWith(jupyterNotebookExtension)) {
@@ -71,6 +72,11 @@ const appsExtensionMap = [
   },
   {
     extension: rstudioNotebookExtension,
+    appType: UIAppType.RSTUDIO,
+    canPlayground: false,
+  },
+  {
+    extension: rFileExtension,
     appType: UIAppType.RSTUDIO,
     canPlayground: false,
   },
