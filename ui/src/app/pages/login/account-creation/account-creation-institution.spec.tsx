@@ -50,7 +50,7 @@ function getInstitutionDropdown(wrapper: AnyWrapper) {
     .find('Dropdown[data-test-id="institution-dropdown"]')
     ?.getElements();
 
-  return matchedElements ? matchedElements[0] : undefined;
+  return matchedElements?.[0];
 }
 
 function getEmailInput(wrapper: AnyWrapper): AnyWrapper {
