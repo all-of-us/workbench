@@ -219,9 +219,12 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
         className='extraction-data-table-container'
       >
         <div className='slim-scroll-bar'>
+          {
+            // This adds a fade between the loading state and the results page.
+          }
           <SwitchTransition>
             <CSSTransition<undefined>
-              key={jobs.toString() ?? 'noJobs'}
+              key={jobs?.toString() ?? 'noJobs'}
               classNames='switch-transition'
               addEndListener={(node, done) => {
                 node.addEventListener('transitionend', done, false);
