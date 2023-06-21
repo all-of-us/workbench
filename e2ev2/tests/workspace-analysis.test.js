@@ -27,7 +27,7 @@ browserTest('create an application', async browser => {
   const nextButton = await page.waitForSelector('div[role="button"][aria-label="next"]')
   await expect(nextButton.evaluate(n => n.style.cursor)).resolves.toBe('not-allowed')
 
-  await page.waitForSelector('input[aria-label="Application List Dropdown"]').then(eh => eh.evaluate(e => e.parentNode.click()))
+  await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
   const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="JUPYTER"]')
   await jupyterOption.click()
