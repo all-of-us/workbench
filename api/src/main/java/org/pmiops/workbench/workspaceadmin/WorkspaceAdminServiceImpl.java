@@ -336,6 +336,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getBucketName();
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
+    // If allFiles is true get all the files from bucket else return just jupyter/RStudio files
     return allFiles
         ? cloudStorageClient.getBlobPage(bucketName).stream()
             .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))

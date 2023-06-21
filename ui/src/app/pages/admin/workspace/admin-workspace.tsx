@@ -274,8 +274,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       : this.setState({ showLockWorkspaceModal: true });
   }
 
-  updateShowAllFiles() {}
-
   render() {
     const {
       cloudStorageTraffic,
