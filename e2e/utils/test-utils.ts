@@ -53,7 +53,7 @@ export async function signInWithAccessToken(
   }
   const { token } = JSON.parse(tokenJson);
 
-  logger.info('Sign in with access token to Workbench application');
+  logger.info(`Sign in with access token to Workbench application as ${userEmail}`);
   const homePage = new HomePage(page);
   await homePage.loadPage({ url: PageUrl.Home });
 
@@ -500,4 +500,16 @@ export async function createDatasetNotebook(page: Page, pyNotebookName: string):
 
 export function parseForNumericalStrings(text: string): RegExpMatchArray | null {
   return text.match(/(\d|\.)+/g);
+}
+
+// Find and delete the workspace
+export async function cleanupWorkspace(page: Page, workspaceName: string) {
+  const workspaceCard = await findWorkspaceCard(page, workspaceName);
+  if (workspaceCard != null) {
+    try {
+      await workspaceCard.delete();
+    } catch (e) {
+      logger.info(`Workspace "${workspaceName}" could not be deleted`);
+    }
+  }
 }
