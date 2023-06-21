@@ -33,7 +33,7 @@ browserTest('create user', async browser => {
 
   await page.waitForSelector('#account-creation-institution') // Institution Page
   await page.waitForSelector('[aria-label="Institution"]')
-    .then(eh => eh.evaluate(e => e.parentNode.parentNode.click()))
+    .then(eh => eh.evaluate(e => e.parentNode.click()))
   await page.waitForSelector('[role="option"][aria-label="Broad Institute"]').then(eh => eh.click())
   // Email needs to be real or it will bounce and account creation will fail.
   await page.type('#contact-email', 'dmohs@broadinstitute.org')
