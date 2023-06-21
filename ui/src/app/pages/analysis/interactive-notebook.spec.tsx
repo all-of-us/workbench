@@ -3,7 +3,9 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import { AppStatus, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import {
@@ -31,13 +33,14 @@ beforeEach(async () => {
   mockNotebooksApi = jest.spyOn(swaggerClients, 'notebooksApi');
 });
 
-const setup = (mockAppOverrides, mockNotebookOverrides) => {
+const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
   mockAppsApi.mockImplementation(() => ({
     ...mockAppOverrides,
   }));
   mockNotebooksApi.mockImplementation(() => ({
     ...mockNotebookOverrides,
   }));
+  return userEvent.setup();
 };
 
 const renderInteractiveNotebook = (pathParameters) =>
@@ -54,7 +57,7 @@ const renderInteractiveNotebook = (pathParameters) =>
   );
 
 test('Edit Rmd file with running RStudio', async () => {
-  setup(
+  const user = setup(
     { localizeApp: () => Promise.resolve({}) },
     {
       getNotebookLockingMetadata: () => Promise.resolve({}),
@@ -71,7 +74,7 @@ test('Edit Rmd file with running RStudio', async () => {
   spyWindowOpen.mockImplementation(jest.fn(() => window));
   renderInteractiveNotebook(pathParameters);
   const editButton = screen.getByTitle('Edit');
-  fireEvent.click(editButton);
+  await user.click(editButton);
   await waitFor(() => {
     expect(spyWindowOpen).toHaveBeenCalledTimes(1);
     expect(spyWindowOpen).toHaveBeenCalledWith(
@@ -82,7 +85,7 @@ test('Edit Rmd file with running RStudio', async () => {
 });
 
 test('Should open the RStudio configuration panel when you click edit on an Rmd file without a running RStudio instance.', async () => {
-  setup(
+  const user = setup(
     { localizeApp: () => Promise.resolve({}) },
     {
       getNotebookLockingMetadata: () => Promise.resolve({}),
@@ -97,7 +100,7 @@ test('Should open the RStudio configuration panel when you click edit on an Rmd 
   spyWindowOpen.mockImplementation(jest.fn(() => window));
   renderInteractiveNotebook(pathParameters);
   const editButton = screen.getByTitle('Edit');
-  fireEvent.click(editButton);
+  await user.click(editButton);
   expect(spyWindowOpen).toHaveBeenCalledTimes(0);
   expect(setSidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
 });

@@ -3,6 +3,7 @@ package org.pmiops.workbench.mail;
 import static org.pmiops.workbench.access.AccessTierService.CONTROLLED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
@@ -39,6 +41,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
@@ -94,8 +97,15 @@ public class MailServiceImpl implements MailService {
 
   private static final String RAB_SUPPORT_EMAIL = "aouresourceaccess@od.nih.gov";
 
+  private static final String UNUSED_DISK_DELETE_HELP =
+      "https://support.researchallofus.org/hc/en-us/articles/5140493753620#h_01H0NEWRR4DRJ8JJAE7HW5NRR3";
+
   private static final String OPEN_LI_TAG = "<li>";
   private static final String CLOSE_LI_TAG = "</li>";
+
+  @VisibleForTesting static final String ATTACHED_DISK_STATUS = "attached to";
+
+  @VisibleForTesting static final String DETACHED_DISK_STATUS = "detached from";
 
   // RT Steps
   private static final String TWO_STEP_VERIFICATION = "Turn on Google 2-Step Verification";
@@ -278,11 +288,18 @@ public class MailServiceImpl implements MailService {
         htmlMessage);
   }
 
+  private String getEnvironmentType(Object labels) {
+    return LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(labels)
+        .map(appType -> CaseUtils.toCamelCase(appType.toString(), true))
+        .orElse("Jupyter");
+  }
+
   @Override
   public void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
       LeonardoListPersistentDiskResponse disk,
+      boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException {
@@ -306,9 +323,14 @@ public class MailServiceImpl implements MailService {
                     formatDateCentralTime(Instant.parse(disk.getAuditInfo().getCreatedDate())))
                 .put(EmailSubstitutionField.DISK_CREATOR_USERNAME, disk.getAuditInfo().getCreator())
                 .put(
+                    EmailSubstitutionField.DISK_STATUS,
+                    isDiskAttached ? ATTACHED_DISK_STATUS : DETACHED_DISK_STATUS)
+                .put(EmailSubstitutionField.ENVIRONMENT_TYPE, getEnvironmentType(disk.getLabels()))
+                .put(
                     EmailSubstitutionField.BILLING_ACCOUNT_DETAILS,
                     buildBillingAccountDescription(diskWorkspace, workspaceInitialCreditsRemaining))
                 .put(EmailSubstitutionField.WORKSPACE_URL, buildWorkspaceUrl(diskWorkspace))
+                .put(EmailSubstitutionField.DISK_DELETE_INSTRUCTION, UNUSED_DISK_DELETE_HELP)
                 .build());
     sendWithRetries(
         workbenchConfigProvider.get().mandrill.fromEmail,
