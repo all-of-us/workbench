@@ -33,6 +33,11 @@ public class NotebookUtils {
     return R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
   }
 
+  public static boolean isRStudioFilesWithDirectory(String nameWithFileExtension) {
+    return isRMarkDownNotebookWithDirectory(nameWithFileExtension)
+        || isRNotebookWithDirectory(nameWithFileExtension);
+  }
+
   public static boolean isJupyterNotebook(String nameWithFileExtension) {
     return nameWithFileExtension.endsWith(JUPYTER_NOTEBOOK_EXTENSION);
   }

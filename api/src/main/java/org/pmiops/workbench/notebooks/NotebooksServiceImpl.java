@@ -134,8 +134,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public boolean isNotebookBlob(Blob blob) {
     // Blobs have notebooks/ directory
     return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
-        || NotebookUtils.isRMarkDownNotebookWithDirectory(blob.getName())
-        || NotebookUtils.isRNotebookWithDirectory(blob.getName());
+        || NotebookUtils.isRStudioFilesWithDirectory(blob.getName());
   }
 
   @Override
