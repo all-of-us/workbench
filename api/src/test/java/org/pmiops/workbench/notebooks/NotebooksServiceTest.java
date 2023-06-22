@@ -663,7 +663,8 @@ public class NotebooksServiceTest {
 
   @Test
   public void testIsManagedNotebookBlob_negative_path() {
-    String unmanagedNotebookFile = NotebookUtils.withJupyterNotebookExtension("test");
+    String unmanagedNotebookFile =
+        NotebookUtils.withJupyterNotebookExtension("some_other_dir/test");
     when(mockBlob.getName()).thenReturn(unmanagedNotebookFile);
     assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(false);
   }
