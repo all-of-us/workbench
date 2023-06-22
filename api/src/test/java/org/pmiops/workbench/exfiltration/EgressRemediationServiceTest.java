@@ -220,7 +220,9 @@ public class EgressRemediationServiceTest {
     when(mockUserAdminService.getCurrentEgressBypassWindow(userId))
         .thenReturn(new EgressBypassWindow());
 
-    egressRemediationService.remediateEgressEvent(saveNewEvent());
+
+    long eventId = saveNewEvent(newGCEEvent().setEgressMegabytes((float) (200)));
+    egressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
     assertComputeNotSuspended();
