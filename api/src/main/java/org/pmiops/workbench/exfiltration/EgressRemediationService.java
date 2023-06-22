@@ -102,6 +102,7 @@ public abstract class EgressRemediationService {
               "Skip egress event %d because user is bypassed for large file download",
               egressEventId));
       egressEventDao.save(event.setStatus(DbEgressEventStatus.BYPASSED));
+      egressEventAuditor.fireRemediateEgressEvent(event, null);
       return;
     }
 
