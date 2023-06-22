@@ -33,6 +33,14 @@ export function appendRstudioNotebookFileSuffix(filename: string) {
   return filename;
 }
 
+export function appendRNotebookFileSuffix(filename: string) {
+  if (filename && !filename.endsWith(R_FILE_EXT)) {
+    return filename + R_FILE_EXT;
+  }
+
+  return filename;
+}
+
 export function appendNotebookFileSuffixByOldName(
   filename: string,
   oldFileName: string
@@ -45,6 +53,10 @@ export function appendNotebookFileSuffixByOldName(
     [
       oldFileName.endsWith(RMD_FILE_EXT),
       () => appendRstudioNotebookFileSuffix(filename),
+    ],
+    [
+      oldFileName.endsWith(R_FILE_EXT),
+      () => appendRNotebookFileSuffix(filename),
     ],
     () => filename
   );
