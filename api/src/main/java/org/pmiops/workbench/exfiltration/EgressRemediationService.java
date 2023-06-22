@@ -95,6 +95,7 @@ public abstract class EgressRemediationService {
     }
 
     if (userAdminService.getCurrentEgressBypassWindow(user.getUserId()) != null
+        && event.getEgressMegabytes() != null
         && event.getEgressMegabytes() < EGRESS_HARD_LIMIT_MB) {
       log.info(
           String.format(
