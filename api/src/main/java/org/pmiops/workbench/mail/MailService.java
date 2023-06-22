@@ -48,6 +48,7 @@ public interface MailService {
       List<DbUser> users,
       DbWorkspace diskWorkspace,
       LeonardoListPersistentDiskResponse disk,
+      boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)
       throws MessagingException;

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import {
   faGear,
-  faPlay,
   faRocket,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
@@ -19,7 +18,6 @@ import {
   rstudioConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
-import { withErrorModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
@@ -32,8 +30,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  createUserApp,
-  localizeUserApp,
+  openRStudio,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -44,9 +41,7 @@ import { NewNotebookButton } from './new-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
 import { RuntimeCost } from './runtime-cost';
 import {
-  canCreateApp,
   canDeleteApp,
-  defaultRStudioConfig,
   fromRuntimeStatus,
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
@@ -159,52 +154,20 @@ const RStudioButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
-  const [creating, setCreating] = useState(false);
-
-  const onClickCreate = withErrorModal(
-    {
-      title: 'Error Creating RStudio Environment',
-      message:
-        'Please wait a few minutes and try to create your RStudio Environment again.',
-      onDismiss: () => setCreating(false),
-    },
-    async () => {
-      setCreating(true);
-      await createUserApp(workspaceNamespace, defaultRStudioConfig);
-    }
-  );
 
   const onClickLaunch = async () => {
-    await localizeUserApp(
-      workspaceNamespace,
-      userApp.appName,
-      userApp.appType,
-      [],
-      false
-    );
-    window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+    openRStudio(workspaceNamespace, userApp);
   };
 
-  const createButtonDisabled = creating || !canCreateApp(userApp);
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
 
   return (
     <FlexRow>
-      <TooltipTrigger
-        disabled={!createButtonDisabled}
-        content='An RStudio app exists or is being created'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={createButtonDisabled}
-            onClick={onClickCreate}
-            icon={faPlay}
-            buttonText={creating ? 'Creating' : 'Create'}
-            data-test-id='RStudio-create-button'
-          />
-        </div>
-      </TooltipTrigger>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(rstudioConfigIconId);
+        }}
+      />
       <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
@@ -216,8 +179,8 @@ const RStudioButtonRow = (props: {
             onClick={onClickLaunch}
             disabled={launchButtonDisabled}
             icon={faRocket}
-            buttonText='Launch'
-            data-test-id='RStudio-launch-button'
+            buttonText='Open RStudio'
+            data-test-id='open-RStudio-button'
           />
         </div>
       </TooltipTrigger>

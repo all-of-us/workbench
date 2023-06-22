@@ -498,13 +498,13 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
 
-    DisksApi disksApi = disksApiProvider.get();
+    DisksApi disksApi = serviceDisksApiProvider.get();
     return leonardoRetryHandler.run(
         (context) ->
             disksApi.listDisksByProject(
                 googleProject,
                 null,
-                /*includeDeleted*/ true,
+                /*includeDeleted*/ false,
                 LeonardoLabelHelper.LEONARDO_DISK_LABEL_KEYS,
                 /* Leonardo Role */ null));
   }

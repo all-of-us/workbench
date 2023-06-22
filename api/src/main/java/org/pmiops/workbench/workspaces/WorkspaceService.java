@@ -32,6 +32,12 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getPublishedWorkspaces();
 
+  /**
+   * Return the email associated with the group that we use to indicate that a workspace is
+   * published. (implementation detail: it's the RT auth domain group email)
+   */
+  String getPublishedWorkspacesGroupEmail();
+
   void deleteWorkspace(DbWorkspace dbWorkspace);
 
   /*

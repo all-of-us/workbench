@@ -2,9 +2,16 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
+import {
+  AppStatus,
+  BillingStatus,
+  Runtime,
+  RuntimeStatus,
+} from 'generated/fetch';
 
+import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { IconButton } from 'app/components/buttons';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
@@ -23,16 +30,26 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
-import { NavigationProps } from 'app/utils/navigation';
+import {
+  NavigationProps,
+  setSidebarActiveIconStore,
+} from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
   RUNTIME_ERROR_STATUS_MESSAGE_SHORT,
   RuntimeStatusError,
   withRuntimeStore,
+  withUserAppsStore,
 } from 'app/utils/runtime-utils';
-import { MatchParams, profileStore, RuntimeStore } from 'app/utils/stores';
+import {
+  MatchParams,
+  profileStore,
+  RuntimeStore,
+  UserAppsStore,
+} from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
+import { openRStudio } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -101,6 +118,7 @@ interface Props
     RouteComponentProps<MatchParams> {
   workspace: WorkspaceData;
   runtimeStore: RuntimeStore;
+  userAppsStore: UserAppsStore;
 }
 
 interface State {
@@ -113,12 +131,12 @@ interface State {
   runtimeInitializerDefault: Runtime;
   resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
-  canEdit: boolean;
   canPlayground: boolean;
 }
 
 export const InteractiveNotebook = fp.flow(
   withRuntimeStore(),
+  withUserAppsStore(),
   withCurrentWorkspace(),
   withNavigation,
   withRouter
@@ -138,7 +156,6 @@ export const InteractiveNotebook = fp.flow(
         runtimeInitializerDefault: null,
         resolveRuntimeInitializer: null,
         error: null,
-        canEdit: false,
         canPlayground: false,
       };
     }
@@ -183,8 +200,8 @@ export const InteractiveNotebook = fp.flow(
           wsid,
           nbName
         );
-        const { canEdit, canPlayground } = getAppInfoFromFileName(nbName);
-        this.setState({ html, canEdit, canPlayground });
+        const { canPlayground } = getAppInfoFromFileName(nbName);
+        this.setState({ html, canPlayground });
       } catch (e) {
         this.setState({ error: e });
       }
@@ -229,20 +246,6 @@ export const InteractiveNotebook = fp.flow(
           }
         } else {
           this.setState({ error: e });
-        }
-      }
-    }
-
-    private startEditMode() {
-      if (this.canStartRuntimes) {
-        if (!this.notebookInUse) {
-          this.runRuntime(() => {
-            this.navigateEditMode();
-          });
-        } else {
-          this.setState({
-            showInUseModal: true,
-          });
         }
       }
     }
@@ -362,52 +365,6 @@ export const InteractiveNotebook = fp.flow(
       }
     }
 
-    private renderPreviewContents() {
-      const { html, error } = this.state;
-      if (error) {
-        if (error instanceof ComputeSecuritySuspendedError) {
-          return (
-            <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
-              <SecuritySuspendedMessage error={error} />
-            </NotebookFrameError>
-          );
-        }
-        if (error instanceof RuntimeStatusError) {
-          return (
-            <NotebookFrameError errorMode={ErrorMode.ERROR}>
-              {RUNTIME_ERROR_STATUS_MESSAGE_SHORT}
-            </NotebookFrameError>
-          );
-        }
-        const status = error instanceof Response ? error.status : 500;
-        if (status === 412) {
-          return (
-            <NotebookFrameError errorMode={ErrorMode.INVALID}>
-              Notebook is too large to display in preview mode, please use edit
-              mode or playground mode to view this notebook.
-            </NotebookFrameError>
-          );
-        } else {
-          return (
-            <NotebookFrameError errorMode={ErrorMode.ERROR}>
-              Failed to render preview due to an unknown error, please try
-              reloading or opening the notebook in edit or playground mode.
-            </NotebookFrameError>
-          );
-        }
-      }
-      if (html) {
-        return (
-          <iframe
-            id='notebook-frame'
-            style={styles.previewFrame}
-            srcDoc={html}
-          />
-        );
-      }
-      return <SpinnerOverlay />;
-    }
-
     render() {
       const {
         lastLockedBy,
@@ -417,7 +374,6 @@ export const InteractiveNotebook = fp.flow(
         runtimeInitializerDefault,
         resolveRuntimeInitializer,
         error,
-        canEdit,
         canPlayground,
       } = this.state;
       const closeRuntimeInitializerModal = (r?: Runtime) => {
@@ -455,28 +411,27 @@ export const InteractiveNotebook = fp.flow(
               ],
               () => (
                 <div style={{ display: 'flex' }}>
-                  {canEdit && (
-                    <TooltipTrigger
-                      content={
-                        this.billingLocked && ACTION_DISABLED_INVALID_BILLING
-                      }
+                  <TooltipTrigger
+                    content={
+                      this.billingLocked && ACTION_DISABLED_INVALID_BILLING
+                    }
+                  >
+                    <div
+                      style={this.buttonStyleObj}
+                      onClick={() => {
+                        AnalyticsTracker.Notebooks.Edit();
+                        this.startEditMode();
+                      }}
                     >
-                      <div
-                        style={this.buttonStyleObj}
-                        onClick={() => {
-                          AnalyticsTracker.Notebooks.Edit();
-                          this.startEditMode();
-                        }}
-                      >
-                        <EditComponentReact
-                          enableHoverEffect={false}
-                          disabled={!this.canStartRuntimes}
-                          style={styles.navBarIcon}
-                        />
-                        Edit {this.notebookInUse && '(In Use)'}
-                      </div>
-                    </TooltipTrigger>
-                  )}
+                      <EditComponentReact
+                        enableHoverEffect={false}
+                        disabled={!this.canStartRuntimes}
+                        style={styles.navBarIcon}
+                      />
+                      Edit {this.notebookInUse && '(In Use)'}
+                    </div>
+                  </TooltipTrigger>
+
                   {canPlayground && (
                     <TooltipTrigger
                       content={
@@ -543,6 +498,78 @@ export const InteractiveNotebook = fp.flow(
           )}
         </div>
       );
+    }
+
+    private renderPreviewContents() {
+      const { html, error } = this.state;
+      if (error) {
+        if (error instanceof ComputeSecuritySuspendedError) {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.FORBIDDEN}>
+              <SecuritySuspendedMessage error={error} />
+            </NotebookFrameError>
+          );
+        }
+        if (error instanceof RuntimeStatusError) {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.ERROR}>
+              {RUNTIME_ERROR_STATUS_MESSAGE_SHORT}
+            </NotebookFrameError>
+          );
+        }
+        const status = error instanceof Response ? error.status : 500;
+        if (status === 412) {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.INVALID}>
+              Notebook is too large to display in preview mode, please use edit
+              mode or playground mode to view this notebook.
+            </NotebookFrameError>
+          );
+        } else {
+          return (
+            <NotebookFrameError errorMode={ErrorMode.ERROR}>
+              Failed to render preview due to an unknown error, please try
+              reloading or opening the notebook in edit or playground mode.
+            </NotebookFrameError>
+          );
+        }
+      }
+      if (html) {
+        return (
+          <iframe
+            id='notebook-frame'
+            style={styles.previewFrame}
+            srcDoc={html}
+          />
+        );
+      }
+      return <SpinnerOverlay />;
+    }
+
+    private startEditMode() {
+      const { ns, nbName } = this.props.match.params;
+      const { appType } = getAppInfoFromFileName(nbName);
+      if (this.canStartRuntimes) {
+        if (!this.notebookInUse) {
+          if (appType === UIAppType.RSTUDIO) {
+            const { userApps } = this.props.userAppsStore;
+            const userApp = findApp(userApps, UIAppType.RSTUDIO);
+            if (userApp && userApp.status === AppStatus.RUNNING) {
+              openRStudio(ns, userApp);
+            } else {
+              setSidebarActiveIconStore.next(rstudioConfigIconId);
+            }
+          } else {
+            this.runRuntime(() => {
+              this.navigateEditMode();
+            });
+          }
+        } else {
+          this.setState({
+            showInUseModal: true,
+          });
+        }
+      }
     }
   }
 );

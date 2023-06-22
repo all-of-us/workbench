@@ -28,7 +28,6 @@ const styles = reactStyles({
     margin: 'auto',
     marginTop: '1.5rem',
     width: '95.7%',
-    height: 8,
     border: `solid ${colorWithWhiteness(colors.disabled, 0.6)}`,
     borderWidth: '1px 1px 0 1px',
     borderRadius: '8px 8px 0 0',
@@ -146,6 +145,9 @@ export const AppFilesList = withCurrentWorkspace()(
               data-test-id='apps-file-list'
               filterDisplay='row'
               value={filesList}
+              paginator
+              rows={5}
+              style={{ paddingBottom: '10rem' }}
             >
               <Column
                 headerStyle={styles.tableHeader}

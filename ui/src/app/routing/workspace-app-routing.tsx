@@ -22,6 +22,7 @@ import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
 import { DataComponent } from 'app/pages/data/data-component';
 import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
+import { TanagraDev } from 'app/pages/tanagra-dev/tanagra-dev';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -92,6 +93,7 @@ const WorkspaceEditPage = fp.flow(
   withRoutingSpinner
 )(WorkspaceEdit);
 const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
+const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
@@ -438,6 +440,21 @@ export const WorkspaceRoutes = () => {
             title: 'Visual Data Explorer',
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: 'data',
+            workspaceNavBarTab: 'data-explorer',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/tanagra`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <TanagraDevPage
+          routeData={{
+            title: 'Tanagra Dev Env',
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: 'data',
+            workspaceNavBarTab: 'tanagra',
           }}
         />
       </AppRoute>
