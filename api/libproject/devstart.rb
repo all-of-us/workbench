@@ -2422,6 +2422,84 @@ Common.register_command({
 })
 
 
+def deploy_tanagra(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+    "--account [account]",
+    ->(opts, v) { opts.account = v},
+    "Service account to act as for deployment, if any. Defaults to the GAE " +
+    "default service account."
+  )
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Version to deploy (e.g. your-username-test)"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
+  op.add_option(
+    "--key-file [keyfile]",
+    ->(opts, v) { opts.key_file = v},
+    "Service account key file to use for deployment authorization"
+  )
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
+  op.add_option(
+    "--promote",
+    ->(opts, _) { opts.promote = true},
+    "Promote this version to immediately begin serving API traffic"
+  )
+  op.add_option(
+    "--no-promote",
+    ->(opts, _) { opts.promote = false},
+    "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
+  )
+  op.add_option(
+    "--quiet",
+    ->(opts, _) { opts.quiet = true},
+    "Don't display a confirmation prompt when deploying"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("promote option required") if opts.promote.nil?}
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  if (op.opts.key_file)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
+  end
+  ENV.update(read_db_vars(gcc))
+  ENV.update(must_get_env_value(gcc.project, :gae_vars))
+  ENV.update({"WORKBENCH_ENV" => must_get_env_value(gcc.project, :env_name)})
+
+  promote = "--no-promote"
+  unless op.opts.promote.nil?
+    promote = op.opts.promote ? "--promote" : "--no-promote"
+  else
+    promote = op.opts.version ? "--no-promote" : "--promote"
+  end
+
+  //need to build the jar and config files with env vars set
+
+  run_inline_or_log(op.opts.dry_run, %W{
+    gcloud app deploy
+      build/staged-app/app.yaml
+  } + %W{--project #{gcc.project} #{promote}} +
+    (op.opts.quiet ? %W{--quiet} : []) +
+    (op.opts.version ? %W{--version #{op.opts.version}} : []))
+end
+
+Common.register_command({
+  :invocation => "deploy-tanagra",
+  :description => "Deploy the Tanagra API",
+  :fn => ->(*args) { deploy_tanagra("deploy-tanagra", args) }
+})
+
+
 def run_cloud_migrations(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   gcc = GcloudContextV2.new(op)
