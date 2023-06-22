@@ -2,7 +2,6 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
 import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
@@ -101,9 +100,7 @@ describe('App Selector', () => {
     expect(nextButton(wrapper).prop('disabled')).toBe(true);
 
     await act(async () => {
-      const applicationListDropDown = applicationListDropDownWrapper(
-        wrapper
-      ).instance() as Dropdown;
+      const applicationListDropDown = applicationListDropDownWrapper(wrapper);
       await simulateComponentChange(
         wrapper,
         applicationListDropDown,

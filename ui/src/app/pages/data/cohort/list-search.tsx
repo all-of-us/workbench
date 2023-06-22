@@ -1090,7 +1090,7 @@ export const ListSearch = fp.flow(
                       checked={searchSource}
                       disabled={loading}
                       onChange={() => this.toggleSearchSource()}
-                      style={{ display: 'table-cell', boxShadow: 0 }}
+                      style={{ display: 'table-cell', boxShadow: 'none' }}
                     />
                   </span>
                 )}
@@ -1108,7 +1108,7 @@ export const ListSearch = fp.flow(
                       checked={removeDrugBrand}
                       disabled={loading}
                       onChange={() => this.toggleDrugBrand()}
-                      style={{ display: 'table-cell', boxShadow: 0 }}
+                      style={{ display: 'table-cell', boxShadow: 'none' }}
                     />
                   </span>
                 )}
