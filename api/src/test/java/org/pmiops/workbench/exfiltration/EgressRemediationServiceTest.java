@@ -220,7 +220,6 @@ public class EgressRemediationServiceTest {
     when(mockUserAdminService.getCurrentEgressBypassWindow(userId))
         .thenReturn(new EgressBypassWindow());
 
-
     long eventId = saveNewEvent(newGCEEvent().setEgressMegabytes((float) (200)));
     egressRemediationService.remediateEgressEvent(eventId);
 
