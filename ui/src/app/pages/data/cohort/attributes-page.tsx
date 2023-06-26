@@ -609,13 +609,12 @@ export const AttributesPage = fp.flow(
     setAnyVersion(false);
     setCatAttributes([]);
     setNumAttributes([]);
+    initAttributeForm();
   }, [node.id]);
 
   useEffect(() => {
     if (formUpdated > 0) {
       validateForm();
-    } else {
-      initAttributeForm();
     }
   }, [formUpdated]);
 
