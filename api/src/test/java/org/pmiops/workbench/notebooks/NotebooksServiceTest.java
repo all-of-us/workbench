@@ -654,9 +654,26 @@ public class NotebooksServiceTest {
   }
 
   @Test
-  public void testIsNotebookBlob_negative() {
-    when(mockBlob.getName()).thenReturn(NotebookUtils.withNotebookPath("test.txt"));
-    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  public void testIsManagedNotebookBlob_positive() {
+    String managedNotebookFile =
+        NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("test"));
+    when(mockBlob.getName()).thenReturn(managedNotebookFile);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(true);
+  }
+
+  @Test
+  public void testIsManagedNotebookBlob_negative_path() {
+    String unmanagedNotebookFile =
+        NotebookUtils.withJupyterNotebookExtension("some_other_dir/test");
+    when(mockBlob.getName()).thenReturn(unmanagedNotebookFile);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(false);
+  }
+
+  @Test
+  public void testIsManagedNotebookBlob_negative_filename() {
+    String unmanagedOtherFileInNotebookDir = NotebookUtils.withNotebookPath("test.txt");
+    when(mockBlob.getName()).thenReturn(unmanagedOtherFileInNotebookDir);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(false);
   }
 
   @Test
