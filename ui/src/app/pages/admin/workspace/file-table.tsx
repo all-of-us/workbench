@@ -236,7 +236,6 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
           style={styles.accessReasonText}
           onChange={(v) => setTable(updateFileAccessReason(v))}
         />
-        )
       </FlexColumn>
     </div>
   );
