@@ -125,13 +125,13 @@ public class NotebooksServiceImpl implements NotebooksService {
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
-        .filter(this::isNotebookBlob)
+        .filter(this::isManagedNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
 
   @Override
-  public boolean isNotebookBlob(Blob blob) {
+  public boolean isManagedNotebookBlob(Blob blob) {
     // Blobs have notebooks/ directory
     return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
         || NotebookUtils.isRStudioFilesWithDirectory(blob.getName());

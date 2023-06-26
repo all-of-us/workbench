@@ -7332,6 +7332,7 @@ definitions:
     type: string
     description: Workbench processing status for this egress event.
     enum:
+    - BYPASSED
     - PENDING
     - REMEDIATED
     - VERIFIED_FALSE_POSITIVE

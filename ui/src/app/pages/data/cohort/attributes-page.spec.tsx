@@ -24,7 +24,6 @@ import {
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AttributesPage, AttributesPageProps } from './attributes-page';
-
 import SpyInstance = jest.SpyInstance;
 
 type AnyWrapper = ShallowWrapper | ReactWrapper;
@@ -40,9 +39,10 @@ function component(): ReactWrapper {
 }
 
 function getNumericalDropdown(wrapper: AnyWrapper, index: string): Dropdown {
-  return wrapper
+  const elements = wrapper
     .find(`Dropdown[id="numerical-dropdown-${index}"]`)
-    .instance() as Dropdown;
+    ?.getElements();
+  return elements?.length ? (elements[0] as unknown as Dropdown) : undefined;
 }
 
 function getNumericalInput(wrapper: AnyWrapper, index: string): AnyWrapper {

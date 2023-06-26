@@ -24,7 +24,8 @@ public class DbEgressEvent {
   public enum DbEgressEventStatus {
     PENDING,
     REMEDIATED,
-    VERIFIED_FALSE_POSITIVE
+    VERIFIED_FALSE_POSITIVE,
+    BYPASSED
   }
 
   private long egressEventId;

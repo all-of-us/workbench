@@ -18,6 +18,7 @@ import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.user.UserAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -38,14 +39,16 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       EgressEventDao egressEventDao,
       @Qualifier(ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
           EgressJiraHandler egressJiraHandler,
-      MailService mailService) {
+      MailService mailService,
+      UserAdminService userAdminService) {
     super(
         clock,
         workbenchConfigProvider,
         userService,
         leonardoNotebooksClient,
         egressEventAuditor,
-        egressEventDao);
+        egressEventDao,
+        userAdminService);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
   }
