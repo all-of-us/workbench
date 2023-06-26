@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { InputSwitch } from 'primereact/inputswitch';
 
 import { FileDetail } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { CheckBox, TextArea } from 'app/components/inputs';
+import { TextArea } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { PurpleLabel } from 'app/pages/admin/workspace/admin-workspace';
@@ -192,7 +193,7 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
   return (
     <div>
       <FlexRow>
-        <CheckBox
+        <InputSwitch
           checked={!showOnlyAppFiles}
           onChange={() => {
             setShowOnlyAppFiles(!showOnlyAppFiles);
