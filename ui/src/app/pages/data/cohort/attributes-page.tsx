@@ -609,17 +609,12 @@ export const AttributesPage = fp.flow(
     setAnyVersion(false);
     setCatAttributes([]);
     setNumAttributes([]);
-    if (formUpdated === 0) {
-      // Init the form since the useEffect for formUpdated won't get triggered when the value is still 0
-      initAttributeForm();
-    }
+    initAttributeForm();
   }, [node.id]);
 
   useEffect(() => {
     if (formUpdated > 0) {
       validateForm();
-    } else {
-      initAttributeForm();
     }
   }, [formUpdated]);
 
