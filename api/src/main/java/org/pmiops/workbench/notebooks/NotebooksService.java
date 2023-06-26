@@ -22,6 +22,7 @@ public interface NotebooksService {
    * Is this a notebook file which is managed (localized and delocalized) by the Workbench?
    *
    * @return TRUE only if it has a supported file extension and resides in the supported directory
+   *     (and not a subdirectory)
    */
   boolean isManagedNotebookBlob(Blob blob);
 
