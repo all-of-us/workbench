@@ -7157,13 +7157,11 @@ definitions:
         description: The name of the bucket reported in the audit logs that contains the files
         type: string
       min_time:
-        description: The first timestamp when a file was created, in milliseconds since Epoch.
-        type: integer
-        format: int64
+        description: The first timestamp when a file was created.
+        type: string
       max_time:
-        description: The last timestamp when a file was created, in milliseconds since Epoch.
-        type: integer
-        format: int64
+        description: The last timestamp when a file was created.
+        type: string
   SumologicEgressEvent:
     type: object
     required:

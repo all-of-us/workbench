@@ -4,6 +4,8 @@ import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJ
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +15,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.actionaudit.bucket.BucketAuditEntry;
 import org.pmiops.workbench.actionaudit.bucket.BucketAuditQueryService;
 import org.pmiops.workbench.db.dao.EgressEventDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -24,6 +25,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
+import org.pmiops.workbench.model.BucketAuditEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -199,7 +201,19 @@ public class ObjectNameLengthServiceImpl implements ObjectNameLengthService {
             .setSumologicEvent("{}")
             .setBucketAuditEvent(new Gson().toJson(bucketAuditEntry))
             .setEgressMegabytes((float) (bucketAuditEntry.getFileLengths() / (1024.0 * 1024.0)))
-            .setEgressWindowSeconds(bucketAuditEntry.getTimeWindowDurationInSeconds())
+            .setEgressWindowSeconds(
+                getTimeWindowDurationInSeconds(
+                    bucketAuditEntry.getMinTime(), bucketAuditEntry.getMaxTime()))
             .setStatus(DbEgressEventStatus.PENDING));
+  }
+
+  public long getTimeWindowDurationInSeconds(String minTime, String maxTime) {
+    if (minTime == null || maxTime == null) {
+      return 0l;
+    }
+    OffsetDateTime minDateTime = OffsetDateTime.parse(minTime);
+    OffsetDateTime maxDateTime = OffsetDateTime.parse(maxTime);
+
+    return ChronoUnit.SECONDS.between(minDateTime, maxDateTime);
   }
 }
