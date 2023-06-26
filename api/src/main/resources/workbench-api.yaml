@@ -1756,7 +1756,7 @@ paths:
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - in: query
-        name: allFiles
+        name: onlyAppFiles
         type: boolean
         required: false
     get:

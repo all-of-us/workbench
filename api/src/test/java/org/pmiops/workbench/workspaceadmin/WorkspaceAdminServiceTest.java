@@ -316,7 +316,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testListFilesJustNotebook() {
+  public void testListFilesJustAppFiles() {
     final List<Blob> blobs =
         ImmutableList.of(
             mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
@@ -347,7 +347,7 @@ public class WorkspaceAdminServiceTest {
     when(mockNotebooksService.getNotebooks(anyString(), anyString()))
         .thenReturn(expectedNotebookFiles);
 
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, false);
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
     assertThat(files).containsExactlyElementsIn(expectedNotebookFiles);
   }
 
@@ -392,7 +392,7 @@ public class WorkspaceAdminServiceTest {
             expectedAllfiles.get(2),
             expectedAllfiles.get(3));
 
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, false);
     assertThat(files).containsExactlyElementsIn(expectedAllfiles);
   }
 

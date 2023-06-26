@@ -138,7 +138,7 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
   const [fileDetail, setFileDetail] = useState<Array<FileDetail>>();
   const [tableData, setTable] = useState<Array<TableEntry>>();
   const [loading, setLoading] = useState<boolean>();
-  const [showAllFiles, setShowAllFiles] = useState<boolean>(false);
+  const [showOnlyAppFiles, setShowOnlyAppFiles] = useState<boolean>(true);
 
   const initTable = (
     fileDetails: Array<FileDetail>,
@@ -173,11 +173,11 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
     return initTable(fileDetail, fileAccessReason);
   };
 
-  async function getWorkspaceFiles(showAll) {
+  async function getWorkspaceFiles() {
     setLoading(true);
     const files = await workspaceAdminApi().listFiles(
       workspaceNamespace,
-      showAll
+      showOnlyAppFiles
     );
     setFileDetail(files);
     setTable(initTable(files));
@@ -186,22 +186,16 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
 
   useEffect(() => {
     setLoading(true);
-    getWorkspaceFiles(false).finally(() => setLoading(false));
-  }, []);
-
-  async function flipShowAllFiles() {
-    const allFiles = !showAllFiles;
-    setShowAllFiles(allFiles);
-    await getWorkspaceFiles(allFiles);
-  }
+    getWorkspaceFiles().finally(() => setLoading(false));
+  }, [showOnlyAppFiles]);
 
   return (
     <div>
       <FlexRow>
         <CheckBox
-          checked={showAllFiles}
+          checked={!showOnlyAppFiles}
           onChange={() => {
-            flipShowAllFiles();
+            setShowOnlyAppFiles(!showOnlyAppFiles);
           }}
           style={{
             marginRight: '1.5rem',
