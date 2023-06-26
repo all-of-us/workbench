@@ -171,12 +171,16 @@ const NameCell = (props: NameCellProps) => {
     </FlexRow>
   );
 
+  const isAnAppFile = (fileName: string) =>
+    fileName.endsWith(JUPYTER_FILE_EXT) ||
+    fileName.endsWith(RMD_FILE_EXT) ||
+    fileName.endsWith(R_FILE_EXT);
+
   // remove first check after RW-5626
   const isNotebook =
-    (NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
-      filename.endsWith(JUPYTER_FILE_EXT)) ||
-    filename.endsWith(RMD_FILE_EXT) ||
-    filename.endsWith(R_FILE_EXT);
+    NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
+    isAnAppFile(filename);
+
   const isTooLargeNotebook =
     isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
