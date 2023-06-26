@@ -53,7 +53,7 @@ export async function signInWithAccessToken(
   }
   const { token } = JSON.parse(tokenJson);
 
-  logger.info('Sign in with access token to Workbench application');
+  logger.info(`Sign in with access token to Workbench application as ${userEmail}`);
   const homePage = new HomePage(page);
   await homePage.loadPage({ url: PageUrl.Home });
 

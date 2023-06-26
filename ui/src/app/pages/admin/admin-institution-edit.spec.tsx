@@ -2,14 +2,12 @@ import * as React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { mount } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
 import {
   InstitutionApi,
   InstitutionMembershipRequirement,
 } from 'generated/fetch';
 
-import { Toggle } from 'app/components/inputs';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { getAdminUrl } from 'app/utils/institutions';
 import { serverConfigStore } from 'app/utils/stores';
@@ -31,28 +29,16 @@ import { AdminInstitutionEdit } from './admin-institution-edit';
 const findRTDetails = (wrapper) =>
   wrapper.find('[data-test-id="registered-card-details"]');
 const findRTDropdown = (wrapper) =>
-  wrapper
-    .find('[data-test-id="registered-agreement-dropdown"]')
-    .first()
-    .instance() as Dropdown;
+  wrapper.find('[data-test-id="registered-agreement-dropdown"]').first();
 const findRTERARequired = (wrapper) =>
-  wrapper
-    .find('[data-test-id="registered-era-required-switch"]')
-    .first()
-    .instance() as Toggle;
+  wrapper.find('[data-test-id="registered-era-required-switch"]').first();
 
 const findCTDetails = (wrapper) =>
   wrapper.find('[data-test-id="controlled-card-details"]');
 const findCTDropdown = (wrapper) =>
-  wrapper
-    .find('[data-test-id="controlled-agreement-dropdown"]')
-    .first()
-    .instance() as Dropdown;
+  wrapper.find('[data-test-id="controlled-agreement-dropdown"]').first();
 const findCTERARequired = (wrapper) =>
-  wrapper
-    .find('[data-test-id="controlled-era-required-switch"]')
-    .first()
-    .instance() as Toggle;
+  wrapper.find('[data-test-id="controlled-era-required-switch"]').first();
 const findCTEnabled = (wrapper) =>
   wrapper.find('input[data-test-id="controlled-enabled-switch"]').first();
 
@@ -173,7 +159,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
 
     // update RT domains
 
@@ -194,7 +180,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTDomain(wrapper).exists()).toBeTruthy();
     expect(findCTAddress(wrapper).exists()).toBeFalsy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
 
     expect(textInputValue(findCTDomainInput(wrapper))).toBe(testDomains);
   });
@@ -205,7 +191,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(wrapper).toBeTruthy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
 
@@ -242,7 +228,7 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
 
     expect(findCTAddress(wrapper).exists()).toBeTruthy();
     expect(findCTDomain(wrapper).exists()).toBeFalsy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
 
     expect(textInputValue(findCTAddressInput(wrapper))).toBe('');
   });
@@ -252,8 +238,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper).toBeTruthy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
 
     // change Registered from DOMAIN to ADDRESS
@@ -270,8 +256,8 @@ describe('AdminInstitutionEditSpec - edit mode', () => {
     expect(findRTAddress(wrapper).exists()).toBeTruthy();
     expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeTruthy();
-    expect(findCTERARequired(wrapper).props.checked).toBeTruthy();
+    expect(findRTERARequired(wrapper).props().checked).toBeTruthy();
+    expect(findCTERARequired(wrapper).props().checked).toBeTruthy();
     expect(findCTEnabled(wrapper).props().checked).toBeTruthy();
   });
 
@@ -770,7 +756,7 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(findCTDetails(wrapper).exists()).toBeTruthy();
 
     toggleCheckbox(findCTEnabled(wrapper));
-    expect(findCTEnabled(wrapper).props.checked).toBeFalsy();
+    expect(findCTEnabled(wrapper).props().checked).toBeFalsy();
     expect(findCTDetails(wrapper).exists()).toBeFalsy();
 
     // both RT and CT are uninitialized
@@ -819,8 +805,8 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(wrapper).toBeTruthy();
 
     // false by default
-    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
-    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findRTERARequired(wrapper).props().checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props().checked).toBeFalsy();
 
     // change Registered to ADDRESS
 
@@ -835,8 +821,8 @@ describe('AdminInstitutionEditSpec - add mode', () => {
     expect(findRTAddress(wrapper).exists()).toBeTruthy();
     expect(findRTDomain(wrapper).exists()).toBeFalsy();
 
-    expect(findRTERARequired(wrapper).props.checked).toBeFalsy();
-    expect(findCTERARequired(wrapper).props.checked).toBeFalsy();
+    expect(findRTERARequired(wrapper).props().checked).toBeFalsy();
+    expect(findCTERARequired(wrapper).props().checked).toBeFalsy();
   });
 
   it('Should display error in case of invalid email Address Format in Registered Tier requirement', async () => {

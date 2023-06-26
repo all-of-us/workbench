@@ -793,19 +793,11 @@ export const HelpSidebar = fp.flow(
           </div>
 
           <TransitionGroup>
-            <CSSTransition
+            <CSSTransition<undefined>
               key={activeIcon}
               classNames='sidebar'
               addEndListener={(node, done) => {
-                node.addEventListener(
-                  'transitionend',
-                  (e) => {
-                    if (node.isEqualNode(e.target)) {
-                      done(e);
-                    }
-                  },
-                  false
-                );
+                node.addEventListener('transitionend', done, false);
               }}
             >
               <div style={this.sidebarContainerStyles(activeIcon)}>
