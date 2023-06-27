@@ -32,7 +32,7 @@ public class UserAdminServiceTest {
   })
   static class Configuration {}
 
-  @Autowired UserEgressBypassWindowDao uerEgressBypassWindowDao;
+  @Autowired UserEgressBypassWindowDao userEgressBypassWindowDao;
 
   @Autowired UserAdminService userAdminService;
 
@@ -41,7 +41,7 @@ public class UserAdminServiceTest {
     userAdminService.createEgressBypassWindow(
         USER_ID, FakeClockConfiguration.NOW.toInstant(), DESCRIPTION);
     Set<DbUserEgressBypassWindow> dbResults =
-        uerEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
+        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(USER_ID);
     assertThat(dbResults.size()).isEqualTo(1);
     DbUserEgressBypassWindow dbEntity = dbResults.stream().findFirst().get();
     assertThat(dbEntity.getUserId()).isEqualTo(USER_ID);
@@ -61,7 +61,7 @@ public class UserAdminServiceTest {
             .setStartTime(Timestamp.from(startTime))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION);
-    uerEgressBypassWindowDao.save(dbUserEgressBypassWindow);
+    userEgressBypassWindowDao.save(dbUserEgressBypassWindow);
     assertThat(userAdminService.getCurrentEgressBypassWindow(USER_ID))
         .isEqualTo(
             new EgressBypassWindow()
@@ -80,7 +80,7 @@ public class UserAdminServiceTest {
             .setStartTime(Timestamp.from(startTime))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION);
-    uerEgressBypassWindowDao.save(dbUserEgressBypassWindow);
+    userEgressBypassWindowDao.save(dbUserEgressBypassWindow);
     assertThat(userAdminService.getCurrentEgressBypassWindow(USER_ID)).isNull();
   }
 
@@ -94,7 +94,13 @@ public class UserAdminServiceTest {
             .setStartTime(Timestamp.from(startTime))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION);
-    uerEgressBypassWindowDao.save(dbUserEgressBypassWindow);
+    userEgressBypassWindowDao.save(dbUserEgressBypassWindow);
     assertThat(userAdminService.getCurrentEgressBypassWindow(USER_ID)).isNull();
+  }
+
+  @Test
+  public void testGetActiveWindow_noActiveWindow_null() {
+    // does not throw
+    assertThat(userAdminService.getCurrentEgressBypassWindow(null)).isNull();
   }
 }
