@@ -225,6 +225,7 @@
   <include file="changelog/db.changelog-215-add-egress-bypass-table.xml"/>
   <include file="changelog/db.changelog-216-rm-workspace-last-accessed.xml"/>
   <include file="changelog/db.changelog-217-add-new-egress-event-status-enum.xml"/>
+  <include file="changelog/db.changelog-218-add-id-me-access-module.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
