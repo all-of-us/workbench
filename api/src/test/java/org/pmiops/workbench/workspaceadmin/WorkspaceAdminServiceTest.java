@@ -316,7 +316,7 @@ public class WorkspaceAdminServiceTest {
   }
 
   @Test
-  public void testlistFiles() {
+  public void testListFilesJustAppFiles() {
     final List<Blob> blobs =
         ImmutableList.of(
             mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
@@ -326,7 +326,7 @@ public class WorkspaceAdminServiceTest {
                 "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
     when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
-    final List<FileDetail> expectedFiles =
+    final List<FileDetail> expectedNotebookFiles =
         ImmutableList.of(
             new FileDetail()
                 .name("test.ipynb")
@@ -339,21 +339,61 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(2000L)
                 .lastModifiedTime(dummyTime),
             new FileDetail()
-                .name("scratch.txt")
-                .path("gs://bucket/notebooks/scratch.txt")
-                .sizeInBytes(123L)
-                .lastModifiedTime(dummyTime),
-            new FileDetail()
                 .name("sneaky.ipynb")
                 .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
+    when(mockNotebooksService.getNotebooks(anyString(), anyString()))
+        .thenReturn(expectedNotebookFiles);
+
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
+    assertThat(files).containsExactlyElementsIn(expectedNotebookFiles);
+  }
+
+  @Test
+  public void testListFilesAllFilesInBucket() {
+    final List<Blob> blobs =
+        ImmutableList.of(
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test.ipynb"), 1000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("test2.ipynb"), 2000L),
+            mockBlob("bucket", NotebookUtils.withNotebookPath("scratch.txt"), 123L),
+            mockBlob(
+                "bucket", NotebookUtils.withNotebookPath("hidden/sneaky.ipynb"), 1000L * 1000L));
+    when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
+
+    final List<FileDetail> expectedAllfiles =
+        ImmutableList.of(
+            new FileDetail()
+                .name("test.ipynb")
+                .path("gs://bucket/notebooks/test.ipynb")
+                .sizeInBytes(1000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("test2.ipynb")
+                .path("gs://bucket/notebooks/test2.ipynb")
+                .sizeInBytes(2000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("sneaky.ipynb")
+                .path("gs://bucket/notebooks/hidden/sneaky.ipynb")
+                .sizeInBytes(1000L * 1000L)
+                .lastModifiedTime(dummyTime),
+            new FileDetail()
+                .name("scratch.txt")
+                .path("gs://bucket/notebooks/hidden/scratch.txt")
+                .sizeInBytes(1000L * 1000L)
+                .lastModifiedTime(dummyTime));
+
     when(mockCloudStorageClient.blobToFileDetail(any(), anyString(), anySet()))
         .thenReturn(
-            expectedFiles.get(0), expectedFiles.get(1), expectedFiles.get(2), expectedFiles.get(3));
-    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE);
-    assertThat(files).containsExactlyElementsIn(expectedFiles);
+            expectedAllfiles.get(0),
+            expectedAllfiles.get(1),
+            expectedAllfiles.get(2),
+            expectedAllfiles.get(3));
+
+    final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, false);
+    assertThat(files).containsExactlyElementsIn(expectedAllfiles);
   }
 
   @Test
