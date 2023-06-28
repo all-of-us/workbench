@@ -124,7 +124,7 @@ public class RasLinkService {
   }
 
   /** Links RAS login.gov account with AoU account. */
-  public DbUser linkRasLoginGovAccount(String authCode, String redirectUrl) {
+  public DbUser linkRasAccount(String authCode, String redirectUrl) {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
     try {
@@ -152,7 +152,19 @@ public class RasLinkService {
 
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.
-    DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
+    String username = getUsername(userInfoResponse);
+    DbUser user;
+    if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateRasLinkIdMeStatus(username);
+    } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateRasLinkLoginGovStatus(username);
+    } else {
+      throw new ForbiddenException(
+          String.format(
+              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
+              username));
+    }
+
     Optional<AccessModuleStatus> eRAModuleStatus =
         accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
@@ -179,34 +191,11 @@ public class RasLinkService {
   }
 
   /**
-   * Validates and extracts user's login.gov account from UserInfo response in Json format. See
-   * class javadoc Step3 for more details.
-   */
-  private static String getLoginGovUsername(JsonNode userInfo) {
-    String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
-    if (!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      throw new ForbiddenException(
-          String.format(
-              "User does not have valid login.gov account, preferred_username: %s",
-              preferredUsername));
-    }
-    return preferredUsername;
-  }
-
-  /**
    * Validates and extracts user's preferred username from UserInfo response in Json format. See
    * class javadoc Step3 for more details.
    */
   private static String getUsername(JsonNode userInfo) {
-    String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
-    if (!preferredUsername.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)
-        && !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      throw new ForbiddenException(
-          String.format(
-              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
-              preferredUsername));
-    }
-    return preferredUsername;
+    return userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
   }
 
   /**
