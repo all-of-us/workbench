@@ -212,8 +212,7 @@ public class RasLinkServiceTest {
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
     rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
-        .isEqualTo(LOGIN_GOV_USERNAME);
+    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
   }
@@ -226,8 +225,7 @@ public class RasLinkServiceTest {
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
     rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
-        .isEqualTo(LOGIN_GOV_USERNAME);
+    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
         .isEqualTo("eraUserId");
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
@@ -245,8 +243,7 @@ public class RasLinkServiceTest {
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
     rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
-        .isEqualTo(LOGIN_GOV_USERNAME);
+    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, eRATime);
   }

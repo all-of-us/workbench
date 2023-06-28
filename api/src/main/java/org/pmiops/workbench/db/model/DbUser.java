@@ -84,7 +84,7 @@ public class DbUser {
 
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
-  private String rasLinkLoginGovUsername;
+  private String rasLinkUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
   @Id
@@ -312,13 +312,13 @@ public class DbUser {
     return this;
   }
 
-  @Column(name = "ras_link_login_gov_username")
-  public String getRasLinkLoginGovUsername() {
-    return rasLinkLoginGovUsername;
+  @Column(name = "ras_link_username")
+  public String getRasLinkUsername() {
+    return rasLinkUsername;
   }
 
-  public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
-    this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
+  public DbUser setRasLinkUsername(String rasLinkUsername) {
+    this.rasLinkUsername = rasLinkUsername;
     return this;
   }
 

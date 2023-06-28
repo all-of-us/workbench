@@ -7,6 +7,7 @@ import static org.pmiops.workbench.ras.RasLinkConstants.ERA_COMMONS_PROVIDER_NAM
 import static org.pmiops.workbench.ras.RasLinkConstants.FEDERATED_IDENTITIES;
 import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITIES;
 import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITY_USERID;
+import static org.pmiops.workbench.ras.RasLinkConstants.ID_ME_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
@@ -187,6 +188,22 @@ public class RasLinkService {
       throw new ForbiddenException(
           String.format(
               "User does not have valid login.gov account, preferred_username: %s",
+              preferredUsername));
+    }
+    return preferredUsername;
+  }
+
+  /**
+   * Validates and extracts user's preferred username from UserInfo response in Json format. See
+   * class javadoc Step3 for more details.
+   */
+  private static String getUsername(JsonNode userInfo) {
+    String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
+    if (!preferredUsername.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)
+        && !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      throw new ForbiddenException(
+          String.format(
+              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
               preferredUsername));
     }
     return preferredUsername;

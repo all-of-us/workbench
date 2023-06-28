@@ -1628,7 +1628,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     body.setAuthCode("code");
     body.setRedirectUrl("url");
 
-    dbUser.setRasLinkLoginGovUsername(loginGovUsername);
+    dbUser.setRasLinkUsername(loginGovUsername);
     dbUser = userDao.save(dbUser);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
 
@@ -1636,7 +1636,7 @@ public class ProfileControllerTest extends BaseControllerTest {
         .thenReturn(dbUser);
 
     final Profile profile = profileController.linkRasAccount(body).getBody();
-    assertThat(profile.getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
+    assertThat(profile.setRasLinkUsername()).isEqualTo(loginGovUsername);
     assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }

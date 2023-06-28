@@ -384,7 +384,7 @@ public class UserServiceTest {
   public void testUpdateRasLink() {
     String loginGovName = "loginGov@email.com";
     userService.updateRasLinkLoginGovStatus(loginGovName);
-    assertThat(providedDbUser.getRasLinkLoginGovUsername()).isEqualTo(loginGovName);
+    assertThat(providedDbUser.getRasLinkUsername()).isEqualTo(loginGovName);
     assertModuleCompletionEqual(
         DbAccessModuleName.RAS_LOGIN_GOV, providedDbUser, Timestamp.from(START_INSTANT));
   }
