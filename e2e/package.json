@@ -82,6 +82,6 @@
   },
   "resolutions": {
     "semver": "^7.5.2",
-    "word-wrap": "@aashutoshrathi/word-wrap"
+    "word-wrap": "aashutoshrathi/word-wrap"
   }
 }
