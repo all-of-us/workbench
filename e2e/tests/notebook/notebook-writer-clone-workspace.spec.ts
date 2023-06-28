@@ -6,7 +6,7 @@ import { Language, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-lab
 import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import { makeRandomName } from 'utils/str-utils';
+import { makeWorkspaceName, makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
 
 // 30 minutes.
@@ -14,7 +14,7 @@ jest.setTimeout(30 * 60 * 1000);
 
 describe('WRITER clone workspace and notebook tests', () => {
   const notebookName = makeRandomName('notebookWriterTest-Py3');
-  const workspaceName = 'e2eNotebookWriterCloneWorkspaceTest';
+  const workspaceName = makeWorkspaceName();
   const writerWorkspaceName = 'e2eNotebookTestWriterWorkspace2';
 
   test('WRITER create workspace', async () => {

@@ -51,7 +51,7 @@ interface NameCellProps {
   accessReason: string;
 }
 
-const formatMB = (fileSize: number): string => {
+export const formatMB = (fileSize: number): string => {
   const mb = fileSize / 1000000.0;
   if (mb < 1.0) {
     return '<1';

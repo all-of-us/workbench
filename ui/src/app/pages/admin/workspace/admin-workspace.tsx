@@ -24,7 +24,10 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminLockRequest } from 'app/pages/admin/admin-lock-request';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
-import { FileDetailsTable } from 'app/pages/admin/workspace/file-table';
+import {
+  FileDetailsTable,
+  formatMB,
+} from 'app/pages/admin/workspace/file-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { hasNewValidProps, reactStyles } from 'app/utils';
@@ -84,15 +87,6 @@ const WorkspaceInfoField = ({ labelText, children }) => {
       <div style={styles.infoValue}>{children}</div>
     </FlexRow>
   );
-};
-
-const formatMB = (fileSize: number): string => {
-  const mb = fileSize / 1000000.0;
-  if (mb < 1.0) {
-    return '<1';
-  } else {
-    return mb.toFixed(2);
-  }
 };
 
 interface Props

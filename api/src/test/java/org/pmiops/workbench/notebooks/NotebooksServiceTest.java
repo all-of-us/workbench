@@ -159,25 +159,39 @@ public class NotebooksServiceTest {
 
   @Test
   public void testAdminGetReadOnlyHtml() {
-    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
-    firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
-    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
-    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
-    when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
-        .thenReturn(firecloudWorkspaceResponse);
-
-    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    mockBlobsForHtml();
 
     String htmlDocument = "<body><div>test</div></body>";
 
     when(mockFireCloudService.staticJupyterNotebooksConvert(any())).thenReturn(htmlDocument);
 
-    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
-    when(mockBlob.getContent()).thenReturn(new byte[10]);
     String actualResult =
         notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.ipynb");
     assertThat(actualResult).isEqualTo(htmlDocument);
+  }
+
+  @Test
+  public void testAdminGetReadOnlyHtml_RFiles() {
+    mockBlobsForHtml();
+    String htmlDocument = "<body><div>test</div></body>";
+    when(mockFireCloudService.staticRstudioNotebooksConvert(any())).thenReturn(htmlDocument);
+
+    String actualResultForRmdFiles =
+        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.Rmd");
+    assertThat(actualResultForRmdFiles).isEqualTo(htmlDocument);
+
+    String actualResultForRFile =
+        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.R");
+    assertThat(actualResultForRFile).isEqualTo(htmlDocument);
+  }
+
+  @Test
+  public void testAdminGetReadOnlyHtml_IncorrectExt() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.adminGetReadOnlyHtml(
+                NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.RIn"));
   }
 
   @Test
@@ -645,6 +659,14 @@ public class NotebooksServiceTest {
   }
 
   @Test
+  public void testGetReadOnlyHtml_rFile() {
+    stubNotebookToJson("test.R");
+    notebooksService.getReadOnlyHtml("", "", "test.R");
+    verify(mockFireCloudService).staticRstudioNotebooksConvert(any());
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test.R");
+  }
+
+  @Test
   public void testGetReadOnlyHtml_unsupportedFileFormat() {
     stubNotebookToJson("notebook without suffix");
     Assertions.assertThrows(
@@ -726,5 +748,20 @@ public class NotebooksServiceTest {
         () ->
             notebooksService.saveNotebook(
                 BUCKET_NAME, "test.Rmd", new JSONObject().put("who", "I'm a notebook!")));
+  }
+
+  private void mockBlobsForHtml() {
+    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
+    firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
+    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
+        .thenReturn(firecloudWorkspaceResponse);
+
+    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getContent()).thenReturn(new byte[10]);
   }
 }

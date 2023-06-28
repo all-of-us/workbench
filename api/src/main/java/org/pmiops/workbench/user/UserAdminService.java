@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-import java.util.Set;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
@@ -41,22 +39,11 @@ public class UserAdminService {
   }
 
   public EgressBypassWindow getCurrentEgressBypassWindow(Long userId) {
-    Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows =
-        userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId);
-    getActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant());
-    return egressBypassWindowMapper.toApiEgressBypassWindow(
-        getActiveEgressBypassWindow(dbUserEgressBypassWindows, clock.instant()).orElse(null));
-  }
-
-  /**
-   * Returns Optional {@code DbUserEgressBypassWindow} if current timestamp is between any {@code
-   * DbUserEgressBypassWindow} start time and end time.
-   */
-  private static Optional<DbUserEgressBypassWindow> getActiveEgressBypassWindow(
-      Set<DbUserEgressBypassWindow> dbUserEgressBypassWindows, Instant now) {
-    Timestamp timestampNow = Timestamp.from(now);
-    return dbUserEgressBypassWindows.stream()
-        .filter(t -> t.getStartTime().before(timestampNow) && t.getEndTime().after(timestampNow))
-        .findFirst();
+    Timestamp now = Timestamp.from(clock.instant());
+    return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
+        .filter(t -> t.getStartTime().before(now) && t.getEndTime().after(now))
+        .findFirst()
+        .map(egressBypassWindowMapper::toApiEgressBypassWindow)
+        .orElse(null);
   }
 }

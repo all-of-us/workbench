@@ -134,7 +134,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public boolean isManagedNotebookBlob(Blob blob) {
     // Blobs have notebooks/ directory
     return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
-        || NotebookUtils.isRMarkDownNotebookWithDirectory(blob.getName());
+        || NotebookUtils.isRStudioFileWithDirectory(blob.getName());
   }
 
   @Override
@@ -322,7 +322,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     final Function<byte[], String> converter;
     if (NotebookUtils.isJupyterNotebook(notebookName)) {
       converter = this::convertJupyterNotebookToHtml;
-    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
+    } else if (NotebookUtils.isRStudioFile(notebookName)) {
       converter = this::convertRstudioNotebookToHtml;
     } else {
       throw new NotImplementedException(
@@ -342,7 +342,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String adminGetReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
-    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+    if (!(NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
+        || NotebookUtils.isRStudioFile(notebookNameWithFileExtension))) {
       throw new NotImplementedException(
           String.format(
               "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
@@ -355,7 +356,9 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
-    return convertJupyterNotebookToHtml(blob.getContent());
+    return NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
+        ? convertJupyterNotebookToHtml(blob.getContent())
+        : convertRstudioNotebookToHtml(blob.getContent());
   }
 
   private GoogleCloudLocators getNotebookLocators(
