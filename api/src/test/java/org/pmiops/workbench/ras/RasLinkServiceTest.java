@@ -214,11 +214,11 @@ public class RasLinkServiceTest {
     when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
         .thenReturn(TOKEN_RESPONSE_IAL2);
     when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
+        .thenReturn(objectMapper.readTree(USER_INFO_JSON_ID_ME));
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
-    assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.RAS_ID_ME, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
   }
 
@@ -227,7 +227,7 @@ public class RasLinkServiceTest {
     when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
         .thenReturn(TOKEN_RESPONSE_IAL2);
     when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_ID_ME));
+        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
