@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.notebooks.NotebookUtils.isRstudioNotebook;
+import static org.pmiops.workbench.notebooks.NotebookUtils.isRmdNotebook;
 
 import java.time.Clock;
 import java.util.List;
@@ -76,7 +76,7 @@ public class NotebooksController implements NotebooksApiDelegate {
       // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       String newNameWithExtension =
-          isRstudioNotebook(fromNotebookNameWithExtension)
+          isRmdNotebook(fromNotebookNameWithExtension)
               ? NotebookUtils.withRMarkdownExtension(copyRequest.getNewName())
               : NotebookUtils.withJupyterNotebookExtension(copyRequest.getNewName());
 

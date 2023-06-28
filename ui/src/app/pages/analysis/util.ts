@@ -3,32 +3,39 @@ import { FileDetail } from 'generated/fetch';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { cond } from 'app/utils';
-
-const jupyterNotebookExtension = '.ipynb';
-const rstudioNotebookExtension = '.Rmd';
+import {
+  JUPYTER_FILE_EXT,
+  R_FILE_EXT,
+  RMD_FILE_EXT,
+} from 'app/utils/constants';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
-  if (filename?.endsWith(jupyterNotebookExtension)) {
-    return filename.substring(
-      0,
-      filename.length - jupyterNotebookExtension.length
-    );
+  if (filename?.endsWith(JUPYTER_FILE_EXT)) {
+    return filename.substring(0, filename.length - JUPYTER_FILE_EXT.length);
   }
 
   return filename;
 }
 
 export function appendJupyterNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(jupyterNotebookExtension)) {
-    return filename + jupyterNotebookExtension;
+  if (filename && !filename.endsWith(JUPYTER_FILE_EXT)) {
+    return filename + JUPYTER_FILE_EXT;
   }
 
   return filename;
 }
 
 export function appendRstudioNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(rstudioNotebookExtension)) {
-    return filename + rstudioNotebookExtension;
+  if (filename && !filename.endsWith(RMD_FILE_EXT)) {
+    return filename + RMD_FILE_EXT;
+  }
+
+  return filename;
+}
+
+export function appendRNotebookFileSuffix(filename: string) {
+  if (filename && !filename.endsWith(R_FILE_EXT)) {
+    return filename + R_FILE_EXT;
   }
 
   return filename;
@@ -40,12 +47,16 @@ export function appendNotebookFileSuffixByOldName(
 ) {
   return cond(
     [
-      oldFileName.endsWith(jupyterNotebookExtension),
+      oldFileName.endsWith(JUPYTER_FILE_EXT),
       () => appendJupyterNotebookFileSuffix(filename),
     ],
     [
-      oldFileName.endsWith(rstudioNotebookExtension),
+      oldFileName.endsWith(RMD_FILE_EXT),
       () => appendRstudioNotebookFileSuffix(filename),
+    ],
+    [
+      oldFileName.endsWith(R_FILE_EXT),
+      () => appendRNotebookFileSuffix(filename),
     ],
     () => filename
   );
@@ -65,12 +76,17 @@ export const getExistingNotebookNames = async (
 
 const appsExtensionMap = [
   {
-    extension: jupyterNotebookExtension,
+    extension: JUPYTER_FILE_EXT,
     appType: UIAppType.JUPYTER,
     canPlayground: true,
   },
   {
-    extension: rstudioNotebookExtension,
+    extension: RMD_FILE_EXT,
+    appType: UIAppType.RSTUDIO,
+    canPlayground: false,
+  },
+  {
+    extension: R_FILE_EXT,
     appType: UIAppType.RSTUDIO,
     canPlayground: false,
   },
