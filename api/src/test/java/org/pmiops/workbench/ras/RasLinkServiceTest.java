@@ -210,7 +210,7 @@ public class RasLinkServiceTest {
         .thenReturn(TOKEN_RESPONSE_IAL2);
     when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
-    rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
@@ -223,7 +223,7 @@ public class RasLinkServiceTest {
         .thenReturn(TOKEN_RESPONSE_IAL2);
     when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
-    rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
@@ -241,7 +241,7 @@ public class RasLinkServiceTest {
         .thenReturn(TOKEN_RESPONSE_IAL2);
     when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
-    rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
@@ -254,7 +254,7 @@ public class RasLinkServiceTest {
         .thenReturn(TOKEN_RESPONSE_IAL1);
     assertThrows(
         ForbiddenException.class,
-        () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
+        () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
 
   @Test
@@ -265,7 +265,7 @@ public class RasLinkServiceTest {
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_ERA));
     assertThrows(
         ForbiddenException.class,
-        () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
+        () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
 
   private void assertModuleCompletionTime(DbAccessModuleName moduleName, Timestamp timestamp) {
