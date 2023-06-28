@@ -386,7 +386,7 @@ public class UserServiceTest {
     userService.updateRasLinkIdMeStatus(loginGovName);
     assertThat(providedDbUser.getRasLinkUsername()).isEqualTo(loginGovName);
     assertModuleCompletionEqual(
-        DbAccessModuleName.RAS_LOGIN_GOV, providedDbUser, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RAS_ID_ME, providedDbUser, Timestamp.from(START_INSTANT));
   }
 
   @Test
