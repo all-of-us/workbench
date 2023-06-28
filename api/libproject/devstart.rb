@@ -113,7 +113,7 @@ def dev_up_tanagra(cmd_name, args)
   common.status "starting local database - mariadb"
   start_local_db_service()
 
-  Dir.chdir('../aou-tanagra-utils') do
+  Dir.chdir('../tanagra-aou-utils') do
     if op.opts.disable_auth_checks
       common.status "Starting tanagra-service authorization checks disabled"
       common.run_inline %W{./run_tanagra_server.sh -a}
@@ -2469,12 +2469,14 @@ def deploy_tanagra(cmd_name, args)
   op.parse.validate
   gcc.validate
 
+  ENV.update(read_db_vars(gcc))
+  tanagra_db_uri = ENV["CLOUD_SQL_INSTANCE_NAME"]
+  tanagra_db_username = ENV["WORKBENCH_DB_USER"]
+  tanagra_db_password = ENV["WORKBENCH_DB_PASSWORD"]
+
   if (op.opts.key_file)
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
   end
-  ENV.update(read_db_vars(gcc))
-  ENV.update(must_get_env_value(gcc.project, :gae_vars))
-  ENV.update({"WORKBENCH_ENV" => must_get_env_value(gcc.project, :env_name)})
 
   promote = "--no-promote"
   unless op.opts.promote.nil?
@@ -2483,14 +2485,40 @@ def deploy_tanagra(cmd_name, args)
     promote = op.opts.version ? "--no-promote" : "--promote"
   end
 
-  //need to build the jar and config files with env vars set
+  common = Common.new
+  common.status "Update Tanagra submodule..."
+  common.run_inline("git submodule update --remote ../tanagra")
 
-  run_inline_or_log(op.opts.dry_run, %W{
-    gcloud app deploy
-      build/staged-app/app.yaml
-  } + %W{--project #{gcc.project} #{promote}} +
-    (op.opts.quiet ? %W{--quiet} : []) +
-    (op.opts.version ? %W{--version #{op.opts.version}} : []))
+  Dir.chdir('../tanagra') do
+    common.status "Building Tanagra API..."
+    common.run_inline("./gradlew -x test clean service:build")
+
+    common.status "Copying jar into appengine folder..."
+    common.run_inline("cp ./service/build/libs/*SNAPSHOT.jar ../tanagra-aou-utils/appengine/tanagraapi.jar")
+  end
+
+  Dir.chdir('../tanagra-aou-utils') do
+    common.status "Building appengine config file..."
+    common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-api.yaml > ./appengine/tanagra-api.yaml")
+
+    common.status "Building env variables file..."
+    common.run_inline("touch ./appengine/tanagra_env_variables.yaml > ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"env_variables:\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_URI: jdbc:mysql://10.29.16.3:3306/tanagra_db\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_USERNAME: #{tanagra_db_username}\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_PASSWORD: #{tanagra_db_password}\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_UNDERLAY_FILES: broad/aou_synthetic/expanded/aou_synthetic.json\" >> ./appengine/tanagra_env_variables.yaml")
+  end
+
+  Dir.chdir('../tanagra-aou-utils/appengine') do
+    common.status "Deploying Tanagra API to appengine..."
+    run_inline_or_log(op.opts.dry_run, %W{
+      gcloud app deploy tanagra-api.yaml
+      } + %W{--project #{gcc.project} #{promote}} +
+      (op.opts.quiet ? %W{--quiet} : []) +
+      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+  end
+
 end
 
 Common.register_command({

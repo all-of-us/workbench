@@ -58,3 +58,4 @@ gradle.properties
 **/.gradle
 **/*.orig
 **/.vscode
+/tanagra-aou-utils/appengine/
