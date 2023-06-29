@@ -1,54 +1,45 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from 'primereact/calendar';
-import { formatDate } from 'app/utils/dates';
-import {
-  AdminTableUser,
-  CreateEgressBypassWindowRequest,
-  EgressBypassWindow,
-} from 'generated/fetch';
+
+import { CreateEgressBypassWindowRequest } from 'generated/fetch';
+
 import { Button } from 'app/components/buttons';
-import { SemiBoldHeader } from 'app/components/headers';
-import {
-  TextAreaWithLengthValidationMessage,
-} from 'app/components/inputs';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-} from 'app/components/modals';
+import { FlexColumn, FlexRow } from 'app/components/flex';
+import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
-import {
-    userAdminApi
-} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import { userAdminApi } from 'app/services/swagger-fetch-clients';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
+import { reactStyles } from 'app/utils';
+import { formatDate } from 'app/utils/dates';
 import { isDateValid } from 'app/utils/dates';
-import {FlexColumn, FlexRow} from "app/components/flex";
-import {reactStyles} from "app/utils";
-import {commonStyles} from "./admin-user-common";
+
+import { commonStyles } from './admin-user-common';
 
 const styles = reactStyles({
-    ...commonStyles,
-    header: {
-        color: colors.primary,
-        fontSize: '18px',
-        fontWeight: 600,
-        padding: '1em',
-    }
+  ...commonStyles,
+  header: {
+    color: colors.primary,
+    fontSize: '18px',
+    fontWeight: 600,
+    padding: '1em',
+  },
 });
 
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
 interface Props {
-    userId: number;
+  userId: number;
 }
 export const AdminUserEgressByPass = (props: Props) => {
   const [startTime, setStartTime] = useState(null);
   const [byPassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
-  const [currentEgressBypassWindow, setCurrentEgressBypassWindow] = useState(null);
+  const [currentEgressBypassWindow, setCurrentEgressBypassWindow] =
+    useState(null);
+
+  const [showCurrentEgress, setShowCurrentEgress] = useState(false);
 
   const invalidReason =
     !byPassDescription ||
@@ -77,13 +68,11 @@ export const AdminUserEgressByPass = (props: Props) => {
     </div>
   );
 
-    useEffect(() => {
-        userAdminApi()
-            .getEgressBypassWindow(props.userId)
-            .then((bypassWindow) =>
-                setCurrentEgressBypassWindow(bypassWindow)
-            );
-    }, []);
+  useEffect(() => {
+    userAdminApi()
+      .getEgressBypassWindow(props.userId)
+      .then((bypassWindow) => setCurrentEgressBypassWindow(bypassWindow));
+  }, [showCurrentEgress]);
 
   const onCreateBypassRequest = () => {
     const { userId } = props;
@@ -96,22 +85,25 @@ export const AdminUserEgressByPass = (props: Props) => {
       .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
       .catch(() => {
         setApiError(true);
+      })
+      .finally(() => {
+        setShowCurrentEgress(true);
       });
   };
 
   return (
-      <FlexRow>
-    <FlexColumn style={{ width: '60%' }}>
+    <FlexRow>
+      <FlexColumn style={{ width: '60%' }}>
         <FlexRow>
-      <h3>Enable Large Download</h3>
+          <h3>Enable Large Download</h3>
         </FlexRow>
-      <FlexRow>
-        {apiError && (
-          <label style={{ color: colors.danger }}>
-            Something went wrong while enabling large download.
-          </label>
-        )}
-      </FlexRow>
+        <FlexRow>
+          {apiError && (
+            <label style={{ color: colors.danger }}>
+              Something went wrong while enabling large download.
+            </label>
+          )}
+        </FlexRow>
         {/* Text area to enter the reason for large file download */}
         <FlexRow>
           <label style={{ fontWeight: 'bold', color: colors.primary }}>
@@ -119,7 +111,7 @@ export const AdminUserEgressByPass = (props: Props) => {
             download
           </label>
         </FlexRow>
-        <FlexRow>
+        <FlexColumn>
           <TextAreaWithLengthValidationMessage
             id='BYPASS-DESCRIPTION'
             textBoxStyleOverrides={{ width: '60%' }}
@@ -133,7 +125,7 @@ export const AdminUserEgressByPass = (props: Props) => {
             tooShortWarningCharacters={MIN_BYPASS_DESCRIPTION}
             tooShortWarning={`Bypass Egress Request Reason should be at least ${MIN_BYPASS_DESCRIPTION} characters long`}
           />
-        </FlexRow>
+        </FlexColumn>
 
         {/* Bypass request Date*/}
         <FlexRow>
@@ -144,9 +136,9 @@ export const AdminUserEgressByPass = (props: Props) => {
               paddingBottom: '0.45rem',
             }}
           >
-           By pass staring date. (end date is 48 hours after starting time)
+            By pass staring date. (end date is 48 hours after starting time)
           </div>
-            </FlexRow>
+        </FlexRow>
         <FlexRow>
           <Calendar
             value={startTime}
@@ -159,60 +151,64 @@ export const AdminUserEgressByPass = (props: Props) => {
           />
         </FlexRow>
         <FlexRow>
-            <TooltipTrigger
-                content={getToolTipContent}
-                disabled={!egressBypassButtonDisabled}
+          <TooltipTrigger
+            content={getToolTipContent}
+            disabled={!egressBypassButtonDisabled}
+          >
+            <Button
+              type='primary'
+              onClick={() => onCreateBypassRequest()}
+              disabled={egressBypassButtonDisabled}
             >
-                <Button
-                    type='primary'
-                    onClick={() => onCreateBypassRequest()}
-                    disabled={egressBypassButtonDisabled}
+              ENABLE LARGE DOWNLOAD
+            </Button>
+          </TooltipTrigger>
+        </FlexRow>
+      </FlexColumn>
+      {showCurrentEgress && (
+        <FlexColumn style={{ marginLeft: '8%', width: '50%' }}>
+          <FlexRow>
+            <h3>Current Egress Large Download Window</h3>
+          </FlexRow>
+          <FlexRow>
+            {/* Current Bypass date*/}
+            {currentEgressBypassWindow && (
+              <div>
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.primary,
+                    paddingBottom: '0.45rem',
+                  }}
                 >
-                    ENABLE LARGE DOWNLOAD
-                </Button>
-            </TooltipTrigger>
-        </FlexRow>
-    </FlexColumn>
-      <FlexColumn style={{ marginLeft: '8%', width: '50%' }}>
-          <FlexRow><h3>Current Egress Large Download Window</h3></FlexRow>
-        <FlexRow>
-        {/* Current Bypass date*/}
-        {currentEgressBypassWindow && (
-          <div>
-            <div
-              style={{
-                fontWeight: 'bold',
-                color: colors.primary,
-                paddingBottom: '0.45rem',
-              }}
-            >
-              Start time
-            </div>
-            <div>{formatDate(currentEgressBypassWindow.startTime)}</div>
-            <div
-              style={{
-                fontWeight: 'bold',
-                color: colors.primary,
-                paddingBottom: '0.45rem',
-              }}
-            >
-              End time
-            </div>
-            <div>{formatDate(currentEgressBypassWindow.endTime)}</div>
-            <div
-              style={{
-                fontWeight: 'bold',
-                color: colors.primary,
-                paddingBottom: '0.45rem',
-              }}
-            >
-              Description time
-            </div>
-            <div>{currentEgressBypassWindow.description}</div>
-          </div>
-        )}
-        </FlexRow>
-          </FlexColumn>
-      </FlexRow>
+                  Start time
+                </div>
+                <div>{formatDate(currentEgressBypassWindow.startTime)}</div>
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.primary,
+                    paddingBottom: '0.45rem',
+                  }}
+                >
+                  End time
+                </div>
+                <div>{formatDate(currentEgressBypassWindow.endTime)}</div>
+                <div
+                  style={{
+                    fontWeight: 'bold',
+                    color: colors.primary,
+                    paddingBottom: '0.45rem',
+                  }}
+                >
+                  Description time
+                </div>
+                <div>{currentEgressBypassWindow.description}</div>
+              </div>
+            )}
+          </FlexRow>
+        </FlexColumn>
+      )}
+    </FlexRow>
   );
 };
