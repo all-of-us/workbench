@@ -60,6 +60,7 @@ const body = JSON.stringify(
   latestTermsOfServiceVersion: 1,
   latestTermsOfServiceTime: 1666285094027,
   rasLinkUsername: null,
+  rasLinkLoginGovUsername: null,
   accessModules: {
     modules: [
       {

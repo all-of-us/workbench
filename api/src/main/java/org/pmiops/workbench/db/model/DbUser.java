@@ -85,6 +85,7 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private String rasLinkUsername;
+  private String rasLinkLoginGovUsername;
   private DbUserCodeOfConductAgreement duccAgreement;
 
   @Id
@@ -309,6 +310,18 @@ public class DbUser {
 
   public DbUser setEraCommonsLinkExpireTime(Timestamp eraCommonsLinkExpireTime) {
     this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
+    return this;
+  }
+
+  @Deprecated
+  @Column(name = "ras_link_login_gov_username")
+  public String getRasLinkLoginGovUsername() {
+    return rasLinkUsername;
+  }
+
+  @Deprecated
+  public DbUser setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
+    this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
     return this;
   }
 

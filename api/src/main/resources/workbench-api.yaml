@@ -6305,6 +6305,9 @@ definitions:
         format: int64
         description: 'Timestamp when the user last acknowledged the terms of service.
           May be null if the user has never acknowledged the Terms of Service.'
+      rasLinkLoginGovUsername:
+        type: string
+        description: The user's identity name in login.gov (deprecated in favor of rasLinkUsername)
       rasLinkUsername:
         type: string
         description: The user's identity name in RAS.

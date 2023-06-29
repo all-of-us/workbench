@@ -64,6 +64,7 @@ const body = JSON.stringify(
   freeTierDollarQuota: 300,
   latestTermsOfServiceVersion: 1,
   latestTermsOfServiceTime: 1650401853000,
+  rasLinkLoginGovUsername: null,
   rasLinkUsername: null,
   accessModules: {
     modules: [
