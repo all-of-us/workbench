@@ -7137,6 +7137,31 @@ definitions:
         type: string
         description: 'A JSON string containing an array of JSON-encoded egress events.
           See the SumologicEgressEvent definition for the expected schema of each event.'
+  BucketAuditEntry:
+    type: object
+    required:
+      - pet_account
+      - google_project_id
+    properties:
+      pet_account:
+        description: This is the pet account associated with the user
+        type: string
+      file_lengths:
+        description: The total file lengths reported in the audit logs for the user
+        type: integer
+        format: int64
+      google_project_id:
+        description: The google project id that caused the egress
+        type: string
+      bucket_name:
+        description: The name of the bucket reported in the audit logs that contains the files
+        type: string
+      min_time:
+        description: The first timestamp when a file was created.
+        type: string
+      max_time:
+        description: The last timestamp when a file was created.
+        type: string
   SumologicEgressEvent:
     type: object
     required:
