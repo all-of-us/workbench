@@ -2470,7 +2470,6 @@ def deploy_tanagra(cmd_name, args)
   gcc.validate
 
   ENV.update(read_db_vars(gcc))
-  tanagra_db_uri = ENV["CLOUD_SQL_INSTANCE_NAME"]
   tanagra_db_username = ENV["WORKBENCH_DB_USER"]
   tanagra_db_password = ENV["WORKBENCH_DB_PASSWORD"]
 
