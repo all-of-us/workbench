@@ -193,6 +193,12 @@
       "category": "TUTORIAL_WORKSPACES"
     },
     {
+      "name": "genomics-workshop-07122023",
+      "namespace": "aou-rw-393498d0",
+      "id": "genomicsworkshop07122023",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
       "name": "Phenotype - Breast Cancer (v7)",
       "namespace": "aou-rw-fcaafea1",
       "id": "phenotypebreastcancerv7",
