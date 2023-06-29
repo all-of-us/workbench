@@ -22,9 +22,12 @@
       INSERT INTO access_module (name, expirable)
       VALUES('RAS_ID_ME', false)
     </sql>
-    <renameColumn newColumnName="ras_link_username"
-      oldColumnName="ras_link_login_gov_username"
-      columnDataType="varchar(255)"
-      tableName="user"/>
+    <addColumn tableName="user">
+      <column name="ras_link_username" type="varchar(255)"/>
+    </addColumn>
+    <sql>
+      UPDATE user
+        SET ras_link_username = ras_link_login_gov_username;
+    </sql>
   </changeSet>
 </databaseChangeLog>
