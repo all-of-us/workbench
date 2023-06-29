@@ -68,6 +68,7 @@ import {
   UserAdminTableLink,
   UserAuditLink,
 } from './admin-user-common';
+import {AdminUserEgressByPass} from "./admin-user-egress-bypass";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -756,12 +757,20 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </Button>
           </FlexRow>
           <FlexRow>
+            <h2>Egress bypass request</h2>
+          </FlexRow>
+          <FlexRow>
+            <AdminUserEgressByPass
+              userId={updatedProfile.userId}
+            />
+          </FlexRow>
+          <FlexRow>
             <h2>Egress event history</h2>
           </FlexRow>
           <FlexRow>
             <EgressEventsTable
-              displayPageSize={10}
-              sourceUserEmail={updatedProfile.username}
+                displayPageSize={10}
+                sourceUserEmail={updatedProfile.username}
             />
           </FlexRow>
         </FlexColumn>
