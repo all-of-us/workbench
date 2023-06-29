@@ -2487,7 +2487,7 @@ def deploy_tanagra(cmd_name, args)
 
   common = Common.new
   common.status "Update Tanagra submodule..."
-  common.run_inline("git submodule update --remote ../tanagra")
+  common.run_inline("git submodule init && git submodule update --init --recursive")
 
   Dir.chdir('../tanagra') do
     common.status "Building Tanagra API..."
