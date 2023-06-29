@@ -2491,10 +2491,10 @@ def deploy_tanagra(cmd_name, args)
 
   Dir.chdir('../tanagra') do
     common.status "Building Tanagra API..."
-    common.run_inline("./gradlew -x test clean service:build")
+    common.run_inline("./gradlew -x test -PisMySQL clean service:build")
 
     common.status "Copying jar into appengine folder..."
-    common.run_inline("cp ./service/build/libs/*SNAPSHOT.jar ../tanagra-aou-utils/appengine/tanagraapi.jar")
+    common.run_inline("mkdir -p ../tanagra-aou-utils/appengine && cp ./service/build/libs/*SNAPSHOT.jar ../tanagra-aou-utils/appengine/tanagraapi.jar")
   end
 
   Dir.chdir('../tanagra-aou-utils') do
