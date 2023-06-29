@@ -12,6 +12,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import moment from 'moment';
 
@@ -20,8 +21,6 @@ import {
   mockJupyterDisk,
   mockRStudioDisk,
 } from 'testing/stubs/disks-api-stub';
-
-import { DisksTable } from './disks-table';
 
 const convertDate = (originalDate: string) => {
   let date = moment(originalDate).utc();

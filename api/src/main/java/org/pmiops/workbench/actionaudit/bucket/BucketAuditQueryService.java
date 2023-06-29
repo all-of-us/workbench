@@ -2,6 +2,7 @@ package org.pmiops.workbench.actionaudit.bucket;
 
 import java.util.List;
 import org.pmiops.workbench.exfiltration.ExfiltrationConstants;
+import org.pmiops.workbench.model.BucketAuditEntry;
 
 public interface BucketAuditQueryService {
 

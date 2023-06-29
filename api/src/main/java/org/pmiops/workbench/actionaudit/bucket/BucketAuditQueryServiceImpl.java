@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -13,6 +14,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BucketAuditConfig;
+import org.pmiops.workbench.model.BucketAuditEntry;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
           + "FROM \n"
           + "  %s \n"
           + "WHERE \n"
-          + "  datetime(timestamp) > datetime_sub(CURRENT_DATETIME(), INTERVAL 24 HOUR) \n"
+          + "  datetime(timestamp) > datetime_sub(CURRENT_DATETIME(), INTERVAL 8 HOUR) \n"
           + "  AND protopayload_auditlog.methodName=\"storage.objects.create\" \n"
           + "  AND protopayload_auditlog.resourceName LIKE \"projects/_/buckets/%%\" \n"
           + "GROUP BY \n"
@@ -86,8 +88,13 @@ public class BucketAuditQueryServiceImpl implements BucketAuditQueryService {
     FieldValues.getLong(row, "file_lengths").ifPresent(bucketAuditEntry::setFileLengths);
     FieldValues.getString(row, "project_id").ifPresent(bucketAuditEntry::setGoogleProjectId);
     FieldValues.getString(row, "bucket_name").ifPresent(bucketAuditEntry::setBucketName);
-    FieldValues.getDateTime(row, "min_time").ifPresent(bucketAuditEntry::setMinTime);
-    FieldValues.getDateTime(row, "max_time").ifPresent(bucketAuditEntry::setMaxTime);
+
+    FieldValues.getDateTime(row, "min_time")
+        .map(OffsetDateTime::toString)
+        .ifPresent(bucketAuditEntry::setMinTime);
+    FieldValues.getDateTime(row, "max_time")
+        .map(OffsetDateTime::toString)
+        .ifPresent(bucketAuditEntry::setMaxTime);
     return bucketAuditEntry;
   }
 }

@@ -1,39 +1,36 @@
 import * as React from 'react';
-import { ReactFragment, useState } from 'react';
+import { ReactFragment } from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
 
 import {
   CloudStorageTraffic,
-  FileDetail,
   ListRuntimeResponse,
   WorkspaceAdminView,
 } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { Error as ErrorDiv, TextArea } from 'app/components/inputs';
+import { Error as ErrorDiv } from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import { TooltipTrigger } from 'app/components/popups';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { AdminLockRequest } from 'app/pages/admin/admin-lock-request';
+import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
+import { DisksTable } from 'app/pages/admin/workspace/disks-table';
+import {
+  FileDetailsTable,
+  formatMB,
+} from 'app/pages/admin/workspace/file-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { cond, hasNewValidProps, reactStyles } from 'app/utils';
-import {
-  JUPYTER_FILE_EXT,
-  R_FILE_EXT,
-  RMD_FILE_EXT,
-} from 'app/utils/constants';
-import { useNavigation } from 'app/utils/navigation';
+import { hasNewValidProps, reactStyles } from 'app/utils';
 import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems,
@@ -41,10 +38,6 @@ import {
 import { MatchParams } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import moment from 'moment';
-
-import { AdminLockRequest } from './admin-lock-request';
-import { DisksTable } from './disks-table';
-import { EgressEventsTable } from './egress-events-table';
 
 const styles = reactStyles({
   infoRow: {
@@ -83,7 +76,7 @@ const styles = reactStyles({
   },
 });
 
-const PurpleLabel = ({ style = {}, children }) => {
+export const PurpleLabel = ({ style = {}, children }) => {
   return <label style={{ color: colors.primary, ...style }}>{children}</label>;
 };
 
@@ -93,179 +86,6 @@ const WorkspaceInfoField = ({ labelText, children }) => {
       <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
       <div style={styles.infoValue}>{children}</div>
     </FlexRow>
-  );
-};
-
-const formatMB = (fileSize: number): string => {
-  const mb = fileSize / 1000000.0;
-  if (mb < 1.0) {
-    return '<1';
-  } else {
-    return mb.toFixed(2);
-  }
-};
-
-const parseLocation = (file: FileDetail, bucket: string): string => {
-  const prefixLength = bucket.length;
-  const start = prefixLength + 1; // slash after bucket name
-  const suffixPos = file.path.lastIndexOf(file.name);
-  const end = suffixPos - 1; // slash before filename
-
-  return file.path.substring(start, end);
-};
-
-const NOTEBOOKS_DIRECTORY = 'notebooks';
-
-const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
-
-interface NameCellProps {
-  file: FileDetail;
-  bucket: string;
-  workspaceNamespace: string;
-  accessReason: string;
-}
-
-const NameCell = (props: NameCellProps) => {
-  const [navigate] = useNavigation();
-  const { file, bucket, workspaceNamespace, accessReason } = props;
-  const filename = file.name.trim();
-
-  const filenameSpan = () => <span>{filename}</span>;
-
-  const fileTooLarge = () => (
-    <FlexRow>
-      {filenameSpan()}
-      <TooltipTrigger
-        content={`Files larger than ${formatMB(
-          MAX_NOTEBOOK_READ_SIZE_BYTES
-        )} MB are too large to preview`}
-      >
-        <Button style={styles.previewButton} disabled={true}>
-          Preview
-        </Button>
-      </TooltipTrigger>
-    </FlexRow>
-  );
-
-  const navigateToPreview = () =>
-    navigate(
-      ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
-      { queryParams: { accessReason: accessReason } }
-    );
-
-  const fileWithPreviewButton = () => (
-    <FlexRow>
-      {filenameSpan()}
-      <TooltipTrigger
-        content='Please enter an access reason below'
-        disabled={accessReason?.trim()}
-      >
-        <Button
-          style={styles.previewButton}
-          disabled={!accessReason?.trim()}
-          onClick={navigateToPreview}
-        >
-          Preview
-        </Button>
-      </TooltipTrigger>
-    </FlexRow>
-  );
-
-  const isAnAppFile = (fileName: string) =>
-    fileName.endsWith(JUPYTER_FILE_EXT) ||
-    fileName.endsWith(RMD_FILE_EXT) ||
-    fileName.endsWith(R_FILE_EXT);
-
-  // remove first check after RW-5626
-  const isNotebook =
-    NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
-    isAnAppFile(filename);
-
-  const isTooLargeNotebook =
-    isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
-
-  // if (tooLarge()) fileTooLarge();
-  // else if (isNotebook()) fileWithPreviewButton();
-  // else filenameSpan();
-  return cond(
-    [isTooLargeNotebook, fileTooLarge],
-    [isNotebook, fileWithPreviewButton],
-    filenameSpan
-  );
-};
-
-interface FileDetailsProps {
-  workspaceNamespace: string;
-  data: Array<FileDetail>;
-  bucket: string;
-}
-
-const FileDetailsTable = (props: FileDetailsProps) => {
-  const { workspaceNamespace, data, bucket } = props;
-
-  interface TableEntry {
-    location: string;
-    rawName: string;
-    nameCell: JSX.Element;
-    size: string;
-  }
-
-  const initTable = (accessReason: string): Array<TableEntry> => {
-    return data
-      .map((file) => {
-        return {
-          location: parseLocation(file, bucket),
-          rawName: file.name,
-          nameCell: (
-            <NameCell
-              file={file}
-              bucket={bucket}
-              workspaceNamespace={workspaceNamespace}
-              accessReason={accessReason}
-            />
-          ),
-          size: formatMB(file.sizeInBytes),
-        };
-      })
-      .sort((a, b) => {
-        const locationComparison = a.location.localeCompare(b.location);
-        return locationComparison === 0
-          ? a.rawName.localeCompare(b.rawName)
-          : locationComparison;
-      });
-  };
-
-  const [tableData, setTable] = useState<Array<TableEntry>>(initTable(''));
-
-  return (
-    <FlexColumn>
-      <DataTable
-        paginator
-        scrollable
-        data-test-id='object-details-table'
-        value={tableData}
-        style={styles.fileDetailsTable}
-        rows={100}
-        breakpoint='0px'
-        paginatorTemplate='CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink'
-        currentPageReportTemplate='Showing {first} to {last} of {totalRecords} entries'
-      >
-        <Column field='location' header='Location' />
-        <Column field='nameCell' header='Filename' />
-        <Column
-          field='size'
-          header='File size (MB)'
-          style={{ textAlign: 'right' }}
-        />
-      </DataTable>
-      <PurpleLabel>
-        To preview notebooks, enter Access Reason (for auditing purposes)
-      </PurpleLabel>
-      <TextArea
-        style={styles.accessReasonText}
-        onChange={(v) => setTable(initTable(v))}
-      />
-    </FlexColumn>
   );
 };
 
@@ -281,7 +101,6 @@ interface State {
   runtimeToDelete?: ListRuntimeResponse;
   confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
-  files?: Array<FileDetail>;
   showLockWorkspaceModal: boolean;
 }
 
@@ -310,7 +129,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   async getFederatedWorkspaceInformation() {
     const { ns } = this.props.match.params;
-
     this.setState({
       loadingData: true,
     });
@@ -321,14 +139,12 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
         workspaceAdminApi().getWorkspaceAdminView(ns);
       const cloudStorageTrafficPromise =
         workspaceAdminApi().getCloudStorageTraffic(ns);
-      const filesPromise = workspaceAdminApi().listFiles(ns);
       // Wait for all promises to complete before updating state.
-      const [workspaceDetails, cloudStorageTraffic, files] = await Promise.all([
+      const [workspaceDetails, cloudStorageTraffic] = await Promise.all([
         workspaceDetailsPromise,
         cloudStorageTrafficPromise,
-        filesPromise,
       ]);
-      this.setState({ workspaceDetails, cloudStorageTraffic, files });
+      this.setState({ workspaceDetails, cloudStorageTraffic });
     } catch (error) {
       if (error instanceof Response) {
         console.log('error', error, await error.json());
@@ -459,7 +275,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       confirmDeleteRuntime,
       loadingData,
       dataLoadError,
-      files,
       workspaceDetails: { collaborators, resources, workspace },
       showLockWorkspaceModal,
       loadingWorkspaceAdminLockedStatus,
@@ -607,13 +422,11 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 {formatMB(resources.cloudStorage.storageBytesUsed)}
               </WorkspaceInfoField>
             </div>
-            {files && (
-              <FileDetailsTable
-                workspaceNamespace={workspace.namespace}
-                data={files}
-                bucket={resources.cloudStorage.storageBucketPath}
-              />
-            )}
+            <FileDetailsTable
+              workspaceNamespace={workspace.namespace}
+              bucket={resources.cloudStorage.storageBucketPath}
+            />
+
             <h3>Research Purpose</h3>
             <div className='research-purpose' style={{ marginTop: '1.5rem' }}>
               <WorkspaceInfoField labelText='Primary purpose of project'>
