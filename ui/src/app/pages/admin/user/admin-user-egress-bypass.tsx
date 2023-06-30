@@ -32,6 +32,7 @@ const MAX_BYPASS_DESCRIPTION = 4000;
 interface Props {
   userId: number;
 }
+
 export const AdminUserEgressByPass = (props: Props) => {
   const [startTime, setStartTime] = useState(null);
   const [byPassDescription, setBypassDescription] = useState('');
@@ -46,7 +47,7 @@ export const AdminUserEgressByPass = (props: Props) => {
     byPassDescription.length < MIN_BYPASS_DESCRIPTION ||
     byPassDescription.length > MAX_BYPASS_DESCRIPTION;
 
-  const egressBypassButtonDisabled =
+  let egressBypassButtonDisabled =
     apiError || invalidReason || !isDateValid(startTime);
 
   const getToolTipContent = apiError ? (
@@ -76,6 +77,7 @@ export const AdminUserEgressByPass = (props: Props) => {
 
   const onCreateBypassRequest = () => {
     const { userId } = props;
+    egressBypassButtonDisabled = true;
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription,
@@ -88,6 +90,7 @@ export const AdminUserEgressByPass = (props: Props) => {
       })
       .finally(() => {
         setShowCurrentEgress(true);
+        egressBypassButtonDisabled = false;
       });
   };
 
@@ -144,6 +147,7 @@ export const AdminUserEgressByPass = (props: Props) => {
             value={startTime}
             showTime
             hourFormat='12'
+            minDate= {new Date()}
             onChange={(e) => {
               setApiError(false);
               setStartTime(e.value);
