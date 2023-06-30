@@ -4767,6 +4767,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
+      enableRasIdMeLinking:
+        type: boolean
+        default: false
+        description: Whether users are required to link their RAS/ID.me account to AoU
       enableRasLoginGovLinking:
         type: boolean
         default: false
