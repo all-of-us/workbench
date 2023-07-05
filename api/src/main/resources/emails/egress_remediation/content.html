@@ -21,13 +21,12 @@
   </style>
 </head>
 <body>
-<img src="${HEADER_IMG}">
-<div>Dear researcher,</div>
+<div>Dear Researcher,</div>
 <div>This is an automated email from the ${ALL_OF_US} Security Team at Vanderbilt University Medical
   Center. We received an alert related to activity on your account <b>${USERNAME}</b>. This
   alert was triggered because our monitoring system detected potential data egress from
-  your workspace. Please be advised users are not permitted to pull any row level data out of the
-  Researcher Workbench, per the ${ALL_OF_US} Research Program Data User Code of Conduct.
+  your workspace. Please be advised users are not permitted to pull any row-level/participant-level data out of the
+  Researcher Workbench, per the All of Us Research Program Data User Code of Conduct ${ALL_OF_US}.
   ${EGRESS_REMEDIATION_DESCRIPTION}
 </div>
 <div>
@@ -35,13 +34,18 @@
 </div>
 <div>
   <ul>
-    <li>Can you please confirm your account activity, and please share the details of that activity?
-    <li>Specifically, can you share the SQL query you used so we can validate it against our logs?
-    <li>Can you confirm no row level data was downloaded to your local device during this activity?
+    <li>Can you please confirm your account activity, and the details of that activity?
+    <li>Specifically, can you share the query you used so we can validate it against our logs?
+    <li>Can you confirm no row-level/participant-level data was downloaded to your local device during this activity?
   </ul>
 </div>
 <div>
-  Please respond by choosing "Reply to All". Please do not include any participant data in your
+  If you are working with large sized data files due to the nature of your research (i.e.: genomics) or large sized notebooks,
+  you may request a temporary increase in your egress threshold limit by filling out and
+  submitting the Large Data Download request form (add hyperlink to form or request page).
+</div>
+<div>
+  Please respond by choosing "Reply to All" and do not include any participant data in your
   response.
 </div>
 <div>
