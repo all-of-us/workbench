@@ -169,50 +169,6 @@ export const AdminUserEgressByPass = (props: Props) => {
           </TooltipTrigger>
         </FlexRow>
       </FlexColumn>
-      {showCurrentEgress && (
-        <FlexColumn style={{ marginLeft: '8%', width: '50%' }}>
-          <FlexRow>
-            <h3>Current Egress Large Download Window</h3>
-          </FlexRow>
-          <FlexRow>
-            {/* Current Bypass date*/}
-            {currentEgressBypassWindow && (
-              <div>
-                <div
-                  style={{
-                    fontWeight: 'bold',
-                    color: colors.primary,
-                    paddingBottom: '0.45rem',
-                  }}
-                >
-                  Start time
-                </div>
-                <div>{formatDate(currentEgressBypassWindow.startTime)}</div>
-                <div
-                  style={{
-                    fontWeight: 'bold',
-                    color: colors.primary,
-                    paddingBottom: '0.45rem',
-                  }}
-                >
-                  End time
-                </div>
-                <div>{formatDate(currentEgressBypassWindow.endTime)}</div>
-                <div
-                  style={{
-                    fontWeight: 'bold',
-                    color: colors.primary,
-                    paddingBottom: '0.45rem',
-                  }}
-                >
-                  Description time
-                </div>
-                <div>{currentEgressBypassWindow.description}</div>
-              </div>
-            )}
-          </FlexRow>
-        </FlexColumn>
-      )}
     </FlexRow>
   );
 };
