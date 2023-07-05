@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Calendar } from 'primereact/calendar';
 
 import { CreateEgressBypassWindowRequest } from 'generated/fetch';
@@ -9,23 +9,8 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
-import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
-import { formatDate } from 'app/utils/dates';
+import colors from 'app/styles/colors';
 import { isDateValid } from 'app/utils/dates';
-
-import { commonStyles } from './admin-user-common';
-
-const styles = reactStyles({
-  ...commonStyles,
-  header: {
-    color: colors.primary,
-    fontSize: '18px',
-    fontWeight: 600,
-    padding: '1em',
-  },
-});
-
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -37,10 +22,6 @@ export const AdminUserEgressByPass = (props: Props) => {
   const [startTime, setStartTime] = useState(null);
   const [byPassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
-  const [currentEgressBypassWindow, setCurrentEgressBypassWindow] =
-    useState(null);
-
-  const [showCurrentEgress, setShowCurrentEgress] = useState(false);
 
   const invalidReason =
     !byPassDescription ||
@@ -69,12 +50,6 @@ export const AdminUserEgressByPass = (props: Props) => {
     </div>
   );
 
-  useEffect(() => {
-    userAdminApi()
-      .getEgressBypassWindow(props.userId)
-      .then((bypassWindow) => setCurrentEgressBypassWindow(bypassWindow));
-  }, [showCurrentEgress]);
-
   const onCreateBypassRequest = () => {
     const { userId } = props;
     egressBypassButtonDisabled = true;
@@ -87,10 +62,6 @@ export const AdminUserEgressByPass = (props: Props) => {
       .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
       .catch(() => {
         setApiError(true);
-      })
-      .finally(() => {
-        setShowCurrentEgress(true);
-        egressBypassButtonDisabled = false;
       });
   };
 
@@ -147,7 +118,7 @@ export const AdminUserEgressByPass = (props: Props) => {
             value={startTime}
             showTime
             hourFormat='12'
-            minDate= {new Date()}
+            minDate={new Date()}
             onChange={(e) => {
               setApiError(false);
               setStartTime(e.value);
