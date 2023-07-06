@@ -82,7 +82,7 @@ export const AdminUserEgressByPass = (props: Props) => {
   };
 
   return (
-    <FlexRow>
+    <FlexRow style={{ minWidth: '100rem' }}>
       <FlexColumn style={{ width: '60%', justifyContent: 'space-between' }}>
         <FlexRow>
           <h3>Enable Large Download</h3>
