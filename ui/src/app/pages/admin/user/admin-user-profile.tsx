@@ -757,12 +757,6 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
             </Button>
           </FlexRow>
           <FlexRow>
-            <h2>Egress bypass request</h2>
-          </FlexRow>
-          <FlexRow>
-            <AdminUserEgressByPass userId={updatedProfile.userId} />
-          </FlexRow>
-          <FlexRow>
             <h2>Egress event history</h2>
           </FlexRow>
           <FlexRow>
@@ -770,6 +764,12 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
               displayPageSize={10}
               sourceUserEmail={updatedProfile.username}
             />
+          </FlexRow>
+          <FlexRow>
+            <h2>Egress bypass request</h2>
+          </FlexRow>
+          <FlexRow>
+            <AdminUserEgressByPass userId={updatedProfile.userId} />
           </FlexRow>
         </FlexColumn>
       )}
