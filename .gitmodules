@@ -4,3 +4,4 @@
 [submodule "tanagra"]
 	path = tanagra
 	url = https://github.com/DataBiosphere/tanagra
+	branch = chenchals/DT-436-chenchals-AoU-tanagra-uderlay-SR2022Q4R6
