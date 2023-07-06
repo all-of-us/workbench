@@ -1,6 +1,8 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar } from 'primereact/calendar';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 
 import { CreateEgressBypassWindowRequest } from 'generated/fetch';
 
@@ -10,7 +12,7 @@ import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { isDateValid } from 'app/utils/dates';
+import { formatDate, isDateValid } from 'app/utils/dates';
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -22,6 +24,15 @@ export const AdminUserEgressByPass = (props: Props) => {
   const [startTime, setStartTime] = useState(null);
   const [byPassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
+  const [bypassWindowsList, setBypasswindowsList] = useState([]);
+  const [reload, setReload] = useState(false);
+
+  useEffect(() => {
+    const { userId } = props;
+    userAdminApi()
+      .listEgressBypassWindows(userId)
+      .then((res) => setBypasswindowsList(res.bypassWindows));
+  }, [reload]);
 
   const invalidReason =
     !byPassDescription ||
@@ -62,12 +73,17 @@ export const AdminUserEgressByPass = (props: Props) => {
       .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
       .catch(() => {
         setApiError(true);
-      });
+      })
+      .finally(() => setReload(true));
+  };
+
+  const displayTime = (row, opt) => {
+    return <div style={{ width: '7rem' }}>{formatDate(row[opt.field])}</div>;
   };
 
   return (
     <FlexRow>
-      <FlexColumn style={{ width: '60%' }}>
+      <FlexColumn style={{ width: '60%', justifyContent: 'space-between' }}>
         <FlexRow>
           <h3>Enable Large Download</h3>
         </FlexRow>
@@ -102,7 +118,7 @@ export const AdminUserEgressByPass = (props: Props) => {
         </FlexColumn>
 
         {/* Bypass request Date*/}
-        <FlexRow>
+        <FlexRow style={{ paddingTop: '1rem' }}>
           <div
             style={{
               fontWeight: 'bold',
@@ -125,7 +141,7 @@ export const AdminUserEgressByPass = (props: Props) => {
             }}
           />
         </FlexRow>
-        <FlexRow>
+        <FlexRow style={{ paddingTop: '1rem' }}>
           <TooltipTrigger
             content={getToolTipContent}
             disabled={!egressBypassButtonDisabled}
@@ -138,6 +154,21 @@ export const AdminUserEgressByPass = (props: Props) => {
               ENABLE LARGE DOWNLOAD
             </Button>
           </TooltipTrigger>
+        </FlexRow>
+        <FlexRow style={{ paddingTop: '1rem' }}>
+          <DataTable value={bypassWindowsList}>
+            <Column
+              field={'startTime'}
+              header={'Start Time'}
+              body={(date, opt) => displayTime(date, opt)}
+            />
+            <Column
+              field={'endTime'}
+              header={'End Time'}
+              body={(date, opt) => displayTime(date, opt)}
+            />
+            <Column field={'description'} header={'Description'} />
+          </DataTable>
         </FlexRow>
       </FlexColumn>
     </FlexRow>
