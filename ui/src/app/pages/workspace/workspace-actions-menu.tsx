@@ -5,14 +5,14 @@ import { WorkspaceAccessLevel } from 'generated/fetch';
 import { MenuItem } from 'app/components/buttons';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-interface WorkspaceActionsProps {
+export interface WorkspaceActionsMenuProps {
   workspaceData: WorkspaceData;
   onDuplicate: Function;
   onEdit: Function;
   onShare: Function;
   onDelete: Function;
 }
-export const WorkspaceActionsMenu = (props: WorkspaceActionsProps) => {
+export const WorkspaceActionsMenu = (props: WorkspaceActionsMenuProps) => {
   const {
     workspaceData,
     workspaceData: { accessLevel, adminLocked },
