@@ -278,7 +278,7 @@ public class RasLinkServiceTest {
   }
 
   @Test
-  public void testLinkRasFail_notLoginGov() throws Exception {
+  public void testLinkRasFail_notLoginGovOrIdMe() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_ERA);
     assertThrows(
