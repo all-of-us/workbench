@@ -322,11 +322,12 @@ export const AttributesPage = fp.flow(
     cohortBuilderApi()
       .findCriteriaAttributeByConceptId(namespace, id, conceptId)
       .then((resp) => {
+        const newAttributes = { numAttributes: [], catAttributes: [] };
         resp.items.forEach((attr) => {
           if (attr.type === AttrName[AttrName.NUM]) {
             // NUM attributes set the min and max range for the number inputs in the attributes form
-            if (!numAttributes.length) {
-              numAttributes.push({
+            if (!newAttributes.numAttributes.length) {
+              newAttributes.numAttributes.push({
                 name: AttrName.NUM,
                 operator: isSurvey() ? 'ANY' : null,
                 operands: [],
@@ -334,7 +335,9 @@ export const AttributesPage = fp.flow(
                 [attr.conceptName]: parseFloat(attr.estCount),
               });
             } else {
-              numAttributes[0][attr.conceptName] = parseFloat(attr.estCount);
+              newAttributes.numAttributes[0][attr.conceptName] = parseFloat(
+                attr.estCount
+              );
             }
           } else {
             // CAT attributes are displayed as checkboxes in the attributes form
@@ -343,13 +346,13 @@ export const AttributesPage = fp.flow(
               // TODO RW-5572 confirm proper behavior and fix
               // eslint-disable-next-line @typescript-eslint/dot-notation
               attr['checked'] = false;
-              catAttributes.push(attr);
+              newAttributes.catAttributes.push(attr);
             }
           }
         });
         setAttributeCount(null);
-        setCatAttributes(catAttributes);
-        setNumAttributes(numAttributes);
+        setCatAttributes(newAttributes.catAttributes);
+        setNumAttributes(newAttributes.numAttributes);
         setLoading(false);
       });
   };

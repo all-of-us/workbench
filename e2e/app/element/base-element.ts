@@ -343,21 +343,6 @@ export default class BaseElement {
     return cursor && cursor === 'not-allowed';
   }
 
-  /**
-   * Finds visible element's bounding box size.
-   */
-  async getSize(): Promise<{ width: number; height: number }> {
-    const box = await this.asElementHandle().then((element) => {
-      return element.boundingBox();
-    });
-    if (box === null) {
-      // if element is not visible, returns size of (0, 0).
-      return { width: 0, height: 0 };
-    }
-    const { width, height } = box;
-    return { width, height };
-  }
-
   async dispose(): Promise<void> {
     return this.element.dispose();
   }

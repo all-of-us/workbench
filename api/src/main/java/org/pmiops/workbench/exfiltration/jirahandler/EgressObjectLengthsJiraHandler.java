@@ -2,10 +2,13 @@ package org.pmiops.workbench.exfiltration.jirahandler;
 
 import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
@@ -13,8 +16,11 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraContent;
+import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.AtlassianContent;
 import org.pmiops.workbench.jira.model.SearchResults;
+import org.pmiops.workbench.model.BucketAuditEntry;
+import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +31,13 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
       Logger.getLogger(EgressObjectLengthsJiraHandler.class.getName());
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final EgressEventMapper egressEventMapper;
 
   @Autowired
-  public EgressObjectLengthsJiraHandler(Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public EgressObjectLengthsJiraHandler(
+      Provider<WorkbenchConfig> workbenchConfigProvider, EgressEventMapper egressEventMapper) {
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.egressEventMapper = egressEventMapper;
   }
 
   @Override
@@ -80,6 +89,7 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
   private Stream<AtlassianContent> jiraEventDescriptionShort(
       DbEgressEvent event, EgressRemediationAction action) {
     Optional<DbWorkspace> workspace = Optional.ofNullable(event.getWorkspace());
+    BucketAuditEntry bucketAuditEntry = egressEventMapper.toBucketAuditEntry(event);
     return Stream.of(
         JiraContent.text(String.format("Egress event details (as RW admin): ", action)),
         JiraContent.link(
@@ -93,6 +103,11 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
                 workspace.map(DbWorkspace::getWorkspaceNamespace).orElse("unknown"))),
         JiraContent.text(
             String.format("Google project ID: %s\n\n", event.getWorkspace().getGoogleProject())),
+        JiraContent.text(
+            String.format(
+                "Detected between %s and %s\n",
+                JiraService.detailedDateFormat.format(calculateStartTime(event, bucketAuditEntry)),
+                JiraService.detailedDateFormat.format(calculateEndTime(event, bucketAuditEntry)))),
         JiraContent.text(
             String.format("Total egress detected: %.2f MiB\n", event.getEgressMegabytes())),
         JiraContent.text("Workspace admin console (as RW admin):"),
@@ -111,5 +126,21 @@ public class EgressObjectLengthsJiraHandler extends EgressJiraHandler {
     return Stream.concat(
         Stream.of(JiraContent.text("Additional file length egress detected\n\n")),
         jiraEventDescriptionShort(event, action));
+  }
+
+  private Instant calculateStartTime(DbEgressEvent event, BucketAuditEntry bucketAuditEntry) {
+    String startTime = event.getCreationTime().toString();
+    if (bucketAuditEntry != null && StringUtils.isNotEmpty(bucketAuditEntry.getMinTime())) {
+      startTime = bucketAuditEntry.getMinTime();
+    }
+    return Instant.parse(startTime);
+  }
+
+  private Instant calculateEndTime(DbEgressEvent event, BucketAuditEntry bucketAuditEntry) {
+    String endTime = event.getCreationTime().toInstant().minus(6, ChronoUnit.HOURS).toString();
+    if (bucketAuditEntry != null && StringUtils.isNotEmpty(bucketAuditEntry.getMaxTime())) {
+      endTime = bucketAuditEntry.getMaxTime();
+    }
+    return Instant.parse(endTime);
   }
 }

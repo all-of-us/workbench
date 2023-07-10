@@ -325,7 +325,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
-  public List<FileDetail> listFiles(String workspaceNamespace) {
+  public List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles) {
     final String workspaceName =
         getWorkspaceByNamespaceOrThrow(workspaceNamespace).getFirecloudName();
     final String bucketName =
@@ -335,9 +335,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getBucketName();
     Set<String> workspaceUsers =
         workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
-    return cloudStorageClient.getBlobPage(bucketName).stream()
-        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
-        .collect(Collectors.toList());
+    // If onlyAppFiles is true get all Apps (Jupyter/Rmd/R) files, else return all files from bucket
+    return onlyAppFiles
+        ? notebooksService.getNotebooks(workspaceNamespace, workspaceName)
+        : cloudStorageClient.getBlobPage(bucketName).stream()
+            .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
+            .collect(Collectors.toList());
   }
 
   @Override

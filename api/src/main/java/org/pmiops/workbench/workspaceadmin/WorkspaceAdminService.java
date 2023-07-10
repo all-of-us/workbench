@@ -36,7 +36,7 @@ public interface WorkspaceAdminService {
   String getReadOnlyNotebook(
       String workspaceNamespace, String notebookName, AccessReason accessReason);
 
-  List<FileDetail> listFiles(String workspaceNamespace);
+  List<FileDetail> listFiles(String workspaceNamespace, boolean onlyAppFiles);
 
   List<ListRuntimeResponse> deleteRuntimesInWorkspace(
       String workspaceNamespace, ListRuntimeDeleteRequest req);

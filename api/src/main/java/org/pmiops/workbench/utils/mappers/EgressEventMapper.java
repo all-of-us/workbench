@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbEgressEvent.DbEgressEventStatus;
+import org.pmiops.workbench.model.BucketAuditEntry;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventStatus;
 import org.pmiops.workbench.model.SumologicEgressEvent;
@@ -43,5 +44,12 @@ public interface EgressEventMapper {
 
   default SumologicEgressEvent toSumoLogicEvent(DbEgressEvent dbEgressEvent) {
     return new Gson().fromJson(dbEgressEvent.getSumologicEvent(), SumologicEgressEvent.class);
+  }
+
+  default BucketAuditEntry toBucketAuditEntry(DbEgressEvent dbEgressEvent) {
+    if (dbEgressEvent.getBucketAuditEvent() == null) {
+      return null;
+    }
+    return new Gson().fromJson(dbEgressEvent.getBucketAuditEvent(), BucketAuditEntry.class);
   }
 }

@@ -1,0 +1,19 @@
+runtime: java11
+env: standard
+service: 'tanagra-api'
+service_account: ${SERVICE_ACCOUNT}
+instance_class: F4
+automatic_scaling:
+  min_idle_instances: 0
+  max_instances: 10
+inbound_services:
+  - warmup
+handlers:
+  - url: /.*
+    script: tanagraapi.jar
+  - url: /_ah/warmup
+    script: tanagraapi.jar
+includes:
+  - tanagra_env_variables.yaml
+vpc_access_connector:
+  name: "projects/all-of-us-workbench-test/locations/us-central1/connectors/gae-tanagra-connector"

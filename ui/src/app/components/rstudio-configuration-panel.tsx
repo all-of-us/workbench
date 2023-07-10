@@ -11,6 +11,7 @@ import { DeletePersistentDiskButton } from 'app/components/delete-persistent-dis
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { CreateGKEAppButton } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 import { DisabledCloudComputeProfile } from 'app/components/gke-app-configuration-panels/disabled-cloud-compute-profile';
+import { InfoMessage } from 'app/components/messages';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
@@ -88,6 +89,16 @@ export const RStudioConfigurationPanel = ({
           appType={AppType.RSTUDIO}
         />
       </div>
+      <InfoMessage>
+        <h4 style={{ marginTop: 0, fontSize: '1rem' }}>
+          How to create RStudio artifacts:
+        </h4>
+        <p style={{ marginTop: '0.5rem' }}>
+          You can create R and RMD files within RStudio’s menu bar. Saved files
+          will appear in the analysis tab and be stored in the workspace bucket.
+          Access your files in RStudio through the Output pane.
+        </p>
+      </InfoMessage>
       <FlexRow
         style={{
           alignItems: 'center',
