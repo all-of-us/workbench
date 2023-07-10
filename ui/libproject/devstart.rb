@@ -5,6 +5,8 @@ require "set"
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
+require_relative "../../api/libproject/wboptionsparser"
+require_relative "../../api/libproject/gcloudcontext"
 
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
@@ -18,6 +20,11 @@ def create_parser(command_name)
     parser.banner = "Usage: ./project.rb #{command_name} [options]"
     parser
   end
+end
+
+def run_inline_or_log(dry_run, args)
+  cmd_prefix = dry_run ? DRY_RUN_CMD : []
+  Common.new.run_inline(cmd_prefix + args)
 end
 
 def build(cmd_name, args)
@@ -43,6 +50,96 @@ def build(cmd_name, args)
   common.run_inline "#{react_opts} yarn run build #{optimize} --no-watch --no-progress"
 end
 
+def deploy_tanagra_ui(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+    "--account [account]",
+    ->(opts, v) { opts.account = v},
+    "Service account to act as for deployment, if any. Defaults to the GAE " +
+    "default service account."
+  )
+  op.add_option(
+    "--version [version]",
+    ->(opts, v) { opts.version = v},
+    "Version to deploy (e.g. your-username-test)"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("version required") unless opts.version }
+  op.add_option(
+    "--key-file [keyfile]",
+    ->(opts, v) { opts.key_file = v},
+    "Service account key file to use for deployment authorization"
+  )
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
+  op.add_option(
+    "--promote",
+    ->(opts, _) { opts.promote = true},
+    "Promote this version to immediately begin serving API traffic"
+  )
+  op.add_option(
+    "--no-promote",
+    ->(opts, _) { opts.promote = false},
+    "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
+  )
+  op.add_option(
+    "--quiet",
+    ->(opts, _) { opts.quiet = true},
+    "Don't display a confirmation prompt when deploying"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("promote option required") if opts.promote.nil?}
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  if (op.opts.key_file)
+    ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
+  end
+
+  promote = "--no-promote"
+  unless op.opts.promote.nil?
+    promote = op.opts.promote ? "--promote" : "--no-promote"
+  else
+    promote = op.opts.version ? "--no-promote" : "--promote"
+  end
+
+  common = Common.new
+  common.status "Update Tanagra submodule..."
+  common.run_inline("git submodule init && git submodule update --init --recursive")
+
+  Dir.chdir('../tanagra/ui') do
+    common.status "Building Tanagra UI..."
+    common.run_inline("npm version 0.0.2")
+#     common.run_inline("npm ci")
+    common.status "npm run codegen"
+#     common.run_inline("npm run codegen")
+    common.status "npm run build --if-present"
+#     common.run_inline("npm run build --if-present")
+
+    common.status "Copying build into appengine folder..."
+    common.run_inline("mkdir -p ../../tanagra-aou-utils/appengine && cp -av ./build ../../tanagra-aou-utils/appengine/")
+  end
+
+  Dir.chdir('../tanagra-aou-utils') do
+    common.status "Building appengine config file..."
+    common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-ui.yaml > ./appengine/tanagra-ui.yaml")
+  end
+
+  Dir.chdir('../tanagra-aou-utils/appengine') do
+    common.status "Deploying Tanagra UI to appengine..."
+    run_inline_or_log(op.opts.dry_run, %W{
+      gcloud app deploy tanagra-ui.yaml
+      } + %W{--project #{gcc.project} #{promote}} +
+      (op.opts.quiet ? %W{--quiet} : []) +
+      (op.opts.version ? %W{--version #{op.opts.version}} : []))
+  end
+end
+
 class DevStart
   def deploy_ui(cmd_name, args)
     DeployUI.new(cmd_name, args).run
@@ -58,6 +155,11 @@ class DevStart
                                 :invocation => "build",
                                 :description => "Builds the UI for the given environment.",
                                 :fn => ->(*args) { build("build", args) }
+                            })
+    Common.register_command({
+                                :invocation => "deploy-tanagra-ui",
+                                :description => "Deploys the Tanagra UI.",
+                                :fn => ->(*args) { deploy_tanagra_ui("deploy-tanagra-ui", args) }
                             })
   end
 end
