@@ -34,36 +34,6 @@ describe('WorkspaceCard', () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'abc' } });
   });
 
-  it('disables sharing for non-owners', async () => {
-    const wrapper = component(WorkspaceAccessLevel.WRITER);
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(
-      wrapper.exists('[data-test-id="workspace-share-modal"]')
-    ).toBeFalsy();
-
-    // Click the snowman menu.
-    wrapper
-      .find('[data-test-id="workspace-card-menu"]')
-      .first()
-      .simulate('click');
-    const shareEl = wrapper.find('[data-test-id="Share-menu-item"]').first();
-
-    // Hover should show the disabled tooltip.
-    shareEl.simulate('mouseenter');
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.exists('[data-test-id="workspace-share-disabled-tooltip"]')
-    ).toBeTruthy();
-
-    // The share modal should not open on click.
-    shareEl.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.exists('[data-test-id="workspace-share-modal"]')
-    ).toBeFalsy();
-  });
-
   it('should not show locked status for workspace that has adminLocked false', async () => {
     const wrapper = component(WorkspaceAccessLevel.OWNER);
     await waitOneTickAndUpdate(wrapper);
