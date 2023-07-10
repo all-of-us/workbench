@@ -36,8 +36,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Service handles link login.gov account with All of Us account. It finishes OAuth dance with RAS
- * then validate users use their login.gov account with IAL2 enabled.
+ * Service handles linking the user's selected identity provider account with All of Us account. It finishes OAuth dance with RAS
+ * then validate users use their RAS account with IAL2 enabled.
  *
  * <p>Key steps: Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
  *
@@ -95,14 +95,16 @@ import org.springframework.stereotype.Service;
  *  }
  * }</pre>
  *
- * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
- * {@code preferred_username} field is unique login.gov username. We can use that as login.gov user
- * name.
+ * The {@code preferred_username} field should end with either  "@login.gov" or "@id.me" if using that to login. The
+ * {@code preferred_username} field is unique login.gov|id.me username. We can use that as
+ * login.|id.me user name.
  *
- * <p>Step4: Use step3's login.gov username to update AoU database by {@link
- * UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
+ * <p>Step4: Use step3's RAS username to update AoU database by
+ * {@link UserService#updateRasLinkLoginGovStatus(String)} or
+ * {@link UserService#updateRasLinkIdMeStatus(String)} (based on which service was used).
+ * Then return it as user profile.
  *
- * <p>TODO(yonghao): Fow now we return {@llink ForbiddenException} for all scenarios, determine if
+ * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if
  * we need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
  */
 @Service
@@ -123,7 +125,7 @@ public class RasLinkService {
     this.rasOidcClientProvider = rasOidcClientProvider;
   }
 
-  /** Links RAS login.gov account with AoU account. */
+  /** Links RAS account with AoU account. */
   public DbUser linkRasAccount(String authCode, String redirectUrl) {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
@@ -150,8 +152,6 @@ public class RasLinkService {
       throw new ServerErrorException("Failed to link RAS account", e);
     }
 
-    // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
-    // information.
     String username = getUsername(userInfoResponse);
     DbUser user;
     if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
@@ -165,6 +165,8 @@ public class RasLinkService {
               username));
     }
 
+    // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
+    // information.
     Optional<AccessModuleStatus> eRAModuleStatus =
         accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
