@@ -36,8 +36,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Service handles linking the user's selected identity provider account with All of Us account. It finishes OAuth dance with RAS
- * then validate users use their RAS account with IAL2 enabled.
+ * Service handles linking the user's selected identity provider account with All of Us account. It
+ * finishes OAuth dance with RAS then validate users use their RAS account with IAL2 enabled.
  *
  * <p>Key steps: Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
  *
@@ -95,17 +95,17 @@ import org.springframework.stereotype.Service;
  *  }
  * }</pre>
  *
- * The {@code preferred_username} field should end with either  "@login.gov" or "@id.me" if using that to login. The
- * {@code preferred_username} field is unique login.gov|id.me username. We can use that as
- * login.|id.me user name.
+ * The {@code preferred_username} field should end with either "@login.gov" or "@id.me" if using
+ * that to login. The {@code preferred_username} field is unique login.gov|id.me username. We can
+ * use that as login.|id.me user name.
  *
- * <p>Step4: Use step3's RAS username to update AoU database by
- * {@link UserService#updateRasLinkLoginGovStatus(String)} or
- * {@link UserService#updateRasLinkIdMeStatus(String)} (based on which service was used).
- * Then return it as user profile.
+ * <p>Step4: Use step3's RAS username to update AoU database by {@link
+ * UserService#updateRasLinkLoginGovStatus(String)} or {@link
+ * UserService#updateRasLinkIdMeStatus(String)} (based on which service was used). Then return it as
+ * user profile.
  *
- * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if
- * we need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
+ * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if we
+ * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
  */
 @Service
 public class RasLinkService {
