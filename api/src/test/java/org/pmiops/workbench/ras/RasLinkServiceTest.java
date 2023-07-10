@@ -17,6 +17,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.HttpTransport;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -112,6 +113,16 @@ public class RasLinkServiceTest {
       new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_1);
   private static final TokenResponse TOKEN_RESPONSE_IAL2 =
       new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_2);
+
+  private void mockCodeExchangeResponse(TokenResponse tokenResponse) throws IOException {
+    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+        .thenReturn(tokenResponse);
+  }
+
+  private void mockAccessTokenResponse(String jsonResponse) throws IOException {
+    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
+        .thenReturn(objectMapper.readTree(jsonResponse));
+  }
 
   private long userId;
   private Institution institution = new Institution();
@@ -211,10 +222,9 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasIdMeSuccess() throws Exception {
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_ID_ME));
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ID_ME);
+
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
@@ -224,10 +234,8 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasLoginGovSuccess() throws Exception {
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV);
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
@@ -237,10 +245,8 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasSuccess_withEraCommons() throws Exception {
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV_WITH_ERA);
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
@@ -255,10 +261,8 @@ public class RasLinkServiceTest {
     // ERA is linked before, expect ERA record not update by RAS linking again.
     Timestamp eRATime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
     accessModuleService.updateCompletionTime(currentUser, DbAccessModuleName.ERA_COMMONS, eRATime);
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV_WITH_ERA));
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV_WITH_ERA);
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
@@ -268,18 +272,15 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasFail_ial1() throws Exception {
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL1);
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL1);
     assertThrows(
         ForbiddenException.class, () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
 
   @Test
   public void testLinkRasFail_notLoginGov() throws Exception {
-    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
-        .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_ERA));
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ERA);
     assertThrows(
         ForbiddenException.class, () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
