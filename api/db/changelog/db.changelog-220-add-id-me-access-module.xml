@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="eric" id="db.changelog-219-add-id-me-access-module">
+  <changeSet author="eric" id="db.changelog-220-add-id-me-access-module">
     <sql>
       ALTER TABLE access_module
         MODIFY COLUMN name
