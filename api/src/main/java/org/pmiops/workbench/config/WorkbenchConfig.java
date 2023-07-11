@@ -277,7 +277,7 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, all users are required to finish identity verification using RAS/login.gov.
+    public boolean enableRasIdMeLinking;
     public boolean enableRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;

@@ -64,6 +64,7 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableResearchReviewPrompt",
       source = "config.featureFlags.enableResearchPurposePrompt")
+  @Mapping(target = "enableRasIdMeLinking", source = "config.access.enableRasIdMeLinking")
   @Mapping(target = "enableRasLoginGovLinking", source = "config.access.enableRasLoginGovLinking")
   @Mapping(
       target = "enableGenomicExtraction",

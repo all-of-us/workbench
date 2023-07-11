@@ -1628,15 +1628,15 @@ public class ProfileControllerTest extends BaseControllerTest {
     body.setAuthCode("code");
     body.setRedirectUrl("url");
 
-    dbUser.setRasLinkLoginGovUsername(loginGovUsername);
+    dbUser.setRasLinkUsername(loginGovUsername);
     dbUser = userDao.save(dbUser);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
 
-    when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl()))
+    when(mockRasLinkService.linkRasAccount(body.getAuthCode(), body.getRedirectUrl()))
         .thenReturn(dbUser);
 
     final Profile profile = profileController.linkRasAccount(body).getBody();
-    assertThat(profile.getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
+    assertThat(profile.getRasLinkUsername()).isEqualTo(loginGovUsername);
     assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
