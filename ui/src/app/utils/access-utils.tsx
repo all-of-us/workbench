@@ -161,6 +161,7 @@ export const getAccessModuleConfig = (
   moduleName: AccessModule
 ): AccessModuleUIConfig => {
   const {
+    enableRasIdMeLinking,
     enableRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
@@ -186,6 +187,27 @@ export const getAccessModuleConfig = (
       AccessModule.RASLINKIDME,
       () => ({
         ...apiConfig,
+        isEnabledInEnvironment:
+          enableRasIdMeLinking && enableRasLoginGovLinking,
+        DARTitleComponent: (props: DARTitleComponentConfig) => {
+          return (
+            <>
+              <div>
+                (NEW!) Verify your identity with Login.gov{' '}
+                <TooltipTrigger
+                  content={
+                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
+                  }
+                >
+                  <InfoIcon style={{ margin: '0 0.45rem' }} />
+                </TooltipTrigger>
+              </div>
+              <LoginGovHelpText {...props} />
+            </>
+          );
+        },
+        adminPageTitle: 'Verify your identity with Login.gov',
+        refreshAction: () => redirectToRas(false),
       }),
     ],
 
@@ -320,6 +342,11 @@ export const rtAccessRenewalModules = [
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
+];
+
+export const identityModules: AccessModule[] = [
+  AccessModule.RASLINKIDME,
+  AccessModule.RASLINKLOGINGOV,
 ];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
@@ -457,6 +484,43 @@ export const getAccessModuleStatusByName = (
     profile.accessModules.modules,
     moduleName
   );
+};
+
+export const getAccessModuleStatusForIdentityVerification = (
+  profile: Profile
+): AccessModuleStatus => {
+  const idMeStatus = getAccessModuleStatusByNameOrEmpty(
+    profile.accessModules.modules,
+    AccessModule.RASLINKIDME
+  );
+  const loginGovStatus = getAccessModuleStatusByNameOrEmpty(
+    profile.accessModules.modules,
+    AccessModule.RASLINKLOGINGOV
+  );
+
+  const statuses = [idMeStatus, loginGovStatus];
+
+  if (
+    idMeStatus.completionEpochMillis &&
+    loginGovStatus.completionEpochMillis
+  ) {
+    return statuses.reduce((max, status) =>
+      status.completionEpochMillis > max.completionEpochMillis ? status : max
+    );
+  } else if (
+    idMeStatus.completionEpochMillis ||
+    loginGovStatus.completionEpochMillis
+  ) {
+    return idMeStatus.completionEpochMillis ? idMeStatus : loginGovStatus;
+  } else if (idMeStatus.bypassEpochMillis && loginGovStatus.bypassEpochMillis) {
+    return statuses.reduce((max, status) =>
+      status.bypassEpochMillis > max.bypassEpochMillis ? status : max
+    );
+  } else if (idMeStatus.bypassEpochMillis || loginGovStatus.bypassEpochMillis) {
+    return idMeStatus.bypassEpochMillis ? idMeStatus : loginGovStatus;
+  } else {
+    return loginGovStatus;
+  }
 };
 
 export const GetStartedButton = ({ style = { marginLeft: '0.75rem' } }) => (

@@ -296,6 +296,7 @@ const RenewalRequirementsText = () => (
 // in display order
 export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
+  AccessModule.RASLINKIDME,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
