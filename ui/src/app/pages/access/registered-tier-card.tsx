@@ -7,13 +7,16 @@ import { RegisteredTierBadge } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { switchCase } from 'app/utils';
 import { AccessTierDisplayNames } from 'app/utils/access-tiers';
-import { DARPageMode, getAccessModuleConfig } from 'app/utils/access-utils';
+import {
+  DARPageMode,
+  getAccessModuleConfig,
+  getInitialRTModules,
+} from 'app/utils/access-utils';
 import { serverConfigStore } from 'app/utils/stores';
 
 import {
   DataDetail,
   getEligibleModules,
-  initialRtModules,
   renewalRtModules,
   styles,
 } from './data-access-requirements';
@@ -105,7 +108,7 @@ export const RegisteredTierCard = (props: {
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
           {...{ profile, activeModule, clickableModules, spinnerProps }}
-          modules={getEligibleModules(initialRtModules, profile)}
+          modules={getEligibleModules(getInitialRTModules(), profile)}
         >
           {!enableRasLoginGovLinking && <TemporaryRASModule {...{ profile }} />}
         </ModulesForInitialRegistration>

@@ -36,6 +36,9 @@ import {
 } from './dates';
 import { cond, switchCase } from './index';
 
+const ctModule = AccessModule.CTCOMPLIANCETRAINING;
+const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
   CURRENT = 'Current',
@@ -334,6 +337,27 @@ export const getAccessModuleConfig = (
       }),
     ]
   );
+};
+
+export const getInitialRTModules = (): AccessModule[] => {
+  const { enableRasIdMeLinking } = serverConfigStore.get().config;
+  const modules = [
+    AccessModule.TWOFACTORAUTH,
+    enableRasIdMeLinking
+      ? AccessModule.RASLINKIDME
+      : AccessModule.RASLINKLOGINGOV,
+    AccessModule.ERACOMMONS,
+    AccessModule.COMPLIANCETRAINING,
+  ];
+  return modules;
+};
+
+export const getInitialRequiredModules = (): AccessModule[] => {
+  return [...getInitialRTModules(), duccModule];
+};
+
+export const getAllInitialModules = (): AccessModule[] => {
+  return [...getInitialRequiredModules(), ctModule];
 };
 
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.

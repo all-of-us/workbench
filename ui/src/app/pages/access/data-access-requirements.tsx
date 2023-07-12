@@ -25,6 +25,8 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
+  getAllInitialModules,
+  getInitialRequiredModules,
   GetStartedButton,
   isCompliant,
   isEligibleModule,
@@ -294,37 +296,35 @@ const RenewalRequirementsText = () => (
 );
 
 // in display order
-export const initialRtModules = [
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKIDME,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
-];
+// export const initialRtModules = [
+//   AccessModule.TWOFACTORAUTH,
+//   AccessModule.RASLINKIDME,
+//   AccessModule.RASLINKLOGINGOV,
+//   AccessModule.ERACOMMONS,
+//   AccessModule.COMPLIANCETRAINING,
+// ];
 export const renewalRtModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
 ];
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
-export const initialRequiredModules: AccessModule[] = [
-  ...initialRtModules,
-  duccModule,
-];
+// export const initialRequiredModules: AccessModule[] = [
+//   ...initialRtModules,
+//   duccModule,
+// ];
 
-export const allInitialModules: AccessModule[] = [
-  ...initialRtModules,
-  ctModule,
-  duccModule,
-];
+// export const allInitialModules: AccessModule[] = [
+//   ...initialRtModules,
+//   ctModule,
+//   duccModule,
+// ];
 
 export const renewalRequiredModules: AccessModule[] = [
   ...renewalRtModules,
-  duccModule,
+  AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
 const handleTerraShibbolethCallback = (
@@ -629,10 +629,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         ? DARPageMode[pageModeParam]
         : DARPageMode.INITIAL_REGISTRATION;
 
-    const nextActive = getNextActive(allInitialModules, profile, pageMode);
+    const nextActive = getNextActive(getAllInitialModules(), profile, pageMode);
     const nextRequired = getNextActive(
       pageMode === DARPageMode.INITIAL_REGISTRATION
-        ? initialRequiredModules
+        ? getInitialRequiredModules()
         : renewalRequiredModules,
       profile,
       pageMode
@@ -640,9 +640,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const ctNeedsRenewal =
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
-      isCompliant(getAccessModuleStatusByName(profile, ctModule)) &&
+      isCompliant(
+        getAccessModuleStatusByName(profile, AccessModule.CTCOMPLIANCETRAINING)
+      ) &&
       !isRenewalCompleteForModule(
-        getAccessModuleStatusByName(profile, ctModule)
+        getAccessModuleStatusByName(profile, AccessModule.CTCOMPLIANCETRAINING)
       );
     const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
@@ -680,7 +682,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       const onMount = async () => {
         await syncModulesExternal(
           incompleteModules(
-            getEligibleModules(allInitialModules, profile),
+            getEligibleModules(getAllInitialModules(), profile),
             profile,
             pageMode
           )
