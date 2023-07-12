@@ -2472,6 +2472,7 @@ def deploy_tanagra(cmd_name, args)
   ENV.update(read_db_vars(gcc))
   tanagra_db_username = ENV["WORKBENCH_DB_USER"]
   tanagra_db_password = ENV["WORKBENCH_DB_PASSWORD"]
+  tanagra_db_cloudSqlInstance = ENV["CLOUD_SQL_INSTANCE_NAME"]
 
   if (op.opts.key_file)
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
@@ -2503,9 +2504,12 @@ def deploy_tanagra(cmd_name, args)
     common.status "Building env variables file..."
     common.run_inline("touch ./appengine/tanagra_env_variables.yaml > ./appengine/tanagra_env_variables.yaml")
     common.run_inline("echo \"env_variables:\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_URI: jdbc:mysql://10.29.16.3:3306/tanagra_db\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_URI: jdbc:mysql:///tanagra_db\" >> ./appengine/tanagra_env_variables.yaml")
     common.run_inline("echo \"  TANAGRA_DB_USERNAME: #{tanagra_db_username}\" >> ./appengine/tanagra_env_variables.yaml")
     common.run_inline("echo \"  TANAGRA_DB_PASSWORD: #{tanagra_db_password}\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_CLOUD_SQL_INSTANCE: #{tanagra_db_cloudSqlInstance}\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_SOCKET_FACTORY: com.google.cloud.sql.mysql.SocketFactory\" >> ./appengine/tanagra_env_variables.yaml")
+    common.run_inline("echo \"  TANAGRA_DB_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver\" >> ./appengine/tanagra_env_variables.yaml")
     common.run_inline("echo \"  TANAGRA_UNDERLAY_FILES: broad/aou_synthetic/expanded/aou_synthetic.json\" >> ./appengine/tanagra_env_variables.yaml")
   end
 
