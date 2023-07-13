@@ -48,6 +48,8 @@ import {
   UIAppType,
 } from './utils';
 
+// This is an arbitrary change in the /ui directory to trigger CI
+
 const styles = reactStyles({
   expandedAppContainer: {
     background: colors.white,
