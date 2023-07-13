@@ -106,10 +106,10 @@ public class UserAdminServiceTest {
   }
 
   @Test
-  public void tesListWindows() {
+  public void testListWindows() {
     Instant startTime1 = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
     Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
-    Instant startTime2 = startTime1.plus(1, ChronoUnit.DAYS);
+    Instant startTime2 = FakeClockConfiguration.NOW.toInstant();
     DbUserEgressBypassWindow dbUserEgressBypassWindow1 =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
@@ -128,12 +128,13 @@ public class UserAdminServiceTest {
         .containsExactly(
             new EgressBypassWindow()
                 .description(DESCRIPTION)
-                .startTime(startTime1.toEpochMilli())
+                .startTime(startTime2.toEpochMilli())
                 .endTime(endTime.toEpochMilli()),
             new EgressBypassWindow()
                 .description(DESCRIPTION)
-                .startTime(startTime2.toEpochMilli())
-                .endTime(endTime.toEpochMilli()));
+                .startTime(startTime1.toEpochMilli())
+                .endTime(endTime.toEpochMilli()))
+        .inOrder();
   }
 
   @Test
