@@ -61,9 +61,7 @@ export const MaybeModule = ({
   );
 
   const eligible = isEligibleModule(moduleName, profile);
-
   const status = getAccessModuleStatusByName(profile, moduleName);
-
   return (
     <Module
       {...{
