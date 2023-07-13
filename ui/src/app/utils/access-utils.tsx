@@ -357,7 +357,7 @@ export const getInitialRequiredModules = (): AccessModule[] => {
 };
 
 export const getAllInitialModules = (): AccessModule[] => {
-  return [...getInitialRequiredModules(), ctModule];
+  return [...getInitialRTModules(), ctModule, duccModule];
 };
 
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
