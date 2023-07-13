@@ -1885,7 +1885,7 @@ paths:
       tags:
         - userAdmin
       description: >
-        Get the user's all egress bypass windows. 
+        List all of the user's egress bypass windows. 
         Require RESEARCHER_DATA_VIEW authority
       parameters:
         - "$ref": "#/parameters/userId"

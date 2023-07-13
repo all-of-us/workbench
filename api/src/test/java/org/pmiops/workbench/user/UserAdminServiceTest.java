@@ -107,25 +107,37 @@ public class UserAdminServiceTest {
 
   @Test
   public void tesListWindows() {
-    Instant startTime = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
+    Instant startTime1 = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
     Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
+    Instant startTime2 = startTime1.plus(1, ChronoUnit.DAYS);
     DbUserEgressBypassWindow dbUserEgressBypassWindow1 =
         new DbUserEgressBypassWindow()
             .setUserId(USER_ID)
-            .setStartTime(Timestamp.from(startTime))
+            .setStartTime(Timestamp.from(startTime1))
             .setEndTime(Timestamp.from(endTime))
             .setDescription(DESCRIPTION);
-    userEgressBypassWindowDao.saveAll(ImmutableList.of(dbUserEgressBypassWindow1));
+    DbUserEgressBypassWindow dbUserEgressBypassWindow2 =
+        new DbUserEgressBypassWindow()
+            .setUserId(USER_ID)
+            .setStartTime(Timestamp.from(startTime2))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(DESCRIPTION);
+    userEgressBypassWindowDao.saveAll(
+        ImmutableList.of(dbUserEgressBypassWindow1, dbUserEgressBypassWindow2));
     assertThat(userAdminService.listAllEgressBypassWindows(USER_ID))
         .containsExactly(
             new EgressBypassWindow()
                 .description(DESCRIPTION)
-                .startTime(startTime.toEpochMilli())
+                .startTime(startTime1.toEpochMilli())
+                .endTime(endTime.toEpochMilli()),
+            new EgressBypassWindow()
+                .description(DESCRIPTION)
+                .startTime(startTime2.toEpochMilli())
                 .endTime(endTime.toEpochMilli()));
   }
 
   @Test
-  public void tesListWindows_emptyResult() {
+  public void testListWindows_emptyResult() {
     assertThat(userAdminService.listAllEgressBypassWindows(USER_ID)).isEmpty();
   }
 }

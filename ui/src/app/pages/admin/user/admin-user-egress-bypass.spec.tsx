@@ -8,7 +8,7 @@ import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { UserAdminApiStub } from 'testing/stubs/user-admin-api-stub';
 
-import { AdminUserEgressByPass } from './admin-user-egress-bypass';
+import { AdminUserEgressBypass } from './admin-user-egress-bypass';
 
 describe('AdminUserEgressBypassSpec', () => {
   const defaultProps = {
@@ -16,7 +16,7 @@ describe('AdminUserEgressBypassSpec', () => {
   };
 
   const component = () => {
-    return mount(<AdminUserEgressByPass {...defaultProps} />);
+    return mount(<AdminUserEgressBypass {...defaultProps} />);
   };
 
   beforeEach(() => {

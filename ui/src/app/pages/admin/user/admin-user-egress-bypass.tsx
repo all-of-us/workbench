@@ -20,7 +20,7 @@ interface Props {
   userId: number;
 }
 
-export const AdminUserEgressByPass = (props: Props) => {
+export const AdminUserEgressBypass = (props: Props) => {
   const [startTime, setStartTime] = useState(null);
   const [byPassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
@@ -43,7 +43,7 @@ export const AdminUserEgressByPass = (props: Props) => {
     apiError || invalidReason || !isDateValid(startTime);
 
   const getToolTipContent = apiError ? (
-    'Error occurred while Locking Workspace'
+    'Error occurred while create egress bypass request'
   ) : (
     <div>
       Required to lock workspace:
@@ -90,15 +90,14 @@ export const AdminUserEgressByPass = (props: Props) => {
         <FlexRow>
           {apiError && (
             <label style={{ color: colors.danger }}>
-              Something went wrong while enabling large download.
+              Something went wrong while enabling large file download.
             </label>
           )}
         </FlexRow>
         {/* Text area to enter the reason for large file download */}
         <FlexRow>
           <label style={{ fontWeight: 'bold', color: colors.primary }}>
-            Enter description for researchers on why request enabling large file
-            download
+            Enter description for large file download request.
           </label>
         </FlexRow>
         <FlexColumn>
@@ -126,7 +125,8 @@ export const AdminUserEgressByPass = (props: Props) => {
               paddingBottom: '0.45rem',
             }}
           >
-            By pass staring date. (end date is 48 hours after starting time)
+            Bypass staring date and time. (end date is 48 hours after starting
+            time)
           </div>
         </FlexRow>
         <FlexRow>
@@ -151,9 +151,12 @@ export const AdminUserEgressByPass = (props: Props) => {
               onClick={() => onCreateBypassRequest()}
               disabled={egressBypassButtonDisabled}
             >
-              ENABLE LARGE DOWNLOAD
+              Temporarily Enable Large File Downloads
             </Button>
           </TooltipTrigger>
+        </FlexRow>
+        <FlexRow>
+          <h3>Large File Download Requests</h3>
         </FlexRow>
         <FlexRow style={{ paddingTop: '1rem' }}>
           <DataTable value={bypassWindowsList}>
