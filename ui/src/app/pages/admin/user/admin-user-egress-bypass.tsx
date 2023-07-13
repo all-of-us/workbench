@@ -1,10 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Calendar } from 'primereact/calendar';
+import { Calendar, CalendarValueType } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
-import { CreateEgressBypassWindowRequest } from 'generated/fetch';
+import {
+  CreateEgressBypassWindowRequest,
+  EgressBypassWindow,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -21,32 +24,34 @@ interface Props {
 }
 
 export const AdminUserEgressBypass = (props: Props) => {
-  const [startTime, setStartTime] = useState(null);
-  const [byPassDescription, setBypassDescription] = useState('');
+  const [startTime, setStartTime] = useState<CalendarValueType>(null);
+  const [bypassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
-  const [bypassWindowsList, setBypasswindowsList] = useState([]);
+  const [bypassWindowsList, setBypassWindowsList] = useState<
+    EgressBypassWindow[]
+  >([]);
   const [reload, setReload] = useState(false);
 
   useEffect(() => {
     const { userId } = props;
     userAdminApi()
       .listEgressBypassWindows(userId)
-      .then((res) => setBypasswindowsList(res.bypassWindows));
+      .then((res) => setBypassWindowsList(res.bypassWindows));
   }, [reload]);
 
   const invalidReason =
-    !byPassDescription ||
-    byPassDescription.length < MIN_BYPASS_DESCRIPTION ||
-    byPassDescription.length > MAX_BYPASS_DESCRIPTION;
+    !bypassDescription ||
+    bypassDescription.length < MIN_BYPASS_DESCRIPTION ||
+    bypassDescription.length > MAX_BYPASS_DESCRIPTION;
 
   let egressBypassButtonDisabled =
-    apiError || invalidReason || !isDateValid(startTime);
+    apiError || invalidReason || !isDateValid(startTime as Date);
 
   const getToolTipContent = apiError ? (
-    'Error occurred while create egress bypass request'
+    'Error occurred while creating egress bypass request'
   ) : (
     <div>
-      Required to lock workspace:
+      Required to bypass Request for large downloads:
       <ul>
         {invalidReason && (
           <li>
@@ -54,7 +59,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             {MAX_BYPASS_DESCRIPTION})
           </li>
         )}
-        {!isDateValid(startTime) && (
+        {!isDateValid(startTime as Date) && (
           <li>Valid Request Date (in YYYY-MM-DD Format)</li>
         )}
       </ul>
@@ -65,8 +70,8 @@ export const AdminUserEgressBypass = (props: Props) => {
     const { userId } = props;
     egressBypassButtonDisabled = true;
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
-      startTime: startTime.valueOf(),
-      byPassDescription,
+      startTime: (startTime as Date).valueOf(),
+      byPassDescription: bypassDescription,
     };
 
     userAdminApi()
@@ -85,12 +90,12 @@ export const AdminUserEgressBypass = (props: Props) => {
     <FlexRow style={{ minWidth: '100rem' }}>
       <FlexColumn style={{ width: '60%', justifyContent: 'space-between' }}>
         <FlexRow>
-          <h3>Enable Large Download</h3>
+          <h3>Enable Large File Downloads</h3>
         </FlexRow>
         <FlexRow>
           {apiError && (
             <label style={{ color: colors.danger }}>
-              Something went wrong while enabling large file download.
+              Something went wrong while enabling large file downloads.
             </label>
           )}
         </FlexRow>
@@ -125,7 +130,7 @@ export const AdminUserEgressBypass = (props: Props) => {
               paddingBottom: '0.45rem',
             }}
           >
-            Bypass staring date and time. (end date is 48 hours after starting
+            Bypass starting date and time. (end date is 48 hours after starting
             time)
           </div>
         </FlexRow>
