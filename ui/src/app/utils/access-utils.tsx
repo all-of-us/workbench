@@ -196,7 +196,7 @@ export const getAccessModuleConfig = (
           return (
             <>
               <div>
-                (NEW!) Verify your identity with Login.gov{' '}
+                Verify your identity with Login.gov{' '}
                 <TooltipTrigger
                   content={
                     'For additional security, we require you to verify your identity by uploading a photo of your ID.'
