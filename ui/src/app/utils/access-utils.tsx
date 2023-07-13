@@ -500,19 +500,7 @@ export const getAccessModuleStatusByNameOrEmpty = (
   );
 };
 
-export const getAccessModuleStatusByName = (
-  profile: Profile,
-  moduleName: AccessModule
-): AccessModuleStatus => {
-  return identityModules.includes(moduleName)
-    ? getAccessModuleStatusForIdentityVerification(profile)
-    : getAccessModuleStatusByNameOrEmpty(
-        profile.accessModules.modules,
-        moduleName
-      );
-};
-
-export const getAccessModuleStatusForIdentityVerification = (
+const getAccessModuleStatusForIdentityVerification = (
   profile: Profile
 ): AccessModuleStatus => {
   const idMeStatus = getAccessModuleStatusByNameOrEmpty(
@@ -547,6 +535,18 @@ export const getAccessModuleStatusForIdentityVerification = (
   } else {
     return loginGovStatus;
   }
+};
+
+export const getAccessModuleStatusByName = (
+  profile: Profile,
+  moduleName: AccessModule
+): AccessModuleStatus => {
+  return identityModules.includes(moduleName)
+    ? getAccessModuleStatusForIdentityVerification(profile)
+    : getAccessModuleStatusByNameOrEmpty(
+        profile.accessModules.modules,
+        moduleName
+      );
 };
 
 export const GetStartedButton = ({ style = { marginLeft: '0.75rem' } }) => (
