@@ -8,8 +8,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { switchCase } from 'app/utils';
 import {
   getAccessModuleStatusByName,
-  getAccessModuleStatusForIdentityVerification,
-  identityModules,
   isEligibleModule,
   redirectToControlledTraining,
   redirectToNiH,
