@@ -504,10 +504,12 @@ export const getAccessModuleStatusByName = (
   profile: Profile,
   moduleName: AccessModule
 ): AccessModuleStatus => {
-  return getAccessModuleStatusByNameOrEmpty(
-    profile.accessModules.modules,
-    moduleName
-  );
+  return identityModules.includes(moduleName)
+    ? getAccessModuleStatusForIdentityVerification(profile)
+    : getAccessModuleStatusByNameOrEmpty(
+        profile.accessModules.modules,
+        moduleName
+      );
 };
 
 export const getAccessModuleStatusForIdentityVerification = (
