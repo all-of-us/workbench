@@ -99,6 +99,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
+    "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4, 5],
     "renewal": {

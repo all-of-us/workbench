@@ -10,7 +10,7 @@ const MessageWithIcon = ({
   iconPosition,
   children,
 }: {
-  messageType: 'warning' | 'error' | 'success';
+  messageType: 'warning' | 'error' | 'info';
   iconSize: number;
   iconPosition: 'top' | 'center' | 'bottom';
   children;
@@ -18,13 +18,13 @@ const MessageWithIcon = ({
   const icon = {
     warning: 'warning-standard',
     error: 'warning-standard',
-    success: 'success-standard',
+    info: 'info-standard',
   };
 
   const color = {
     warning: colors.warning,
     error: colors.danger,
-    success: colors.success,
+    info: colors.secondary,
   };
 
   const position = {
@@ -99,6 +99,18 @@ export const ErrorMessage = ({
       iconSize={iconSize}
       iconPosition={iconPosition}
     >
+      {children}
+    </MessageWithIcon>
+  );
+};
+
+export const InfoMessage = ({
+  children,
+}: {
+  children: string | React.ReactNode;
+}) => {
+  return (
+    <MessageWithIcon messageType={'info'} iconSize={20} iconPosition='top'>
       {children}
     </MessageWithIcon>
   );

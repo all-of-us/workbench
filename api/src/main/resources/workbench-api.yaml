@@ -4771,10 +4771,14 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
+      enableRasIdMeLinking:
+        type: boolean
+        default: false
+        description: Whether users are given the option to link their RAS/ID.me account to AoU
       enableRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether users are required to link their RAS/login.gov account to AoU
+        description: Whether users are given the option to link their RAS/Login.gov account to AoU
       enableGenomicExtraction:
         type: boolean
         default: false
@@ -5443,6 +5447,7 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - RAS_LINK_ID_ME
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
@@ -6310,7 +6315,10 @@ definitions:
           May be null if the user has never acknowledged the Terms of Service.'
       rasLinkLoginGovUsername:
         type: string
-        description: The user's identity name in login.gov.
+        description: The user's identity name in login.gov (deprecated in favor of rasLinkUsername)
+      rasLinkUsername:
+        type: string
+        description: The user's identity name in RAS.
       accessModules:
         type: object
         properties:

@@ -244,10 +244,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       />
                     }
                   >
-                    <SnowmanButton
-                      style={{ marginLeft: 0 }}
-                      data-test-id='workspace-card-menu'
-                    />
+                    <SnowmanButton style={{ marginLeft: 0 }} />
                   </PopupTrigger>
                 )}
               </FlexColumn>

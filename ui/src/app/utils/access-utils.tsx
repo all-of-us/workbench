@@ -182,6 +182,12 @@ export const getAccessModuleConfig = (
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
       }),
     ],
+    [
+      AccessModule.RASLINKIDME,
+      () => ({
+        ...apiConfig,
+      }),
+    ],
 
     [
       AccessModule.RASLINKLOGINGOV,
