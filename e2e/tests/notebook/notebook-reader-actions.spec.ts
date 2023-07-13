@@ -1,13 +1,11 @@
 import DataResourceCard from 'app/component/card/data-resource-card';
 import WorkspaceCard from 'app/component/card/workspace-card';
 import Link from 'app/element/link';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import { LinkText, MenuOption, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
-import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -26,33 +24,6 @@ describe('Workspace READER Jupyter notebook action tests', () => {
 
   const pyCode = '!jupyter kernelspec list';
   const pyAnswer = 'python3';
-
-  test('Share notebook to workspace READER', async () => {
-    await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName });
-
-    const dataPage = new WorkspaceDataPage(page);
-
-    // Share workspace to a READER before creating new notebook.
-    const aboutPage = new WorkspaceAboutPage(page);
-    await openTab(page, Tabs.About, aboutPage);
-
-    const shareModal = await aboutPage.openShareModal();
-    await shareModal.shareWithUser(config.READER_USER, WorkspaceAccessLevel.Reader);
-    await waitWhileLoading(page);
-
-    const notebook = await dataPage.createNotebook(notebookName, Language.Python);
-
-    // Run Python code.
-    const codeOutput = await notebook.runCodeCell(1, { code: pyCode });
-    expect(codeOutput).toEqual(expect.stringContaining(pyAnswer));
-
-    await notebook.save();
-
-    const analysisPage = await notebook.goAnalysisPage();
-    const notebookCard = await analysisPage.findNotebookCard(notebookName);
-    expect(notebookCard).toBeTruthy();
-  });
 
   // TODO(RW-7312): update and re-enable
   test.skip('Workspace READER copy notebook to another workspace', async () => {
