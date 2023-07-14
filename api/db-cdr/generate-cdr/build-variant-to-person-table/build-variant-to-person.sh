@@ -15,10 +15,10 @@ then
   bq rm -f -t --project_id="$BQ_PROJECT" "$BQ_DATASET".prep_variant_sample
 fi
 
-if [[ "$TABLE_LIST" == *"prep_variant_search"* ]]
+if [[ "$TABLE_LIST" == *"prep_variant_to_person"* ]]
 then
-  echo "Removing the prep_variant_search table"
-  bq rm -f -t --project_id="$BQ_PROJECT" "$BQ_DATASET".prep_variant_search
+  echo "Removing the prep_variant_to_person table"
+  bq rm -f -t --project_id="$BQ_PROJECT" "$BQ_DATASET".prep_variant_to_person
 fi
 
 echo "Loading data into the prep_variant_sample table"
@@ -27,12 +27,12 @@ bq load --source_format=CSV --field_delimiter=tab --skip_leading_rows 1 \
 "$TSV_FILE_BUCKET" \
 prep_variant_sample.json
 
-echo "Creating prep_variant_search table"
-bq --quiet --project_id="$BQ_PROJECT" mk --schema=prep_variant_search.json --clustering_fields vid "$BQ_DATASET".prep_variant_search
+echo "Creating prep_variant_to_person table"
+bq --quiet --project_id="$BQ_PROJECT" mk --schema=prep_variant_to_person.json --clustering_fields vid "$BQ_DATASET".prep_variant_to_person
 
-echo "Transforming prep_variant_sample to prep_variant_search"
+echo "Transforming prep_variant_sample to prep_variant_to_person"
 bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_variant_search\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_variant_to_person\`
  WITH converted_person_ids AS (
  SELECT vid, SAFE_CAST(person_id AS INT64) AS person_id
  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_variant_sample\`

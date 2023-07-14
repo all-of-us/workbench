@@ -10,7 +10,7 @@ export const environment: Environment = {
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicUiUrl: 'https://aou-db-staging.appspot.com',
   debug: false,
-  gaId: 'UA-112406425-2',
+  gaId: 'G-BYPVFY24Q2',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   gaUserInstitutionCategoryDimension: 'dimension3',
