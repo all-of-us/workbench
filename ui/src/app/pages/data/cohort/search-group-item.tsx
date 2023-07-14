@@ -37,7 +37,6 @@ import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
