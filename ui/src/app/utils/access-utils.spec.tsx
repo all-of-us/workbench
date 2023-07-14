@@ -18,6 +18,7 @@ import {
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
   getAccessModuleStatusByName,
+  getRelativeAccessModuleStatus,
   getTwoFactorSetupUrl,
   hasExpired,
   isExpiringOrExpired,
@@ -705,54 +706,54 @@ describe('getAccessModuleStatusByName', () => {
 
   test.each([
     [
+      AccessModule.RASLINKIDME,
+      AccessModule.RASLINKIDME,
       10000,
+      undefined,
       10,
       undefined,
-      undefined,
-      AccessModule.RASLINKIDME,
-      AccessModule.RASLINKIDME,
     ],
     [
+      AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKIDME,
+      undefined,
       undefined,
       10,
       undefined,
-      undefined,
+    ],
+    [
       AccessModule.RASLINKIDME,
       AccessModule.RASLINKLOGINGOV,
-    ],
-    [
-      undefined,
       undefined,
       300,
-      100,
-      AccessModule.RASLINKLOGINGOV,
-      AccessModule.RASLINKIDME,
-    ],
-    [
-      undefined,
-      undefined,
       undefined,
       100,
-      AccessModule.RASLINKLOGINGOV,
-      AccessModule.RASLINKLOGINGOV,
     ],
     [
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      AccessModule.RASLINKIDME,
       AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKLOGINGOV,
+      undefined,
+      undefined,
+      undefined,
+      100,
+    ],
+    [
+      AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKIDME,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
     ],
   ])(
-    'jj',
+    'Get status for %s when asking for %s given that ID.me {completed: %s, bypassed: %s} and Login.gov {completed: %s, bypassed: %s}',
     (
-      idMeCompletionTime,
-      loginGovCompletionTime,
-      idMeBypassTime,
-      loginGovBypassTime,
+      nameExpected,
       nameProvided,
-      nameExpected
+      idMeCompletionTime,
+      idMeBypassTime,
+      loginGovCompletionTime,
+      loginGovBypassTime
     ) => {
       const idMeStatus: AccessModuleStatus = {
         moduleName: AccessModule.RASLINKIDME,
@@ -785,7 +786,7 @@ describe('getAccessModuleStatusByName', () => {
       };
 
       expect(
-        getAccessModuleStatusByName(profileWithIdentityProfile, nameProvided)
+        getRelativeAccessModuleStatus(profileWithIdentityProfile, nameProvided)
       ).toEqual(expectedStatus);
     }
   );
