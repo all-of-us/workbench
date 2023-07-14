@@ -1,4 +1,7 @@
 import * as React from 'react';
+import { useRef } from 'react';
+import Iframe from 'react-iframe';
+import { SandboxAttributeValue } from 'react-iframe/src/types';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
@@ -29,6 +32,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { getAccessToken } from 'app/utils/authentication';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import {
   NavigationProps,
@@ -49,7 +53,7 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { openRStudio } from 'app/utils/user-apps-utils';
+import { openRStudio, openRStudioSource } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -132,6 +136,10 @@ interface State {
   resolveRuntimeInitializer: (Runtime) => void;
   error: Error;
   canPlayground: boolean;
+  showRStudioEdit: boolean;
+  rstudioUrl: string;
+  rStudioHtml: any;
+  iFrameRef: any;
 }
 
 export const InteractiveNotebook = fp.flow(
@@ -157,6 +165,10 @@ export const InteractiveNotebook = fp.flow(
         resolveRuntimeInitializer: null,
         error: null,
         canPlayground: false,
+        showRStudioEdit: false,
+        rstudioUrl: '',
+        rStudioHtml: { __html: '' },
+        iFrameRef: null,
       };
     }
 
@@ -375,6 +387,8 @@ export const InteractiveNotebook = fp.flow(
         resolveRuntimeInitializer,
         error,
         canPlayground,
+        showRStudioEdit,
+        rstudioUrl,
       } = this.state;
       const closeRuntimeInitializerModal = (r?: Runtime) => {
         resolveRuntimeInitializer(r);
@@ -382,6 +396,10 @@ export const InteractiveNotebook = fp.flow(
           runtimeInitializerDefault: null,
           resolveRuntimeInitializer: null,
         });
+      };
+
+      const creatHtml = () => {
+        __html: 'First &middot; Second';
       };
       return (
         <div>
@@ -458,7 +476,37 @@ export const InteractiveNotebook = fp.flow(
               )
             )}
           </div>
-          <div style={styles.previewDiv}>{this.renderPreviewContents()}</div>
+          {!showRStudioEdit && (
+            <div style={styles.previewDiv}>{this.renderPreviewContents()}</div>
+          )}
+          {showRStudioEdit && (
+            <>
+              {/* <Iframe*/}
+              {/* id='rstudioframe'*/}
+              {/* url={rstudioUrl}*/}
+              {/* width='100%'*/}
+              {/* height='154rem'*/}
+              {/* />*/}
+              <iframe
+                seamless
+                src={rstudioUrl}
+                style={{ width: '100%', height: '54rem' }}
+              />
+              <div dangerouslySetInnerHTML={this.state.rStudioHtml} />
+              {/* <div>*/}
+              {/*  <label>Start html</label>*/}
+              {/*  <object*/}
+              {/*    type='text/html'*/}
+              {/*    data={rstudioUrl}*/}
+              {/*    width='100%'*/}
+              {/*    height='100%'*/}
+              {/*    style={{ overflow: 'auto', border: '5px ridge blue' }}*/}
+              {/*  ></object>*/}
+              {/*  <label>End html</label>*/}
+              {/* </div>*/}
+            </>
+            // <iframe name='theFrame'></iframe>
+          )}
           {showPlaygroundModeModal && (
             <ConfirmPlaygroundModeModal
               onCancel={() => {
@@ -546,7 +594,7 @@ export const InteractiveNotebook = fp.flow(
       return <SpinnerOverlay />;
     }
 
-    private startEditMode() {
+    async startEditMode() {
       const { ns, nbName } = this.props.match.params;
       const { appType } = getAppInfoFromFileName(nbName);
       if (this.canStartRuntimes) {
@@ -555,7 +603,15 @@ export const InteractiveNotebook = fp.flow(
             const { userApps } = this.props.userAppsStore;
             const userApp = findApp(userApps, UIAppType.RSTUDIO);
             if (userApp && userApp.status === AppStatus.RUNNING) {
-              openRStudio(ns, userApp);
+              const url = openRStudioSource(ns, userApp, nbName);
+
+              console.log(Cookies.get());
+
+              this.setState({
+                showRStudioEdit: true,
+                rstudioUrl: url,
+                rStudioHtml: { __html: `<div class="ext">Hello!</div>` },
+              });
             } else {
               setSidebarActiveIconStore.next(rstudioConfigIconId);
             }

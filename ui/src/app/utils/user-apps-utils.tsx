@@ -114,3 +114,14 @@ export const openRStudio = (workspaceNamespace, userApp) => {
   );
   window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
 };
+
+export const openRStudioSource = (workspaceNamespace, userApp, fileName) => {
+  localizeUserApp(
+    workspaceNamespace,
+    userApp.appName,
+    userApp.appType,
+    [],
+    false
+  );
+  return userApp.proxyUrls['rstudio-service'];
+};
