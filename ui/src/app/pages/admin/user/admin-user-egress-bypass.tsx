@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Calendar, CalendarValueType } from 'primereact/calendar';
+import { Calendar } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
@@ -15,7 +15,7 @@ import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { formatDate, isDateValid } from 'app/utils/dates';
+import { formatDate, isDateValid, toDate } from 'app/utils/dates';
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -24,12 +24,13 @@ interface Props {
 }
 
 export const AdminUserEgressBypass = (props: Props) => {
-  const [startTime, setStartTime] = useState<CalendarValueType>(null);
+  const [startTime, setStartTime] = useState<Date>(null);
   const [bypassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
+  const [reload, setReload] = useState(false);
   const [reload, setReload] = useState(true);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export const AdminUserEgressBypass = (props: Props) => {
     bypassDescription.length > MAX_BYPASS_DESCRIPTION;
 
   let egressBypassButtonDisabled =
-    apiError || invalidReason || !isDateValid(startTime as Date);
+    apiError || invalidReason || !isDateValid(startTime);
 
   const getToolTipContent = apiError ? (
     'Error occurred while creating egress bypass request'
@@ -59,7 +60,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             {MAX_BYPASS_DESCRIPTION})
           </li>
         )}
-        {!isDateValid(startTime as Date) && (
+        {!isDateValid(startTime) && (
           <li>Valid Request Date (in YYYY-MM-DD Format)</li>
         )}
       </ul>
@@ -71,7 +72,7 @@ export const AdminUserEgressBypass = (props: Props) => {
     setReload(false);
     egressBypassButtonDisabled = true;
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
-      startTime: (startTime as Date).valueOf(),
+      startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
     };
     setBypassDescription('');
@@ -147,7 +148,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             minDate={new Date()}
             onChange={(e) => {
               setApiError(false);
-              setStartTime(e.value);
+              setStartTime(toDate(e.value));
             }}
           />
         </FlexRow>
