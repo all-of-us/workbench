@@ -111,7 +111,14 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     boolean eraCompliant =
         accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
 
+    boolean idMeCompliant =
+        accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
+    boolean loginGovCompliant =
+        accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
+    boolean identityCompliant = (loginGovCompliant || (workbenchConfigProvider.get().access.enableRasIdMeLinking && idMeCompliant));
+
     boolean eRARequiredForTier = true;
+
     boolean institutionalEmailValidForTier = false;
     Optional<Institution> institution = institutionService.getByUser(user);
     if (institution.isPresent()) {
@@ -128,6 +135,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
     }
     return !user.getDisabled()
         && (!eRARequiredForTier || eraCompliant)
+        && identityCompliant
         && institutionalEmailValidForTier
         && allStandardRequiredModulesCompliant;
   }
