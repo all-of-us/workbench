@@ -454,7 +454,6 @@ export const SearchGroupItem = withCurrentWorkspace()(
         item: { searchParameters, type },
       } = this.props;
       return (
-        !serverConfigStore.get().config.enableConceptSetsInCohortBuilder ||
         this.preventItemEdit ||
         type === Domain.PERSON.toString() ||
         !searchParameters.some(
