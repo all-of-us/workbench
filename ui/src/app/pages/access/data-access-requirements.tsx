@@ -27,6 +27,7 @@ import {
   getAccessModuleStatusByNameOrEmpty,
   getAllInitialModules,
   getInitialRequiredModules,
+  getRelativeAccessModuleStatus,
   GetStartedButton,
   isCompliant,
   isEligibleModule,
@@ -409,7 +410,7 @@ const incompleteModules = (
 ): AccessModule[] =>
   modules.filter(
     (moduleName) =>
-      !isCompliant(getAccessModuleStatusByName(profile, moduleName)) ||
+      !isCompliant(getRelativeAccessModuleStatus(profile, moduleName)) ||
       (pageMode === DARPageMode.ANNUAL_RENEWAL &&
         !isRenewalCompleteForModule(
           getAccessModuleStatusByNameOrEmpty(

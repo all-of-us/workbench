@@ -8,6 +8,7 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { switchCase } from 'app/utils';
 import {
   getAccessModuleStatusByName,
+  getRelativeAccessModuleStatus,
   isEligibleModule,
   redirectToControlledTraining,
   redirectToNiH,
@@ -59,7 +60,7 @@ export const MaybeModule = ({
   );
 
   const eligible = isEligibleModule(moduleName, profile);
-  const status = getAccessModuleStatusByName(profile, moduleName);
+  const status = getRelativeAccessModuleStatus(profile, moduleName);
   return (
     <Module
       {...{

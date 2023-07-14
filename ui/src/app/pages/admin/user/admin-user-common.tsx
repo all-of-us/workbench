@@ -654,9 +654,8 @@ export const getOrderedAccessModules = () => {
     AccessModule.COMPLIANCETRAINING,
     AccessModule.CTCOMPLIANCETRAINING,
     AccessModule.DATAUSERCODEOFCONDUCT,
-    enableRasIdMeLinking
-      ? AccessModule.RASLINKIDME
-      : AccessModule.RASLINKLOGINGOV,
+    ...(enableRasIdMeLinking ? [AccessModule.RASLINKIDME] : []),
+    AccessModule.RASLINKLOGINGOV,
     AccessModule.PROFILECONFIRMATION,
     AccessModule.PUBLICATIONCONFIRMATION,
   ];

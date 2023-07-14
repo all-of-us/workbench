@@ -209,7 +209,7 @@ export const getAccessModuleConfig = (
             </>
           );
         },
-        adminPageTitle: 'Verify your identity with Login.gov',
+        adminPageTitle: 'Verify your identity with ID.me',
         refreshAction: () => redirectToRas(false),
       }),
     ],
@@ -500,7 +500,7 @@ export const getAccessModuleStatusByNameOrEmpty = (
   );
 };
 
-const getAccessModuleStatusForIdentityVerification = (
+export const getAccessModuleStatusForIdentityVerification = (
   profile: Profile
 ): AccessModuleStatus => {
   const idMeStatus = getAccessModuleStatusByNameOrEmpty(
@@ -538,6 +538,18 @@ const getAccessModuleStatusForIdentityVerification = (
 };
 
 export const getAccessModuleStatusByName = (
+  profile: Profile,
+  moduleName: AccessModule
+): AccessModuleStatus => {
+  return getAccessModuleStatusByNameOrEmpty(
+    profile.accessModules.modules,
+    moduleName
+  );
+};
+
+// Gets status of moduleName, but if it is an identity module,
+// it will return the status of the "most complete" identity module.
+export const getRelativeAccessModuleStatus = (
   profile: Profile,
   moduleName: AccessModule
 ): AccessModuleStatus => {
