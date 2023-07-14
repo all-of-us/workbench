@@ -7,7 +7,6 @@ import { AccessModule, Profile } from 'generated/fetch';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { switchCase } from 'app/utils';
 import {
-  getAccessModuleStatusByName,
   getRelativeAccessModuleStatus,
   isEligibleModule,
   redirectToControlledTraining,
