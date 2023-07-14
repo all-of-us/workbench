@@ -115,6 +115,7 @@ public class AccessSyncServiceImpl implements AccessSyncService {
         accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
     boolean loginGovCompliant =
         accessModuleService.isModuleCompliant(user, DbAccessModuleName.ERA_COMMONS);
+    //Compliance indicates that a module is enabled and valid or not enabled.
     boolean identityCompliant = (loginGovCompliant || (workbenchConfigProvider.get().access.enableRasIdMeLinking && idMeCompliant));
 
     boolean eRARequiredForTier = true;
