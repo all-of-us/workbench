@@ -500,7 +500,7 @@ export const getAccessModuleStatusByNameOrEmpty = (
   );
 };
 
-export const getAccessModuleStatusForIdentityVerification = (
+const getAccessModuleStatusForIdentityVerification = (
   profile: Profile
 ): AccessModuleStatus => {
   const idMeStatus = getAccessModuleStatusByNameOrEmpty(
