@@ -55,13 +55,13 @@ import {
   ErrorsTooltip,
   getEraNote,
   getInitialCreditsUsage,
+  getOrderedAccessModules,
   getPublicInstitutionDetails,
   InitialCreditsDropdown,
   InstitutionalRoleDropdown,
   InstitutionalRoleOtherTextInput,
   InstitutionDropdown,
   isBypassed,
-  orderedAccessModules,
   profileNeedsUpdate,
   TierBadgesMaybe,
   updateAccountProperties,
@@ -393,7 +393,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
           },
         ]
       : [];
-  }, orderedAccessModules);
+  }, getOrderedAccessModules());
 
   return (
     <DataTable

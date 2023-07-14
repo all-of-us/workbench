@@ -17,6 +17,7 @@ import {
   AccessRenewalStatus,
   buildRasRedirectUrl,
   computeRenewalDisplayDates,
+  getAccessModuleStatusByName,
   getTwoFactorSetupUrl,
   hasExpired,
   isExpiringOrExpired,
@@ -686,4 +687,106 @@ describe('isExpiringOrExpired', () => {
       isExpiringOrExpired(undefined, AccessModule.PUBLICATIONCONFIRMATION)
     ).toEqual(false);
   });
+});
+
+describe('getAccessModuleStatusByName', () => {
+  it('should return status of access module in profile', () => {
+    const expectedAccessModuleStatus =
+      ProfileStubVariables.PROFILE_STUB.accessModules.modules.find(
+        (module) => module.moduleName === AccessModule.DATAUSERCODEOFCONDUCT
+      );
+    expect(
+      getAccessModuleStatusByName(
+        ProfileStubVariables.PROFILE_STUB,
+        AccessModule.DATAUSERCODEOFCONDUCT
+      )
+    ).toEqual(expectedAccessModuleStatus);
+  });
+
+  test.each([
+    [
+      10000,
+      10,
+      undefined,
+      undefined,
+      AccessModule.RASLINKIDME,
+      AccessModule.RASLINKIDME,
+    ],
+    [
+      undefined,
+      10,
+      undefined,
+      undefined,
+      AccessModule.RASLINKIDME,
+      AccessModule.RASLINKLOGINGOV,
+    ],
+    [
+      undefined,
+      undefined,
+      300,
+      100,
+      AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKIDME,
+    ],
+    [
+      undefined,
+      undefined,
+      undefined,
+      100,
+      AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKLOGINGOV,
+    ],
+    [
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      AccessModule.RASLINKIDME,
+      AccessModule.RASLINKLOGINGOV,
+    ],
+  ])(
+    'jj',
+    (
+      idMeCompletionTime,
+      loginGovCompletionTime,
+      idMeBypassTime,
+      loginGovBypassTime,
+      nameProvided,
+      nameExpected
+    ) => {
+      const idMeStatus: AccessModuleStatus = {
+        moduleName: AccessModule.RASLINKIDME,
+        bypassEpochMillis: idMeBypassTime,
+        completionEpochMillis: idMeCompletionTime,
+      };
+
+      const loginGovStatus: AccessModuleStatus = {
+        moduleName: AccessModule.RASLINKLOGINGOV,
+        bypassEpochMillis: loginGovBypassTime,
+        completionEpochMillis: loginGovCompletionTime,
+      };
+      const profileWithIdentityProfile: Profile = {
+        ...ProfileStubVariables.PROFILE_STUB,
+        accessModules: {
+          modules: [idMeStatus, loginGovStatus],
+        },
+      };
+
+      const expectedStatus: AccessModuleStatus = {
+        moduleName: nameExpected,
+        completionEpochMillis:
+          nameExpected === AccessModule.RASLINKIDME
+            ? idMeCompletionTime
+            : loginGovCompletionTime,
+        bypassEpochMillis:
+          nameExpected === AccessModule.RASLINKIDME
+            ? idMeBypassTime
+            : loginGovBypassTime,
+      };
+
+      expect(
+        getAccessModuleStatusByName(profileWithIdentityProfile, nameProvided)
+      ).toEqual(expectedStatus);
+    }
+  );
 });

@@ -12,10 +12,16 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
+    name: AccessModule.RASLINKIDME,
+    expirable: false,
+    requiredForRTAccess: false,
+    requiredForCTAccess: false,
+  },
+  {
     name: AccessModule.RASLINKLOGINGOV,
     expirable: false,
-    requiredForRTAccess: true,
-    requiredForCTAccess: true,
+    requiredForRTAccess: false,
+    requiredForCTAccess: false,
   },
   {
     name: AccessModule.ERACOMMONS,

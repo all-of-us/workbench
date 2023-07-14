@@ -48,6 +48,7 @@ import {
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
 import { getRoleOptions } from 'app/utils/institutions';
+import { serverConfigStore } from 'app/utils/stores';
 
 export const commonStyles = reactStyles({
   semiBold: {
@@ -645,13 +646,18 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 };
 
 // list the access modules in the desired order
-export const orderedAccessModules = [
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-];
+export const getOrderedAccessModules = () => {
+  const { enableRasIdMeLinking } = serverConfigStore.get().config;
+  return [
+    AccessModule.TWOFACTORAUTH,
+    AccessModule.ERACOMMONS,
+    AccessModule.COMPLIANCETRAINING,
+    AccessModule.CTCOMPLIANCETRAINING,
+    AccessModule.DATAUSERCODEOFCONDUCT,
+    enableRasIdMeLinking
+      ? AccessModule.RASLINKIDME
+      : AccessModule.RASLINKLOGINGOV,
+    AccessModule.PROFILECONFIRMATION,
+    AccessModule.PUBLICATIONCONFIRMATION,
+  ];
+};

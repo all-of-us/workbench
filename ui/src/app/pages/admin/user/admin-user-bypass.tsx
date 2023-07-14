@@ -9,7 +9,7 @@ import { ClrIcon } from 'app/components/icons';
 import { Toggle } from 'app/components/inputs';
 import { PopupTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { orderedAccessModules } from 'app/pages/admin/user/admin-user-common';
+import { getOrderedAccessModules } from 'app/pages/admin/user/admin-user-common';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { getAccessModuleConfig } from 'app/utils/access-utils';
@@ -176,7 +176,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
   render() {
     const { selectedModules, isPopupOpen, isSaving } = this.state;
 
-    const bypassToggleProps = orderedAccessModules
+    const bypassToggleProps = getOrderedAccessModules()
       .filter((module) => getAccessModuleConfig(module).isEnabledInEnvironment)
       .map((module) => {
         return {
