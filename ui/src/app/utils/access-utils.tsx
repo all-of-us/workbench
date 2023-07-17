@@ -36,9 +36,6 @@ import {
 } from './dates';
 import { cond, switchCase } from './index';
 
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
-
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
   CURRENT = 'Current',
