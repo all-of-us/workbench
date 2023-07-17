@@ -296,10 +296,32 @@ const RenewalRequirementsText = () => (
   </span>
 );
 
+// in display order
+export const initialRtModules = [
+  AccessModule.TWOFACTORAUTH,
+  AccessModule.RASLINKLOGINGOV,
+  AccessModule.ERACOMMONS,
+  AccessModule.COMPLIANCETRAINING,
+];
 export const renewalRtModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
+];
+const ctModule = AccessModule.CTCOMPLIANCETRAINING;
+const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+
+// in display order
+// exported for test
+export const initialRequiredModules: AccessModule[] = [
+  ...initialRtModules,
+  duccModule,
+];
+
+export const allInitialModules: AccessModule[] = [
+  ...initialRtModules,
+  ctModule,
+  duccModule,
 ];
 
 export const renewalRequiredModules: AccessModule[] = [

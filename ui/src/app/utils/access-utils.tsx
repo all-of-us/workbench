@@ -334,7 +334,6 @@ export const getAccessModuleConfig = (
 };
 
 export const getInitialRTModules = (): AccessModule[] => {
-  const { enableRasIdMeLinking } = serverConfigStore.get().config;
   const modules = [
     AccessModule.TWOFACTORAUTH,
     AccessModule.RASLINKLOGINGOV,
