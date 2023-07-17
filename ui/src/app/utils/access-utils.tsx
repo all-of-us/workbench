@@ -338,7 +338,7 @@ export const rtAccessRenewalModules = [
   AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
-export const identityModules: AccessModule[] = [
+const identityModules: AccessModule[] = [
   AccessModule.RASLINKIDME,
   AccessModule.RASLINKLOGINGOV,
 ];
