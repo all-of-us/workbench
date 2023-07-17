@@ -333,20 +333,6 @@ export const getAccessModuleConfig = (
   );
 };
 
-export const getInitialRTModules = (): AccessModule[] => {
-  const modules = [
-    AccessModule.TWOFACTORAUTH,
-    AccessModule.RASLINKLOGINGOV,
-    AccessModule.ERACOMMONS,
-    AccessModule.COMPLIANCETRAINING,
-  ];
-  return modules;
-};
-
-export const getAllInitialModules = (): AccessModule[] => {
-  return [...getInitialRTModules(), ctModule, duccModule];
-};
-
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const rtAccessRenewalModules = [
   AccessModule.PROFILECONFIRMATION,
