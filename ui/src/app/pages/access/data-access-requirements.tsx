@@ -306,20 +306,18 @@ export const renewalRtModules = [
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
 ];
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 
 // in display order
 // exported for test
 export const initialRequiredModules: AccessModule[] = [
   ...initialRtModules,
-  duccModule,
+  AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
 export const allInitialModules: AccessModule[] = [
   ...initialRtModules,
-  ctModule,
-  duccModule,
+  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
 export const renewalRequiredModules: AccessModule[] = [
