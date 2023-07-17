@@ -631,7 +631,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         ? DARPageMode[pageModeParam]
         : DARPageMode.INITIAL_REGISTRATION;
 
-    const nextActive = getNextActive(getAllInitialModules(), profile, pageMode);
+    const nextActive = getNextActive(allInitialModules, profile, pageMode);
     const nextRequired = getNextActive(
       pageMode === DARPageMode.INITIAL_REGISTRATION
         ? getInitialRequiredModules()
@@ -684,7 +684,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       const onMount = async () => {
         await syncModulesExternal(
           incompleteModules(
-            getEligibleModules(getAllInitialModules(), profile),
+            getEligibleModules(allInitialModules, profile),
             profile,
             pageMode
           )
