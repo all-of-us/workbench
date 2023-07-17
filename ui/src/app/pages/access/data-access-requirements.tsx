@@ -25,7 +25,6 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
-  getAllInitialModules,
   getInitialRequiredModules,
   getRelativeAccessModuleStatus,
   GetStartedButton,

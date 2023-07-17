@@ -20,7 +20,6 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
-  getAllInitialModules,
   getInitialRequiredModules,
   rtAccessRenewalModules,
 } from 'app/utils/access-utils';
@@ -43,6 +42,7 @@ import {
 } from 'testing/stubs/profile-api-stub';
 
 import {
+  allInitialModules,
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
@@ -287,10 +287,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
-    const enabledModules = getEligibleModules(
-      getAllInitialModules(),
-      stubProfile
-    );
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     getInitialRequiredModules().forEach((module) =>
       expect(enabledModules.includes(module)).toBeTruthy()
     );
@@ -303,10 +300,7 @@ describe('DataAccessRequirements', () => {
         enableRasLoginGovLinking: false,
       },
     });
-    const enabledModules = getEligibleModules(
-      getAllInitialModules(),
-      stubProfile
-    );
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
   });
 
@@ -314,10 +308,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
-    const enabledModules = getEligibleModules(
-      getAllInitialModules(),
-      stubProfile
-    );
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
   });
 
@@ -325,10 +316,7 @@ describe('DataAccessRequirements', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableComplianceTraining: false },
     });
-    const enabledModules = getEligibleModules(
-      getAllInitialModules(),
-      stubProfile
-    );
+    const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(
       enabledModules.includes(AccessModule.COMPLIANCETRAINING)
     ).toBeFalsy();
@@ -563,7 +551,7 @@ describe('DataAccessRequirements', () => {
 
   it('should render all required modules by default (all FFs enabled)', () => {
     const wrapper = component();
-    getAllInitialModules().forEach((module) =>
+    allInitialModules.forEach((module) =>
       expect(findModule(wrapper, module).exists()).toBeTruthy()
     );
   });
@@ -1549,7 +1537,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getAllInitialModules().map((moduleName) => {
+          modules: allInitialModules.map((moduleName) => {
             if (
               [
                 AccessModule.CTCOMPLIANCETRAINING,
