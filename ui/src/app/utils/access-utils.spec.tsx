@@ -691,6 +691,31 @@ describe('isExpiringOrExpired', () => {
 });
 
 describe('getAccessModuleStatusByName', () => {
+  const generateIdentityVerificationProfile = (
+    idMeCompletionTime,
+    idMeBypassTime,
+    loginGovCompletionTime,
+    loginGovBypassTime
+  ): Profile => {
+    const idMeStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKIDME,
+      bypassEpochMillis: idMeBypassTime,
+      completionEpochMillis: idMeCompletionTime,
+    };
+
+    const loginGovStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKLOGINGOV,
+      bypassEpochMillis: loginGovBypassTime,
+      completionEpochMillis: loginGovCompletionTime,
+    };
+    return {
+      ...ProfileStubVariables.PROFILE_STUB,
+      accessModules: {
+        modules: [idMeStatus, loginGovStatus],
+      },
+    };
+  };
+
   it('should return status of access module in profile', () => {
     const expectedAccessModuleStatus =
       ProfileStubVariables.PROFILE_STUB.accessModules.modules.find(
@@ -704,90 +729,80 @@ describe('getAccessModuleStatusByName', () => {
     ).toEqual(expectedAccessModuleStatus);
   });
 
-  test.each([
-    [
-      AccessModule.RASLINKIDME,
-      AccessModule.RASLINKIDME,
-      10000,
-      undefined,
-      10,
-      undefined,
-    ],
-    [
-      AccessModule.RASLINKLOGINGOV,
-      AccessModule.RASLINKIDME,
-      undefined,
-      undefined,
-      10,
-      undefined,
-    ],
-    [
-      AccessModule.RASLINKIDME,
-      AccessModule.RASLINKLOGINGOV,
-      undefined,
-      300,
-      undefined,
-      100,
-    ],
-    [
-      AccessModule.RASLINKLOGINGOV,
-      AccessModule.RASLINKLOGINGOV,
-      undefined,
-      undefined,
-      undefined,
-      100,
-    ],
-    [
-      AccessModule.RASLINKIDME,
-      AccessModule.RASLINKIDME,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-    ],
-  ])(
-    'Get status for %s when asking for %s given that ID.me {completed: %s, bypassed: %s} and Login.gov {completed: %s, bypassed: %s}',
-    (
-      nameExpected,
-      nameProvided,
-      idMeCompletionTime,
-      idMeBypassTime,
-      loginGovCompletionTime,
-      loginGovBypassTime
-    ) => {
-      const idMeStatus: AccessModuleStatus = {
-        moduleName: AccessModule.RASLINKIDME,
-        bypassEpochMillis: idMeBypassTime,
-        completionEpochMillis: idMeCompletionTime,
-      };
+  it('Should return the status with the latest completion time when bypass times are undefined', () => {
+    const profileWithIdentityProfile: Profile =
+      generateIdentityVerificationProfile(1000, undefined, 10, undefined);
 
-      const loginGovStatus: AccessModuleStatus = {
-        moduleName: AccessModule.RASLINKLOGINGOV,
-        bypassEpochMillis: loginGovBypassTime,
-        completionEpochMillis: loginGovCompletionTime,
-      };
-      const profileWithIdentityProfile: Profile = {
-        ...ProfileStubVariables.PROFILE_STUB,
-        accessModules: {
-          modules: [idMeStatus, loginGovStatus],
-        },
-      };
+    const expectedStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKIDME,
+      completionEpochMillis: 1000,
+      bypassEpochMillis: undefined,
+    };
 
-      const expectedStatus: AccessModuleStatus = {
-        moduleName: nameExpected,
-        completionEpochMillis:
-          nameExpected === AccessModule.RASLINKIDME
-            ? idMeCompletionTime
-            : loginGovCompletionTime,
-        bypassEpochMillis:
-          nameExpected === AccessModule.RASLINKIDME
-            ? idMeBypassTime
-            : loginGovBypassTime,
-      };
+    expect(
+      getRelativeAccessModuleStatus(
+        profileWithIdentityProfile,
+        AccessModule.RASLINKLOGINGOV
+      )
+    ).toEqual(expectedStatus);
+  });
 
-      expect(
-        getRelativeAccessModuleStatus(profileWithIdentityProfile, nameProvided)
-      ).toEqual(expectedStatus);
-    }
-  );
+  it('Should return the status with the latest bypass time when completion times are undefined', () => {
+    const profileWithIdentityProfile: Profile =
+      generateIdentityVerificationProfile(undefined, 10, undefined, 1000);
+
+    const expectedStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKLOGINGOV,
+      completionEpochMillis: undefined,
+      bypassEpochMillis: 1000,
+    };
+
+    expect(
+      getRelativeAccessModuleStatus(
+        profileWithIdentityProfile,
+        AccessModule.RASLINKIDME
+      )
+    ).toEqual(expectedStatus);
+  });
+
+  it('Should return the status with the latest bypass or completion time when both are present', () => {
+    const profileWithIdentityProfile: Profile =
+      generateIdentityVerificationProfile(10, undefined, undefined, 1000);
+
+    const expectedStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKLOGINGOV,
+      completionEpochMillis: undefined,
+      bypassEpochMillis: 1000,
+    };
+
+    expect(
+      getRelativeAccessModuleStatus(
+        profileWithIdentityProfile,
+        AccessModule.RASLINKLOGINGOV
+      )
+    ).toEqual(expectedStatus);
+  });
+
+  it('Should return ID.me status when no identification module has been bypassed or completed', () => {
+    const profileWithIdentityProfile: Profile =
+      generateIdentityVerificationProfile(
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      );
+
+    const expectedStatus: AccessModuleStatus = {
+      moduleName: AccessModule.RASLINKIDME,
+      completionEpochMillis: undefined,
+      bypassEpochMillis: undefined,
+    };
+
+    expect(
+      getRelativeAccessModuleStatus(
+        profileWithIdentityProfile,
+        AccessModule.RASLINKLOGINGOV
+      )
+    ).toEqual(expectedStatus);
+  });
 });
