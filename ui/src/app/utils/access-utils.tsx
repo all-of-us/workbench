@@ -192,25 +192,7 @@ export const getAccessModuleConfig = (
         ...apiConfig,
         isEnabledInEnvironment:
           enableRasIdMeLinking && enableRasLoginGovLinking,
-        DARTitleComponent: (props: DARTitleComponentConfig) => {
-          return (
-            <>
-              <div>
-                Verify your identity with Login.gov{' '}
-                <TooltipTrigger
-                  content={
-                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-                  }
-                >
-                  <InfoIcon style={{ margin: '0 0.45rem' }} />
-                </TooltipTrigger>
-              </div>
-              <LoginGovHelpText {...props} />
-            </>
-          );
-        },
         adminPageTitle: 'Verify your identity with ID.me',
-        refreshAction: () => redirectToRas(false),
       }),
     ],
 
@@ -222,6 +204,7 @@ export const getAccessModuleConfig = (
         DARTitleComponent: (props: DARTitleComponentConfig) => {
           return (
             <>
+              enableRasIdMeLinking ? (
               <div>
                 Verify your identity with Login.gov{' '}
                 <TooltipTrigger
@@ -232,7 +215,18 @@ export const getAccessModuleConfig = (
                   <InfoIcon style={{ margin: '0 0.45rem' }} />
                 </TooltipTrigger>
               </div>
-              <LoginGovHelpText {...props} />
+              <LoginGovHelpText {...props} />) : (
+              <div>
+                Verify your identity with Login.gov{' '}
+                <TooltipTrigger
+                  content={
+                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
+                  }
+                >
+                  <InfoIcon style={{ margin: '0 0.45rem' }} />
+                </TooltipTrigger>
+              </div>
+              <LoginGovHelpText {...props} />)
             </>
           );
         },
@@ -343,9 +337,7 @@ export const getInitialRTModules = (): AccessModule[] => {
   const { enableRasIdMeLinking } = serverConfigStore.get().config;
   const modules = [
     AccessModule.TWOFACTORAUTH,
-    enableRasIdMeLinking
-      ? AccessModule.RASLINKIDME
-      : AccessModule.RASLINKLOGINGOV,
+    AccessModule.RASLINKLOGINGOV,
     AccessModule.ERACOMMONS,
     AccessModule.COMPLIANCETRAINING,
   ];
