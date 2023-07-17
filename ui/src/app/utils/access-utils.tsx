@@ -470,9 +470,7 @@ export const getAccessModuleStatusByNameOrEmpty = (
   );
 };
 
-const getAccessModuleStatusForIdentityVerification = (
-  profile: Profile
-): AccessModuleStatus => {
+const getIdentityVerification = (profile: Profile): AccessModuleStatus => {
   const idMeStatus = getAccessModuleStatusByNameOrEmpty(
     profile.accessModules.modules,
     AccessModule.RASLINKIDME
@@ -482,29 +480,11 @@ const getAccessModuleStatusForIdentityVerification = (
     AccessModule.RASLINKLOGINGOV
   );
 
-  const statuses = [idMeStatus, loginGovStatus];
-
-  if (
-    idMeStatus.completionEpochMillis &&
-    loginGovStatus.completionEpochMillis
-  ) {
-    return statuses.reduce((max, status) =>
-      status.completionEpochMillis > max.completionEpochMillis ? status : max
-    );
-  } else if (
-    idMeStatus.completionEpochMillis ||
-    loginGovStatus.completionEpochMillis
-  ) {
-    return idMeStatus.completionEpochMillis ? idMeStatus : loginGovStatus;
-  } else if (idMeStatus.bypassEpochMillis && loginGovStatus.bypassEpochMillis) {
-    return statuses.reduce((max, status) =>
-      status.bypassEpochMillis > max.bypassEpochMillis ? status : max
-    );
-  } else if (idMeStatus.bypassEpochMillis || loginGovStatus.bypassEpochMillis) {
-    return idMeStatus.bypassEpochMillis ? idMeStatus : loginGovStatus;
-  } else {
-    return loginGovStatus;
-  }
+  return [idMeStatus, loginGovStatus].sort(
+    (a, b) =>
+      Math.max(b.completionEpochMillis ?? 0, b.bypassEpochMillis ?? 0) -
+      Math.max(a.completionEpochMillis ?? 0, a.bypassEpochMillis ?? 0)
+  )[0];
 };
 
 export const getAccessModuleStatusByName = (
@@ -524,7 +504,7 @@ export const getRelativeAccessModuleStatus = (
   moduleName: AccessModule
 ): AccessModuleStatus => {
   return identityModules.includes(moduleName)
-    ? getAccessModuleStatusForIdentityVerification(profile)
+    ? getIdentityVerification(profile)
     : getAccessModuleStatusByNameOrEmpty(
         profile.accessModules.modules,
         moduleName
