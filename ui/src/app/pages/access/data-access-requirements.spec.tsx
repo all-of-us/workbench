@@ -20,7 +20,6 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   DARPageMode,
   DATA_ACCESS_REQUIREMENTS_PATH,
-  getInitialRequiredModules,
   rtAccessRenewalModules,
 } from 'app/utils/access-utils';
 import { nowPlusDays } from 'app/utils/dates';
@@ -46,6 +45,7 @@ import {
   DataAccessRequirements,
   getActiveModule,
   getEligibleModules,
+  initialRequiredModules,
 } from './data-access-requirements';
 
 const stubProfile = ProfileStubVariables.PROFILE_STUB as Profile;
@@ -288,7 +288,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return all required modules from getEligibleModules by default (all FFs enabled)', () => {
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    getInitialRequiredModules().forEach((module) =>
+    initialRequiredModules.forEach((module) =>
       expect(enabledModules.includes(module)).toBeTruthy()
     );
   });
@@ -324,7 +324,7 @@ describe('DataAccessRequirements', () => {
 
   it('should return the first module (2FA) from getActiveModule when no modules have been completed', () => {
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
     const activeModule = getActiveModule(
@@ -333,7 +333,7 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(getInitialRequiredModules()[0]);
+    expect(activeModule).toEqual(initialRequiredModules[0]);
     expect(activeModule).toEqual(enabledModules[0]);
 
     // update this if the order changes
@@ -351,7 +351,7 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
     const activeModule = getActiveModule(
@@ -360,7 +360,7 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(getInitialRequiredModules()[1]);
+    expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
@@ -378,7 +378,7 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
     const activeModule = getActiveModule(
@@ -387,7 +387,7 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(getInitialRequiredModules()[1]);
+    expect(activeModule).toEqual(initialRequiredModules[1]);
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
@@ -418,7 +418,7 @@ describe('DataAccessRequirements', () => {
       };
 
       const enabledModules = getEligibleModules(
-        getInitialRequiredModules(),
+        initialRequiredModules,
         stubProfile
       );
       const activeModule = getActiveModule(
@@ -434,7 +434,7 @@ describe('DataAccessRequirements', () => {
       expect(activeModule).toEqual(enabledModules[1]);
 
       // but we skip requiredModules[1] because it's RAS and is not enabled
-      expect(activeModule).toEqual(getInitialRequiredModules()[2]);
+      expect(activeModule).toEqual(initialRequiredModules[2]);
     }
   );
 
@@ -454,7 +454,7 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
     const activeModule = getActiveModule(
@@ -463,7 +463,7 @@ describe('DataAccessRequirements', () => {
       DARPageMode.INITIAL_REGISTRATION
     );
 
-    expect(activeModule).toEqual(getInitialRequiredModules()[3]);
+    expect(activeModule).toEqual(initialRequiredModules[3]);
     expect(activeModule).toEqual(enabledModules[3]);
 
     // update this if the order changes
@@ -474,7 +474,7 @@ describe('DataAccessRequirements', () => {
     const testProfile = {
       ...stubProfile,
       accessModules: {
-        modules: getInitialRequiredModules().map((module) => ({
+        modules: initialRequiredModules.map((module) => ({
           moduleName: module,
           completionEpochMillis: 1,
         })),
@@ -482,7 +482,7 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
     const activeModule = getActiveModule(
@@ -515,7 +515,7 @@ describe('DataAccessRequirements', () => {
     };
 
     const enabledModules = getEligibleModules(
-      getInitialRequiredModules(),
+      initialRequiredModules,
       stubProfile
     );
 
@@ -602,7 +602,7 @@ describe('DataAccessRequirements', () => {
 
   it('should render all required modules as incomplete when the profile accessModules are empty', () => {
     const wrapper = component();
-    getInitialRequiredModules().forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findIncompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findCompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -616,7 +616,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),
@@ -628,7 +628,7 @@ describe('DataAccessRequirements', () => {
     });
 
     const wrapper = component();
-    getInitialRequiredModules().forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -644,7 +644,7 @@ describe('DataAccessRequirements', () => {
 
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
 
-    const allExceptRas = getInitialRequiredModules().filter(
+    const allExceptRas = initialRequiredModules.filter(
       (m) => m !== AccessModule.RASLINKLOGINGOV
     );
     profileStore.set({
@@ -690,7 +690,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),
@@ -703,7 +703,7 @@ describe('DataAccessRequirements', () => {
 
     await waitForFakeTimersAndUpdate(wrapper);
 
-    getInitialRequiredModules().forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -718,7 +718,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, bypassEpochMillis: 1 };
           }),
         },
@@ -729,7 +729,7 @@ describe('DataAccessRequirements', () => {
     });
 
     const wrapper = component();
-    getInitialRequiredModules().forEach((module) => {
+    initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(wrapper, module).exists()).toBeTruthy();
 
       expect(findIncompleteModule(wrapper, module).exists()).toBeFalsy();
@@ -739,9 +739,9 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should render a mix of complete and incomplete modules, as appropriate', () => {
-    const requiredModulesSize = getInitialRequiredModules().length;
+    const requiredModulesSize = initialRequiredModules.length;
     const incompleteModules = [AccessModule.RASLINKLOGINGOV];
-    const completeModules = getInitialRequiredModules().filter(
+    const completeModules = initialRequiredModules.filter(
       (module) => module !== AccessModule.RASLINKLOGINGOV
     );
     const completeModulesSize = requiredModulesSize - incompleteModules.length;
@@ -813,7 +813,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, completionEpochMillis: 1 };
           }),
         },
@@ -838,7 +838,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => {
+          modules: initialRequiredModules.map((module) => {
             return { moduleName: module, completionEpochMillis: 1 };
           }),
         },
@@ -888,7 +888,7 @@ describe('DataAccessRequirements', () => {
       profile: {
         ...ProfileStubVariables.PROFILE_STUB,
         accessModules: {
-          modules: getInitialRequiredModules().map((module) => ({
+          modules: initialRequiredModules.map((module) => ({
             moduleName: module,
             completionEpochMillis: 1,
           })),

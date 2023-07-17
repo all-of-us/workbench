@@ -25,7 +25,6 @@ import {
   getAccessModuleConfig,
   getAccessModuleStatusByName,
   getAccessModuleStatusByNameOrEmpty,
-  getInitialRequiredModules,
   getRelativeAccessModuleStatus,
   GetStartedButton,
   isCompliant,
@@ -633,7 +632,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const nextActive = getNextActive(allInitialModules, profile, pageMode);
     const nextRequired = getNextActive(
       pageMode === DARPageMode.INITIAL_REGISTRATION
-        ? getInitialRequiredModules()
+        ? initialRequiredModules
         : renewalRequiredModules,
       profile,
       pageMode

@@ -343,10 +343,6 @@ export const getInitialRTModules = (): AccessModule[] => {
   return modules;
 };
 
-export const getInitialRequiredModules = (): AccessModule[] => {
-  return [...getInitialRTModules(), duccModule];
-};
-
 export const getAllInitialModules = (): AccessModule[] => {
   return [...getInitialRTModules(), ctModule, duccModule];
 };
