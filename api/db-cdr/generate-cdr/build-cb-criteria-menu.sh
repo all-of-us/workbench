@@ -7,6 +7,8 @@ set -e
 export BQ_PROJECT=$1   # project
 export BQ_DATASET=$2   # dataset
 
+TABLE_LIST=$(bq ls -n 1000 "$BQ_PROJECT:$BQ_DATASET")
+
 echo "Getting fitbit count"
 query="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
 where has_fitbit = 1"
@@ -77,6 +79,12 @@ if [[ $structuralVariantDataCount > 0 ]];
 then
   echo "Insert Structural Variant data into cb_criteria_menu"
   insertCriteriaMenu "($((++ID)),0,'Program Data','STRUCTURAL_VARIANT_DATA','','Structural Variant Data',0,$ID)"
+fi
+
+if [[ "$TABLE_LIST" == *"cb_variant_attribute"* ]]
+then
+  echo "Insert SNP/Indel Variants data into cb_criteria_menu"
+  insertCriteriaMenu "($((++ID)),0,'Program Data','SNP_INDEL_VARIANT','','SNP/Indel Variants',0,$ID)"
 fi
 
 echo "Insert cb_criteria_menu"
