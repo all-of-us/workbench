@@ -738,7 +738,7 @@ describe('getAccessModuleStatusByName', () => {
       100,
     ],
     [
-      AccessModule.RASLINKLOGINGOV,
+      AccessModule.RASLINKIDME,
       AccessModule.RASLINKIDME,
       undefined,
       undefined,
