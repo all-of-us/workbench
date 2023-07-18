@@ -52,7 +52,7 @@ export const AdminUserEgressBypass = (props: Props) => {
     'Error occurred while creating egress bypass request'
   ) : (
     <div>
-      Required to bypass Request for large downloads:
+      Required to enable large file downloads:
       <ul>
         {invalidReason && (
           <li>
