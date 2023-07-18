@@ -5444,7 +5444,6 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
-    - RAS_LINK_ID_ME
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
   AccessBypassRequest:

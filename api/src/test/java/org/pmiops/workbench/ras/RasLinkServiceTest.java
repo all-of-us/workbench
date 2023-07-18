@@ -79,9 +79,6 @@ public class RasLinkServiceTest {
   private static final String ID_ME_USERNAME = "foo@id.me";
   private static final String LOGIN_GOV_USERNAME = "foo@Login.Gov.com";
   private static final String ERA_COMMONS_USERNAME = "user2@eraCommons.com";
-
-  private static final String USER_INFO_JSON_ID_ME =
-      "{\"preferred_username\":\"" + ID_ME_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV =
       "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_ERA =
@@ -218,18 +215,6 @@ public class RasLinkServiceTest {
     userId = currentUser.getUserId();
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
-  }
-
-  @Test
-  public void testLinkRasIdMeSuccess() throws Exception {
-    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
-    mockAccessTokenResponse(USER_INFO_JSON_ID_ME);
-
-    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
-
-    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
-    assertModuleCompletionTime(DbAccessModuleName.RAS_ID_ME, NOW);
-    assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
   }
 
   @Test

@@ -91,7 +91,6 @@ public class TestMockFactory {
       ImmutableList.of(
           new DbAccessModule().setName(DbAccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
-          new DbAccessModule().setName(DbAccessModuleName.RAS_ID_ME).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
           new DbAccessModule()
               .setName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
