@@ -30,7 +30,8 @@ export const AdminUserEgressBypass = (props: Props) => {
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
-  const [reload, setReload] = useState(false);
+  const [reload, setReload] = useState(true);
+  const [resetInput, setResetInput] = useState(false);
 
   useEffect(() => {
     const { userId } = props;
@@ -68,18 +69,26 @@ export const AdminUserEgressBypass = (props: Props) => {
 
   const onCreateBypassRequest = () => {
     const { userId } = props;
+    setReload(false);
     egressBypassButtonDisabled = true;
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: (startTime as Date).valueOf(),
       byPassDescription: bypassDescription,
     };
+    setBypassDescription('');
+    setResetInput(true);
+    setStartTime(null);
 
     userAdminApi()
       .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
       .catch(() => {
         setApiError(true);
       })
-      .finally(() => setReload(true));
+      .finally(() => {
+        setReload(true);
+        // This value will need to be reset so that input.TextAreaWithLengthValidationMessage componentDidUpdate triggers
+        setResetInput(false);
+      });
   };
 
   const displayTime = (row, opt) => {
@@ -110,8 +119,9 @@ export const AdminUserEgressBypass = (props: Props) => {
             id='BYPASS-DESCRIPTION'
             textBoxStyleOverrides={{ width: '60%' }}
             heightOverride={{ height: '5rem' }}
-            initialText=''
+            initialText={bypassDescription}
             maxCharacters={MAX_BYPASS_DESCRIPTION}
+            resetAfterUpdate={resetInput}
             onChange={(s: string) => {
               setApiError(false);
               setBypassDescription(s);

@@ -152,6 +152,7 @@ interface TextAreaWithLengthValidationMessageProps {
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
   textBoxStyleOverrides?: {};
+  resetAfterUpdate?: boolean;
 }
 
 interface TextAreaWithLengthValidationMessageState {
@@ -169,6 +170,20 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
       showTooShortWarning: false,
       text: props.initialText,
     };
+  }
+
+  componentDidUpdate(
+    prevProps: Readonly<TextAreaWithLengthValidationMessageProps>,
+    _prevState: Readonly<TextAreaWithLengthValidationMessageState>,
+    _snapshot?: any
+  ) {
+    if (
+      prevProps.resetAfterUpdate !== this.props.resetAfterUpdate &&
+      this.props.resetAfterUpdate
+    ) {
+      const { initialText } = this.props;
+      this.setState({ text: initialText });
+    }
   }
 
   onTextUpdate(text) {
