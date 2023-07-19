@@ -16,7 +16,7 @@ describe('Notebook Upload File Test', () => {
   const workspaceName = 'e2eTestNotebookUploadFile';
   const pyNotebookName = makeRandomName('Py3');
   const pyFileName = 'nbstripoutput-filter.py';
-  const pyFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${pyFileName}`);
+  const pyFilePath = path.relative(process.cwd(), __dirname + `../../../../resources/python-code/${pyFileName}`);
 
   test('Upload file and run Python code', async () => {
     await findOrCreateWorkspace(page, { workspaceName });
