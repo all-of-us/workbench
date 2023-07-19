@@ -197,7 +197,7 @@ public class UserDaoTest {
     final DbAccessModule duccModule =
         accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
     final DbAccessModule rasConfirmModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
+        accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get();
     final DbAccessModule profileConfirmationModule =
         accessModuleDao.findOneByName(DbAccessModuleName.PROFILE_CONFIRMATION).get();
     final DbAccessModule publicationConfirmationModule =

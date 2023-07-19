@@ -250,7 +250,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
       case COMPLIANCE_TRAINING:
       case CT_COMPLIANCE_TRAINING:
         return accessConfig.enableComplianceTraining;
-      case RAS_LINK_LOGIN_GOV:
+      case IDENTITY:
         return accessConfig.enableRasLoginGovLinking || accessConfig.enableRasIdMeLinking;
       default:
         return true;

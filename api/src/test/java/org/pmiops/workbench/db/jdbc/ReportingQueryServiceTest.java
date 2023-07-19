@@ -148,7 +148,7 @@ public class ReportingQueryServiceTest {
     rtTrainingModule =
         accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
     eRACommonsModule = accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
-    rasLoginGovModule = accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
+    rasLoginGovModule = accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get();
     duccModule = accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
 

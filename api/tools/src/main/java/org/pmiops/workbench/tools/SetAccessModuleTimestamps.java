@@ -102,7 +102,7 @@ public class SetAccessModuleTimestamps extends Tool {
           DbAccessModuleName.PROFILE_CONFIRMATION,
           PROFILE_CONFIRMATION_TIMESTAMP);
 
-      updateCompletionTime(accessModuleService, dbRasUser, DbAccessModuleName.RAS_LOGIN_GOV, null);
+      updateCompletionTime(accessModuleService, dbRasUser, DbAccessModuleName.IDENTITY, null);
     };
   }
 

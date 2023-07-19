@@ -1014,13 +1014,13 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(
-        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
+        dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Complete RAS Linking, verify user become registered
     accessModuleService.updateCompletionTime(
-        dbUser, DbAccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
+        dbUser, DbAccessModuleName.IDENTITY, new Timestamp(PROVIDED_CLOCK.millis()));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
@@ -1348,7 +1348,7 @@ public class UserServiceAccessTest {
         user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
-    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.IDENTITY, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, true);
     accessModuleService.updateBypassTime(

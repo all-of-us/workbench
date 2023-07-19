@@ -12,11 +12,9 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 @Mapper(config = MapStructConfig.class)
 public interface AccessModuleNameMapper {
   @ValueMapping(source = "COMPLIANCE_TRAINING", target = "RT_COMPLIANCE_TRAINING")
-  @ValueMapping(source = "RAS_LINK_LOGIN_GOV", target = "RAS_LOGIN_GOV")
   DbAccessModuleName clientAccessModuleToStorage(AccessModule source);
 
   @ValueMapping(source = "RT_COMPLIANCE_TRAINING", target = "COMPLIANCE_TRAINING")
-  @ValueMapping(source = "RAS_LOGIN_GOV", target = "RAS_LINK_LOGIN_GOV")
   AccessModule storageAccessModuleToClient(DbAccessModuleName source);
 
   BypassTimeTargetProperty bypassAuditPropertyFromStorage(DbAccessModuleName source);

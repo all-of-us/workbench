@@ -66,7 +66,7 @@ public class DbAccessModule {
   public enum DbAccessModuleName {
     ERA_COMMONS,
     TWO_FACTOR_AUTH,
-    RAS_LOGIN_GOV,
+    IDENTITY,
     RT_COMPLIANCE_TRAINING,
     DATA_USER_CODE_OF_CONDUCT,
     PROFILE_CONFIRMATION,

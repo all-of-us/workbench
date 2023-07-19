@@ -140,7 +140,7 @@ public interface UserService {
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
 
-  DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
+  DbUser updateIdentityStatus(String userName);
 
   /** Link eRA commons account in RW using RAS as source of truth. */
   DbUser updateRasLinkEraStatus(String eRACommonsUsername);
