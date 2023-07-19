@@ -42,69 +42,69 @@ export const launchPage = async (browser: Browser): Promise<Page> => {
   return incognitoPage;
 };
 
-export const withBrowser = (launchOpts?: LaunchOptions) => async (
-  testFn: (browser: Browser) => Promise<void>
-): Promise<void> => {
-  const browser = await launchBrowser(launchOpts);
-  try {
-    await testFn(browser);
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error(err.message);
-      logger.error(err.stack);
-    }
-  } finally {
-    await browser
-      .close()
-      .then(() => logger.info('Closing browser'))
-      .catch((err: Error) => {
-        console.error(`Unable to close browser. Error message: ${err.message}`);
-      });
-  }
-};
-
-/**
- * Launch new browser and incognito page. Opens Workbench Login page.
- * @param launchOpts: {@link LaunchOptions} New browser launch options.
- */
-export const withPageTest = (launchOpts?: LaunchOptions) => async (
-  testFn: (page: Page, browser: Browser) => Promise<void>
-): Promise<void> => {
-  await withBrowser(launchOpts)(async (browser) => {
-    const incognitoPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
+export const withBrowser =
+  (launchOpts?: LaunchOptions) =>
+  async (testFn: (browser: Browser) => Promise<void>): Promise<void> => {
+    const browser = await launchBrowser(launchOpts);
     try {
-      await initPageBeforeTest(incognitoPage);
-      await testFn(incognitoPage, browser);
+      await testFn(browser);
     } catch (err) {
       if (err instanceof Error) {
         logger.error(err.message);
         logger.error(err.stack);
       }
-      // Take screenshot and save html contents immediately after failure.
-      await fs.ensureDir(failScreenshotDir);
-      await fs.ensureDir(failHtmlDir);
-      await takeScreenshot(incognitoPage, __SPEC_NAME__);
-      await savePageToFile(incognitoPage, `${__SPEC_NAME__}.html`);
-      throw err;
     } finally {
-      await incognitoPage
+      await browser
         .close()
-        .then(() => logger.info('Closing page'))
+        .then(() => logger.info('Closing browser'))
         .catch((err: Error) => {
-          console.error(`Unable to close page. Error message: ${err.message}`);
+          console.error(`Unable to close browser. Error message: ${err.message}`);
         });
     }
-  });
-};
+  };
 
-export const withSignIn = (userEmail?: string) => async (
-  testFn: (page: Page, browser: Browser) => Promise<void>
-): Promise<void> => {
-  await withPageTest()(async (page, browser) => {
-    await signInWithAccessToken(page, userEmail);
-    await testFn(page, browser);
-  });
-};
+/**
+ * Launch new browser and incognito page. Opens Workbench Login page.
+ * @param launchOpts: {@link LaunchOptions} New browser launch options.
+ */
+export const withPageTest =
+  (launchOpts?: LaunchOptions) =>
+  async (testFn: (page: Page, browser: Browser) => Promise<void>): Promise<void> => {
+    await withBrowser(launchOpts)(async (browser) => {
+      const incognitoPage = await browser.createIncognitoBrowserContext().then((context) => context.newPage());
+      try {
+        await initPageBeforeTest(incognitoPage);
+        await testFn(incognitoPage, browser);
+      } catch (err) {
+        if (err instanceof Error) {
+          logger.error(err.message);
+          logger.error(err.stack);
+        }
+        // Take screenshot and save html contents immediately after failure.
+        await fs.ensureDir(failScreenshotDir);
+        await fs.ensureDir(failHtmlDir);
+        await takeScreenshot(incognitoPage, __SPEC_NAME__);
+        await savePageToFile(incognitoPage, `${__SPEC_NAME__}.html`);
+        throw err;
+      } finally {
+        await incognitoPage
+          .close()
+          .then(() => logger.info('Closing page'))
+          .catch((err: Error) => {
+            console.error(`Unable to close page. Error message: ${err.message}`);
+          });
+      }
+    });
+  };
+
+export const withSignIn =
+  (userEmail?: string) =>
+  async (testFn: (page: Page, browser: Browser) => Promise<void>): Promise<void> => {
+    await withPageTest()(async (page, browser) => {
+      await signInWithAccessToken(page, userEmail);
+      await testFn(page, browser);
+    });
+  };
 
 const getPageTitle = async (page: Page) => {
   return await page

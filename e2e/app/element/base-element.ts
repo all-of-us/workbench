@@ -292,8 +292,10 @@ export default class BaseElement {
       return this.page.evaluate(
         (elemt, textValue) => {
           // Refer to https://stackoverflow.com/a/46012210/440432
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')
-            .set;
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            'value'
+          ).set;
           nativeInputValueSetter.call(elemt, textValue);
           const event = new Event('input', { bubbles: true });
           elemt.dispatchEvent(event);
@@ -379,8 +381,10 @@ export default class BaseElement {
       return this.page.evaluate(
         (elemt, textValue) => {
           // Refer to https://stackoverflow.com/a/46012210/440432
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')
-            .set;
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLTextAreaElement.prototype,
+            'value'
+          ).set;
           nativeInputValueSetter.call(elemt, textValue);
           const event = new Event('input', { bubbles: true });
           elemt.dispatchEvent(event);
@@ -420,8 +424,13 @@ export default class BaseElement {
     await this.page
       .waitForFunction(
         (xpath) => {
-          const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
+          const elemt = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue;
           const style = window.getComputedStyle(elemt as Element);
           const propValue = style.getPropertyValue('cursor');
           return propValue === 'pointer';
@@ -447,8 +456,13 @@ export default class BaseElement {
     await this.page
       .waitForFunction(
         (xpath) => {
-          const node = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
+          const node = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue;
           const style = window.getComputedStyle(node as Element);
           const cursor = style.getPropertyValue('cursor');
           return cursor === 'not-allowed';

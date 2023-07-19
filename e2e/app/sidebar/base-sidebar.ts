@@ -90,8 +90,13 @@ export default abstract class BaseSidebar extends Container {
       this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
       this.page.waitForFunction(
         (selector) => {
-          const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
+          const node = document.evaluate(
+            selector,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue;
           return node === null;
         },
         { polling: 'mutation' },

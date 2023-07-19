@@ -32,7 +32,9 @@ export default class NotebookDownloadModal extends NotebookFrame {
     // Chrome headless is unable to click this button properly using standard
     // ElementHandle.click(). Even a standard element click() doesn't do it,
     // likely because the Jupyter UI heavily uses jQuery event handling.
-    await (await this.getIFrame()).evaluate(() => {
+    await (
+      await this.getIFrame()
+    ).evaluate(() => {
       return (window as any).$('#aou-download').click();
     });
   }
