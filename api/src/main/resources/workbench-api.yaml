@@ -1885,16 +1885,16 @@ paths:
       tags:
         - userAdmin
       description: >
-        Get the user's active egress bypass window. Returns null if user does not have active. 
+        List all of the user's egress bypass windows. 
         Require RESEARCHER_DATA_VIEW authority
       parameters:
         - "$ref": "#/parameters/userId"
-      operationId: getEgressBypassWindow
+      operationId: listEgressBypassWindows
       responses:
         200:
           description: success
           schema:
-            "$ref": "#/definitions/EgressBypassWindow"
+            "$ref": "#/definitions/ListEgressBypassWindowResponse"
 
   "/v1/cron/deleteOldRuntimes":
     get:
@@ -7273,6 +7273,13 @@ definitions:
       byPassDescription:
         type: string
         description: Brief description of this bypass request.
+  ListEgressBypassWindowResponse:
+    type: object
+    properties:
+      bypassWindows:
+        type: array
+        items:
+          "$ref": "#/definitions/EgressBypassWindow"
   EgressBypassWindow:
     type: object
     properties:

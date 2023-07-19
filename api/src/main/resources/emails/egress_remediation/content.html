@@ -21,13 +21,13 @@
   </style>
 </head>
 <body>
-<img src="${HEADER_IMG}">
-<div>Dear researcher,</div>
+<div>Dear Researcher,</div>
 <div>This is an automated email from the ${ALL_OF_US} Security Team at Vanderbilt University Medical
   Center. We received an alert related to activity on your account <b>${USERNAME}</b>. This
   alert was triggered because our monitoring system detected potential data egress from
-  your workspace. Please be advised users are not permitted to pull any row level data out of the
-  Researcher Workbench, per the ${ALL_OF_US} Research Program Data User Code of Conduct.
+  your workspace. Please be advised users are not permitted to pull any row-level/participant-level data out of the
+  Researcher Workbench, per the ${ALL_OF_US} Research Program
+  <a href="https://www.researchallofus.org/wp-content/themes/research-hub-wordpress-theme/media/data&tools/data-access-use/Data_User_Code_of_Conduct%204.4.2022.pdf">Data User Code of Conduct</a>
   ${EGRESS_REMEDIATION_DESCRIPTION}
 </div>
 <div>
@@ -35,13 +35,18 @@
 </div>
 <div>
   <ul>
-    <li>Can you please confirm your account activity, and please share the details of that activity?
-    <li>Specifically, can you share the SQL query you used so we can validate it against our logs?
-    <li>Can you confirm no row level data was downloaded to your local device during this activity?
+    <li>Can you please confirm your account activity, and the details of that activity?
+    <li>Specifically, can you share the query you used so we can validate it against our logs?
+    <li>Can you confirm no row-level/participant-level data was downloaded to your local device during this activity?
   </ul>
 </div>
 <div>
-  Please respond by choosing "Reply to All". Please do not include any participant data in your
+  If you are working with large sized data files due to the nature of your research (i.e.: genomics) or large sized notebooks,
+  you may request a temporary increase in your egress threshold limit by filling out and
+  submitting the <a href="https://redcap.pmi-ops.org/surveys/?s=YRXMJFJ97J3WMWLE">Large Data Download request form</a>.
+</div>
+<div>
+  Please respond by choosing "Reply to All" and do not include any participant data in your
   response.
 </div>
 <div>
@@ -52,4 +57,5 @@
   ${ALL_OF_US} DRC / RW Security Team<br/>
   Vanderbilt University Medical Center
 </div>
+<img src="${HEADER_IMG}">
 </body>
