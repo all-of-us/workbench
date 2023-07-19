@@ -317,8 +317,6 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable enableConceptSetsInCohortBuilder
-    public boolean enableConceptSetsInCohortBuilder;
     // If true, enable using the Cromwell GKE app
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app
