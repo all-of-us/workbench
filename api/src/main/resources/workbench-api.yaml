@@ -6184,7 +6184,7 @@ definitions:
       eraCommonsBypassTime:
         type: integer
         format: int64
-      rasLinkLoginGovBypassTime:
+      identityBypassTime:
         type: integer
         format: int64
       complianceTrainingBypassTime:

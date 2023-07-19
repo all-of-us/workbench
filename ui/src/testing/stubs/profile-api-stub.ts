@@ -27,7 +27,7 @@ export class ProfileStubVariables {
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
     eraCommonsBypassTime: null,
-    rasLinkLoginGovBypassTime: null,
+    identityBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,

@@ -301,7 +301,7 @@ describe('DataAccessRequirements', () => {
       },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    expect(enabledModules.includes(AccessModule.IDENTITY)).toBeFalsy();
   });
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
@@ -364,7 +364,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModule.IDENTITY);
   });
 
   it('should return the second module (RAS) from getActiveModule when the first module (2FA) has been bypassed', () => {
@@ -391,7 +391,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[1]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModule.IDENTITY);
   });
 
   it(
@@ -446,7 +446,7 @@ describe('DataAccessRequirements', () => {
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
           { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
           },
         ],
@@ -524,7 +524,7 @@ describe('DataAccessRequirements', () => {
       testProfile,
       DARPageMode.INITIAL_REGISTRATION
     );
-    expect(activeModule).toEqual(AccessModule.RASLINKLOGINGOV);
+    expect(activeModule).toEqual(AccessModule.IDENTITY);
 
     // simulate handleRasCallback() by updating the profile
 
@@ -534,7 +534,7 @@ describe('DataAccessRequirements', () => {
         modules: [
           ...testProfile.accessModules.modules,
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
           },
         ],
@@ -585,18 +585,16 @@ describe('DataAccessRequirements', () => {
       },
     });
     const wrapper = component();
+    expect(findModule(wrapper, AccessModule.IDENTITY).exists()).toBeTruthy();
     expect(
-      findModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
-    ).toBeTruthy();
-    expect(
-      findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIneligibleModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeTruthy();
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
   });
 
@@ -645,7 +643,7 @@ describe('DataAccessRequirements', () => {
     // initially, the user has completed all required modules except RAS (the standard case at RAS launch time)
 
     const allExceptRas = initialRequiredModules.filter(
-      (m) => m !== AccessModule.RASLINKLOGINGOV
+      (m) => m !== AccessModule.IDENTITY
     );
     profileStore.set({
       profile: {
@@ -672,14 +670,14 @@ describe('DataAccessRequirements', () => {
 
     // RAS is not complete
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeTruthy();
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
     expect(
-      findIneligibleModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIneligibleModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
 
     expect(findCompletionBanner(wrapper).exists()).toBeFalsy();
@@ -740,9 +738,9 @@ describe('DataAccessRequirements', () => {
 
   it('should render a mix of complete and incomplete modules, as appropriate', () => {
     const requiredModulesSize = initialRequiredModules.length;
-    const incompleteModules = [AccessModule.RASLINKLOGINGOV];
+    const incompleteModules = [AccessModule.IDENTITY];
     const completeModules = initialRequiredModules.filter(
-      (module) => module !== AccessModule.RASLINKLOGINGOV
+      (module) => module !== AccessModule.IDENTITY
     );
     const completeModulesSize = requiredModulesSize - incompleteModules.length;
 
@@ -1359,10 +1357,10 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeTruthy();
 
     expect(findContactUs(wrapper).exists()).toBeTruthy();
@@ -1375,7 +1373,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModule.RASLINKLOGINGOV,
+              moduleName: AccessModule.IDENTITY,
               completionEpochMillis: 1,
             },
           ],
@@ -1390,10 +1388,10 @@ describe('DataAccessRequirements', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(
-      findCompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findCompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeTruthy();
     expect(
-      findIncompleteModule(wrapper, AccessModule.RASLINKLOGINGOV).exists()
+      findIncompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
 
     expect(findContactUs(wrapper).exists()).toBeFalsy();

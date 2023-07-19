@@ -45,7 +45,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.duccBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
-    ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
+    ...(user.identityBypassTime ? [AccessModule.IDENTITY] : []),
     ...(user.profileConfirmationBypassTime
       ? [AccessModule.PROFILECONFIRMATION]
       : []),
@@ -79,7 +79,7 @@ const moduleToToggleProps: Record<
     name: 'Two Factor Auth',
     'data-test-id': 'two-factor-auth-toggle',
   },
-  [AccessModule.RASLINKLOGINGOV]: {
+  [AccessModule.IDENTITY]: {
     name: 'RAS Login.gov Link',
     'data-test-id': 'ras-link-login-gov-toggle',
   },
