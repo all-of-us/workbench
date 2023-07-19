@@ -30,14 +30,13 @@ export const AdminUserEgressBypass = (props: Props) => {
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
-  const [reload, setReload] = useState(false);
   const [reload, setReload] = useState(true);
 
   useEffect(() => {
     const { userId } = props;
     userAdminApi()
-      .getEgressBypassWindow(userId)
-      .then((res) => setBypassWindowsList([res]));
+      .listEgressBypassWindows(userId)
+      .then((res) => setBypassWindowsList(res.bypassWindows));
   }, [reload]);
 
   const invalidReason =
