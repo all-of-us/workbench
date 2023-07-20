@@ -7268,8 +7268,7 @@ definitions:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window begins in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
       byPassDescription:
         type: string
         description: Brief description of this bypass request.
@@ -7287,14 +7286,12 @@ definitions:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window begins in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
       endTime:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window ends in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window ends in milliseconds since the UNIX epoch
       description:
         type: string
         description: Brief description of this bypass request.
