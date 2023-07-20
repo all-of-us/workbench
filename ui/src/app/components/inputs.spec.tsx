@@ -84,7 +84,7 @@ describe('inputs', () => {
         onChange={() => {}}
       />
     );
-    // Length of initialText (Hey): 3 characters remaining 5 - 3
+    // Length of initialText (Hey): 3, characters remaining 5 - 3
     expect(
       wrapper.find('[data-test-id="characterLimit"]').first().text()
     ).toEqual(`2 characters remaining`);
@@ -119,7 +119,7 @@ describe('inputs', () => {
   });
 
   it('Shows too short warning if text input is less the short characters', () => {
-    // No props for tooShortWarning should not show any warning
+    // No tooShortWarning props: should not show any warning
     let wrapper = mount(
       <TextAreaWithLengthValidationMessage
         id={'test'}
@@ -132,7 +132,7 @@ describe('inputs', () => {
     wrapper.find('textarea').simulate('blur');
     expect(wrapper.find('[data-test-id="warning"]').length).toBe(0);
 
-    // Props for tooShortWarning should show any warning if the text is less than tooShortWarningCharacters
+    // Props for tooShortWarning should show tooShortWarning if the text length is less than tooShortWarningCharacters
     wrapper = mount(
       <TextAreaWithLengthValidationMessage
         id={'test'}
@@ -149,7 +149,7 @@ describe('inputs', () => {
       'Testing too short'
     );
 
-    // Props for tooShortWarning should not show any warning if the text is more than tooShortWarningCharacters
+    // Props for tooShortWarning should not show any warning if the text length is more than tooShortWarningCharacters
     wrapper = mount(
       <TextAreaWithLengthValidationMessage
         id={'test'}
