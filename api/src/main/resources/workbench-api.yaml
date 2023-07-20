@@ -4264,6 +4264,38 @@ paths:
           description: A collection of data filter options
           schema:
             "$ref": "#/definitions/DataFiltersResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/{searchTerm}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns genomic variants from VAT per specified search term
+      operationId: findVariants
+      parameters:
+        - in: path
+          name: searchTerm
+          type: string
+          required: true
+          description: search term (variant id, gene, rs number or chr position)
+        - in: query
+          name: pageToken
+          description: 'Pagination token retrieved from a previous call to user; used
+         for retrieving additional pages of results.'
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: 'Maximum number of results to return in a response. Defaults
+         to 10.'
+          type: integer
+          required: false
+      responses:
+        200:
+          description: A collection of variants
+          schema:
+            "$ref": "#/definitions/VariantListResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -9213,6 +9245,53 @@ definitions:
         format: int64
       conceptName:
         type: string
+  VariantListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/Variant"
+      nextPageToken:
+        type: string
+        description: >
+          If present, this token can be provided to retrieve the next page of results.
+          If null or empty, there are no further pages in the result stream.
+      totalSize:
+        type: integer
+        description: Total size of the result set.
+  Variant:
+    type: object
+    required:
+      - vid
+      - participantCount
+    properties:
+      vid:
+        description: 'Primary identifier of a variant.'
+        type: string
+      gene:
+        description: 'Gene name.'
+        type: string
+      consequence:
+        type: string
+      proteinChange:
+        type: string
+      clinVarSignificance:
+        type: string
+      alleleCount:
+        type: integer
+        format: int64
+      alleleNumber:
+        type: integer
+        format: int64
+      alleleFrequency:
+        type: number
+        format: double
+      participantCount:
+        type: integer
+        format: int64
 
   AuditProjectAccessRequest:
     type: object

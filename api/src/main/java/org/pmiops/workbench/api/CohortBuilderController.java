@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -32,7 +34,10 @@ import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
+import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
+  private static final int DEFAULT_PAGE_SIZE = 25;
+  private static final int MAX_PAGE_SIZE = 100;
   public static final Integer DEFAULT_COHORT_CHART_DATA_LIMIT = 10;
   private static final String BAD_REQUEST_MESSAGE =
       "Bad Request: Please provide a valid %s. %s is not valid.";
@@ -222,6 +229,48 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     return ResponseEntity.ok(
         new CardCountResponse().items(cohortBuilderService.findUniversalDomainCounts(term)));
+  }
+
+  @Override
+  public ResponseEntity<VariantListResponse> findVariants(
+      String workspaceNamespace,
+      String workspaceId,
+      String searchTerm,
+      String pageToken,
+      Integer pageSize) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(searchTerm);
+
+    int limit = DEFAULT_PAGE_SIZE;
+    if (pageSize != null && pageSize > 0) {
+      limit = Math.min(pageSize, MAX_PAGE_SIZE);
+    }
+
+    int offset = 0;
+    int page = 0;
+    if (!Strings.isNullOrEmpty(pageToken)) {
+      PaginationToken token = PaginationToken.fromBase64(pageToken);
+      page = (int) token.getOffset();
+      offset = page * limit;
+    }
+
+    // query total count for pagination
+    int totalCount = cohortBuilderService.findVariantsCount(searchTerm);
+
+    // query page of data
+    List<Variant> variants = cohortBuilderService.findVariants(searchTerm, limit, offset);
+
+    String nextPageToken = null;
+    if (offset < totalCount) {
+      nextPageToken = PaginationToken.of(page + 1).toBase64();
+    }
+
+    return ResponseEntity.ok(
+        new VariantListResponse()
+            .items(variants)
+            .nextPageToken(nextPageToken)
+            .totalSize(totalCount));
   }
 
   @Override

@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.Variant;
 
 public interface CohortBuilderService {
 
@@ -82,4 +83,8 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys);
 
   List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);
+
+  int findVariantsCount(String searchTerm);
+
+  List<Variant> findVariants(String searchTerm, Integer limit, Integer offset);
 }

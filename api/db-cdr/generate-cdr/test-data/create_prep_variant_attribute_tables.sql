@@ -2,9 +2,9 @@ CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_att
     CLUSTER BY vid
 AS
     WITH sorted_transcripts AS (SELECT vid, consequence, aa_change AS protein_change,
-        contig, position, ref_allele, alt_allele, transcript, ARRAY_TO_STRING(consequence, ',') AS cons_str, dna_change_in_transcript, clinvar_classification AS clinical_significance,
+        contig, position, ref_allele, alt_allele, transcript, ARRAY_TO_STRING(consequence, ', ') AS cons_str, dna_change_in_transcript, ARRAY_TO_STRING(clinvar_classification, ', ') AS clinical_significance,
     gvs_all_ac, gvs_all_an, gvs_all_af,
-    ROW_NUMBER() OVER(PARTITION BY vid ORDER BY CASE ARRAY_TO_STRING(consequence, ',')
+    ROW_NUMBER() OVER(PARTITION BY vid ORDER BY CASE ARRAY_TO_STRING(consequence, ', ')
     WHEN 'upstream_gene_variant'
     THEN 4
     WHEN 'downstream_gene_variant'
@@ -40,9 +40,7 @@ FROM sorted_transcripts, genes
 WHERE genes.vid = sorted_transcripts.vid
   AND (sorted_transcripts.row_number =1 or sorted_transcripts.transcript is NULL);
 
-CREATE MATERIALIZED VIEW `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute_contig_position`
-  CLUSTER BY contig, position
-  AS
+CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute_contig_position` CLUSTER BY contig, position AS
 SELECT *
 FROM `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute`;
 

@@ -55,6 +55,8 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -590,6 +592,25 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public int findVariantsCount(String searchTerm) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildCountQuery(searchTerm));
+    FieldValueList row = result.iterateAll().iterator().next();
+    return Integer.parseInt(row.get("count").getStringValue());
+  }
+
+  @Override
+  public List<Variant> findVariants(String searchTerm, Integer limit, Integer offset) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildQuery(searchTerm, limit, offset));
+    return StreamSupport.stream(result.iterateAll().spliterator(), false)
+        .map(this::fieldValueListToVariant)
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  @Override
   public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
     List<String> searchDomains =
         ImmutableList.of(
@@ -611,6 +632,20 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return dbCriteria.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private Variant fieldValueListToVariant(FieldValueList row) {
+    Variant variant = new Variant();
+    FieldValues.getString(row, "vid").ifPresent(variant::setVid);
+    FieldValues.getString(row, "genes").ifPresent(variant::setGene);
+    FieldValues.getString(row, "cons_str").ifPresent(variant::setConsequence);
+    FieldValues.getString(row, "protein_change").ifPresent(variant::setProteinChange);
+    FieldValues.getString(row, "clinical_significance").ifPresent(variant::setClinVarSignificance);
+    FieldValues.getLong(row, "allele_count").ifPresent(variant::setAlleleCount);
+    FieldValues.getLong(row, "allele_number").ifPresent(variant::setAlleleNumber);
+    FieldValues.getDouble(row, "allele_frequency").ifPresent(variant::setAlleleFrequency);
+    FieldValues.getLong(row, "participant_count").ifPresent(variant::setParticipantCount);
+    return variant;
   }
 
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(
