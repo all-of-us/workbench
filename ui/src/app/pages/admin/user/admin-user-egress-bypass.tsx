@@ -15,7 +15,7 @@ import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { formatDate, isDateValid, toDate } from 'app/utils/dates';
+import { formatDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -147,7 +147,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             minDate={new Date()}
             onChange={(e) => {
               setApiError(false);
-              setStartTime(toDate(e.value));
+              setStartTime(maybeToSingleDate(e.value));
             }}
           />
         </FlexRow>

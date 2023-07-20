@@ -53,7 +53,10 @@ export function isDateValid(date: Date): boolean {
   );
 }
 
-export const toDate = (c: CalendarValueType): Date | undefined => {
+// CalendarValueType is a union type of Date | Date[] | string | undefined | null
+// if Date or string: return a Date
+// if Date[], undefined, or null: return undefined
+export const maybeToSingleDate = (c: CalendarValueType): Date | undefined => {
   // can't use cond() here because type narrowing isn't supported
   if (c instanceof Date) {
     return c;
