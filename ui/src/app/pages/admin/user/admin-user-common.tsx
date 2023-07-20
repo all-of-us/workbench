@@ -140,10 +140,12 @@ export const getInitialCreditLimitOptions = (
   const group2 = fp.rangeStep(STEP2, START2, END2 + 1);
   const group3 = fp.rangeStep(STEP3, START3, END3 + 1);
 
+  // the override value often duplicates one of the step values (like $400)
+  // this is fine because it's a set
   const defaultsPlusMaybeOverride = new Set([
-    ...group1,
-    ...group2,
-    ...group3,
+    ...group1, // 300, 325, ..., 500
+    ...group2, // 500, 600, 700, 800, 900, 1000
+    ...group3, // 1000, 1500, ..., 10000
     initialCreditLimitOverride ?? START1,
   ]);
 
@@ -152,10 +154,10 @@ export const getInitialCreditLimitOptions = (
     (a, b) => a - b
   );
 
-  return fp.map(
-    (limit) => ({ label: formatInitialCreditsUSD(limit), value: limit }),
-    numericallySorted
-  );
+  return numericallySorted.map((value) => ({
+    value,
+    label: formatInitialCreditsUSD(value),
+  }));
 };
 
 export const getInitialCreditsUsage = (profile: Profile): string => {
