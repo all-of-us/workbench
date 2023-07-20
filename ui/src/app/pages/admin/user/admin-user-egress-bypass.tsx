@@ -24,7 +24,7 @@ interface Props {
 }
 
 export const AdminUserEgressBypass = (props: Props) => {
-  const [startTime, setStartTime] = useState<Date>(null);
+  const [startTime, setStartTime] = useState(new Date());
   const [bypassDescription, setBypassDescription] = useState('');
   const [apiError, setApiError] = useState(false);
   const [bypassWindowsList, setBypassWindowsList] = useState<
