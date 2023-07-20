@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="eric" id="db.changelog-221-update-access-modules">
+  <changeSet author="eric" id="db.changelog-221-identity-modules">
     <sql>
       ALTER TABLE access_module
         MODIFY COLUMN name
@@ -20,32 +20,18 @@
         'CT_COMPLIANCE_TRAINING')
     </sql>
     <sql>
-      UPDATE access_module
-      SET name = 'IDENTITY'
-      WHERE name = 'RAS_LOGIN_GOV'
+      INSERT INTO access_module (name, expirable)
+      VALUES('IDENTITY', false);
     </sql>
+    <!-- Duplicate all RAS_LOGIN_GOV records with IDENTITY records -->
     <sql>
-      DELETE FROM user_access_module
-      WHERE access_module_id = (
-        SELECT access_module_id
-        FROM access_module
-        WHERE name = 'RAS_ID_ME')
-    </sql>
-    <sql>
-      DELETE FROM access_module
-      WHERE name = 'RAS_ID_ME'
-    </sql>
-    <sql>
-      ALTER TABLE access_module
-        MODIFY COLUMN name
-        ENUM('ERA_COMMONS',
-        'TWO_FACTOR_AUTH',
-        'IDENTITY',
-        'RT_COMPLIANCE_TRAINING',
-        'DATA_USER_CODE_OF_CONDUCT',
-        'PROFILE_CONFIRMATION',
-        'PUBLICATION_CONFIRMATION',
-        'CT_COMPLIANCE_TRAINING')
+      INSERT INTO user_access_module (access_module_id, user_id, bypass_time, completion_time)
+      SELECT i.access_module_id, uam.user_id, uam.bypass_time, uam.completion_time
+      FROM user_access_module AS uam
+             INNER JOIN access_module AS am
+                        ON uam.access_module_id = am.access_module_id
+             CROSS JOIN (SELECT access_module_id FROM access_module WHERE name = 'IDENTITY') AS i
+      WHERE am.name = 'RAS_LOGIN_GOV';
     </sql>
   </changeSet>
 </databaseChangeLog>
