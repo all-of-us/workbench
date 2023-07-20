@@ -30,14 +30,17 @@ export const AdminUserEgressBypass = (props: Props) => {
   const [bypassWindowsList, setBypassWindowsList] = useState<
     EgressBypassWindow[]
   >([]);
-  const [reload, setReload] = useState(true);
 
-  useEffect(() => {
+  const loadEgressWindows = () => {
     const { userId } = props;
     userAdminApi()
       .listEgressBypassWindows(userId)
       .then((res) => setBypassWindowsList(res.bypassWindows));
-  }, [reload]);
+  };
+
+  useEffect(() => {
+    loadEgressWindows();
+  }, []);
 
   const invalidReason =
     !bypassDescription ||
@@ -68,14 +71,12 @@ export const AdminUserEgressBypass = (props: Props) => {
 
   const onCreateBypassRequest = () => {
     const { userId } = props;
-    setReload(false);
     egressBypassButtonDisabled = true;
     const createEgressBypassWindowRequest: CreateEgressBypassWindowRequest = {
       startTime: startTime.valueOf(),
       byPassDescription: bypassDescription,
     };
     setBypassDescription('');
-    setStartTime(null);
 
     userAdminApi()
       .createEgressBypassWindow(userId, createEgressBypassWindowRequest)
@@ -83,7 +84,7 @@ export const AdminUserEgressBypass = (props: Props) => {
         setApiError(true);
       })
       .finally(() => {
-        setReload(true);
+        loadEgressWindows();
       });
   };
 
