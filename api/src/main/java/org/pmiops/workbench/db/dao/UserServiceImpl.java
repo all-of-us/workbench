@@ -767,8 +767,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return updateUserWithRetries(
         user -> {
           user.setRasLinkUsername(userName);
-          accessModuleService.updateCompletionTime(
-              user, DbAccessModuleName.IDENTITY, clockNow());
+          accessModuleService.updateCompletionTime(user, DbAccessModuleName.IDENTITY, clockNow());
           return user;
         },
         dbUser,
