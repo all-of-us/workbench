@@ -152,7 +152,6 @@ interface TextAreaWithLengthValidationMessageProps {
   tooShortWarningCharacters?: number;
   tooShortWarning?: string;
   textBoxStyleOverrides?: {};
-  resetAfterUpdate?: boolean;
 }
 
 export const TextAreaWithLengthValidationMessage = (
@@ -163,11 +162,8 @@ export const TextAreaWithLengthValidationMessage = (
   const [text, setText] = useState<string>(props.initialText);
 
   useEffect(() => {
-    const { initialText, resetAfterUpdate } = props;
-    if (resetAfterUpdate) {
-      setText(initialText);
-    }
-  }, [props.resetAfterUpdate]);
+    setText(props.initialText);
+  }, [props.initialText]);
 
   function onTextUpdate(newText) {
     if (showTooShortWarning && newText.length >= 50) {
