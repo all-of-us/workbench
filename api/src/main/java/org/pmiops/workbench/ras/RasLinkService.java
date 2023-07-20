@@ -152,9 +152,8 @@ public class RasLinkService {
 
     String username = getUsername(userInfoResponse);
     DbUser user;
-    if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateIdentityStatus(username);
-    } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+    if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)
+        || username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
       user = userService.updateIdentityStatus(username);
     } else {
       throw new ForbiddenException(
