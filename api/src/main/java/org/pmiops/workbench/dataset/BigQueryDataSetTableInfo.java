@@ -51,7 +51,12 @@ public enum BigQueryDataSetTableInfo {
   FITBIT_SLEEP_DAILY_SUMMARY(
       Domain.FITBIT_SLEEP_DAILY_SUMMARY, "ds_sleep_daily_summary", null, null),
   FITBIT_SLEEP_LEVEL(Domain.FITBIT_SLEEP_LEVEL, "ds_sleep_level", null, null),
-  ZIP_CODE_SOCIOECONOMIC(Domain.ZIP_CODE_SOCIOECONOMIC, "ds_zip_code_socioeconomic", null, null);
+  ZIP_CODE_SOCIOECONOMIC(Domain.ZIP_CODE_SOCIOECONOMIC, "ds_zip_code_socioeconomic", null, null),
+  VISIT(
+      Domain.VISIT,
+      "ds_visit_occurrence",
+      " visit_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
+      " visit_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0));
 
   private final Domain domain;
   private final String tableName;
