@@ -55,8 +55,8 @@ public enum BigQueryDataSetTableInfo {
   VISIT(
       Domain.VISIT,
       "ds_visit_occurrence",
-      " visit_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@standardConceptIds", 1),
-      " visit_source_concept_id IN " + String.format(CHILD_LOOKUP_SQL, "@sourceConceptIds", 0));
+      " visit_concept_id IN unnest(@standardConceptIds)",
+      " visit_source_concept_id IN unnest(@sourceConceptIds)");
 
   private final Domain domain;
   private final String tableName;
