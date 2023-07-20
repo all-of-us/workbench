@@ -1,4 +1,5 @@
 import { AdminUserListResponse, Profile, UserAdminApi } from 'generated/fetch';
+import { ListEgressBypassWindowResponse } from 'generated/fetch';
 
 import { ProfileStubVariables } from './profile-api-stub';
 import { stubNotImplementedError } from './stub-utils';
@@ -24,5 +25,8 @@ export class UserAdminApiStub extends UserAdminApi {
 
   public getUserByUsername(): Promise<Profile> {
     return Promise.resolve(this.profile);
+  }
+  public listEgressBypassWindows(): Promise<ListEgressBypassWindowResponse> {
+    return Promise.resolve({});
   }
 }

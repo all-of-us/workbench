@@ -15,5 +15,3 @@ handlers:
     script: tanagraapi.jar
 includes:
   - tanagra_env_variables.yaml
-vpc_access_connector:
-  name: "projects/all-of-us-workbench-test/locations/us-central1/connectors/gae-tanagra-connector"

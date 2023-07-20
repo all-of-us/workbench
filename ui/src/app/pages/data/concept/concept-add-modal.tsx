@@ -351,7 +351,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
                     }}
                   />
                   <ValidationError>
-                    {summarizeErrors(nameTouched && errors && errors.name)}
+                    {summarizeErrors(nameTouched && errors?.name)}
                   </ValidationError>
                   <textarea
                     style={{ marginTop: '1.5rem' }}

@@ -1885,16 +1885,16 @@ paths:
       tags:
         - userAdmin
       description: >
-        Get the user's active egress bypass window. Returns null if user does not have active. 
+        List all of the user's egress bypass windows. 
         Require RESEARCHER_DATA_VIEW authority
       parameters:
         - "$ref": "#/parameters/userId"
-      operationId: getEgressBypassWindow
+      operationId: listEgressBypassWindows
       responses:
         200:
           description: success
           schema:
-            "$ref": "#/definitions/EgressBypassWindow"
+            "$ref": "#/definitions/ListEgressBypassWindowResponse"
 
   "/v1/cron/deleteOldRuntimes":
     get:
@@ -4415,6 +4415,7 @@ definitions:
     - WHOLE_GENOME_VARIANT
     - LR_WHOLE_GENOME_VARIANT
     - STRUCTURAL_VARIANT_DATA
+    - SNP_INDEL_VARIANT
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
     - CONCEPT_SET
@@ -4817,10 +4818,6 @@ definitions:
         type: boolean
         default: true
         description: Whether a captcha check is part of the new user registration process
-      enableConceptSetsInCohortBuilder:
-        type: boolean
-        default: false
-        description: Whether to enable adding ConceptSets to CohortBuilder.
       enableCromwellGKEApp:
         type: boolean
         default: false
@@ -7276,6 +7273,13 @@ definitions:
       byPassDescription:
         type: string
         description: Brief description of this bypass request.
+  ListEgressBypassWindowResponse:
+    type: object
+    properties:
+      bypassWindows:
+        type: array
+        items:
+          "$ref": "#/definitions/EgressBypassWindow"
   EgressBypassWindow:
     type: object
     properties:

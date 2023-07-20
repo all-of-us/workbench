@@ -75,9 +75,6 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
-  @Mapping(
-      target = "enableConceptSetsInCohortBuilder",
-      source = "config.featureFlags.enableConceptSetsInCohortBuilder")
   @Mapping(target = "enableCromwellGKEApp", source = "config.featureFlags.enableCromwellGKEApp")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")

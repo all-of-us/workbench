@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 
-import { CheckBox } from './inputs';
+import { CheckBox, TextAreaWithLengthValidationMessage } from './inputs';
+
+const initialText = 'Hey';
 
 function findInput(
   wrapper: ShallowWrapper | ReactWrapper
@@ -71,5 +73,94 @@ describe('inputs', () => {
       />
     );
     expect(wrapper).toBeTruthy();
+  });
+
+  it('Shows characters remaining warning ', () => {
+    let wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText}
+        maxCharacters={5}
+        onChange={() => {}}
+      />
+    );
+    // Length of initialText (Hey): 3, characters remaining 5 - 3
+    expect(
+      wrapper.find('[data-test-id="characterLimit"]').first().text()
+    ).toEqual(`2 characters remaining`);
+
+    wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText + 'me'}
+        maxCharacters={5}
+        onChange={() => {}}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-id="characterLimit"]').first().text()
+    ).toEqual(`0 characters remaining`);
+  });
+
+  it('Shows characters over warning', () => {
+    const wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText + ' lets test'}
+        maxCharacters={5}
+        onChange={() => {}}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-id="characterLimit"]').first().text()
+    ).toEqual('8 characters over');
+  });
+
+  it('Shows too short warning if text input is less the short characters', () => {
+    // No tooShortWarning props: should not show any warning
+    let wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText}
+        maxCharacters={15}
+        onChange={() => {}}
+      />
+    );
+
+    wrapper.find('textarea').simulate('blur');
+    expect(wrapper.find('[data-test-id="warning"]').length).toBe(0);
+
+    // Props for tooShortWarning should show tooShortWarning if the text length is less than tooShortWarningCharacters
+    wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText}
+        maxCharacters={15}
+        onChange={() => {}}
+        tooShortWarning={'Testing too short'}
+        tooShortWarningCharacters={5}
+      />
+    );
+    wrapper.find('textarea').simulate('blur');
+    expect(wrapper.find('[data-test-id="warning"]').length).toBe(1);
+    expect(wrapper.find('[data-test-id="warning"]').first().text()).toBe(
+      'Testing too short'
+    );
+
+    // Props for tooShortWarning should not show any warning if the text length is more than tooShortWarningCharacters
+    wrapper = mount(
+      <TextAreaWithLengthValidationMessage
+        id={'test'}
+        initialText={initialText}
+        maxCharacters={15}
+        onChange={() => {}}
+        tooShortWarning={'Testing too short'}
+        tooShortWarningCharacters={2}
+      />
+    );
+    wrapper.find('textarea').simulate('blur');
+    expect(wrapper.find('[data-test-id="warning"]').length).toBe(0);
   });
 });

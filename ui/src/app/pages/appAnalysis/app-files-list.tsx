@@ -31,6 +31,7 @@ const styles = reactStyles({
     border: `solid ${colorWithWhiteness(colors.disabled, 0.6)}`,
     borderWidth: '1px 1px 0 1px',
     borderRadius: '8px 8px 0 0',
+    minHeight: '650px', // kluge to give more space to the config panel
   },
   spacing: {
     marginBottom: '32px',
