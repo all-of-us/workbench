@@ -4,7 +4,9 @@ import { Dropdown } from 'primereact/dropdown';
 
 import { BillingStatus } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import {
   Modal,
   ModalBody,
@@ -15,7 +17,7 @@ import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
+import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -34,32 +36,43 @@ const styles = reactStyles({
   },
 });
 
+export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+
+const enum VisiblePanel {
+  None = 'None',
+  Selector = 'Selector',
+  Jupyter = 'Jupyter',
+  RStudio = 'RStudio',
+}
+
 interface AppSelectorProps {
   workspace: WorkspaceData;
 }
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
-  const [selectedApp, setSelectedApp] = useState('');
-  const [showSelectAppModal, setShowSelectAppModal] = useState(false);
-  const [showJupyterModal, setShowJupyterModal] = useState(false);
+  const [visiblePanel, setVisiblePanel] = useState(VisiblePanel.None);
+  const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
 
   const canCreateApps =
     workspace.billingStatus === BillingStatus.ACTIVE &&
     WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
 
   const onClose = () => {
-    setSelectedApp('');
-    setShowSelectAppModal(false);
-    setShowJupyterModal(false);
+    setSelectedApp(undefined);
+    setVisiblePanel(VisiblePanel.None);
   };
 
   const onNext = () => {
-    setShowSelectAppModal(false);
     switch (selectedApp) {
-      case JUPYTER_APP:
+      case UIAppType.JUPYTER:
         AnalyticsTracker.Notebooks.OpenCreateModal();
-        setShowJupyterModal(true);
+        setVisiblePanel(VisiblePanel.Jupyter);
+        break;
+      case UIAppType.RSTUDIO:
+        // TODO do something more interesting?
+        setVisiblePanel(VisiblePanel.None);
+        setSidebarActiveIconStore.next(rstudioConfigIconId);
         break;
     }
   };
@@ -71,13 +84,13 @@ export const AppSelector = (props: AppSelectorProps) => {
         data-test-id='start-button'
         style={styles.startButton}
         onClick={() => {
-          setShowSelectAppModal(true);
+          setVisiblePanel(VisiblePanel.Selector);
         }}
         disabled={!canCreateApps}
       >
         <div style={{ width: '9rem', paddingLeft: '1rem' }}>Choose an App</div>
       </Button>
-      {showSelectAppModal && (
+      {visiblePanel === VisiblePanel.Selector && (
         <Modal
           data-test-id='select-application-modal'
           aria={{
@@ -113,19 +126,21 @@ export const AppSelector = (props: AppSelectorProps) => {
               type='primary'
               aria-label='next'
               onClick={onNext}
-              disabled={selectedApp === ''}
+              disabled={!selectedApp}
             >
               Next
             </Button>
           </ModalFooter>
         </Modal>
       )}
-      {showJupyterModal && !showSelectAppModal && (
+      {visiblePanel === VisiblePanel.Jupyter && (
         <NewJupyterNotebookModal
           {...{ workspace, onClose }}
           data-test-id='jupyter-modal'
           existingNameList={null}
-          onBack={() => setShowSelectAppModal(true)}
+          onBack={() => {
+            setVisiblePanel(VisiblePanel.Selector);
+          }}
         />
       )}
     </>
