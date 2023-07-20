@@ -211,7 +211,7 @@ public class UserDaoTest {
     Timestamp eRACompleteTime = Timestamp.from(now.minusSeconds(60));
     Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
-    Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(90));
+    Timestamp identityBypassTime = Timestamp.from(now.minusSeconds(90));
     Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(100));
     Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(110));
     Timestamp profileConfirmationBypassTime = Timestamp.from(now.minusSeconds(120));
@@ -223,7 +223,7 @@ public class UserDaoTest {
     addUserAccessModule(user, ctTrainingModule, ctTrainingBypassTime, ctTrainingCompleteTime);
     addUserAccessModule(user, eRACommonsModule, eRABypassTime, eRACompleteTime);
     addUserAccessModule(user, duccModule, duccBypassTime, duccCompleteTime);
-    addUserAccessModule(user, rasConfirmModule, rasBypassTime, rasCompleteTime);
+    addUserAccessModule(user, rasConfirmModule, identityBypassTime, rasCompleteTime);
     addUserAccessModule(user, profileConfirmationModule, profileConfirmationBypassTime, null);
     addUserAccessModule(
         user, publicationConfirmationModule, publicationConfirmationBypassTime, null);
@@ -234,7 +234,7 @@ public class UserDaoTest {
     assertThat(rows.get(0).getCtComplianceTrainingBypassTime()).isEqualTo(ctTrainingBypassTime);
     assertThat(rows.get(0).getDuccBypassTime()).isEqualTo(duccBypassTime);
     assertThat(rows.get(0).getTwoFactorAuthBypassTime()).isEqualTo(twoFactorAuthBypassTime);
-    assertThat(rows.get(0).getRasLinkLoginGovBypassTime()).isEqualTo(rasBypassTime);
+    assertThat(rows.get(0).getIdentityBypassTime()).isEqualTo(identityBypassTime);
     assertThat(rows.get(0).getProfileConfirmationBypassTime())
         .isEqualTo(profileConfirmationBypassTime);
     assertThat(rows.get(0).getPublicationConfirmationBypassTime())
