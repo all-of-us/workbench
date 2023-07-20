@@ -841,7 +841,7 @@ export const AdminInstitutionEdit = fp.flow(
                   style={{ color: colors.danger }}
                   data-test-id='displayNameError'
                 >
-                  {institution.displayName && errors && errors.displayName}
+                  {institution.displayName && errors?.displayName}
                 </div>
                 <label style={styles.label}>Institution Type</label>
                 <Dropdown

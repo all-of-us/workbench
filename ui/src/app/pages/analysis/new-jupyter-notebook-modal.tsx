@@ -98,7 +98,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
           }}
         />
         <ValidationError data-test-id='create-jupyter-new-name-invalid'>
-          {summarizeErrors(nameTouched && errors && errors.name)}
+          {summarizeErrors(nameTouched && errors?.name)}
         </ValidationError>
         <div style={headerStyles.formLabel}>Programming Language:</div>
         <label style={{ display: 'block' }}>
