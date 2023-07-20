@@ -31,7 +31,6 @@ export const AdminUserEgressBypass = (props: Props) => {
     EgressBypassWindow[]
   >([]);
   const [reload, setReload] = useState(true);
-  const [resetInput, setResetInput] = useState(false);
 
   useEffect(() => {
     const { userId } = props;
@@ -76,7 +75,6 @@ export const AdminUserEgressBypass = (props: Props) => {
       byPassDescription: bypassDescription,
     };
     setBypassDescription('');
-    setResetInput(true);
     setStartTime(null);
 
     userAdminApi()
@@ -86,8 +84,6 @@ export const AdminUserEgressBypass = (props: Props) => {
       })
       .finally(() => {
         setReload(true);
-        // This value will need to be reset so that input.TextAreaWithLengthValidationMessage componentDidUpdate triggers
-        setResetInput(false);
       });
   };
 
@@ -121,7 +117,6 @@ export const AdminUserEgressBypass = (props: Props) => {
             heightOverride={{ height: '5rem' }}
             initialText={bypassDescription}
             maxCharacters={MAX_BYPASS_DESCRIPTION}
-            resetAfterUpdate={resetInput}
             onChange={(s: string) => {
               setApiError(false);
               setBypassDescription(s);
