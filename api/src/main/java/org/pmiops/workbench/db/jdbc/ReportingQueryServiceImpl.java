@@ -226,8 +226,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.disabled,\n"
                 + "  uame.era_commons_bypass_time,\n"
                 + "  uame.era_commons_completion_time,\n"
-                + "  uaml.ras_login_gov_bypass_time,\n"
-                + "  uaml.ras_login_gov_completion_time,\n"
+                + "  uaml.identity_bypass_time,\n"
+                + "  uaml.identity_completion_time,\n"
                 + "  u.family_name,\n"
                 // temporary solution for RW-6566
                 + "  uat.first_enabled AS first_registration_completion_time,\n"
@@ -325,11 +325,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  ) uame ON u.user_id = uame.user_id "
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
-                + "      uam.bypass_time AS ras_login_gov_bypass_time, "
-                + "      uam.completion_time AS ras_login_gov_completion_time "
+                + "      uam.bypass_time AS identity_bypass_time, "
+                + "      uam.completion_time AS identity_completion_time "
                 + "    FROM user_access_module uam "
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
-                + "    WHERE am.name = 'RAS_LOGIN_GOV' "
+                + "    WHERE am.name = 'IDENTITY' "
                 + "  ) uaml ON u.user_id = uaml.user_id "
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
@@ -378,10 +378,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .eraCommonsBypassTime(offsetDateTimeUtc(rs.getTimestamp("era_commons_bypass_time")))
                 .eraCommonsCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("era_commons_completion_time")))
-                .rasLoginGovBypassTime(
-                    offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_bypass_time")))
-                .rasLoginGovCompletionTime(
-                    offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_completion_time")))
+                .identityBypassTime(
+                    offsetDateTimeUtc(rs.getTimestamp("identity_bypass_time")))
+                .identityCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("identity_completion_time")))
                 .familyName(rs.getString("family_name"))
                 .firstRegistrationCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))
