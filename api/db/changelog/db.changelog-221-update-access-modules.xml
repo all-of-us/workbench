@@ -35,5 +35,17 @@
       DELETE FROM access_module
       WHERE name = 'RAS_ID_ME'
     </sql>
+    <sql>
+      ALTER TABLE access_module
+        MODIFY COLUMN name
+        ENUM('ERA_COMMONS',
+        'TWO_FACTOR_AUTH',
+        'IDENTITY',
+        'RT_COMPLIANCE_TRAINING',
+        'DATA_USER_CODE_OF_CONDUCT',
+        'PROFILE_CONFIRMATION',
+        'PUBLICATION_CONFIRMATION',
+        'CT_COMPLIANCE_TRAINING')
+    </sql>
   </changeSet>
 </databaseChangeLog>
