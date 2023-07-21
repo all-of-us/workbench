@@ -17,6 +17,7 @@ import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card'
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { convertToResources } from 'app/utils/resources';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -111,7 +112,7 @@ export const AppFilesList = withCurrentWorkspace()(
         workspace: { namespace, id },
       } = props;
       const { name } = row;
-      const url = `/workspaces/${namespace}/${id}/notebooks/preview/${name}`;
+      const url = `/workspaces/${namespace}/${id}/${NOTEBOOKS_TAB_NAME}/preview/${name}`;
       return (
         <Clickable>
           <RouterLink to={url} data-test-id='notebook-navigation'>

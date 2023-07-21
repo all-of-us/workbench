@@ -11,6 +11,7 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
+import { NOTEBOOKS_TAB_NAME } from './constants';
 import { encodeURIComponentStrict, UrlObj } from './navigation';
 import { WorkspaceData } from './workspace-data';
 
@@ -100,7 +101,7 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isNotebook,
       (r) => ({
-        url: `${workspacePrefix}/notebooks/preview/${encodeURIComponentStrict(
+        url: `${workspacePrefix}/${NOTEBOOKS_TAB_NAME}/preview/${encodeURIComponentStrict(
           r.notebook.name
         )}`,
       }),

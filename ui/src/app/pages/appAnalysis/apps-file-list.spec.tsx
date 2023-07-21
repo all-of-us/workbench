@@ -6,6 +6,7 @@ import { NotebooksApi, WorkspacesApi } from 'generated/fetch';
 
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -14,7 +15,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
-const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/notebooks/preview/mockFile.ipynb`;
+const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
 const appsFilesTable = (wrapper) =>
   wrapper.find('[data-test-id="apps-file-list"]').find('tbody');
 const appsFilesTableColumns = (wrapper) => appsFilesTable(wrapper).find('td');
