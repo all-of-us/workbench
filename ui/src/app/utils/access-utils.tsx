@@ -34,7 +34,7 @@ import {
   getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import { cond, switchCase } from './index';
+import { cond, DEFAULT, switchCase } from './index';
 
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
@@ -310,6 +310,12 @@ export const getAccessModuleConfig = (
         adminPageTitle: 'Report any publications',
         renewalTimeEstimate: 5,
       }),
+    ],
+    [
+      DEFAULT,
+      () => ({
+        ...apiConfig,
+      }),
     ]
   );
 };
@@ -336,10 +342,15 @@ export const maybeDaysRemaining = (
   profile: Profile,
   accessTier: AccessTierShortNames = AccessTierShortNames.Registered
 ): number | undefined => {
-  const tierFilter = (status: AccessModuleStatus): boolean =>
-    accessTier === AccessTierShortNames.Registered
-      ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
-      : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
+  const tierFilter = (status: AccessModuleStatus): boolean => {
+    const x =
+      accessTier === AccessTierShortNames.Registered
+        ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
+        : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
+    console.log('Name: ', status.moduleName);
+    console.log('config: ', x);
+    return x;
+  };
 
   const earliestExpiration: number = fp.flow(
     fp.get(['accessModules', 'modules']),
