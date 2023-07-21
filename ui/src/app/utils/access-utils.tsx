@@ -342,15 +342,10 @@ export const maybeDaysRemaining = (
   profile: Profile,
   accessTier: AccessTierShortNames = AccessTierShortNames.Registered
 ): number | undefined => {
-  const tierFilter = (status: AccessModuleStatus): boolean => {
-    const x =
-      accessTier === AccessTierShortNames.Registered
-        ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
-        : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
-    console.log('Name: ', status.moduleName);
-    console.log('config: ', x);
-    return x;
-  };
+  const tierFilter = (status: AccessModuleStatus): boolean =>
+    accessTier === AccessTierShortNames.Registered
+      ? getAccessModuleConfig(status.moduleName).requiredForRTAccess
+      : getAccessModuleConfig(status.moduleName).requiredForCTAccess;
 
   const earliestExpiration: number = fp.flow(
     fp.get(['accessModules', 'modules']),
