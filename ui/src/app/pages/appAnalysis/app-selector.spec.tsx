@@ -16,7 +16,8 @@ import {
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
-import { APP_LIST, AppSelector } from './app-selector';
+import { AppSelector } from './app-selector';
+import { APP_LIST } from './app-selector-modal';
 
 describe('App Selector', () => {
   const startButton = (wrapper) => {
