@@ -25,7 +25,7 @@ import { cond, reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 import { FlexRow } from './flex';
@@ -38,7 +38,7 @@ enum RequestState {
 }
 
 const ResourceTypeHomeTabs = new Map()
-  .set(ResourceType.NOTEBOOK, NOTEBOOKS_TAB_NAME)
+  .set(ResourceType.NOTEBOOK, appFilesTabName)
   .set(ResourceType.COHORT, 'data')
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');

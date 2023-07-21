@@ -135,4 +135,4 @@ export const openRStudioOrConfigPanel = (
 };
 
 // name of the tab for accessing notebooks and runtimes, also used to construct URLs
-export const NOTEBOOKS_TAB_NAME = 'notebooks';
+export const appFilesTabName = 'notebooks';

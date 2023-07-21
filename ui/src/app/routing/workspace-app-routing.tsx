@@ -32,7 +32,7 @@ import {
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(
@@ -162,15 +162,15 @@ export const WorkspaceRoutes = () => {
         <NotebookListPage
           routeData={{
             title: 'View Notebooks',
-            pageKey: NOTEBOOKS_TAB_NAME,
-            workspaceNavBarTab: NOTEBOOKS_TAB_NAME,
+            pageKey: appFilesTabName,
+            workspaceNavBarTab: appFilesTabName,
             breadcrumb: BreadcrumbType.Workspace,
           }}
         />
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${NOTEBOOKS_TAB_NAME}/preview/:nbName`}
+        path={`${path}/${appFilesTabName}/preview/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <InteractiveNotebookPage
@@ -178,14 +178,14 @@ export const WorkspaceRoutes = () => {
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: NOTEBOOKS_TAB_NAME,
+            workspaceNavBarTab: appFilesTabName,
             minimizeChrome: true,
           }}
         />
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${NOTEBOOKS_TAB_NAME}/:nbName`}
+        path={`${path}/${appFilesTabName}/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <LeonardoAppRedirectPage
@@ -198,7 +198,7 @@ export const WorkspaceRoutes = () => {
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: NOTEBOOKS_TAB_NAME,
+            workspaceNavBarTab: appFilesTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Notebook}
@@ -215,7 +215,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: NOTEBOOKS_TAB_NAME,
+            workspaceNavBarTab: appFilesTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Terminal}
@@ -231,7 +231,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: NOTEBOOKS_TAB_NAME,
+            workspaceNavBarTab: appFilesTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.SparkConsole}

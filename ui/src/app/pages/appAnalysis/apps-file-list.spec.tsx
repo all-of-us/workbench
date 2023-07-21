@@ -8,12 +8,13 @@ import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
+
 const appsFilesTable = (wrapper) =>
   wrapper.find('[data-test-id="apps-file-list"]').find('tbody');
 const appsFilesTableColumns = (wrapper) => appsFilesTable(wrapper).find('td');

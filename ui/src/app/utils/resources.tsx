@@ -12,7 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { encodeURIComponentStrict, UrlObj } from './navigation';
-import { NOTEBOOKS_TAB_NAME } from './user-apps-utils';
+import { appFilesTabName } from './user-apps-utils';
 import { WorkspaceData } from './workspace-data';
 
 export const isCohort = (resource: WorkspaceResource): boolean =>
@@ -101,7 +101,7 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     [
       isNotebook,
       (r) => ({
-        url: `${workspacePrefix}/${NOTEBOOKS_TAB_NAME}/preview/${encodeURIComponentStrict(
+        url: `${workspacePrefix}/${appFilesTabName}/preview/${encodeURIComponentStrict(
           r.notebook.name
         )}`,
       }),

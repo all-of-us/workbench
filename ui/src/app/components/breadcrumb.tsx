@@ -24,7 +24,7 @@ import {
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';
@@ -116,12 +116,12 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          fp.upperFirst(NOTEBOOKS_TAB_NAME),
-          `${prefix}/${NOTEBOOKS_TAB_NAME}`
+          fp.upperFirst(appFilesTabName),
+          `${prefix}/${appFilesTabName}`
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/${NOTEBOOKS_TAB_NAME}/${nbName}`
+          `${prefix}/${appFilesTabName}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -325,10 +325,10 @@ export const Breadcrumb = fp.flow(
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
       const notebookMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/:nbName`,
+        path: `/workspaces/:ns/:wsid/${appFilesTabName}/:nbName`,
       });
       const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/preview/:nbName`,
+        path: `/workspaces/:ns/:wsid/${appFilesTabName}/preview/:nbName`,
       });
       const nbName = notebookMatch
         ? notebookMatch.params.nbName

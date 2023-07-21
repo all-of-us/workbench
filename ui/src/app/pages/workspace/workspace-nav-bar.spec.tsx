@@ -6,7 +6,7 @@ import { mockNavigate } from 'setupTests';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 
 import {
   CdrVersionsStubVariables,
@@ -69,7 +69,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      appFilesTabName,
     ]);
 
     wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
@@ -120,7 +120,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      appFilesTabName,
     ]);
   });
 
@@ -142,7 +142,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      appFilesTabName,
     ]);
   });
 

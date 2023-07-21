@@ -14,7 +14,7 @@ import {
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';

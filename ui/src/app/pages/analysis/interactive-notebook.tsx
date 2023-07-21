@@ -40,7 +40,7 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { NOTEBOOKS_TAB_NAME, openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
+import { appFilesTabName, openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -273,7 +273,7 @@ export const InteractiveNotebook = fp.flow(
           'workspaces',
           this.props.match.params.ns,
           this.props.match.params.wsid,
-          NOTEBOOKS_TAB_NAME,
+          appFilesTabName,
           this.props.match.params.nbName,
         ],
         { queryParams: queryParams }
@@ -319,7 +319,7 @@ export const InteractiveNotebook = fp.flow(
             'workspaces',
             ns,
             wsid,
-            NOTEBOOKS_TAB_NAME,
+            appFilesTabName,
             encodeURIComponent(notebook.name),
           ]);
         });

@@ -32,7 +32,7 @@ import {
   getTypeString,
   isNotebook,
 } from 'app/utils/resources';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -72,7 +72,7 @@ const WorkspaceNavigation = (props: NavProps) => {
     resource,
     style,
   } = props;
-  const tab = isNotebook(resource) ? NOTEBOOKS_TAB_NAME : 'data';
+  const tab = isNotebook(resource) ? appFilesTabName : 'data';
   const url = `/workspaces/${namespace}/${id}/${tab}`;
 
   return (

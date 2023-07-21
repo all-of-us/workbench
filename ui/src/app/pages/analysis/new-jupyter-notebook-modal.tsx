@@ -21,7 +21,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { nameValidationFormat } from 'app/utils/resources';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 
 import { appendJupyterNotebookFileSuffix } from './util';
 
@@ -72,7 +72,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         'workspaces',
         workspace.namespace,
         workspace.id,
-        NOTEBOOKS_TAB_NAME,
+        appFilesTabName,
         encodeURIComponent(name),
       ],
       { queryParams: { kernelType: kernel, creating: true } }

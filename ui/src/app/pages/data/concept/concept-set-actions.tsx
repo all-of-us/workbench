@@ -20,7 +20,7 @@ import {
 } from 'app/utils';
 import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
+import { appFilesTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -157,7 +157,7 @@ export const ConceptSetActions = fp.flow(
           url += 'data/concepts';
           break;
         case 'notebook':
-          url += NOTEBOOKS_TAB_NAME;
+          url += appFilesTabName;
           break;
         case 'dataSet':
           url += 'data/data-sets';
