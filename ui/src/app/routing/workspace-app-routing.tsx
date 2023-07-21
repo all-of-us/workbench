@@ -156,7 +156,7 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/notebooks`}
+        path={`${path}/${NOTEBOOKS_TAB_NAME}`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <NotebookListPage
