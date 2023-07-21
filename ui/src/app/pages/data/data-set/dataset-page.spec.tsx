@@ -584,7 +584,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(7);
+    ).toBe(15);
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
     wrapper = component();
@@ -618,7 +618,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(7);
+    ).toBe(15);
 
     serverConfigStore.set({
       config: { enableGenomicExtraction: false, gsuiteDomain: '' },
