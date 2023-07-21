@@ -6189,6 +6189,9 @@ definitions:
       identityBypassTime:
         type: integer
         format: int64
+      rasLinkLoginGovBypassTime:
+        type: integer
+        format: int64
       complianceTrainingBypassTime:
         type: integer
         format: int64
@@ -9804,6 +9807,14 @@ definitions:
         type: string
         format: date-time
         description: Time user completed the identity account link.
+      rasLoginGovBypassTime:
+        type: string
+        format: date-time
+        description: Time an administrator bypassed the RAS Login.gov requirement for this user.
+      rasLoginGovCompletionTime:
+        type: string
+        format: date-time
+        description: Time user completed the RAS Login.gov account link.
       twoFactorAuthBypassTime:
         type: string
         format: date-time
