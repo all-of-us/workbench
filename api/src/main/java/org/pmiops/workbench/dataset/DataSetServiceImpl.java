@@ -390,7 +390,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 findDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
             List<Long> prePackagedSurveyConceptIds =
                 request.getPrePackagedConceptSet().stream()
-                    .map(p -> PRE_PACKAGED_SURVEY_CONCEPT_IDS.get(p))
+                    .map(PRE_PACKAGED_SURVEY_CONCEPT_IDS::get)
                     .collect(Collectors.toList());
 
             // add selected prePackaged survey question concept ids
@@ -580,8 +580,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
-    if (prePackagedConceptSet.stream()
-        .anyMatch(PRE_PACKAGED_SURVEY_CONCEPT_IDS::containsKey)
+    if (prePackagedConceptSet.stream().anyMatch(PRE_PACKAGED_SURVEY_CONCEPT_IDS::containsKey)
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       selectedConceptSetsBuilder.addAll(buildPrePackagedSurveyConceptSets(prePackagedConceptSet));
     } else {
@@ -1710,7 +1709,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return ImmutableList.of(createSurveyDbConceptSet(SURVEY));
     }
     return prePackagedConceptSet.stream()
-        .map(s -> createSurveyDbConceptSet(s))
+        .map(this::createSurveyDbConceptSet)
         .collect(Collectors.toList());
   }
 

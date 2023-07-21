@@ -657,22 +657,23 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertThat(code.replaceAll("[ \\s]",""))
-        .contains(expectedConceptId.replaceAll(" ",""));
+    assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
   }
 
   @Test
   public void testGenerateCodePrepackagedCohortAllIndividualSurveysExceptPfhhInOrder() {
-    final ImmutableList<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList = ImmutableList.of(
-        PrePackagedConceptSetEnum.SURVEY_BASICS,
-        PrePackagedConceptSetEnum.SURVEY_LIFESTYLE,
-        PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH,
-        PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION,
-        PrePackagedConceptSetEnum.SURVEY_COPE,
-        PrePackagedConceptSetEnum.SURVEY_SDOH,
-        PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE);
+    final ImmutableList<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList =
+        ImmutableList.of(
+            PrePackagedConceptSetEnum.SURVEY_BASICS,
+            PrePackagedConceptSetEnum.SURVEY_LIFESTYLE,
+            PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH,
+            PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION,
+            PrePackagedConceptSetEnum.SURVEY_COPE,
+            PrePackagedConceptSetEnum.SURVEY_SDOH,
+            PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE);
 
-    final String expectedConceptId = "concept_id IN (1586134,1585855,1585710,43528895,1333342,40192389,1741006)";
+    final String expectedConceptId =
+        "concept_id IN (1586134,1585855,1585710,43528895,1333342,40192389,1741006)";
     String code =
         joinCodeCells(
             dataSetService.generateCodeCells(
@@ -687,8 +688,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             prePackagedConceptSetEnumList)),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
-    assertThat(code.replaceAll("[ \\s]",""))
-        .contains(expectedConceptId.replaceAll(" ",""));
+    assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
   }
 
   @Test
