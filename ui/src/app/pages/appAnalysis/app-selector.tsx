@@ -38,8 +38,8 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
-  const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
   const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
+  const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
 
   const canCreateApps =
     workspace.billingStatus === BillingStatus.ACTIVE &&
@@ -57,8 +57,8 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.Jupyter);
         break;
       case UIAppType.RSTUDIO:
-        // TODO do something more interesting?
         setVisibleModal(VisibleModal.None);
+        // TODO iterate on what is the best action here
         setSidebarActiveIconStore.next(rstudioConfigIconId);
         break;
     }
