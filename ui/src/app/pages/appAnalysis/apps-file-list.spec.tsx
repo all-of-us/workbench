@@ -85,7 +85,7 @@ describe('AppsList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
+    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${appFilesTabName}/preview/mockFile.ipynb`;
     expect(
       appsFilesTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)

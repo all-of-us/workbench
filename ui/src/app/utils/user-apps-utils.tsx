@@ -9,6 +9,7 @@ import {
 
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
+import { environment } from 'environments/environment';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
@@ -135,7 +136,6 @@ export const openRStudioOrConfigPanel = (
 };
 
 // name of the tab for accessing apps and app files, also used to construct URLs
-export const appFilesTabName = 'joeltemp';
-// environment.showNewAnalysisTab
-//     ? 'app-files'
-//     : 'notebooks';
+export const appFilesTabName = environment.showNewAnalysisTab
+  ? 'app-files'
+  : 'notebooks';
