@@ -72,6 +72,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
   public static final Timestamp USER__IDENTITY_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
+  public static final Timestamp USER__RAS_LOGIN_GOV_BYPASS_TIME =
+      Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
+  public static final Timestamp USER__RAS_LOGIN_GOV_COMPLETION_TIME =
+      Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
   public static final String USER__FAMILY_NAME = "foo_16";
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
       Timestamp.from(Instant.parse("2015-05-23T00:00:00.00Z"));
