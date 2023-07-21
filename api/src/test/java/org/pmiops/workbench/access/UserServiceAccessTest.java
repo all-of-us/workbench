@@ -1014,7 +1014,8 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
-    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
