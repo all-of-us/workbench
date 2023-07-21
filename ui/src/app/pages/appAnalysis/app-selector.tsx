@@ -38,11 +38,12 @@ const styles = reactStyles({
 
 export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
 
-const enum VisiblePanel {
+const enum VisibleModal {
   None = 'None',
-  Selector = 'Selector',
+  SelectAnApp = 'SelectAnApp',
   Jupyter = 'Jupyter',
-  RStudio = 'RStudio',
+  // TODO will we need this?
+  // RStudio = 'RStudio'
 }
 
 interface AppSelectorProps {
@@ -51,7 +52,7 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
-  const [visiblePanel, setVisiblePanel] = useState(VisiblePanel.None);
+  const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
   const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
 
   const canCreateApps =
@@ -60,18 +61,18 @@ export const AppSelector = (props: AppSelectorProps) => {
 
   const onClose = () => {
     setSelectedApp(undefined);
-    setVisiblePanel(VisiblePanel.None);
+    setVisibleModal(VisibleModal.None);
   };
 
   const onNext = () => {
     switch (selectedApp) {
       case UIAppType.JUPYTER:
         AnalyticsTracker.Notebooks.OpenCreateModal();
-        setVisiblePanel(VisiblePanel.Jupyter);
+        setVisibleModal(VisibleModal.Jupyter);
         break;
       case UIAppType.RSTUDIO:
         // TODO do something more interesting?
-        setVisiblePanel(VisiblePanel.None);
+        setVisibleModal(VisibleModal.None);
         setSidebarActiveIconStore.next(rstudioConfigIconId);
         break;
     }
@@ -84,13 +85,13 @@ export const AppSelector = (props: AppSelectorProps) => {
         data-test-id='start-button'
         style={styles.startButton}
         onClick={() => {
-          setVisiblePanel(VisiblePanel.Selector);
+          setVisibleModal(VisibleModal.SelectAnApp);
         }}
         disabled={!canCreateApps}
       >
         <div style={{ width: '9rem', paddingLeft: '1rem' }}>Choose an App</div>
       </Button>
-      {visiblePanel === VisiblePanel.Selector && (
+      {visibleModal === VisibleModal.SelectAnApp && (
         <Modal
           data-test-id='select-application-modal'
           aria={{
@@ -133,13 +134,13 @@ export const AppSelector = (props: AppSelectorProps) => {
           </ModalFooter>
         </Modal>
       )}
-      {visiblePanel === VisiblePanel.Jupyter && (
+      {visibleModal === VisibleModal.Jupyter && (
         <NewJupyterNotebookModal
           {...{ workspace, onClose }}
           data-test-id='jupyter-modal'
           existingNameList={null}
           onBack={() => {
-            setVisiblePanel(VisiblePanel.Selector);
+            setVisibleModal(VisibleModal.SelectAnApp);
           }}
         />
       )}
