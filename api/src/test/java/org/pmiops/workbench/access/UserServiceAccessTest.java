@@ -1014,12 +1014,15 @@ public class UserServiceAccessTest {
 
     // Incomplete RAS module, expect user removed from Registered tier;
     accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierDisabled(dbUser);
 
     // Complete RAS Linking, verify user become registered
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.IDENTITY, new Timestamp(PROVIDED_CLOCK.millis()));
+    accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }

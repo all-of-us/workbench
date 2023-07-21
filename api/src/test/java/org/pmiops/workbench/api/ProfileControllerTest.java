@@ -553,6 +553,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     final DbUser dbUser = userDao.findUserByUserId(userId);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.ERA_COMMONS, TIMESTAMP);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
     accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RT_COMPLIANCE_TRAINING, TIMESTAMP);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.TWO_FACTOR_AUTH, TIMESTAMP);
@@ -1631,6 +1632,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     dbUser.setRasLinkUsername(loginGovUsername);
     dbUser = userDao.save(dbUser);
     accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, TIMESTAMP);
+    accessModuleService.updateCompletionTime(dbUser, DbAccessModuleName.RAS_LOGIN_GOV, TIMESTAMP);
 
     when(mockRasLinkService.linkRasAccount(body.getAuthCode(), body.getRedirectUrl()))
         .thenReturn(dbUser);
@@ -1638,6 +1640,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     final Profile profile = profileController.linkRasAccount(body).getBody();
     assertThat(profile.getRasLinkUsername()).isEqualTo(loginGovUsername);
     assertThat(getCompletionEpochMillis(profile, AccessModule.IDENTITY))
+        .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
+    assertThat(getCompletionEpochMillis(profile, AccessModule.RAS_LINK_LOGIN_GOV))
         .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
