@@ -1,0 +1,12 @@
+[
+  {
+    "type": "string",
+    "name": "vid",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "gene_symbol",
+    "mode": "nullable"
+  }
+]

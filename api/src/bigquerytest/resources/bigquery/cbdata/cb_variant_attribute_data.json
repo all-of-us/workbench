@@ -1,0 +1,51 @@
+[
+  {
+    "vid": "1-101504524-G-A",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 5,
+    "allele_number": 18242,
+    "allele_frequency": 0.000277,
+    "clinical_significance": "clinvar",
+    "transcript": "",
+    "contig": "chr20",
+    "position": 1000,
+    "ref_allele": "G",
+    "alt_allele": "A",
+    "cons_str": "cons",
+    "genes": "gene",
+    "participant_count": 1
+  },
+  {
+    "vid": "1-100550658-T-C",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 7,
+    "allele_number": 18226,
+    "allele_frequency": 0.000266,
+    "clinical_significance": "clinvar",
+    "transcript": "",
+    "contig": "chr20",
+    "ref_allele": "T",
+    "alt_allele": "C",
+    "cons_str": "cons",
+    "genes": "gene1",
+    "participant_count": 1
+  },
+  {
+    "vid": "1-100550658-T-H",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 7,
+    "allele_number": 18226,
+    "allele_frequency": 0.000266,
+    "clinical_significance": "clinvar",
+    "transcript": "",
+    "contig": "chr20",
+    "ref_allele": "T",
+    "alt_allele": "C",
+    "cons_str": "cons",
+    "genes": "gene1",
+    "participant_count": 1
+  }
+]
