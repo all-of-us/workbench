@@ -4,9 +4,9 @@ import { mount } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 
 import {
   CdrVersionsStubVariables,

@@ -31,8 +31,8 @@ import {
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(

@@ -18,13 +18,13 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace,
 } from 'app/utils';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';

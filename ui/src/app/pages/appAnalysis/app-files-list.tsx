@@ -17,9 +17,9 @@ import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card'
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { convertToResources } from 'app/utils/resources';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { AppSelector } from './app-selector';

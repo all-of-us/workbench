@@ -12,7 +12,6 @@ import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 
-import { NOTEBOOKS_TAB_NAME } from './constants';
 import { stringifyUrl } from './navigation';
 import {
   getDescription,
@@ -28,6 +27,7 @@ import {
   isNotebook,
   toDisplay,
 } from './resources';
+import { NOTEBOOKS_TAB_NAME } from './user-apps-utils';
 
 const COHORT_NAME = exampleCohortStubs[0].name;
 const COHORT_DESCRIPTION = exampleCohortStubs[0].description;

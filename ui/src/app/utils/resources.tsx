@@ -11,8 +11,8 @@ import {
   WorkspaceResource,
 } from 'generated/fetch';
 
-import { NOTEBOOKS_TAB_NAME } from './constants';
 import { encodeURIComponentStrict, UrlObj } from './navigation';
+import { NOTEBOOKS_TAB_NAME } from './user-apps-utils';
 import { WorkspaceData } from './workspace-data';
 
 export const isCohort = (resource: WorkspaceResource): boolean =>

@@ -27,7 +27,6 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
@@ -41,6 +40,7 @@ import {
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

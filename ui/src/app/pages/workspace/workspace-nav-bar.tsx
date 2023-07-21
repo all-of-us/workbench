@@ -16,9 +16,9 @@ import {
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion,
 } from 'app/utils/cdr-versions';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 

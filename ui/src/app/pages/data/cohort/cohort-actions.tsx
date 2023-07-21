@@ -19,9 +19,9 @@ import {
   withCurrentCohort,
   withCurrentWorkspace,
 } from 'app/utils';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

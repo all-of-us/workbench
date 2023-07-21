@@ -25,7 +25,6 @@ import {
 } from 'app/pages/analysis/leonardo-app-launcher';
 import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
@@ -33,6 +32,7 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/user-apps-utils';
 import {
   JupyterApi,
   ProxyApi,
