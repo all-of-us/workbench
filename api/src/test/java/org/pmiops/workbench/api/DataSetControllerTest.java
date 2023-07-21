@@ -332,6 +332,7 @@ public class DataSetControllerTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.accountId = "free-tier";
     workbenchConfig.featureFlags.enableGenomicExtraction = true;
+    workbenchConfig.featureFlags.enableDataExplorer = true;
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
