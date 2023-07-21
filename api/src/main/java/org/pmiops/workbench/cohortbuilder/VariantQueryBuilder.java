@@ -17,8 +17,11 @@ public final class VariantQueryBuilder {
     RS_NUMBER;
 
     public static SearchTermType fromValue(String searchTerm) {
+      // rs number pattern ex: rs23346
       String rsNumberPattern = "^rs.*";
+      // chromosome position pattern ex: chr20:955-1000
       String contigPattern = ".*:.*-.*";
+      // variant id pattern ex: 1-101504524-G-A
       String vidPattern = ".*-.*-.*-.*";
       if (Pattern.matches(rsNumberPattern, searchTerm)) {
         return RS_NUMBER;
@@ -27,6 +30,7 @@ public final class VariantQueryBuilder {
       } else if (Pattern.matches(vidPattern, searchTerm)) {
         return VID;
       }
+      // any patterns that don't match are consider a gene name
       return GENE;
     }
   }

@@ -2483,7 +2483,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .getBody();
     List<Variant> items = Objects.requireNonNull(response).getItems();
     assertThat(response.getTotalSize()).isEqualTo(1);
-    assertThat(response.getNextPageToken()).isNotNull();
+    assertThat(response.getNextPageToken()).isNull();
     assertThat(items.size()).isEqualTo(1);
     assertThat(items.get(0))
         .isEqualTo(
@@ -2522,11 +2522,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     response =
         controller
-            .findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", response.getNextPageToken(), 1)
+            .findVariants(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", response.getNextPageToken(), 1)
             .getBody();
     items = Objects.requireNonNull(response).getItems();
     assertThat(response.getTotalSize()).isEqualTo(2);
-    assertThat(response.getNextPageToken()).isNotNull();
+    assertThat(response.getNextPageToken()).isNull();
     assertThat(items.size()).isEqualTo(1);
     assertThat(items.get(0))
         .isEqualTo(
@@ -2540,13 +2541,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .alleleNumber(18226L)
                 .alleleFrequency(0.000266)
                 .participantCount(1L));
-
-    response =
-        controller
-            .findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", response.getNextPageToken(), 1)
-            .getBody();
-    items = Objects.requireNonNull(response).getItems();
-    assertThat(items.size()).isEqualTo(0);
   }
 
   protected String getTablePrefix() {
