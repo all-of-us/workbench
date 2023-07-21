@@ -214,12 +214,12 @@ public class UserDaoTest {
     Timestamp duccBypassTime = Timestamp.from(now.minusSeconds(70));
     Timestamp duccCompleteTime = Timestamp.from(now.minusSeconds(80));
     Timestamp identityBypassTime = Timestamp.from(now.minusSeconds(90));
-    Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(100));
-    Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(110));
-    Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(120));
-    Timestamp profileConfirmationBypassTime = Timestamp.from(now.minusSeconds(130));
-    Timestamp publicationConfirmationBypassTime = Timestamp.from(now.minusSeconds(140));
-    Timestamp identityCompleteTime = Timestamp.from(now);
+    Timestamp identityCompleteTime = Timestamp.from(now.minusSeconds(100));
+    Timestamp rasBypassTime = Timestamp.from(now.minusSeconds(110));
+    Timestamp ctTrainingBypassTime = Timestamp.from(now.minusSeconds(120));
+    Timestamp ctTrainingCompleteTime = Timestamp.from(now.minusSeconds(130));
+    Timestamp profileConfirmationBypassTime = Timestamp.from(now.minusSeconds(140));
+    Timestamp publicationConfirmationBypassTime = Timestamp.from(now.minusSeconds(150));
     Timestamp rasCompleteTime = Timestamp.from(now);
     addUserAccessModule(
         user, twoFactorAuthModule, twoFactorAuthBypassTime, twoFactorAuthCompleteTime);
