@@ -134,5 +134,8 @@ export const openRStudioOrConfigPanel = (
   }
 };
 
-// name of the tab for accessing notebooks and runtimes, also used to construct URLs
-export const appFilesTabName = 'notebooks';
+// name of the tab for accessing apps and app files, also used to construct URLs
+export const appFilesTabName = 'joeltemp';
+// environment.showNewAnalysisTab
+//     ? 'app-files'
+//     : 'notebooks';

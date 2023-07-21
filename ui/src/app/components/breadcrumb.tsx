@@ -105,7 +105,7 @@ export const getTrail = (
         ),
         new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
       ];
-    case BreadcrumbType.Notebook:
+    case BreadcrumbType.AppFile:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,
@@ -324,16 +324,16 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      const notebookMatch = matchPath<MatchParams>(location.pathname, {
+      const appFileMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${appFilesTabName}/:nbName`,
       });
-      const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
+      const appFilePreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${appFilesTabName}/preview/:nbName`,
       });
-      const nbName = notebookMatch
-        ? notebookMatch.params.nbName
-        : notebookPreviewMatch
-        ? notebookPreviewMatch.params.nbName
+      const appFileName = appFileMatch
+        ? appFileMatch.params.nbName
+        : appFilePreviewMatch
+        ? appFilePreviewMatch.params.nbName
         : undefined;
 
       return getTrail(
@@ -342,7 +342,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName }
+        { ns, wsid, cid, csid, pid, nbName: appFileName }
       );
     }
 

@@ -98,6 +98,11 @@ const WorkspaceEditPage = fp.flow(
 const AppsListPage = fp.flow(withRouteData, withRoutingSpinner)(AppFilesList);
 const TanagraDevPage = fp.flow(withRouteData, withRoutingSpinner)(TanagraDev);
 
+// name of the tab for accessing apps and app files, also used to construct URLs
+export const appFilesTabName = environment.showNewAnalysisTab
+  ? 'app-files'
+  : 'notebooks';
+
 export const WorkspaceRoutes = () => {
   const { path } = useRouteMatch();
   const { ns, wsid } = useParams<MatchParams>();
@@ -140,34 +145,37 @@ export const WorkspaceRoutes = () => {
           workspaceEditMode={WorkspaceEditMode.Edit}
         />
       </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/apps`}
-        guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
-      >
-        <AppsListPage
-          routeData={{
-            title: 'View Apps',
-            pageKey: 'apps',
-            workspaceNavBarTab: 'apps',
-            breadcrumb: BreadcrumbType.Workspace,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/${NOTEBOOKS_TAB_NAME}`}
-        guards={[adminLockedGuard(ns, wsid)]}
-      >
-        <NotebookListPage
-          routeData={{
-            title: 'View Notebooks',
-            pageKey: appFilesTabName,
-            workspaceNavBarTab: appFilesTabName,
-            breadcrumb: BreadcrumbType.Workspace,
-          }}
-        />
-      </AppRoute>
+      {environment.showNewAnalysisTab ? (
+        <AppRoute
+          exact
+          path={`${path}/${appFilesTabName}`}
+          guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
+        >
+          <AppsListPage
+            routeData={{
+              title: 'View App Files',
+              pageKey: appFilesTabName,
+              workspaceNavBarTab: appFilesTabName,
+              breadcrumb: BreadcrumbType.Workspace,
+            }}
+          />
+        </AppRoute>
+      ) : (
+        <AppRoute
+          exact
+          path={`${path}/${appFilesTabName}`}
+          guards={[adminLockedGuard(ns, wsid)]}
+        >
+          <NotebookListPage
+            routeData={{
+              title: 'View Notebooks',
+              pageKey: appFilesTabName,
+              workspaceNavBarTab: appFilesTabName,
+              breadcrumb: BreadcrumbType.Workspace,
+            }}
+          />
+        </AppRoute>
+      )}
       <AppRoute
         exact
         path={`${path}/${appFilesTabName}/preview/:nbName`}
@@ -176,7 +184,7 @@ export const WorkspaceRoutes = () => {
         <InteractiveNotebookPage
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
+            breadcrumb: BreadcrumbType.AppFile,
             pageKey: LEONARDO_APP_PAGE_KEY,
             workspaceNavBarTab: appFilesTabName,
             minimizeChrome: true,
@@ -192,7 +200,7 @@ export const WorkspaceRoutes = () => {
           key='notebook'
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
+            breadcrumb: BreadcrumbType.AppFile,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.

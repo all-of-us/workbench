@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 
 import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -176,9 +175,6 @@ export const WorkspaceNavBar = fp.flow(
   const { ns, wsid } = useParams<MatchParams>();
 
   useEffect(() => {
-    if (environment.showNewAnalysisTab && tabs.length === 3) {
-      tabs.push({ name: 'Analysis (New)', link: 'apps' });
-    }
     if (
       serverConfigStore.get().config.enableDataExplorer &&
       !tabs.find((tab) => tab.name === 'Data Explorer')
@@ -216,7 +212,7 @@ export const WorkspaceNavBar = fp.flow(
             ...styles.tab,
             ...(selected ? styles.active : {}),
             ...(disabled ? styles.disabled : {}),
-            ...(['apps', 'data-explorer', 'tanagra'].includes(link)
+            ...(['data-explorer', 'tanagra'].includes(link)
               ? experimentalTabStyle(selected)
               : {}),
           }}
