@@ -1691,7 +1691,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private DbConceptSet buildPrePackagedAllSurveyConceptSet() {
     final DbConceptSet surveyConceptSet = new DbConceptSet();
-    surveyConceptSet.setName("All Surveys");
+    surveyConceptSet.setName("SURVEY");
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
     return surveyConceptSet;
   }
