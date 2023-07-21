@@ -5,12 +5,12 @@ import { BillingStatus } from 'generated/fetch';
 
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
-import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import colors from 'app/styles/colors';
 import { reactStyles, switchCase } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
+import { userAppsStore, useStore } from 'app/utils/stores';
+import { openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -28,8 +28,6 @@ const enum VisibleModal {
   None = 'None',
   SelectAnApp = 'SelectAnApp',
   Jupyter = 'Jupyter',
-  // TODO will we need this?
-  // RStudio = 'RStudio'
 }
 
 interface AppSelectorProps {
@@ -38,6 +36,7 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
+  const { userApps } = useStore(userAppsStore);
   const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
   const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
 
@@ -58,8 +57,7 @@ export const AppSelector = (props: AppSelectorProps) => {
         break;
       case UIAppType.RSTUDIO:
         setVisibleModal(VisibleModal.None);
-        // TODO iterate on what is the best action here
-        setSidebarActiveIconStore.next(rstudioConfigIconId);
+        openRStudioOrConfigPanel(workspace.namespace, userApps);
         break;
     }
   };

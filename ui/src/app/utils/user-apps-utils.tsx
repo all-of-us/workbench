@@ -3,12 +3,16 @@ import {
   AppType,
   CreateAppRequest,
   Disk,
+  ListAppsResponse,
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { findApp, UIAppType } from 'app/components/apps-panel/utils';
+import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
+import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
 
 export const appTypeToString: Record<AppType, string> = {
@@ -104,7 +108,10 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (workspaceNamespace, userApp) => {
+export const openRStudio = (
+  workspaceNamespace: string,
+  userApp: UserAppEnvironment
+) => {
   localizeUserApp(
     workspaceNamespace,
     userApp.appName,
@@ -113,4 +120,16 @@ export const openRStudio = (workspaceNamespace, userApp) => {
     false
   );
   window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+};
+
+export const openRStudioOrConfigPanel = (
+  workspaceNamespace: string,
+  userApps: ListAppsResponse
+) => {
+  const userApp = findApp(userApps, UIAppType.RSTUDIO);
+  if (userApp?.status === AppStatus.RUNNING) {
+    openRStudio(workspaceNamespace, userApp);
+  } else {
+    setSidebarActiveIconStore.next(rstudioConfigIconId);
+  }
 };
