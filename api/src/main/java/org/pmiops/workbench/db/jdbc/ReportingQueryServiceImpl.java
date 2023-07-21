@@ -391,7 +391,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .identityBypassTime(offsetDateTimeUtc(rs.getTimestamp("identity_bypass_time")))
                 .identityCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("identity_completion_time")))
-                .rasLoginGovBypassTime(offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_bypass_time")))
+                .rasLoginGovBypassTime(
+                    offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_bypass_time")))
                 .rasLoginGovCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_completion_time")))
                 .familyName(rs.getString("family_name"))

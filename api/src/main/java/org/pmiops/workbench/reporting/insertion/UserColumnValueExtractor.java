@@ -37,9 +37,8 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   RAS_LOGIN_GOV_BYPASS_TIME(
       "ras_login_gov_bypass_time", u -> toInsertRowString(u.getRasLoginGovBypassTime())),
   RAS_LOGIN_GOV_COMPLETION_TIME(
-      "ras_login_gov_completion_time", u ->
-      toInsertRowString(u.getRasLoginGovCompletionTime())),
-      IDENTITY_BYPASS_TIME("identity_bypass_time", u -> toInsertRowString(u.getIdentityBypassTime())),
+      "ras_login_gov_completion_time", u -> toInsertRowString(u.getRasLoginGovCompletionTime())),
+  IDENTITY_BYPASS_TIME("identity_bypass_time", u -> toInsertRowString(u.getIdentityBypassTime())),
   IDENTITY_COMPLETION_TIME(
       "identity_completion_time", u -> toInsertRowString(u.getIdentityCompletionTime())),
   FAMILY_NAME("family_name", ReportingUser::getFamilyName),
