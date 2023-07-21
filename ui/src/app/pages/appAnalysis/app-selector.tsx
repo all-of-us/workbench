@@ -8,7 +8,7 @@ import { Button } from 'app/components/buttons';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { reactStyles, switchCase } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -77,20 +77,29 @@ export const AppSelector = (props: AppSelectorProps) => {
       >
         <div style={{ width: '9rem', paddingLeft: '1rem' }}>Choose an App</div>
       </Button>
-      {visibleModal === VisibleModal.SelectAnApp && (
-        <AppSelectorModal
-          {...{ selectedApp, setSelectedApp, onNext, onClose }}
-        />
-      )}
-      {visibleModal === VisibleModal.Jupyter && (
-        <NewJupyterNotebookModal
-          {...{ workspace, onClose }}
-          data-test-id='jupyter-modal'
-          existingNameList={null}
-          onBack={() => {
-            setVisibleModal(VisibleModal.SelectAnApp);
-          }}
-        />
+      {switchCase(
+        visibleModal,
+        [
+          VisibleModal.SelectAnApp,
+          () => (
+            <AppSelectorModal
+              {...{ selectedApp, setSelectedApp, onNext, onClose }}
+            />
+          ),
+        ],
+        [
+          VisibleModal.Jupyter,
+          () => (
+            <NewJupyterNotebookModal
+              {...{ workspace, onClose }}
+              data-test-id='jupyter-modal'
+              existingNameList={null}
+              onBack={() => {
+                setVisibleModal(VisibleModal.SelectAnApp);
+              }}
+            />
+          ),
+        ]
       )}
     </>
   );
