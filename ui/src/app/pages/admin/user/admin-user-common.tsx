@@ -651,7 +651,7 @@ export const orderedAccessModules = [
   AccessModule.COMPLIANCETRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.IDENTITY,
+  AccessModule.RASLINKLOGINGOV,
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATIONCONFIRMATION,
 ];

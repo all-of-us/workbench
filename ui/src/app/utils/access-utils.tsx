@@ -183,7 +183,7 @@ export const getAccessModuleConfig = (
       }),
     ],
     [
-      AccessModule.IDENTITY,
+      AccessModule.RASLINKLOGINGOV,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableRasLoginGovLinking,

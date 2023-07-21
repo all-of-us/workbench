@@ -544,9 +544,9 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.INCOMPLETE,
-      AccessModule.IDENTITY,
+      AccessModule.RASLINKLOGINGOV,
       {
-        moduleName: AccessModule.IDENTITY,
+        moduleName: AccessModule.RASLINKLOGINGOV,
       },
     ],
     [
@@ -627,7 +627,7 @@ describe('AdminUserProfile', () => {
     });
 
     const excludedModules = [
-      AccessModule.IDENTITY,
+      AccessModule.RASLINKLOGINGOV,
       AccessModule.ERACOMMONS,
       AccessModule.COMPLIANCETRAINING,
       AccessModule.CTCOMPLIANCETRAINING,

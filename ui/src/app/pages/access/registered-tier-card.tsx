@@ -23,7 +23,7 @@ import { ModulesForInitialRegistration } from './modules-for-initial-registratio
 
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = (props: { profile: Profile }) => {
-  const moduleName = AccessModule.IDENTITY;
+  const moduleName = AccessModule.RASLINKLOGINGOV;
   const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
     <FlexRow data-test-id={`module-${moduleName}`}>
