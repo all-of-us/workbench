@@ -24,8 +24,6 @@ import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { NotebookList } from './notebook-list';
 
-const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
-
 describe('NotebookList', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
@@ -76,18 +74,19 @@ describe('NotebookList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
+    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
     expect(
       resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+    ).toBe(expected);
 
     expect(
       resourceTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+    ).toBe(expected);
   });
 });

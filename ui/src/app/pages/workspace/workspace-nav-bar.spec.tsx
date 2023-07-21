@@ -3,7 +3,6 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
-import { environment } from 'environments/environment';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
