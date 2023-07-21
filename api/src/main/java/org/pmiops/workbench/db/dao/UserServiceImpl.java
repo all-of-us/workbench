@@ -774,6 +774,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         Agent.asUser(dbUser));
   }
 
+  @Override
   public DbUser updateRasLinkIdMeStatus(String idMeUserName) {
     DbUser dbUser = userProvider.get();
 
