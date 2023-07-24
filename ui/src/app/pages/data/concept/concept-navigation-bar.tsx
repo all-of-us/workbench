@@ -59,11 +59,13 @@ const tooltipContent = [
   </ul>,
 ];
 
-export const ConceptNavigationBar: React.FunctionComponent<{
-  ns: string;
-  wsId: string;
-  showConcepts: boolean;
-}> = ({ ns, wsId, showConcepts }) => {
+export const ConceptNavigationBar: React.FunctionComponent<
+  React.PropsWithChildren<{
+    ns: string;
+    wsId: string;
+    showConcepts: boolean;
+  }>
+> = ({ ns, wsId, showConcepts }) => {
   const [navigate] = useNavigation();
 
   return (

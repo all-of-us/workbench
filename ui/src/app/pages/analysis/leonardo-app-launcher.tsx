@@ -236,13 +236,15 @@ const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
   [ProgressCardState.Redirecting, [Progress.Redirecting]],
 ]);
 
-const ProgressCard: React.FunctionComponent<{
-  progressState: Progress;
-  cardState: ProgressCardState;
-  progressComplete: Map<Progress, boolean>;
-  creatingNewNotebook: boolean;
-  leoAppType: LeoApplicationType;
-}> = ({
+const ProgressCard: React.FunctionComponent<
+  React.PropsWithChildren<{
+    progressState: Progress;
+    cardState: ProgressCardState;
+    progressComplete: Map<Progress, boolean>;
+    creatingNewNotebook: boolean;
+    leoAppType: LeoApplicationType;
+  }>
+> = ({
   progressState,
   cardState,
   progressComplete,

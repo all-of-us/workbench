@@ -21,7 +21,9 @@ export const styles = reactStyles({
   },
 });
 
-export const GoogleSignInButton: React.FunctionComponent = () => (
+export const GoogleSignInButton: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => (
   <Button type='primary' style={styles.button} onClick={() => signIn()}>
     <img
       src={googleIcon}

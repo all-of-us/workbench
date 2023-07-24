@@ -274,13 +274,15 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 const checkNameWidth = (element: HTMLDivElement) =>
   element.offsetWidth < element.scrollWidth;
 
-const ImmutableListItem: React.FunctionComponent<{
-  name: string;
-  isSubitem: boolean;
-  onChange: Function;
-  checked: boolean;
-  showSourceConceptIcon?: boolean;
-}> = ({ name, isSubitem, onChange, checked, showSourceConceptIcon }) => {
+const ImmutableListItem: React.FunctionComponent<
+  React.PropsWithChildren<{
+    name: string;
+    isSubitem: boolean;
+    onChange: Function;
+    checked: boolean;
+    showSourceConceptIcon?: boolean;
+  }>
+> = ({ name, isSubitem, onChange, checked, showSourceConceptIcon }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -316,14 +318,16 @@ const ImmutableListItem: React.FunctionComponent<{
   );
 };
 
-const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
-  name: string;
-  onChange: Function;
-  checked: boolean;
-  cohortId: number;
-  namespace: string;
-  wid: string;
-}> = ({ name, onChange, checked, cohortId, namespace, wid }) => {
+const ImmutableWorkspaceCohortListItem: React.FunctionComponent<
+  React.PropsWithChildren<{
+    name: string;
+    onChange: Function;
+    checked: boolean;
+    cohortId: number;
+    namespace: string;
+    wid: string;
+  }>
+> = ({ name, onChange, checked, cohortId, namespace, wid }) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -376,7 +380,7 @@ interface DataDictionaryPopupProps {
 }
 
 const DataDictionaryDescription: React.FunctionComponent<
-  DataDictionaryPopupProps
+  React.PropsWithChildren<DataDictionaryPopupProps>
 > = ({ dataDictionaryEntry }) => {
   return (
     <div
@@ -1669,7 +1673,6 @@ export const DatasetPage = fp.flow(
     return (
       <React.Fragment>
         {savingDataset && <SpinnerOverlay opacity={0.3} />}
-
         <FadeBox style={{ paddingTop: '1.5rem' }}>
           <h2 style={{ paddingTop: 0, marginTop: 0 }}>
             Datasets
@@ -2119,7 +2122,6 @@ export const DatasetPage = fp.flow(
             </Button>
           </TooltipTrigger>
         </div>
-
         {switchCase(
           modalState,
           [

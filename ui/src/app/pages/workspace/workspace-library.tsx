@@ -169,12 +169,14 @@ const libraryTabs = {
   },
 };
 
-const LibraryTab: React.FunctionComponent<{
-  title: string;
-  icon: string;
-  onClick: Function;
-  selected: boolean;
-}> = ({ title, icon, onClick, selected }) => {
+const LibraryTab: React.FunctionComponent<
+  React.PropsWithChildren<{
+    title: string;
+    icon: string;
+    onClick: Function;
+    selected: boolean;
+  }>
+> = ({ title, icon, onClick, selected }) => {
   return (
     <Clickable
       style={

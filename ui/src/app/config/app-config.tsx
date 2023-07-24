@@ -7,7 +7,9 @@ import { configApi } from 'app/services/swagger-fetch-clients';
 import { makeOIDC } from 'app/utils/authentication';
 import { serverConfigStore, useStore } from 'app/utils/stores';
 
-export const AppConfigComponent: React.FunctionComponent = () => {
+export const AppConfigComponent: React.FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const { config } = useStore(serverConfigStore);
 
   useEffect(() => {
