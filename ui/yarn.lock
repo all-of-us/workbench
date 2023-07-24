@@ -8011,10 +8011,10 @@ react-app-polyfill@^3.0.0:
     regenerator-runtime "^0.13.9"
     whatwg-fetch "^3.6.2"
 
-react-app-rewired@^2.1.9:
-  version "2.1.11"
-  resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-2.1.11.tgz#ad5781e3ef5e506be935898bb7642f7f9d50b61a"
-  integrity sha512-zRIqJUPsCoPnfYtea3xgPbKR42vx0NoH5oo8R8FELXqzkjJHa39V6zD8CAdkLJoYL8V3JScWHAfKMZOzi1Ydmw==
+react-app-rewired@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-2.2.1.tgz#84901ee1e3f26add0377ebec0b41bcdfce9fc211"
+  integrity sha512-uFQWTErXeLDrMzOJHKp0h8P1z0LV9HzPGsJ6adOtGlA/B9WfT6Shh4j2tLTTGlXOfiVx6w6iWpp7SOC5pvk+gA==
   dependencies:
     semver "^5.6.0"
 
@@ -8141,10 +8141,10 @@ react-modal@^3.16.1:
     react-lifecycles-compat "^3.0.0"
     warning "^4.0.3"
 
-react-oidc-context@^2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/react-oidc-context/-/react-oidc-context-2.2.1.tgz#d3f910e9216263e59ecb70e2f56182732e15301e"
-  integrity sha512-Y5vZJeyqqMDhwIDgR56mdvW2jkJ/xkAr2jDX/q3NjA4o+7zqdlAPMVb6d33RAc5CSD7CyNB6JD5v5vCY5IO0BA==
+react-oidc-context@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/react-oidc-context/-/react-oidc-context-2.2.2.tgz#aa9b66596b63f1373d312007099c32b112646396"
+  integrity sha512-rke8goKuxxQhSAR11h8wVn56m7kEa1mcAfYDlIycsIgmbZOFzKA0Un0y0RodHZ/M/CG6u0JD1I8RKZHqRJjWnA==
 
 react-onclickoutside@^6.13.0:
   version "6.13.0"
