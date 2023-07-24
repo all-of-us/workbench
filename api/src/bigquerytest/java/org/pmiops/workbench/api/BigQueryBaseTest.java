@@ -114,7 +114,15 @@ public abstract class BigQueryBaseTest {
         default:
           throw new IllegalArgumentException("Unrecognized field type '" + typeString + "'.");
       }
-      schemaFields.add(Field.of(column.getName(), fieldType));
+      if (column.getMode().equals(Field.Mode.REPEATED.name())) {
+        schemaFields.add(Field.newBuilder(
+                        column.getName(),
+                        fieldType)
+                .setMode(Field.Mode.REPEATED)
+                .build());
+      } else {
+        schemaFields.add(Field.of(column.getName(), fieldType));
+      }
     }
     return Schema.of(schemaFields);
   }

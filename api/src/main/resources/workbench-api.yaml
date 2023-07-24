@@ -8964,6 +8964,9 @@ definitions:
         description: The concept id that maps to concept table, if any.
         type: integer
         format: int64
+      variantId:
+        description: The variant id of SNP Indel Variants.
+        type: string
       attributes:
         description: |
           Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age), Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc). Measurements and Physical Measurements have overlap in many areas such as body weight, but the difference is standard(measurements) and source(physical measurements).

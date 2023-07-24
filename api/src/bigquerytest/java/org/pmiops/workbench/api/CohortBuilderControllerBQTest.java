@@ -197,7 +197,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "cb_variant_attribute",
         "cb_variant_attribute_contig_position",
         "cb_variant_attribute_genes",
-        "cb_variant_attribute_rs_number");
+        "cb_variant_attribute_rs_number",
+        "cb_variant_to_person");
   }
 
   @Override
@@ -610,6 +611,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(903111L)
         .ancestorData(false)
         .standard(false);
+  }
+
+  private static SearchParameter variant() {
+    return new SearchParameter()
+        .domain(Domain.SNP_INDEL_VARIANT.toString())
+        .ancestorData(false)
+        .group(false)
+        .variantId("1-101504524-G-A");
   }
 
   /**
@@ -1077,6 +1086,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThrows(
         BadRequestException.class,
         () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition));
+  }
+
+  @Test
+  public void countParticipantsVariantData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variant()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
