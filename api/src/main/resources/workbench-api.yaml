@@ -5479,6 +5479,7 @@ definitions:
     - RAS_LINK_ID_ME
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
+    - TEST_MODULE
   AccessBypassRequest:
     type: object
     required:
