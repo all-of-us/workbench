@@ -136,12 +136,11 @@ const searchTooltip = (
   </div>
 );
 
-const DomainCard: React.FunctionComponent<
-  React.PropsWithChildren<{
-    conceptDomainCard: ConceptDomainCard;
-    browseInDomain: Function;
-  }>
-> = ({ conceptDomainCard, browseInDomain }) => {
+interface DomainProps {
+  conceptDomainCard: ConceptDomainCard;
+  browseInDomain: Function;
+}
+const DomainCard = ({ conceptDomainCard, browseInDomain }: DomainProps) => {
   const conceptCount = conceptDomainCard.conceptCount;
   const { name, participantCount } = conceptDomainCard;
   return (
@@ -170,12 +169,11 @@ const DomainCard: React.FunctionComponent<
   );
 };
 
-const SurveyCard: React.FunctionComponent<
-  React.PropsWithChildren<{
-    survey: SurveyModule;
-    browseSurvey: Function;
-  }>
-> = ({ survey, browseSurvey }) => {
+interface SurveyProps {
+  survey: SurveyModule;
+  browseSurvey: Function;
+}
+const SurveyCard = ({ survey, browseSurvey }: SurveyProps) => {
   return (
     <DomainCardBase style={{ maxHeight: 'auto', width: 'calc(25% - 1.5rem)' }}>
       <Clickable
@@ -204,12 +202,14 @@ const SurveyCard: React.FunctionComponent<
   );
 };
 
-const PhysicalMeasurementsCard: React.FunctionComponent<
-  React.PropsWithChildren<{
-    physicalMeasurementCard: ConceptDomainCard;
-    browsePhysicalMeasurements: Function;
-  }>
-> = ({ physicalMeasurementCard, browsePhysicalMeasurements }) => {
+interface PhysicalMeasurementProps {
+  physicalMeasurementCard: ConceptDomainCard;
+  browsePhysicalMeasurements: Function;
+}
+const PhysicalMeasurementsCard = ({
+  physicalMeasurementCard,
+  browsePhysicalMeasurements,
+}: PhysicalMeasurementProps) => {
   const conceptCount = physicalMeasurementCard.conceptCount;
   const { description, name, participantCount } = physicalMeasurementCard;
   return (

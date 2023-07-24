@@ -153,9 +153,7 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent<
-  React.PropsWithChildren<unknown>
-> = () => {
+export const AppRoutingComponent = () => {
   useAuthentication();
   const { authLoaded } = useStore(authStore);
   const isUserDisabledInDb = useIsUserDisabled();

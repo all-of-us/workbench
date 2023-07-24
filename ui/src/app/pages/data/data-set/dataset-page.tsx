@@ -274,15 +274,20 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 const checkNameWidth = (element: HTMLDivElement) =>
   element.offsetWidth < element.scrollWidth;
 
-const ImmutableListItem: React.FunctionComponent<
-  React.PropsWithChildren<{
-    name: string;
-    isSubitem: boolean;
-    onChange: Function;
-    checked: boolean;
-    showSourceConceptIcon?: boolean;
-  }>
-> = ({ name, isSubitem, onChange, checked, showSourceConceptIcon }) => {
+interface ImmutableListItemProps {
+  name: string;
+  isSubitem: boolean;
+  onChange: Function;
+  checked: boolean;
+  showSourceConceptIcon?: boolean;
+}
+const ImmutableListItem = ({
+  name,
+  isSubitem,
+  onChange,
+  checked,
+  showSourceConceptIcon,
+}: ImmutableListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -318,16 +323,22 @@ const ImmutableListItem: React.FunctionComponent<
   );
 };
 
-const ImmutableWorkspaceCohortListItem: React.FunctionComponent<
-  React.PropsWithChildren<{
-    name: string;
-    onChange: Function;
-    checked: boolean;
-    cohortId: number;
-    namespace: string;
-    wid: string;
-  }>
-> = ({ name, onChange, checked, cohortId, namespace, wid }) => {
+interface ImmutableWorkspaceCohortListItemProps {
+  name: string;
+  onChange: Function;
+  checked: boolean;
+  cohortId: number;
+  namespace: string;
+  wid: string;
+}
+const ImmutableWorkspaceCohortListItem = ({
+  name,
+  onChange,
+  checked,
+  cohortId,
+  namespace,
+  wid,
+}: ImmutableWorkspaceCohortListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -379,9 +390,9 @@ interface DataDictionaryPopupProps {
   dataDictionaryEntry: DataDictionaryEntry;
 }
 
-const DataDictionaryDescription: React.FunctionComponent<
-  React.PropsWithChildren<DataDictionaryPopupProps>
-> = ({ dataDictionaryEntry }) => {
+const DataDictionaryDescription = ({
+  dataDictionaryEntry,
+}: DataDictionaryPopupProps) => {
   return (
     <div
       style={{
