@@ -13,7 +13,7 @@ import {
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
@@ -48,10 +48,10 @@ const renderInteractiveNotebook = (pathParameters) =>
   render(
     <MemoryRouter
       initialEntries={[
-        `/workspaces/sampleNameSpace/sampleWorkspace/${appFilesTabName}/preview/example.Rmd`,
+        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/example.Rmd`,
       ]}
     >
-      <Route path={`/workspaces/:ns/:wsid/${appFilesTabName}/preview/:nbName`}>
+      <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>
         <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
       </Route>
     </MemoryRouter>

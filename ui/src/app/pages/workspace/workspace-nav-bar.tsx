@@ -17,7 +17,7 @@ import {
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 
@@ -144,7 +144,7 @@ const tabs = [
   { name: 'Data', link: 'data' },
   {
     name: 'Analysis',
-    link: appFilesTabName,
+    link: analysisTabName,
   },
   { name: 'About', link: 'about' },
 ];

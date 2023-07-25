@@ -32,7 +32,7 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import {
   JupyterApi,
   ProxyApi,
@@ -73,13 +73,13 @@ describe('NotebookLauncher', () => {
 
   let runtimeStub;
 
-  const notebookInitialUrl = `/workspaces/namespace/id/${appFilesTabName}/wharrgarbl`;
+  const notebookInitialUrl = `/workspaces/namespace/id/${analysisTabName}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = async () => {
     const c = mount(
       <Router history={history}>
-        <Route path={`/workspaces/:ns/:wsid/${appFilesTabName}/:nbName`}>
+        <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
@@ -551,7 +551,7 @@ describe('TerminalLauncher', () => {
       'workspaces',
       'defaultNamespace',
       '1',
-      appFilesTabName,
+      analysisTabName,
     ]);
   });
 });

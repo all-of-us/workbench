@@ -7,9 +7,9 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
-import { environment } from 'environments/environment';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
@@ -135,7 +135,7 @@ export const openRStudioOrConfigPanel = (
   }
 };
 
-// name of the tab for accessing apps and app files, also used to construct URLs
-export const appFilesTabName = environment.showNewAnalysisTab
-  ? 'app-files'
+// internal name of the analysis tab, also used to construct URLs
+export const analysisTabName = environment.showNewAnalysisTab
+  ? 'analysis'
   : 'notebooks';

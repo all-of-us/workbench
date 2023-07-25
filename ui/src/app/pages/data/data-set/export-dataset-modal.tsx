@@ -38,7 +38,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -124,7 +124,7 @@ export const ExportDatasetModal = ({
         createExportDatasetRequest()
       );
       const notebookUrl =
-        `/workspaces/${workspace.namespace}/${workspace.id}/${appFilesTabName}/preview/` +
+        `/workspaces/${workspace.namespace}/${workspace.id}/${analysisTabName}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );

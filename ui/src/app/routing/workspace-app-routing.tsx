@@ -33,7 +33,7 @@ import {
 } from 'app/pages/workspace/workspace-edit';
 import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(
@@ -144,14 +144,14 @@ export const WorkspaceRoutes = () => {
       {environment.showNewAnalysisTab ? (
         <AppRoute
           exact
-          path={`${path}/${appFilesTabName}`}
+          path={`${path}/${analysisTabName}`}
           guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
         >
           <AppsListPage
             routeData={{
               title: 'View App Files',
-              pageKey: appFilesTabName,
-              workspaceNavBarTab: appFilesTabName,
+              pageKey: analysisTabName,
+              workspaceNavBarTab: analysisTabName,
               breadcrumb: BreadcrumbType.Workspace,
             }}
           />
@@ -159,14 +159,14 @@ export const WorkspaceRoutes = () => {
       ) : (
         <AppRoute
           exact
-          path={`${path}/${appFilesTabName}`}
+          path={`${path}/${analysisTabName}`}
           guards={[adminLockedGuard(ns, wsid)]}
         >
           <NotebookListPage
             routeData={{
               title: 'View Notebooks',
-              pageKey: appFilesTabName,
-              workspaceNavBarTab: appFilesTabName,
+              pageKey: analysisTabName,
+              workspaceNavBarTab: analysisTabName,
               breadcrumb: BreadcrumbType.Workspace,
             }}
           />
@@ -174,7 +174,7 @@ export const WorkspaceRoutes = () => {
       )}
       <AppRoute
         exact
-        path={`${path}/${appFilesTabName}/preview/:nbName`}
+        path={`${path}/${analysisTabName}/preview/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <InteractiveNotebookPage
@@ -182,14 +182,14 @@ export const WorkspaceRoutes = () => {
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.AppFile,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: appFilesTabName,
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
         />
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/${appFilesTabName}/:nbName`}
+        path={`${path}/${analysisTabName}/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <LeonardoAppRedirectPage
@@ -202,7 +202,7 @@ export const WorkspaceRoutes = () => {
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: appFilesTabName,
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Notebook}
@@ -219,7 +219,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: appFilesTabName,
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Terminal}
@@ -235,7 +235,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: appFilesTabName,
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.SparkConsole}

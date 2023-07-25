@@ -40,7 +40,7 @@ import {
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -510,7 +510,7 @@ export const LeonardoAppLauncher = fp.flow(
           workspace.namespace,
           workspace.id,
           // navigate will encode the notebook name automatically
-          appFilesTabName,
+          analysisTabName,
           ...(this.props.leoAppType === LeoApplicationType.Notebook
             ? ['preview', this.getFullJupyterNotebookName()]
             : []),
@@ -579,7 +579,7 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          `workspaces/${namespace}/${id}/${appFilesTabName}/${encodeURIComponent(
+          `workspaces/${namespace}/${id}/${analysisTabName}/${encodeURIComponent(
             this.getFullJupyterNotebookName()
           )}`
         );

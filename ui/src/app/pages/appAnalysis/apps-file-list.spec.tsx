@@ -8,7 +8,7 @@ import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
-import { appFilesTabName } from 'app/utils/user-apps-utils';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -85,7 +85,7 @@ describe('AppsList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${appFilesTabName}/preview/mockFile.ipynb`;
+    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${analysisTabName}/preview/mockFile.ipynb`;
     expect(
       appsFilesTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)
