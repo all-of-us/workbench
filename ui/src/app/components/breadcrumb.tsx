@@ -324,16 +324,16 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      const appFileMatch = matchPath<MatchParams>(location.pathname, {
+      const analysisMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
       });
-      const appFilePreviewMatch = matchPath<MatchParams>(location.pathname, {
+      const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
         path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
-      const appFileName = appFileMatch
-        ? appFileMatch.params.nbName
-        : appFilePreviewMatch
-        ? appFilePreviewMatch.params.nbName
+      const analysisFileName = analysisMatch
+        ? analysisMatch.params.nbName
+        : analysisPreviewMatch
+        ? analysisPreviewMatch.params.nbName
         : undefined;
 
       return getTrail(
@@ -342,7 +342,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName: appFileName }
+        { ns, wsid, cid, csid, pid, nbName: analysisFileName }
       );
     }
 
