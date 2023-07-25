@@ -600,7 +600,10 @@ public class ReportingQueryServiceTest {
       addUserAccessModule(
           user, identityModule, USER__IDENTITY_BYPASS_TIME, USER__IDENTITY_COMPLETION_TIME);
       addUserAccessModule(
-          user, rasLoginGovModule, USER__RAS_LOGIN_GOV_BYPASS_TIME, USER__RAS_LOGIN_GOV_COMPLETION_TIME);
+          user,
+          rasLoginGovModule,
+          USER__RAS_LOGIN_GOV_BYPASS_TIME,
+          USER__RAS_LOGIN_GOV_COMPLETION_TIME);
       addUserAccessModule(
           user,
           duccModule,
