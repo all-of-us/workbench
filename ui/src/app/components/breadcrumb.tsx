@@ -105,7 +105,7 @@ export const getTrail = (
         ),
         new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
       ];
-    case BreadcrumbType.AppFile:
+    case BreadcrumbType.Analysis:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,

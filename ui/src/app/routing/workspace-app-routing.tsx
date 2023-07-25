@@ -174,7 +174,7 @@ export const WorkspaceRoutes = () => {
         <InteractiveNotebookPage
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.AppFile,
+            breadcrumb: BreadcrumbType.Analysis,
             pageKey: LEONARDO_APP_PAGE_KEY,
             workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
@@ -190,7 +190,7 @@ export const WorkspaceRoutes = () => {
           key='notebook'
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.AppFile,
+            breadcrumb: BreadcrumbType.Analysis,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
