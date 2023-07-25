@@ -31,7 +31,7 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
+import { adminLockedGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
 import { analysisTabName } from 'app/utils/user-apps-utils';
 
@@ -141,12 +141,12 @@ export const WorkspaceRoutes = () => {
           workspaceEditMode={WorkspaceEditMode.Edit}
         />
       </AppRoute>
-      {environment.showNewAnalysisTab ? (
-        <AppRoute
-          exact
-          path={`${path}/${analysisTabName}`}
-          guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
-        >
+      <AppRoute
+        exact
+        path={`${path}/${analysisTabName}`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        {environment.showNewAnalysisTab ? (
           <AppsListPage
             routeData={{
               title: 'View App Files',
@@ -155,13 +155,7 @@ export const WorkspaceRoutes = () => {
               breadcrumb: BreadcrumbType.Workspace,
             }}
           />
-        </AppRoute>
-      ) : (
-        <AppRoute
-          exact
-          path={`${path}/${analysisTabName}`}
-          guards={[adminLockedGuard(ns, wsid)]}
-        >
+        ) : (
           <NotebookListPage
             routeData={{
               title: 'View Notebooks',
@@ -170,8 +164,8 @@ export const WorkspaceRoutes = () => {
               breadcrumb: BreadcrumbType.Workspace,
             }}
           />
-        </AppRoute>
-      )}
+        )}
+      </AppRoute>
       <AppRoute
         exact
         path={`${path}/${analysisTabName}/preview/:nbName`}
