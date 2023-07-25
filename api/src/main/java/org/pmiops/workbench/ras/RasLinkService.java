@@ -100,9 +100,7 @@ import org.springframework.stereotype.Service;
  * use that as login.|id.me user name.
  *
  * <p>Step4: Use step3's RAS username to update AoU database by {@link
- * UserService#updateRasLinkLoginGovStatus(String)} or {@link
- * UserService#updateRasLinkIdMeStatus(String)} (based on which service was used). Then return it as
- * user profile.
+ * UserService#updateIdentityStatus(String)}. Then return it as user profile.
  *
  * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if we
  * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
@@ -155,9 +153,11 @@ public class RasLinkService {
     String username = getUsername(userInfoResponse);
     DbUser user;
     if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateRasLinkIdMeStatus(username);
+      userService.updateRasLinkIdMeStatus(username);
+      user = userService.updateIdentityStatus(username);
     } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateRasLinkLoginGovStatus(username);
+      userService.updateRasLinkLoginGovStatus(username);
+      user = userService.updateIdentityStatus(username);
     } else {
       throw new ForbiddenException(
           String.format(

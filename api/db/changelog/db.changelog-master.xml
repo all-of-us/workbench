@@ -228,6 +228,7 @@
   <include file="changelog/db.changelog-218-drop-unused-columns-user-table.xml"/>
   <include file="changelog/db.changelog-219-bucket-audit-json-egress.xml"/>
   <include file="changelog/db.changelog-220-add-id-me-access-module.xml"/>
+  <include file="changelog/db.changelog-221-identity-access-module.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -381,6 +381,15 @@ public class UserServiceTest {
   }
 
   @Test
+  public void testUpdateIdentityStatus() {
+    String loginGovName = "loginGov@email.com";
+    userService.updateIdentityStatus(loginGovName);
+    assertThat(providedDbUser.getRasLinkUsername()).isEqualTo(loginGovName);
+    assertModuleCompletionEqual(
+        DbAccessModuleName.IDENTITY, providedDbUser, Timestamp.from(START_INSTANT));
+  }
+
+  @Test
   public void testUpdateRasLinkIdMeStatus() {
     String idMeName = "idMe@email.com";
     userService.updateRasLinkIdMeStatus(idMeName);

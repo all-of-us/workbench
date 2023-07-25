@@ -183,13 +183,6 @@ export const getAccessModuleConfig = (
       }),
     ],
     [
-      AccessModule.RASLINKIDME,
-      () => ({
-        ...apiConfig,
-      }),
-    ],
-
-    [
       AccessModule.RASLINKLOGINGOV,
       () => ({
         ...apiConfig,

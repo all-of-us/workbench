@@ -141,6 +141,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getRasLinkLoginGovBypassTime();
 
+    Timestamp getIdentityBypassTime();
+
     String getAccessTierShortNames();
   }
 
@@ -171,6 +173,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "uampublication.publication_confirmation_bypass_time AS publicationConfirmationBypassTime, "
               + "uamt.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
               + "uamr.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
+              + "uami.identity_bypass_time AS identityBypassTime, "
               + "t.access_tier_short_names AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN user_verified_institutional_affiliation AS uvia ON u.user_id = uvia.user_id "
@@ -239,6 +242,13 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  FROM user_access_module uam "
               + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
               + "  WHERE am.name = 'RAS_LOGIN_GOV' "
-              + ") as uamr ON u.user_id = uamr.user_id ")
+              + ") as uamr ON u.user_id = uamr.user_id "
+              + "LEFT JOIN ( "
+              + "  SELECT uam.user_id, "
+              + "    uam.bypass_time AS identity_bypass_time "
+              + "  FROM user_access_module uam "
+              + "  JOIN access_module am ON am.access_module_id=uam.access_module_id "
+              + "  WHERE am.name = 'IDENTITY' "
+              + ") as uami ON u.user_id = uamr.user_id ")
   List<DbAdminTableUser> getAdminTableUsers();
 }

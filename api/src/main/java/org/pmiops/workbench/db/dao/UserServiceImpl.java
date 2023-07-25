@@ -761,6 +761,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  public DbUser updateIdentityStatus(String userName) {
+    DbUser dbUser = userProvider.get();
+
+    return updateUserWithRetries(
+        user -> {
+          user.setRasLinkUsername(userName);
+          accessModuleService.updateCompletionTime(user, DbAccessModuleName.IDENTITY, clockNow());
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
+  }
+
+  @Override
   public DbUser updateRasLinkIdMeStatus(String idMeUserName) {
     DbUser dbUser = userProvider.get();
 

@@ -5477,6 +5477,7 @@ definitions:
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
     - RAS_LINK_ID_ME
+    - IDENTITY
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
@@ -6215,6 +6216,9 @@ definitions:
         type: integer
         format: int64
       eraCommonsBypassTime:
+        type: integer
+        format: int64
+      identityBypassTime:
         type: integer
         format: int64
       rasLinkLoginGovBypassTime:
@@ -9878,11 +9882,18 @@ definitions:
       professionalUrl:
         type: string
         description: User's URL at primary place of work.
+      identityBypassTime:
+        type: string
+        format: date-time
+        description: Time an administrator bypassed the identity requirement for this user.
+      identityCompletionTime:
+        type: string
+        format: date-time
+        description: Time user completed the identity account link.
       rasLoginGovBypassTime:
         type: string
         format: date-time
-        description: Time an administrator bypassed the RAS Login.gov requirement
-          for this user.
+        description: Time an administrator bypassed the RAS Login.gov requirement for this user.
       rasLoginGovCompletionTime:
         type: string
         format: date-time
