@@ -115,7 +115,10 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Notebooks', `${prefix}/${NOTEBOOKS_TAB_NAME}`),
+        new BreadcrumbData(
+          fp.upperFirst(NOTEBOOKS_TAB_NAME),
+          `${prefix}/${NOTEBOOKS_TAB_NAME}`
+        ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
           `${prefix}/${NOTEBOOKS_TAB_NAME}/${nbName}`
