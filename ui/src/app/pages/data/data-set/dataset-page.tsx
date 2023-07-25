@@ -829,16 +829,14 @@ export const DatasetPage = fp.flow(
         workspace,
         cdrVersionTiersResponse
       );
-      if (serverConfigStore.get().config.enableDataExplorer) {
-        PREPACKAGED_DOMAINS = {
-          ...PREPACKAGED_DOMAINS,
-          ...PREPACKAGED_SURVEY_DOMAINS,
-        };
-        prepackagedConceptSetToString = {
-          ...prepackagedConceptSetToString,
-          ...prepackagedSurveyConceptSetToString,
-        };
-      }
+      PREPACKAGED_DOMAINS = {
+        ...PREPACKAGED_DOMAINS,
+        ...PREPACKAGED_SURVEY_DOMAINS,
+      };
+      prepackagedConceptSetToString = {
+        ...prepackagedConceptSetToString,
+        ...prepackagedSurveyConceptSetToString,
+      };
       if (hasFitbitData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,

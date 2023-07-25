@@ -94,7 +94,7 @@ export class RenameModal extends React.Component<Props, States> {
             onChange={(v) => this.setState({ newName: v, nameTouched: true })}
           />
           <ValidationError data-test-id='rename-new-name-invalid'>
-            {summarizeErrors(nameTouched && errors && errors.newName)}
+            {summarizeErrors(nameTouched && errors?.newName)}
           </ValidationError>
           {!hideDescription && (
             <div style={{ marginTop: '1.5rem' }}>
