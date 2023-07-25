@@ -18,6 +18,7 @@ import { getExistingNotebookNames } from 'app/pages/analysis/util';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
 import { summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
 import { nameValidationFormat } from 'app/utils/resources';
@@ -71,7 +72,7 @@ export const NewJupyterNotebookModal = (props: Props) => {
         'workspaces',
         workspace.namespace,
         workspace.id,
-        'notebooks',
+        NOTEBOOKS_TAB_NAME,
         encodeURIComponent(name),
       ],
       { queryParams: { kernelType: kernel, creating: true } }

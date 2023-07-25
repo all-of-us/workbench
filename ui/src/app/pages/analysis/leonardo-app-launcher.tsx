@@ -27,6 +27,7 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
@@ -508,7 +509,7 @@ export const LeonardoAppLauncher = fp.flow(
           workspace.namespace,
           workspace.id,
           // navigate will encode the notebook name automatically
-          'notebooks',
+          NOTEBOOKS_TAB_NAME,
           ...(this.props.leoAppType === LeoApplicationType.Notebook
             ? ['preview', this.getFullJupyterNotebookName()]
             : []),
@@ -577,12 +578,9 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          'workspaces/' +
-            namespace +
-            '/' +
-            id +
-            '/notebooks/' +
-            encodeURIComponent(this.getFullJupyterNotebookName())
+          `workspaces/${namespace}/${id}/${NOTEBOOKS_TAB_NAME}/${encodeURIComponent(
+            this.getFullJupyterNotebookName()
+          )}`
         );
       }
       if (this.isOpeningTerminal()) {

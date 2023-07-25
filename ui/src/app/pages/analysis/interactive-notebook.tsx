@@ -23,6 +23,7 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import {
@@ -273,7 +274,7 @@ export const InteractiveNotebook = fp.flow(
           'workspaces',
           this.props.match.params.ns,
           this.props.match.params.wsid,
-          'notebooks',
+          NOTEBOOKS_TAB_NAME,
           this.props.match.params.nbName,
         ],
         { queryParams: queryParams }
@@ -319,7 +320,7 @@ export const InteractiveNotebook = fp.flow(
             'workspaces',
             ns,
             wsid,
-            'notebooks',
+            NOTEBOOKS_TAB_NAME,
             encodeURIComponent(notebook.name),
           ]);
         });

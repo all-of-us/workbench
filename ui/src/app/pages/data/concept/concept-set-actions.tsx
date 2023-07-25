@@ -18,6 +18,7 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace,
 } from 'app/utils';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { conceptSetUpdating, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -156,7 +157,7 @@ export const ConceptSetActions = fp.flow(
           url += 'data/concepts';
           break;
         case 'notebook':
-          url += 'notebooks';
+          url += NOTEBOOKS_TAB_NAME;
           break;
         case 'dataSet':
           url += 'data/data-sets';
