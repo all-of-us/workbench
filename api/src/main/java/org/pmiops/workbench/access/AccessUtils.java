@@ -34,7 +34,6 @@ public class AccessUtils {
           DbAccessModuleName.PROFILE_CONFIRMATION,
           DbAccessModuleName.PUBLICATION_CONFIRMATION,
           DbAccessModuleName.IDENTITY,
-          DbAccessModuleName.RAS_LOGIN_GOV,
           DbAccessModuleName.RT_COMPLIANCE_TRAINING,
           DbAccessModuleName.TWO_FACTOR_AUTH);
 
