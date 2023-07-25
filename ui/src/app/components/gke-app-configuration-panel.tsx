@@ -179,7 +179,12 @@ export const GKEAppConfigurationPanel = ({
             disk={disk}
           />
         ) : (
-          <ConfirmDelete onCancel={onClose} onConfirm={onConfirmDeleteGKEApp} />
+          <ConfirmDelete
+            onCancel={onClose}
+            onConfirm={() =>
+              onConfirmDeleteGKEApp(false /* deletePdSelected */)
+            }
+          />
         ),
     ]
   );
