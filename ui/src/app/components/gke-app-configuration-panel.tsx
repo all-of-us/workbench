@@ -20,6 +20,8 @@ import { switchCase } from 'app/utils';
 import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 
+import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
+
 type InjectedProps = 'app' | 'disk' | 'onClickDeleteUnattachedPersistentDisk';
 
 export type GkeAppConfigurationPanelProps = {
@@ -165,15 +167,20 @@ export const GKEAppConfigurationPanel = ({
     ],
     [
       GKEAppPanelContent.DELETE_GKE_APP,
-      () => (
-        <ConfirmDeleteEnvironmentWithPD
-          onConfirm={onConfirmDeleteGKEApp}
-          onCancel={onClose}
-          appType={toUIAppType[app.appType]}
-          usingDataproc={false}
-          disk={disk}
-        />
-      ),
+      () =>
+        // currently (July 2023) we do not expose detaching PDs to users, but it's possible to get into
+        // an error state where the disk is missing, so we need to account for this
+        disk ? (
+          <ConfirmDeleteEnvironmentWithPD
+            onConfirm={onConfirmDeleteGKEApp}
+            onCancel={onClose}
+            appType={toUIAppType[app.appType]}
+            usingDataproc={false}
+            disk={disk}
+          />
+        ) : (
+          <ConfirmDelete onCancel={onClose} onConfirm={onConfirmDeleteGKEApp} />
+        ),
     ]
   );
 };
