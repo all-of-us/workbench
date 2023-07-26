@@ -16,22 +16,21 @@ public class IdentityVerificationService {
 
   @Autowired
   public IdentityVerificationService(
-      IdentityVerificationDao identityVerificationDao,
-      UserService userService) {
+      IdentityVerificationDao identityVerificationDao, UserService userService) {
     this.identityVerificationDao = identityVerificationDao;
     this.userService = userService;
   }
 
-public void updateIdentityVerificationSystem(String userName, DbIdentityVerificationSystem identityVerificationSystem){
-  DbIdentityVerification identityVerification = retrieveIdentityVerificationOrCreate(    userService.getByUsernameOrThrow(userName));
-  identityVerification.setIdentityVerificationSystem(identityVerificationSystem);
-}
+  public void updateIdentityVerificationSystem(
+      String userName, DbIdentityVerificationSystem identityVerificationSystem) {
+    DbIdentityVerification identityVerification =
+        retrieveIdentityVerificationOrCreate(userService.getByUsernameOrThrow(userName));
+    identityVerification.setIdentityVerificationSystem(identityVerificationSystem);
+  }
 
-  private DbIdentityVerification retrieveIdentityVerificationOrCreate(
-      DbUser user) {
+  private DbIdentityVerification retrieveIdentityVerificationOrCreate(DbUser user) {
     return identityVerificationDao
         .getByUser(user)
         .orElse(new DbIdentityVerification().setUser(user));
   }
-
 }
