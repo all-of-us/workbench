@@ -9,7 +9,6 @@ import {
   RMD_FILE_EXT,
 } from 'app/utils/constants';
 
-// todo generically drop suffix when previewing?
 export function dropJupyterNotebookFileSuffix(filename: string) {
   if (filename?.endsWith(JUPYTER_FILE_EXT)) {
     return filename.substring(0, filename.length - JUPYTER_FILE_EXT.length);
