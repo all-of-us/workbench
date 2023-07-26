@@ -45,6 +45,8 @@ if [[ ${dropDbIfExists} ]]; then
 else
   source init_new_tanagra_db.sh &
 fi
+echo "Using default application credentials from:"
+env | grep GOOGLE_APPLICATION_CREDENTIALS
 
 # run from tanagra sub-module under workbench
 cd ../tanagra

@@ -106,6 +106,8 @@ def dev_up_tanagra(cmd_name, args)
       " not yet tested cor what auth token to pass...")
   op.parse.validate
 
+  ENV["GOOGLE_APPLICATION_CREDENTIALS"] = File.expand_path("sa-key.json")
+
   common = Common.new
   common.status "Setting up local environment for tanagra API"
   setup_local_environment()
