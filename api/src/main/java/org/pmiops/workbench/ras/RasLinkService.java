@@ -26,9 +26,11 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.identityVerification.IdentityVerificationService;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,15 +113,18 @@ public class RasLinkService {
 
   private final AccessModuleService accessModuleService;
   private final UserService userService;
+  private final IdentityVerificationService identityVerificationService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
   @Autowired
   public RasLinkService(
       AccessModuleService accessModuleService,
       UserService userService,
+      IdentityVerificationService identityVerificationService,
       @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
     this.accessModuleService = accessModuleService;
     this.userService = userService;
+    this.identityVerificationService =identityVerificationService;
     this.rasOidcClientProvider = rasOidcClientProvider;
   }
 
@@ -155,9 +160,13 @@ public class RasLinkService {
     if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
       userService.updateRasLinkIdMeStatus(username);
       user = userService.updateIdentityStatus(username);
+      identityVerificationService.updateIdentityVerificationSystem(user,
+          DbIdentityVerificationSystem.ID_ME);
     } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
       userService.updateRasLinkLoginGovStatus(username);
       user = userService.updateIdentityStatus(username);
+      identityVerificationService.updateIdentityVerificationSystem(user,
+          DbIdentityVerificationSystem.LOGIN_GOV);
     } else {
       throw new ForbiddenException(
           String.format(

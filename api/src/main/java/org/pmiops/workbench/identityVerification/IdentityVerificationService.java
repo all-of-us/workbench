@@ -12,19 +12,17 @@ import org.springframework.stereotype.Service;
 public class IdentityVerificationService {
 
   private final IdentityVerificationDao identityVerificationDao;
-  private final UserService userService;
 
   @Autowired
   public IdentityVerificationService(
       IdentityVerificationDao identityVerificationDao, UserService userService) {
     this.identityVerificationDao = identityVerificationDao;
-    this.userService = userService;
   }
 
   public void updateIdentityVerificationSystem(
-      String userName, DbIdentityVerificationSystem identityVerificationSystem) {
+      DbUser user, DbIdentityVerificationSystem identityVerificationSystem) {
     DbIdentityVerification identityVerification =
-        retrieveIdentityVerificationOrCreate(userService.getByUsernameOrThrow(userName));
+        retrieveIdentityVerificationOrCreate(user);
     identityVerification.setIdentityVerificationSystem(identityVerificationSystem);
   }
 
