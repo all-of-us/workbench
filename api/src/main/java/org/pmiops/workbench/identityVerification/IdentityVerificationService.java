@@ -21,6 +21,7 @@ public class IdentityVerificationService {
       DbUser user, DbIdentityVerificationSystem identityVerificationSystem) {
     DbIdentityVerification identityVerification = retrieveIdentityVerificationOrCreate(user);
     identityVerification.setIdentityVerificationSystem(identityVerificationSystem);
+    identityVerificationDao.save(identityVerification);
   }
 
   private DbIdentityVerification retrieveIdentityVerificationOrCreate(DbUser user) {
