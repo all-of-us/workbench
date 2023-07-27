@@ -109,8 +109,7 @@ public class AccessModuleServiceTest {
   @Test
   public void testBypassSuccess_insertNewEntity_identity() {
     assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
-    accessModuleService.updateBypassTime(
-        user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
     List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
     assertThat(userAccessModule.size()).isEqualTo(2);
     assertThat(userAccessModule.get(0).getAccessModule().getName())

@@ -8,8 +8,6 @@ import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DATA_USER_CODE_OF_CONDUCT_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_BYPASS_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__ERA_COMMONS_COMPLETION_TIME;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__IDENTITY_BYPASS_TIME;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__IDENTITY_COMPLETION_TIME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
@@ -137,7 +135,6 @@ public class ReportingQueryServiceTest {
   private DbAccessModule twoFactorAuthModule;
   private DbAccessModule rtTrainingModule;
   private DbAccessModule eRACommonsModule;
-  private DbAccessModule identityModule;
   private DbAccessModule rasLoginGovModule;
   private DbAccessModule duccModule;
 
@@ -151,7 +148,6 @@ public class ReportingQueryServiceTest {
     rtTrainingModule =
         accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
     eRACommonsModule = accessModuleDao.findOneByName(DbAccessModuleName.ERA_COMMONS).get();
-    identityModule = accessModuleDao.findOneByName(DbAccessModuleName.IDENTITY).get();
     rasLoginGovModule = accessModuleDao.findOneByName(DbAccessModuleName.RAS_LOGIN_GOV).get();
     duccModule = accessModuleDao.findOneByName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT).get();
   }
@@ -597,8 +593,6 @@ public class ReportingQueryServiceTest {
           USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
       addUserAccessModule(
           user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
-      addUserAccessModule(
-          user, identityModule, USER__IDENTITY_BYPASS_TIME, USER__IDENTITY_COMPLETION_TIME);
       addUserAccessModule(
           user,
           rasLoginGovModule,
