@@ -16,6 +16,7 @@ import {
   getDefaultCdrVersionForTier,
   hasDefaultCdrVersion,
 } from 'app/utils/cdr-versions';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
 
@@ -142,8 +143,10 @@ const CdrVersion = (props: {
 
 const tabs = [
   { name: 'Data', link: 'data' },
-  { name: 'Analysis', link: 'notebooks' },
-  // { name: 'Analysis (New)', link: 'apps' },
+  {
+    name: 'Analysis',
+    link: NOTEBOOKS_TAB_NAME,
+  },
   { name: 'About', link: 'about' },
 ];
 
@@ -190,7 +193,7 @@ export const WorkspaceNavBar = fp.flow(
     }
   }, []);
 
-  const appsTabStyle = (selected) => {
+  const experimentalTabStyle = (selected) => {
     return selected
       ? { backgroundColor: colorWithWhiteness(colors.danger, 0.3) }
       : { backgroundColor: colors.danger };
@@ -214,7 +217,7 @@ export const WorkspaceNavBar = fp.flow(
             ...(selected ? styles.active : {}),
             ...(disabled ? styles.disabled : {}),
             ...(['apps', 'data-explorer', 'tanagra'].includes(link)
-              ? appsTabStyle(selected)
+              ? experimentalTabStyle(selected)
               : {}),
           }}
           onClick={() => navigate(['workspaces', ns, wsid, link])}

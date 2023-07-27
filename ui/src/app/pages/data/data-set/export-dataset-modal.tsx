@@ -35,6 +35,7 @@ import { dataSetApi, notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { encodeURIComponentStrict, useNavigation } from 'app/utils/navigation';
 import { nameValidationFormat } from 'app/utils/resources';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
@@ -123,7 +124,7 @@ export const ExportDatasetModal = ({
         createExportDatasetRequest()
       );
       const notebookUrl =
-        `/workspaces/${workspace.namespace}/${workspace.id}/notebooks/preview/` +
+        `/workspaces/${workspace.namespace}/${workspace.id}/${NOTEBOOKS_TAB_NAME}/preview/` +
         encodeURIComponentStrict(
           appendJupyterNotebookFileSuffix(notebookNameWithoutSuffix)
         );

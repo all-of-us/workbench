@@ -23,6 +23,7 @@ import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { cond, reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
@@ -37,7 +38,7 @@ enum RequestState {
 }
 
 const ResourceTypeHomeTabs = new Map()
-  .set(ResourceType.NOTEBOOK, 'notebooks')
+  .set(ResourceType.NOTEBOOK, NOTEBOOKS_TAB_NAME)
   .set(ResourceType.COHORT, 'data')
   .set(ResourceType.CONCEPTSET, 'data')
   .set(ResourceType.DATASET, 'data');

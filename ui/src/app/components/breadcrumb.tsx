@@ -18,6 +18,7 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace,
 } from 'app/utils';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import {
   MatchParams,
   RouteDataStore,
@@ -114,10 +115,13 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Notebooks', `${prefix}/notebooks`),
+        new BreadcrumbData(
+          fp.upperFirst(NOTEBOOKS_TAB_NAME),
+          `${prefix}/${NOTEBOOKS_TAB_NAME}`
+        ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/notebooks/${nbName}`
+          `${prefix}/${NOTEBOOKS_TAB_NAME}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -321,10 +325,10 @@ export const Breadcrumb = fp.flow(
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
       const notebookMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/notebooks/:nbName',
+        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/:nbName`,
       });
       const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName',
+        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/preview/:nbName`,
       });
       const nbName = notebookMatch
         ? notebookMatch.params.nbName
@@ -338,7 +342,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns: ns, wsid: wsid, cid: cid, csid: csid, pid: pid, nbName: nbName }
+        { ns, wsid, cid, csid, pid, nbName }
       );
     }
 

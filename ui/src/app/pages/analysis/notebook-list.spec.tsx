@@ -12,6 +12,7 @@ import {
   resourceTableColumns,
 } from 'app/components/resource-list.spec';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
@@ -22,8 +23,6 @@ import { workspaceDataStub } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
 
 import { NotebookList } from './notebook-list';
-
-const NOTEBOOK_HREF_LOCATION = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/notebooks/preview/mockFile.ipynb`;
 
 describe('NotebookList', () => {
   beforeEach(() => {
@@ -75,18 +74,19 @@ describe('NotebookList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
+    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
     expect(
       resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+    ).toBe(expected);
 
     expect(
       resourceTableColumns(wrapper)
         .at(NAME_COLUMN_NUMBER)
         .find('a')
         .prop('href')
-    ).toBe(NOTEBOOK_HREF_LOCATION);
+    ).toBe(expected);
   });
 });

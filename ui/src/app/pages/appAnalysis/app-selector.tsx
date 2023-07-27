@@ -1,23 +1,20 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Dropdown } from 'primereact/dropdown';
 
 import { BillingStatus } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-} from 'app/components/modals';
 import { NewJupyterNotebookModal } from 'app/pages/analysis/new-jupyter-notebook-modal';
 import colors from 'app/styles/colors';
-import { reactStyles } from 'app/utils';
+import { reactStyles, switchCase } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
+import { userAppsStore, useStore } from 'app/utils/stores';
+import { openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
+
+import { AppSelectorModal } from './app-selector-modal';
 
 const styles = reactStyles({
   startButton: {
@@ -25,14 +22,13 @@ const styles = reactStyles({
     height: '3rem',
     backgroundColor: colors.secondary,
   },
-  appsLabel: {
-    color: colors.primary,
-    fontWeight: 600,
-    fontSize: '14px',
-    lineHeight: '24px',
-    paddingBottom: '0.75rem',
-  },
 });
+
+const enum VisibleModal {
+  None = 'None',
+  SelectAnApp = 'SelectAnApp',
+  Jupyter = 'Jupyter',
+}
 
 interface AppSelectorProps {
   workspace: WorkspaceData;
@@ -40,26 +36,28 @@ interface AppSelectorProps {
 
 export const AppSelector = (props: AppSelectorProps) => {
   const { workspace } = props;
-  const [selectedApp, setSelectedApp] = useState('');
-  const [showSelectAppModal, setShowSelectAppModal] = useState(false);
-  const [showJupyterModal, setShowJupyterModal] = useState(false);
+  const { userApps } = useStore(userAppsStore);
+  const [selectedApp, setSelectedApp] = useState<UIAppType>(undefined);
+  const [visibleModal, setVisibleModal] = useState(VisibleModal.None);
 
   const canCreateApps =
     workspace.billingStatus === BillingStatus.ACTIVE &&
     WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
 
   const onClose = () => {
-    setSelectedApp('');
-    setShowSelectAppModal(false);
-    setShowJupyterModal(false);
+    setSelectedApp(undefined);
+    setVisibleModal(VisibleModal.None);
   };
 
   const onNext = () => {
-    setShowSelectAppModal(false);
     switch (selectedApp) {
-      case JUPYTER_APP:
+      case UIAppType.JUPYTER:
         AnalyticsTracker.Notebooks.OpenCreateModal();
-        setShowJupyterModal(true);
+        setVisibleModal(VisibleModal.Jupyter);
+        break;
+      case UIAppType.RSTUDIO:
+        setVisibleModal(VisibleModal.None);
+        openRStudioOrConfigPanel(workspace.namespace, userApps);
         break;
     }
   };
@@ -71,62 +69,35 @@ export const AppSelector = (props: AppSelectorProps) => {
         data-test-id='start-button'
         style={styles.startButton}
         onClick={() => {
-          setShowSelectAppModal(true);
+          setVisibleModal(VisibleModal.SelectAnApp);
         }}
         disabled={!canCreateApps}
       >
         <div style={{ width: '9rem', paddingLeft: '1rem' }}>Choose an App</div>
       </Button>
-      {showSelectAppModal && (
-        <Modal
-          data-test-id='select-application-modal'
-          aria={{
-            label: 'Select Applications Modal',
-          }}
-        >
-          <ModalTitle>Analyze Data</ModalTitle>
-          <ModalBody>
-            <div style={styles.appsLabel}>Select an application</div>
-            <Dropdown
-              id='application-list-dropdown'
-              data-test-id='application-list-dropdown'
-              ariaLabel='Application List Dropdown'
-              value={selectedApp}
-              appendTo='self'
-              options={APP_LIST}
-              placeholder='Choose One'
-              onChange={(e) => setSelectedApp(e.value)}
-              style={{ width: '13.5rem' }}
+      {switchCase(
+        visibleModal,
+        [
+          VisibleModal.SelectAnApp,
+          () => (
+            <AppSelectorModal
+              {...{ selectedApp, setSelectedApp, onNext, onClose }}
             />
-          </ModalBody>
-          <ModalFooter style={{ paddingTop: '3rem' }}>
-            <Button
-              style={{ marginRight: '3rem' }}
-              type='secondary'
-              aria-label='close'
-              onClick={onClose}
-            >
-              Close
-            </Button>
-            <Button
-              data-test-id='next-btn'
-              type='primary'
-              aria-label='next'
-              onClick={onNext}
-              disabled={selectedApp === ''}
-            >
-              Next
-            </Button>
-          </ModalFooter>
-        </Modal>
-      )}
-      {showJupyterModal && !showSelectAppModal && (
-        <NewJupyterNotebookModal
-          {...{ workspace, onClose }}
-          data-test-id='jupyter-modal'
-          existingNameList={null}
-          onBack={() => setShowSelectAppModal(true)}
-        />
+          ),
+        ],
+        [
+          VisibleModal.Jupyter,
+          () => (
+            <NewJupyterNotebookModal
+              {...{ workspace, onClose }}
+              data-test-id='jupyter-modal'
+              existingNameList={null}
+              onBack={() => {
+                setVisibleModal(VisibleModal.SelectAnApp);
+              }}
+            />
+          ),
+        ]
       )}
     </>
   );

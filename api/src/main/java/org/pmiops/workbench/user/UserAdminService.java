@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserEgressBypassWindowDao;
 import org.pmiops.workbench.db.model.DbUserEgressBypassWindow;
 import org.pmiops.workbench.model.EgressBypassWindow;
@@ -45,5 +47,11 @@ public class UserAdminService {
         .findFirst()
         .map(egressBypassWindowMapper::toApiEgressBypassWindow)
         .orElse(null);
+  }
+
+  public List<EgressBypassWindow> listAllEgressBypassWindows(Long userId) {
+    return userEgressBypassWindowDao.getByUserIdOrderByStartTimeDesc(userId).stream()
+        .map(egressBypassWindowMapper::toApiEgressBypassWindow)
+        .collect(Collectors.toList());
   }
 }

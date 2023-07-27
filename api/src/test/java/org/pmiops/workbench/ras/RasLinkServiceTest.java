@@ -75,9 +75,12 @@ public class RasLinkServiceTest {
   private static final String AUTH_CODE = "code";
   private static final String REDIRECT_URL = "url";
   private static final String ACCESS_TOKEN = "access_token_1";
-
+  private static final String ID_ME_USERNAME = "foo@id.me";
   private static final String LOGIN_GOV_USERNAME = "foo@Login.Gov.com";
   private static final String ERA_COMMONS_USERNAME = "user2@eraCommons.com";
+
+  private static final String USER_INFO_JSON_ID_ME =
+      "{\"preferred_username\":\"" + ID_ME_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_LOGIN_GOV =
       "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_ERA =
@@ -217,6 +220,18 @@ public class RasLinkServiceTest {
   }
 
   @Test
+  public void testLinkRasIdMeSuccess() throws Exception {
+    mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
+    mockAccessTokenResponse(USER_INFO_JSON_ID_ME);
+
+    rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
+
+    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
+    assertModuleCompletionTime(DbAccessModuleName.RAS_ID_ME, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
+  }
+
+  @Test
   public void testLinkRasLoginGovSuccess() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV);
@@ -224,6 +239,7 @@ public class RasLinkServiceTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
   }
 
@@ -237,6 +253,7 @@ public class RasLinkServiceTest {
     assertThat(userDao.findUserByUserId(userId).getEraCommonsLinkedNihUsername())
         .isEqualTo("eraUserId");
     assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, NOW);
   }
 
@@ -251,6 +268,7 @@ public class RasLinkServiceTest {
 
     assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, eRATime);
   }
 

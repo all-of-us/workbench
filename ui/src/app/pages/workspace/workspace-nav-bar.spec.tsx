@@ -4,6 +4,7 @@ import { mount } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
 
@@ -68,7 +69,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      NOTEBOOKS_TAB_NAME,
     ]);
 
     wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
@@ -119,7 +120,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      NOTEBOOKS_TAB_NAME,
     ]);
   });
 
@@ -141,7 +142,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      NOTEBOOKS_TAB_NAME,
     ]);
   });
 

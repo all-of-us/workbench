@@ -85,12 +85,14 @@ public class TestMockFactory {
    * <p>When considering new modules, the simplest option for implementation purposes is to make
    * them non-expirable. So we should default to this, unless required for product reasons.
    *
-   * <p>IDENTITY is non-expirable for this reason.
+   * <p>RAS_LOGIN_GOV is non-expirable for this reason.
    */
   public static final List<DbAccessModule> DEFAULT_ACCESS_MODULES =
       ImmutableList.of(
           new DbAccessModule().setName(DbAccessModuleName.TWO_FACTOR_AUTH).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
+          new DbAccessModule().setName(DbAccessModuleName.RAS_ID_ME).setExpirable(false),
+          new DbAccessModule().setName(DbAccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.IDENTITY).setExpirable(false),
           new DbAccessModule()
               .setName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)

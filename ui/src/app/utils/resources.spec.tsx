@@ -12,6 +12,7 @@ import { exampleCohortStubs } from 'testing/stubs/cohorts-api-stub';
 import { stubResource } from 'testing/stubs/resources-stub';
 import { WorkspaceStubVariables } from 'testing/stubs/workspaces';
 
+import { NOTEBOOKS_TAB_NAME } from './constants';
 import { stringifyUrl } from './navigation';
 import {
   getDescription,
@@ -186,7 +187,7 @@ describe('resources.tsx', () => {
     const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/reviews/${COHORT_REVIEW_ID}`;
     const EXPECTED_CONCEPT_SET_URL = `${WORKSPACE_URL_PREFIX}/data/concepts/sets/${CONCEPT_SET_ID}`;
     const EXPECTED_DATA_SET_URL = `${WORKSPACE_URL_PREFIX}/data/data-sets/${DATA_SET_ID}`;
-    const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/notebooks/preview/${NOTEBOOK_NAME}`;
+    const EXPECTED_NOTEBOOK_URL = `${WORKSPACE_URL_PREFIX}/${NOTEBOOKS_TAB_NAME}/preview/${NOTEBOOK_NAME}`;
 
     expect(stringifyUrl(getResourceUrl(testCohort))).toBe(EXPECTED_COHORT_URL);
     expect(stringifyUrl(getResourceUrl(testCohortReview))).toBe(

@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
@@ -47,10 +48,12 @@ const renderInteractiveNotebook = (pathParameters) =>
   render(
     <MemoryRouter
       initialEntries={[
-        '/workspaces/sampleNameSpace/sampleWorkspace/notebooks/preview/example.Rmd',
+        `/workspaces/sampleNameSpace/sampleWorkspace/${NOTEBOOKS_TAB_NAME}/preview/example.Rmd`,
       ]}
     >
-      <Route path='/workspaces/:ns/:wsid/notebooks/preview/:nbName'>
+      <Route
+        path={`/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/preview/:nbName`}
+      >
         <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
       </Route>
     </MemoryRouter>

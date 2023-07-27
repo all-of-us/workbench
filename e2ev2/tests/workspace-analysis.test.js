@@ -29,7 +29,7 @@ browserTest('create an application', async browser => {
 
   await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
-  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="JUPYTER"]')
+  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="Jupyter"]')
   await jupyterOption.click()
   await nextButton.click()
 

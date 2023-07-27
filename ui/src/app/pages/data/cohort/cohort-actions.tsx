@@ -19,6 +19,7 @@ import {
   withCurrentCohort,
   withCurrentWorkspace,
 } from 'app/utils';
+import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -161,7 +162,7 @@ export const CohortActions = fp.flow(
           url += `data/cohorts/${cohort.id}/reviews`;
           break;
         case 'notebook':
-          url += 'notebooks';
+          url += NOTEBOOKS_TAB_NAME;
           break;
         case 'dataSet':
           url += 'data/data-sets';

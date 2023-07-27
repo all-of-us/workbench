@@ -24,7 +24,10 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
-import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
+import {
+  NOTEBOOKS_TAB_NAME,
+  ROWS_PER_PAGE_RESOURCE_TABLE,
+} from 'app/utils/constants';
 import { displayDate, displayDateWithoutHours } from 'app/utils/dates';
 import {
   getDisplayName,
@@ -71,7 +74,7 @@ const WorkspaceNavigation = (props: NavProps) => {
     resource,
     style,
   } = props;
-  const tab = isNotebook(resource) ? 'notebooks' : 'data';
+  const tab = isNotebook(resource) ? NOTEBOOKS_TAB_NAME : 'data';
   const url = `/workspaces/${namespace}/${id}/${tab}`;
 
   return (
