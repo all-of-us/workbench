@@ -1,7 +1,6 @@
 package org.pmiops.workbench.identityVerification;
 
 import org.pmiops.workbench.db.dao.IdentityVerificationDao;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbIdentityVerification;
 import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;
 import org.pmiops.workbench.db.model.DbUser;
@@ -12,26 +11,21 @@ import org.springframework.stereotype.Service;
 public class IdentityVerificationService {
 
   private final IdentityVerificationDao identityVerificationDao;
-  private final UserService userService;
 
   @Autowired
-  public IdentityVerificationService(
-      IdentityVerificationDao identityVerificationDao,
-      UserService userService) {
+  public IdentityVerificationService(IdentityVerificationDao identityVerificationDao) {
     this.identityVerificationDao = identityVerificationDao;
-    this.userService = userService;
   }
 
-  public void updateIdentityVerificationSystem(String userName, DbIdentityVerificationSystem identityVerificationSystem){
-    DbIdentityVerification identityVerification = retrieveIdentityVerificationOrCreate(    userService.getByUsernameOrThrow(userName));
+  public void updateIdentityVerificationSystem(
+      DbUser user, DbIdentityVerificationSystem identityVerificationSystem) {
+    DbIdentityVerification identityVerification = retrieveIdentityVerificationOrCreate(user);
     identityVerification.setIdentityVerificationSystem(identityVerificationSystem);
   }
 
-  private DbIdentityVerification retrieveIdentityVerificationOrCreate(
-      DbUser user) {
+  private DbIdentityVerification retrieveIdentityVerificationOrCreate(DbUser user) {
     return identityVerificationDao
         .getByUser(user)
         .orElse(new DbIdentityVerification().setUser(user));
   }
-
 }

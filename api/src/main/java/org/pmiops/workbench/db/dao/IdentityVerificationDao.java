@@ -7,5 +7,4 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface IdentityVerificationDao extends CrudRepository<DbIdentityVerification, Long> {
   Optional<DbIdentityVerification> getByUser(DbUser user);
-
 }

@@ -47,7 +47,8 @@ public class DbIdentityVerification {
     return identityVerificationSystem;
   }
 
-  public DbIdentityVerification setIdentityVerificationSystem(DbIdentityVerificationSystem identityVerificationSystem) {
+  public DbIdentityVerification setIdentityVerificationSystem(
+      DbIdentityVerificationSystem identityVerificationSystem) {
     this.identityVerificationSystem = identityVerificationSystem;
     return this;
   }

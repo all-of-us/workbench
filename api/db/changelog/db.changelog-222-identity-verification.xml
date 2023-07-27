@@ -12,7 +12,7 @@
       <column name="user_id" type="bigint">
         <constraints nullable="false" foreignKeyName="identity_verification_user_id" references="user(user_id)"/>
       </column>
-      <column name="identity_verification_system" type="ENUM('ID_ME','LOGIN_GOV)"/>
+      <column name="identity_verification_system" type="ENUM('ID_ME','LOGIN_GOV')"/>
     </createTable>
   </changeSet>
 </databaseChangeLog>
