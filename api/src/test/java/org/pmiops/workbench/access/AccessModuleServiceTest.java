@@ -107,6 +107,33 @@ public class AccessModuleServiceTest {
   }
 
   @Test
+  public void testBypassSuccess_insertNewEntity_identity() {
+    assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
+    accessModuleService.updateBypassTime(
+        user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
+    List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
+    assertThat(userAccessModule.size()).isEqualTo(2);
+    assertThat(userAccessModule.get(0).getAccessModule().getName())
+        .isEqualTo(DbAccessModuleName.RAS_LOGIN_GOV);
+    assertThat(userAccessModule.get(0).getBypassTime()).isEqualTo(FakeClockConfiguration.NOW);
+    assertThat(userAccessModule.get(1).getAccessModule().getName())
+        .isEqualTo(DbAccessModuleName.IDENTITY);
+    assertThat(userAccessModule.get(1).getBypassTime()).isEqualTo(FakeClockConfiguration.NOW);
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            user.getUserId(),
+            BypassTimeTargetProperty.RAS_LOGIN_GOV,
+            Optional.empty(),
+            nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            user.getUserId(),
+            BypassTimeTargetProperty.IDENTITY,
+            Optional.empty(),
+            nullableTimestampToOptionalInstant(FakeClockConfiguration.NOW));
+  }
+
+  @Test
   public void testBypassSuccess_updateExistingEntity() {
     // A TWO_FACTOR_AUTH module exists in DbUserAccessModule
     DbAccessModule twoFactorAuthModule =
@@ -181,6 +208,33 @@ public class AccessModuleServiceTest {
             BypassTimeTargetProperty.TWO_FACTOR_AUTH,
             nullableTimestampToOptionalInstant(existingBypasstime),
             Optional.empty());
+  }
+
+  @Test
+  public void testCompletionSuccess_insertNewEntity() {
+    assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
+    accessModuleService.updateCompletionTime(
+        user, DbAccessModuleName.TWO_FACTOR_AUTH, FakeClockConfiguration.NOW);
+    List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
+    assertThat(userAccessModule.size()).isEqualTo(1);
+    assertThat(userAccessModule.get(0).getAccessModule().getName())
+        .isEqualTo(DbAccessModuleName.TWO_FACTOR_AUTH);
+    assertThat(userAccessModule.get(0).getCompletionTime()).isEqualTo(FakeClockConfiguration.NOW);
+  }
+
+  @Test
+  public void testCompletionSuccess_insertNewEntity_identity() {
+    assertThat(userAccessModuleDao.getAllByUser(user)).isEmpty();
+    accessModuleService.updateCompletionTime(
+        user, DbAccessModuleName.RAS_ID_ME, FakeClockConfiguration.NOW);
+    List<DbUserAccessModule> userAccessModule = userAccessModuleDao.getAllByUser(user);
+    assertThat(userAccessModule.size()).isEqualTo(2);
+    assertThat(userAccessModule.get(0).getAccessModule().getName())
+        .isEqualTo(DbAccessModuleName.RAS_ID_ME);
+    assertThat(userAccessModule.get(0).getCompletionTime()).isEqualTo(FakeClockConfiguration.NOW);
+    assertThat(userAccessModule.get(1).getAccessModule().getName())
+        .isEqualTo(DbAccessModuleName.IDENTITY);
+    assertThat(userAccessModule.get(1).getCompletionTime()).isEqualTo(FakeClockConfiguration.NOW);
   }
 
   @Test
