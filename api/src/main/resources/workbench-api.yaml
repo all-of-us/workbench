@@ -6218,9 +6218,6 @@ definitions:
       eraCommonsBypassTime:
         type: integer
         format: int64
-      identityBypassTime:
-        type: integer
-        format: int64
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
@@ -9882,14 +9879,6 @@ definitions:
       professionalUrl:
         type: string
         description: User's URL at primary place of work.
-      identityBypassTime:
-        type: string
-        format: date-time
-        description: Time an administrator bypassed the identity requirement for this user.
-      identityCompletionTime:
-        type: string
-        format: date-time
-        description: Time user completed the identity account link.
       rasLoginGovBypassTime:
         type: string
         format: date-time
