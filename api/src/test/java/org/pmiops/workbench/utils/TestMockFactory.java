@@ -93,6 +93,7 @@ public class TestMockFactory {
           new DbAccessModule().setName(DbAccessModuleName.ERA_COMMONS).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.RAS_ID_ME).setExpirable(false),
           new DbAccessModule().setName(DbAccessModuleName.RAS_LOGIN_GOV).setExpirable(false),
+          new DbAccessModule().setName(DbAccessModuleName.IDENTITY).setExpirable(false),
           new DbAccessModule()
               .setName(DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT)
               .setExpirable(true),

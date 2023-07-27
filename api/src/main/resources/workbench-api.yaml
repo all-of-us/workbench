@@ -5477,6 +5477,7 @@ definitions:
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
     - RAS_LINK_ID_ME
+    - IDENTITY
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
@@ -9881,8 +9882,7 @@ definitions:
       rasLoginGovBypassTime:
         type: string
         format: date-time
-        description: Time an administrator bypassed the RAS Login.gov requirement
-          for this user.
+        description: Time an administrator bypassed the RAS Login.gov requirement for this user.
       rasLoginGovCompletionTime:
         type: string
         format: date-time
