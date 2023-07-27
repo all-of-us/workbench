@@ -51,7 +51,7 @@ plugins {
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
     id 'org.hidetake.swagger.generator' version '2.19.2'
-    id 'org.owasp.dependencycheck' version '7.4.4'
+    id 'org.owasp.dependencycheck' version '8.3.1'
     id 'org.springframework.boot' version '2.7.4'
 }
 
