@@ -100,8 +100,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   createNewNotebookLink(): Link {
-    const xpath = '//*[local-name()="svg" and @data-icon="circle-plus"]';
-    return new Link(this.page, xpath);
+    throw new Error('not implemented for new analysis tab');
   }
 
   /**
