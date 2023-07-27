@@ -149,7 +149,7 @@ export const WorkspaceRoutes = () => {
         {environment.showNewAnalysisTab ? (
           <AppsListPage
             routeData={{
-              title: 'View App Files',
+              title: 'View Analysis Files',
               pageKey: analysisTabName,
               workspaceNavBarTab: analysisTabName,
               breadcrumb: BreadcrumbType.Workspace,

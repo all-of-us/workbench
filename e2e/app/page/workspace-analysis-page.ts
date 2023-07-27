@@ -11,7 +11,7 @@ import WorkspaceBase from './workspace-base';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
 
-const PageTitle = 'View Notebooks';
+const PageTitle = 'View Analysis Files';
 
 export default class WorkspaceAnalysisPage extends WorkspaceBase {
   constructor(page: Page) {
