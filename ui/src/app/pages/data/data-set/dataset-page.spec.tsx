@@ -584,14 +584,14 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    ).toBe(7);
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
+    ).toBe(6);
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
@@ -599,7 +599,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(11);
+    ).toBe(3);
 
     cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
     cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
@@ -607,7 +607,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(10);
+    ).toBe(2);
   });
 
   it('should display Pre packaged concept set per genomics extraction flag', async () => {
@@ -618,7 +618,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
+    ).toBe(7);
 
     serverConfigStore.set({
       config: { enableGenomicExtraction: false, gsuiteDomain: '' },
@@ -627,7 +627,7 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
+    ).toBe(6);
   });
 
   it('should open Export modal if Analyze is clicked and WGS concept is not selected', async () => {
