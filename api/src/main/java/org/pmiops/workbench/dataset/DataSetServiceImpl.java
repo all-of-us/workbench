@@ -819,7 +819,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       if (prePackagedSurveyConceptSet(dbConceptSets)) {
         surveyConceptIds.addAll(
             dbConceptSets.stream()
-                .filter(d -> d.getConceptSetId() == 0)
+                .filter(d -> d.getConceptSetId() == 0 && Domain.SURVEY.equals(d.getDomainEnum()))
                 .filter(d -> !d.getName().equals(PrePackagedConceptSetEnum.SURVEY_PFHH.toString()))
                 .map(
                     d ->
@@ -1708,9 +1708,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       return ImmutableList.of(createSurveyDbConceptSet(SURVEY));
     }
-    return prePackagedConceptSet.stream()
+    List<DbConceptSet> returnList = prePackagedConceptSet.stream()
+        .filter(d-> PRE_PACKAGED_SURVEY_CONCEPT_IDS.containsKey(d))
         .map(this::createSurveyDbConceptSet)
         .collect(Collectors.toList());
+    return returnList;
   }
 
   /**
