@@ -49,7 +49,7 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.identityVerification.IdentityVerificationService;
+import org.pmiops.workbench.identityverification.IdentityVerificationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
@@ -125,12 +125,12 @@ public class RasLinkServiceTest {
   }
 
   private long userId;
-  private Institution institution = new Institution();
+  private final Institution institution = new Institution();
   private static DbUser currentUser;
   private static List<DbAccessModule> accessModules;
 
   private RasLinkService rasLinkService;
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
@@ -141,8 +141,6 @@ public class RasLinkServiceTest {
 
   @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
-  @Mock private static HttpTransport mockHttpTransport;
-  @Mock private OpenIdConnectClient mockRasOidcClient;
   @MockBean private InstitutionService mockInstitutionService;
 
   @TestConfiguration
@@ -300,7 +298,7 @@ public class RasLinkServiceTest {
     Optional<DbUserAccessModule> dbAccessModule =
         userAccessModuleDao.getByUserAndAccessModule(
             currentUser, accessModuleDao.findOneByName(moduleName).get());
-    if (!dbAccessModule.isPresent()) {
+    if (dbAccessModule.isEmpty()) {
       assertThat(timestamp).isNull();
     } else {
       // Timestamps from the database do not include nanoseconds, so this has to be truncated to

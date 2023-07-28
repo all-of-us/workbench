@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificati
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.identityVerification.IdentityVerificationService;
+import org.pmiops.workbench.identityverification.IdentityVerificationService;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,6 +227,6 @@ public class RasLinkService {
 
   /** Decode an encoded url */
   private static String decodeUrl(String encodedUrl) throws UnsupportedEncodingException {
-    return URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString());
+    return URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8);
   }
 }

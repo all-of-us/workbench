@@ -1,4 +1,4 @@
-package org.pmiops.workbench.identityVerification;
+package org.pmiops.workbench.identityverification;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.identityVerification;
+package org.pmiops.workbench.identityverification;
 
 import org.pmiops.workbench.db.dao.IdentityVerificationDao;
 import org.pmiops.workbench.db.model.DbIdentityVerification;
