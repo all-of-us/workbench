@@ -661,6 +661,29 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void testGenerateCodePrepackagedCohortSurveyBasicsAndFitbitHeartRate() {
+    addFitbitInfoToDsLinkingTable();
+    final String expectedConceptId = "concept_id IN (1586134)";// for survey_basics
+    final String expectedFitbitHrLevel = ".heart_rate_minute_level";
+    String code =
+        joinCodeCells(
+            dataSetService.generateCodeCells(
+                new DataSetExportRequest()
+                    .kernelType(KernelTypeEnum.PYTHON)
+                    .dataSetRequest(
+                        createDataSetRequest(
+                            ImmutableList.of(),
+                            ImmutableList.of(),
+                            ImmutableList.of(Domain.SURVEY, Domain.FITBIT_HEART_RATE_LEVEL),
+                            true,
+                            ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS, PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
+                workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
+
+    assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
+    assertThat(code).contains(expectedFitbitHrLevel);
+  }
+
+  @Test
   public void testGenerateCodePrepackagedCohortAllIndividualSurveysExceptPfhhInOrder() {
     final ImmutableList<PrePackagedConceptSetEnum> prePackagedConceptSetEnumList =
         ImmutableList.of(
