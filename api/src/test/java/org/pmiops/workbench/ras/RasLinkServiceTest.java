@@ -49,6 +49,7 @@ import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.identityVerification.IdentityVerificationService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
@@ -137,6 +138,8 @@ public class RasLinkServiceTest {
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private AccessModuleService accessModuleService;
   @Mock private static OpenIdConnectClient mockOidcClient;
+
+  @Mock private static IdentityVerificationService mockIdentityVerificationService;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static HttpTransport mockHttpTransport;
   @Mock private OpenIdConnectClient mockRasOidcClient;
@@ -150,6 +153,7 @@ public class RasLinkServiceTest {
     CommonMappers.class,
     RasLinkService.class,
     UserServiceTestConfiguration.class,
+    IdentityVerificationService.class
   })
   @MockBean({
     AccessTierService.class,
@@ -203,7 +207,12 @@ public class RasLinkServiceTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    rasLinkService = new RasLinkService(accessModuleService, userService, mockOidcClientProvider);
+    rasLinkService =
+        new RasLinkService(
+            accessModuleService,
+            userService,
+            mockIdentityVerificationService,
+            mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
     when(mockInstitutionService.getByUser(any(DbUser.class))).thenReturn(Optional.of(institution));
     when(mockInstitutionService.validateInstitutionalEmail(
