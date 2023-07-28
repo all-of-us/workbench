@@ -380,12 +380,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .eraCommonsBypassTime(offsetDateTimeUtc(rs.getTimestamp("era_commons_bypass_time")))
                 .eraCommonsCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("era_commons_completion_time")))
-                .identityBypassTime(
-                    offsetDateTimeUtc(rs.getTimestamp("identity_bypass_time")))
+                .identityBypassTime(offsetDateTimeUtc(rs.getTimestamp("identity_bypass_time")))
                 .identityCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("identity_completion_time")))
-                .identityVerificationSystem(
-                    rs.getString("identity_verification_system"))
+                .identityVerificationSystem(rs.getString("identity_verification_system"))
                 .familyName(rs.getString("family_name"))
                 .firstRegistrationCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))

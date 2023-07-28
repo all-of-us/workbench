@@ -34,8 +34,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       "era_commons_bypass_time", u -> toInsertRowString(u.getEraCommonsBypassTime())),
   ERA_COMMONS_COMPLETION_TIME(
       "era_commons_completion_time", u -> toInsertRowString(u.getEraCommonsCompletionTime())),
-  IDENTITY_BYPASS_TIME(
-      "identity_bypass_time", u -> toInsertRowString(u.getIdentityBypassTime())),
+  IDENTITY_BYPASS_TIME("identity_bypass_time", u -> toInsertRowString(u.getIdentityBypassTime())),
   IDENTITY_COMPLETION_TIME(
       "identity_completion_time", u -> toInsertRowString(u.getIdentityBypassTime())),
   FAMILY_NAME("family_name", ReportingUser::getFamilyName),

@@ -594,10 +594,7 @@ public class ReportingQueryServiceTest {
       addUserAccessModule(
           user, eRACommonsModule, USER__ERA_COMMONS_BYPASS_TIME, USER__ERA_COMMONS_COMPLETION_TIME);
       addUserAccessModule(
-          user,
-          identityModule,
-          USER__IDENTITY_BYPASS_TIME,
-          USER__IDENTITY_COMPLETION_TIME);
+          user, identityModule, USER__IDENTITY_BYPASS_TIME, USER__IDENTITY_COMPLETION_TIME);
       addUserAccessModule(
           user,
           duccModule,
