@@ -59,7 +59,7 @@ export const commonStyles = reactStyles({
 /**
  * This content-only component is shown in the side of a couple account-creation sub-components.
  **/
-export const WhyWillSomeInformationBePublic: React.FunctionComponent = () => {
+export const WhyWillSomeInformationBePublic = () => {
   return (
     <React.Fragment>
       <div style={commonStyles.asideHeader}>
