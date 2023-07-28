@@ -23,6 +23,7 @@ import { ConceptQuickAddModal } from 'app/pages/data/cohort/concept-quick-add-mo
 import { Demographics } from 'app/pages/data/cohort/demographics';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import { Selection } from 'app/pages/data/cohort/selection-list';
+import { VariantSearch } from 'app/pages/data/cohort/variant-search';
 import {
   domainToTitle,
   generateId,
@@ -167,6 +168,7 @@ interface Props extends RouteComponentProps<MatchParams> {
 
 interface State {
   initCriteriaSearch: boolean;
+  initVariantSearch: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
   showAddConceptSetModal: boolean;
@@ -188,6 +190,7 @@ export const CohortSearch = fp.flow(
       super(props);
       this.state = {
         initCriteriaSearch: false,
+        initVariantSearch: false,
         selectedIds: [],
         selections: [],
         showAddConceptSetModal: false,
@@ -219,6 +222,8 @@ export const CohortSearch = fp.flow(
       } else if (domain === Domain.CONCEPTSET) {
         this.setState({ showAddConceptSetModal: true });
       } else if (domain === Domain.CONCEPTQUICKADD) {
+        this.setState({ showConceptQuickAddModal: true });
+      } else if (domain === Domain.SNPINDELVARIANT) {
         this.setState({ showConceptQuickAddModal: true });
       } else {
         this.setState({ initCriteriaSearch: true });
@@ -467,6 +472,7 @@ export const CohortSearch = fp.flow(
       } = this.props;
       const {
         initCriteriaSearch,
+        initVariantSearch,
         selectedIds,
         selections,
         showAddConceptSetModal,
@@ -539,13 +545,18 @@ export const CohortSearch = fp.flow(
                         />
                       </div>
                     ) : (
-                      initCriteriaSearch && (
-                        <CriteriaSearch
-                          backFn={() => this.checkUnsavedChanges()}
-                          cohortContext={cohortContext}
-                          conceptSearchTerms={cohortContext.searchTerms}
-                        />
-                      )
+                      <>
+                        initCriteriaSearch && (
+                          <CriteriaSearch
+                            backFn={() => this.checkUnsavedChanges()}
+                            cohortContext={cohortContext}
+                            conceptSearchTerms={cohortContext.searchTerms}
+                          />
+                        )
+                        initVariantSearch && (
+                          <VariantSearch />
+                        )
+                      </>
                     )}
                   </div>
                 </div>
