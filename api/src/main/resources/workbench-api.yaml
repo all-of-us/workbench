@@ -9879,14 +9879,17 @@ definitions:
       professionalUrl:
         type: string
         description: User's URL at primary place of work.
-      rasLoginGovBypassTime:
+      identityBypassTime:
         type: string
         format: date-time
-        description: Time an administrator bypassed the RAS Login.gov requirement for this user.
-      rasLoginGovCompletionTime:
+        description: Time an administrator bypassed the identity requirement for this user.
+      identityCompletionTime:
         type: string
         format: date-time
-        description: Time user completed the RAS Login.gov account link.
+        description: Time user completed the identity requirement.
+      identityVerificationSystem:
+        type: string
+        description: The system that the user used to complete identity verification.
       twoFactorAuthBypassTime:
         type: string
         format: date-time
