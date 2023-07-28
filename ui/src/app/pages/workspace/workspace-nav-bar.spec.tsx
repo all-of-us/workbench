@@ -4,9 +4,9 @@ import { mount } from 'enzyme';
 import { mockNavigate } from 'setupTests';
 
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import {
   CdrVersionsStubVariables,
@@ -69,7 +69,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      analysisTabName,
     ]);
 
     wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
@@ -120,7 +120,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      analysisTabName,
     ]);
   });
 
@@ -142,7 +142,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      NOTEBOOKS_TAB_NAME,
+      analysisTabName,
     ]);
   });
 

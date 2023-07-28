@@ -25,7 +25,6 @@ import {
 } from 'app/pages/analysis/leonardo-app-launcher';
 import { registerApiClient as registerApiClientNotebooks } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
@@ -33,6 +32,7 @@ import {
   runtimeStore,
   serverConfigStore,
 } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import {
   JupyterApi,
   ProxyApi,
@@ -73,13 +73,13 @@ describe('NotebookLauncher', () => {
 
   let runtimeStub;
 
-  const notebookInitialUrl = `/workspaces/namespace/id/${NOTEBOOKS_TAB_NAME}/wharrgarbl`;
+  const notebookInitialUrl = `/workspaces/namespace/id/${analysisTabName}/wharrgarbl`;
   const history = createMemoryHistory({ initialEntries: [notebookInitialUrl] });
 
   const notebookComponent = async () => {
     const c = mount(
       <Router history={history}>
-        <Route path={`/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/:nbName`}>
+        <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/:nbName`}>
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
@@ -551,7 +551,7 @@ describe('TerminalLauncher', () => {
       'workspaces',
       'defaultNamespace',
       '1',
-      NOTEBOOKS_TAB_NAME,
+      analysisTabName,
     ]);
   });
 });

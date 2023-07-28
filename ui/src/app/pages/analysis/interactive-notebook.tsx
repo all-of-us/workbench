@@ -23,7 +23,6 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import {
@@ -41,7 +40,10 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
+import {
+  analysisTabName,
+  openRStudioOrConfigPanel,
+} from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -274,7 +276,7 @@ export const InteractiveNotebook = fp.flow(
           'workspaces',
           this.props.match.params.ns,
           this.props.match.params.wsid,
-          NOTEBOOKS_TAB_NAME,
+          analysisTabName,
           this.props.match.params.nbName,
         ],
         { queryParams: queryParams }
@@ -320,7 +322,7 @@ export const InteractiveNotebook = fp.flow(
             'workspaces',
             ns,
             wsid,
-            NOTEBOOKS_TAB_NAME,
+            analysisTabName,
             encodeURIComponent(notebook.name),
           ]);
         });
