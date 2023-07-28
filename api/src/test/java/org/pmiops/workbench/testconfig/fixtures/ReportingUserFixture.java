@@ -86,7 +86,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-30T00:00:00.00Z"));
   public static final Long USER__USER_ID = 26L;
   public static final String USER__USERNAME = "foo_27";
-  // Address fields - manually renamed
   public static final Long USER__INSTITUTION_ID = 0L;
   public static final InstitutionalRole USER__INSTITUTIONAL_ROLE_ENUM =
       InstitutionalRole.UNDERGRADUATE;
