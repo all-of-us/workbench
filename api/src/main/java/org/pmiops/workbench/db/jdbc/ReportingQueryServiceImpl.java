@@ -332,7 +332,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
                 + "    WHERE am.name = 'IDENTITY' "
                 + "  ) uami ON u.user_id = uami.user_id "
-                + "  LEFT OUTER JOIN identity_verification AS iv on u.user_id = iv.user_id\n"
+                + "  LEFT OUTER JOIN identity_verification AS iv on u.user_id = iv.user_id"
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS two_factor_auth_bypass_time, "
