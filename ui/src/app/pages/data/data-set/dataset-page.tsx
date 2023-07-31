@@ -274,13 +274,20 @@ export const COMPARE_DOMAINS_FOR_DISPLAY = (a: Domain, b: Domain) => {
 const checkNameWidth = (element: HTMLDivElement) =>
   element.offsetWidth < element.scrollWidth;
 
-const ImmutableListItem: React.FunctionComponent<{
+interface ImmutableListItemProps {
   name: string;
   isSubitem: boolean;
   onChange: Function;
   checked: boolean;
   showSourceConceptIcon?: boolean;
-}> = ({ name, isSubitem, onChange, checked, showSourceConceptIcon }) => {
+}
+const ImmutableListItem = ({
+  name,
+  isSubitem,
+  onChange,
+  checked,
+  showSourceConceptIcon,
+}: ImmutableListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -316,14 +323,22 @@ const ImmutableListItem: React.FunctionComponent<{
   );
 };
 
-const ImmutableWorkspaceCohortListItem: React.FunctionComponent<{
+interface ImmutableWorkspaceCohortListItemProps {
   name: string;
   onChange: Function;
   checked: boolean;
   cohortId: number;
   namespace: string;
   wid: string;
-}> = ({ name, onChange, checked, cohortId, namespace, wid }) => {
+}
+const ImmutableWorkspaceCohortListItem = ({
+  name,
+  onChange,
+  checked,
+  cohortId,
+  namespace,
+  wid,
+}: ImmutableWorkspaceCohortListItemProps) => {
   const [showNameTooltip, setShowNameTooltip] = useState(false);
   return (
     <div style={styles.listItem}>
@@ -375,9 +390,9 @@ interface DataDictionaryPopupProps {
   dataDictionaryEntry: DataDictionaryEntry;
 }
 
-const DataDictionaryDescription: React.FunctionComponent<
-  DataDictionaryPopupProps
-> = ({ dataDictionaryEntry }) => {
+const DataDictionaryDescription = ({
+  dataDictionaryEntry,
+}: DataDictionaryPopupProps) => {
   return (
     <div
       style={{
@@ -1671,7 +1686,6 @@ export const DatasetPage = fp.flow(
     return (
       <React.Fragment>
         {savingDataset && <SpinnerOverlay opacity={0.3} />}
-
         <FadeBox style={{ paddingTop: '1.5rem' }}>
           <h2 style={{ paddingTop: 0, marginTop: 0 }}>
             Datasets
@@ -2121,7 +2135,6 @@ export const DatasetPage = fp.flow(
             </Button>
           </TooltipTrigger>
         </div>
-
         {switchCase(
           modalState,
           [

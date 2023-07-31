@@ -33,7 +33,7 @@ public class AccessUtils {
           DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
           DbAccessModuleName.PROFILE_CONFIRMATION,
           DbAccessModuleName.PUBLICATION_CONFIRMATION,
-          DbAccessModuleName.RAS_LOGIN_GOV,
+          DbAccessModuleName.IDENTITY,
           DbAccessModuleName.RT_COMPLIANCE_TRAINING,
           DbAccessModuleName.TWO_FACTOR_AUTH);
 

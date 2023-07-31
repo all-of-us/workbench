@@ -99,10 +99,10 @@ import org.springframework.stereotype.Service;
  * that to login. The {@code preferred_username} field is unique login.gov|id.me username. We can
  * use that as login.|id.me user name.
  *
- * <p>Step4: Use step3's RAS username to update AoU database by {@link
- * UserService#updateRasLinkLoginGovStatus(String)} or {@link
+ * <p>Step4: Use step3's RAS username to update AoU database by {@link *
+ * UserService#updateRasLinkLoginGovStatus(String)} or {@link *
  * UserService#updateRasLinkIdMeStatus(String)} (based on which service was used). Then return it as
- * user profile.
+ * * user profile.
  *
  * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if we
  * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.

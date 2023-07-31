@@ -263,6 +263,12 @@
       "namespace": "aou-rw-bef5bf62",
       "id": "demopolygenicriskscoregeneticancestrycalibration",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - General Health and Well-Being of SGM Participants",
+      "namespace": "aou-rw-7278c55d",
+      "id": "duplicateofgeneralhealthandwellbeingofsgmparticipants",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

@@ -24,6 +24,7 @@ import {
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';
@@ -104,7 +105,7 @@ export const getTrail = (
         ),
         new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
       ];
-    case BreadcrumbType.Notebook:
+    case BreadcrumbType.Analysis:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,
@@ -114,10 +115,13 @@ export const getTrail = (
           conceptSet,
           params
         ),
-        new BreadcrumbData('Notebooks', `${prefix}/notebooks`),
+        new BreadcrumbData(
+          fp.upperFirst(analysisTabName),
+          `${prefix}/${analysisTabName}`
+        ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/notebooks/${nbName}`
+          `${prefix}/${analysisTabName}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -320,16 +324,16 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      const notebookMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/notebooks/:nbName',
+      const analysisMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
       });
-      const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: '/workspaces/:ns/:wsid/notebooks/preview/:nbName',
+      const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
-      const nbName = notebookMatch
-        ? notebookMatch.params.nbName
-        : notebookPreviewMatch
-        ? notebookPreviewMatch.params.nbName
+      const analysisFileName = analysisMatch
+        ? analysisMatch.params.nbName
+        : analysisPreviewMatch
+        ? analysisPreviewMatch.params.nbName
         : undefined;
 
       return getTrail(
@@ -338,7 +342,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns: ns, wsid: wsid, cid: cid, csid: csid, pid: pid, nbName: nbName }
+        { ns, wsid, cid, csid, pid, nbName: analysisFileName }
       );
     }
 

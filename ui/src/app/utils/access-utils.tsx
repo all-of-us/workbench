@@ -34,7 +34,7 @@ import {
   getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import { cond, switchCase } from './index';
+import { cond, DEFAULT, switchCase } from './index';
 
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
@@ -183,13 +183,6 @@ export const getAccessModuleConfig = (
       }),
     ],
     [
-      AccessModule.RASLINKIDME,
-      () => ({
-        ...apiConfig,
-      }),
-    ],
-
-    [
       AccessModule.RASLINKLOGINGOV,
       () => ({
         ...apiConfig,
@@ -309,6 +302,12 @@ export const getAccessModuleConfig = (
           'Report any publications or presentations based on your research using the Researcher Workbench',
         adminPageTitle: 'Report any publications',
         renewalTimeEstimate: 5,
+      }),
+    ],
+    [
+      DEFAULT,
+      () => ({
+        ...apiConfig,
       }),
     ]
   );

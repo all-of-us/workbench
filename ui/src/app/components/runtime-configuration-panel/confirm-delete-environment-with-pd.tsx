@@ -43,7 +43,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
     [DEFAULT, () => null]
   );
 
-  const standardvmDeleteOption = (
+  const gceDeleteOption = (
     <div>
       <div style={styles.confirmWarning}>
         <h3
@@ -191,7 +191,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
           Delete environment options
         </h3>
       </div>
-      {usingDataproc ? dataprocDeleteOption : standardvmDeleteOption}
+      {usingDataproc ? dataprocDeleteOption : gceDeleteOption}
       <BackupFilesHelpSection appType={appType} />
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button

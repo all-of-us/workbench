@@ -101,6 +101,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
         accessModuleNameMapper.bypassAuditPropertyFromStorage(accessModule.getName()),
         Optional.ofNullable(previousBypassTime).map(Timestamp::toInstant),
         Optional.ofNullable(newBypassTime).map(Timestamp::toInstant));
+    if (accessModuleName.equals(DbAccessModuleName.RAS_ID_ME)
+        || accessModuleName.equals(DbAccessModuleName.RAS_LOGIN_GOV)) {
+      updateBypassTime(userId, DbAccessModuleName.IDENTITY, isBypassed);
+    }
   }
 
   @Override
@@ -111,6 +115,10 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
     userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+    if (accessModuleName.equals(DbAccessModuleName.RAS_ID_ME)
+        || accessModuleName.equals(DbAccessModuleName.RAS_LOGIN_GOV)) {
+      updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, timestamp);
+    }
   }
 
   @Override
