@@ -1708,10 +1708,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
       return ImmutableList.of(createSurveyDbConceptSet(SURVEY));
     }
-    List<DbConceptSet> returnList = prePackagedConceptSet.stream()
-        .filter(d-> PRE_PACKAGED_SURVEY_CONCEPT_IDS.containsKey(d))
-        .map(this::createSurveyDbConceptSet)
-        .collect(Collectors.toList());
+    List<DbConceptSet> returnList =
+        prePackagedConceptSet.stream()
+            .filter(d -> PRE_PACKAGED_SURVEY_CONCEPT_IDS.containsKey(d))
+            .map(this::createSurveyDbConceptSet)
+            .collect(Collectors.toList());
     return returnList;
   }
 

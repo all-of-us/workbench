@@ -162,6 +162,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbDSLinking surveyLinking2;
   private DbDSLinking procedureLinking1;
   private DbDSLinking procedureLinking2;
+  private DbDSLinking fitbitHeartRateLinking1;
+  private DbDSLinking fitbitHeartRateLinking2;
 
   @TestConfiguration
   @Import({
@@ -444,6 +446,25 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             .addDomain("Procedure")
             .build();
     dsLinkingDao.save(procedureLinking2);
+
+    fitbitHeartRateLinking1 =
+        DbDSLinking.builder()
+            .addDenormalizedName("PERSON_ID")
+            .addOmopSql("heart_rate_minute_level.PERSON_ID")
+            .addJoinValue(
+                "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level")
+            .addDomain("Fitbit_heart_rate_level")
+            .build();
+    dsLinkingDao.save(fitbitHeartRateLinking1);
+    fitbitHeartRateLinking2 =
+        DbDSLinking.builder()
+            .addDenormalizedName("CORE_TABLE_FOR_DOMAIN")
+            .addOmopSql("CORE_TABLE_FOR_DOMAIN")
+            .addJoinValue(
+                "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level")
+            .addDomain("Fitbit_heart_rate_level")
+            .build();
+    dsLinkingDao.save(fitbitHeartRateLinking2);
   }
 
   private DbConceptSet createConceptSet(
@@ -476,6 +497,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dsLinkingDao.delete(surveyLinking2);
     dsLinkingDao.delete(procedureLinking1);
     dsLinkingDao.delete(procedureLinking2);
+    dsLinkingDao.delete(fitbitHeartRateLinking1);
+    dsLinkingDao.delete(fitbitHeartRateLinking2);
   }
 
   private String joinCodeCells(List<String> codeCells) {
@@ -662,8 +685,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePrepackagedCohortSurveyBasicsAndFitbitHeartRate() {
-    addFitbitInfoToDsLinkingTable();
-    final String expectedConceptId = "concept_id IN (1586134)";// for survey_basics
+    final String expectedConceptId = "concept_id IN (1586134)"; // for survey_basics
     final String expectedFitbitHrLevel = ".heart_rate_minute_level";
     String code =
         joinCodeCells(
@@ -676,7 +698,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                             ImmutableList.of(),
                             ImmutableList.of(Domain.SURVEY, Domain.FITBIT_HEART_RATE_LEVEL),
                             true,
-                            ImmutableList.of(PrePackagedConceptSetEnum.SURVEY_BASICS, PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
+                            ImmutableList.of(
+                                PrePackagedConceptSetEnum.SURVEY_BASICS,
+                                PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL))),
                 workspaceDao.get(WORKSPACE_NAMESPACE, WORKSPACE_NAME)));
 
     assertThat(code.replaceAll("[ \\s]", "")).contains(expectedConceptId.replaceAll(" ", ""));
@@ -716,8 +740,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void testGenerateCodePrepackagedConceptSetFitBit() {
-    addFitbitInfoToDsLinkingTable();
-
     String code =
         joinCodeCells(
             dataSetService.generateCodeCells(
@@ -1134,25 +1156,5 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     return s.replace(
         "`" + tableName + "`",
         String.format("`%s`", projectId + "." + dataSetId + "." + tableName));
-  }
-
-  private void addFitbitInfoToDsLinkingTable() {
-    DbDSLinking fitbitHeartRateLinking_personId = new DbDSLinking();
-    fitbitHeartRateLinking_personId.setOmopSql("heart_rate_minute_level.PERSON_ID");
-    fitbitHeartRateLinking_personId.setJoinValue(
-        "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level");
-    fitbitHeartRateLinking_personId.setDomain("Fitbit_heart_rate_level");
-    fitbitHeartRateLinking_personId.setDenormalizedName("PERSON_ID");
-
-    dsLinkingDao.save(fitbitHeartRateLinking_personId);
-
-    DbDSLinking fitbitHeartRateLinking_coreTable = new DbDSLinking();
-    fitbitHeartRateLinking_coreTable.setOmopSql("CORE_TABLE_FOR_DOMAIN");
-    fitbitHeartRateLinking_coreTable.setJoinValue(
-        "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level");
-    fitbitHeartRateLinking_coreTable.setDomain("Fitbit_heart_rate_level");
-    fitbitHeartRateLinking_coreTable.setDenormalizedName("CORE_TABLE_FOR_DOMAIN");
-
-    dsLinkingDao.save(fitbitHeartRateLinking_coreTable);
   }
 }
