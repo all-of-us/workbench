@@ -114,7 +114,7 @@ public abstract class BigQueryBaseTest {
         default:
           throw new IllegalArgumentException("Unrecognized field type '" + typeString + "'.");
       }
-      if (column.getMode().equals(Field.Mode.REPEATED.name())) {
+      if (column.getMode() != null && column.getMode().equals(Field.Mode.REPEATED.name())) {
         schemaFields.add(
             Field.newBuilder(column.getName(), fieldType).setMode(Field.Mode.REPEATED).build());
       } else {
