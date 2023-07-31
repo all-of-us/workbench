@@ -8,12 +8,12 @@ import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import { userAppsStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
@@ -48,12 +48,10 @@ const renderInteractiveNotebook = (pathParameters) =>
   render(
     <MemoryRouter
       initialEntries={[
-        `/workspaces/sampleNameSpace/sampleWorkspace/${NOTEBOOKS_TAB_NAME}/preview/example.Rmd`,
+        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/example.Rmd`,
       ]}
     >
-      <Route
-        path={`/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/preview/:nbName`}
-      >
+      <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>
         <InteractiveNotebook hideSpinner={() => {}} match={pathParameters} />
       </Route>
     </MemoryRouter>

@@ -18,13 +18,13 @@ import {
   withCurrentConceptSet,
   withCurrentWorkspace,
 } from 'app/utils';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import {
   MatchParams,
   RouteDataStore,
   routeDataStore,
   withStore,
 } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 import { BreadcrumbType } from './breadcrumb-type';
@@ -105,7 +105,7 @@ export const getTrail = (
         ),
         new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`),
       ];
-    case BreadcrumbType.Notebook:
+    case BreadcrumbType.Analysis:
       return [
         ...getTrail(
           BreadcrumbType.Workspace,
@@ -116,12 +116,12 @@ export const getTrail = (
           params
         ),
         new BreadcrumbData(
-          fp.upperFirst(NOTEBOOKS_TAB_NAME),
-          `${prefix}/${NOTEBOOKS_TAB_NAME}`
+          fp.upperFirst(analysisTabName),
+          `${prefix}/${analysisTabName}`
         ),
         new BreadcrumbData(
           nbName && dropJupyterNotebookFileSuffix(decodeURIComponent(nbName)),
-          `${prefix}/${NOTEBOOKS_TAB_NAME}/${nbName}`
+          `${prefix}/${analysisTabName}/${nbName}`
         ),
       ];
     case BreadcrumbType.ConceptSet:
@@ -324,16 +324,16 @@ export const Breadcrumb = fp.flow(
       });
       const { pid = '' } = participantMatch ? participantMatch.params : {};
 
-      const notebookMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/:nbName`,
+      const analysisMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/:nbName`,
       });
-      const notebookPreviewMatch = matchPath<MatchParams>(location.pathname, {
-        path: `/workspaces/:ns/:wsid/${NOTEBOOKS_TAB_NAME}/preview/:nbName`,
+      const analysisPreviewMatch = matchPath<MatchParams>(location.pathname, {
+        path: `/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`,
       });
-      const nbName = notebookMatch
-        ? notebookMatch.params.nbName
-        : notebookPreviewMatch
-        ? notebookPreviewMatch.params.nbName
+      const analysisFileName = analysisMatch
+        ? analysisMatch.params.nbName
+        : analysisPreviewMatch
+        ? analysisPreviewMatch.params.nbName
         : undefined;
 
       return getTrail(
@@ -342,7 +342,7 @@ export const Breadcrumb = fp.flow(
         this.props.cohort,
         this.props.cohortReview,
         this.props.conceptSet,
-        { ns, wsid, cid, csid, pid, nbName }
+        { ns, wsid, cid, csid, pid, nbName: analysisFileName }
       );
     }
 

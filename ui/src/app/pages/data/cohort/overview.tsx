@@ -39,10 +39,10 @@ import {
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { isAbortError } from 'app/utils/errors';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -445,7 +445,7 @@ export const ListOverview = fp.flow(
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');
-          url += NOTEBOOKS_TAB_NAME;
+          url += analysisTabName;
           break;
         case 'review':
           AnalyticsTracker.CohortBuilder.CohortAction('Review cohort');

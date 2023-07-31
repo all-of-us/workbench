@@ -61,12 +61,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
       u -> toInsertRowString(u.getTwoFactorAuthCompletionTime())),
   USER_ID("user_id", ReportingUser::getUserId),
   USERNAME("username", ReportingUser::getUsername),
-  CITY("city", ReportingUser::getCity),
-  COUNTRY("country", ReportingUser::getCountry),
-  STATE("state", ReportingUser::getState),
-  STREET_ADDRESS_1("street_address_1", ReportingUser::getStreetAddress1),
-  STREET_ADDRESS_2("street_address_2", ReportingUser::getStreetAddress2),
-  ZIP_CODE("zip_code", ReportingUser::getZipCode),
   INSTITUTION_ID("institution_id", ReportingUser::getInstitutionId),
   INSTITUTIONAL_ROLE_ENUM(
       "institutional_role_enum", u -> enumToString(u.getInstitutionalRoleEnum())),

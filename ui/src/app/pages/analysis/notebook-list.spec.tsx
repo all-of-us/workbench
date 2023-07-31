@@ -12,9 +12,9 @@ import {
   resourceTableColumns,
 } from 'app/components/resource-list.spec';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { NOTEBOOKS_TAB_NAME } from 'app/utils/constants';
 import { displayDateWithoutHours } from 'app/utils/dates';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -74,7 +74,7 @@ describe('NotebookList', () => {
     );
     await waitOneTickAndUpdate(wrapper);
 
-    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${NOTEBOOKS_TAB_NAME}/preview/mockFile.ipynb`;
+    const expected = `/workspaces/${workspaceDataStub.namespace}/${workspaceDataStub.id}/${analysisTabName}/preview/mockFile.ipynb`;
     expect(
       resourceTableColumns(wrapper)
         .at(RESOURCE_TYPE_COLUMN_NUMBER)

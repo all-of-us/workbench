@@ -9913,25 +9913,6 @@ definitions:
         description: |-
           User's GSuite username, including appropriate domain for this environment. Uniquely describes a
           user account (but not constrained to be unique by BigQuery).
-      city:
-        type: string
-        description: User-reported city of residence.
-      country:
-        type: string
-        description: User-reported country of residence.
-      state:
-        type: string
-        description: User-reported state or province. Not guaranteed to match official
-          abbreviations or spellings.
-      streetAddress1:
-        type: string
-        description: First line of user street address.
-      streetAddress2:
-        type: string
-        description: Second line of user street address.
-      zipCode:
-        type: string
-        description: Up to 10-digit zip code for use residence.
       institutionId:
         type: integer
         format: int64
