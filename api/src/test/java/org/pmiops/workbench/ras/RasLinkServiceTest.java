@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
@@ -44,6 +46,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
+import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -233,9 +236,14 @@ public class RasLinkServiceTest {
 
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
+    DbUser expectedUser = userDao.findUserByUserId(userId);
+    assertThat(expectedUser.getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.RAS_ID_ME, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
+    verify(mockIdentityVerificationService)
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
+    verify(mockIdentityVerificationService, never())
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
   }
 
   @Test
@@ -244,10 +252,15 @@ public class RasLinkServiceTest {
     mockAccessTokenResponse(USER_INFO_JSON_LOGIN_GOV);
     rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
+    DbUser expectedUser = userDao.findUserByUserId(userId);
+    assertThat(expectedUser.getRasLinkUsername()).isEqualTo(LOGIN_GOV_USERNAME);
     assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
     assertModuleCompletionTime(DbAccessModuleName.RAS_LOGIN_GOV, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
+    verify(mockIdentityVerificationService)
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.LOGIN_GOV);
+    verify(mockIdentityVerificationService, never())
+        .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);
   }
 
   @Test
@@ -282,6 +295,7 @@ public class RasLinkServiceTest {
   @Test
   public void testLinkRasFail_ial1() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL1);
+    verify(mockIdentityVerificationService, never()).updateIdentityVerificationSystem(any(), any());
     assertThrows(
         ForbiddenException.class, () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
@@ -290,6 +304,7 @@ public class RasLinkServiceTest {
   public void testLinkRasFail_notLoginGovOrIdMe() throws Exception {
     mockCodeExchangeResponse(TOKEN_RESPONSE_IAL2);
     mockAccessTokenResponse(USER_INFO_JSON_ERA);
+    verify(mockIdentityVerificationService, never()).updateIdentityVerificationSystem(any(), any());
     assertThrows(
         ForbiddenException.class, () -> rasLinkService.linkRasAccount(AUTH_CODE, REDIRECT_URL));
   }
