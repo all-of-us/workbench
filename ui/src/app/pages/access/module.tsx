@@ -97,7 +97,7 @@ export const Module = (props: {
           {...{ moduleName, eligible }}
           completedOrBypassed={isCompliant(status)}
         />
-        <FlexColumn>
+        <FlexColumn style={{ flex: 1 }}>
           <div
             data-test-id={`module-${moduleName}-${
               clickable ? 'clickable' : 'unclickable'

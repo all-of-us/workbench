@@ -265,8 +265,7 @@ export const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'underline',
   },
-  loginGovHelp: {
-    opacity: '0.5',
+  helpContainer: {
     fontSize: '12px',
     lineHeight: '22px',
   },
@@ -296,7 +295,7 @@ const RenewalRequirementsText = () => (
 // in display order
 export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
+  AccessModule.IDENTITY,
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
 ];
