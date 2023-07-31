@@ -281,6 +281,12 @@ export const styles = reactStyles({
     gridArea: 'icon',
     marginRight: '0.75rem',
   },
+  identityProviderDescription: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
 });
 
 const RenewalRequirementsText = () => (

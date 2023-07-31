@@ -34,6 +34,10 @@ const ContactUs = (props: { profile: Profile }) => {
   );
 };
 
+const ViewRequiredDocuments = () => (
+  <a href='google.com'>View required documents</a>
+);
+
 export const IdentityHelpText = (props: {
   profile: Profile;
   afterInitialClick: boolean;
@@ -66,21 +70,27 @@ export const IdentityHelpText = (props: {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div style={{ flex: 1 }}>
+            <div style={styles.identityProviderDescription}>
               <img
                 src={loginGovLogo}
                 alt='all of us logo'
                 style={{ height: '16px' }}
               />
-              <div>Roomba</div>
+              <div>
+                For <b>U.S. residents only</b>
+              </div>
+              <ViewRequiredDocuments />
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={styles.identityProviderDescription}>
               <img
                 src={idMeLogo}
                 alt='all of us logo'
                 style={{ height: '16px' }}
               />
-              <div>iRobot</div>
+              <div>
+                For <b>U.S. residents and international users</b>
+              </div>
+              <ViewRequiredDocuments />
             </div>
           </div>
         </div>
