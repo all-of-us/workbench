@@ -46,9 +46,6 @@ public class IdentityVerificationServiceTest {
   public void updateIdentityVerificationSystem_create() {
     DbUser user = new DbUser();
     user.setUserId(5L);
-    DbIdentityVerification identityVerification = new DbIdentityVerification();
-    identityVerification.setIdentityVerificationId(7L);
-    identityVerification.setUser(user);
     when(mockIdentityVerificationDao.getByUser(user)).thenReturn(Optional.empty());
 
     identityVerificationService.updateIdentityVerificationSystem(
