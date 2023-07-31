@@ -118,7 +118,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": false,
+    "enableRStudioGKEApp": true,
     "enableDataExplorer": false,
     "enableTanagra": false
   },
