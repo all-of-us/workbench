@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { CSSProperties } from 'react';
+import * as React from 'react';
 
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
@@ -17,7 +17,8 @@ import {
   withCurrentWorkspace,
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import {CriteriaType, Domain, Variant} from 'generated/fetch';
+
+import { CriteriaType, Domain, Variant } from 'generated/fetch';
 
 const { useEffect, useState } = React;
 
@@ -62,7 +63,6 @@ const styles = reactStyles({
     width: '64.3%',
   },
   table: {
-    height: '22.5rem',
     width: '100%',
     border: borderStyle,
     borderRadius: '3px',
@@ -325,7 +325,7 @@ export const VariantSearch = withCurrentWorkspace()(
               <div>No results found</div>
             )}
             {searchResults.length > 0 && (
-              <>
+              <div style={{height: '22.5rem'}}>
                 <table className='p-datatable' style={styles.table}>
                   <thead className='p-datatable-thead'>
                     <tr style={{ height: '3rem' }}>
@@ -421,7 +421,7 @@ export const VariantSearch = withCurrentWorkspace()(
                     ))}
                   </tbody>
                 </table>
-              </>
+              </div>
             )}
           </>
         )}
