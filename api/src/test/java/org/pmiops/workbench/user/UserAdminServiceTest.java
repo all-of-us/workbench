@@ -2,6 +2,7 @@ package org.pmiops.workbench.user;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -102,5 +103,42 @@ public class UserAdminServiceTest {
   public void testGetActiveWindow_noActiveWindow_null() {
     // does not throw
     assertThat(userAdminService.getCurrentEgressBypassWindow(null)).isNull();
+  }
+
+  @Test
+  public void testListWindows() {
+    Instant startTime1 = FakeClockConfiguration.NOW.toInstant().minus(1, ChronoUnit.DAYS);
+    Instant endTime = FakeClockConfiguration.NOW.toInstant().plus(1, ChronoUnit.DAYS);
+    Instant startTime2 = FakeClockConfiguration.NOW.toInstant();
+    DbUserEgressBypassWindow dbUserEgressBypassWindow1 =
+        new DbUserEgressBypassWindow()
+            .setUserId(USER_ID)
+            .setStartTime(Timestamp.from(startTime1))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(DESCRIPTION);
+    DbUserEgressBypassWindow dbUserEgressBypassWindow2 =
+        new DbUserEgressBypassWindow()
+            .setUserId(USER_ID)
+            .setStartTime(Timestamp.from(startTime2))
+            .setEndTime(Timestamp.from(endTime))
+            .setDescription(DESCRIPTION);
+    userEgressBypassWindowDao.saveAll(
+        ImmutableList.of(dbUserEgressBypassWindow1, dbUserEgressBypassWindow2));
+    assertThat(userAdminService.listAllEgressBypassWindows(USER_ID))
+        .containsExactly(
+            new EgressBypassWindow()
+                .description(DESCRIPTION)
+                .startTime(startTime2.toEpochMilli())
+                .endTime(endTime.toEpochMilli()),
+            new EgressBypassWindow()
+                .description(DESCRIPTION)
+                .startTime(startTime1.toEpochMilli())
+                .endTime(endTime.toEpochMilli()))
+        .inOrder();
+  }
+
+  @Test
+  public void testListWindows_emptyResult() {
+    assertThat(userAdminService.listAllEgressBypassWindows(USER_ID)).isEmpty();
   }
 }

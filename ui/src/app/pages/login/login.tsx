@@ -40,9 +40,10 @@ export const styles = reactStyles({
   },
 });
 
-export const LoginReactComponent: React.FunctionComponent<{
+interface LoginProps {
   onCreateAccount: Function;
-}> = ({ onCreateAccount }) => {
+}
+export const LoginReactComponent = ({ onCreateAccount }: LoginProps) => {
   return (
     <React.Fragment>
       <div

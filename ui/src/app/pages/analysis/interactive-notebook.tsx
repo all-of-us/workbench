@@ -2,16 +2,10 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import {
-  AppStatus,
-  BillingStatus,
-  Runtime,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
 
-import { findApp, UIAppType } from 'app/components/apps-panel/utils';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { IconButton } from 'app/components/buttons';
-import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeInitializerModal } from 'app/components/runtime-initializer-modal';
@@ -30,10 +24,7 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
-import {
-  NavigationProps,
-  setSidebarActiveIconStore,
-} from 'app/utils/navigation';
+import { NavigationProps } from 'app/utils/navigation';
 import {
   ComputeSecuritySuspendedError,
   maybeInitializeRuntime,
@@ -49,7 +40,10 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { openRStudio } from 'app/utils/user-apps-utils';
+import {
+  analysisTabName,
+  openRStudioOrConfigPanel,
+} from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -282,7 +276,7 @@ export const InteractiveNotebook = fp.flow(
           'workspaces',
           this.props.match.params.ns,
           this.props.match.params.wsid,
-          'notebooks',
+          analysisTabName,
           this.props.match.params.nbName,
         ],
         { queryParams: queryParams }
@@ -328,7 +322,7 @@ export const InteractiveNotebook = fp.flow(
             'workspaces',
             ns,
             wsid,
-            'notebooks',
+            analysisTabName,
             encodeURIComponent(notebook.name),
           ]);
         });
@@ -553,12 +547,7 @@ export const InteractiveNotebook = fp.flow(
         if (!this.notebookInUse) {
           if (appType === UIAppType.RSTUDIO) {
             const { userApps } = this.props.userAppsStore;
-            const userApp = findApp(userApps, UIAppType.RSTUDIO);
-            if (userApp && userApp.status === AppStatus.RUNNING) {
-              openRStudio(ns, userApp);
-            } else {
-              setSidebarActiveIconStore.next(rstudioConfigIconId);
-            }
+            openRStudioOrConfigPanel(ns, userApps);
           } else {
             this.runRuntime(() => {
               this.navigateEditMode();

@@ -18,6 +18,8 @@ import javax.inject.Provider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -31,6 +33,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.VariantQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartServiceImpl;
@@ -71,6 +74,8 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
+import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -104,7 +109,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
     CohortBuilderMapperImpl.class,
-    CohortReviewMapperImpl.class
+    CohortReviewMapperImpl.class,
+    VariantQueryBuilder.class
   })
   @MockBean({
     FireCloudService.class,
@@ -187,7 +193,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         "cb_search_all_events",
         "cb_review_all_events",
         "cb_criteria",
-        "cb_criteria_ancestor");
+        "cb_criteria_ancestor",
+        "cb_variant_attribute",
+        "cb_variant_attribute_contig_position",
+        "cb_variant_attribute_genes",
+        "cb_variant_attribute_rs_number",
+        "cb_variant_to_person");
   }
 
   @Override
@@ -600,6 +611,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(903111L)
         .ancestorData(false)
         .standard(false);
+  }
+
+  private static SearchParameter variant() {
+    return new SearchParameter()
+        .domain(Domain.SNP_INDEL_VARIANT.toString())
+        .ancestorData(false)
+        .group(false)
+        .variantId("1-101504524-G-A");
   }
 
   /**
@@ -1067,6 +1086,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThrows(
         BadRequestException.class,
         () -> controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition));
+  }
+
+  @Test
+  public void countParticipantsVariantData() {
+    CohortDefinition cohortDefinition =
+        createCohortDefinition(
+            Domain.SNP_INDEL_VARIANT.toString(), ImmutableList.of(variant()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(WORKSPACE_NAMESPACE, WORKSPACE_ID, cohortDefinition), 1);
   }
 
   @Test
@@ -2462,6 +2490,75 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     final String expectedResult = "my statement " + getTablePrefix() + ".myTableName";
     assertThat(expectedResult)
         .isEqualTo(bigQueryService.filterBigQueryConfig(queryJobConfiguration).getQuery());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"1-101504524-G-A", "gene", "chr20:955-1000", "rs23346"})
+  public void findVariants(String searchTerm) {
+    VariantListResponse response =
+        controller
+            .findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, searchTerm, null, null)
+            .getBody();
+    List<Variant> items = Objects.requireNonNull(response).getItems();
+    assertThat(response.getTotalSize()).isEqualTo(1);
+    assertThat(response.getNextPageToken()).isNull();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.get(0))
+        .isEqualTo(
+            new Variant()
+                .vid("1-101504524-G-A")
+                .gene("gene")
+                .consequence("cons")
+                .proteinChange("change")
+                .clinVarSignificance("clinvar")
+                .alleleCount(5L)
+                .alleleNumber(18242L)
+                .alleleFrequency(0.000277)
+                .participantCount(1L));
+  }
+
+  @Test
+  public void findVariants_Pagination() {
+    VariantListResponse response =
+        controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", null, 1).getBody();
+    List<Variant> items = Objects.requireNonNull(response).getItems();
+    assertThat(response.getTotalSize()).isEqualTo(2);
+    assertThat(response.getNextPageToken()).isNotNull();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.get(0))
+        .isEqualTo(
+            new Variant()
+                .vid("1-100550658-T-C")
+                .gene("gene1")
+                .consequence("cons")
+                .proteinChange("change")
+                .clinVarSignificance("clinvar")
+                .alleleCount(7L)
+                .alleleNumber(18226L)
+                .alleleFrequency(0.000266)
+                .participantCount(1L));
+
+    response =
+        controller
+            .findVariants(
+                WORKSPACE_NAMESPACE, WORKSPACE_ID, "gene1", response.getNextPageToken(), 1)
+            .getBody();
+    items = Objects.requireNonNull(response).getItems();
+    assertThat(response.getTotalSize()).isEqualTo(2);
+    assertThat(response.getNextPageToken()).isNull();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.get(0))
+        .isEqualTo(
+            new Variant()
+                .vid("1-100550658-T-H")
+                .gene("gene1")
+                .consequence("cons")
+                .proteinChange("change")
+                .clinVarSignificance("clinvar")
+                .alleleCount(7L)
+                .alleleNumber(18226L)
+                .alleleFrequency(0.000266)
+                .participantCount(1L));
   }
 
   protected String getTablePrefix() {

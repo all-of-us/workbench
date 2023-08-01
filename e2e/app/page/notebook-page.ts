@@ -76,18 +76,12 @@ export default class NotebookPage extends NotebookFrame {
     return true;
   }
 
-  async getNotebookName(): Promise<string> {
-    const iframe = await this.getIFrame();
-    const element = await iframe.waitForSelector(CssSelector.notebookName, { visible: true });
-    return getPropValue<string>(element, 'innerText');
-  }
-
   /**
-   * Click "Notebook" link, goto Workspace Analysis page.
+   * Click "Analysis" link, goto Workspace Analysis page.
    * This function does not handle Unsaved Changes confirmation.
    */
   async goAnalysisPage(): Promise<WorkspaceAnalysisPage> {
-    const selector = '//a[text()="Notebooks"]';
+    const selector = '//a[text()="Analysis"]';
     const navPromise = this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
     await this.page.waitForXPath(selector, { visible: true }).then((link) => link.click());
     await navPromise;

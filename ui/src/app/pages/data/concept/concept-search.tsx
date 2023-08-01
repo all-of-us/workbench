@@ -101,13 +101,13 @@ export interface ConceptSetMenuProps {
   onCopy: Function;
 }
 
-const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = ({
+const ConceptSetMenu = ({
   canDelete,
   canEdit,
   onEdit,
   onDelete,
   onCopy,
-}) => (
+}: ConceptSetMenuProps) => (
   <PopupTrigger
     side='right'
     closeOnClick

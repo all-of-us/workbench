@@ -34,10 +34,7 @@ import {
   getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import { cond, switchCase } from './index';
-
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+import { cond, DEFAULT, switchCase } from './index';
 
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
@@ -164,7 +161,6 @@ export const getAccessModuleConfig = (
   moduleName: AccessModule
 ): AccessModuleUIConfig => {
   const {
-    enableRasIdMeLinking,
     enableRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
@@ -186,34 +182,6 @@ export const getAccessModuleConfig = (
         refreshAction: async () => await profileApi().syncTwoFactorAuthStatus(),
       }),
     ],
-    [
-      AccessModule.RASLINKIDME,
-      () => ({
-        ...apiConfig,
-        isEnabledInEnvironment:
-          enableRasIdMeLinking && enableRasLoginGovLinking,
-        DARTitleComponent: (props: DARTitleComponentConfig) => {
-          return (
-            <>
-              <div>
-                Verify your identity
-                <TooltipTrigger
-                  content={
-                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-                  }
-                >
-                  <InfoIcon style={{ margin: '0 0.45rem' }} />
-                </TooltipTrigger>
-              </div>
-              <LoginGovHelpText {...props} />
-            </>
-          );
-        },
-        adminPageTitle: 'Verify your identity with ID.me',
-        refreshAction: () => redirectToRas(false),
-      }),
-    ],
-
     [
       AccessModule.RASLINKLOGINGOV,
       () => ({
@@ -335,29 +303,14 @@ export const getAccessModuleConfig = (
         adminPageTitle: 'Report any publications',
         renewalTimeEstimate: 5,
       }),
+    ],
+    [
+      DEFAULT,
+      () => ({
+        ...apiConfig,
+      }),
     ]
   );
-};
-
-export const getInitialRTModules = (): AccessModule[] => {
-  const { enableRasIdMeLinking } = serverConfigStore.get().config;
-  const modules = [
-    AccessModule.TWOFACTORAUTH,
-    enableRasIdMeLinking
-      ? AccessModule.RASLINKIDME
-      : AccessModule.RASLINKLOGINGOV,
-    AccessModule.ERACOMMONS,
-    AccessModule.COMPLIANCETRAINING,
-  ];
-  return modules;
-};
-
-export const getInitialRequiredModules = (): AccessModule[] => {
-  return [...getInitialRTModules(), duccModule];
-};
-
-export const getAllInitialModules = (): AccessModule[] => {
-  return [...getInitialRTModules(), ctModule, duccModule];
 };
 
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
@@ -366,11 +319,6 @@ export const rtAccessRenewalModules = [
   AccessModule.PUBLICATIONCONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
-];
-
-export const identityModules: AccessModule[] = [
-  AccessModule.RASLINKIDME,
-  AccessModule.RASLINKLOGINGOV,
 ];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
@@ -500,43 +448,6 @@ export const getAccessModuleStatusByNameOrEmpty = (
   );
 };
 
-const getAccessModuleStatusForIdentityVerification = (
-  profile: Profile
-): AccessModuleStatus => {
-  const idMeStatus = getAccessModuleStatusByNameOrEmpty(
-    profile.accessModules.modules,
-    AccessModule.RASLINKIDME
-  );
-  const loginGovStatus = getAccessModuleStatusByNameOrEmpty(
-    profile.accessModules.modules,
-    AccessModule.RASLINKLOGINGOV
-  );
-
-  const statuses = [idMeStatus, loginGovStatus];
-
-  if (
-    idMeStatus.completionEpochMillis &&
-    loginGovStatus.completionEpochMillis
-  ) {
-    return statuses.reduce((max, status) =>
-      status.completionEpochMillis > max.completionEpochMillis ? status : max
-    );
-  } else if (
-    idMeStatus.completionEpochMillis ||
-    loginGovStatus.completionEpochMillis
-  ) {
-    return idMeStatus.completionEpochMillis ? idMeStatus : loginGovStatus;
-  } else if (idMeStatus.bypassEpochMillis && loginGovStatus.bypassEpochMillis) {
-    return statuses.reduce((max, status) =>
-      status.bypassEpochMillis > max.bypassEpochMillis ? status : max
-    );
-  } else if (idMeStatus.bypassEpochMillis || loginGovStatus.bypassEpochMillis) {
-    return idMeStatus.bypassEpochMillis ? idMeStatus : loginGovStatus;
-  } else {
-    return loginGovStatus;
-  }
-};
-
 export const getAccessModuleStatusByName = (
   profile: Profile,
   moduleName: AccessModule
@@ -545,20 +456,6 @@ export const getAccessModuleStatusByName = (
     profile.accessModules.modules,
     moduleName
   );
-};
-
-// Gets status of moduleName, but if it is an identity module,
-// it will return the status of the "most complete" identity module.
-export const getRelativeAccessModuleStatus = (
-  profile: Profile,
-  moduleName: AccessModule
-): AccessModuleStatus => {
-  return identityModules.includes(moduleName)
-    ? getAccessModuleStatusForIdentityVerification(profile)
-    : getAccessModuleStatusByNameOrEmpty(
-        profile.accessModules.modules,
-        moduleName
-      );
 };
 
 export const GetStartedButton = ({ style = { marginLeft: '0.75rem' } }) => (

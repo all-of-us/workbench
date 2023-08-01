@@ -314,12 +314,12 @@ export const ProfileComponent = fp.flow(
         isLong = false,
         ...props
       }) => {
-        let errorText = profile && errors && errors[valueKey];
+        let errorText = profile && errors?.[valueKey];
         if (valueKey && !Array.isArray(valueKey)) {
           valueKey = [valueKey];
         }
         if (valueKey && valueKey.length > 1) {
-          errorText = profile && errors && errors[valueKey[1]];
+          errorText = profile && errors?.[valueKey[1]];
         }
         const inputProps = {
           value: fp.get(valueKey, currentProfile) || '',

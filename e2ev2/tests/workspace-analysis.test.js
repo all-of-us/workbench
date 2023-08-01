@@ -4,20 +4,20 @@ const utils = require("../src/utils");
 
 const browserTest = tu.browserTest(__filename)
 
-const navigateToNewAnalysisPage = async (browser) => {
+const navigateToAnalysisTab = async (browser) => {
   const page = browser.initialPage
   await tu.useApiProxy(page)
   await tu.fakeSignIn(page)
   await utils.dismissLeoAuthErrorModal(page);
   await page.goto(config.urlRoot()+'/workspaces/aou-rw-test-53ff4756/mohstest/data')
   await utils.dismissLeoAuthErrorModal(page);
-  const newAnalysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis (New)"]')
-  await newAnalysisTab.click()
+  const analysisTab = await page.waitForSelector('div[role="button"][aria-label="Analysis"]')
+  await analysisTab.click()
   return page
 }
 
 browserTest('create an application', async browser => {
-  const page = await navigateToNewAnalysisPage(browser)
+  const page = await navigateToAnalysisTab(browser)
 
   const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
   await startButton.click()
@@ -29,7 +29,7 @@ browserTest('create an application', async browser => {
 
   await page.waitForSelector('#application-list-dropdown').then(eh => eh.evaluate(e => e.click()))
 
-  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="JUPYTER"]')
+  const jupyterOption = await page.waitForSelector('li[role="option"][aria-label="Jupyter"]')
   await jupyterOption.click()
   await nextButton.click()
 
@@ -39,7 +39,7 @@ browserTest('create an application', async browser => {
 }, 10e3)
 
 browserTest('Cancel the creation of an application', async browser => {
-  const page = await navigateToNewAnalysisPage(browser)
+  const page = await navigateToAnalysisTab(browser)
 
   const startButton = await page.waitForSelector('div[role="button"][aria-label="start"]')
   await startButton.click()

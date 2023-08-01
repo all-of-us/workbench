@@ -26,13 +26,14 @@ public class AccessUtils {
             () -> new NotFoundException("Access tier " + accessTierShortName + "not found"));
   }
 
-  // missing ERA_COMMONS, RAS_ID_ME, and RAS_LOGIN_GOV(special-cased)
+  // missing ERA_COMMONS (special-cased)
   // see also: AccessModuleServiceImpl.isModuleEnabledInEnvironment()
   static final List<DbAccessModuleName> REQUIRED_MODULES_FOR_REGISTERED_TIER =
       ImmutableList.of(
           DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT,
           DbAccessModuleName.PROFILE_CONFIRMATION,
           DbAccessModuleName.PUBLICATION_CONFIRMATION,
+          DbAccessModuleName.IDENTITY,
           DbAccessModuleName.RT_COMPLIANCE_TRAINING,
           DbAccessModuleName.TWO_FACTOR_AUTH);
 

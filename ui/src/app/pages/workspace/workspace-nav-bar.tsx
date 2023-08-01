@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 
 import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -18,6 +17,7 @@ import {
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 
@@ -142,8 +142,10 @@ const CdrVersion = (props: {
 
 const tabs = [
   { name: 'Data', link: 'data' },
-  { name: 'Analysis', link: 'notebooks' },
-  // { name: 'Analysis (New)', link: 'apps' },
+  {
+    name: 'Analysis',
+    link: analysisTabName,
+  },
   { name: 'About', link: 'about' },
 ];
 
@@ -173,9 +175,6 @@ export const WorkspaceNavBar = fp.flow(
   const { ns, wsid } = useParams<MatchParams>();
 
   useEffect(() => {
-    if (environment.showNewAnalysisTab && tabs.length === 3) {
-      tabs.push({ name: 'Analysis (New)', link: 'apps' });
-    }
     if (
       serverConfigStore.get().config.enableDataExplorer &&
       !tabs.find((tab) => tab.name === 'Data Explorer')
@@ -190,7 +189,7 @@ export const WorkspaceNavBar = fp.flow(
     }
   }, []);
 
-  const appsTabStyle = (selected) => {
+  const experimentalTabStyle = (selected) => {
     return selected
       ? { backgroundColor: colorWithWhiteness(colors.danger, 0.3) }
       : { backgroundColor: colors.danger };
@@ -213,8 +212,8 @@ export const WorkspaceNavBar = fp.flow(
             ...styles.tab,
             ...(selected ? styles.active : {}),
             ...(disabled ? styles.disabled : {}),
-            ...(['apps', 'data-explorer', 'tanagra'].includes(link)
-              ? appsTabStyle(selected)
+            ...(['data-explorer', 'tanagra'].includes(link)
+              ? experimentalTabStyle(selected)
               : {}),
           }}
           onClick={() => navigate(['workspaces', ns, wsid, link])}

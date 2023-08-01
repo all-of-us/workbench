@@ -15,6 +15,7 @@ import { BROAD } from './institution-api-stub';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
+    userId: 123,
     username: 'tester@fake-research-aou.org',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
     accessTierShortNames: [AccessTierShortNames.Registered],
