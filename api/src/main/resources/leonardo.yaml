@@ -1497,7 +1497,7 @@ components:
         - CUSTOM
         - GALAXY
         - RSTUDIO
-    AppStatus:
+    AppStatus:Ï
       type: string
       enum:
         - DELETED
