@@ -1,20 +1,27 @@
 import * as React from 'react';
+import { CSSProperties } from 'react';
 
 import { AlertDanger } from 'app/components/alert';
+import { Clickable } from 'app/components/buttons';
+import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
-import { Spinner } from 'app/components/spinners';
+import { SpinnerOverlay } from 'app/components/spinners';
+import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
+  validateInputForMySQL,
   withCurrentWorkspace,
 } from 'app/utils';
-import {Clickable} from 'app/components/buttons';
+import { AnalyticsTracker } from 'app/utils/analytics';
+import {CriteriaType, Domain, Variant} from 'generated/fetch';
 
 const { useEffect, useState } = React;
 
+const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
     float: 'left',
@@ -38,65 +45,387 @@ const styles = reactStyles({
     border: 0,
     outline: 'none',
   },
+  clearSearchIcon: {
+    color: colors.accent,
+    display: 'inline-block',
+    float: 'right',
+    marginTop: '0.375rem',
+  },
+  infoIcon: {
+    color: colorWithWhiteness(colors.accent, 0.1),
+    marginLeft: '0.375rem',
+    height: '100%',
+  },
+  inputAlert: {
+    justifyContent: 'space-between',
+    padding: '0.3rem',
+    width: '64.3%',
+  },
+  table: {
+    height: '22.5rem',
+    width: '100%',
+    border: borderStyle,
+    borderRadius: '3px',
+    borderBottom: 0,
+    tableLayout: 'fixed',
+  },
+  columnNameHeader: {
+    padding: '0 0 0 0.375rem',
+    background: colorWithWhiteness(colors.dark, 0.93),
+    color: colors.primary,
+    border: 0,
+    borderBottom: borderStyle,
+    fontWeight: 600,
+    textAlign: 'left',
+    verticalAlign: 'middle',
+    lineHeight: '1.125rem',
+  },
+  columnBodyName: {
+    background: colors.white,
+    verticalAlign: 'middle',
+    padding: 0,
+    border: 0,
+    borderBottom: borderStyle,
+    color: colors.primary,
+    lineHeight: '1.2rem',
+    whiteSpace: 'nowrap',
+  },
+  selectIcon: {
+    margin: '2px 0.75rem 2px 2px',
+    color: colorWithWhiteness(colors.success, -0.5),
+    cursor: 'pointer',
+  },
+  selectedIcon: {
+    marginRight: '0.6rem',
+    color: colorWithWhiteness(colors.success, -0.5),
+    opacity: 0.4,
+    cursor: 'not-allowed',
+  },
+  disabledIcon: {
+    marginRight: '0.6rem',
+    color: colorWithWhiteness(colors.dark, 0.5),
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    pointerEvents: 'none',
+  },
+  selectDiv: {
+    minWidth: '6%',
+    float: 'left',
+    lineHeight: '0.9rem',
+  },
+  nameDiv: {
+    width: '80%',
+    float: 'left',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
 });
 
-export const VariantSearch = withCurrentWorkspace()(({workspace}) => {
-  const [loading, setLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchTerms, setSearchTerms] = useState('');
+const columns = [
+  {
+    name: 'Variant Id',
+    style: { ...styles.columnNameHeader, borderLeft: 0, width: '20%' },
+  },
+  {
+    name: 'Gene',
+    style: {
+      ...styles.columnNameHeader,
+      width: '10%',
+      paddingLeft: '0',
+      paddingRight: '0.75rem',
+    },
+  },
+  {
+    name: 'Consequence',
+    style: {
+      ...styles.columnNameHeader,
+      width: '15%',
+      paddingLeft: '0',
+      paddingRight: '0.75rem',
+    },
+  },
+  {
+    name: 'Protein Change',
+    style: { ...styles.columnNameHeader, paddingLeft: '0' },
+  },
+  {
+    name: 'ClinVar Significance',
+    style: styles.columnNameHeader,
+  },
+  {
+    name: 'Allele Count',
+    style: styles.columnNameHeader,
+  },
+  {
+    name: 'Allele Number',
+    style: styles.columnNameHeader,
+  },
+  {
+    name: 'Allele Frequency',
+    style: styles.columnNameHeader,
+  },
+];
 
-  const searchVariants = async () => {
-    const { id, namespace } = workspace;
-    await cohortBuilderApi()
-    .findVariants(namespace, id, searchTerms)
-    .then((response) =>
-      setSearchResults(response.items)
-    );
-  };
+const searchTrigger = 2;
 
-  useEffect(() => {
-    searchVariants();
-  }, []);
+export const VariantSearch = withCurrentWorkspace()(
+  ({ select, selectedIds, workspace }) => {
+    const [hoverId, setHoverId] = useState(null);
+    const [inputErrors, setInputErrors] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searching, setSearching] = useState(false);
+    const [searchResults, setSearchResults] = useState<Variant[]>([]);
+    const [searchTerms, setSearchTerms] = useState('');
 
-  return (
-    <>
-      <div style={{ display: 'flex' }}>
-        <div style={styles.searchContainer}>
-          <div style={styles.searchBar}>
-            <ClrIcon shape='search' size='18' />
-            <TextInput
-              data-test-id='list-search-input'
-              style={styles.searchInput}
-              value={searchTerms}
-              placeholder={this.textInputPlaceholder}
-              onChange={(e) => this.setState({ searchTerms: e })}
-              onKeyPress={this.handleInput}
-            />
-            {searching && (
-              <Clickable
-                style={styles.clearSearchIcon}
-                onClick={() => this.clearSearch()}
-              >
-                <ClrIcon size={24} shape='times-circle' />
-              </Clickable>
-            )}
-          </div>
-          {inputErrors.map((error, e) => (
-            <AlertDanger key={e} style={styles.inputAlert}>
-              <span data-test-id='input-error-alert'>{error}</span>
-            </AlertDanger>
-          ))}
-        </div>
-        <div style={{ float: 'right', width: '20%' }}>
-          <TooltipTrigger side='top' content={searchTooltip}>
+    const searchVariants = async (searchString: string) => {
+      try {
+        setLoading(true);
+        const { id, namespace } = workspace;
+        const variantResponse = await cohortBuilderApi().findVariants(
+          namespace,
+          id,
+          searchString
+        );
+        setSearchResults(variantResponse.items);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      // searchVariants('');
+    }, []);
+
+    const handleInput = (event: any) => {
+      const {
+        key,
+        target: { value },
+      } = event;
+      if (key === 'Enter') {
+        if (value.trim().length < searchTrigger) {
+          setInputErrors([
+            `Minimum criteria search length is ${searchTrigger} characters`,
+          ]);
+        } else {
+          const newInputErrors = validateInputForMySQL(value, searchTrigger);
+          if (inputErrors.length > 0) {
+            setInputErrors(newInputErrors);
+          } else {
+            setSearching(true);
+            searchVariants(value.trim());
+          }
+        }
+      }
+    };
+
+    const clearSearch = () => {
+      setSearching(false);
+      setSearchTerms('');
+      setSearchResults([]);
+    };
+
+    const getParamId = (row: Variant) =>
+      `param${row.vid}`;
+
+    const isSelected = (row: any) => {
+      const paramId = getParamId(row);
+      return selectedIds.includes(paramId);
+    };
+
+    const onNameHover = (el: HTMLDivElement, id: string) => {
+      if (el.offsetWidth < el.scrollWidth) {
+        setHoverId(id);
+      }
+    };
+
+    const selectItem = (row: any) => {
+      const param = {
+        parameterId: getParamId(row),
+        parentId: null,
+        type: CriteriaType.NONE,
+        name: `Variant ${row.vid}`,
+        group: false,
+        domainId: Domain.SNPINDELVARIANT,
+        hasAttributes: false,
+        selectable: true,
+        variantId: row.vid,
+        attributes: []
+      };
+      AnalyticsTracker.CohortBuilder.SelectCriteria(
+        `Select ${domainToTitle(row.domainId)} - '${row.name}'`
+      );
+      select(param);
+    };
+
+    const renderColumnWithToolTip = (columnLabel, toolTip) => {
+      return (
+        <FlexRow>
+          <label>{columnLabel}</label>
+          <TooltipTrigger side='top' content={<div>{toolTip}</div>}>
             <ClrIcon
               style={styles.infoIcon}
               className='is-solid'
               shape='info-standard'
             />
           </TooltipTrigger>
+        </FlexRow>
+      );
+    };
+
+    return (
+      <>
+        <div style={{ display: 'flex' }}>
+          <div style={styles.searchContainer}>
+            <div style={styles.searchBar}>
+              <ClrIcon shape='search' size='18' />
+              <TextInput
+                data-test-id='list-search-input'
+                style={styles.searchInput}
+                value={searchTerms}
+                placeholder='Search Variants'
+                onChange={(e) => setSearchTerms(e)}
+                onKeyPress={handleInput}
+              />
+              {searching && (
+                <Clickable
+                  style={styles.clearSearchIcon}
+                  onClick={() => clearSearch()}
+                >
+                  <ClrIcon size={24} shape='times-circle' />
+                </Clickable>
+              )}
+            </div>
+            {inputErrors.map((error, e) => (
+              <AlertDanger key={e} style={styles.inputAlert}>
+                <span data-test-id='input-error-alert'>{error}</span>
+              </AlertDanger>
+            ))}
+          </div>
+          <div style={{ float: 'right', width: '20%' }}>
+            <TooltipTrigger side='top' content={<></>}>
+              <ClrIcon
+                style={styles.infoIcon}
+                className='is-solid'
+                shape='info-standard'
+              />
+            </TooltipTrigger>
+          </div>
         </div>
-      </div>
-    </>
-  );
-});
+        <div style={{ display: 'table', height: '100%', width: '100%' }}>
+          BRCA2
+        </div>
+        {loading ? (
+          <SpinnerOverlay />
+        ) : (
+          <>
+            {searching && searchResults.length === 0 && (
+              <div>No results found</div>
+            )}
+            {searchResults.length > 0 && (
+              <>
+                <table className='p-datatable' style={styles.table}>
+                  <thead className='p-datatable-thead'>
+                    <tr style={{ height: '3rem' }}>
+                      {columns.map((column, index) => (
+                        <th key={index} style={column.style as CSSProperties}>
+                          {column.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className='p-datatable-tbody'>
+                    {searchResults.map((row, index) => (
+                      <React.Fragment key={index}>
+                        <tr style={{ height: '2.625rem' }}>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              width: '20%',
+                              paddingRight: '0.75rem',
+                            }}
+                          >
+                            {isSelected(row) ? (
+                              <ClrIcon
+                                style={styles.selectedIcon}
+                                shape='check-circle'
+                                size='20'
+                              />
+                            ) : (
+                              <ClrIcon
+                                style={styles.selectIcon}
+                                shape='plus-circle'
+                                size='16'
+                                onClick={() => selectItem(row)}
+                              />
+                            )}
+                            {row.vid}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              width: '10%',
+                              paddingRight: '0.75rem',
+                            }}
+                          >
+                            {row.gene}
+                          </td>
+                          <td style={styles.columnBodyName}>
+                            {row.consequence}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              paddingLeft: '0.3rem',
+                              paddingRight: '0.75rem',
+                            }}
+                          >
+                            {row.proteinChange || '-'}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              paddingLeft: '0.3rem',
+                            }}
+                          >
+                            {row.clinVarSignificance || '-'}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              paddingLeft: '0.3rem',
+                            }}
+                          >
+                            {row.alleleCount}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              paddingLeft: '0.3rem',
+                            }}
+                          >
+                            {row.alleleNumber}
+                          </td>
+                          <td
+                            style={{
+                              ...styles.columnBodyName,
+                              paddingLeft: '0.3rem',
+                            }}
+                          >
+                            {row.alleleFrequency}
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </>
+        )}
+      </>
+    );
+  }
+);

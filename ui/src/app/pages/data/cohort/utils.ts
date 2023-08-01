@@ -37,6 +37,8 @@ export function toTitleCase(str: string): string {
 export function nameDisplay(parameter): string {
   if (parameter.type === CriteriaType.DECEASED) {
     return '';
+  } else if (!!parameter.variantId) {
+    return `Variant ${parameter.variantId}`;
   } else {
     let name = stripHtml(parameter.name);
     if (
@@ -129,6 +131,9 @@ export function domainToTitle(domain: any): string {
       break;
     case Domain.STRUCTURALVARIANTDATA:
       domain = 'Structural Variant Data';
+      break;
+    case Domain.SNPINDELVARIANT:
+      domain = 'SNP/Indel Variants';
       break;
   }
   return domain;
@@ -345,6 +350,7 @@ export function mapParameter(sp: any) {
     conceptId,
     hasAncestorData,
     isStandard,
+    variantId,
   } = sp;
   const param = <SearchParameter>{
     parameterId,
@@ -358,6 +364,9 @@ export function mapParameter(sp: any) {
   };
   if (conceptId !== null && conceptId !== undefined) {
     param.conceptId = conceptId;
+  }
+  if (variantId !== null && variantId !== undefined) {
+    param.variantId = variantId;
   }
   if (domainId === Domain.SURVEY) {
     param.subtype = subtype;
