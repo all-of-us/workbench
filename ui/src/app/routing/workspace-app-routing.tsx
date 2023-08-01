@@ -2,13 +2,16 @@ import * as React from 'react';
 import { Redirect, Switch, useParams, useRouteMatch } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
+import { environment } from 'environments/environment';
 import { AppRoute, withRouteData } from 'app/components/app-router';
 import { BreadcrumbType } from 'app/components/breadcrumb-type';
 import { LEONARDO_APP_PAGE_KEY } from 'app/components/help-sidebar';
 import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { InteractiveNotebook } from 'app/pages/analysis/interactive-notebook';
-import { LeonardoAppLauncher } from 'app/pages/analysis/leonardo-app-launcher';
-import { LeoApplicationType } from 'app/pages/analysis/leonardo-app-launcher';
+import {
+  LeoApplicationType,
+  LeonardoAppLauncher,
+} from 'app/pages/analysis/leonardo-app-launcher';
 import { NotebookList } from 'app/pages/analysis/notebook-list';
 import { AppFilesList } from 'app/pages/appAnalysis/app-files-list';
 import { CohortActions } from 'app/pages/data/cohort/cohort-actions';
@@ -28,8 +31,9 @@ import {
   WorkspaceEdit,
   WorkspaceEditMode,
 } from 'app/pages/workspace/workspace-edit';
-import { adminLockedGuard, tempAppsAnalysisGuard } from 'app/routing/guards';
+import { adminLockedGuard } from 'app/routing/guards';
 import { MatchParams, withParamsKey } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 const CohortPagePage = fp.flow(withRouteData, withRoutingSpinner)(CohortPage);
 const CohortActionsPage = fp.flow(
@@ -139,63 +143,60 @@ export const WorkspaceRoutes = () => {
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/apps`}
-        guards={[adminLockedGuard(ns, wsid), tempAppsAnalysisGuard(ns, wsid)]}
-      >
-        <AppsListPage
-          routeData={{
-            title: 'View Apps',
-            pageKey: 'apps',
-            workspaceNavBarTab: 'apps',
-            breadcrumb: BreadcrumbType.Workspace,
-          }}
-        />
-      </AppRoute>
-      <AppRoute
-        exact
-        path={`${path}/notebooks`}
+        path={`${path}/${analysisTabName}`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
-        <NotebookListPage
-          routeData={{
-            title: 'View Notebooks',
-            pageKey: 'notebooks',
-            workspaceNavBarTab: 'notebooks',
-            breadcrumb: BreadcrumbType.Workspace,
-          }}
-        />
+        {environment.showNewAnalysisTab ? (
+          <AppsListPage
+            routeData={{
+              title: 'View Analysis Files',
+              pageKey: analysisTabName,
+              workspaceNavBarTab: analysisTabName,
+              breadcrumb: BreadcrumbType.Workspace,
+            }}
+          />
+        ) : (
+          <NotebookListPage
+            routeData={{
+              title: 'View Notebooks',
+              pageKey: analysisTabName,
+              workspaceNavBarTab: analysisTabName,
+              breadcrumb: BreadcrumbType.Workspace,
+            }}
+          />
+        )}
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/notebooks/preview/:nbName`}
+        path={`${path}/${analysisTabName}/preview/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <InteractiveNotebookPage
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
+            breadcrumb: BreadcrumbType.Analysis,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: 'notebooks',
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
         />
       </AppRoute>
       <AppRoute
         exact
-        path={`${path}/notebooks/:nbName`}
+        path={`${path}/${analysisTabName}/:nbName`}
         guards={[adminLockedGuard(ns, wsid)]}
       >
         <LeonardoAppRedirectPage
           key='notebook'
           routeData={{
             pathElementForTitle: 'nbName',
-            breadcrumb: BreadcrumbType.Notebook,
+            breadcrumb: BreadcrumbType.Analysis,
             // The iframe we use to display the Jupyter notebook does something strange
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
             pageKey: LEONARDO_APP_PAGE_KEY,
-            workspaceNavBarTab: 'notebooks',
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Notebook}
@@ -212,7 +213,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: 'notebooks',
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.Terminal}
@@ -228,7 +229,7 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.Workspace,
             pageKey: LEONARDO_APP_PAGE_KEY,
             contentFullHeightOverride: true,
-            workspaceNavBarTab: 'notebooks',
+            workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
           leoAppType={LeoApplicationType.SparkConsole}

@@ -1885,16 +1885,16 @@ paths:
       tags:
         - userAdmin
       description: >
-        Get the user's active egress bypass window. Returns null if user does not have active. 
+        List all of the user's egress bypass windows. 
         Require RESEARCHER_DATA_VIEW authority
       parameters:
         - "$ref": "#/parameters/userId"
-      operationId: getEgressBypassWindow
+      operationId: listEgressBypassWindows
       responses:
         200:
           description: success
           schema:
-            "$ref": "#/definitions/EgressBypassWindow"
+            "$ref": "#/definitions/ListEgressBypassWindowResponse"
 
   "/v1/cron/deleteOldRuntimes":
     get:
@@ -4264,6 +4264,38 @@ paths:
           description: A collection of data filter options
           schema:
             "$ref": "#/definitions/DataFiltersResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/{searchTerm}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns genomic variants from VAT per specified search term
+      operationId: findVariants
+      parameters:
+        - in: path
+          name: searchTerm
+          type: string
+          required: true
+          description: search term (variant id, gene, rs number or chr position)
+        - in: query
+          name: pageToken
+          description: 'Pagination token retrieved from a previous call to user; used
+         for retrieving additional pages of results.'
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: 'Maximum number of results to return in a response. Defaults
+         to 10.'
+          type: integer
+          required: false
+      responses:
+        200:
+          description: A collection of variants
+          schema:
+            "$ref": "#/definitions/VariantListResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -4415,6 +4447,7 @@ definitions:
     - WHOLE_GENOME_VARIANT
     - LR_WHOLE_GENOME_VARIANT
     - STRUCTURAL_VARIANT_DATA
+    - SNP_INDEL_VARIANT
     - ZIP_CODE_SOCIOECONOMIC
     - ARRAY_DATA
     - CONCEPT_SET
@@ -4771,10 +4804,14 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
+      enableRasIdMeLinking:
+        type: boolean
+        default: false
+        description: Whether users are given the option to link their RAS/ID.me account to AoU
       enableRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether users are required to link their RAS/login.gov account to AoU
+        description: Whether users are given the option to link their RAS/Login.gov account to AoU
       enableGenomicExtraction:
         type: boolean
         default: false
@@ -4813,10 +4850,6 @@ definitions:
         type: boolean
         default: true
         description: Whether a captcha check is part of the new user registration process
-      enableConceptSetsInCohortBuilder:
-        type: boolean
-        default: false
-        description: Whether to enable adding ConceptSets to CohortBuilder.
       enableCromwellGKEApp:
         type: boolean
         default: false
@@ -5443,6 +5476,8 @@ definitions:
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
     - RAS_LINK_LOGIN_GOV
+    - RAS_LINK_ID_ME
+    - IDENTITY
     - PROFILE_CONFIRMATION
     - PUBLICATION_CONFIRMATION
   AccessBypassRequest:
@@ -6310,7 +6345,10 @@ definitions:
           May be null if the user has never acknowledged the Terms of Service.'
       rasLinkLoginGovUsername:
         type: string
-        description: The user's identity name in login.gov.
+        description: The user's identity name in login.gov (deprecated in favor of rasLinkUsername)
+      rasLinkUsername:
+        type: string
+        description: The user's identity name in RAS.
       accessModules:
         type: object
         properties:
@@ -7137,6 +7175,31 @@ definitions:
         type: string
         description: 'A JSON string containing an array of JSON-encoded egress events.
           See the SumologicEgressEvent definition for the expected schema of each event.'
+  BucketAuditEntry:
+    type: object
+    required:
+      - pet_account
+      - google_project_id
+    properties:
+      pet_account:
+        description: This is the pet account associated with the user
+        type: string
+      file_lengths:
+        description: The total file lengths reported in the audit logs for the user
+        type: integer
+        format: int64
+      google_project_id:
+        description: The google project id that caused the egress
+        type: string
+      bucket_name:
+        description: The name of the bucket reported in the audit logs that contains the files
+        type: string
+      min_time:
+        description: The first timestamp when a file was created.
+        type: string
+      max_time:
+        description: The last timestamp when a file was created.
+        type: string
   SumologicEgressEvent:
     type: object
     required:
@@ -7238,11 +7301,17 @@ definitions:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window begins in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
       byPassDescription:
         type: string
         description: Brief description of this bypass request.
+  ListEgressBypassWindowResponse:
+    type: object
+    properties:
+      bypassWindows:
+        type: array
+        items:
+          "$ref": "#/definitions/EgressBypassWindow"
   EgressBypassWindow:
     type: object
     properties:
@@ -7250,14 +7319,12 @@ definitions:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window begins in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window begins in milliseconds since the UNIX epoch
       endTime:
         type: integer
         format: int64
         description: >
-          Timestamp when user egress bypass window ends in milliseconds in milliseconds
-          since the UNIX epoch
+          Timestamp when user egress bypass window ends in milliseconds since the UNIX epoch
       description:
         type: string
         description: Brief description of this bypass request.
@@ -9184,6 +9251,53 @@ definitions:
         format: int64
       conceptName:
         type: string
+  VariantListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/Variant"
+      nextPageToken:
+        type: string
+        description: >
+          If present, this token can be provided to retrieve the next page of results.
+          If null or empty, there are no further pages in the result stream.
+      totalSize:
+        type: integer
+        description: Total size of the result set.
+  Variant:
+    type: object
+    required:
+      - vid
+      - participantCount
+    properties:
+      vid:
+        description: 'Primary identifier of a variant.'
+        type: string
+      gene:
+        description: 'Gene name.'
+        type: string
+      consequence:
+        type: string
+      proteinChange:
+        type: string
+      clinVarSignificance:
+        type: string
+      alleleCount:
+        type: integer
+        format: int64
+      alleleNumber:
+        type: integer
+        format: int64
+      alleleFrequency:
+        type: number
+        format: double
+      participantCount:
+        type: integer
+        format: int64
 
   AuditProjectAccessRequest:
     type: object
@@ -9768,8 +9882,7 @@ definitions:
       rasLoginGovBypassTime:
         type: string
         format: date-time
-        description: Time an administrator bypassed the RAS Login.gov requirement
-          for this user.
+        description: Time an administrator bypassed the RAS Login.gov requirement for this user.
       rasLoginGovCompletionTime:
         type: string
         format: date-time
@@ -9797,25 +9910,6 @@ definitions:
         description: |-
           User's GSuite username, including appropriate domain for this environment. Uniquely describes a
           user account (but not constrained to be unique by BigQuery).
-      city:
-        type: string
-        description: User-reported city of residence.
-      country:
-        type: string
-        description: User-reported country of residence.
-      state:
-        type: string
-        description: User-reported state or province. Not guaranteed to match official
-          abbreviations or spellings.
-      streetAddress1:
-        type: string
-        description: First line of user street address.
-      streetAddress2:
-        type: string
-        description: Second line of user street address.
-      zipCode:
-        type: string
-        description: Up to 10-digit zip code for use residence.
       institutionId:
         type: integer
         format: int64

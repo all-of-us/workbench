@@ -49,4 +49,4 @@ fi
 # run from tanagra sub-module under workbench
 cd ../tanagra
 # deploy service
-./gradlew service:bootRun
+./gradlew -PisMySQL service:bootRun

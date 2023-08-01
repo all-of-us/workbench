@@ -53,7 +53,11 @@ import {
   UserAppsStore,
 } from 'app/utils/stores';
 import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
-import { openRStudio, openRStudioSource } from 'app/utils/user-apps-utils';
+import { openRStudio } from 'app/utils/user-apps-utils';
+import {
+  analysisTabName,
+  openRStudioOrConfigPanel,
+} from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -294,7 +298,7 @@ export const InteractiveNotebook = fp.flow(
           'workspaces',
           this.props.match.params.ns,
           this.props.match.params.wsid,
-          'notebooks',
+          analysisTabName,
           this.props.match.params.nbName,
         ],
         { queryParams: queryParams }
@@ -340,7 +344,7 @@ export const InteractiveNotebook = fp.flow(
             'workspaces',
             ns,
             wsid,
-            'notebooks',
+            analysisTabName,
             encodeURIComponent(notebook.name),
           ]);
         });
@@ -601,20 +605,21 @@ export const InteractiveNotebook = fp.flow(
         if (!this.notebookInUse) {
           if (appType === UIAppType.RSTUDIO) {
             const { userApps } = this.props.userAppsStore;
-            const userApp = findApp(userApps, UIAppType.RSTUDIO);
-            if (userApp && userApp.status === AppStatus.RUNNING) {
-              const url = openRStudioSource(ns, userApp, nbName);
-
-              console.log(Cookies.get());
-
-              this.setState({
-                showRStudioEdit: true,
-                rstudioUrl: url,
-                rStudioHtml: { __html: `<div class="ext">Hello!</div>` },
-              });
-            } else {
-              setSidebarActiveIconStore.next(rstudioConfigIconId);
-            }
+            //   const userApp = findApp(userApps, UIAppType.RSTUDIO);
+            //   if (userApp && userApp.status === AppStatus.RUNNING) {
+            //     const url = openRStudioOrConfigPanel(ns, userApps);
+            //
+            //     console.log(Cookies.get());
+            //
+            //     this.setState({
+            //       showRStudioEdit: true,
+            //       rstudioUrl: url,
+            //       rStudioHtml: { __html: `<div class="ext">Hello!</div>` },
+            //     });
+            //   } else {
+            //     setSidebarActiveIconStore.next(rstudioConfigIconId);
+            //   }
+            openRStudioOrConfigPanel(ns, userApps);
           } else {
             this.runRuntime(() => {
               this.navigateEditMode();

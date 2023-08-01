@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.common.collect.Table;
 import java.util.Collection;
 import java.util.List;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.CardCount;
@@ -18,6 +19,7 @@ import org.pmiops.workbench.model.DomainCard;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.Variant;
 
 public interface CohortBuilderService {
 
@@ -82,4 +84,12 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys);
 
   List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);
+
+  /**
+   * Find variants by specified search term. Supported searches include variant id, gene name,
+   * chromosome position and rs number. This method returns an ImmutableTriple that includes next
+   * pageToken, total query count and list of variants(paginated).
+   */
+  ImmutableTriple<String, Integer, List<Variant>> findVariants(
+      String searchTerm, String pageToken, Integer pageSize);
 }

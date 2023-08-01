@@ -5,8 +5,8 @@ import { mount } from 'enzyme';
 
 import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import {
@@ -17,6 +17,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AppSelector } from './app-selector';
+import { APP_LIST } from './app-selector-modal';
 
 describe('App Selector', () => {
   const startButton = (wrapper) => {
@@ -93,7 +94,7 @@ describe('App Selector', () => {
 
     // Application Drop down List should have Jupyter as an option
     expect(applicationListDropDownWrapper(wrapper).prop('options')).toContain(
-      JUPYTER_APP
+      UIAppType.JUPYTER
     );
 
     // Next button should be disabled by default
@@ -104,7 +105,7 @@ describe('App Selector', () => {
       await simulateComponentChange(
         wrapper,
         applicationListDropDown,
-        JUPYTER_APP
+        UIAppType.JUPYTER
       );
     });
 

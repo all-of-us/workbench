@@ -42,6 +42,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -444,7 +445,7 @@ export const ListOverview = fp.flow(
       switch (action) {
         case 'notebook':
           AnalyticsTracker.CohortBuilder.CohortAction('Export to notebook');
-          url += 'notebooks';
+          url += analysisTabName;
           break;
         case 'review':
           AnalyticsTracker.CohortBuilder.CohortAction('Review cohort');

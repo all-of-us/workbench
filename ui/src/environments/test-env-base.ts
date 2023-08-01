@@ -11,7 +11,7 @@ export const testEnvironmentBase: EnvironmentBase = {
   // Keep in sync with config_test.json.
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'https://aou-db-test.appspot.com',
-  gaId: 'UA-112406425-1',
+  gaId: 'G-Q111PQFJH3',
   // note: these are shifted by 1 from other environments due to an extra
   // custom GA dimension "Test" which has the #1 spot in Test
   gaUserAgentDimension: 'dimension2',

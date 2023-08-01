@@ -37,7 +37,7 @@ describe('Export Dataset to Notebook Test', () => {
 
     // Verify notebook created successfully. Not going to start notebook runtime.
     const currentPageUrl = page.url();
-    expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
+    expect(currentPageUrl).toContain(`preview/${notebookName}.ipynb`);
 
     // Delete notebook.
     const analysisPage = await notebookPreviewPage.goAnalysisPage();

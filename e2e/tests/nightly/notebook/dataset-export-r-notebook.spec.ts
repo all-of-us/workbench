@@ -42,7 +42,7 @@ describe('Export Dataset to Notebook Test', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.waitForLoad();
     const currentPageUrl = page.url();
-    expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
+    expect(currentPageUrl).toContain(`preview/${notebookName}.ipynb`);
 
     previewCodeLines = await notebookPreviewPage.getFormattedCode();
     // Verify few randomly selected code snippet

@@ -99,6 +99,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableRasIdMeLinking": false,
     "enableRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4],
     "renewal": {
@@ -116,9 +117,8 @@
     "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
-    "enableRStudioGKEApp": false,
+    "enableRStudioGKEApp": true,
     "enableDataExplorer": false,
     "enableTanagra": false
   },

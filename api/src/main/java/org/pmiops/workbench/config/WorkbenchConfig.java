@@ -277,7 +277,7 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, all users are required to finish identity verification using RAS/login.gov.
+    public boolean enableRasIdMeLinking;
     public boolean enableRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
@@ -317,8 +317,6 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable enableConceptSetsInCohortBuilder
-    public boolean enableConceptSetsInCohortBuilder;
     // If true, enable using the Cromwell GKE app
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app

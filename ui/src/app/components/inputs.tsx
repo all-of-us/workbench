@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
 import Switch from 'react-switch';
@@ -10,7 +10,7 @@ import { ClrIcon } from 'app/components/icons';
 import { PopupTrigger } from 'app/components/popups';
 import { commonStyles } from 'app/pages/login/account-creation/common';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { withStyle } from 'app/utils';
+import { cond, withStyle } from 'app/utils';
 import { isDateValid } from 'app/utils/dates';
 import moment from 'moment';
 
@@ -154,45 +154,35 @@ interface TextAreaWithLengthValidationMessageProps {
   textBoxStyleOverrides?: {};
 }
 
-interface TextAreaWithLengthValidationMessageState {
-  showTooShortWarning: boolean;
-  text: string;
-}
+export const TextAreaWithLengthValidationMessage = (
+  props: TextAreaWithLengthValidationMessageProps
+) => {
+  const [showTooShortWarning, setShowTooShortWarning] =
+    useState<boolean>(false);
+  const [text, setText] = useState<string>(props.initialText);
 
-export class TextAreaWithLengthValidationMessage extends React.Component<
-  TextAreaWithLengthValidationMessageProps,
-  TextAreaWithLengthValidationMessageState
-> {
-  constructor(props: TextAreaWithLengthValidationMessageProps) {
-    super(props);
-    this.state = {
-      showTooShortWarning: false,
-      text: props.initialText,
-    };
-  }
+  useEffect(() => {
+    setText(props.initialText);
+  }, [props.initialText]);
 
-  onTextUpdate(text) {
-    if (this.state.showTooShortWarning && text.length >= 50) {
-      this.setState({ showTooShortWarning: false });
+  function onTextUpdate(newText) {
+    if (showTooShortWarning && newText.length >= 50) {
+      setShowTooShortWarning(false);
     }
-    this.setState({ text: text });
-    this.props.onChange(text);
+    setText(newText);
+    props.onChange(newText);
   }
 
-  updateShowTooShortWarning() {
-    if (
-      this.state.text &&
-      this.props.tooShortWarningCharacters &&
-      this.props.tooShortWarning &&
-      this.state.text.length < this.props.tooShortWarningCharacters
-    ) {
-      this.setState({ showTooShortWarning: true });
-    } else {
-      this.setState({ showTooShortWarning: false });
-    }
+  function updateShowTooShortWarning() {
+    const showWarning =
+      text &&
+      props.tooShortWarningCharacters &&
+      props.tooShortWarning &&
+      text.length < props.tooShortWarningCharacters;
+    setShowTooShortWarning(showWarning);
   }
 
-  renderCharacterLimitMessage(textColor: string, message: string) {
+  function renderCharacterLimitMessage(textColor: string, message: string) {
     return (
       <div
         data-test-id='characterLimit'
@@ -203,69 +193,82 @@ export class TextAreaWithLengthValidationMessage extends React.Component<
     );
   }
 
-  render() {
-    const { id, maxCharacters, tooShortWarning } = this.props;
-    const { showTooShortWarning, text } = this.state;
-
-    return (
-      <React.Fragment>
-        <TextArea
-          style={{
-            ...styles.textBoxWithLengthValidationTextBoxStyle,
-            ...this.props.textBoxStyleOverrides,
-            ...this.props.heightOverride,
-          }}
-          id={id}
-          value={text}
-          onBlur={() => this.updateShowTooShortWarning()}
-          onChange={(v) => this.onTextUpdate(v)}
-        />
-        <FlexRow
-          style={{
-            ...styles.textBoxWithLengthValidationValidationStyle,
-            ...this.props.textBoxStyleOverrides,
-          }}
-        >
-          {showTooShortWarning && (
-            <label
-              data-test-id='warning'
-              style={{
-                color: colors.danger,
-                justifyContent: 'flex-start',
-                marginRight: '.375rem',
-              }}
-            >
-              {tooShortWarning}
-            </label>
-          )}
-          {!text &&
-            this.renderCharacterLimitMessage(
-              colors.primary,
-              maxCharacters + ' characters remaining'
-            )}
-          {text &&
-            text.length < maxCharacters &&
-            this.renderCharacterLimitMessage(
-              colors.primary,
-              maxCharacters - text.length + ' characters remaining'
-            )}
-          {text &&
-            text.length === maxCharacters &&
-            this.renderCharacterLimitMessage(
-              colors.danger,
-              '0 characters remaining'
-            )}
-          {text &&
-            text.length > maxCharacters &&
-            this.renderCharacterLimitMessage(
-              colors.danger,
-              text.length - maxCharacters + ' characters over'
-            )}
-        </FlexRow>
-      </React.Fragment>
+  function renderMessage() {
+    const { maxCharacters } = props;
+    return cond(
+      [
+        text.length < maxCharacters,
+        () =>
+          renderCharacterLimitMessage(
+            colors.primary,
+            maxCharacters - text.length + ' characters remaining'
+          ),
+      ],
+      [
+        text.length === maxCharacters,
+        () =>
+          renderCharacterLimitMessage(colors.danger, '0 characters remaining'),
+      ],
+      [
+        text.length > maxCharacters,
+        () =>
+          renderCharacterLimitMessage(
+            colors.danger,
+            text.length - maxCharacters + ' characters over'
+          ),
+      ]
     );
   }
-}
+
+  const {
+    textBoxStyleOverrides,
+    heightOverride,
+    id,
+    tooShortWarning,
+    maxCharacters,
+  } = props;
+
+  return (
+    <React.Fragment>
+      <TextArea
+        style={{
+          ...styles.textBoxWithLengthValidationTextBoxStyle,
+          ...textBoxStyleOverrides,
+          ...heightOverride,
+        }}
+        id={id}
+        value={text}
+        onBlur={() => updateShowTooShortWarning()}
+        onChange={(v) => onTextUpdate(v)}
+      />
+      <FlexRow
+        style={{
+          ...styles.textBoxWithLengthValidationValidationStyle,
+          ...textBoxStyleOverrides,
+        }}
+      >
+        {showTooShortWarning && (
+          <label
+            data-test-id='warning'
+            style={{
+              color: colors.danger,
+              justifyContent: 'flex-start',
+              marginRight: '.375rem',
+            }}
+          >
+            {tooShortWarning}
+          </label>
+        )}
+        {!text &&
+          renderCharacterLimitMessage(
+            colors.primary,
+            maxCharacters + ' characters remaining'
+          )}
+        {text && renderMessage()}
+      </FlexRow>
+    </React.Fragment>
+  );
+};
 
 export const FormValidationErrorMessage = withStyle({
   color: colors.danger,

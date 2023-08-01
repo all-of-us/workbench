@@ -146,21 +146,6 @@ yarn
 yarn lint --fix
 ```
 
-### Tanagra Integration
-
-There are two commands for deploying the Tanagra app locally along with the Workbench
-
-To deploy the Tanagra api locally:
-```
-./project.rb dev-up-tanagra --disable-auth
-```
-The normal `./project.rb dev-up` will still need to be run to deploy the Workbench api
-
-To deploy the Tanagra UI and the Workbench UI together:
-```
-yarn dev-up-tanagra-local
-```
-
 ## Deploying
 
 To deploy your local workbench API code to a given AppEngine project, in the api
@@ -257,6 +242,28 @@ Finally, write a new changelog file in `api/db/changelog/` and include it in
 Workbench schema lives in `api/db` --> all workbench related activities access/persist data here
 
 CDR schema lives in `api/db-cdr` --> all cdr/cohort builder related activities access/persist data here
+
+## Tanagra Integration
+
+There are two commands for deploying the Tanagra app locally along with the Workbench
+
+To deploy the Tanagra api locally:
+```
+./project.rb dev-up-tanagra --disable-auth
+```
+The normal `./project.rb dev-up` will still need to be run to deploy the Workbench api
+
+To deploy the Tanagra UI and the Workbench UI together:
+```
+yarn dev-up-tanagra-local
+```
+
+### Tanagra Deploy to test
+
+To deploy Tanagra api to test:
+```
+./project.rb deploy-tanagra --project all-of-us-workbench-test --version my-version --promote --quiet
+```
 
 ## Building a new CDR Database
 [Documented here](https://docs.google.com/document/d/1St6pG_EUFB9oRQUQaOSO7a9UPxPkQ5n4qAVyKF9j9tk/edit#)
