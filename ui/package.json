@@ -10,7 +10,7 @@
     "dev-up": "yarn && yarn run deps && yarn start",
     "dev-up-test": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start",
     "dev-up-local": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start",
-    "dev-up-tanagra-local": "concurrently \"yarn run start-tanagra\" \"yarn run dev-up-local\"",
+    "dev-up-tanagra-local": "yarn && concurrently \"yarn run start-tanagra\" \"yarn run dev-up-local\"",
     "build": "react-app-rewired build",
     "test:debug": "react-app-rewired --inspect-brk test --watchAll=false --run-in-band",
     "test": "react-app-rewired test --watchAll=false",
