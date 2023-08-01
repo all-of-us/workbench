@@ -6,6 +6,7 @@ import WorkspaceAnalysisPage from './workspace-analysis-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { getFormattedPreviewCode, waitForPreviewCellsRendered } from 'utils/notebook-preview-utils';
+import { environmentTimeout } from 'utils/timeout-constants';
 
 const Selector = {
   editLink: '//div[contains(normalize-space(text()), "Edit")]',
@@ -40,7 +41,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     await initializeRuntimeIfModalPresented(this.page);
 
     // Restarting notebook server may take a while.
-    await waitWhileLoading(this.page, { timeout: 15 * 60 * 1000 });
+    await waitWhileLoading(this.page, { timeout: environmentTimeout });
 
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();
