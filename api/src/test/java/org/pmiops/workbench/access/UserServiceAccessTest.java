@@ -1029,6 +1029,20 @@ public class UserServiceAccessTest {
   }
 
   @Test
+  public void testRasLinkNotComplete_LoginGovDisabled() {
+    // IDENTITY and LOGIN.GOV modules are not required for registered tier access when
+    // enableRasLoginGovLinking is disabled.
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    dbUser = updateUserWithRetries(registerUserNow);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
+    dbUser = updateUserAccessTiers();
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
   public void test_updateUserWithRetries_addToControlledTier() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
