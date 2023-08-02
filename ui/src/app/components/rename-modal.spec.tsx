@@ -3,7 +3,7 @@ import { mount } from 'enzyme';
 
 import { ResourceType } from 'generated/fetch';
 
-import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
+import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 
@@ -45,7 +45,7 @@ describe('should show error if new name already exist', () => {
           oldName={oldNotebookName}
           existingNames={[oldNotebookName]}
           nameFormat={(name) =>
-            appendNotebookFileSuffixByOldName(name, oldNotebookName)
+            appendAnalysisFileSuffixByOldName(name, oldNotebookName)
           }
         />
       );

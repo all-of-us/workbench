@@ -25,7 +25,7 @@ export function appendJupyterNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export function appendRstudioNotebookFileSuffix(filename: string) {
+export function appendRStudioNotebookFileSuffix(filename: string) {
   if (filename && !filename.endsWith(RMD_FILE_EXT)) {
     return filename + RMD_FILE_EXT;
   }
@@ -41,7 +41,7 @@ export function appendRScriptSuffix(filename: string) {
   return filename;
 }
 
-export function appendNotebookFileSuffixByOldName(
+export function appendAnalysisFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
@@ -52,7 +52,7 @@ export function appendNotebookFileSuffixByOldName(
     ],
     [
       oldFileName.endsWith(RMD_FILE_EXT),
-      () => appendRstudioNotebookFileSuffix(filename),
+      () => appendRStudioNotebookFileSuffix(filename),
     ],
     [oldFileName.endsWith(R_SCRIPT_EXT), () => appendRScriptSuffix(filename)],
     () => filename

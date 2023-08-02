@@ -13,7 +13,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
-import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
+import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import { reactStyles, summarizeErrors } from 'app/utils';
 import { nameValidationFormat, toDisplay } from 'app/utils/resources';
@@ -75,7 +75,7 @@ export class RenameModal extends React.Component<Props, States> {
         newName:
           // Append .ipynb or .Rmd file based on the oldName format
           resourceType === ResourceType.NOTEBOOK
-            ? appendNotebookFileSuffixByOldName(newName?.trim(), oldName)
+            ? appendAnalysisFileSuffixByOldName(newName?.trim(), oldName)
             : newName?.trim(),
       },
       {
