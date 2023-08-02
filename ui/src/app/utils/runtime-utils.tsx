@@ -7,6 +7,7 @@ import {
   DiskType,
   ErrorCode,
   GpuConfig,
+  ListRuntimeResponse,
   PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
@@ -1279,3 +1280,6 @@ export const isVisible = (status: RuntimeStatus) =>
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
   [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);
+
+export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
+  runtime?.labels?.creator;
