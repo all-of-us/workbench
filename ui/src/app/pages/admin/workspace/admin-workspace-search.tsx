@@ -25,7 +25,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
         marginTop: '1.5rem',
       }}
     >
-      <label style={{ color: colors.primary, marginRight: '1.5rem' }}>
+      <label style={{ color: colors.primary, margin: '1.5rem' }}>
         Workspace namespace
       </label>
       <TextInput
