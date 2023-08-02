@@ -9,7 +9,7 @@ public class NotebookUtils {
   public static String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
   public static String JUPYTER_NOTEBOOK_EXTENSION = ".ipynb";
   public static String R_MARKDOWN_NOTEBOOK_EXTENSION = ".Rmd";
-  public static String R_NOTEBOOK_EXTENSION = ".R";
+  public static String R_SCRIPT_EXTENSION = ".R";
 
   // Pattern matches directory and the file type, e.g. notebooks/file.ipynb
   public static final Pattern JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN =
@@ -18,24 +18,24 @@ public class NotebookUtils {
   public static final Pattern R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(Rmd))$");
 
-  public static final Pattern R_NOTEBOOK_WITH_DIRECTORY_PATTERN =
+  public static final Pattern R_SCRIPT_WITH_DIRECTORY_PATTERN =
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(R))$");
 
   public static boolean isJupyterNotebookWithDirectory(String nameWithFileExtension) {
     return JUPYTER_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
   }
 
-  public static boolean isRNotebookWithDirectory(String nameWithFileExtension) {
-    return R_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
-  }
-
   public static boolean isRMarkDownNotebookWithDirectory(String nameWithFileExtension) {
     return R_MARKDOWN_NOTEBOOK_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
   }
 
+  public static boolean isRScriptWithDirectory(String nameWithFileExtension) {
+    return R_SCRIPT_WITH_DIRECTORY_PATTERN.matcher(nameWithFileExtension).matches();
+  }
+
   public static boolean isRStudioFileWithDirectory(String nameWithFileExtension) {
     return isRMarkDownNotebookWithDirectory(nameWithFileExtension)
-        || isRNotebookWithDirectory(nameWithFileExtension);
+        || isRScriptWithDirectory(nameWithFileExtension);
   }
 
   public static boolean isJupyterNotebook(String nameWithFileExtension) {
@@ -46,12 +46,12 @@ public class NotebookUtils {
     return nameWithFileExtension.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION);
   }
 
-  public static boolean isRStudioFile(String nameWithFileExtension) {
-    return isRmdNotebook(nameWithFileExtension) || isRNotebook(nameWithFileExtension);
+  public static boolean isRScriptFile(String nameWithFileExtension) {
+    return nameWithFileExtension.endsWith(R_SCRIPT_EXTENSION);
   }
 
-  public static boolean isRNotebook(String nameWithFileExtension) {
-    return nameWithFileExtension.endsWith(R_NOTEBOOK_EXTENSION);
+  public static boolean isRStudioFile(String nameWithFileExtension) {
+    return isRmdNotebook(nameWithFileExtension) || isRScriptFile(nameWithFileExtension);
   }
 
   public static String withJupyterNotebookExtension(String notebookName) {
