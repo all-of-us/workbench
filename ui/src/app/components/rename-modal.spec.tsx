@@ -35,24 +35,24 @@ describe('should show error if new name already exist', () => {
     ['123.Rmd', '123'],
     ['123.Rmd', '123.Rmd'],
   ])(
-    'Old notebook name %s, new notebook name %s',
-    async (oldNotebookName, newNotebookName) => {
+    'Old analysis file name %s, new analysis file name %s',
+    async (oldFilename, newFilename) => {
       const wrapper = mount(
         <RenameModal
           onRename={() => {}}
           resourceType={ResourceType.NOTEBOOK}
           onCancel={() => {}}
-          oldName={oldNotebookName}
-          existingNames={[oldNotebookName]}
+          oldName={oldFilename}
+          existingNames={[oldFilename]}
           nameFormat={(name) =>
-            appendAnalysisFileSuffixByOldName(name, oldNotebookName)
+            appendAnalysisFileSuffixByOldName(name, oldFilename)
           }
         />
       );
       wrapper
         .find('[data-test-id="rename-new-name-input"]')
         .first()
-        .simulate('change', { target: { value: newNotebookName } });
+        .simulate('change', { target: { value: newFilename } });
       await waitOneTickAndUpdate(wrapper);
       expect(
         wrapper.find('[data-test-id="rename-new-name-invalid"]').first().text()
