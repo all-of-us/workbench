@@ -37,6 +37,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.AccountDisabledStatus;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
@@ -140,6 +142,8 @@ public class ProfileService {
         institutionService.getUserTierEligibilities(user);
     final ProfileAccessModules accessModules =
         new ProfileAccessModules().modules(accessModuleService.getAccessModuleStatus(userLite));
+
+    accessModules.addModulesItem(new AccessModuleStatus().moduleName(AccessModule.TEST_MODULE));
 
     final boolean newUserSatisfactionSurveyEligibility =
         newUserSatisfactionSurveyService.eligibleToTakeSurvey(user);
