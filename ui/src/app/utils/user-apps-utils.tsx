@@ -120,7 +120,7 @@ export const openRStudio = (
     [],
     false
   );
-  window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
+  window.open(userApp.proxyUrls['app'], '_blank').focus();
 };
 
 export const openRStudioOrConfigPanel = (

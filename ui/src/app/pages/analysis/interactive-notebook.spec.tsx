@@ -79,7 +79,7 @@ test('Edit Rmd file with running RStudio', async () => {
   await waitFor(() => {
     expect(spyWindowOpen).toHaveBeenCalledTimes(1);
     expect(spyWindowOpen).toHaveBeenCalledWith(
-      rStudioApp.proxyUrls['rstudio-service'],
+      rStudioApp.proxyUrls['app'],
       '_blank'
     );
   });

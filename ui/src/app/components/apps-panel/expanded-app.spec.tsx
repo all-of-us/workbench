@@ -355,7 +355,7 @@ describe('ExpandedApp', () => {
       appType: AppType.RSTUDIO,
       status: AppStatus.RUNNING,
       proxyUrls: {
-        'rstudio-service': proxyUrl,
+        'app': proxyUrl,
       },
     });
     const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
