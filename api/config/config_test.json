@@ -120,7 +120,7 @@
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
     "enableDataExplorer": false,
-    "enableTanagra": false
+    "enableTanagra": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

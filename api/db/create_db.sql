@@ -24,3 +24,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `sc_%`.* TO '${
 
 -- Liquibase needs to perform schema changes on the main database.
 GRANT SELECT, INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, INDEX, REFERENCES, CREATE TEMPORARY TABLES, CREATE VIEW ON ${DB_NAME}.* TO '${LIQUIBASE_DB_USER}'@'%';
+
+-- workbench user needs privileges to perform schema changes on tanagra_db
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, INDEX, REFERENCES, CREATE TEMPORARY TABLES, CREATE VIEW ON `tanagra_db`.* TO '${WORKBENCH_DB_USER}'@'%';
