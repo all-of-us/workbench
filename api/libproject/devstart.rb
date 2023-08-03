@@ -2506,13 +2506,11 @@ def deploy_tanagra(cmd_name, args)
     common.status "Building env variables file..."
     common.run_inline("touch ./appengine/tanagra_env_variables.yaml > ./appengine/tanagra_env_variables.yaml")
     common.run_inline("echo \"env_variables:\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_URI: jdbc:mysql:///tanagra_db\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_USERNAME: #{tanagra_db_username}\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_PASSWORD: #{tanagra_db_password}\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_CLOUD_SQL_INSTANCE: #{tanagra_db_cloudSqlInstance}\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_SOCKET_FACTORY: com.google.cloud.sql.mysql.SocketFactory\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_DB_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver\" >> ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"  TANAGRA_UNDERLAY_FILES: broad/aou_synthetic/expanded/aou_synthetic.json\" >> ./appengine/tanagra_env_variables.yaml")
+    ENV.each_pair do |k,v|
+      if (k.start_with?("TANAGRA_"))
+        common.run_inline("echo \"  #{k}: #{v}\" >> ./appengine/tanagra_env_variables.yaml")
+      end
+    end
   end
 
   Dir.chdir('../tanagra-aou-utils/appengine') do
