@@ -114,12 +114,11 @@ def deploy_tanagra_ui(cmd_name, args)
 
   Dir.chdir('../tanagra/ui') do
     common.status "Building Tanagra UI..."
-    common.run_inline("npm version 0.0.2")
-#     common.run_inline("npm ci")
+    common.run_inline("npm ci")
     common.status "npm run codegen"
-#     common.run_inline("npm run codegen")
+    common.run_inline("npm run codegen")
     common.status "npm run build --if-present"
-#     common.run_inline("npm run build --if-present")
+    common.run_inline("npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
     common.run_inline("mkdir -p ../../tanagra-aou-utils/appengine && cp -av ./build ../../tanagra-aou-utils/appengine/")
