@@ -10,8 +10,8 @@ export const AdminEgressEvents = (props: WithSpinnerOverlayProps) => {
   }, []);
 
   return (
-    <>
+    <div style={{ margin: '1.5rem' }}>
       <EgressEventsTable />
-    </>
+    </div>
   );
 };

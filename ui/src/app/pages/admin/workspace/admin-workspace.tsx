@@ -281,7 +281,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       loadingWorkspaceAdminLockedStatus,
     } = this.state;
     return (
-      <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ margin: '1.5rem' }}>
         {showLockWorkspaceModal && (
           <AdminLockRequest
             workspace={workspace.namespace}
