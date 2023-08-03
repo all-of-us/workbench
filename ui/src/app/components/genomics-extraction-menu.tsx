@@ -36,6 +36,8 @@ interface Props {
   onMutate: () => void;
 }
 
+// this is an arbitrary change in the /ui repo to trigger E2E CI checks
+
 export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
