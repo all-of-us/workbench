@@ -13,7 +13,7 @@ import { ModulesForInitialRegistration } from './modules-for-initial-registratio
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
 export const DuccCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
+  focusedModule: AccessModule;
   clickableModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
@@ -21,7 +21,7 @@ export const DuccCard = (props: {
 }) => {
   const {
     profile,
-    activeModule,
+    focusedModule,
     clickableModules,
     spinnerProps,
     pageMode,
@@ -35,7 +35,7 @@ export const DuccCard = (props: {
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
-          {...{ profile, activeModule, clickableModules, spinnerProps }}
+          {...{ profile, focusedModule, clickableModules, spinnerProps }}
           modules={[duccModule]}
         />
       ) : (

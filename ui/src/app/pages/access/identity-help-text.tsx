@@ -48,7 +48,7 @@ export const IdentityHelpText = (props: {
 
   // don't return help text if complete or bypassed
   const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV)
+    getAccessModuleStatusByName(profile, AccessModule.IDENTITY)
   );
 
   return (

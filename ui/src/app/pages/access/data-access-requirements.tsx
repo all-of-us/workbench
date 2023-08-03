@@ -445,17 +445,17 @@ const incompleteModules = (
   );
 
 // exported for test
-export const getActiveModule = (
+export const getFocusedModule = (
   modules: AccessModule[],
   profile: Profile,
   pageMode: DARPageMode
 ): AccessModule => incompleteModules(modules, profile, pageMode)[0];
 
-const getNextActive = (
+const getNextFocused = (
   modules: AccessModule[],
   profile: Profile,
   pageMode: DARPageMode
-) => getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
+) => getFocusedModule(getEligibleModules(modules, profile), profile, pageMode);
 
 // the header(s) outside the Fadebox
 
@@ -610,10 +610,10 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     // Local State
     // At any given time, at most two modules will be clickable during initial registration:
-    //  1. The active module, which we visually direct the user to with a CTA
-    //  2. The next required module, which may diverge when the active module is optional.
+    //  1. The focused module, which we visually direct the user to with a CTA
+    //  2. The next required module, which may diverge when the focused module is optional.
     // This configuration allows the user to skip the optional CT section.
-    const [activeModule, setActiveModule] = useState(null);
+    const [focusedModule, setFocusedModule] = useState(null);
     const [clickableModules, setClickableModules] = useState([]);
 
     // Local Variables
@@ -633,8 +633,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         ? DARPageMode[pageModeParam]
         : DARPageMode.INITIAL_REGISTRATION;
 
-    const nextActive = getNextActive(allInitialModules, profile, pageMode);
-    const nextRequired = getNextActive(
+    const nextFocused = getNextFocused(allInitialModules, profile, pageMode);
+    const nextRequired = getNextFocused(
       pageMode === DARPageMode.INITIAL_REGISTRATION
         ? initialRequiredModules
         : renewalRequiredModules,
@@ -652,7 +652,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const rtCard = (
       <RegisteredTierCard
-        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
+        {...{
+          profile,
+          focusedModule,
+          clickableModules,
+          spinnerProps,
+          pageMode,
+        }}
         key='rt'
       />
     );
@@ -660,7 +666,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <ControlledTierCard
         {...{
           profile,
-          activeModule,
+          focusedModule,
           clickableModules,
           reload,
           spinnerProps,
@@ -671,7 +677,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     );
     const dCard = (
       <DuccCard
-        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
+        {...{
+          profile,
+          focusedModule,
+          clickableModules,
+          spinnerProps,
+          pageMode,
+        }}
         key='dt'
         stepNumber={3}
       />
@@ -719,14 +731,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
-      setActiveModule(nextActive);
+      setFocusedModule(nextFocused);
       setClickableModules(
         fp.flow(
           fp.filter((m) => !!m),
           fp.uniq
-        )([nextActive, nextRequired])
+        )([nextFocused, nextRequired])
       );
-    }, [nextActive, nextRequired]);
+    }, [nextFocused, nextRequired]);
 
     const daysRemaining = maybeDaysRemaining(profile);
     const hasExpired = daysRemaining && daysRemaining <= 0;

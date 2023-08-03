@@ -93,13 +93,13 @@ const ControlledTierStep = (props: {
 
 export const ControlledTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
+  focusedModule: AccessModule;
   clickableModules: AccessModule[];
   reload: Function;
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+  const { profile, focusedModule, clickableModules, spinnerProps, pageMode } =
     props;
   const controlledTierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
@@ -190,7 +190,7 @@ export const ControlledTierCard = (props: {
         {enableComplianceTraining &&
           pageMode === DARPageMode.INITIAL_REGISTRATION && (
             <ModulesForInitialRegistration
-              {...{ profile, activeModule, clickableModules, spinnerProps }}
+              {...{ profile, focusedModule, clickableModules, spinnerProps }}
               modules={[ctModule]}
             />
           )}
