@@ -6,7 +6,6 @@ import { CriteriaType, Domain, Variant } from 'generated/fetch';
 
 import { AlertDanger } from 'app/components/alert';
 import { Clickable } from 'app/components/buttons';
-import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { TextInput } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
@@ -14,7 +13,6 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { datatableStyles } from 'app/styles/datatable';
 import {
   reactStyles,
   validateInputForMySQL,
@@ -22,7 +20,7 @@ import {
 } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 
-const { useEffect, useRef, useState } = React;
+const { useState } = React;
 
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
@@ -71,110 +69,63 @@ const styles = reactStyles({
     borderBottom: 0,
     tableLayout: 'fixed',
   },
-  columnNameHeader: {
-    padding: '0 0 0 0.375rem',
-    background: colorWithWhiteness(colors.dark, 0.93),
+  columnHeader: {
+    background: '#f4f4f4',
+    borderBottom: 0,
     color: colors.primary,
-    border: 0,
-    borderBottom: borderStyle,
     fontWeight: 600,
+  },
+  columnBody: {
+    background: '#ffffff',
+    padding: '0.75rem 0.75rem 0.45rem 0.25rem',
+    verticalAlign: 'top',
     textAlign: 'left',
-    verticalAlign: 'middle',
-    lineHeight: '1.125rem',
-  },
-  columnBodyName: {
-    background: colors.white,
-    verticalAlign: 'middle',
-    padding: 0,
-    border: 0,
-    borderBottom: borderStyle,
-    color: colors.primary,
-    lineHeight: '1.2rem',
-    whiteSpace: 'nowrap',
-  },
-  selectIcon: {
-    margin: '2px 0.75rem 2px 2px',
-    color: colorWithWhiteness(colors.success, -0.5),
-    cursor: 'pointer',
-  },
-  selectedIcon: {
-    marginRight: '0.6rem',
-    color: colorWithWhiteness(colors.success, -0.5),
-    opacity: 0.4,
-    cursor: 'not-allowed',
-  },
-  disabledIcon: {
-    marginRight: '0.6rem',
-    color: colorWithWhiteness(colors.dark, 0.5),
-    opacity: 0.4,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  },
-  selectDiv: {
-    minWidth: '6%',
-    float: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    borderBottom: 'none',
     lineHeight: '0.9rem',
-  },
-  nameDiv: {
-    width: '80%',
-    float: 'left',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  selectIcon: {
+    margin: '2px 0.25rem 2px 2px',
+    color: colorWithWhiteness(colors.success, -0.5),
+    cursor: 'pointer',
+  },
+  selectedIcon: {
+    marginRight: '0.125rem',
+    color: colorWithWhiteness(colors.success, -0.5),
+    opacity: 0.4,
+    cursor: 'not-allowed',
+  },
 });
 
-const columns = [
-  {
-    name: 'Variant Id',
-    style: { ...styles.columnNameHeader, borderLeft: 0, width: '20%' },
-  },
-  {
-    name: 'Gene',
-    style: {
-      ...styles.columnNameHeader,
-      width: '10%',
-      paddingLeft: '0',
-      paddingRight: '0.75rem',
-    },
-  },
-  {
-    name: 'Consequence',
-    style: {
-      ...styles.columnNameHeader,
-      width: '15%',
-      paddingLeft: '0',
-      paddingRight: '0.75rem',
-    },
-  },
-  {
-    name: 'Protein Change',
-    style: { ...styles.columnNameHeader, paddingLeft: '0' },
-  },
-  {
-    name: 'ClinVar Significance',
-    style: styles.columnNameHeader,
-  },
-  {
-    name: 'Allele Count',
-    style: styles.columnNameHeader,
-  },
-  {
-    name: 'Allele Number',
-    style: styles.columnNameHeader,
-  },
-  {
-    name: 'Allele Frequency',
-    style: styles.columnNameHeader,
-  },
-];
-
+const pageSize = 25;
 const searchTrigger = 2;
+const searchTooltip = (
+  <div style={{ marginLeft: '0.5rem' }}>
+    Examples by query type:
+    <ul>
+      <li>
+        <b>Gene:</b> BRCA2
+      </li>
+      <li>
+        <b>Variant:</b> 13-32355250-T-C
+      </li>
+      <li>
+        <b>RS Number:</b> rs169547
+      </li>
+      <li>
+        <b>Genomic Region:</b> chr13:32355000-32375000
+      </li>
+    </ul>
+  </div>
+);
 
 export const VariantSearch = withCurrentWorkspace()(
   ({ select, selectedIds, workspace }) => {
     const [first, setFirst] = useState(0);
-    const [hoverId, setHoverId] = useState(null);
     const [inputErrors, setInputErrors] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -229,16 +180,18 @@ export const VariantSearch = withCurrentWorkspace()(
       }
     };
 
-    const handlePage = (rows: number, firstPage: number) => {
+    const handlePage = (firstPage: number, rows: number) => {
       if (searchResults.length >= rows + firstPage - 1) {
+        setFirst(firstPage);
         return;
       }
       if (searchResults && !pageToken) {
         // We've loaded at least one page, and there's no more data to load.
+        setFirst(firstPage);
         return;
       }
       setLoadingMore(true);
-      searchVariants(searchTerms);
+      searchVariants(searchTerms, firstPage);
     };
 
     const clearSearch = () => {
@@ -252,12 +205,6 @@ export const VariantSearch = withCurrentWorkspace()(
     const isSelected = (row: any) => {
       const paramId = getParamId(row);
       return selectedIds.includes(paramId);
-    };
-
-    const onNameHover = (el: HTMLDivElement, id: string) => {
-      if (el.offsetWidth < el.scrollWidth) {
-        setHoverId(id);
-      }
     };
 
     const selectItem = (row: any) => {
@@ -279,24 +226,9 @@ export const VariantSearch = withCurrentWorkspace()(
       select(param);
     };
 
-    const renderColumnWithToolTip = (columnLabel, toolTip) => {
-      return (
-        <FlexRow>
-          <label>{columnLabel}</label>
-          <TooltipTrigger side='top' content={<div>{toolTip}</div>}>
-            <ClrIcon
-              style={styles.infoIcon}
-              className='is-solid'
-              shape='info-standard'
-            />
-          </TooltipTrigger>
-        </FlexRow>
-      );
-    };
-
+    const displayResults = searchResults?.slice(first, first + pageSize);
     return (
       <>
-        <style>{datatableStyles}</style>
         <div style={{ display: 'flex' }}>
           <div style={styles.searchContainer}>
             <div style={styles.searchBar}>
@@ -325,7 +257,7 @@ export const VariantSearch = withCurrentWorkspace()(
             ))}
           </div>
           <div style={{ float: 'right', width: '20%' }}>
-            <TooltipTrigger side='top' content={<></>}>
+            <TooltipTrigger side='top' content={searchTooltip}>
               <ClrIcon
                 style={styles.infoIcon}
                 className='is-solid'
@@ -333,9 +265,6 @@ export const VariantSearch = withCurrentWorkspace()(
               />
             </TooltipTrigger>
           </div>
-        </div>
-        <div style={{ display: 'table', height: '100%', width: '100%' }}>
-          BRCA2
         </div>
         {loading ? (
           <SpinnerOverlay />
@@ -348,175 +277,103 @@ export const VariantSearch = withCurrentWorkspace()(
               onPage={(e) => handlePage(e.first, e.rows)}
               paginator
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
-              rows={25}
+              rows={pageSize}
               scrollable
               scrollHeight='calc(100vh - 350px)'
+              style={{ fontSize: '12px' }}
               totalRecords={totalCount}
-              value={searchResults}
+              value={displayResults}
             >
               <Column
                 field='vid'
                 header='Variant Id'
-                headerStyle={{ width: '20%' }}
-                body={({ vid }) => <div>{vid}</div>}
-                sortable
+                headerStyle={{ ...styles.columnHeader, width: '20%' }}
+                body={(variant) => (
+                  <div title={variant.vid}>
+                    {isSelected(variant) ? (
+                      <ClrIcon
+                        style={styles.selectedIcon}
+                        shape='check-circle'
+                        size='20'
+                      />
+                    ) : (
+                      <ClrIcon
+                        style={styles.selectIcon}
+                        shape='plus-circle'
+                        size='16'
+                        onClick={() => selectItem(variant)}
+                      />
+                    )}
+                    {variant.vid}
+                  </div>
+                )}
+                bodyStyle={{ ...styles.columnBody, borderLeft: borderStyle }}
               />
               <Column
                 field='gene'
                 header='Gene'
-                body={({ gene }) => <div>{gene}</div>}
+                headerStyle={styles.columnHeader}
+                body={({ gene }) => <div title={gene}>{gene}</div>}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='consequence'
                 header='Consequence'
-                headerStyle={{ width: '15%' }}
-                body={({ consequence }) => <div>{consequence}</div>}
+                headerStyle={{ ...styles.columnHeader, width: '15%' }}
+                body={({ consequence }) => (
+                  <div title={consequence}>{consequence}</div>
+                )}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='proteinChange'
                 header='Protein Change'
-                body={({ proteinChange }) => <div>{proteinChange || '-'}</div>}
+                headerStyle={styles.columnHeader}
+                body={({ proteinChange }) => (
+                  <div title={proteinChange}>{proteinChange || '-'}</div>
+                )}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='clinVarSignificance'
                 header='ClinVar Significance'
+                headerStyle={styles.columnHeader}
                 body={({ clinVarSignificance }) => (
-                  <div>{clinVarSignificance || '-'}</div>
+                  <div title={clinVarSignificance}>
+                    {clinVarSignificance || '-'}
+                  </div>
                 )}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='alleleCount'
                 header='Allele Count'
-                body={({ alleleCount }) => <div>{alleleCount}</div>}
+                headerStyle={styles.columnHeader}
+                body={({ alleleCount }) => (
+                  <div title={alleleCount}>{alleleCount}</div>
+                )}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='alleleNumber'
                 header='Allele Number'
-                body={({ alleleNumber }) => <div>{alleleNumber}</div>}
+                headerStyle={styles.columnHeader}
+                body={({ alleleNumber }) => (
+                  <div title={alleleNumber}>{alleleNumber}</div>
+                )}
+                bodyStyle={styles.columnBody}
               />
               <Column
                 field='alleleFrequency'
                 header='Allele Frequency'
-                body={({ alleleFrequency }) => <div>{alleleFrequency}</div>}
+                headerStyle={styles.columnHeader}
+                body={({ alleleFrequency }) => (
+                  <div title={alleleFrequency}>{alleleFrequency}</div>
+                )}
+                bodyStyle={{ ...styles.columnBody, borderRight: borderStyle }}
               />
             </DataTable>
           )
-          // <>
-          //   {searching && searchResults.length === 0 && (
-          //     <div>No results found</div>
-          //   )}
-          //   {searchResults.length > 0 && (
-          //     <div
-          //       ref={(el) => {
-          //         scrollTable.current = el;
-          //         setResultsLoaded(true);
-          //       }}
-          //       id='scrollArea'
-          //       style={{ height: '25rem', overflow: 'auto' }}
-          //     >
-          //       <table
-          //         ref={(el) => {
-          //           scrollBody.current = el;
-          //         }}
-          //         className='p-datatable' style={styles.table}>
-          //         <thead className='p-datatable-thead'>
-          //           <tr style={{ height: '3rem', position: 'sticky', top: 0 }}>
-          //             {columns.map((column, index) => (
-          //               <th key={index} style={column.style as CSSProperties}>
-          //                 {column.name}
-          //               </th>
-          //             ))}
-          //           </tr>
-          //         </thead>
-          //         <tbody
-          //           id='listItem' className='p-datatable-tbody'>
-          //           {searchResults.map((row, index) => (
-          //             <React.Fragment key={index}>
-          //               <tr style={{ height: '2.625rem' }}>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     width: '20%',
-          //                     paddingRight: '0.75rem',
-          //                   }}
-          //                 >
-          //                   {isSelected(row) ? (
-          //                     <ClrIcon
-          //                       style={styles.selectedIcon}
-          //                       shape='check-circle'
-          //                       size='20'
-          //                     />
-          //                   ) : (
-          //                     <ClrIcon
-          //                       style={styles.selectIcon}
-          //                       shape='plus-circle'
-          //                       size='16'
-          //                       onClick={() => selectItem(row)}
-          //                     />
-          //                   )}
-          //                   {row.vid}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     width: '10%',
-          //                     paddingRight: '0.75rem',
-          //                   }}
-          //                 >
-          //                   {row.gene}
-          //                 </td>
-          //                 <td style={styles.columnBodyName}>
-          //                   {row.consequence}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     paddingLeft: '0.3rem',
-          //                     paddingRight: '0.75rem',
-          //                   }}
-          //                 >
-          //                   {row.proteinChange || '-'}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     paddingLeft: '0.3rem',
-          //                   }}
-          //                 >
-          //                   {row.clinVarSignificance || '-'}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     paddingLeft: '0.3rem',
-          //                   }}
-          //                 >
-          //                   {row.alleleCount}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     paddingLeft: '0.3rem',
-          //                   }}
-          //                 >
-          //                   {row.alleleNumber}
-          //                 </td>
-          //                 <td
-          //                   style={{
-          //                     ...styles.columnBodyName,
-          //                     paddingLeft: '0.3rem',
-          //                   }}
-          //                 >
-          //                   {row.alleleFrequency}
-          //                 </td>
-          //               </tr>
-          //             </React.Fragment>
-          //           ))}
-          //         </tbody>
-          //       </table>
-          //     </div>
-          //   )}
-          // </>
         )}
       </>
     );
