@@ -12,7 +12,7 @@ interface InitialCardProps {
   profile: Profile;
   modules: AccessModule[];
   focusedModule: AccessModule;
-  clickableModules: AccessModule[];
+  activeModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
   children?: string | React.ReactNode;
 }
@@ -22,7 +22,7 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
     profile,
     modules,
     focusedModule,
-    clickableModules,
+    activeModules,
     spinnerProps,
     children,
   } = props;
@@ -34,7 +34,7 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
           {...{ moduleName, profile, spinnerProps }}
           key={moduleName}
           active={focusedModule === moduleName}
-          clickable={clickableModules.includes(moduleName)}
+          clickable={activeModules.includes(moduleName)}
           style={{
             marginTop:
               index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING

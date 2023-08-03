@@ -609,12 +609,12 @@ export const DataDetail = (props: { icon: string; text: string }) => {
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     // Local State
-    // At any given time, at most two modules will be clickable during initial registration:
+    // At any given time, at most two modules will be active during initial registration:
     //  1. The focused module, which we visually direct the user to with a CTA
     //  2. The next required module, which may diverge when the focused module is optional.
     // This configuration allows the user to skip the optional CT section.
     const [focusedModule, setFocusedModule] = useState(null);
-    const [clickableModules, setClickableModules] = useState([]);
+    const [activeModules, setActiveModules] = useState([]);
 
     // Local Variables
     const { profile, reload } = useStore(profileStore);
@@ -655,7 +655,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         {...{
           profile,
           focusedModule,
-          clickableModules,
+          activeModules,
           spinnerProps,
           pageMode,
         }}
@@ -667,7 +667,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         {...{
           profile,
           focusedModule,
-          clickableModules,
+          activeModules,
           reload,
           spinnerProps,
           pageMode,
@@ -680,7 +680,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         {...{
           profile,
           focusedModule,
-          clickableModules,
+          activeModules,
           spinnerProps,
           pageMode,
         }}
@@ -732,7 +732,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
       setFocusedModule(nextFocused);
-      setClickableModules(
+      setActiveModules(
         fp.flow(
           fp.filter((m) => !!m),
           fp.uniq
@@ -748,7 +748,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         <OuterHeader {...{ pageMode }} />
         {ctNeedsRenewal && <ControlledTierRenewalBanner />}
         {showCompletionBanner && <CompletionBanner />}
-        {unsafeAllowSelfBypass && clickableModules.length > 0 && (
+        {unsafeAllowSelfBypass && activeModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>

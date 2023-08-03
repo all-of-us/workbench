@@ -72,11 +72,11 @@ const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
 export const RegisteredTierCard = (props: {
   profile: Profile;
   focusedModule: AccessModule;
-  clickableModules: AccessModule[];
+  activeModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
-  const { profile, focusedModule, clickableModules, spinnerProps, pageMode } =
+  const { profile, focusedModule, activeModules, spinnerProps, pageMode } =
     props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
@@ -104,7 +104,7 @@ export const RegisteredTierCard = (props: {
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
-          {...{ profile, focusedModule, clickableModules, spinnerProps }}
+          {...{ profile, focusedModule, activeModules, spinnerProps }}
           modules={getEligibleModules(initialRtModules, profile)}
         >
           {!enableRasLoginGovLinking && <TemporaryRASModule {...{ profile }} />}
