@@ -355,7 +355,7 @@ describe('HelpSidebar', () => {
     ).toBe(0);
   });
 
-  it('should display apps icon for writable workspaces when Cromwell is enabled', async () => {
+  it('should display apps icon for writable workspaces', async () => {
     currentWorkspaceStore.next({
       ...currentWorkspaceStore.value,
       accessLevel: WorkspaceAccessLevel.WRITER,
@@ -363,50 +363,14 @@ describe('HelpSidebar', () => {
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
-        enableCromwellGKEApp: true,
         enableRStudioGKEApp: false,
       },
     });
+
     const wrapper = await component();
     expect(
       wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
     ).toBe(1);
-  });
-
-  it('should display apps icon for writable workspaces when RStudio is enabled', async () => {
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.value,
-      accessLevel: WorkspaceAccessLevel.WRITER,
-    });
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableCromwellGKEApp: false,
-        enableRStudioGKEApp: true,
-      },
-    });
-    const wrapper = await component();
-    expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-    ).toBe(1);
-  });
-
-  it('should not display apps icon for writable workspaces when no apps are enabled', async () => {
-    currentWorkspaceStore.next({
-      ...currentWorkspaceStore.value,
-      accessLevel: WorkspaceAccessLevel.WRITER,
-    });
-    serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableCromwellGKEApp: false,
-        enableRStudioGKEApp: false,
-      },
-    });
-    const wrapper = await component();
-    expect(
-      wrapper.find({ 'data-test-id': 'help-sidebar-icon-apps' }).length
-    ).toBe(0);
   });
 
   it('should display dynamic runtime status icon', async () => {
@@ -652,22 +616,9 @@ describe('HelpSidebar', () => {
     expect(wrapper.text()).toContain('Cromwell Cloud Environment');
   });
 
-  it('should not show the Cromwell icon if Cromwell is disabled', async () => {
-    serverConfigStore.set({
-      config: { ...defaultServerConfig, enableCromwellGKEApp: false },
-    });
-    const wrapper = await component();
-
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'help-sidebar-icon-cromwellConfig' })
-        .exists()
-    ).toBeFalsy();
-  });
-
   it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+      config: defaultServerConfig,
     });
     const wrapper = await component();
 
