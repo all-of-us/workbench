@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { showAppsPanel } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { TextInput } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
@@ -12,7 +11,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import { appsApi } from 'app/services/swagger-fetch-clients';
-import { serverConfigStore, useStore } from 'app/utils/stores';
 
 export interface ConfirmWorkspaceDeleteModalProps {
   closeFunction: Function;
@@ -26,28 +24,22 @@ export const ConfirmWorkspaceDeleteModal = ({
   workspaceName,
   workspaceNamespace,
 }: ConfirmWorkspaceDeleteModalProps) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
-  const { config } = useStore(serverConfigStore);
-  const [checkingForUserApps, setCheckingForUserApps] = useState<boolean>(
-    showAppsPanel(config)
-  );
-  const [appsExistForWorkspace, setAppsExistForWorkspace] =
-    useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [deleteDisabled, setDeleteDisabled] = useState(true);
+  const [checkingForUserApps, setCheckingForUserApps] = useState(true);
+  const [appsExist, setAppsExist] = useState(false);
 
   useEffect(() => {
-    if (showAppsPanel(config)) {
-      setCheckingForUserApps(true);
-      appsApi()
-        .listAppsInWorkspace(workspaceNamespace)
-        .then((userApps) => {
-          setAppsExistForWorkspace(userApps?.length > 0);
-          setCheckingForUserApps(false);
-        })
-        .finally(() => {
-          setCheckingForUserApps(false);
-        });
-    }
+    setCheckingForUserApps(true);
+    appsApi()
+      .listAppsInWorkspace(workspaceNamespace)
+      .then((userApps) => {
+        setAppsExist(userApps?.length > 0);
+        setCheckingForUserApps(false);
+      })
+      .finally(() => {
+        setCheckingForUserApps(false);
+      });
   }, []);
 
   const emitDelete = () => {
@@ -59,7 +51,7 @@ export const ConfirmWorkspaceDeleteModal = ({
     setDeleteDisabled(!event.toLowerCase().match('delete'));
   };
 
-  const displayUserInput = !checkingForUserApps && !appsExistForWorkspace;
+  const displayUserInput = !checkingForUserApps && !appsExist;
 
   return (
     <Modal loading={loading}>
@@ -93,7 +85,7 @@ export const ConfirmWorkspaceDeleteModal = ({
               Checking for any existing User Apps....
             </div>
           )}
-          {appsExistForWorkspace && (
+          {appsExist && (
             <WarningMessage>
               You cannot delete the workspace as there are Apps you must delete
               first
@@ -112,10 +104,7 @@ export const ConfirmWorkspaceDeleteModal = ({
         <Button
           aria-label='Confirm Delete'
           disabled={
-            loading ||
-            deleteDisabled ||
-            checkingForUserApps ||
-            appsExistForWorkspace
+            loading || deleteDisabled || checkingForUserApps || appsExist
           }
           style={{ marginLeft: '0.75rem' }}
           data-test-id='confirm-delete'

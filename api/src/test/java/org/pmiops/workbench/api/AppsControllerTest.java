@@ -98,8 +98,7 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateAppSuccess() throws Exception {
-    config.featureFlags.enableCromwellGKEApp = true;
+  public void testCreateAppSuccess() {
     config.featureFlags.enableRStudioGKEApp = true;
 
     controller.createApp(WORKSPACE_NS, createAppRequest);
@@ -108,7 +107,6 @@ public class AppsControllerTest {
 
   @Test
   public void testCreateAppFail_validateActiveBilling() {
-    config.featureFlags.enableCromwellGKEApp = true;
     config.featureFlags.enableRStudioGKEApp = true;
 
     doThrow(ForbiddenException.class)
@@ -120,29 +118,14 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateCromwellAppSuccess_featureEnabled() {
-    config.featureFlags.enableCromwellGKEApp = true;
-    config.featureFlags.enableRStudioGKEApp = true;
+  public void testCreateCromwellAppSuccess() {
     CreateAppRequest createCromwellAppRequest = new CreateAppRequest().appType(AppType.CROMWELL);
-
     controller.createApp(WORKSPACE_NS, createCromwellAppRequest);
-
     verify(mockLeonardoApiClient).createApp(createCromwellAppRequest, testWorkspace);
   }
 
   @Test
-  public void testCreateCromwellAppFail_featureNotEnabled() throws Exception {
-    config.featureFlags.enableCromwellGKEApp = false;
-    config.featureFlags.enableRStudioGKEApp = true;
-    CreateAppRequest createCromwellAppRequest = new CreateAppRequest().appType(AppType.CROMWELL);
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> controller.createApp(WORKSPACE_NS, createCromwellAppRequest));
-  }
-
-  @Test
   public void testCreateRStudioAppSuccess_featureEnabled() {
-    config.featureFlags.enableCromwellGKEApp = true;
     config.featureFlags.enableRStudioGKEApp = true;
     CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
 
@@ -152,8 +135,7 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCreateRStudioAppFail_featureNotEnabled() throws Exception {
-    config.featureFlags.enableCromwellGKEApp = true;
+  public void testCreateRStudioAppFail_featureNotEnabled() {
     config.featureFlags.enableRStudioGKEApp = false;
     CreateAppRequest createRStudioAppRequest = new CreateAppRequest().appType(AppType.RSTUDIO);
     assertThrows(

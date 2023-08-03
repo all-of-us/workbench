@@ -56,10 +56,8 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     validateCanPerformApiAction(dbWorkspace);
-    if ((createAppRequest.getAppType() == AppType.RSTUDIO
-            && !configProvider.get().featureFlags.enableRStudioGKEApp)
-        || (createAppRequest.getAppType() == AppType.CROMWELL
-            && !configProvider.get().featureFlags.enableCromwellGKEApp)) {
+    if (createAppRequest.getAppType() == AppType.RSTUDIO
+        && !configProvider.get().featureFlags.enableRStudioGKEApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
 

@@ -40,12 +40,7 @@ import moment from 'moment/moment';
 
 import { RouteLink } from './app-router';
 import { AppStatusIndicator } from './app-status-indicator';
-import {
-  appAssets,
-  findApp,
-  showAppsPanel,
-  UIAppType,
-} from './apps-panel/utils';
+import { appAssets, findApp, UIAppType } from './apps-panel/utils';
 import { FlexRow } from './flex';
 import { TooltipTrigger } from './popups';
 import { RuntimeStatusIndicator } from './runtime-status-indicator';
@@ -85,6 +80,12 @@ const styles = reactStyles({
     cursor: 'pointer',
     textAlign: 'center',
     verticalAlign: 'middle',
+  },
+  compoundStyle: { width: '36px', position: 'absolute' },
+  compoundContainerStyle: {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 
@@ -138,25 +139,14 @@ const CompoundIcon = ({
   iconConfig,
   children,
 }: CompoundIconProps) => {
-  const { config } = useStore(serverConfigStore);
-  const iconStyle: CSSProperties = showAppsPanel(config)
-    ? { width: '36px', position: 'absolute' }
-    : { width: '22px', position: 'absolute' };
-
-  const containerStyle: CSSProperties = {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  };
-
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <FlexRow style={containerStyle}>
+    <FlexRow style={styles.compoundContainerStyle}>
       <img
         src={iconPath}
         alt={iconConfig.label}
-        style={iconStyle}
+        style={styles.compoundStyle}
         data-test-id={'help-sidebar-icon-' + iconConfig.id}
       />
       {children}
@@ -194,11 +184,9 @@ export const RuntimeIcon = (props: {
     (aa) => aa.appType === UIAppType.JUPYTER
   );
 
-  const iconPath = showAppsPanel(config) ? jupyterAssets.icon : thunderstorm;
-
-  // We always want to show the thunderstorm or Jupyter icon.
+  // We always want to show the Jupyter icon.
   return (
-    <CompoundIcon {...{ config, iconConfig, iconPath }}>
+    <CompoundIcon {...{ config, iconConfig }} iconPath={jupyterAssets.icon}>
       <RuntimeStatusIndicator
         {...{ workspaceNamespace, userSuspended }}
         style={styles.statusIconContainer}
@@ -701,12 +689,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    if (showAppsPanel(config)) {
-      keys.push('apps');
-    }
-    if (config.enableCromwellGKEApp) {
-      keys.push(cromwellConfigIconId);
-    }
+    keys.push('apps', cromwellConfigIconId);
     if (config.enableRStudioGKEApp) {
       keys.push(rstudioConfigIconId);
     }
