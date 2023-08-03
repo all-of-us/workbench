@@ -7,7 +7,7 @@
   <changeSet author="yonghao" id="db.changelog-223-modify-egress-bypass-window-datatype">
     <modifyDataType
       columnName="description"
-      newDataType="varchar(8128)"
+      newDataType="varchar(4000)"
       tableName="user_egress_bypass_window"/>
   </changeSet>
 </databaseChangeLog>
