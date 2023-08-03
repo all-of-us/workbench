@@ -617,9 +617,6 @@ describe('HelpSidebar', () => {
   });
 
   it('should open the Cromwell config panel after clicking the Cromwell icon', async () => {
-    serverConfigStore.set({
-      config: defaultServerConfig,
-    });
     const wrapper = await component();
 
     const cromwellIcon = wrapper.find({

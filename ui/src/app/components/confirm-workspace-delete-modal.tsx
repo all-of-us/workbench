@@ -24,18 +24,17 @@ export const ConfirmWorkspaceDeleteModal = ({
   workspaceName,
   workspaceNamespace,
 }: ConfirmWorkspaceDeleteModalProps) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [deleteDisabled, setDeleteDisabled] = useState<boolean>(true);
-  const [checkingForUserApps, setCheckingForUserApps] = useState<boolean>(true);
-  const [appsExistForWorkspace, setAppsExistForWorkspace] =
-    useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [deleteDisabled, setDeleteDisabled] = useState(true);
+  const [checkingForUserApps, setCheckingForUserApps] = useState(true);
+  const [appsExist, setAppsExist] = useState(false);
 
   useEffect(() => {
     setCheckingForUserApps(true);
     appsApi()
       .listAppsInWorkspace(workspaceNamespace)
       .then((userApps) => {
-        setAppsExistForWorkspace(userApps?.length > 0);
+        setAppsExist(userApps?.length > 0);
         setCheckingForUserApps(false);
       })
       .finally(() => {
@@ -52,7 +51,7 @@ export const ConfirmWorkspaceDeleteModal = ({
     setDeleteDisabled(!event.toLowerCase().match('delete'));
   };
 
-  const displayUserInput = !checkingForUserApps && !appsExistForWorkspace;
+  const displayUserInput = !checkingForUserApps && !appsExist;
 
   return (
     <Modal loading={loading}>
@@ -86,7 +85,7 @@ export const ConfirmWorkspaceDeleteModal = ({
               Checking for any existing User Apps....
             </div>
           )}
-          {appsExistForWorkspace && (
+          {appsExist && (
             <WarningMessage>
               You cannot delete the workspace as there are Apps you must delete
               first
@@ -105,10 +104,7 @@ export const ConfirmWorkspaceDeleteModal = ({
         <Button
           aria-label='Confirm Delete'
           disabled={
-            loading ||
-            deleteDisabled ||
-            checkingForUserApps ||
-            appsExistForWorkspace
+            loading || deleteDisabled || checkingForUserApps || appsExist
           }
           style={{ marginLeft: '0.75rem' }}
           data-test-id='confirm-delete'

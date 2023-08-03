@@ -138,10 +138,12 @@ describe('AppsPanel', () => {
       const wrapper = await component();
       await waitOneTickAndUpdate(wrapper);
 
+      // Cromwell is always available
+      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+
       expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
         enableRStudioGKEApp
       );
-      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
     }
   );
 });

@@ -81,6 +81,12 @@ const styles = reactStyles({
     textAlign: 'center',
     verticalAlign: 'middle',
   },
+  compoundStyle: { width: '36px', position: 'absolute' },
+  compoundContainerStyle: {
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
 });
 
 const iconStyles = reactStyles({
@@ -133,22 +139,14 @@ const CompoundIcon = ({
   iconConfig,
   children,
 }: CompoundIconProps) => {
-  const iconStyle: CSSProperties = { width: '36px', position: 'absolute' };
-
-  const containerStyle: CSSProperties = {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  };
-
   // For most runtime statuses (Deleting and Unknown currently excepted), we will show a small
   // overlay icon in the bottom right of the tab showing the runtime status.
   return (
-    <FlexRow style={containerStyle}>
+    <FlexRow style={styles.compoundContainerStyle}>
       <img
         src={iconPath}
         alt={iconConfig.label}
-        style={iconStyle}
+        style={styles.compoundStyle}
         data-test-id={'help-sidebar-icon-' + iconConfig.id}
       />
       {children}
