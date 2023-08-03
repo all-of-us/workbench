@@ -12,6 +12,7 @@ import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
 import Button from 'app/element/button';
 import SelectMenu from 'app/component/select-menu';
+import { environmentTimeout } from 'utils/timeout-constants';
 
 const PageTitle = 'View Analysis Files';
 
@@ -85,8 +86,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       this.page.waitForXPath(redirectingTextsXpath, { visible: true })
     ]);
 
-    // Waiting up to 15 minutes
-    await waitWhileLoading(this.page, { timeout: 15 * 60 * 1000 });
+    // Waiting up to 15 minutes for runtime
+    await waitWhileLoading(this.page, { timeout: environmentTimeout });
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
     return notebook;
