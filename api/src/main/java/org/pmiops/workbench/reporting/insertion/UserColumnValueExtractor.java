@@ -37,7 +37,8 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   IDENTITY_BYPASS_TIME("identity_bypass_time", u -> toInsertRowString(u.getIdentityBypassTime())),
   IDENTITY_COMPLETION_TIME(
       "identity_completion_time", u -> toInsertRowString(u.getIdentityCompletionTime())),
-  IDENTITY_VERIFICATION_SYSTEM("identity_verification_system", ReportingUser::getIdentityVerificationSystem),
+  IDENTITY_VERIFICATION_SYSTEM(
+      "identity_verification_system", ReportingUser::getIdentityVerificationSystem),
 
   FAMILY_NAME("family_name", ReportingUser::getFamilyName),
   FIRST_REGISTRATION_COMPLETION_TIME(
