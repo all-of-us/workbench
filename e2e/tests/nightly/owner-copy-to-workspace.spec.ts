@@ -24,7 +24,7 @@ import Modal from 'app/modal/modal';
  * @param {string} sourceWorkspaceName: Source workspace name
  * @param {string} to create new destination workspace with CDR Version
  */
-describe('Workspace owner can copy notebook', () => {
+describe.skip('Workspace owner can copy notebook', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

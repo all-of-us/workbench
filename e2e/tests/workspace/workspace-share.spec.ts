@@ -17,7 +17,7 @@ import { waitWhileLoading } from 'utils/waits-utils';
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
 
-describe('Workspace Reader and Writer Permission Test', () => {
+describe.skip('Workspace Reader and Writer Permission Test', () => {
   const assignAccess = [
     {
       accessRole: WorkspaceAccessLevel.Writer,

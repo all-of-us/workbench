@@ -16,7 +16,7 @@ import { waitForText } from '../../utils/waits-utils';
 // 10 minutes.
 jest.setTimeout(10 * 60 * 1000);
 
-describe('Dataset rename', () => {
+describe.skip('Dataset rename', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

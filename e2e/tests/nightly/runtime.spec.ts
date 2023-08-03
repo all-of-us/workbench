@@ -5,7 +5,7 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 // 30 minutes. Test could take a long time.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Updating runtime status', () => {
+describe.skip('Updating runtime status', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

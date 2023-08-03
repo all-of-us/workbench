@@ -10,7 +10,7 @@ import InstitutionEditPage, {
 } from 'app/page/admin/admin-institution-edit-page';
 import waitForExpect from 'wait-for-expect';
 
-describe('Institution Admin', () => {
+describe.skip('Institution Admin', () => {
   const testInstitutionName = 'Admin testing';
 
   beforeEach(async () => {

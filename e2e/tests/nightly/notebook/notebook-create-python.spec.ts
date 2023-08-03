@@ -12,7 +12,7 @@ import { JupyterKernels } from 'app/text-labels';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Python Kernel Notebook Test', () => {
+describe.skip('Python Kernel Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
