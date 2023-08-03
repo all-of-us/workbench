@@ -35,6 +35,7 @@ import {
   getSelectedPopulations,
   getSelectedPrimaryPurposeItems,
 } from 'app/utils/research-purpose';
+import { getCreator } from 'app/utils/runtime-utils';
 import { MatchParams } from 'app/utils/stores';
 import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
 import moment from 'moment';
@@ -479,7 +480,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                   Runtime Name
                 </PurpleLabel>
                 <PurpleLabel style={styles.narrowWithMargin}>
-                  Google Project
+                  Creator
                 </PurpleLabel>
                 <PurpleLabel style={styles.narrowWithMargin}>
                   Created Time
@@ -497,7 +498,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                     {runtime.runtimeName}
                   </div>
                   <div style={styles.narrowWithMargin}>
-                    {runtime.googleProject}
+                    {getCreator(runtime)}
                   </div>
                   <div style={styles.narrowWithMargin}>
                     {new Date(runtime.createdDate).toDateString()}
