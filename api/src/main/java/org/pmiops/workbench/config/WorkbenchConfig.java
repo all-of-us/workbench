@@ -24,6 +24,7 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public MandrillConfig mandrill;
   public MoodleConfig moodle;
+  public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
   public AccessConfig access;
   public FeatureFlagsConfig featureFlags;
@@ -64,6 +65,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.reporting = new ReportingConfig();
     config.server = new ServerConfig();
+    config.tanagra = new TanagraConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
@@ -255,6 +257,10 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public String credentialsKeyV2;
+  }
+
+  public static class TanagraConfig {
+    public String baseUrl;
   }
 
   public static class ZendeskConfig {
