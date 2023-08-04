@@ -108,16 +108,16 @@ const searchTooltip = (
     Examples by query type:
     <ul>
       <li>
-        <b>Gene:</b> BRCA2
+        <b>Gene:</b> WFDC2
       </li>
       <li>
-        <b>Variant:</b> 13-32355250-T-C
+        <b>Variant:</b> 20-38623282-G-A
       </li>
       <li>
-        <b>RS Number:</b> rs169547
+        <b>RS Number:</b> rs558865434
       </li>
       <li>
-        <b>Genomic Region:</b> chr13:32355000-32375000
+        <b>Genomic Region:</b> chr20:38623000-38623379
       </li>
     </ul>
   </div>
@@ -266,6 +266,9 @@ export const VariantSearch = withCurrentWorkspace()(
             </TooltipTrigger>
           </div>
         </div>
+        <div style={{ fontSize: '11px' }}>
+          SNP/Indel Variant search is currently a proof of concept and only contains data for chromosome 20
+        </div>
         {loading ? (
           <SpinnerOverlay />
         ) : (
@@ -369,6 +372,15 @@ export const VariantSearch = withCurrentWorkspace()(
                 headerStyle={styles.columnHeader}
                 body={({ alleleFrequency }) => (
                   <div title={alleleFrequency}>{alleleFrequency}</div>
+                )}
+                bodyStyle={{ ...styles.columnBody }}
+              />
+              <Column
+                field='participantCount'
+                header='Participant Count'
+                headerStyle={styles.columnHeader}
+                body={({ participantCount }) => (
+                  <div title={participantCount}>{participantCount}</div>
                 )}
                 bodyStyle={{ ...styles.columnBody, borderRight: borderStyle }}
               />
