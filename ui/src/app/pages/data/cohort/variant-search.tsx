@@ -291,8 +291,8 @@ export const VariantSearch = withCurrentWorkspace()(
               paginatorTemplate='PrevPageLink CurrentPageReport NextPageLink'
               rows={pageSize}
               scrollable
-              scrollHeight='calc(100vh - 350px)'
-              style={{ fontSize: '12px', maxHeight: '600px' }}
+              scrollHeight='calc(100vh - 450px)'
+              style={{ fontSize: '12px' }}
               totalRecords={totalCount}
               value={displayResults}
             >
