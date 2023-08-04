@@ -1,14 +1,14 @@
 [
   {
     "vid": "1-101504524-G-A",
-    "gene_symbol": "gene"
+    "gene_symbol": "GENE"
   },
   {
     "vid": "1-100550658-T-C",
-    "gene_symbol": "gene1"
+    "gene_symbol": "GENE1"
   },
   {
     "vid": "1-100550658-T-H",
-    "gene_symbol": "gene1"
+    "gene_symbol": "GENE1"
   }
 ]

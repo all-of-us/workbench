@@ -86,4 +86,4 @@ export const STATE_CODE_MAPPING = {
 
 export const JUPYTER_FILE_EXT = '.ipynb';
 export const RMD_FILE_EXT = '.Rmd';
-export const R_FILE_EXT = '.R';
+export const R_SCRIPT_EXT = '.R';

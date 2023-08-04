@@ -110,13 +110,13 @@ public final class VariantQueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID:
-        params.put("vid", QueryParameterValue.string(searchTerm));
+        params.put("vid", QueryParameterValue.string(searchTerm.toUpperCase()));
         return params;
       case CONTIG:
         // chr13:32355000-32375000
         String[] chr = searchTerm.split(":");
         String[] position = chr[1].split("-");
-        params.put("contig", QueryParameterValue.string(chr[0]));
+        params.put("contig", QueryParameterValue.string(chr[0].toLowerCase()));
         params.put("start", QueryParameterValue.int64(Integer.valueOf(position[0])));
         params.put("end", QueryParameterValue.int64(Integer.valueOf(position[1])));
         if (limit != null) {
@@ -127,7 +127,7 @@ public final class VariantQueryBuilder {
         }
         return params;
       case GENE:
-        params.put("gene", QueryParameterValue.string(searchTerm));
+        params.put("gene", QueryParameterValue.string(searchTerm.toUpperCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
         }
@@ -136,7 +136,7 @@ public final class VariantQueryBuilder {
         }
         return params;
       case RS_NUMBER:
-        params.put("rs_number", QueryParameterValue.string(searchTerm));
+        params.put("rs_number", QueryParameterValue.string(searchTerm.toLowerCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
         }

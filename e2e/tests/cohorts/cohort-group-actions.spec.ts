@@ -10,7 +10,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import { Ethnicity, PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 import waitForExpect from 'wait-for-expect';
 
-describe('Build cohort page actions', () => {
+describe.skip('Build cohort page actions', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

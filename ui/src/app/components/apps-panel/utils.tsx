@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import {
   AppStatus,
   AppType,
-  ConfigResponse,
   CreateAppRequest,
   DiskType,
   Runtime,
@@ -190,10 +189,6 @@ export const toUserEnvironmentStatusByAppType = (
   appType === UIAppType.JUPYTER
     ? fromRuntimeStatus(status as RuntimeStatus)
     : fromUserAppStatus(status as AppStatus);
-
-export const showAppsPanel = (config: ConfigResponse) => {
-  return config.enableCromwellGKEApp || config.enableRStudioGKEApp;
-};
 
 export interface AppDisplayState {
   appType: UIAppType;

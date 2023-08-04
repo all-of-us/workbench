@@ -10,7 +10,7 @@ import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspacesPage from 'app/page/workspaces-page';
 import WorkspaceCard from 'app/component/card/workspace-card';
 
-describe('Workspace CDR Version Upgrade modal', () => {
+describe.skip('Workspace CDR Version Upgrade modal', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

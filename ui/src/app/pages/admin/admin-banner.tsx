@@ -98,7 +98,7 @@ export class AdminBanner extends React.Component<
       }
     );
     return (
-      <div style={{ width: '36rem' }}>
+      <div style={{ width: '36rem', margin: '1.5rem' }}>
         <BoldHeader style={{ fontSize: 18 }}>Service Banners</BoldHeader>
         <Header style={{ ...styles.smallHeaderStyles, marginTop: '0.75rem' }}>
           Banner Headline

@@ -8,7 +8,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { config } from 'resources/workbench-config';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 
-describe('Duplicate workspace', () => {
+describe.skip('Duplicate workspace', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

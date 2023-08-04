@@ -65,7 +65,7 @@ describe('AppsPanel', () => {
   const leoAppsStub = new LeoAppsApiStub();
   beforeEach(() => {
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+      config: defaultServerConfig,
     });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
@@ -124,19 +124,13 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 
-  test.each([
-    [true, true],
-    [true, false],
-    [false, true],
-    [false, false],
-  ])(
-    'should / should not show apps when the feature flags are Rstudio=%s, Cromwell=%s',
-    async (enableRStudioGKEApp, enableCromwellGKEApp) => {
+  test.each([true, false])(
+    'should / should not show apps when the RStudio feature flag is %s',
+    async (enableRStudioGKEApp) => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
           enableRStudioGKEApp,
-          enableCromwellGKEApp,
         },
       });
       appsStub.listAppsResponse = [];
@@ -144,11 +138,11 @@ describe('AppsPanel', () => {
       const wrapper = await component();
       await waitOneTickAndUpdate(wrapper);
 
+      // Cromwell is always available
+      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+
       expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
         enableRStudioGKEApp
-      );
-      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toEqual(
-        enableCromwellGKEApp
       );
     }
   );

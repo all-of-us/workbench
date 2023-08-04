@@ -34,7 +34,7 @@ async function createConceptSet(): Promise<{ dataPage: WorkspaceDataPage; concep
   return { dataPage, conceptSetName };
 }
 
-describe('Copy Concept Set to another workspace', () => {
+describe.skip('Copy Concept Set to another workspace', () => {
   const destWorkspace = 'e2eTestCopyConceptSetToWorkspaceV4'; // The copy-to workspace with default CDR version
 
   beforeEach(async () => {

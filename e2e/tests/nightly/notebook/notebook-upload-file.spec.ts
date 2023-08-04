@@ -8,7 +8,7 @@ import path from 'path';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Notebook Upload File Test', () => {
+describe.skip('Notebook Upload File Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

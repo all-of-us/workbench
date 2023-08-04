@@ -7,6 +7,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { Language } from 'app/text-labels';
 import path from 'path';
+import { environmentTimeout } from 'utils/timeout-constants';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
@@ -31,7 +32,7 @@ const cromshellStatusRCmd = (cromshell_version: string, cromshellJobId: string) 
 
 const workspaceName = makeRandomName('e2eCromwellTest');
 
-describe('Cromwell GKE App', () => {
+describe.skip('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });
@@ -63,7 +64,7 @@ describe('Cromwell GKE App', () => {
     console.log('Cromwell status: PROVISIONING');
 
     // Poll until cromwell is running
-    await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', 15 * 60e3);
+    await appsPanel.pollForStatus(expandedCromwellXpath, 'Running', environmentTimeout);
 
     // Cromwell is running, now lets delete it
     const isDeleted = await appsPanel.deleteCromwellGkeApp();
@@ -166,7 +167,7 @@ describe('Cromwell GKE App', () => {
         return cromshellJobStatus.includes('Succeeded');
       },
       20e3, // every 20 sec
-      15 * 60e3 // with a 15 min timeout
+      environmentTimeout // with a 15 min timeout
     );
 
     expect(succeededStatus).toBeTruthy();

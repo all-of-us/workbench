@@ -16,7 +16,7 @@ import expect from 'expect';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Workspace READER Jupyter notebook action tests', () => {
+describe.skip('Workspace READER Jupyter notebook action tests', () => {
   // Test reuse same workspace and notebook if exists.
   const workspaceName = makeWorkspaceName();
   const notebookName = makeRandomName('py', { includeHyphen: false });

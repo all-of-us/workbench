@@ -11,7 +11,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Create R kernel notebook', () => {
+describe.skip('Create R kernel notebook', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

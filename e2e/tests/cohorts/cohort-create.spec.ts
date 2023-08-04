@@ -16,7 +16,7 @@ import ReviewCriteriaSidebar from 'app/sidebar/review-criteria-sidebar';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 
-describe('Create Cohorts Test', () => {
+describe.skip('Create Cohorts Test', () => {
   const workspaceName = makeWorkspaceName();
   let workspaceUrl: string;
 

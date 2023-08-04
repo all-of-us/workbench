@@ -26,7 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
+import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -122,7 +122,7 @@ export const NotebookResourceCard = fp.flow(
           resource.workspaceFirecloudName,
           {
             name: resource.notebook.name,
-            newName: appendNotebookFileSuffixByOldName(newName, oldName),
+            newName: appendAnalysisFileSuffixByOldName(newName, oldName),
           }
         )
         .then(() => this.props.onUpdate())
@@ -217,7 +217,7 @@ export const NotebookResourceCard = fp.flow(
               hideDescription={true}
               oldName={oldName}
               nameFormat={(name) =>
-                appendNotebookFileSuffixByOldName(name, oldName)
+                appendAnalysisFileSuffixByOldName(name, oldName)
               }
               existingNames={existingNameList}
             />

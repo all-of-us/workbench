@@ -81,7 +81,7 @@ export const AppsPanel = (props: {
   const appsToDisplay = [
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
-    ...(config.enableCromwellGKEApp ? [UIAppType.CROMWELL] : []),
+    UIAppType.CROMWELL,
   ];
 
   useEffect(() => {

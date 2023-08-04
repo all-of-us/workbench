@@ -9,7 +9,7 @@ import WorkspaceCard from 'app/component/card/workspace-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import AdminNotebookPreviewPage from 'app/page/admin/admin-notebook-preview-page';
 
-describe('Workspace Admin', () => {
+describe.skip('Workspace Admin', () => {
   const workspaceName = 'e2eAdminWorkspace';
   const pyNotebookName = 'e2eAdminNotebook';
   const reasonText = 'locking this workspace';

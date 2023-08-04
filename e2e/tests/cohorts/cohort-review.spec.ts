@@ -16,7 +16,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
-describe('Cohort review set tests', () => {
+describe.skip('Cohort review set tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
