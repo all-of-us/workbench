@@ -43,7 +43,7 @@ const ModuleBox = (props: {
 };
 
 export const Module = (props: {
-  active: boolean;
+  focused: boolean;
   children?: ReactNode;
   clickable: boolean;
   eligible: boolean;
@@ -55,7 +55,7 @@ export const Module = (props: {
   style?;
 }) => {
   const {
-    active,
+    focused,
     children,
     clickable,
     eligible,
@@ -83,7 +83,7 @@ export const Module = (props: {
               !!refreshAction,
             () => <Refresh {...{ refreshAction, showSpinner }} />,
           ],
-          [active, () => <Next />]
+          [focused, () => <Next />]
         )}
       </FlexRow>
       <ModuleBox
