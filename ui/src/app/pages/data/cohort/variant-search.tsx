@@ -124,7 +124,7 @@ const searchTooltip = (
 );
 
 export const VariantSearch = withCurrentWorkspace()(
-  ({ select, selectedIds, workspace }) => {
+  ({ select, selectedIds, workspace: { id, namespace } }) => {
     const [first, setFirst] = useState(0);
     const [inputErrors, setInputErrors] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -137,7 +137,6 @@ export const VariantSearch = withCurrentWorkspace()(
 
     const searchVariants = async (searchString: string, firstPage?: number) => {
       try {
-        const { id, namespace } = workspace;
         const { items, nextPageToken, totalSize } =
           await cohortBuilderApi().findVariants(
             namespace,
@@ -146,7 +145,9 @@ export const VariantSearch = withCurrentWorkspace()(
             pageToken
           );
         setPageToken(nextPageToken);
-        setSearchResults((prevState) => [...prevState, ...items]);
+        setSearchResults((prevState) =>
+          firstPage ? [...prevState, ...items] : items
+        );
         setTotalCount(totalSize);
         setFirst(firstPage || 0);
       } catch (error) {
@@ -267,7 +268,8 @@ export const VariantSearch = withCurrentWorkspace()(
           </div>
         </div>
         <div style={{ fontSize: '11px' }}>
-          SNP/Indel Variant search is currently a proof of concept and only contains data for chromosome 20
+          SNP/Indel Variant search is currently a proof of concept and only
+          contains data for chromosome 20
         </div>
         {loading ? (
           <SpinnerOverlay />
