@@ -236,7 +236,6 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(
                 <FailedRequestMessage />
               ) : (
                 <DataTable
-                  autoLayout
                   emptyMessage={<EmptyTableMessage />}
                   sortField={!jobs || jobs.length > 0 ? 'dateStarted' : ''}
                   sortOrder={-1}

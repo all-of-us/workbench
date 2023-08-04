@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useParams } from 'react-router';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableSortOrderType } from 'primereact/datatable';
+import { DataTable } from 'primereact/datatable';
 import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
@@ -70,6 +70,7 @@ const styles = reactStyles({
     borderBottom: 'none',
     lineHeight: '0.9rem',
     cursor: 'pointer',
+    borderTop: `1px solid ${colors.tableBorder}`,
   },
   sortIcon: {
     marginTop: '4px',
@@ -213,9 +214,10 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
     page: 0,
     pageSize: numberOfRows,
   });
+
   const [sortState, setSortState] = useState({
     sortField: 'participantId',
-    sortOrder: 1 as DataTableSortOrderType,
+    sortOrder: 1 as 1 | 0 | -1 | null | undefined,
   });
   const [totalCount, setTotalCount] = useState(null);
   const initialRender = useRef(true);
@@ -597,6 +599,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
           ? {
               ...styles.columnBody,
               color: '#2691D0',
+              borderTop: `1px solid #c8c8c8`,
             }
           : styles.columnBody;
       const asc = sortField === col.field && sortOrder === 1;
