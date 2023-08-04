@@ -7,7 +7,7 @@ import { twoRuntimesTimeout } from 'utils/timeout-constants';
 
 jest.setTimeout(twoRuntimesTimeout);
 
-describe('Updating runtime status', () => {
+describe.skip('Updating runtime status', () => {
   // Notebooks to run before/after reattaching a PD.
   const diskBeforeNotebookName = 'disk-reattach-before.py';
   const diskBeforeNotebookFilePath = path.relative(

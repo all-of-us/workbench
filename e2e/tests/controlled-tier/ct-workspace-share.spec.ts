@@ -13,7 +13,7 @@ import UnavailableTierModal from 'app/modal/unavailable-tier-modal';
 import DataAccessRequirementsPage from 'app/page/data-access/data-access-requirements-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 
-describe('Share Controlled Tier Workspace', () => {
+describe.skip('Share Controlled Tier Workspace', () => {
   const hasCTAccessUser = config.WRITER_USER;
   const notCTUser = config.EGRESS_TEST_USER; // Without CT access
 

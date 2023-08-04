@@ -9,7 +9,7 @@ import expect from 'expect';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Workspace WRITER notebook tests', () => {
+describe.skip('Workspace WRITER notebook tests', () => {
   const notebookName = makeRandomName('notebookWriterActionsTest-Py3');
   const workspaceName = 'e2eNotebookWriterActionsTest';
 

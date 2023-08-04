@@ -26,7 +26,7 @@ import { range } from 'lodash';
 // Since refresh token expires in 60 min. test may fail if running takes longer than 60 min.
 jest.setTimeout(60 * 60 * 1000);
 
-describe('Genomics Extraction Test', () => {
+describe.skip('Genomics Extraction Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

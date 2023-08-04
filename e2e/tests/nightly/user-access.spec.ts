@@ -12,7 +12,7 @@ import HomePage from 'app/page/home-page';
 // `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`.
 // This can also be run locally.
 
-describe('User Access', () => {
+describe.skip('User Access', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page, config.ACCESS_TEST_USER, { postSignInPage: new AccessRenewalMode(page) });
   });

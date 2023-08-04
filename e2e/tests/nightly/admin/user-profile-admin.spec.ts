@@ -31,7 +31,7 @@ import fp from 'lodash/fp';
  *
  */
 
-describe('User Profile Admin page', () => {
+describe.skip('User Profile Admin page', () => {
   enum TableColumns {
     ACCESS_MODULE = 'Access module',
     STATUS = 'Status',

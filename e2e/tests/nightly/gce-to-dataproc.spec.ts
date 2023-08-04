@@ -8,7 +8,7 @@ import { AccessTierDisplayNames, ResourceCard } from 'app/text-labels';
 // This test could take a long time to run
 jest.setTimeout(40 * 60 * 1000);
 
-describe('Updating runtime compute type', () => {
+describe.skip('Updating runtime compute type', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

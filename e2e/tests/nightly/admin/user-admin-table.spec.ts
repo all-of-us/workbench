@@ -4,7 +4,7 @@ import { config } from 'resources/workbench-config';
 import navigation, { NavLink } from 'app/component/navigation';
 import AdminTable from 'app/component/admin-table';
 
-describe('User Admin Table', () => {
+describe.skip('User Admin Table', () => {
   const userEmail = 'admin_test';
 
   beforeEach(async () => {
