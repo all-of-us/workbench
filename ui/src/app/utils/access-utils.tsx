@@ -138,6 +138,7 @@ export const ACCESS_RENEWAL_PATH =
 interface DARTitleComponentConfig {
   profile: Profile;
   afterInitialClick: boolean;
+  onClick?: Function;
 }
 
 interface AccessModuleUIConfig extends AccessModuleConfig {

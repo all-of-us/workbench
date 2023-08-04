@@ -23,8 +23,8 @@ import { TwoFactorAuthModal } from './two-factor-auth-modal';
 interface ModuleProps {
   profile: Profile;
   moduleName: AccessModule;
+  focused: boolean;
   active: boolean;
-  clickable: boolean;
   spinnerProps: WithSpinnerOverlayProps;
   style?;
 }
@@ -32,8 +32,8 @@ interface ModuleProps {
 export const MaybeModule = ({
   profile,
   moduleName,
+  focused,
   active,
-  clickable,
   spinnerProps,
   style,
 }: ModuleProps): JSX.Element => {
@@ -46,6 +46,7 @@ export const MaybeModule = ({
     moduleName,
     [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
     [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
+    [AccessModule.IDENTITY, () => redirectToRas],
     [AccessModule.ERACOMMONS, () => redirectToNiH],
     [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
     [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
@@ -63,8 +64,8 @@ export const MaybeModule = ({
   return (
     <Module
       {...{
+        focused,
         active,
-        clickable,
         eligible,
         moduleAction,
         moduleName,

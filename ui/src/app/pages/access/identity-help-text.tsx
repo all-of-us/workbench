@@ -43,8 +43,9 @@ const ViewRequiredDocuments = () => (
 export const IdentityHelpText = (props: {
   profile: Profile;
   afterInitialClick: boolean;
+  onClick?: Function;
 }) => {
-  const { profile, afterInitialClick } = props;
+  const { profile, afterInitialClick, onClick } = props;
 
   // don't return help text if complete or bypassed
   const needsHelp = !isCompliant(
@@ -106,7 +107,9 @@ export const IdentityHelpText = (props: {
             necessary permissions.
           </div>
         </FlexRow>
-        <Button style={{ alignSelf: 'end' }}>Get Started</Button>
+        <Button style={{ alignSelf: 'end' }} onClick={onClick}>
+          Get Started
+        </Button>
         <ContactUs {...{ profile }} />
       </FlexColumn>
     ))

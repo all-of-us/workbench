@@ -45,7 +45,7 @@ const ModuleBox = (props: {
 export const Module = (props: {
   focused: boolean;
   children?: ReactNode;
-  clickable: boolean;
+  active: boolean;
   eligible: boolean;
   moduleAction: Function;
   moduleName: AccessModule;
@@ -57,7 +57,7 @@ export const Module = (props: {
   const {
     focused,
     children,
-    clickable,
+    active,
     eligible,
     moduleAction,
     moduleName,
@@ -78,7 +78,7 @@ export const Module = (props: {
       <FlexRow style={styles.moduleCTA}>
         {cond(
           [
-            (clickable || moduleName === AccessModule.ERACOMMONS) &&
+            (active || moduleName === AccessModule.ERACOMMONS) &&
               showRefresh &&
               !!refreshAction,
             () => <Refresh {...{ refreshAction, showSpinner }} />,
@@ -87,7 +87,7 @@ export const Module = (props: {
         )}
       </FlexRow>
       <ModuleBox
-        {...{ clickable }}
+        clickable={active && moduleName !== AccessModule.IDENTITY}
         action={() => {
           setShowRefresh(true);
           moduleAction();
@@ -100,10 +100,10 @@ export const Module = (props: {
         <FlexColumn style={{ flex: 1 }}>
           <div
             data-test-id={`module-${moduleName}-${
-              clickable ? 'clickable' : 'unclickable'
+              active ? 'clickable' : 'unclickable'
             }-text`}
             style={{
-              ...(clickable
+              ...(active
                 ? styles.clickableModuleText
                 : styles.backgroundModuleText),
               ...{ fontWeight: 500 },
@@ -112,6 +112,10 @@ export const Module = (props: {
             <DARTitleComponent
               {...{ profile }}
               afterInitialClick={showRefresh}
+              onClick={() => {
+                setShowRefresh(true);
+                moduleAction();
+              }}
             />
           </div>
           {isCompliant(status) && (

@@ -49,12 +49,12 @@ const ControlledTierEraModule = (props: {
   const status = getAccessModuleStatusByName(profile, moduleName);
 
   // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const clickable = eligible && !isCompliant(status);
+  const active = eligible && !isCompliant(status);
 
   return (
     <Module
-      {...{ clickable, eligible, moduleName, profile, spinnerProps, status }}
-      active={false}
+      {...{ active, eligible, moduleName, profile, spinnerProps, status }}
+      focused={false}
       moduleAction={redirectToNiH}
     />
   );

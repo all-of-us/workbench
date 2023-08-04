@@ -33,8 +33,8 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
         <MaybeModule
           {...{ moduleName, profile, spinnerProps }}
           key={moduleName}
-          active={focusedModule === moduleName}
-          clickable={activeModules.includes(moduleName)}
+          focused={focusedModule === moduleName}
+          active={activeModules.includes(moduleName)}
           style={{
             marginTop:
               index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING

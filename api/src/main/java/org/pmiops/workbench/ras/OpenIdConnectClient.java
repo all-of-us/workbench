@@ -19,6 +19,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 
 /**
@@ -63,7 +64,15 @@ public class OpenIdConnectClient {
    */
   public JsonNode fetchUserInfo(String accessToken) throws IOException {
     HttpResponse response = executeGet(httpTransport, accessToken, new GenericUrl(userInfoUrl));
-    return objectMapper.readTree(response.getContent());
+    InputStream content = response.getContent();
+    JsonNode userInfo;
+    try{
+      userInfo = objectMapper.readTree(content);
+    } finally {
+      content.close();
+    }
+
+    return userInfo;
   }
 
   /** Helper method to decode a JWT into {@link DecodedJWT} object. */
