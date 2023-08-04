@@ -88,11 +88,17 @@ public final class VariantQueryBuilder {
   private static String generateSQL(String searchTerm, boolean isCount) {
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID:
-        return isCount ? SELECT_COUNT + VID_SQL + PARTICIPANT_COUNT : SELECT_ALL_COLUMNS + VID_SQL + PARTICIPANT_COUNT;
+        return isCount
+            ? SELECT_COUNT + VID_SQL + PARTICIPANT_COUNT
+            : SELECT_ALL_COLUMNS + VID_SQL + PARTICIPANT_COUNT;
       case CONTIG:
         return isCount
             ? SELECT_COUNT + CONTIG_POSITION_SQL + PARTICIPANT_COUNT
-            : SELECT_ALL_COLUMNS + CONTIG_POSITION_SQL + PARTICIPANT_COUNT + ORDER_BY + LIMIT_OFFSET;
+            : SELECT_ALL_COLUMNS
+                + CONTIG_POSITION_SQL
+                + PARTICIPANT_COUNT
+                + ORDER_BY
+                + LIMIT_OFFSET;
       case GENE:
         return isCount
             ? SELECT_COUNT + GENE_SQL + PARTICIPANT_COUNT
