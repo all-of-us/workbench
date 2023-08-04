@@ -9610,6 +9610,8 @@ components:
             $ref: '#/components/schemas/WorkspaceUserAdminView'
         resources:
           $ref: '#/components/schemas/AdminWorkspaceResources'
+        activeStatus:
+          $ref: '#/components/schemas/WorkspaceActiveStatus'
       description: Admin-visible metadata about a workspace.
     AdminWorkspaceResources:
       type: object

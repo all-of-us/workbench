@@ -2,10 +2,10 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -55,10 +55,10 @@ public class WorkspaceMapperTest {
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
   private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
-  private static final ImmutableSet<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
-      ImmutableSet.of(SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY);
-  private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
-      ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
+  private static final Set<SpecificPopulationEnum> SPECIFIC_POPULATIONS =
+      Set.of(SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY);
+  private static final Set<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
+      Set.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
   private static final String ACCESS_TIER_SHORT_NAME = "registered";
 
@@ -88,7 +88,6 @@ public class WorkspaceMapperTest {
             .workspaceId(Long.toString(CREATOR_USER_ID))
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
-            .namespace(FIRECLOUD_NAMESPACE)
             .name(WORKSPACE_FIRECLOUD_NAME)
             .googleProject(GOOGLE_PROJECT);
 
@@ -102,48 +101,50 @@ public class WorkspaceMapperTest {
     cdrVersion.setCdrVersionId(CDR_VERSION_ID);
     cdrVersion.setAccessTier(accessTier);
 
-    sourceDbWorkspace = new DbWorkspace();
-    sourceDbWorkspace.setWorkspaceId(WORKSPACE_DB_ID);
-    sourceDbWorkspace.setVersion(WORKSPACE_VERSION);
-    sourceDbWorkspace.setName(WORKSPACE_AOU_NAME);
-    sourceDbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    sourceDbWorkspace.setCdrVersion(cdrVersion);
-    sourceDbWorkspace.setCreator(creatorUser);
-    sourceDbWorkspace.setCreationTime(DB_CREATION_TIMESTAMP);
-    sourceDbWorkspace.setLastModifiedTime(DB_CREATION_TIMESTAMP);
-    sourceDbWorkspace.setCohorts(Collections.emptySet());
-    sourceDbWorkspace.setConceptSets(Collections.emptySet());
-    sourceDbWorkspace.setDataSets(Collections.emptySet());
-    sourceDbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
-    sourceDbWorkspace.setPublished(false);
-    sourceDbWorkspace.setDiseaseFocusedResearch(true);
-    sourceDbWorkspace.setDiseaseOfFocus("leukemia");
-    sourceDbWorkspace.setMethodsDevelopment(false);
-    sourceDbWorkspace.setControlSet(true);
-    sourceDbWorkspace.setAncestry(false);
-    sourceDbWorkspace.setCommercialPurpose(false);
-    sourceDbWorkspace.setSpecificPopulationsEnum(
-        ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL));
-    sourceDbWorkspace.setSocialBehavioral(false);
-    sourceDbWorkspace.setPopulationHealth(true);
-    sourceDbWorkspace.setEducational(true);
-    sourceDbWorkspace.setDrugDevelopment(false);
-    sourceDbWorkspace.setOtherPurpose(true);
-    sourceDbWorkspace.setOtherPurposeDetails("I want to discover a new disease.");
-    sourceDbWorkspace.setOtherPopulationDetails(null);
-    sourceDbWorkspace.setAdditionalNotes(null);
-    sourceDbWorkspace.setReasonForAllOfUs("We can't get this data anywhere else.");
-    sourceDbWorkspace.setIntendedStudy(null);
-    sourceDbWorkspace.setReviewRequested(false);
-    sourceDbWorkspace.setApproved(true);
-    sourceDbWorkspace.setTimeRequested(DB_CREATION_TIMESTAMP);
-    sourceDbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
-    sourceDbWorkspace.setBillingAccountName(BILLING_ACCOUNT_NAME);
-    sourceDbWorkspace.setSpecificPopulationsEnum(SPECIFIC_POPULATIONS);
-    sourceDbWorkspace.setResearchOutcomeEnumSet(RESEARCH_OUTCOMES);
-    sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
-    sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
-    sourceDbWorkspace.setGoogleProject(GOOGLE_PROJECT);
+    sourceDbWorkspace =
+        new DbWorkspace()
+            .setWorkspaceId(WORKSPACE_DB_ID)
+            .setVersion(WORKSPACE_VERSION)
+            .setName(WORKSPACE_AOU_NAME)
+            .setFirecloudName(WORKSPACE_FIRECLOUD_NAME)
+            .setWorkspaceNamespace(FIRECLOUD_NAMESPACE)
+            .setCdrVersion(cdrVersion)
+            .setCreator(creatorUser)
+            .setCreationTime(DB_CREATION_TIMESTAMP)
+            .setLastModifiedTime(DB_CREATION_TIMESTAMP)
+            .setCohorts(Collections.emptySet())
+            .setConceptSets(Collections.emptySet())
+            .setDataSets(Collections.emptySet())
+            .setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE)
+            .setPublished(false)
+            .setDiseaseFocusedResearch(true)
+            .setDiseaseOfFocus("leukemia")
+            .setMethodsDevelopment(false)
+            .setControlSet(true)
+            .setAncestry(false)
+            .setCommercialPurpose(false)
+            .setSpecificPopulationsEnum(
+                Set.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL))
+            .setSocialBehavioral(false)
+            .setPopulationHealth(true)
+            .setEducational(true)
+            .setDrugDevelopment(false)
+            .setOtherPurpose(true)
+            .setOtherPurposeDetails("I want to discover a new disease.")
+            .setOtherPopulationDetails(null)
+            .setAdditionalNotes(null)
+            .setReasonForAllOfUs("We can't get this data anywhere else.")
+            .setIntendedStudy(null)
+            .setReviewRequested(false)
+            .setApproved(true)
+            .setTimeRequested(DB_CREATION_TIMESTAMP)
+            .setBillingStatus(BillingStatus.ACTIVE)
+            .setBillingAccountName(BILLING_ACCOUNT_NAME)
+            .setSpecificPopulationsEnum(SPECIFIC_POPULATIONS)
+            .setResearchOutcomeEnumSet(RESEARCH_OUTCOMES)
+            .setDisseminateResearchEnumSet(Collections.emptySet())
+            .setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER)
+            .setGoogleProject(GOOGLE_PROJECT);
   }
 
   @Test

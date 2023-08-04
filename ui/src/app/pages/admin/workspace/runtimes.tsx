@@ -34,11 +34,10 @@ interface Props {
   onDelete: () => void;
 }
 export const Runtimes = ({
-  resources,
+  resources: { runtimes },
   workspaceNamespace,
   onDelete,
 }: Props) => {
-  const { runtimes } = resources;
   const [runtimeToDelete, setRuntimeToDelete] =
     useState<ListRuntimeResponse>(null);
   const [confirmDeleteRuntime, setConfirmDeleteRuntime] = useState(false);
@@ -83,7 +82,7 @@ export const Runtimes = ({
         </Modal>
       )}
       <h2>Runtimes</h2>
-      {runtimes.length === 0 ? (
+      {!runtimes || runtimes.length === 0 ? (
         <p>No active runtimes exist for this workspace.</p>
       ) : (
         <FlexColumn>
