@@ -77,7 +77,7 @@ const styles = reactStyles({
   searchContainer: {
     display: 'flex',
     flexWrap: 'wrap',
-    height: '70vh',
+    height: '85vh',
     position: 'relative',
     width: '100%',
   },

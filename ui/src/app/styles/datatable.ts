@@ -24,11 +24,11 @@ export const datatableStyles = `
   .pi.pi-sort-down {
     display: none;
   }
-  .p-datatable .p-datatable-scrollable-wrapper {
+  .p-datatable .p-datatable-wrapper {
     border: 1px solid #c8c8c8;
     border-radius: 3px;
   }
-  .p-datatable-scrollable-body {
+  .p-datatable-tbody {
     -webkit-transform: translate3d(0, 0, 0);
   }
   .p-datatable .p-paginator.p-paginator-bottom {

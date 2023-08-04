@@ -14,6 +14,7 @@ import { ListSearch } from 'app/pages/data/cohort/list-search';
 import { Selection } from 'app/pages/data/cohort/selection-list';
 import { CriteriaTree } from 'app/pages/data/cohort/tree';
 import { domainToTitle, typeToTitle } from 'app/pages/data/cohort/utils';
+import { VariantSearch } from 'app/pages/data/cohort/variant-search';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import {
@@ -518,7 +519,14 @@ export const CriteriaSearch = fp.flow(
               />
             )}
             {/* List View (using duplicated version of ListSearch) */}
-            {!this.initTree && cohortContext.domain && (
+            {!this.initTree &&
+            cohortContext.domain === Domain.SNPINDELVARIANT ? (
+              <VariantSearch
+                searchTerms={conceptSearchTerms}
+                select={this.addSelection}
+                selectedIds={this.getListSearchSelectedIds()}
+              />
+            ) : (
               <div style={this.searchContentStyle('list')}>
                 <ListSearch
                   hierarchy={this.showHierarchy}
