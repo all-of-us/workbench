@@ -276,6 +276,13 @@ export const VariantSearch = withCurrentWorkspace()(
         ) : (
           searching && (
             <DataTable
+              currentPageReportTemplate={
+                displayResults.length > 0
+                  ? `${first + 1} - ${
+                      first + displayResults.length
+                    } of ${totalCount}`
+                  : ''
+              }
               first={first}
               lazy
               loading={loadingMore}
@@ -285,7 +292,7 @@ export const VariantSearch = withCurrentWorkspace()(
               rows={pageSize}
               scrollable
               scrollHeight='calc(100vh - 350px)'
-              style={{ fontSize: '12px' }}
+              style={{ fontSize: '12px', maxHeight: '600px' }}
               totalRecords={totalCount}
               value={displayResults}
             >
