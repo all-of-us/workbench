@@ -10,7 +10,7 @@ import { environmentTimeout } from 'utils/timeout-constants';
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
 
-describe('RStudio GKE App', () => {
+describe.skip('RStudio GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

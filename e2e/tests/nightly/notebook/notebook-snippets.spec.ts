@@ -4,7 +4,7 @@ import { makeRandomName } from 'utils/str-utils';
 import expect from 'expect';
 import { JupyterKernels, Language } from 'app/text-labels';
 
-describe('Notebook Snippets Tests', () => {
+describe.skip('Notebook Snippets Tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

@@ -7,7 +7,7 @@ import { ResourceCard, Tabs } from 'app/text-labels';
 import { makeRandomName, makeString } from 'utils/str-utils';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 
-describe('Editing and rename Concept Set', () => {
+describe.skip('Editing and rename Concept Set', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

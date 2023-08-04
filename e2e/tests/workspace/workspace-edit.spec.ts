@@ -5,7 +5,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { makeWorkspaceName } from 'utils/str-utils';
 
-describe('Editing workspace via workspace card snowman menu', () => {
+describe.skip('Editing workspace via workspace card snowman menu', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

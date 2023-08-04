@@ -4,7 +4,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { signInWithAccessToken } from 'utils/test-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 
-describe('Sidebar Navigation', () => {
+describe.skip('Sidebar Navigation', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

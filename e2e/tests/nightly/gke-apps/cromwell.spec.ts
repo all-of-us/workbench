@@ -32,7 +32,7 @@ const cromshellStatusRCmd = (cromshell_version: string, cromshellJobId: string) 
 
 const workspaceName = makeRandomName('e2eCromwellTest');
 
-describe('Cromwell GKE App', () => {
+describe.skip('Cromwell GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName });

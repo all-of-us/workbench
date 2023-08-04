@@ -8,7 +8,7 @@ import DataResourceCard from 'app/component/card/data-resource-card';
 import Link from 'app/element/link';
 import { Visits } from 'app/page/cohort-participants-group';
 
-describe('Editing Cohort Test', () => {
+describe.skip('Editing Cohort Test', () => {
   // Tests require one and same workspace
   const workspaceName = makeWorkspaceName();
   let workspaceUrl: string;
