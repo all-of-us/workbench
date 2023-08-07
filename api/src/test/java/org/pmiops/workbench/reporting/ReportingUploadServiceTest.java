@@ -230,7 +230,7 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadBatchWorkspace(reportingWorkspaces, NOW.toEpochMilli());
+    reportingUploadService.uploadWorkspaceBatch(reportingWorkspaces, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -267,7 +267,7 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadBatchUser(reportingUsers, NOW.toEpochMilli());
+    reportingUploadService.uploadUserBatch(reportingUsers, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -292,7 +292,7 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadBatchCohort(reportingCohorts, NOW.toEpochMilli());
+    reportingUploadService.uploadCohortBatch(reportingCohorts, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -318,7 +318,7 @@ public class ReportingUploadServiceTest {
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadBatchNewUserSatisfactionSurveys(
+    reportingUploadService.uploadNewUserSatisfactionSurveyBatch(
         reportingNewUserSatisfactionSurveys, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
@@ -339,7 +339,7 @@ public class ReportingUploadServiceTest {
     cohort.setWorkspaceId(101L);
     cohort.setCreatorId(null);
 
-    reportingUploadService.uploadBatchCohort(ImmutableList.of(cohort), NOW.toEpochMilli());
+    reportingUploadService.uploadCohortBatch(ImmutableList.of(cohort), NOW.toEpochMilli());
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
 
     final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();

@@ -4,8 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
@@ -30,7 +28,6 @@ public class ReportingServiceImpl implements ReportingService {
   private final ReportingSnapshotService reportingSnapshotService;
   private final ReportingQueryService reportingQueryService;
   private final ReportingUploadService reportingUploadService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ReportingVerificationService reportingVerificationService;
 
   @VisibleForTesting
@@ -45,11 +42,9 @@ public class ReportingServiceImpl implements ReportingService {
       ReportingQueryService reportingQueryService,
       ReportingUploadService reportingUploadService,
       ReportingSnapshotService reportingSnapshotService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       ReportingVerificationService reportingVerificationService) {
     this.reportingQueryService = reportingQueryService;
     this.reportingUploadService = reportingUploadService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.reportingSnapshotService = reportingSnapshotService;
     this.reportingVerificationService = reportingVerificationService;
   }
@@ -66,17 +61,17 @@ public class ReportingServiceImpl implements ReportingService {
     // Second: Obtain data on smaller batches for larger data.
     reportingQueryService
         .getWorkspaceStream()
-        .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
+        .forEach(b -> reportingUploadService.uploadWorkspaceBatch(b, captureTimestamp));
     reportingQueryService
         .getUserStream()
-        .forEach(b -> reportingUploadService.uploadBatchUser(b, captureTimestamp));
+        .forEach(b -> reportingUploadService.uploadUserBatch(b, captureTimestamp));
     reportingQueryService
         .getCohortStream()
-        .forEach(b -> reportingUploadService.uploadBatchCohort(b, captureTimestamp));
+        .forEach(b -> reportingUploadService.uploadCohortBatch(b, captureTimestamp));
     reportingQueryService
         .getNewUserSatisfactionSurveyStream()
         .forEach(
-            b -> reportingUploadService.uploadBatchNewUserSatisfactionSurveys(b, captureTimestamp));
+            b -> reportingUploadService.uploadNewUserSatisfactionSurveyBatch(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

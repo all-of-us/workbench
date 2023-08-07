@@ -115,7 +115,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingWorkspace}. */
   @Override
-  public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
+  public void uploadWorkspaceBatch(List<ReportingWorkspace> batch, long captureTimestamp) {
     uploadBatchTable(
         workspaceRequestBuilder.build(
             getTableId(WorkspaceColumnValueExtractor.class),
@@ -125,7 +125,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingUser}. */
   @Override
-  public void uploadBatchUser(List<ReportingUser> batch, long captureTimestamp) {
+  public void uploadUserBatch(List<ReportingUser> batch, long captureTimestamp) {
     uploadBatchTable(
         userRequestBuilder.build(
             getTableId(UserColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
@@ -133,7 +133,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingCohort}. */
   @Override
-  public void uploadBatchCohort(List<ReportingCohort> batch, long captureTimestamp) {
+  public void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp) {
     uploadBatchTable(
         cohortRequestBuilder.build(
             getTableId(CohortColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
@@ -141,7 +141,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
   @Override
-  public void uploadBatchNewUserSatisfactionSurveys(
+  public void uploadNewUserSatisfactionSurveyBatch(
       List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp) {
     uploadBatchTable(
         newUserSatisfactionSurveyRequestBuilder.build(
