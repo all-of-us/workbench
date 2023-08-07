@@ -356,7 +356,7 @@ describe('ExpandedApp', () => {
       appType: AppType.RSTUDIO,
       status: AppStatus.RUNNING,
       proxyUrls: {
-        PROXY_PATH_SUFFIX: proxyUrl,
+        GKE_APP_PROXY_PATH_SUFFIX: proxyUrl,
       },
     });
     const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
