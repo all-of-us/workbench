@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -71,6 +72,7 @@ import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
@@ -337,6 +339,29 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
+  public void testWorkspaceIteratorStream_withDeleted() {
+    final int numWorkspaces = 5;
+    List<DbWorkspace> workspaces = createWorkspaces(numWorkspaces);
+    workspaceDao.save(workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
+    entityManager.flush();
+
+    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    assertThat(totalRows).isEqualTo(numWorkspaces-1);
+
+    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
+
+    // verify that we get all of them and they're distinct in terms of their PKs
+    final Set<Long> ids =
+        reportingQueryService
+            .getWorkspacesStream()
+            .flatMap(List::stream)
+            .map(ReportingWorkspace::getWorkspaceId)
+            .collect(ImmutableSet.toImmutableSet());
+    assertThat(ids).hasSize(numWorkspaces-1);
+  }
+
+  @Test
   public void testEmptyStream() {
     workspaceDao.deleteAll();
     final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
@@ -350,6 +375,14 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceCount() {
     createWorkspaces(5);
     assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(5);
+  }
+
+  @Test
+  public void testWorkspaceCount_withDeleted() {
+    List<DbWorkspace> workspaces = createWorkspaces(5);
+    workspaceDao.save(workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
+    entityManager.flush();
+    assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(4);
   }
 
   @Test
@@ -568,13 +601,15 @@ public class ReportingQueryServiceTest {
     assertThat(reportingQueryService.getNewUserSatisfactionSurveysCount()).isEqualTo(5);
   }
 
-  private void createWorkspaces(int count) {
+  private List<DbWorkspace> createWorkspaces(int count) {
     final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
+    final List<DbWorkspace> workspaces = new ArrayList<>();
     for (int i = 0; i < count; ++i) {
-      createDbWorkspace(user, cdrVersion);
+      workspaces.add(createDbWorkspace(user, cdrVersion));
     }
     entityManager.flush();
+    return workspaces;
   }
 
   private void createUsers(int count) {

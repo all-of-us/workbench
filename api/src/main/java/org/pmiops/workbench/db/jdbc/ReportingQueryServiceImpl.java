@@ -462,6 +462,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+                + "WHERE active_status = 0\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
@@ -509,7 +510,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public int getWorkspacesCount() {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace", Integer.class);
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace WHERE active_status = 0", Integer.class);
   }
 
   @Override
