@@ -10,13 +10,13 @@ import org.springframework.web.context.annotation.RequestScope;
 @Configuration
 public class TanagraConfig {
 
-    @Bean
-    @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-    public TanagraApi tanagraApi(WorkbenchConfig workbenchConfig) {
-        TanagraApi api = new TanagraApi();
-        ApiClient apiClient = new ApiClient();
-        apiClient.setBasePath(workbenchConfig.tanagra.baseUrl);
-        api.setApiClient(apiClient);
-        return api;
-    }
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public TanagraApi tanagraApi(WorkbenchConfig workbenchConfig) {
+    TanagraApi api = new TanagraApi();
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.tanagra.baseUrl);
+    api.setApiClient(apiClient);
+    return api;
+  }
 }
