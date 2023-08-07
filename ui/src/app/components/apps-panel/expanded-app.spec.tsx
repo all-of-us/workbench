@@ -19,6 +19,7 @@ import {
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import {
   AppsApi as LeoAppsApi,
@@ -42,7 +43,6 @@ import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
 import { UIAppType } from './utils';
-import {PROXY_PATH_SUFFIX} from "../../utils/constants";
 
 const googleProject = 'project-for-test';
 const workspace = {

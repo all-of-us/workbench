@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
+import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
@@ -19,7 +20,6 @@ import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { InteractiveNotebook } from './interactive-notebook';
-import {PROXY_PATH_SUFFIX} from "../../utils/constants";
 
 let mockAppsApi;
 let mockNotebooksApi;
@@ -80,7 +80,7 @@ test('Edit Rmd file with running RStudio', async () => {
   await waitFor(() => {
     expect(spyWindowOpen).toHaveBeenCalledTimes(1);
     expect(spyWindowOpen).toHaveBeenCalledWith(
-      rStudioApp.proxyUrls[PROXY_PATH_SUFFIX],
+      rStudioApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
       '_blank'
     );
   });

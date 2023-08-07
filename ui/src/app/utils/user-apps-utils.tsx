@@ -13,9 +13,9 @@ import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
+import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
 import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
-import {PROXY_PATH_SUFFIX} from "./constants";
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
@@ -121,7 +121,7 @@ export const openRStudio = (
     [],
     false
   );
-  window.open(userApp.proxyUrls[PROXY_PATH_SUFFIX], '_blank').focus();
+  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openRStudioOrConfigPanel = (
