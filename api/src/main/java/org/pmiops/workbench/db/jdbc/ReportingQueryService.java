@@ -35,7 +35,7 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspace> getWorkspaces(long limit, long offset);
 
-  long getWorkspacesCount();
+  int getWorkspacesCount();
 
   default Stream<List<ReportingWorkspace>> getWorkspacesStream() {
     return getStream(this::getWorkspaces);
@@ -47,7 +47,7 @@ public interface ReportingQueryService {
     return getStream(this::getUsers);
   }
 
-  long getUsersCount();
+  int getUsersCount();
 
   List<ReportingCohort> getCohorts(long limit, long offset);
 
@@ -55,7 +55,7 @@ public interface ReportingQueryService {
     return getStream(this::getCohorts);
   }
 
-  long getCohortsCount();
+  int getCohortsCount();
 
   List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(long limit, long offset);
 
@@ -63,7 +63,7 @@ public interface ReportingQueryService {
     return getStream(this::getNewUserSatisfactionSurveys);
   }
 
-  long getNewUserSatisfactionSurveysCount();
+  int getNewUserSatisfactionSurveysCount();
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;

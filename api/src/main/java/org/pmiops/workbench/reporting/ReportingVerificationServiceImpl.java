@@ -89,7 +89,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
     // alt: this could be a Map, but we don't need to reference it in that way
-    List<Map.Entry<String, Supplier<Long>>> tableCounters =
+    List<Map.Entry<String, Supplier<Integer>>> tableCounters =
         List.of(
             Map.entry(
                 WorkspaceColumnValueExtractor.TABLE_NAME,
