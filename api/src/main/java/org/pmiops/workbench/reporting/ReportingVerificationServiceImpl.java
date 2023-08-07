@@ -178,22 +178,17 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     return workbenchConfigProvider.get().server.projectId;
   }
 
-  private ReportingUploadResult getUploadResult(
-      String tableName, long sourceRowCount, long snapshotTimestamp) {
-    return new ReportingUploadResult()
-        .tableName(tableName)
-        .sourceRowCount(sourceRowCount)
-        .destinationRowCount(getActualRowCount(tableName, snapshotTimestamp));
-  }
-
   private <T, E extends Enum<E> & ColumnValueExtractor<T>> ReportingUploadResult getUploadResult(
       ReportingSnapshot snapshot,
       Class<E> extractorClass,
       Function<ReportingSnapshot, List<T>> collectionExtractor) {
-    return getUploadResult(
-        getBigQueryTableName(extractorClass),
-        collectionExtractor.apply(snapshot).size(),
-        snapshot.getCaptureTimestamp());
+
+    String tableName = getBigQueryTableName(extractorClass);
+
+    return new ReportingUploadResult()
+        .tableName(tableName)
+        .sourceRowCount((long) collectionExtractor.apply(snapshot).size())
+        .destinationRowCount(getActualRowCount(tableName, snapshot.getCaptureTimestamp()));
   }
 
   private Long getActualRowCount(String tableName, long snapshotTimestamp) {
