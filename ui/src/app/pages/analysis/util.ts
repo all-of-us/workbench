@@ -1,51 +1,60 @@
 import { FileDetail } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { cond } from 'app/utils';
-
-const jupyterNotebookExtension = '.ipynb';
-const rstudioNotebookExtension = '.Rmd';
+import {
+  JUPYTER_FILE_EXT,
+  R_SCRIPT_EXT,
+  RMD_FILE_EXT,
+} from 'app/utils/constants';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
-  if (filename?.endsWith(jupyterNotebookExtension)) {
-    return filename.substring(
-      0,
-      filename.length - jupyterNotebookExtension.length
-    );
+  if (filename?.endsWith(JUPYTER_FILE_EXT)) {
+    return filename.substring(0, filename.length - JUPYTER_FILE_EXT.length);
   }
 
   return filename;
 }
 
 export function appendJupyterNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(jupyterNotebookExtension)) {
-    return filename + jupyterNotebookExtension;
+  if (filename && !filename.endsWith(JUPYTER_FILE_EXT)) {
+    return filename + JUPYTER_FILE_EXT;
   }
 
   return filename;
 }
 
-export function appendRstudioNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(rstudioNotebookExtension)) {
-    return filename + rstudioNotebookExtension;
+export function appendRStudioNotebookFileSuffix(filename: string) {
+  if (filename && !filename.endsWith(RMD_FILE_EXT)) {
+    return filename + RMD_FILE_EXT;
   }
 
   return filename;
 }
 
-export function appendNotebookFileSuffixByOldName(
+export function appendRScriptSuffix(filename: string) {
+  if (filename && !filename.endsWith(R_SCRIPT_EXT)) {
+    return filename + R_SCRIPT_EXT;
+  }
+
+  return filename;
+}
+
+export function appendAnalysisFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
   return cond(
     [
-      oldFileName.endsWith(jupyterNotebookExtension),
+      oldFileName.endsWith(JUPYTER_FILE_EXT),
       () => appendJupyterNotebookFileSuffix(filename),
     ],
     [
-      oldFileName.endsWith(rstudioNotebookExtension),
-      () => appendRstudioNotebookFileSuffix(filename),
+      oldFileName.endsWith(RMD_FILE_EXT),
+      () => appendRStudioNotebookFileSuffix(filename),
     ],
+    [oldFileName.endsWith(R_SCRIPT_EXT), () => appendRScriptSuffix(filename)],
     () => filename
   );
 }
@@ -60,4 +69,26 @@ export const getExistingNotebookNames = async (
 ): Promise<string[]> => {
   const notebooks = await listNotebooks(workspace);
   return notebooks.map((fd) => dropJupyterNotebookFileSuffix(fd.name));
+};
+
+const appsExtensionMap = [
+  {
+    extension: JUPYTER_FILE_EXT,
+    appType: UIAppType.JUPYTER,
+    canPlayground: true,
+  },
+  {
+    extension: RMD_FILE_EXT,
+    appType: UIAppType.RSTUDIO,
+    canPlayground: false,
+  },
+  {
+    extension: R_SCRIPT_EXT,
+    appType: UIAppType.RSTUDIO,
+    canPlayground: false,
+  },
+];
+
+export const getAppInfoFromFileName = (name: string) => {
+  return appsExtensionMap.find((app) => name.endsWith(app.extension));
 };

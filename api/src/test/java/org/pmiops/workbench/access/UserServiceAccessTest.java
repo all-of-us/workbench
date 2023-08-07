@@ -1013,6 +1013,7 @@ public class UserServiceAccessTest {
     assertRegisteredTierEnabled(dbUser);
 
     // Incomplete RAS module, expect user removed from Registered tier;
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
     accessModuleService.updateBypassTime(
         dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
@@ -1020,7 +1021,23 @@ public class UserServiceAccessTest {
 
     // Complete RAS Linking, verify user become registered
     accessModuleService.updateCompletionTime(
+        dbUser, DbAccessModuleName.IDENTITY, new Timestamp(PROVIDED_CLOCK.millis()));
+    accessModuleService.updateCompletionTime(
         dbUser, DbAccessModuleName.RAS_LOGIN_GOV, new Timestamp(PROVIDED_CLOCK.millis()));
+    dbUser = updateUserAccessTiers();
+    assertRegisteredTierEnabled(dbUser);
+  }
+
+  @Test
+  public void testRasLinkNotComplete_LoginGovDisabled() {
+    // IDENTITY and LOGIN.GOV modules are not required for registered tier access when
+    // enableRasLoginGovLinking is disabled.
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    providedWorkbenchConfig.access.enableRasLoginGovLinking = false;
+    dbUser = updateUserWithRetries(registerUserNow);
+    accessModuleService.updateBypassTime(dbUser.getUserId(), DbAccessModuleName.IDENTITY, false);
+    accessModuleService.updateBypassTime(
+        dbUser.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, false);
     dbUser = updateUserAccessTiers();
     assertRegisteredTierEnabled(dbUser);
   }
@@ -1348,7 +1365,7 @@ public class UserServiceAccessTest {
         user.getUserId(), DbAccessModuleName.TWO_FACTOR_AUTH, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), DbAccessModuleName.DATA_USER_CODE_OF_CONDUCT, true);
-    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.RAS_LOGIN_GOV, true);
+    accessModuleService.updateBypassTime(user.getUserId(), DbAccessModuleName.IDENTITY, true);
     accessModuleService.updateBypassTime(
         user.getUserId(), DbAccessModuleName.PUBLICATION_CONFIRMATION, true);
     accessModuleService.updateBypassTime(

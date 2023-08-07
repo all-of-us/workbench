@@ -1,8 +1,5 @@
 package org.pmiops.workbench.utils.mappers;
 
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
-import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.labelValueToAppType;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.Gson;
@@ -131,26 +128,21 @@ public interface LeonardoMapper {
   @Mapping(target = "isGceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
 
-  @SuppressWarnings("unchecked")
   @AfterMapping
   default void getDiskAfterMapper(
       @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
-    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoGetDiskResponse.getLabels());
+    setDiskEnvironmentType(disk, leoGetDiskResponse.getLabels());
   }
 
-  @SuppressWarnings("unchecked")
   @AfterMapping
   default void listDisksAfterMapper(
       @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
-    mapDiskLabelsToDiskAppType(disk, (Map<String, String>) leoListDisksResponse.getLabels());
+    setDiskEnvironmentType(disk, leoListDisksResponse.getLabels());
   }
 
-  default void mapDiskLabelsToDiskAppType(Disk disk, Map<String, String> diskLabels) {
-    if (diskLabels != null && diskLabels.containsKey(LEONARDO_LABEL_APP_TYPE)) {
-      disk.appType(labelValueToAppType(diskLabels.get(LEONARDO_LABEL_APP_TYPE)));
-    } else {
-      disk.isGceRuntime(true);
-    }
+  default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
+    LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(diskLabels)
+        .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
@@ -250,11 +242,10 @@ public interface LeonardoMapper {
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  @ValueMapping(source = "RSTUDIO", target = "CUSTOM")
   LeonardoAppType toLeonardoAppType(AppType appType);
 
-  @ValueMapping(source = "CUSTOM", target = "RSTUDIO")
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
+  @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
   AppType toApiAppType(LeonardoAppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {

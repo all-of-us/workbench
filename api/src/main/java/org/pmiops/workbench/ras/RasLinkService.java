@@ -7,6 +7,7 @@ import static org.pmiops.workbench.ras.RasLinkConstants.ERA_COMMONS_PROVIDER_NAM
 import static org.pmiops.workbench.ras.RasLinkConstants.FEDERATED_IDENTITIES;
 import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITIES;
 import static org.pmiops.workbench.ras.RasLinkConstants.IDENTITY_USERID;
+import static org.pmiops.workbench.ras.RasLinkConstants.ID_ME_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
@@ -25,9 +26,11 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbIdentityVerification.DbIdentityVerificationSystem;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.identityverification.IdentityVerificationService;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +38,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * Service handles link login.gov account with All of Us account. It finishes OAuth dance with RAS
- * then validate users use their login.gov account with IAL2 enabled.
+ * Service handles linking the user's selected identity provider account with All of Us account. It
+ * finishes OAuth dance with RAS then validate users use their RAS account with IAL2 enabled.
  *
  * <p>Key steps: Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
  *
@@ -94,15 +97,17 @@ import org.springframework.stereotype.Service;
  *  }
  * }</pre>
  *
- * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
- * {@code preferred_username} field is unique login.gov username. We can use that as login.gov user
- * name.
+ * The {@code preferred_username} field should end with either "@login.gov" or "@id.me" if using
+ * that to login. The {@code preferred_username} field is unique login.gov|id.me username. We can
+ * use that as login.|id.me user name.
  *
- * <p>Step4: Use step3's login.gov username to update AoU database by {@link
- * UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
+ * <p>Step4: Use step3's RAS username to update AoU database by {@link *
+ * UserService#updateRasLinkLoginGovStatus(String)} or {@link *
+ * UserService#updateRasLinkIdMeStatus(String)} (based on which service was used). Then return it as
+ * * user profile.
  *
- * <p>TODO(yonghao): Fow now we return {@llink ForbiddenException} for all scenarios, determine if
- * we need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
+ * <p>TODO(yonghao): Fow now we return {@link ForbiddenException} for all scenarios, determine if we
+ * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
  */
 @Service
 public class RasLinkService {
@@ -110,20 +115,24 @@ public class RasLinkService {
 
   private final AccessModuleService accessModuleService;
   private final UserService userService;
+
+  private final IdentityVerificationService identityVerificationService;
   private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
   @Autowired
   public RasLinkService(
       AccessModuleService accessModuleService,
       UserService userService,
+      IdentityVerificationService identityVerificationService,
       @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
     this.accessModuleService = accessModuleService;
     this.userService = userService;
+    this.identityVerificationService = identityVerificationService;
     this.rasOidcClientProvider = rasOidcClientProvider;
   }
 
-  /** Links RAS login.gov account with AoU account. */
-  public DbUser linkRasLoginGovAccount(String authCode, String redirectUrl) {
+  /** Links RAS account with AoU account. */
+  public DbUser linkRasAccount(String authCode, String redirectUrl) {
     OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
     JsonNode userInfoResponse;
     try {
@@ -149,9 +158,25 @@ public class RasLinkService {
       throw new ServerErrorException("Failed to link RAS account", e);
     }
 
+    String username = getUsername(userInfoResponse);
+    DbUser user;
+    if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateRasLinkIdMeStatus(username);
+      identityVerificationService.updateIdentityVerificationSystem(
+          user, DbIdentityVerificationSystem.ID_ME);
+    } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      user = userService.updateRasLinkLoginGovStatus(username);
+      identityVerificationService.updateIdentityVerificationSystem(
+          user, DbIdentityVerificationSystem.LOGIN_GOV);
+    } else {
+      throw new ForbiddenException(
+          String.format(
+              "User has neither a valid id.me account nor a valid login.gov account, preferred_username: %s",
+              username));
+    }
+
     // If eRA is not already linked, check response from RAS see if RAS contains eRA Linking
     // information.
-    DbUser user = userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
     Optional<AccessModuleStatus> eRAModuleStatus =
         accessModuleService.getAccessModuleStatus(user).stream()
             .filter(a -> a.getModuleName() == AccessModule.ERA_COMMONS)
@@ -178,18 +203,11 @@ public class RasLinkService {
   }
 
   /**
-   * Validates and extracts user's login.gov account from UserInfo response in Json format. See
+   * Validates and extracts user's preferred username from UserInfo response in Json format. See
    * class javadoc Step3 for more details.
    */
-  private static String getLoginGovUsername(JsonNode userInfo) {
-    String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
-    if (!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      throw new ForbiddenException(
-          String.format(
-              "User does not have valid login.gov account, preferred_username: %s",
-              preferredUsername));
-    }
-    return preferredUsername;
+  private static String getUsername(JsonNode userInfo) {
+    return userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
   }
 
   /**
@@ -209,6 +227,6 @@ public class RasLinkService {
 
   /** Decode an encoded url */
   private static String decodeUrl(String encodedUrl) throws UnsupportedEncodingException {
-    return URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString());
+    return URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8);
   }
 }

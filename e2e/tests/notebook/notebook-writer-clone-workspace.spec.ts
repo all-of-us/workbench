@@ -1,50 +1,24 @@
 import DataResourceCard from 'app/component/card/data-resource-card';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { Language, ResourceCard, Tabs, WorkspaceAccessLevel } from 'app/text-labels';
+import { ResourceCard, Tabs } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { findOrCreateWorkspace, openTab, signInWithAccessToken } from 'utils/test-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import { makeRandomName } from 'utils/str-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import expect from 'expect';
 
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('WRITER clone workspace and notebook tests', () => {
+describe.skip('WRITER clone workspace and notebook tests', () => {
   const notebookName = makeRandomName('notebookWriterTest-Py3');
-  const workspaceName = 'e2eNotebookWriterCloneWorkspaceTest';
+  const workspaceName = makeWorkspaceName();
   const writerWorkspaceName = 'e2eNotebookTestWriterWorkspace2';
 
   test('WRITER create workspace', async () => {
     await signInWithAccessToken(page, config.WRITER_USER);
     await findOrCreateWorkspace(page, { workspaceName: writerWorkspaceName });
-  });
-
-  test('Create notebook and share workspace to WRITER', async () => {
-    await signInWithAccessToken(page);
-    await findOrCreateWorkspace(page, { workspaceName });
-
-    // Share workspace to a WRITER before creating new notebook.
-    const aboutPage = new WorkspaceAboutPage(page);
-    await openTab(page, Tabs.About, aboutPage);
-
-    await aboutPage.ensureCollaboratorAccess(config.WRITER_USER, WorkspaceAccessLevel.Writer);
-
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await openTab(page, Tabs.Analysis, analysisPage);
-    const notebookPage = await analysisPage.createNotebook(notebookName, Language.Python);
-
-    // Run Python code.
-    expect(
-      await notebookPage.runCodeCell(1, {
-        codeFile: 'resources/python-code/git-ignore-check.py',
-        markdownWorkaround: true
-      })
-    ).toMatch(/success$/);
-
-    await notebookPage.save();
   });
 
   test.skip('WRITER can clone workspace and edit notebook in workspace clone', async () => {

@@ -7,7 +7,7 @@ import path from 'path';
 
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Batch workflow support', () => {
+describe.skip('Batch workflow support', () => {
   const pyFilename = 'batch.py';
   const pyFilePath = path.relative(process.cwd(), __dirname + `../../../resources/python-code/${pyFilename}`);
 

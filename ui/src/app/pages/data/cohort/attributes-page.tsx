@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 
@@ -262,6 +263,19 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
   );
 };
 
+const defaultOptions = [
+  { label: 'Equals', value: Operator.EQUAL.toString() },
+  {
+    label: 'Greater Than or Equal To',
+    value: Operator.GREATERTHANOREQUALTO.toString(),
+  },
+  {
+    label: 'Less Than or Equal To',
+    value: Operator.LESSTHANOREQUALTO.toString(),
+  },
+  { label: 'Between', value: Operator.BETWEEN.toString() },
+];
+
 const optionUtil = {
   ANY: { display: 'Any value', code: 'Any' },
   EQUAL: { display: '= ', code: '01' },
@@ -269,13 +283,6 @@ const optionUtil = {
   LESS_THAN_OR_EQUAL_TO: { display: '<= ', code: '03' },
   BETWEEN: { display: '', code: '04' },
 };
-
-interface AttributeForm {
-  anyValue: boolean; // Include any values that exist (Measurements and COPE only)
-  anyVersion: boolean; // Include any version that exist (COPE only)
-  num: Array<any>; // Numerical attributes (Physical Measurements, Measurements or COPE)
-  cat: Array<any>; // Categorical attributes (Measurements only)
-}
 
 export interface AttributesPageProps {
   back: Function;
@@ -285,938 +292,847 @@ export interface AttributesPageProps {
   workspace: WorkspaceData;
 }
 
-interface State {
-  calculating: boolean;
-  count: number;
-  countError: boolean;
-  form: AttributeForm;
-  formErrors: Array<string>;
-  formValid: boolean;
-  isCOPESurvey: boolean;
-  isCOPEOrMinuteSurvey: boolean;
-  loading: boolean;
-  options: any;
-}
 export const AttributesPage = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohortCriteria()
-)(
-  class extends React.Component<AttributesPageProps, State> {
-    constructor(props: AttributesPageProps) {
-      super(props);
-      this.state = {
-        calculating: false,
-        count: null,
-        countError: false,
-        form: { anyValue: false, anyVersion: false, num: [], cat: [] },
-        formErrors: [],
-        formValid: false,
-        isCOPESurvey: false,
-        isCOPEOrMinuteSurvey: false,
-        loading: true,
-        options: [
-          { label: 'Equals', value: Operator.EQUAL },
-          {
-            label: 'Greater Than or Equal To',
-            value: Operator.GREATERTHANOREQUALTO,
-          },
-          { label: 'Less Than or Equal To', value: Operator.LESSTHANOREQUALTO },
-          { label: 'Between', value: Operator.BETWEEN },
-        ],
-      };
-    }
+)(({ back, close, criteria, node, workspace }: AttributesPageProps) => {
+  const [calculating, setCalculating] = useState(false);
+  const [attributeCount, setAttributeCount] = useState(null);
+  const [countError, setCountError] = useState(false);
+  const [anyValue, setAnyValue] = useState(false);
+  const [anyVersion, setAnyVersion] = useState(false);
+  const [numAttributes, setNumAttributes] = useState([]);
+  const [catAttributes, setCatAttributes] = useState([]);
+  const [formUpdated, setFormUpdated] = useState(0);
+  const [formErrors, setFormErrors] = useState([]);
+  const [formValid, setFormValid] = useState(false);
+  const [isCOPEOrMinuteSurvey, setIsCOPEOrMinuteSurvey] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [options, setOptions] = useState(
+    JSON.parse(JSON.stringify(defaultOptions))
+  );
 
-    componentDidMount() {
-      this.initAttributeForm();
-    }
+  const isSurvey = () => {
+    return node.domainId === Domain.SURVEY;
+  };
 
-    componentDidUpdate(prevProps: Readonly<AttributesPageProps>): void {
-      if (this.props.node !== prevProps.node) {
-        // A different node has been selected, so we reset the form and load the new attributes
-        this.setState(
-          {
-            form: { anyValue: false, anyVersion: false, num: [], cat: [] },
-            formErrors: [],
-            formValid: this.isPhysicalMeasurement,
-            loading: true,
-          },
-          () => this.initAttributeForm()
-        );
-      }
-    }
-
-    initAttributeForm() {
-      const {
-        node: { subtype },
-      } = this.props;
-      const { form, options } = this.state;
-      if (this.isSurvey) {
-        this.getSurveyAttributes();
-      } else if (this.isMeasurement || this.isObservation) {
-        this.getAttributes();
-      } else {
-        if (!options.find((opt) => opt.value === AttrName.ANY.toString())) {
-          options.unshift({
-            label: optionUtil.ANY.display,
-            value: AttrName[AttrName.ANY],
-          });
-        }
-        form.num =
-          subtype === CriteriaSubType[CriteriaSubType.BP]
-            ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-            : [{ name: subtype, operator: 'ANY', operands: [] }];
-        this.setState({
-          count: this.nodeCount,
-          form,
-          formValid: true,
-          loading: false,
-          options,
-        });
-      }
-    }
-
-    async getSurveyAttributes() {
-      const {
-        node: { conceptId, parentId, path, subtype, value },
-        workspace: { namespace, id },
-      } = this.props;
-      const { form, options } = this.state;
-      const { cdrVersionId } = currentWorkspaceStore.getValue();
-      const surveyId = path.split('.')[0];
-      let surveyNode = ppiSurveys
-        .getValue()
-        [cdrVersionId]?.find((n) => n.id === +surveyId);
-      if (!surveyNode) {
-        await cohortBuilderApi()
-          .findCriteriaBy(
-            namespace,
-            id,
-            Domain.SURVEY.toString(),
-            CriteriaType.PPI.toString(),
-            false,
-            0
-          )
-          .then(({ items }) => {
-            const rootSurveys = ppiSurveys.getValue();
-            rootSurveys[cdrVersionId] = items;
-            ppiSurveys.next(rootSurveys);
-            surveyNode = items.find((n) => n.id === +surveyId);
-          });
-      }
-      if (
-        !!surveyNode &&
-        [COPE_SURVEY_GROUP_NAME, MINUTE_SURVEY_GROUP_NAME].includes(
-          surveyNode.name
-        )
-      ) {
-        const promises = [];
-        if (
-          subtype === CriteriaSubType.QUESTION ||
-          (subtype === CriteriaSubType.ANSWER && !value)
-        ) {
-          promises.push(
-            cohortBuilderApi().findSurveyVersionByQuestionConceptId(
-              namespace,
-              id,
-              conceptId
-            )
-          );
-        } else {
-          promises.push(
-            cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
-              namespace,
-              id,
-              ppiQuestions.getValue()[parentId].conceptId,
-              +value
-            )
-          );
-        }
-        if (subtype === CriteriaSubType.ANSWER) {
-          promises.push(
-            cohortBuilderApi().findCriteriaAttributeByConceptId(
-              namespace,
-              id,
-              conceptId
-            )
-          );
-        }
-        const [surveyVersions, numericalAttributes] = await Promise.all(
-          promises
-        );
-        form.cat = surveyVersions.items.map((attr) => ({
-          checked: false,
-          conceptName: attr.displayName,
-          estCount: attr.itemCount,
-          valueAsConceptId: attr.surveyVersionConceptId,
-        }));
-        if (
-          numericalAttributes &&
-          !(subtype === CriteriaSubType.ANSWER.toString() && !!value)
-        ) {
-          numericalAttributes.items.forEach((attr) => {
-            if (!form.num.length) {
-              form.num.push({
+  const getAttributes = () => {
+    const { conceptId } = node;
+    const { id, namespace } = workspace;
+    cohortBuilderApi()
+      .findCriteriaAttributeByConceptId(namespace, id, conceptId)
+      .then((resp) => {
+        const newAttributes = { numAttributes: [], catAttributes: [] };
+        resp.items.forEach((attr) => {
+          if (attr.type === AttrName[AttrName.NUM]) {
+            // NUM attributes set the min and max range for the number inputs in the attributes form
+            if (!newAttributes.numAttributes.length) {
+              newAttributes.numAttributes.push({
                 name: AttrName.NUM,
-                operator: null,
+                operator: isSurvey() ? 'ANY' : null,
                 operands: [],
-                conceptId: +value,
+                conceptId: conceptId,
                 [attr.conceptName]: parseFloat(attr.estCount),
               });
             } else {
-              form.num[0][attr.conceptName] = parseFloat(attr.estCount);
-            }
-          });
-        }
-        this.setState({
-          count: null,
-          form,
-          isCOPEOrMinuteSurvey: true,
-          loading: false,
-        });
-      } else {
-        if (
-          !options.find((option) => option.value === AttrName.ANY.toString())
-        ) {
-          options.unshift({
-            label: optionUtil.ANY.display,
-            value: AttrName[AttrName.ANY],
-          });
-        }
-        this.setState(
-          { formValid: true, isCOPEOrMinuteSurvey: false, options },
-          () => this.getAttributes()
-        );
-      }
-    }
-
-    getAttributes() {
-      const {
-        node: { conceptId },
-        workspace: { id, namespace },
-      } = this.props;
-      const { form } = this.state;
-      cohortBuilderApi()
-        .findCriteriaAttributeByConceptId(namespace, id, conceptId)
-        .then((resp) => {
-          resp.items.forEach((attr) => {
-            if (attr.type === AttrName[AttrName.NUM]) {
-              // NUM attributes set the min and max range for the number inputs in the attributes form
-              if (!form.num.length) {
-                form.num.push({
-                  name: AttrName.NUM,
-                  operator: this.isSurvey ? 'ANY' : null,
-                  operands: [],
-                  conceptId: conceptId,
-                  [attr.conceptName]: parseFloat(attr.estCount),
-                });
-              } else {
-                form.num[0][attr.conceptName] = parseFloat(attr.estCount);
-              }
-            } else {
-              // CAT attributes are displayed as checkboxes in the attributes form
-              if (parseInt(attr.estCount, 10) > 0) {
-                // Property 'checked' does not exist on type 'CriteriaAttribute'.
-                // TODO RW-5572 confirm proper behavior and fix
-                // eslint-disable-next-line @typescript-eslint/dot-notation
-                attr['checked'] = false;
-                form.cat.push(attr);
-              }
-            }
-          });
-          this.setState({ count: null, form, loading: false });
-        });
-    }
-
-    toggleAnyValueCheckbox(checked: boolean) {
-      const { form } = this.state;
-      let {
-        node: { count },
-      } = this.props;
-      form.anyValue = checked;
-      if (checked) {
-        form.num = form.num.map((attr) => ({
-          ...attr,
-          operator: this.isPhysicalMeasurement ? 'ANY' : null,
-          operands: [],
-        }));
-        if (this.isMeasurement || this.isObservation) {
-          form.cat = form.cat.map((attr) => ({ ...attr, checked: false }));
-        }
-      }
-      if (!checked || count === -1) {
-        count = null;
-      }
-      this.setState({ form, count }, () => this.validateForm());
-    }
-
-    toggleAnyVersionCheckbox(checked: boolean) {
-      const { form } = this.state;
-      form.anyVersion = checked;
-      form.cat = form.cat.map((attr) => ({ ...attr, checked: false }));
-      this.setState({ form }, () => this.validateForm());
-    }
-
-    selectChange(attributeIndex: number, value: string) {
-      const { form } = this.state;
-      form.num[attributeIndex].operator = value;
-      if (this.isBloodPressure) {
-        // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
-        const otherAttribute = attributeIndex === 0 ? 1 : 0;
-        if (value === 'ANY') {
-          form.num[attributeIndex].operands = [];
-          form.num[otherAttribute].operands = [];
-          form.num[otherAttribute].operator = 'ANY';
-        } else if (form.num[otherAttribute].operator === 'ANY') {
-          form.num[otherAttribute].operator = value;
-        }
-      } else if (value === 'ANY') {
-        form.num[attributeIndex].operands = [];
-      }
-      if (value !== Operator[Operator.BETWEEN]) {
-        // delete second operand if it exists
-        form.num[attributeIndex].operands.splice(1);
-      }
-      const count = value === 'ANY' && !this.isSurvey ? this.nodeCount : null;
-      this.setState({ form, count }, () => this.validateForm());
-    }
-
-    inputChange(input: string, attributeIndex: number, operandIndex: number) {
-      const { form } = this.state;
-      form.num[attributeIndex].operands[operandIndex] =
-        sanitizeNumericalInput(input);
-      this.setState({ form, count: null }, () => this.validateForm());
-    }
-
-    checkboxChange(checked: boolean, index: number) {
-      const { form } = this.state;
-      form.cat[index].checked = checked;
-      this.setState({ form, count: null }, () => this.validateForm());
-    }
-
-    validateForm() {
-      const { form, isCOPEOrMinuteSurvey } = this.state;
-      if (
-        (form.anyValue || (isCOPEOrMinuteSurvey && form.num.length === 0)) &&
-        (!isCOPEOrMinuteSurvey || form.anyVersion)
-      ) {
-        this.setState({ formValid: true, formErrors: [] });
-      } else {
-        let formValid = true,
-          operatorSelected = form.num.length !== 0;
-        const formErrors = form.num.reduce((acc, attr) => {
-          const { MIN, MAX, operator } = attr;
-          const operands = attr.operands.map((op) => parseFloat(op));
-          switch (operator) {
-            case null:
-              operatorSelected = false;
-              return acc;
-            case 'ANY':
-              return acc;
-            case Operator.BETWEEN:
-              if (operands.length < 2) {
-                formValid = false;
-              }
-              break;
-            default:
-              if (operands.length === 0) {
-                formValid = false;
-              }
-          }
-          if (operands.includes(NaN)) {
-            formValid = false;
-            acc.add('Form can only accept valid numbers');
-          }
-          if (this.isPhysicalMeasurement && operands.some((op) => op < 0)) {
-            formValid = false;
-            acc.add('Form cannot accept negative values');
-          }
-          if (this.hasRange && operands.some((op) => op < MIN || op > MAX)) {
-            formValid = false;
-            acc.add(
-              `Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`
-            );
-          }
-          return acc;
-        }, new Set());
-        // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
-        // dropdown and no categorical checkboxes checked
-        if ((this.isMeasurement || this.isObservation) && formValid) {
-          formValid = operatorSelected || form.cat.some((attr) => attr.checked);
-        }
-        if (isCOPEOrMinuteSurvey && formValid) {
-          formValid =
-            (form.num.length === 0 || form.anyValue || operatorSelected) &&
-            (form.anyVersion || form.cat.some((attr) => attr.checked));
-        }
-        this.setState({ formErrors: Array.from(formErrors), formValid });
-      }
-    }
-
-    get nodeCount() {
-      const {
-        node: { count, parentId },
-      } = this.props;
-      if (this.isSurvey) {
-        const parent = ppiQuestions.getValue()[parentId];
-        return !!parent ? parent.count : null;
-      } else {
-        return count;
-      }
-    }
-
-    get paramId() {
-      const {
-        node: { conceptId, id, value },
-      } = this.props;
-      const { form, isCOPEOrMinuteSurvey } = this.state;
-      const code = form.anyValue
-        ? 'Any'
-        : form.num.reduce((acc, attr) => {
-            if (attr.operator) {
-              acc += optionUtil[attr.operator].code;
-            }
-            return acc;
-          }, '');
-      const paramConceptId =
-        isCOPEOrMinuteSurvey && !!value ? value : conceptId;
-      // make sure param ID is unique for different checkbox combinations
-      const catValues = form.cat
-        .filter((c) => c.checked)
-        .map((c) => c.valueAsConceptId)
-        .join('');
-      return `param${(paramConceptId || id) + code + catValues}`;
-    }
-
-    get displayName() {
-      const {
-        node: { name },
-      } = this.props;
-      return stripHtml(name);
-    }
-
-    get paramWithAttributes() {
-      const {
-        node,
-        node: { name, subtype, value },
-      } = this.props;
-      const { form, isCOPEOrMinuteSurvey } = this.state;
-      let paramName;
-      const attrs = [];
-      if (!isCOPEOrMinuteSurvey && form.anyValue) {
-        paramName = name + ` (${optionUtil.ANY.display})`;
-      } else if (isCOPEOrMinuteSurvey && form.anyValue && form.anyVersion) {
-        paramName = name + ' (Any version AND any value)';
-      } else {
-        form.num
-          .filter((at) => at.operator)
-          .forEach(({ operator, operands, conceptId }) => {
-            const attr = { name: AttrName.NUM, operator, operands };
-            if (subtype === CriteriaSubType.BP) {
-              // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
-              // TODO RW-5572 confirm proper behavior and fix
-              // eslint-disable-next-line @typescript-eslint/dot-notation
-              attr['conceptId'] = conceptId;
-            }
-            if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
-              attr.name = AttrName.ANY;
-              attr.operands = [];
-              delete attr.operator;
-              attrs.push(attr);
-            } else if (attr.operator !== 'ANY') {
-              attrs.push(attr);
-            }
-          });
-        if (form.cat.some((at) => at.checked)) {
-          const catOperands = form.cat.reduce((checked, current) => {
-            if (current.checked) {
-              checked.push(current.valueAsConceptId.toString());
-            }
-            return checked;
-          }, []);
-          if (isCOPEOrMinuteSurvey && !form.anyVersion) {
-            attrs.push({
-              name: AttrName.SURVEYVERSIONCONCEPTID,
-              operator: Operator.IN,
-              operands: catOperands,
-            });
-          } else if (!isCOPEOrMinuteSurvey) {
-            attrs.push({
-              name: AttrName.CAT,
-              operator: Operator.IN,
-              operands: catOperands,
-            });
-          }
-        }
-        paramName = this.paramName;
-      }
-      if (
-        isCOPEOrMinuteSurvey &&
-        subtype === CriteriaSubType.ANSWER &&
-        !!value
-      ) {
-        attrs.push({
-          name: AttrName.CAT,
-          operator: Operator.IN,
-          operands: [value],
-        });
-      }
-      if (
-        subtype === CriteriaSubType.ANSWER &&
-        (form.anyValue ||
-          (form.num.length && form.num[0].operator === 'ANY')) &&
-        value === ''
-      ) {
-        attrs.push({ name: AttrName.ANY });
-      }
-      return {
-        ...node,
-        parameterId: this.paramId,
-        name: paramName,
-        attributes: attrs,
-      };
-    }
-
-    get paramName() {
-      const { node } = this.props;
-      const { form } = this.state;
-      const selectionDisplay = [];
-      let name = '';
-      if (form.anyVersion) {
-        selectionDisplay.push('Any version');
-      }
-      form.num
-        .filter((at) => at.operator)
-        .forEach((attr, i) => {
-          if (attr.operator === 'ANY') {
-            if (i === 0) {
-              name += optionUtil.ANY.display;
+              newAttributes.numAttributes[0][attr.conceptName] = parseFloat(
+                attr.estCount
+              );
             }
           } else {
-            if (i > 0) {
-              name += ' / ';
+            // CAT attributes are displayed as checkboxes in the attributes form
+            if (parseInt(attr.estCount, 10) > 0) {
+              // Property 'checked' does not exist on type 'CriteriaAttribute'.
+              // TODO RW-5572 confirm proper behavior and fix
+              // eslint-disable-next-line @typescript-eslint/dot-notation
+              attr['checked'] = false;
+              newAttributes.catAttributes.push(attr);
             }
-            if (node.subtype === CriteriaSubType.BP) {
-              name += attr.name + ' ';
-            }
-            name +=
-              optionUtil[attr.operator].display +
-              attr.operands
-                .map((op) => parseFloat(op).toLocaleString())
-                .join('-');
           }
         });
-      if (name !== '') {
-        selectionDisplay.push(name);
-      }
-      form.cat
-        .filter((ca) => ca.checked)
-        .forEach((attr) => selectionDisplay.push(attr.conceptName));
-      const nodeName =
-        node.domainId === Domain.SURVEY && !node.group
-          ? `${ppiQuestions.getValue()[node.parentId].name} - ${node.name}`
-          : node.name;
-      return (
-        nodeName +
-        ' (' +
-        selectionDisplay.join(', ') +
-        (this.hasUnits && form.num[0].operator !== AttrName.ANY
-          ? ' ' + PM_UNITS[node.subtype]
-          : '') +
-        ')'
-      );
+        setAttributeCount(null);
+        setCatAttributes(newAttributes.catAttributes);
+        setNumAttributes(newAttributes.numAttributes);
+        setLoading(false);
+      });
+  };
+
+  const getSurveyAttributes = async () => {
+    const { conceptId, parentId, path, subtype, value } = node;
+    const { namespace, id } = workspace;
+    const { cdrVersionId } = currentWorkspaceStore.getValue();
+    const surveyId = path.split('.')[0];
+    let surveyNode = ppiSurveys
+      .getValue()
+      [cdrVersionId]?.find((n) => n.id === +surveyId);
+    if (!surveyNode) {
+      await cohortBuilderApi()
+        .findCriteriaBy(
+          namespace,
+          id,
+          Domain.SURVEY.toString(),
+          CriteriaType.PPI.toString(),
+          false,
+          0
+        )
+        .then(({ items }) => {
+          const rootSurveys = ppiSurveys.getValue();
+          rootSurveys[cdrVersionId] = items;
+          ppiSurveys.next(rootSurveys);
+          surveyNode = items.find((n) => n.id === +surveyId);
+        });
     }
-
-    requestPreview() {
-      const {
-        workspace: { id, namespace },
-      } = this.props;
-
-      this.setState({ count: null, calculating: true, countError: false });
-      const param = this.paramWithAttributes;
-      const label = `Calculate - ${domainToTitle(param.domainId)}${
-        this.isPhysicalMeasurement ? subTypeToTitle(param.subtype) : ''
-      }`;
-      AnalyticsTracker.CohortBuilder.AttributesAction(label);
-      const request = {
-        excludes: [],
-        includes: [
-          {
-            items: [
-              {
-                type: param.domainId,
-                searchParameters: [mapParameter(param)],
-                modifiers: [],
-              },
-            ],
-            temporal: false,
-          },
-        ],
-        dataFilters: [],
-      };
-      cohortBuilderApi()
-        .countParticipants(namespace, id, request)
-        .then(
-          (response) => {
-            this.setState({ count: response, calculating: false });
-          },
-          () => {
-            this.setState({ calculating: false, countError: true });
-          }
+    if (
+      !!surveyNode &&
+      [COPE_SURVEY_GROUP_NAME, MINUTE_SURVEY_GROUP_NAME].includes(
+        surveyNode.name
+      )
+    ) {
+      const promises = [];
+      if (
+        subtype === CriteriaSubType.QUESTION ||
+        (subtype === CriteriaSubType.ANSWER && !value)
+      ) {
+        promises.push(
+          cohortBuilderApi().findSurveyVersionByQuestionConceptId(
+            namespace,
+            id,
+            conceptId
+          )
         );
+      } else {
+        promises.push(
+          cohortBuilderApi().findSurveyVersionByQuestionConceptIdAndAnswerConceptId(
+            namespace,
+            id,
+            ppiQuestions.getValue()[parentId].conceptId,
+            +value
+          )
+        );
+      }
+      if (subtype === CriteriaSubType.ANSWER) {
+        promises.push(
+          cohortBuilderApi().findCriteriaAttributeByConceptId(
+            namespace,
+            id,
+            conceptId
+          )
+        );
+      }
+      const [surveyVersions, numericalAttributes] = await Promise.all(promises);
+      const updatedCatAttributes = surveyVersions.items.map((attr) => ({
+        checked: false,
+        conceptName: attr.displayName,
+        estCount: attr.itemCount,
+        valueAsConceptId: attr.surveyVersionConceptId,
+      }));
+      setCatAttributes(updatedCatAttributes);
+      if (
+        numericalAttributes &&
+        !(subtype === CriteriaSubType.ANSWER.toString() && !!value)
+      ) {
+        numericalAttributes.items.forEach((attr) => {
+          if (!numAttributes.length) {
+            numAttributes.push({
+              name: AttrName.NUM,
+              operator: null,
+              operands: [],
+              conceptId: +value,
+              [attr.conceptName]: parseFloat(attr.estCount),
+            });
+          } else {
+            numAttributes[0][attr.conceptName] = parseFloat(attr.estCount);
+          }
+        });
+        setNumAttributes(numAttributes);
+      }
+      setAttributeCount(null);
+      setIsCOPEOrMinuteSurvey(true);
+      setLoading(false);
+    } else {
+      if (!options.find((option) => option.value === AttrName.ANY.toString())) {
+        options.unshift({
+          label: optionUtil.ANY.display,
+          value: AttrName[AttrName.ANY],
+        });
+      }
+      setFormValid(true);
+      setIsCOPEOrMinuteSurvey(false);
+      setOptions(options);
+      getAttributes();
     }
+  };
 
-    addParameterToSearchItem() {
-      const { close } = this.props;
-      let { criteria } = this.props;
-      const param = this.paramWithAttributes;
-      const label = `Add - ${domainToTitle(param.domainId)}${
-        this.isPhysicalMeasurement ? subTypeToTitle(param.subtype) : ''
-      }`;
-      AnalyticsTracker.CohortBuilder.AttributesAction(label);
-      criteria = criteria.filter(
-        (crit) => crit.parameterId !== param.parameterId
+  const isPhysicalMeasurement = () => {
+    return node.domainId === Domain.PHYSICALMEASUREMENT;
+  };
+
+  const hasUnits = () => {
+    return (
+      isPhysicalMeasurement && typeof PM_UNITS[node.subtype] !== 'undefined'
+    );
+  };
+
+  const isMeasurement = () => {
+    return node.domainId === Domain.MEASUREMENT;
+  };
+
+  const isObservation = () => {
+    return node.domainId === Domain.OBSERVATION;
+  };
+
+  const isBloodPressure = () => {
+    return node.subtype === CriteriaSubType.BP;
+  };
+
+  const hasRange = () => {
+    return isMeasurement() || isObservation() || isSurvey();
+  };
+
+  const disableAddButton = () => {
+    return calculating || !formValid;
+  };
+
+  const disableCalculateButton = () => {
+    return (
+      calculating ||
+      !formValid ||
+      (anyValue && attributeCount !== null) ||
+      (isCOPEOrMinuteSurvey &&
+        !anyVersion &&
+        !catAttributes.some((attr) => attr.checked)) ||
+      (!isSurvey() &&
+        numAttributes.length &&
+        numAttributes.every((attr) => attr.operator === 'ANY'))
+    );
+  };
+
+  const nodeCount = () => {
+    const { count, parentId } = node;
+    if (isSurvey()) {
+      const parent = ppiQuestions.getValue()[parentId];
+      return !!parent ? parent.count : null;
+    } else {
+      return count;
+    }
+  };
+
+  const initAttributeForm = () => {
+    setLoading(true);
+    setFormErrors([]);
+    const { subtype } = node;
+    if (isSurvey()) {
+      getSurveyAttributes();
+    } else if (isMeasurement() || isObservation()) {
+      getAttributes();
+    } else {
+      if (!options.find((opt) => opt.value === AttrName.ANY.toString())) {
+        options.unshift({
+          label: optionUtil.ANY.display,
+          value: AttrName[AttrName.ANY],
+        });
+      }
+      const updatedNumAttributes =
+        subtype === CriteriaSubType[CriteriaSubType.BP]
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+          : [{ name: subtype, operator: 'ANY', operands: [] }];
+      setOptions(options);
+      setAttributeCount(nodeCount());
+      setNumAttributes(updatedNumAttributes);
+      setFormValid(true);
+      setLoading(false);
+    }
+  };
+
+  const validateForm = () => {
+    if (
+      (anyValue || (isCOPEOrMinuteSurvey && numAttributes.length === 0)) &&
+      (!isCOPEOrMinuteSurvey || anyVersion)
+    ) {
+      setFormErrors([]);
+      setFormValid(true);
+    } else {
+      let updatedFormValid = true,
+        operatorSelected = numAttributes.length !== 0;
+      const updatedFormErrors = numAttributes.reduce((acc, attr) => {
+        const { MIN, MAX, operator } = attr;
+        const operands = attr.operands.map((op) => parseFloat(op));
+        switch (operator) {
+          case null:
+            operatorSelected = false;
+            return acc;
+          case 'ANY':
+            return acc;
+          case Operator.BETWEEN:
+            if (operands.length < 2) {
+              updatedFormValid = false;
+            }
+            break;
+          default:
+            if (operands.length === 0) {
+              updatedFormValid = false;
+            }
+        }
+        if (operands.includes(NaN)) {
+          updatedFormValid = false;
+          acc.add('Form can only accept valid numbers');
+        }
+        if (isPhysicalMeasurement() && operands.some((op) => op < 0)) {
+          updatedFormValid = false;
+          acc.add('Form cannot accept negative values');
+        }
+        if (hasRange() && operands.some((op) => op < MIN || op > MAX)) {
+          updatedFormValid = false;
+          acc.add(
+            `Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`
+          );
+        }
+        return acc;
+      }, new Set());
+      // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
+      // dropdown and no categorical checkboxes checked
+      if ((isMeasurement() || isObservation()) && updatedFormValid) {
+        updatedFormValid =
+          operatorSelected || catAttributes.some((attr) => attr.checked);
+      }
+      if (isCOPEOrMinuteSurvey && updatedFormValid) {
+        updatedFormValid =
+          (numAttributes.length === 0 || anyValue || operatorSelected) &&
+          (anyVersion || catAttributes.some((attr) => attr.checked));
+      }
+      setFormErrors(Array.from(updatedFormErrors));
+      setFormValid(updatedFormValid);
+    }
+  };
+
+  useEffect(() => {
+    setOptions(defaultOptions);
+    setFormUpdated(0);
+    setAnyValue(false);
+    setAnyVersion(false);
+    setCatAttributes([]);
+    setNumAttributes([]);
+    initAttributeForm();
+  }, [node.id]);
+
+  useEffect(() => {
+    if (formUpdated > 0) {
+      validateForm();
+    }
+  }, [formUpdated]);
+
+  const toggleAnyValueCheckbox = (checked: boolean) => {
+    let { count } = node;
+    setAnyValue(checked);
+    if (checked) {
+      setNumAttributes((prevNumAttributes) =>
+        prevNumAttributes.map((attr) => ({
+          ...attr,
+          operator: isPhysicalMeasurement() ? 'ANY' : null,
+          operands: [],
+        }))
       );
-      currentCohortCriteriaStore.next([...criteria, param]);
-      close();
+      if (isMeasurement() || isObservation()) {
+        setCatAttributes((prevCatAttributes) =>
+          prevCatAttributes.map((attr) => ({ ...attr, checked: false }))
+        );
+      }
     }
+    if (!checked || count === -1) {
+      count = null;
+    }
+    setAttributeCount(count);
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
+  };
 
-    get hasUnits() {
-      const {
-        node: { subtype },
-      } = this.props;
-      return (
-        this.isPhysicalMeasurement && typeof PM_UNITS[subtype] !== 'undefined'
+  const toggleAnyVersionCheckbox = (checked: boolean) => {
+    setAnyVersion(checked);
+    setCatAttributes((prevCatAttributes) =>
+      prevCatAttributes.map((attr) => ({ ...attr, checked: false }))
+    );
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
+  };
+
+  const selectChange = (attributeIndex: number, value: string) => {
+    const updatedNumAttributes = JSON.parse(JSON.stringify(numAttributes));
+    updatedNumAttributes[attributeIndex].operator = value;
+    if (isBloodPressure()) {
+      // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
+      const otherAttribute = attributeIndex === 0 ? 1 : 0;
+      if (value === 'ANY') {
+        updatedNumAttributes[attributeIndex].operands = [];
+        updatedNumAttributes[otherAttribute].operands = [];
+        updatedNumAttributes[otherAttribute].operator = 'ANY';
+      } else if (updatedNumAttributes[otherAttribute].operator === 'ANY') {
+        updatedNumAttributes[otherAttribute].operator = value;
+      }
+    } else if (value === 'ANY') {
+      updatedNumAttributes[attributeIndex].operands = [];
+    }
+    if (value !== Operator[Operator.BETWEEN]) {
+      // delete second operand if it exists
+      updatedNumAttributes[attributeIndex].operands.splice(1);
+    }
+    setAttributeCount(value === 'ANY' && !isSurvey() ? nodeCount() : null);
+    setNumAttributes(updatedNumAttributes);
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
+  };
+
+  const inputChange = (
+    input: string,
+    attributeIndex: number,
+    operandIndex: number
+  ) => {
+    setNumAttributes((prevNumAttributes) => {
+      prevNumAttributes[attributeIndex].operands[operandIndex] =
+        sanitizeNumericalInput(input);
+      return prevNumAttributes;
+    });
+    setAttributeCount(null);
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
+  };
+
+  const checkboxChange = (checked: boolean, index: number) => {
+    setCatAttributes((prevCatAttributes) => {
+      prevCatAttributes[index].checked = checked;
+      return prevCatAttributes;
+    });
+    setAttributeCount(null);
+    setFormUpdated((prevFormUpdated) => prevFormUpdated + 1);
+  };
+
+  const paramId = () => {
+    const { conceptId, id, value } = node;
+    const code = anyValue
+      ? 'Any'
+      : numAttributes.reduce((acc, attr) => {
+          if (attr.operator) {
+            acc += optionUtil[attr.operator].code;
+          }
+          return acc;
+        }, '');
+    const paramConceptId = isCOPEOrMinuteSurvey && !!value ? value : conceptId;
+    // make sure param ID is unique for different checkbox combinations
+    const catValues = catAttributes
+      .filter((c) => c.checked)
+      .map((c) => c.valueAsConceptId)
+      .join('');
+    return `param${(paramConceptId || id) + code + catValues}`;
+  };
+
+  const displayName = () => {
+    return stripHtml(node.name);
+  };
+
+  const getParamName = () => {
+    const selectionDisplay = [];
+    let name = '';
+    if (anyVersion) {
+      selectionDisplay.push('Any version');
+    }
+    numAttributes
+      .filter((at) => at.operator)
+      .forEach((attr, i) => {
+        if (attr.operator === 'ANY') {
+          if (i === 0) {
+            name += optionUtil.ANY.display;
+          }
+        } else {
+          if (i > 0) {
+            name += ' / ';
+          }
+          if (node.subtype === CriteriaSubType.BP) {
+            name += attr.name + ' ';
+          }
+          name +=
+            optionUtil[attr.operator].display +
+            attr.operands
+              .map((op) => parseFloat(op).toLocaleString())
+              .join('-');
+        }
+      });
+    if (name !== '') {
+      selectionDisplay.push(name);
+    }
+    catAttributes
+      .filter((ca) => ca.checked)
+      .forEach((attr) => selectionDisplay.push(attr.conceptName));
+    const nodeName =
+      node.domainId === Domain.SURVEY && !node.group
+        ? `${ppiQuestions.getValue()[node.parentId].name} - ${node.name}`
+        : node.name;
+    return (
+      nodeName +
+      ' (' +
+      selectionDisplay.join(', ') +
+      (hasUnits() && numAttributes[0].operator !== AttrName.ANY
+        ? ' ' + PM_UNITS[node.subtype]
+        : '') +
+      ')'
+    );
+  };
+
+  const paramWithAttributes = () => {
+    const { name, subtype, value } = node;
+    let paramName;
+    const attrs = [];
+    if (!isCOPEOrMinuteSurvey && anyValue) {
+      paramName = name + ` (${optionUtil.ANY.display})`;
+    } else if (isCOPEOrMinuteSurvey && anyValue && anyVersion) {
+      paramName = name + ' (Any version AND any value)';
+    } else {
+      numAttributes
+        .filter((at) => at.operator)
+        .forEach(({ operator, operands, conceptId }) => {
+          const attr = { name: AttrName.NUM, operator, operands };
+          if (subtype === CriteriaSubType.BP) {
+            // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
+            // TODO RW-5572 confirm proper behavior and fix
+            // eslint-disable-next-line @typescript-eslint/dot-notation
+            attr['conceptId'] = conceptId;
+          }
+          if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
+            attr.name = AttrName.ANY;
+            attr.operands = [];
+            delete attr.operator;
+            attrs.push(attr);
+          } else if (attr.operator !== 'ANY') {
+            attrs.push(attr);
+          }
+        });
+      if (catAttributes.some((at) => at.checked)) {
+        const catOperands = catAttributes.reduce((checked, current) => {
+          if (current.checked) {
+            checked.push(current.valueAsConceptId.toString());
+          }
+          return checked;
+        }, []);
+        if (isCOPEOrMinuteSurvey && !anyVersion) {
+          attrs.push({
+            name: AttrName.SURVEYVERSIONCONCEPTID,
+            operator: Operator.IN,
+            operands: catOperands,
+          });
+        } else if (!isCOPEOrMinuteSurvey) {
+          attrs.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: catOperands,
+          });
+        }
+      }
+      paramName = getParamName();
+    }
+    if (isCOPEOrMinuteSurvey && subtype === CriteriaSubType.ANSWER && !!value) {
+      attrs.push({
+        name: AttrName.CAT,
+        operator: Operator.IN,
+        operands: [value],
+      });
+    }
+    if (
+      subtype === CriteriaSubType.ANSWER &&
+      (anyValue ||
+        (numAttributes.length && numAttributes[0].operator === 'ANY')) &&
+      value === ''
+    ) {
+      attrs.push({ name: AttrName.ANY });
+    }
+    return {
+      ...node,
+      parameterId: paramId(),
+      name: paramName,
+      attributes: attrs,
+    };
+  };
+
+  const requestPreview = () => {
+    const { id, namespace } = workspace;
+    setCalculating(true);
+    setAttributeCount(null);
+    setCountError(false);
+    const param = paramWithAttributes();
+    const label = `Calculate - ${domainToTitle(param.domainId)}${
+      isPhysicalMeasurement() ? subTypeToTitle(param.subtype) : ''
+    }`;
+    AnalyticsTracker.CohortBuilder.AttributesAction(label);
+    const request = {
+      excludes: [],
+      includes: [
+        {
+          items: [
+            {
+              type: param.domainId,
+              searchParameters: [mapParameter(param)],
+              modifiers: [],
+            },
+          ],
+          temporal: false,
+        },
+      ],
+      dataFilters: [],
+    };
+    cohortBuilderApi()
+      .countParticipants(namespace, id, request)
+      .then(
+        (response) => {
+          setCalculating(false);
+          setAttributeCount(response);
+        },
+        () => {
+          setCalculating(false);
+          setCountError(true);
+        }
       );
-    }
+  };
 
-    get isMeasurement() {
-      const {
-        node: { domainId },
-      } = this.props;
-      return domainId === Domain.MEASUREMENT;
-    }
+  const addParameterToSearchItem = () => {
+    const param = paramWithAttributes();
+    const label = `Add - ${domainToTitle(param.domainId)}${
+      isPhysicalMeasurement() ? subTypeToTitle(param.subtype) : ''
+    }`;
+    AnalyticsTracker.CohortBuilder.AttributesAction(label);
+    criteria = criteria.filter(
+      (crit) => crit.parameterId !== param.parameterId
+    );
+    currentCohortCriteriaStore.next([...criteria, param]);
+    close();
+  };
 
-    get isObservation() {
-      const {
-        node: { domainId },
-      } = this.props;
-      return domainId === Domain.OBSERVATION;
-    }
-
-    get isPhysicalMeasurement() {
-      const {
-        node: { domainId },
-      } = this.props;
-      return domainId === Domain.PHYSICALMEASUREMENT;
-    }
-
-    get isSurvey() {
-      const {
-        node: { domainId },
-      } = this.props;
-      return domainId === Domain.SURVEY;
-    }
-
-    get isBloodPressure() {
-      const {
-        node: { subtype },
-      } = this.props;
-      return subtype === CriteriaSubType.BP;
-    }
-
-    get hasRange() {
-      return this.isMeasurement || this.isObservation || this.isSurvey;
-    }
-
-    get disableAddButton() {
-      const { calculating, formValid } = this.state;
-      return calculating || !formValid;
-    }
-
-    get disableCalculateButton() {
-      const { calculating, count, form, formValid, isCOPEOrMinuteSurvey } =
-        this.state;
-      return (
-        calculating ||
-        !formValid ||
-        (form.anyValue && count !== null) ||
-        (isCOPEOrMinuteSurvey &&
-          !form.anyVersion &&
-          !form.cat.some((attr) => attr.checked)) ||
-        (!this.isSurvey &&
-          form.num.length &&
-          form.num.every((attr) => attr.operator === 'ANY'))
-      );
-    }
-
-    renderNumericalAttributes() {
-      const {
-        node: { count, subtype },
-      } = this.props;
-      const { form, isCOPEOrMinuteSurvey, options } = this.state;
-      return (
-        form.num.length > 0 && (
-          <React.Fragment>
-            {(this.isMeasurement || this.isObservation) && (
-              <div style={styles.label}>Numeric Values</div>
-            )}
-            {isCOPEOrMinuteSurvey && (
-              <div>
-                <CheckBox onChange={(v) => this.toggleAnyValueCheckbox(v)} />{' '}
-                Any value
-                {count > -1 && (
-                  <span style={styles.badge}> {count.toLocaleString()}</span>
+  const renderNumericalAttributes = () => {
+    const { count, subtype } = node;
+    return (
+      numAttributes.length > 0 && (
+        <React.Fragment>
+          {(isMeasurement() || isObservation()) && (
+            <div style={styles.label}>Numeric Values</div>
+          )}
+          {isCOPEOrMinuteSurvey && (
+            <div>
+              <CheckBox onChange={(v) => toggleAnyValueCheckbox(v)} /> Any value
+              {count > -1 && (
+                <span style={styles.badge}> {count.toLocaleString()}</span>
+              )}
+            </div>
+          )}
+          {!(isCOPEOrMinuteSurvey && anyValue) &&
+            numAttributes.map((attr, a) => (
+              <div key={a}>
+                {isBloodPressure() && (
+                  <div style={styles.label}>{attr.name}</div>
                 )}
-              </div>
-            )}
-            {!(isCOPEOrMinuteSurvey && form.anyValue) &&
-              form.num.map((attr, a) => (
-                <div key={a}>
-                  {this.isBloodPressure && (
-                    <div style={styles.label}>{attr.name}</div>
-                  )}
-                  {isCOPEOrMinuteSurvey && (
-                    <div style={styles.orCircle}>OR</div>
-                  )}
-                  <Dropdown
-                    id={`numerical-dropdown-${a}`}
-                    data-test-id={`numerical-dropdown-${a}`}
-                    style={{ marginBottom: '0.75rem', width: '100%' }}
-                    value={attr.operator}
-                    options={options}
-                    placeholder='Select Operator'
-                    onChange={(e) => this.selectChange(a, e.value)}
-                    appendTo='self'
-                  />
-                  <FlexRowWrap>
-                    {![null, 'ANY'].includes(attr.operator) && (
-                      <div style={{ width: '33%' }}>
-                        <NumberInput
-                          id={`numerical-input-${a}-0`}
-                          data-test-id={`numerical-input-${a}-0`}
-                          style={{
-                            padding: '0 0.375rem',
-                            ...(this.hasUnits ? { width: '70%' } : {}),
-                          }}
-                          value={attr.operands[0]}
-                          min={attr.MIN}
-                          max={attr.MAX}
-                          onChange={(v) => this.inputChange(v, a, 0)}
-                        />
-                        {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-                      </div>
-                    )}
-                    {attr.operator === Operator.BETWEEN && (
-                      <React.Fragment>
-                        <div style={{ padding: '0.3rem 2.25rem 0 1.5rem' }}>
-                          and
-                        </div>
-                        <div style={{ width: '33%' }}>
-                          <NumberInput
-                            id={`numerical-input-${a}-1`}
-                            data-test-id={`numerical-input-${a}-1`}
-                            style={{
-                              padding: '0 0.375rem',
-                              ...(this.hasUnits ? { width: '70%' } : {}),
-                            }}
-                            value={attr.operands[1]}
-                            min={attr.MIN}
-                            max={attr.MAX}
-                            onChange={(v) => this.inputChange(v, a, 1)}
-                          />
-                          {this.hasUnits && <span> {PM_UNITS[subtype]}</span>}
-                        </div>
-                      </React.Fragment>
-                    )}
-                  </FlexRowWrap>
-                  {this.hasRange && ![null, 'ANY'].includes(attr.operator) && (
-                    <div style={{ paddingTop: '0.3rem' }}>
-                      Range: {attr.MIN.toLocaleString()} -{' '}
-                      {attr.MAX.toLocaleString()}
+                {isCOPEOrMinuteSurvey && <div style={styles.orCircle}>OR</div>}
+                <Dropdown
+                  id={`numerical-dropdown-${a}`}
+                  style={{ marginBottom: '0.5rem', width: '100%' }}
+                  value={attr.operator}
+                  options={options}
+                  placeholder='Select Operator'
+                  onChange={(e) => selectChange(a, e.value)}
+                  appendTo='self'
+                />
+                <FlexRowWrap>
+                  {![null, 'ANY'].includes(attr.operator) && (
+                    <div style={{ width: '33%' }}>
+                      <NumberInput
+                        id={`numerical-input-${a}-0`}
+                        style={{
+                          padding: '0 0.25rem',
+                          ...(hasUnits() ? { width: '70%' } : {}),
+                        }}
+                        value={attr.operands[0]}
+                        min={attr.MIN}
+                        max={attr.MAX}
+                        onChange={(v) => inputChange(v, a, 0)}
+                      />
+                      {hasUnits() && <span> {PM_UNITS[subtype]}</span>}
                     </div>
                   )}
-                </div>
-              ))}
-          </React.Fragment>
-        )
-      );
-    }
-
-    renderCategoricalAttributes() {
-      const {
-        node: { count },
-      } = this.props;
-      const { form, isCOPEOrMinuteSurvey } = this.state;
-      return (
-        form.cat.length > 0 && (
-          <React.Fragment>
-            {isCOPEOrMinuteSurvey && (
-              <div>
-                <CheckBox onChange={(v) => this.toggleAnyVersionCheckbox(v)} />{' '}
-                Any version
-                {count > -1 && (
-                  <span style={styles.badge}>{count.toLocaleString()}</span>
-                )}
-              </div>
-            )}
-            {!(isCOPEOrMinuteSurvey && form.anyVersion) && (
-              <React.Fragment>
-                {(form.num.length > 0 || this.isObservation) && (
-                  <div style={styles.orCircle}>OR</div>
-                )}
-                {!isCOPEOrMinuteSurvey && (
-                  <div style={styles.label}>Categorical Values</div>
-                )}
-                {form.cat.map((attr, a) => (
-                  <div key={a} style={styles.categorical}>
-                    <CheckBox
-                      checked={attr.checked}
-                      style={{ marginRight: '3px' }}
-                      onChange={(v) => this.checkboxChange(v, a)}
-                    />
-                    {attr.conceptName}
-                    <span style={styles.badge}>
-                      {parseInt(attr.estCount, 10).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </React.Fragment>
-            )}
-          </React.Fragment>
-        )
-      );
-    }
-
-    render() {
-      const {
-        back,
-        node: { domainId, name, parentId, subtype },
-      } = this.props;
-      const {
-        calculating,
-        count,
-        countError,
-        form,
-        formErrors,
-        isCOPEOrMinuteSurvey,
-        loading,
-      } = this.state;
-      return loading ? (
-        <SpinnerOverlay />
-      ) : (
-        <div id='attributes-form' style={{ marginTop: '0.75rem' }}>
-          {isCOPEOrMinuteSurvey ? (
-            <div>
-              <h3
-                style={{
-                  fontWeight: 600,
-                  margin: '0 0 0.75rem',
-                  textTransform: 'capitalize',
-                }}
-              >
-                COPE Survey (COVID-19) attribute
-              </h3>
-              <div style={{ lineHeight: '1.125rem', paddingRight: '2.25rem' }}>
-                The COPE survey is longitudinal and will change over time. Use
-                the following attributes to select data from one or more
-                versions.
-              </div>
-              <div style={styles.moreInfo}>
-                <StyledExternalLink
-                  href='https://www.researchallofus.org/data-tools/survey-explorer/cope-survey/'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  More info
-                </StyledExternalLink>
-              </div>
-            </div>
-          ) : (
-            <h3
-              style={{
-                fontWeight: 600,
-                margin: '0 0 0.75rem',
-                textTransform: 'capitalize',
-              }}
-            >
-              {this.isPhysicalMeasurement
-                ? name
-                : domainId.toString().toLowerCase()}{' '}
-              Detail
-            </h3>
-          )}
-          {this.isSurvey && (
-            <div style={{ ...styles.label, marginBottom: '0.75rem' }}>
-              {subtype === CriteriaSubType.ANSWER
-                ? `${ppiQuestions.getValue()[parentId].name} - ${name}`
-                : name}
-            </div>
-          )}
-          {countError && (
-            <div style={styles.error}>
-              <ClrIcon
-                style={{ margin: '0 0.75rem 0 0.375rem' }}
-                className='is-solid'
-                shape='exclamation-triangle'
-                size='22'
-              />
-              Sorry, the request cannot be completed.
-            </div>
-          )}
-          {formErrors.length > 0 && (
-            <div style={styles.errors}>
-              {formErrors.map((err, e) => (
-                <div key={e} style={styles.errorItem}>
-                  {err}
-                </div>
-              ))}
-            </div>
-          )}
-          {isCOPEOrMinuteSurvey ? (
-            <div>
-              {this.renderCategoricalAttributes()}
-              {form.num.length > 0 && form.cat.length > 0 && (
-                <div style={{ position: 'relative' }}>
-                  <div style={styles.andCircle}>AND</div>
-                  <div style={styles.andDivider} />
-                </div>
-              )}
-              {this.renderNumericalAttributes()}
-            </div>
-          ) : (
-            <div>
-              {(this.isMeasurement || this.isObservation) && (
-                <div>
-                  <div style={styles.label}>{this.displayName}</div>
-                  <CheckBox
-                    onChange={(v) => this.toggleAnyValueCheckbox(v)}
-                  />{' '}
-                  Any value {this.isMeasurement && <span> (lab exists)</span>}
-                  {!form.anyValue && form.num.length > 0 && (
-                    <div style={styles.orCircle}>OR</div>
+                  {attr.operator === Operator.BETWEEN && (
+                    <React.Fragment>
+                      <div style={{ padding: '0.2rem 1.5rem 0 1rem' }}>and</div>
+                      <div style={{ width: '33%' }}>
+                        <NumberInput
+                          id={`numerical-input-${a}-1`}
+                          style={{
+                            padding: '0 0.25rem',
+                            ...(hasUnits() ? { width: '70%' } : {}),
+                          }}
+                          value={attr.operands[1]}
+                          min={attr.MIN}
+                          max={attr.MAX}
+                          onChange={(v) => inputChange(v, a, 1)}
+                        />
+                        {hasUnits() && <span> {PM_UNITS[subtype]}</span>}
+                      </div>
+                    </React.Fragment>
                   )}
-                </div>
-              )}
-              {!form.anyValue && (
-                <div style={{ minHeight: '15rem' }}>
-                  {this.renderNumericalAttributes()}
-                  {this.renderCategoricalAttributes()}
-                </div>
+                </FlexRowWrap>
+                {hasRange() && ![null, 'ANY'].includes(attr.operator) && (
+                  <div style={{ paddingTop: '0.2rem' }}>
+                    Range: {attr.MIN.toLocaleString()} -{' '}
+                    {attr.MAX.toLocaleString()}
+                  </div>
+                )}
+              </div>
+            ))}
+        </React.Fragment>
+      )
+    );
+  };
+
+  const renderCategoricalAttributes = () => {
+    return (
+      catAttributes.length > 0 && (
+        <React.Fragment>
+          {isCOPEOrMinuteSurvey && (
+            <div>
+              <CheckBox onChange={(v) => toggleAnyVersionCheckbox(v)} /> Any
+              version
+              {node.count > -1 && (
+                <span style={styles.badge}>{node.count.toLocaleString()}</span>
               )}
             </div>
           )}
-          <CalculateFooter
-            addButtonText='ADD THIS'
-            addFn={() => this.addParameterToSearchItem()}
-            backFn={() => back()}
-            calculateFn={() => this.requestPreview()}
-            calculating={calculating}
-            count={count}
-            disableAdd={this.disableAddButton}
-            disableCalculate={this.disableCalculateButton}
-          />
+          {!(isCOPEOrMinuteSurvey && anyVersion) && (
+            <React.Fragment>
+              {(numAttributes.length > 0 || isObservation()) && (
+                <div style={styles.orCircle}>OR</div>
+              )}
+              {!isCOPEOrMinuteSurvey && (
+                <div style={styles.label}>Categorical Values</div>
+              )}
+              {catAttributes.map((attr, a) => (
+                <div key={a} style={styles.categorical}>
+                  <CheckBox
+                    checked={attr.checked}
+                    style={{ marginRight: '3px' }}
+                    onChange={(v) => checkboxChange(v, a)}
+                  />
+                  {attr.conceptName}
+                  <span style={styles.badge}>
+                    {parseInt(attr.estCount, 10).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </React.Fragment>
+          )}
+        </React.Fragment>
+      )
+    );
+  };
+
+  return loading ? (
+    <SpinnerOverlay />
+  ) : (
+    <div id='attributes-form' style={{ marginTop: '0.75rem' }}>
+      {isCOPEOrMinuteSurvey ? (
+        <div>
+          <h3
+            style={{
+              fontWeight: 600,
+              margin: '0 0 0.75rem',
+              textTransform: 'capitalize',
+            }}
+          >
+            COPE Survey (COVID-19) attribute
+          </h3>
+          <div style={{ lineHeight: '1.125rem', paddingRight: '2.25rem' }}>
+            The COPE survey is longitudinal and will change over time. Use the
+            following attributes to select data from one or more versions.
+          </div>
+          <div style={styles.moreInfo}>
+            <StyledExternalLink
+              href='https://www.researchallofus.org/data-tools/survey-explorer/cope-survey/'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              More info
+            </StyledExternalLink>
+          </div>
         </div>
-      );
-    }
-  }
-);
+      ) : (
+        <h3
+          style={{
+            fontWeight: 600,
+            margin: '0 0 0.75rem',
+            textTransform: 'capitalize',
+          }}
+        >
+          {isPhysicalMeasurement()
+            ? node.name
+            : node.domainId.toString().toLowerCase()}{' '}
+          Detail
+        </h3>
+      )}
+      {isSurvey() && (
+        <div style={{ ...styles.label, marginBottom: '0.75rem' }}>
+          {node.subtype === CriteriaSubType.ANSWER
+            ? `${ppiQuestions.getValue()[node.parentId].name} - ${node.name}`
+            : node.name}
+        </div>
+      )}
+      {countError && (
+        <div style={styles.error}>
+          <ClrIcon
+            style={{ margin: '0 0.75rem 0 0.375rem' }}
+            className='is-solid'
+            shape='exclamation-triangle'
+            size='22'
+          />
+          Sorry, the request cannot be completed.
+        </div>
+      )}
+      {formErrors.length > 0 && (
+        <div style={styles.errors}>
+          {formErrors.map((err, e) => (
+            <div key={e} style={styles.errorItem}>
+              {err}
+            </div>
+          ))}
+        </div>
+      )}
+      {isCOPEOrMinuteSurvey ? (
+        <div>
+          {renderCategoricalAttributes()}
+          {numAttributes.length > 0 && catAttributes.length > 0 && (
+            <div style={{ position: 'relative' }}>
+              <div style={styles.andCircle}>AND</div>
+              <div style={styles.andDivider} />
+            </div>
+          )}
+          {renderNumericalAttributes()}
+        </div>
+      ) : (
+        <div>
+          {(isMeasurement() || isObservation()) && (
+            <div>
+              <div style={styles.label}>{displayName()}</div>
+              <CheckBox onChange={(v) => toggleAnyValueCheckbox(v)} /> Any value{' '}
+              {isMeasurement() && <span> (lab exists)</span>}
+              {!anyValue && numAttributes.length > 0 && (
+                <div style={styles.orCircle}>OR</div>
+              )}
+            </div>
+          )}
+          {!anyValue && (
+            <div style={{ minHeight: '15rem' }}>
+              {renderNumericalAttributes()}
+              {renderCategoricalAttributes()}
+            </div>
+          )}
+        </div>
+      )}
+      <CalculateFooter
+        addButtonText='ADD THIS'
+        addFn={() => addParameterToSearchItem()}
+        backFn={() => back()}
+        calculateFn={() => requestPreview()}
+        calculating={calculating}
+        count={attributeCount}
+        disableAdd={disableAddButton()}
+        disableCalculate={disableCalculateButton()}
+      />
+    </div>
+  );
+});

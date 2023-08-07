@@ -1,5 +1,7 @@
 package org.pmiops.workbench.tools;
 
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.gson.Gson;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
@@ -55,6 +57,15 @@ public class CommandLineToolConfig {
   @Bean
   public Sleeper sleeper() {
     return new ThreadWaitSleeper();
+  }
+
+  /**
+   * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine HTTP
+   * transport.
+   */
+  @Bean
+  HttpTransport httpTransport() {
+    return new ApacheHttpTransport();
   }
 
   @Bean

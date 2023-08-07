@@ -200,14 +200,14 @@ export const CohortSearch = fp.flow(
 
     componentDidMount(): void {
       const {
-        cohortContext: { domain, item, type },
+        cohortContext: { domain, item, name, type },
       } = this.props;
       // JSON stringify and parse prevents changes to selections from being passed to the cohortContext
       const selections = JSON.parse(JSON.stringify(item.searchParameters));
       if (type === CriteriaType.DECEASED) {
         this.selectDeceased();
-      } else if (domain === Domain.FITBIT) {
-        this.selectFitbit();
+      } else if (domain.includes(Domain.FITBIT.toString())) {
+        this.selectFitbit(domain, name);
       } else if (domain === Domain.WHOLEGENOMEVARIANT) {
         this.selectGenome();
       } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
@@ -369,15 +369,15 @@ export const CohortSearch = fp.flow(
       saveCriteria([param]);
     }
 
-    selectFitbit() {
+    selectFitbit(domainId: string, name: string) {
       const param = {
         id: null,
         parentId: null,
         parameterId: '',
         type: CriteriaType.PPI.toString(),
-        name: 'Has any Fitbit data',
+        name,
         group: false,
-        domainId: Domain.FITBIT.toString(),
+        domainId,
         hasAttributes: false,
         selectable: true,
         attributes: [],

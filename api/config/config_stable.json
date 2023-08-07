@@ -21,10 +21,7 @@
       "gce": [],
       "dataproc": []
     },
-    "gceVmZone": "us-central1-a",
-    "userApps": {
-      "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
-    }
+    "gceVmZone": "us-central1-a"
   },
   "billing": {
     "accountId": "01DDC8-7ED304-6E46FE",
@@ -102,6 +99,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": false,
     "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableRasIdMeLinking": false,
     "enableRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4],
     "renewal": {
@@ -119,7 +117,6 @@
     "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": false,
     "enableDataExplorer": false,

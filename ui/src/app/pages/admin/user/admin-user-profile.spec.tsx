@@ -80,12 +80,8 @@ const getUneditableFieldText = (
   return divs.at(2).text();
 };
 
-const findDropdown = (wrapper: ReactWrapper, dataTestId: string): Dropdown =>
-  wrapper
-    .find(`[data-test-id="${dataTestId}"]`)
-    .find(Dropdown)
-    .first()
-    .instance() as Dropdown;
+const findDropdown = (wrapper: ReactWrapper, dataTestId: string) =>
+  wrapper.find(`[data-test-id="${dataTestId}"]`).find(Dropdown).first();
 
 const findTextInput = (wrapper: ReactWrapper, dataTestId: string) =>
   wrapper.find(`[data-test-id="${dataTestId}"]`).first();
@@ -295,7 +291,7 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       VERILY.shortName
     );
 
@@ -304,7 +300,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'verifiedInstitution'),
       VERILY_WITHOUT_CT.shortName
     );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       VERILY_WITHOUT_CT.shortName
     );
     expect(wrapper.find('[data-test-id="email-invalid"]').exists()).toBeFalsy();
@@ -320,7 +316,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'institutionalRole'),
       InstitutionalRole.POSTDOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
       InstitutionalRole.POSTDOCTORAL
     );
 
@@ -343,7 +339,7 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       VERILY.shortName
     );
 
@@ -352,7 +348,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'verifiedInstitution'),
       BROAD.shortName
     );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       BROAD.shortName
     );
     expect(
@@ -366,7 +362,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'institutionalRole'),
       InstitutionalRole.POSTDOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
       InstitutionalRole.POSTDOCTORAL
     );
 
@@ -389,7 +385,7 @@ describe('AdminUserProfile', () => {
     expect(wrapper).toBeTruthy();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       VERILY.shortName
     );
 
@@ -398,7 +394,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'verifiedInstitution'),
       BROAD.shortName
     );
-    expect(findDropdown(wrapper, 'verifiedInstitution').props.value).toEqual(
+    expect(findDropdown(wrapper, 'verifiedInstitution').props().value).toEqual(
       BROAD.shortName
     );
 
@@ -409,7 +405,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'institutionalRole'),
       InstitutionalRole.POSTDOCTORAL
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
       InstitutionalRole.POSTDOCTORAL
     );
 
@@ -447,7 +443,7 @@ describe('AdminUserProfile', () => {
       findDropdown(wrapper, 'institutionalRole'),
       InstitutionalRole.OTHER
     );
-    expect(findDropdown(wrapper, 'institutionalRole').props.value).toEqual(
+    expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
       InstitutionalRole.OTHER
     );
 
@@ -480,7 +476,7 @@ describe('AdminUserProfile', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props.value
+      findDropdown(wrapper, 'initial-credits-dropdown').props().value
     ).toEqual(TARGET_USER_PROFILE.freeTierDollarQuota);
 
     const newLimit = 800.0;
@@ -492,7 +488,7 @@ describe('AdminUserProfile', () => {
       newLimit
     );
     expect(
-      findDropdown(wrapper, 'initial-credits-dropdown').props.value
+      findDropdown(wrapper, 'initial-credits-dropdown').props().value
     ).toEqual(newLimit);
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');

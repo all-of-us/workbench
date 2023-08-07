@@ -1,6 +1,6 @@
 cron:
-- description: 'Periodic notebook runtime checks'
-  url: /v1/cron/checkRuntimes
+- description: 'Periodic notebook runtime deletion due to age > 2 weeks (1 week if idle)'
+  url: /v1/cron/deleteOldRuntimes
   schedule: every 3 hours
   timezone: UTC
   target: api
@@ -90,7 +90,7 @@ cron:
   timezone: America/Chicago
   target: api
 - description: Delete all test user workspaces which have been orphaned in Rawls
-  url: /v1/cron/deleteTestUserWorkspacesInRawls
+  url: /v1/cron/deleteTestUserWorkspacesOrphanedInRawls
   schedule: every day 21:00
   timezone: America/Chicago
   target: api

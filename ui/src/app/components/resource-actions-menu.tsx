@@ -16,8 +16,13 @@ export interface Action {
 export const ResourceActionsMenu = (props: {
   actions: Action[];
   disabled?: boolean;
+  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
 }) => {
-  const { actions, disabled } = props;
+  const { actions, disabled, menuButtonComponentOverride } = props;
+
+  const menuButtonComponent: (props: { disabled: boolean }) => JSX.Element =
+    menuButtonComponentOverride ?? SnowmanButton;
+
   return (
     <PopupTrigger
       data-test-id='resource-card-menu'
@@ -27,16 +32,10 @@ export const ResourceActionsMenu = (props: {
         !disabled && (
           <React.Fragment>
             {actions.map((action, i) => {
+              const { hoverText, displayName } = action;
               return (
-                <TooltipTrigger key={i} content={action.hoverText}>
-                  <MenuItem
-                    icon={action.icon}
-                    faIcon={action.faIcon}
-                    onClick={() => action.onClick()}
-                    disabled={action.disabled}
-                  >
-                    {action.displayName}
-                  </MenuItem>
+                <TooltipTrigger key={i} content={hoverText}>
+                  <MenuItem {...action}>{displayName}</MenuItem>
                 </TooltipTrigger>
               );
             })}
@@ -44,7 +43,7 @@ export const ResourceActionsMenu = (props: {
         )
       }
     >
-      <SnowmanButton data-test-id='resource-menu' disabled={disabled} />
+      {menuButtonComponent({ ...{ disabled } })}
     </PopupTrigger>
   );
 };

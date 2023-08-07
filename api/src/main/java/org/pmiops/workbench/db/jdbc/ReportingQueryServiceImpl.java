@@ -241,12 +241,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  uamt.two_factor_auth_bypass_time,\n"
                 + "  uamt.two_factor_auth_completion_time,\n"
                 + "  u.email AS username,\n"
-                + "  a.city,\n"
-                + "  a.country,\n"
-                + "  a.state,\n"
-                + "  a.street_address_1,\n"
-                + "  a.street_address_2,\n"
-                + "  a.zip_code,\n"
                 + "  via.institution_id AS institution_id,\n"
                 + "  via.institutional_role_enum,\n"
                 + "  via.institutional_role_other_text,\n"
@@ -262,7 +256,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  dm.sex_at_birth,\n"
                 + "  t.access_tier_short_names\n"
                 + "FROM user u"
-                + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
                 + "  LEFT OUTER JOIN user_code_of_conduct_agreement AS ducc on u.user_id = ducc.user_id\n"
                 + "  LEFT OUTER JOIN "
@@ -401,12 +394,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_completion_time")))
                 .userId(rs.getLong("user_id"))
                 .username(rs.getString("username"))
-                .city(rs.getString("city"))
-                .country(rs.getString("country"))
-                .state(rs.getString("state"))
-                .streetAddress1(rs.getString("street_address_1"))
-                .streetAddress2(rs.getString("street_address_2"))
-                .zipCode(rs.getString("zip_code"))
                 .institutionId(rs.getLong("institution_id"))
                 .institutionalRoleEnum(
                     institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
@@ -443,7 +430,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
-                + "  last_accessed_time,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
                 + "  needs_rp_review_prompt,\n"
@@ -491,7 +477,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .creatorId(rs.getLong("creator_id"))
                 .disseminateResearchOther(rs.getString("disseminate_research_other"))
-                .lastAccessedTime(offsetDateTimeUtc(rs.getTimestamp("last_accessed_time")))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
                 .needsRpReviewPrompt((int) rs.getShort("needs_rp_review_prompt"))

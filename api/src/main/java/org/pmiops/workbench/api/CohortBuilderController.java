@@ -2,10 +2,12 @@ package org.pmiops.workbench.api;
 
 import com.google.gson.Gson;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.chart.ChartService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -32,6 +34,8 @@ import org.pmiops.workbench.model.GenderSexRaceOrEthType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
+import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,6 +229,30 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<VariantListResponse> findVariants(
+      String workspaceNamespace,
+      String workspaceId,
+      String searchTerm,
+      String pageToken,
+      Integer pageSize) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(searchTerm);
+
+    // this method returns a paginated list of variants
+    // ImmutableTriple contains nextPageToken, total results count
+    // and list of variants
+    ImmutableTriple<String, Integer, List<Variant>> searchResults =
+        cohortBuilderService.findVariants(searchTerm, pageToken, pageSize);
+
+    return ResponseEntity.ok(
+        new VariantListResponse()
+            .nextPageToken(searchResults.getLeft())
+            .totalSize(searchResults.getMiddle())
+            .items(searchResults.getRight()));
+  }
+
+  @Override
   public ResponseEntity<CriteriaListResponse> findVersionedSurveys(
       String workspaceNamespace, String workspaceId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -348,14 +376,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    if (workbenchConfigProvider.get().featureFlags.enableConceptSetsInCohortBuilder) {
-      return ResponseEntity.ok(
-          new CriteriaListResponse()
-              .items(
-                  cohortBuilderService.findCriteriaByConceptIdsOrConceptCodes(
-                      request.getConceptKeys())));
-    }
-    return ResponseEntity.ok(new CriteriaListResponse());
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(
+                cohortBuilderService.findCriteriaByConceptIdsOrConceptCodes(
+                    request.getConceptKeys())));
   }
 
   protected void validateDomain(String domain) {

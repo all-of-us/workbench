@@ -24,7 +24,8 @@ public class DbEgressEvent {
   public enum DbEgressEventStatus {
     PENDING,
     REMEDIATED,
-    VERIFIED_FALSE_POSITIVE
+    VERIFIED_FALSE_POSITIVE,
+    BYPASSED
   }
 
   private long egressEventId;
@@ -38,6 +39,8 @@ public class DbEgressEvent {
   private Timestamp lastModifiedTime;
   private DbEgressEventStatus status;
   private String sumologicEvent;
+
+  private String bucketAuditEvent;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,6 +125,16 @@ public class DbEgressEvent {
 
   public DbEgressEvent setSumologicEvent(String sumologicEvent) {
     this.sumologicEvent = sumologicEvent;
+    return this;
+  }
+
+  @Column(name = "bucket_audit_event")
+  public String getBucketAuditEvent() {
+    return bucketAuditEvent;
+  }
+
+  public DbEgressEvent setBucketAuditEvent(String bucketAuditEvent) {
+    this.bucketAuditEvent = bucketAuditEvent;
     return this;
   }
 

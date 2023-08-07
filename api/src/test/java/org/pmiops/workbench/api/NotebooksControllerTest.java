@@ -603,7 +603,7 @@ public class NotebooksControllerTest {
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
 
-    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcls(anyString(), anyString()))
+    when(mockWorkspaceAuthService.getFirecloudWorkspaceAcl(anyString(), anyString()))
         .thenReturn(FirecloudTransforms.extractAclResponse(acl));
 
     final String testNotebookPath = NotebookUtils.withNotebookPath(testNotebook);

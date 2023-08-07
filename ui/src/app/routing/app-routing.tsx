@@ -39,7 +39,7 @@ import {
 import { initializeAnalytics } from 'app/utils/analytics';
 import { getAccessToken, useAuthentication } from 'app/utils/authentication';
 import {
-  cookiesEnabled,
+  firstPartyCookiesEnabled,
   LOCAL_STORAGE_API_OVERRIDE_KEY,
 } from 'app/utils/cookies';
 import {
@@ -118,7 +118,7 @@ const useOverriddenApiUrl = () => {
   const [overriddenUrl, setOverriddenUrl] = useState('');
 
   useEffect(() => {
-    if (cookiesEnabled()) {
+    if (firstPartyCookiesEnabled()) {
       try {
         setOverriddenUrl(localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY));
 
@@ -153,7 +153,7 @@ const useOverriddenApiUrl = () => {
   return overriddenUrl;
 };
 
-export const AppRoutingComponent: React.FunctionComponent = () => {
+export const AppRoutingComponent = () => {
   useAuthentication();
   const { authLoaded } = useStore(authStore);
   const isUserDisabledInDb = useIsUserDisabled();
@@ -167,9 +167,13 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
     initializeAnalytics();
   }, []);
 
-  const firstPartyCookiesEnabled = cookiesEnabled();
-  // TODO is third-party cookie logic still necessary? See RW-9484.
-  const thirdPartyCookiesEnabled = true;
+  // We also require *third-party* cookies to authenticate with Leo and would like to show the cookie page if
+  // third-party cookies are disabled (such as in incognito mode). However, it is not possible to check whether
+  // third-party cookies are enabled without communicating with a third-party server. Setting up a server for this
+  // purpose is not worth the implementation cost. If Leo or another third-party service eventually provides a way to
+  // check whether third-party cookies are enabled we should include that check in this logic.
+  // Additional info: https://stackoverflow.com/questions/3550790/check-if-third-party-cookies-are-enabled
+  const showCookiePage = !firstPartyCookiesEnabled();
 
   return (
     <React.Fragment>
@@ -177,7 +181,7 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
         <React.Fragment>
           {/* Once Angular is removed the app structure will change and we can put this in a more appropriate place */}
           <NotificationModal />
-          {firstPartyCookiesEnabled && thirdPartyCookiesEnabled && (
+          {!showCookiePage && (
             <AppRouter>
               <ScrollToTop />
               {/* Previously, using a top-level Switch with AppRoute and ProtectedRoute has caused bugs: */}
@@ -242,42 +246,41 @@ export const AppRoutingComponent: React.FunctionComponent = () => {
           )}
         </React.Fragment>
       )}
-      {!firstPartyCookiesEnabled ||
-        (!thirdPartyCookiesEnabled && (
-          <div>
+      {showCookiePage && (
+        <div>
+          <div
+            style={{
+              maxWidth: '500px',
+              margin: '1.5rem',
+              fontFamily: 'Montserrat',
+            }}
+          >
+            <SignedInAouHeaderWithDisplayTag />
             <div
               style={{
-                maxWidth: '500px',
-                margin: '1.5rem',
-                fontFamily: 'Montserrat',
+                fontSize: '20pt',
+                color: '#2F2E7E',
+                padding: '1.5rem 0 1.5rem 0',
               }}
             >
-              <SignedInAouHeaderWithDisplayTag />
-              <div
-                style={{
-                  fontSize: '20pt',
-                  color: '#2F2E7E',
-                  padding: '1.5rem 0 1.5rem 0',
-                }}
+              Cookies are Disabled
+            </div>
+            <div style={{ fontSize: '14pt', color: '#000000' }}>
+              For full functionality of this site it is necessary to enable
+              cookies. Here are the{' '}
+              <a
+                href='https://support.google.com/accounts/answer/61416'
+                style={{ color: '#2691D0' }}
+                target='_blank'
+                rel='noopener noreferrer'
               >
-                Cookies are Disabled
-              </div>
-              <div style={{ fontSize: '14pt', color: '#000000' }}>
-                For full functionality of this site it is necessary to enable
-                cookies. Here are the{' '}
-                <a
-                  href='https://support.google.com/accounts/answer/61416'
-                  style={{ color: '#2691D0' }}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  instructions how to enable cookies in your web browser
-                </a>
-                .
-              </div>
+                instructions how to enable cookies in your web browser
+              </a>
+              .
             </div>
           </div>
-        ))}
+        </div>
+      )}
     </React.Fragment>
   );
 };

@@ -20,6 +20,10 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
 /** Utility class for holding Leonardo APP environment variables constant and methods. */
 public class LeonardoCustomEnvVarUtils {
 
+  public static String WORKSPACE_NAME_ENV_KEY = "WORKSPACE_NAME";
+  public static String GOOGLE_PROJECT_ENV_KEY = "GOOGLE_PROJECT";
+  public static String OWNER_EMAIL_ENV_KEY = "OWNER_EMAIL";
+
   private static final String MICROARRAY_HAIL_STORAGE_PATH_KEY = "MICROARRAY_HAIL_STORAGE_PATH";
   @VisibleForTesting public static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
 
@@ -127,7 +131,7 @@ public class LeonardoCustomEnvVarUtils {
               .put(WGS_EXOME_VCF_PATH_KEY, Optional.ofNullable(cdrVersion.getWgsExomeVcfPath()))
               .put(
                   WGS_ACAF_THRESHOLD_MULTI_HAIL_PATH_KEY,
-                  Optional.ofNullable(cdrVersion.getWgsAcafThresholdSplitHailPath()))
+                  Optional.ofNullable(cdrVersion.getWgsAcafThresholdMultiHailPath()))
               .put(
                   WGS_ACAF_THRESHOLD_SPLIT_HAIL_PATH_KEY,
                   Optional.ofNullable(cdrVersion.getWgsAcafThresholdSplitHailPath()))

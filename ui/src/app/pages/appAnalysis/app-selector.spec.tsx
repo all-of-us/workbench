@@ -2,12 +2,11 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import { mount } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
 import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { APP_LIST, JUPYTER_APP } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 
 import {
@@ -18,6 +17,7 @@ import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AppSelector } from './app-selector';
+import { APP_LIST } from './app-selector-modal';
 
 describe('App Selector', () => {
   const startButton = (wrapper) => {
@@ -94,20 +94,18 @@ describe('App Selector', () => {
 
     // Application Drop down List should have Jupyter as an option
     expect(applicationListDropDownWrapper(wrapper).prop('options')).toContain(
-      JUPYTER_APP
+      UIAppType.JUPYTER
     );
 
     // Next button should be disabled by default
     expect(nextButton(wrapper).prop('disabled')).toBe(true);
 
     await act(async () => {
-      const applicationListDropDown = applicationListDropDownWrapper(
-        wrapper
-      ).instance() as Dropdown;
+      const applicationListDropDown = applicationListDropDownWrapper(wrapper);
       await simulateComponentChange(
         wrapper,
         applicationListDropDown,
-        JUPYTER_APP
+        UIAppType.JUPYTER
       );
     });
 

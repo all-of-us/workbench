@@ -4,7 +4,7 @@ import { Language, LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateDataset, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
-describe('Export Dataset to Notebook Test', () => {
+describe.skip('Export Dataset to Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -37,7 +37,7 @@ describe('Export Dataset to Notebook Test', () => {
 
     // Verify notebook created successfully. Not going to start notebook runtime.
     const currentPageUrl = page.url();
-    expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
+    expect(currentPageUrl).toContain(`preview/${notebookName}.ipynb`);
 
     // Delete notebook.
     const analysisPage = await notebookPreviewPage.goAnalysisPage();

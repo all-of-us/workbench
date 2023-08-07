@@ -9,7 +9,11 @@ import {
   Action,
   ResourceActionsMenu,
 } from 'app/components/resource-actions-menu';
-import { canDelete, canWrite } from 'app/components/resource-card';
+import {
+  canDelete,
+  canWrite,
+  ResourceCard,
+} from 'app/components/resource-card';
 import {
   withConfirmDeleteModal,
   WithConfirmDeleteModalProps,
@@ -22,7 +26,7 @@ import {
   withSpinnerOverlay,
   WithSpinnerOverlayProps,
 } from 'app/components/with-spinner-overlay';
-import { appendNotebookFileSuffixByOldName } from 'app/pages/analysis/util';
+import { appendAnalysisFileSuffixByOldName } from 'app/pages/analysis/util';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getDisplayName, getType } from 'app/utils/resources';
@@ -36,6 +40,8 @@ interface Props
   existingNameList: string[];
   onUpdate: () => Promise<void>;
   disableDuplicate: boolean;
+  menuOnly: boolean;
+  menuButtonComponentOverride?: (props: { disabled: boolean }) => JSX.Element;
 }
 
 interface State {
@@ -116,7 +122,7 @@ export const NotebookActionMenu = fp.flow(
           resource.workspaceFirecloudName,
           {
             name: resource.notebook.name,
-            newName: appendNotebookFileSuffixByOldName(newName, oldName),
+            newName: appendAnalysisFileSuffixByOldName(newName, oldName),
           }
         )
         .then(() => this.props.onUpdate())
@@ -173,7 +179,14 @@ export const NotebookActionMenu = fp.flow(
     }
 
     render() {
-      const { resource } = this.props;
+      const {
+        resource,
+        menuOnly,
+        onUpdate,
+        existingNameList,
+        menuButtonComponentOverride,
+      } = this.props;
+      const actions = this.actions;
       const oldName = getDisplayName(resource);
       return (
         <React.Fragment>
@@ -186,7 +199,7 @@ export const NotebookActionMenu = fp.flow(
               fromAccessTierShortName={resource.accessTierShortName}
               resourceType={getType(resource)}
               onClose={() => this.setState({ showCopyNotebookModal: false })}
-              onCopy={() => this.props.onUpdate()}
+              onCopy={() => onUpdate()}
               saveFunction={(copyRequest: CopyRequest) =>
                 this.copyNotebook(copyRequest)
               }
@@ -204,15 +217,19 @@ export const NotebookActionMenu = fp.flow(
               hideDescription={true}
               oldName={oldName}
               nameFormat={(name) =>
-                appendNotebookFileSuffixByOldName(name, oldName)
+                appendAnalysisFileSuffixByOldName(name, oldName)
               }
-              existingNames={this.props.existingNameList}
+              existingNames={existingNameList}
             />
           )}
-          <ResourceActionsMenu
-            actions={this.actions}
-            disabled={resource.adminLocked}
-          />
+          {menuOnly ? (
+            <ResourceActionsMenu
+              {...{ menuButtonComponentOverride, actions }}
+              disabled={resource.adminLocked}
+            />
+          ) : (
+            <ResourceCard {...{ resource, actions }} />
+          )}
         </React.Fragment>
       );
     }

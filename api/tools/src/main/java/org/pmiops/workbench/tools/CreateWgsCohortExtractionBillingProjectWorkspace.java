@@ -20,7 +20,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -146,26 +145,18 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
       BillingV2Api billingV2Api = rawlsApiClientFactory.billingV2Api();
       billingV2Api.createBillingProjectFullV2(billingProjectRequest);
-      DbWorkspace.FirecloudWorkspaceId workspaceId =
-          new DbWorkspace.FirecloudWorkspaceId(
-              billingProjectName, FireCloudService.toFirecloudName(workspaceName));
+      String firecloudName = FireCloudService.toFirecloudName(workspaceName);
 
       RawlsWorkspaceRequest workspaceIngest =
-          new RawlsWorkspaceRequest()
-              .namespace(workspaceId.getWorkspaceNamespace())
-              .name(workspaceId.getWorkspaceName());
+          new RawlsWorkspaceRequest().namespace(billingProjectName).name(firecloudName);
 
       log.info(
-          "Creating workspace with ("
-              + workspaceId.getWorkspaceNamespace()
-              + ", "
-              + workspaceId.getWorkspaceName()
-              + ")");
+          String.format("Creating workspace with (%s, %s)", billingProjectName, firecloudName));
       RawlsWorkspaceDetails workspace =
           rawlsApiClientFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       log.info("Updating Workspace ACL");
-      List<RawlsWorkspaceACLUpdate> acls =
+      List<RawlsWorkspaceACLUpdate> acl =
           Stream.concat(
                   Arrays.stream(opts.getOptionValue(ownersOpt.getLongOpt()).split(",")),
                   Arrays.stream(new String[] {workspace.getCreatedBy()}))
@@ -173,7 +164,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace extends Tool {
               .collect(Collectors.toList());
       rawlsApiClientFactory
           .workspacesApi()
-          .updateACL(acls, workspace.getNamespace(), workspace.getName(), false);
+          .updateACL(acl, workspace.getNamespace(), workspace.getName(), false);
 
       String proxyGroup =
           firecloudApiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());

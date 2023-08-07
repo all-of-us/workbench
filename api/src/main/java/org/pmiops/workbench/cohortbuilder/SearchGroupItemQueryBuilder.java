@@ -17,6 +17,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -62,19 +63,25 @@ public final class SearchGroupItemQueryBuilder {
   private static final ImmutableList<Domain> SOURCE_STANDARD_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
   private static final ImmutableMap<Domain, String> HAS_DATA_DOMAINS =
-      ImmutableMap.of(
-          Domain.FITBIT,
-          "has_fitbit",
-          Domain.WHOLE_GENOME_VARIANT,
-          "has_whole_genome_variant",
-          Domain.PHYSICAL_MEASUREMENT,
-          "has_physical_measurement_data",
-          Domain.ARRAY_DATA,
-          "has_array_data",
-          Domain.LR_WHOLE_GENOME_VARIANT,
-          "has_lr_whole_genome_variant",
-          Domain.STRUCTURAL_VARIANT_DATA,
-          "has_structural_variant_data");
+      ImmutableMap.ofEntries(
+          new AbstractMap.SimpleEntry<>(Domain.FITBIT, "has_fitbit"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.FITBIT_HEART_RATE_SUMMARY, "has_fitbit_heart_rate_summary"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.FITBIT_HEART_RATE_LEVEL, "has_fitbit_heart_rate_level"),
+          new AbstractMap.SimpleEntry<>(Domain.FITBIT_ACTIVITY, "has_fitbit_activity_summary"),
+          new AbstractMap.SimpleEntry<>(Domain.FITBIT_INTRADAY_STEPS, "has_fitbit_steps_intraday"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.FITBIT_SLEEP_DAILY_SUMMARY, "has_fitbit_sleep_daily_summary"),
+          new AbstractMap.SimpleEntry<>(Domain.FITBIT_SLEEP_LEVEL, "has_fitbit_sleep_level"),
+          new AbstractMap.SimpleEntry<>(Domain.WHOLE_GENOME_VARIANT, "has_whole_genome_variant"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.PHYSICAL_MEASUREMENT, "has_physical_measurement_data"),
+          new AbstractMap.SimpleEntry<>(Domain.ARRAY_DATA, "has_array_data"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.LR_WHOLE_GENOME_VARIANT, "has_lr_whole_genome_variant"),
+          new AbstractMap.SimpleEntry<>(
+              Domain.STRUCTURAL_VARIANT_DATA, "has_structural_variant_data"));
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " OR ";
@@ -213,6 +220,11 @@ public final class SearchGroupItemQueryBuilder {
   private static final String CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE =
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
+  private static final String VARIANT_SQL =
+      "SELECT person_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_variant_to_person`\n"
+          + "CROSS JOIN UNNEST(person_ids) AS person_id\n"
+          + "WHERE vid IN UNNEST(%s)";
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -257,6 +269,10 @@ public final class SearchGroupItemQueryBuilder {
 
     Domain domain = Domain.fromValue(searchGroupItem.getType());
 
+    // When building sql for SNP Indel Variant
+    if (Domain.SNP_INDEL_VARIANT.equals(domain)) {
+      return buildVariantSql(queryParams, searchGroupItem);
+    }
     // When building sql for demographics - we query against the person table
     if (Domain.PERSON.equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
@@ -275,7 +291,7 @@ public final class SearchGroupItemQueryBuilder {
       } else {
         // All PFHH survey search parameters will have a PFHH attribute
         // PFHH parameters only search with answer concept ids
-        // If we get questions or survey we have to generate SQL that will lookup all the answers
+        // If we get questions or survey we have to generate SQL that will look up all the answers
         if (param.getAttributes().contains(getPFHHAttribute())) {
           if (param.getSubtype().equals(CriteriaSubType.ANSWER.toString())) {
             pfhhAnswerSearchParameters.add(param);
@@ -395,6 +411,19 @@ public final class SearchGroupItemQueryBuilder {
         throw new BadRequestException(
             "Search unsupported for demographics type " + param.getType());
     }
+  }
+
+  /** Build sql statement for SNP Indel Variants */
+  private static String buildVariantSql(
+      Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
+    String[] variantIds =
+        searchGroupItem.getSearchParameters().stream()
+            .map(SearchParameter::getVariantId)
+            .toArray(String[]::new);
+    String namedParameter =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.array(variantIds, String.class));
+    return String.format(VARIANT_SQL, namedParameter);
   }
 
   /**
@@ -878,11 +907,7 @@ public final class SearchGroupItemQueryBuilder {
 
   private static boolean hasDataDomains(SearchGroupItem searchGroupItem) {
     Domain domain = Domain.fromValue(searchGroupItem.getType());
-    return Domain.FITBIT.equals(domain)
-        || Domain.WHOLE_GENOME_VARIANT.equals(domain)
-        || Domain.LR_WHOLE_GENOME_VARIANT.equals(domain)
-        || Domain.ARRAY_DATA.equals(domain)
-        || Domain.STRUCTURAL_VARIANT_DATA.equals(domain)
+    return (HAS_DATA_DOMAINS.containsKey(domain) && !Domain.PHYSICAL_MEASUREMENT.equals(domain))
         || (searchGroupItem.getSearchParameters().size() == 1
             && searchGroupItem.getSearchParameters().stream()
                 .allMatch(

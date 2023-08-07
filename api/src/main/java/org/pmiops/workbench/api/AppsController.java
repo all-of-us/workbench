@@ -5,8 +5,11 @@ import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
+import org.pmiops.workbench.model.AppLocalizeRequest;
+import org.pmiops.workbench.model.AppLocalizeResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -26,6 +29,7 @@ public class AppsController implements AppsApiDelegate {
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceService workspaceService;
   private final LeonardoApiHelper leonardoApiHelper;
+  private final InteractiveAnalysisService interactiveAnalysisService;
   private final Provider<WorkbenchConfig> configProvider;
 
   @Autowired
@@ -35,12 +39,14 @@ public class AppsController implements AppsApiDelegate {
       WorkspaceAuthService workspaceAuthService,
       WorkspaceService workspaceService,
       LeonardoApiHelper leonardoApiHelper,
+      InteractiveAnalysisService interactiveAnalysisService,
       Provider<WorkbenchConfig> configProvider) {
     this.leonardoApiClient = leonardoApiClient;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceService = workspaceService;
     this.leonardoApiHelper = leonardoApiHelper;
+    this.interactiveAnalysisService = interactiveAnalysisService;
     this.configProvider = configProvider;
   }
 
@@ -50,10 +56,8 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, dbWorkspace.getFirecloudName());
     validateCanPerformApiAction(dbWorkspace);
-    if ((createAppRequest.getAppType() == AppType.RSTUDIO
-            && !configProvider.get().featureFlags.enableRStudioGKEApp)
-        || (createAppRequest.getAppType() == AppType.CROMWELL
-            && !configProvider.get().featureFlags.enableCromwellGKEApp)) {
+    if (createAppRequest.getAppType() == AppType.RSTUDIO
+        && !configProvider.get().featureFlags.enableRStudioGKEApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
 
@@ -95,6 +99,22 @@ public class AppsController implements AppsApiDelegate {
     response.addAll(
         leonardoApiClient.listAppsInProjectCreatedByCreator(dbWorkspace.getGoogleProject()));
     return ResponseEntity.ok(response);
+  }
+
+  public ResponseEntity<AppLocalizeResponse> localizeApp(
+      String workspaceNamespace, String appName, AppLocalizeRequest body) {
+    DbUser user = userProvider.get();
+    leonardoApiHelper.enforceComputeSecuritySuspension(user);
+
+    return ResponseEntity.ok(
+        new AppLocalizeResponse()
+            .appLocalDirectory(
+                interactiveAnalysisService.localize(
+                    workspaceNamespace,
+                    appName,
+                    body.getFileNames(),
+                    body.getPlaygroundMode(),
+                    false)));
   }
 
   /**

@@ -5,7 +5,10 @@ import * as fp from 'lodash/fp';
 import { BillingStatus } from 'generated/fetch';
 
 import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
-import { GKEAppConfigurationPanel } from 'app/components/gke-app-configuration-panel';
+import {
+  GKEAppConfigurationPanel,
+  GkeAppConfigurationPanelProps,
+} from 'app/components/gke-app-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
@@ -21,6 +24,7 @@ export interface ConfigurationPanelProps {
   onClose: () => void;
   type: UIAppType;
   runtimeConfPanelInitialState?: RuntimeConfigurationPanelProps['initialPanelContent'];
+  gkeAppConfPanelInitialState?: GkeAppConfigurationPanelProps['initialPanelContent'];
 }
 
 export const ConfigurationPanel = fp.flow(
@@ -32,6 +36,7 @@ export const ConfigurationPanel = fp.flow(
     workspace,
     type,
     runtimeConfPanelInitialState = null,
+    gkeAppConfPanelInitialState = null,
     profileState,
   }: ConfigurationPanelProps & {
     workspace: WorkspaceData;
@@ -82,12 +87,13 @@ export const ConfigurationPanel = fp.flow(
           () => (
             <GKEAppConfigurationPanel
               {...{
-                type: toAppType(type),
+                type: toAppType[type],
                 onClose,
                 creatorFreeCreditsRemaining,
                 workspace,
                 profileState,
                 workspaceNamespace: workspace.namespace,
+                initialPanelContent: gkeAppConfPanelInitialState,
               }}
             />
           )

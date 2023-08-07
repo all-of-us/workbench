@@ -12,6 +12,7 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { faCircle } from '@fortawesome/pro-regular-svg-icons';
+import { faCircleEllipsisVertical } from '@fortawesome/pro-regular-svg-icons';
 import { faAlarmExclamation, faRepeat } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -48,6 +49,12 @@ export const styles = {
     marginLeft: -9,
     width: '21px',
     height: '21px',
+  },
+
+  kebabCircleIcon: {
+    width: 21,
+    height: 21,
+    marginLeft: 8,
   },
 
   circleBackground: {
@@ -117,6 +124,16 @@ export const SnowmanIcon = ({ style = {}, ...props }) => {
       shape='ellipsis-vertical'
       {...props}
       style={{ ...styles.snowmanIcon, ...style }}
+    />
+  );
+};
+
+export const KebabCircleMenuIcon = ({ style = {}, ...props }) => {
+  return (
+    <FontAwesomeIcon
+      icon={faCircleEllipsisVertical}
+      {...props}
+      style={{ ...styles.kebabCircleIcon, ...style }}
     />
   );
 };

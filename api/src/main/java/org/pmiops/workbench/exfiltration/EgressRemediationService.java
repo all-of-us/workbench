@@ -29,6 +29,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.user.UserAdminService;
 
 /** Service for automated egress alert remediation. */
 public abstract class EgressRemediationService {
@@ -40,6 +41,11 @@ public abstract class EgressRemediationService {
   // case (still suspend, to be safe).
   private static final Duration EGRESS_NOTIFY_DEBOUNCE_TIME = Duration.ofHours(1L);
 
+  // The maximum egress user is allowed when bypassed for large file download. If more than this
+  // user will still trigger egress alert.
+  // Current value is 100GB
+  private static final int EGRESS_HARD_LIMIT_MB = 100 * 1024;
+
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
 
   private final Clock clock;
@@ -48,6 +54,7 @@ public abstract class EgressRemediationService {
   private final LeonardoApiClient leonardoNotebooksClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventDao egressEventDao;
+  private final UserAdminService userAdminService;
 
   public EgressRemediationService(
       Clock clock,
@@ -55,13 +62,15 @@ public abstract class EgressRemediationService {
       UserService userService,
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
-      EgressEventDao egressEventDao) {
+      EgressEventDao egressEventDao,
+      UserAdminService userAdminService) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
+    this.userAdminService = userAdminService;
   }
 
   public void remediateEgressEvent(long egressEventId) {
@@ -83,6 +92,18 @@ public abstract class EgressRemediationService {
       throw new FailedPreconditionException(
           String.format(
               "egress event %d has no associated user, please investigate", egressEventId));
+    }
+
+    if (userAdminService.getCurrentEgressBypassWindow(user.getUserId()) != null
+        && event.getEgressMegabytes() != null
+        && event.getEgressMegabytes() < EGRESS_HARD_LIMIT_MB) {
+      log.info(
+          String.format(
+              "Skip egress event %d because user is bypassed for large file download",
+              egressEventId));
+      egressEventDao.save(event.setStatus(DbEgressEventStatus.BYPASSED));
+      egressEventAuditor.fireRemediateEgressEvent(event, null);
+      return;
     }
 
     // Gather/merge past alerts into an incident history

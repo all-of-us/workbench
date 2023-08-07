@@ -21,10 +21,7 @@
       "gce": ["test-gce-docker-image"],
       "dataproc": ["test-dataproc-docker-image"]
     },
-    "gceVmZone": "us-central1-c",
-    "userApps": {
-      "rStudioDescriptorPath": "https:\/\/raw.githubusercontent.com\/DataBiosphere\/terra-app\/39c602e20ba027eb065dcb7690e76f2236ac2848\/apps\/rstudio\/app.yaml"
-    }
+    "gceVmZone": "us-central1-c"
   },
   "billing": {
     "accountId": "013713-75CFF6-1751E5",
@@ -102,6 +99,7 @@
     "enableEraCommons": true,
     "unsafeAllowSelfBypass": true,
     "unsafeAllowUserCreationFromGSuiteData": true,
+    "enableRasIdMeLinking": true,
     "enableRasLoginGovLinking": true,
     "currentDuccVersions": [3, 4, 5],
     "renewal": {
@@ -119,11 +117,10 @@
     "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableConceptSetsInCohortBuilder": true,
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
     "enableDataExplorer": true,
-    "enableTanagra": false
+    "enableTanagra": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

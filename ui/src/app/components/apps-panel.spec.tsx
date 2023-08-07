@@ -37,6 +37,7 @@ const component = async () =>
       onClose={stubFunction}
       onClickRuntimeConf={stubFunction}
       onClickDeleteRuntime={stubFunction}
+      onClickDeleteGkeApp={stubFunction}
     />
   );
 
@@ -64,7 +65,7 @@ describe('AppsPanel', () => {
   const leoAppsStub = new LeoAppsApiStub();
   beforeEach(() => {
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableCromwellGKEApp: true },
+      config: defaultServerConfig,
     });
     registerApiClient(AppsApi, appsStub);
     registerApiClient(NotebooksApi, new NotebooksApiStub());
@@ -78,7 +79,7 @@ describe('AppsPanel', () => {
     });
   });
 
-  it('should allow a user to expand Jupyter and RStudio', async () => {
+  it('should allow a user to expand Jupyter', async () => {
     // initial state: no apps exist
 
     runtimeStub.runtime.status = undefined;
@@ -101,18 +102,8 @@ describe('AppsPanel', () => {
     expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeFalsy();
     expect(findExpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
 
-    // Click unexpanded RStudio app
-
-    expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toBeTruthy();
-    const clickRStudio = findUnexpandedApp(wrapper, 'RStudio').prop('onClick');
-    await clickRStudio();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toBeFalsy();
-    expect(findExpandedApp(wrapper, 'RStudio').exists()).toBeTruthy();
-
     // the overall apps panel state doesn't change: there are still no ActiveApps
-    // the newly expanded apps are in the AvailableApps section
+    // the newly expanded app is in the AvailableApps section
 
     expect(findActiveApps(wrapper).exists()).toBeFalsy();
     expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
@@ -133,19 +124,13 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 
-  test.each([
-    [true, true],
-    [true, false],
-    [false, true],
-    [false, false],
-  ])(
-    'should / should not show apps when the feature flags are Rstudio=%s, Cromwell=%s',
-    async (enableRStudioGKEApp, enableCromwellGKEApp) => {
+  test.each([true, false])(
+    'should / should not show apps when the RStudio feature flag is %s',
+    async (enableRStudioGKEApp) => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
           enableRStudioGKEApp,
-          enableCromwellGKEApp,
         },
       });
       appsStub.listAppsResponse = [];
@@ -153,11 +138,11 @@ describe('AppsPanel', () => {
       const wrapper = await component();
       await waitOneTickAndUpdate(wrapper);
 
+      // Cromwell is always available
+      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+
       expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
         enableRStudioGKEApp
-      );
-      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toEqual(
-        enableCromwellGKEApp
       );
     }
   );

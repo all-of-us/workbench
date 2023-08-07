@@ -36,7 +36,6 @@ import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.rdr.model.RdrAccessTier;
 import org.pmiops.workbench.rdr.model.RdrDegree;
 import org.pmiops.workbench.rdr.model.RdrDemographicSurveyV2;
-import org.pmiops.workbench.rdr.model.RdrDisability;
 import org.pmiops.workbench.rdr.model.RdrEducation;
 import org.pmiops.workbench.rdr.model.RdrEthnicity;
 import org.pmiops.workbench.rdr.model.RdrGender;
@@ -48,6 +47,7 @@ import org.pmiops.workbench.rdr.model.RdrWorkspace;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.AgeEnum;
 import org.pmiops.workbench.rdr.model.RdrWorkspaceDemographic.RaceEthnicityEnum;
+import org.pmiops.workbench.rdr.model.RdrYesNoPreferNot;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class, uses = DemographicSurveyMapper.class)
@@ -160,7 +160,7 @@ public interface RdrMapper {
   @ValueMapping(source = "TRUE", target = "YES")
   @ValueMapping(source = "FALSE", target = "NO")
   @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
-  RdrDisability toRdrDisability(Disability d);
+  RdrYesNoPreferNot toRdrDisability(Disability d);
 
   @ValueMapping(source = "PREFER_NO_ANSWER", target = "PREFER_NOT_TO_ANSWER")
   RdrEducation toRdrEducation(Education e);

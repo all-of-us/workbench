@@ -37,7 +37,6 @@ import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
 } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -169,6 +168,12 @@ class SearchGroupItemParameter extends React.Component<
 
 const SKIP_DOMAIN_SEARCH = [
   Domain.FITBIT.toString(),
+  Domain.FITBITSLEEPLEVEL.toString(),
+  Domain.FITBITSLEEPDAILYSUMMARY.toString(),
+  Domain.FITBITHEARTRATELEVEL.toString(),
+  Domain.FITBITHEARTRATESUMMARY.toString(),
+  Domain.FITBITACTIVITY.toString(),
+  Domain.FITBITINTRADAYSTEPS.toString(),
   Domain.WHOLEGENOMEVARIANT.toString(),
   Domain.LRWHOLEGENOMEVARIANT.toString(),
   Domain.ARRAYDATA.toString(),
@@ -448,7 +453,6 @@ export const SearchGroupItem = withCurrentWorkspace()(
         item: { searchParameters, type },
       } = this.props;
       return (
-        !serverConfigStore.get().config.enableConceptSetsInCohortBuilder ||
         this.preventItemEdit ||
         type === Domain.PERSON.toString() ||
         !searchParameters.some(

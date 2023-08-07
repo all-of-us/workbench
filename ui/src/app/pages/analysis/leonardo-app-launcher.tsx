@@ -40,6 +40,7 @@ import {
   withRuntimeStore,
 } from 'app/utils/runtime-utils';
 import { MatchParams, RuntimeStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -235,19 +236,20 @@ const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
   [ProgressCardState.Redirecting, [Progress.Redirecting]],
 ]);
 
-const ProgressCard: React.FunctionComponent<{
+interface ProgressCardProps {
   progressState: Progress;
   cardState: ProgressCardState;
   progressComplete: Map<Progress, boolean>;
   creatingNewNotebook: boolean;
   leoAppType: LeoApplicationType;
-}> = ({
+}
+const ProgressCard = ({
   progressState,
   cardState,
   progressComplete,
   creatingNewNotebook,
   leoAppType,
-}) => {
+}: ProgressCardProps) => {
   const includesStates = progressCardStates.get(cardState);
   const isCurrent = includesStates.includes(progressState);
   const isComplete = includesStates.every(
@@ -508,7 +510,7 @@ export const LeonardoAppLauncher = fp.flow(
           workspace.namespace,
           workspace.id,
           // navigate will encode the notebook name automatically
-          'notebooks',
+          analysisTabName,
           ...(this.props.leoAppType === LeoApplicationType.Notebook
             ? ['preview', this.getFullJupyterNotebookName()]
             : []),
@@ -577,12 +579,9 @@ export const LeonardoAppLauncher = fp.flow(
         window.history.replaceState(
           {},
           'Notebook',
-          'workspaces/' +
-            namespace +
-            '/' +
-            id +
-            '/notebooks/' +
-            encodeURIComponent(this.getFullJupyterNotebookName())
+          `workspaces/${namespace}/${id}/${analysisTabName}/${encodeURIComponent(
+            this.getFullJupyterNotebookName()
+          )}`
         );
       }
       if (this.isOpeningTerminal()) {

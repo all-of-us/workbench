@@ -1496,6 +1496,7 @@ components:
         - CROMWELL
         - CUSTOM
         - GALAXY
+        - RSTUDIO
     AppStatus:
       type: string
       enum:

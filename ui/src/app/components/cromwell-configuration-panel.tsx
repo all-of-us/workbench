@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
+import {
+  AppType,
+  CreateAppRequest,
+  Disk,
+  UserAppEnvironment,
+} from 'generated/fetch';
 
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -13,14 +18,15 @@ import {
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
-import { findMachineByName, Machine } from 'app/utils/machines';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 import { ProfileStore } from 'app/utils/stores';
 import { unattachedDiskExists } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { defaultCromwellConfig, findApp, UIAppType } from './apps-panel/utils';
+import {
+  createAppRequestToAnalysisConfig,
+  defaultCromwellConfig,
+} from './apps-panel/utils';
 import { EnvironmentInformedActionPanel } from './environment-informed-action-panel';
 
 const cromwellSupportArticles = [
@@ -38,29 +44,12 @@ const cromwellSupportArticles = [
   },
 ];
 
-const DEFAULT_MACHINE_TYPE: Machine = findMachineByName(
-  defaultCromwellConfig.kubernetesRuntimeConfig.machineType
-);
-
-const { cpu, memory } = DEFAULT_MACHINE_TYPE;
-
-const analysisConfig: Partial<AnalysisConfig> = {
-  machine: DEFAULT_MACHINE_TYPE,
-  diskConfig: {
-    size: defaultCromwellConfig.persistentDiskRequest.size,
-    detachable: true,
-    detachableType: defaultCromwellConfig.persistentDiskRequest.diskType,
-    existingDiskName: null,
-  },
-  numNodes: defaultCromwellConfig.kubernetesRuntimeConfig.numNodes,
-};
-
 export interface CromwellConfigurationPanelProps {
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
   profileState: ProfileStore;
-  gkeAppsInWorkspace: NonNullable<UserAppEnvironment[]>;
+  app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteUnattachedPersistentDisk: () => void;
 }
@@ -70,17 +59,23 @@ export const CromwellConfigurationPanel = ({
   creatorFreeCreditsRemaining,
   workspace,
   profileState,
-  gkeAppsInWorkspace,
+  app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
 }: CromwellConfigurationPanelProps) => {
-  const app = findApp(gkeAppsInWorkspace, UIAppType.CROMWELL);
   const { profile } = profileState;
 
   const onDismiss = () => {
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
   };
+
+  const cromwellConfig: CreateAppRequest = {
+    ...defaultCromwellConfig,
+    persistentDiskRequest:
+      disk !== undefined ? disk : defaultCromwellConfig.persistentDiskRequest,
+  };
+  const analysisConfig = createAppRequestToAnalysisConfig(cromwellConfig);
 
   return (
     <FlexColumn
@@ -129,11 +124,9 @@ export const CromwellConfigurationPanel = ({
       </div>
       <div style={{ ...styles.controlSection }}>
         <DisabledCloudComputeProfile
-          cpu={cpu}
-          memory={memory}
-          persistentDiskRequestSize={
-            defaultCromwellConfig.persistentDiskRequest.size
-          }
+          cpu={analysisConfig.machine.cpu}
+          memory={analysisConfig.machine.memory}
+          persistentDiskRequestSize={cromwellConfig.persistentDiskRequest.size}
           appType={AppType.CROMWELL}
         />
       </div>
@@ -168,7 +161,7 @@ export const CromwellConfigurationPanel = ({
           </div>
         </div>
         <CreateGKEAppButton
-          createAppRequest={defaultCromwellConfig}
+          createAppRequest={cromwellConfig}
           existingApp={app}
           workspaceNamespace={workspace.namespace}
           onDismiss={onDismiss}

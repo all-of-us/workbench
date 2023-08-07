@@ -10,8 +10,11 @@ import NotebookPage from './notebook-page';
 import WorkspaceBase from './workspace-base';
 import { initializeRuntimeIfModalPresented } from 'utils/runtime-utils';
 import { logger } from 'libs/logger';
+import Button from 'app/element/button';
+import SelectMenu from 'app/component/select-menu';
+import { environmentTimeout } from 'utils/timeout-constants';
 
-const PageTitle = 'View Notebooks';
+const PageTitle = 'View Analysis Files';
 
 export default class WorkspaceAnalysisPage extends WorkspaceBase {
   constructor(page: Page) {
@@ -19,41 +22,32 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), this.createNewNotebookLink().waitUntilEnabled()]);
+    await waitForDocumentTitle(this.page, PageTitle);
     await waitWhileLoading(this.page);
     return true;
   }
 
   /**
    * Create a new notebook.
-   * - Click "Create a New Notebook" link in Analysis page.
+   * - Click the "Choose an App" button on the Analysis page.
+   * - Choose "Jupyter" from the selection in the App Selector Modal.
+   * - Click the "Next" button on the App Selector Modal.
    * - Fill in Notebook name and choose language in New Notebook modal.
    * - Wait for Jupyter notebook page load.
    * @param {string} notebookName New notebook name.
    * @param {Language} language Notebook language.
    */
   async createNotebook(notebookName: string, language: Language = Language.Python): Promise<NotebookPage> {
-    const modal = new NewNotebookModal(this.page);
-    let maxRetries = 3;
-    const clickCreateButtonWithRetries = async (): Promise<void> => {
-      const link = this.createNewNotebookLink();
-      await link.click();
-      try {
-        await modal.waitForLoad();
-        return;
-      } catch (err) {
-        if (maxRetries < 1) {
-          throw new Error(`Click link "Create a New Notebook" failed after trying ${maxRetries} times.\n${err}`);
-        }
-      }
-      if (maxRetries < 1) {
-        throw new Error('Investigate why waitForLoad() did not throw error. It should not happen.');
-      }
-      maxRetries--;
-      await this.page.waitForTimeout(2000).then(() => clickCreateButtonWithRetries());
-    };
+    const appSelectorButton = Button.findByName(this.page, { normalizeSpace: 'Choose an App' });
+    await appSelectorButton.click();
 
-    await clickCreateButtonWithRetries();
+    const appSelectorOptions = SelectMenu.findByName(this.page, { normalizeSpace: 'Choose One' });
+    await appSelectorOptions.select('Jupyter');
+
+    const nextButton = Button.findByName(this.page, { name: 'Next' });
+    await nextButton.click();
+
+    const modal = new NewNotebookModal(this.page);
     await modal.fillInModal(notebookName, language);
 
     // Log notebook page heading.
@@ -92,16 +86,16 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       this.page.waitForXPath(redirectingTextsXpath, { visible: true })
     ]);
 
-    // Waiting up to 15 minutes
-    await waitWhileLoading(this.page, { timeout: 15 * 60 * 1000 });
+    // Waiting up to 15 minutes for runtime
+    await waitWhileLoading(this.page, { timeout: environmentTimeout });
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
     return notebook;
   }
 
+  // the only remaining test references to this are skipped
   createNewNotebookLink(): Link {
-    const xpath = '//*[local-name()="svg" and @data-icon="circle-plus"]';
-    return new Link(this.page, xpath);
+    throw new Error('not implemented for new analysis tab');
   }
 
   /**

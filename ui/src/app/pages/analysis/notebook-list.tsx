@@ -193,7 +193,12 @@ export const NotebookList = withCurrentWorkspace()(
       } = this.state;
       return (
         <FadeBox
-          style={{ margin: 'auto', marginTop: '1.5rem', width: '95.7%' }}
+          style={{
+            margin: 'auto',
+            marginTop: '1.5rem',
+            width: '95.7%',
+            minHeight: '650px', // kluge to give more space to the config panel
+          }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
             <div

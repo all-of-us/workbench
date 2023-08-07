@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import {
   faGear,
-  faPlay,
   faRocket,
   faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
@@ -14,12 +13,15 @@ import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
-import { cromwellConfigIconId } from 'app/components/help-sidebar-icons';
-import { withErrorModal } from 'app/components/modals';
+import {
+  cromwellConfigIconId,
+  rstudioConfigIconId,
+  SidebarIconId,
+} from 'app/components/help-sidebar-icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { cond, reactStyles } from 'app/utils';
+import { cond, reactStyles, switchCase } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,
@@ -28,8 +30,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  createUserApp,
-  deleteUserApp,
+  openRStudio,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -40,9 +41,7 @@ import { NewNotebookButton } from './new-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
 import { RuntimeCost } from './runtime-cost';
 import {
-  canCreateApp,
   canDeleteApp,
-  defaultRStudioConfig,
   fromRuntimeStatus,
   fromUserAppStatus,
   fromUserAppStatusWithFallback,
@@ -155,45 +154,20 @@ const RStudioButtonRow = (props: {
   workspaceNamespace: string;
 }) => {
   const { userApp, workspaceNamespace } = props;
-  const [creating, setCreating] = useState(false);
 
-  const onClickCreate = withErrorModal(
-    {
-      title: 'Error Creating RStudio Environment',
-      message:
-        'Please wait a few minutes and try to create your RStudio Environment again.',
-      onDismiss: () => setCreating(false),
-    },
-    async () => {
-      setCreating(true);
-      await createUserApp(workspaceNamespace, defaultRStudioConfig);
-    }
-  );
-
-  const onClickLaunch = () => {
-    window.open(userApp.proxyUrls.rstudio, '_blank').focus();
+  const onClickLaunch = async () => {
+    openRStudio(workspaceNamespace, userApp);
   };
 
-  const createButtonDisabled = creating || !canCreateApp(userApp);
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
 
   return (
     <FlexRow>
-      <TooltipTrigger
-        disabled={!createButtonDisabled}
-        content='An RStudio app exists or is being created'
-      >
-        {/* tooltip trigger needs a div for some reason */}
-        <div>
-          <AppsPanelButton
-            disabled={createButtonDisabled}
-            onClick={onClickCreate}
-            icon={faPlay}
-            buttonText={creating ? 'Creating' : 'Create'}
-            data-test-id='RStudio-create-button'
-          />
-        </div>
-      </TooltipTrigger>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(rstudioConfigIconId);
+        }}
+      />
       <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
       <TooltipTrigger
         disabled={!launchButtonDisabled}
@@ -205,8 +179,8 @@ const RStudioButtonRow = (props: {
             onClick={onClickLaunch}
             disabled={launchButtonDisabled}
             icon={faRocket}
-            buttonText='Launch'
-            data-test-id='RStudio-launch-button'
+            buttonText='Open RStudio'
+            data-test-id='open-RStudio-button'
           />
         </div>
       </TooltipTrigger>
@@ -220,6 +194,7 @@ interface ExpandedAppProps {
   workspace: Workspace;
   onClickRuntimeConf: Function;
   onClickDeleteRuntime: Function;
+  onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
 }
 export const ExpandedApp = (props: ExpandedAppProps) => {
   const { runtime } = useStore(runtimeStore);
@@ -229,35 +204,24 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     workspace,
     onClickRuntimeConf,
     onClickDeleteRuntime,
+    onClickDeleteGkeApp,
   } = props;
-  const [deletingApp, setDeletingApp] = useState(false);
   const [showCromwellDeleteModal, setShowCromwellDeleteModal] = useState(false);
 
   const trashEnabled =
     appType === UIAppType.JUPYTER
       ? isActionable(runtime?.status)
-      : !deletingApp && canDeleteApp(initialUserAppInfo);
-
-  // TODO allow configuration
-  const deleteDiskWithUserApp = true;
-
-  const deleteGkeApp = async () => {
-    setDeletingApp(true);
-    await deleteUserApp(
-      workspace.namespace,
-      initialUserAppInfo.appName,
-      deleteDiskWithUserApp
-    );
-  };
+      : canDeleteApp(initialUserAppInfo);
 
   const displayCromwellDeleteModal = () => {
     setShowCromwellDeleteModal(true);
   };
 
-  const onClickDelete = cond(
-    [appType === UIAppType.JUPYTER, () => onClickDeleteRuntime],
-    [appType === UIAppType.CROMWELL, () => displayCromwellDeleteModal],
-    () => deleteGkeApp
+  const onClickDelete = switchCase(
+    appType,
+    [UIAppType.JUPYTER, () => onClickDeleteRuntime],
+    [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
+    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)]
   );
 
   return (
@@ -340,7 +304,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
         <DeleteCromwellConfirmationModal
           clickYes={() => {
             setShowCromwellDeleteModal(false);
-            deleteGkeApp();
+            onClickDeleteGkeApp(cromwellConfigIconId);
           }}
           clickNo={() => setShowCromwellDeleteModal(false)}
         />

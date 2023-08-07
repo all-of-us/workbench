@@ -65,7 +65,7 @@ export const AppsPanelButton = (props: Props) => {
       <Clickable
         {...{ disabled, onClick }}
         style={{ padding: '0.5em' }}
-        data-test-id={`apps-panel-button-${buttonText}`}
+        data-test-id={`apps-panel-button-${buttonText.replace(' ', '-')}`}
         propagateDataTestId
       >
         <FlexColumn

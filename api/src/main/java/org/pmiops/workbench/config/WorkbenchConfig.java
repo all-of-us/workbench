@@ -55,7 +55,6 @@ public class WorkbenchConfig {
     config.egressAlertRemediationPolicy = new EgressAlertRemediationPolicy();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
-    config.firecloud.userApps = new UserApps();
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
@@ -171,18 +170,11 @@ public class WorkbenchConfig {
 
     // The deployment area of the GCE VM. For example, us-east1-a or europe-west2-c
     public String gceVmZone;
-
-    public UserApps userApps;
   }
 
   public static class RuntimeImages {
     public List<String> gce;
     public List<String> dataproc;
-  }
-
-  public static class UserApps {
-    /** The descriptor path which defines RStudio application configuration. */
-    public String rStudioDescriptorPath;
   }
 
   public static class AuthConfig {
@@ -285,7 +277,7 @@ public class WorkbenchConfig {
     // These booleans control whether each of our core access modules are enabled per environment.
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
-    // If true, all users are required to finish identity verification using RAS/login.gov.
+    public boolean enableRasIdMeLinking;
     public boolean enableRasLoginGovLinking;
     // Which Data User Code of Conduct (DUCC) Agreement version(s) are currently accepted as valid
     public List<Integer> currentDuccVersions;
@@ -325,8 +317,6 @@ public class WorkbenchConfig {
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable enableConceptSetsInCohortBuilder
-    public boolean enableConceptSetsInCohortBuilder;
     // If true, enable using the Cromwell GKE app
     public boolean enableCromwellGKEApp;
     // If true, enable using the RStudio GKE app

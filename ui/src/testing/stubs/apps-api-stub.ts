@@ -1,4 +1,6 @@
 import {
+  AppLocalizeRequest,
+  AppLocalizeResponse,
   AppsApi,
   AppStatus,
   AppType,
@@ -44,7 +46,7 @@ const createRStudioListAppsResponseDefaults: UserAppEnvironment = {
   appName: 'all-of-us-2-rstudio-1234',
   appType: AppType.RSTUDIO,
   proxyUrls: {
-    rstudio:
+    'rstudio-service':
       'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-rstudio-1234/rstudio',
   },
   diskName: 'all-of-us-pd-2-rstudio-1234',
@@ -85,5 +87,13 @@ export class AppsApiStub extends AppsApi {
 
   public deleteApp(): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(() => {});
+  }
+  public localizeApp(
+    _workspaceNamespace: string,
+    _appName: string,
+    _body: AppLocalizeRequest,
+    _options: any
+  ): Promise<AppLocalizeResponse> {
+    return new Promise<AppLocalizeResponse>(() => {});
   }
 }

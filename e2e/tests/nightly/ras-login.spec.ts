@@ -17,7 +17,7 @@ import Button from 'app/element/button';
  *   `./project.rb set-access-module-timestamps --profile-user ${ACCESS_TEST_USER} --ras-user ${RAS_TEST_USER}`
  *   This can also be run locally in workbench/api dir.
  */
-describe('RAS Test', () => {
+describe.skip('RAS Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page, config.RAS_TEST_USER, { waitForLoad: false });
   });

@@ -48,6 +48,7 @@ enum AnalyticsCategory {
   HELP = 'Help',
   WORKSPACE_UPDATE_PROMPT = 'Workspace update prompt',
   COHORT_BUILDER = 'Cohort Builder',
+  USER = 'USER',
 }
 
 function getCurrentPageLabel(suffix = '') {
@@ -416,6 +417,14 @@ export const AnalyticsTracker = {
         AnalyticsCategory.COHORT_BUILDER,
         'Navigate from cohort',
         label
+      ),
+  },
+  User: {
+    InactivitySignOut: () =>
+      triggerEvent(
+        AnalyticsCategory.USER,
+        'Sign out due to inactivity',
+        'Sign out due to inactivity'
       ),
   },
 };

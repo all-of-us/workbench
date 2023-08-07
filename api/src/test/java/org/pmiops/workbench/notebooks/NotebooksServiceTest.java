@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -148,35 +149,49 @@ public class NotebooksServiceTest {
                         .bucketName(bucketName)));
   }
 
-  private void stubNotebookToJson() {
+  private void stubNotebookToJson(String notebookName) {
     when(mockFireCloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
             new RawlsWorkspaceResponse().workspace(new RawlsWorkspaceDetails().bucketName("bkt")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockCloudStorageClient.getBlob("bkt", "notebooks/" + notebookName)).thenReturn(mockBlob);
   }
 
   @Test
   public void testAdminGetReadOnlyHtml() {
-    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
-    firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
-    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
-    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
-    when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
-        .thenReturn(firecloudWorkspaceResponse);
-
-    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+    mockBlobsForHtml();
 
     String htmlDocument = "<body><div>test</div></body>";
 
     when(mockFireCloudService.staticJupyterNotebooksConvert(any())).thenReturn(htmlDocument);
 
-    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
-    when(mockBlob.getSize()).thenReturn(1l);
-    when(mockBlob.getContent()).thenReturn(new byte[10]);
     String actualResult =
         notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.ipynb");
     assertThat(actualResult).isEqualTo(htmlDocument);
+  }
+
+  @Test
+  public void testAdminGetReadOnlyHtml_RFiles() {
+    mockBlobsForHtml();
+    String htmlDocument = "<body><div>test</div></body>";
+    when(mockFireCloudService.staticRstudioNotebooksConvert(any())).thenReturn(htmlDocument);
+
+    String actualResultForRmdFiles =
+        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.Rmd");
+    assertThat(actualResultForRmdFiles).isEqualTo(htmlDocument);
+
+    String actualResultForRFile =
+        notebooksService.adminGetReadOnlyHtml(NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.R");
+    assertThat(actualResultForRFile).isEqualTo(htmlDocument);
+  }
+
+  @Test
+  public void testAdminGetReadOnlyHtml_IncorrectExt() {
+    Assertions.assertThrows(
+        NotImplementedException.class,
+        () ->
+            notebooksService.adminGetReadOnlyHtml(
+                NAMESPACE_NAME, WORKSPACE_NAME, "notebookName.RIn"));
   }
 
   @Test
@@ -548,55 +563,68 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_allowsDataImage() {
-    stubNotebookToJson();
+    stubNotebookToJson("test_allowsDataImage.ipynb");
     String dataUri = "data:image/png;base64,MTIz";
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_allowsDataImage.ipynb").getBytes());
     assertThat(html).contains(dataUri);
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_allowsDataImage.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_basicContent() {
-    stubNotebookToJson();
+    stubNotebookToJson("test_basicContent.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
+    String html =
+        new String(notebooksService.getReadOnlyHtml("", "", "test_basicContent.ipynb").getBytes());
     assertThat(html).contains("div");
     assertThat(html).contains("asdf");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_basicContent.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
-    stubNotebookToJson();
+    stubNotebookToJson("test_disallowsRemoteImage.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_disallowsRemoteImage.ipynb").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_disallowsRemoteImage.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
-    stubNotebookToJson();
+    stubNotebookToJson("test_scriptSanitization.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_scriptSanitization.ipynb").getBytes());
     assertThat(html).doesNotContain("script");
     assertThat(html).doesNotContain("alert");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_scriptSanitization.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
-    stubNotebookToJson();
+    stubNotebookToJson("test_styleSanitization.ipynb");
     when(mockFireCloudService.staticJupyterNotebooksConvert(any()))
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
-    String html = new String(notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes());
+    String html =
+        new String(
+            notebooksService.getReadOnlyHtml("", "", "test_styleSanitization.ipynb").getBytes());
     assertThat(html).contains("style");
     assertThat(html).contains("color");
     // This behavior is not desired, but this test is in place to enshrine current expected
@@ -604,41 +632,70 @@ public class NotebooksServiceTest {
     // expect that the only style tags produced in the preview are produced by nbconvert, and are
     // therefore safe. Ideally we would keep the style tag, but sanitize the contents.
     assertThat(html).contains("XSS");
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_styleSanitization.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_tooBig() {
     when(mockBlob.getSize()).thenReturn(50L * 1000 * 1000); // 50MB
-    stubNotebookToJson();
+    stubNotebookToJson("test_tooBig.ipynb");
 
     try {
-      notebooksService.getReadOnlyHtml("", "", "test.ipynb").getBytes();
+      notebooksService.getReadOnlyHtml("", "", "test_tooBig.ipynb").getBytes();
       fail("expected 412 exception");
     } catch (FailedPreconditionException e) {
       // expected
     }
     verify(mockFireCloudService, never()).staticJupyterNotebooksConvert(any());
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test_tooBig.ipynb");
   }
 
   @Test
   public void testGetReadOnlyHtml_rstudioFile() {
-    stubNotebookToJson();
+    stubNotebookToJson("test.Rmd");
     notebooksService.getReadOnlyHtml("", "", "test.Rmd");
     verify(mockFireCloudService).staticRstudioNotebooksConvert(any());
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test.Rmd");
   }
 
   @Test
-  public void testGetReadOnlyHtml_unSupportFileFormat() {
-    stubNotebookToJson();
+  public void testGetReadOnlyHtml_rFile() {
+    stubNotebookToJson("test.R");
+    notebooksService.getReadOnlyHtml("", "", "test.R");
+    verify(mockFireCloudService).staticRstudioNotebooksConvert(any());
+    verify(mockCloudStorageClient).getBlob("bkt", "notebooks/test.R");
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_unsupportedFileFormat() {
+    stubNotebookToJson("notebook without suffix");
     Assertions.assertThrows(
         NotImplementedException.class,
         () -> notebooksService.getReadOnlyHtml("", "", "notebook without suffix"));
+    verifyNoInteractions(mockCloudStorageClient);
   }
 
   @Test
-  public void testIsNotebookBlob_negative() {
-    when(mockBlob.getName()).thenReturn(NotebookUtils.withNotebookPath("test.txt"));
-    assertThat(notebooksService.isNotebookBlob(mockBlob)).isEqualTo(false);
+  public void testIsManagedNotebookBlob_positive() {
+    String managedNotebookFile =
+        NotebookUtils.withNotebookPath(NotebookUtils.withJupyterNotebookExtension("test"));
+    when(mockBlob.getName()).thenReturn(managedNotebookFile);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(true);
+  }
+
+  @Test
+  public void testIsManagedNotebookBlob_negative_path() {
+    String unmanagedNotebookFile =
+        NotebookUtils.withJupyterNotebookExtension("some_other_dir/test");
+    when(mockBlob.getName()).thenReturn(unmanagedNotebookFile);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(false);
+  }
+
+  @Test
+  public void testIsManagedNotebookBlob_negative_filename() {
+    String unmanagedOtherFileInNotebookDir = NotebookUtils.withNotebookPath("test.txt");
+    when(mockBlob.getName()).thenReturn(unmanagedOtherFileInNotebookDir);
+    assertThat(notebooksService.isManagedNotebookBlob(mockBlob)).isEqualTo(false);
   }
 
   @Test
@@ -691,5 +748,20 @@ public class NotebooksServiceTest {
         () ->
             notebooksService.saveNotebook(
                 BUCKET_NAME, "test.Rmd", new JSONObject().put("who", "I'm a notebook!")));
+  }
+
+  private void mockBlobsForHtml() {
+    RawlsWorkspaceDetails firecloudWorkspaceDetails = new RawlsWorkspaceDetails();
+    firecloudWorkspaceDetails.setBucketName(BUCKET_NAME);
+    RawlsWorkspaceResponse firecloudWorkspaceResponse = new RawlsWorkspaceResponse();
+    firecloudWorkspaceResponse.setWorkspace(firecloudWorkspaceDetails);
+    when(mockFireCloudService.getWorkspaceAsService(anyString(), anyString()))
+        .thenReturn(firecloudWorkspaceResponse);
+
+    stubGetWorkspace(NAMESPACE_NAME, WORKSPACE_NAME, BUCKET_NAME, WorkspaceAccessLevel.OWNER);
+
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockBlob.getSize()).thenReturn(1l);
+    when(mockBlob.getContent()).thenReturn(new byte[10]);
   }
 }

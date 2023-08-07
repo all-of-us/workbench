@@ -21,6 +21,7 @@ import { ConfigurationPanel } from 'app/components/configuration-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GenomicsExtractionTable } from 'app/components/genomics-extraction-table';
+import { GKEAppPanelContent } from 'app/components/gke-app-configuration-panel';
 import {
   cromwellConfigIconId,
   HelpSidebarIcons,
@@ -245,6 +246,7 @@ interface State {
   currentModal: CurrentModal;
   runtimeErrors: Array<RuntimeError>;
   runtimeConfPanelInitialState: PanelContent | null;
+  gkeAppConfPanelInitialState: GKEAppPanelContent | null;
 }
 
 const BetaBadge = ({ tooltipContent, style }) => (
@@ -284,6 +286,7 @@ export const HelpSidebar = fp.flow(
         currentModal: CurrentModal.None,
         runtimeErrors: null,
         runtimeConfPanelInitialState: null,
+        gkeAppConfPanelInitialState: null,
       };
     }
 
@@ -310,13 +313,24 @@ export const HelpSidebar = fp.flow(
 
     setActiveIcon(activeIcon: SidebarIconId) {
       setSidebarActiveIconStore.next(activeIcon);
-      // let the Runtime Config Panel use its own logic
-      this.setState({ runtimeConfPanelInitialState: null });
+      // let the Config Panels use their own logic
+      this.setState({
+        runtimeConfPanelInitialState: null,
+        gkeAppConfPanelInitialState: null,
+      });
     }
 
     openRuntimeConfigWithState(runtimeConfPanelInitialState: PanelContent) {
       setSidebarActiveIconStore.next('runtimeConfig');
       this.setState({ runtimeConfPanelInitialState });
+    }
+
+    openGkeAppConfigWithState(
+      icon: SidebarIconId,
+      gkeAppConfPanelInitialState: GKEAppPanelContent
+    ) {
+      setSidebarActiveIconStore.next(icon);
+      this.setState({ gkeAppConfPanelInitialState });
     }
 
     async componentDidMount() {
@@ -440,11 +454,16 @@ export const HelpSidebar = fp.flow(
 
     get sidebarWidth() {
       const { activeIcon } = this.state;
-      return fp.getOr('21', 'bodyWidthRem', this.sidebarContent(activeIcon));
+      return fp.getOr(
+        '21',
+        'bodyWidthRem',
+        this.sidebarContent(activeIcon, null)
+      );
     }
 
     sidebarContent(
       activeIcon: SidebarIconId,
+      gkeAppConfPanelInitialState: GKEAppPanelContent | null,
       runtimeConfPanelInitialState?: PanelContent
     ): {
       overflow?: string;
@@ -526,6 +545,12 @@ export const HelpSidebar = fp.flow(
                 onClickDeleteRuntime={() =>
                   this.openRuntimeConfigWithState(PanelContent.DeleteRuntime)
                 }
+                onClickDeleteGkeApp={(sidebarIcon: SidebarIconId) =>
+                  this.openGkeAppConfigWithState(
+                    sidebarIcon,
+                    GKEAppPanelContent.DELETE_GKE_APP
+                  )
+                }
               />
             ),
             showFooter: false,
@@ -558,6 +583,7 @@ export const HelpSidebar = fp.flow(
               <ConfigurationPanel
                 type={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
+                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -589,6 +615,7 @@ export const HelpSidebar = fp.flow(
               <ConfigurationPanel
                 type={UIAppType.RSTUDIO}
                 onClose={() => this.setActiveIcon(null)}
+                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -660,8 +687,12 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const { activeIcon, runtimeErrors, runtimeConfPanelInitialState } =
-        this.state;
+      const {
+        activeIcon,
+        runtimeErrors,
+        runtimeConfPanelInitialState,
+        gkeAppConfPanelInitialState,
+      } = this.state;
       const {
         workspace,
         workspace: { namespace, id },
@@ -670,6 +701,7 @@ export const HelpSidebar = fp.flow(
       } = this.props;
       const sidebarContent = this.sidebarContent(
         activeIcon,
+        gkeAppConfPanelInitialState,
         runtimeConfPanelInitialState
       );
       const shouldRenderWorkspaceMenu =
@@ -761,19 +793,11 @@ export const HelpSidebar = fp.flow(
           </div>
 
           <TransitionGroup>
-            <CSSTransition
+            <CSSTransition<undefined>
               key={activeIcon}
               classNames='sidebar'
               addEndListener={(node, done) => {
-                node.addEventListener(
-                  'transitionend',
-                  (e) => {
-                    if (node.isEqualNode(e.target)) {
-                      done(e);
-                    }
-                  },
-                  false
-                );
+                node.addEventListener('transitionend', done, false);
               }}
             >
               <div style={this.sidebarContainerStyles(activeIcon)}>

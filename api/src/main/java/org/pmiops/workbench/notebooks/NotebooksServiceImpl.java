@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -120,20 +121,20 @@ public class NotebooksServiceImpl implements NotebooksService {
   public List<FileDetail> getNotebooksAsService(
       String bucketName, String workspaceNamespace, String workspaceName) {
     Set<String> workspaceUsers =
-        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+        workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     return cloudStorageClient
         .getBlobPageForPrefix(bucketName, NotebookUtils.NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
-        .filter(this::isNotebookBlob)
+        .filter(this::isManagedNotebookBlob)
         .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
         .collect(Collectors.toList());
   }
 
   @Override
-  public boolean isNotebookBlob(Blob blob) {
+  public boolean isManagedNotebookBlob(Blob blob) {
     // Blobs have notebooks/ directory
     return NotebookUtils.isJupyterNotebookWithDirectory(blob.getName())
-        || NotebookUtils.isRMarkDownNotebookWithDirectory(blob.getName());
+        || NotebookUtils.isRStudioFileWithDirectory(blob.getName());
   }
 
   @Override
@@ -275,16 +276,12 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
-    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return getNotebookKernel(cloudStorageClient.readBlobAsJson(blob));
+    return getNotebookKernel(getNotebookContents(bucketName, notebookName));
   }
 
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
     Blob blob =
-        cloudStorageClient.getBlob(
-            bucketName,
-            NotebookUtils.withNotebookPath(
-                NotebookUtils.withJupyterNotebookExtension(notebookName)));
+        cloudStorageClient.getBlob(bucketName, NotebookUtils.withNotebookPath(notebookName));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
           String.format(
@@ -321,6 +318,17 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
+
+    final Function<byte[], String> converter;
+    if (NotebookUtils.isJupyterNotebook(notebookName)) {
+      converter = this::convertJupyterNotebookToHtml;
+    } else if (NotebookUtils.isRStudioFile(notebookName)) {
+      converter = this::convertRstudioNotebookToHtml;
+    } else {
+      throw new NotImplementedException(
+          String.format("Converting %s to read-only HTML is not supported", notebookName));
+    }
+
     String bucketName =
         fireCloudService
             .getWorkspace(workspaceNamespace, workspaceName)
@@ -328,21 +336,14 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-
-    if (NotebookUtils.isJupyterNotebook(notebookName)) {
-      return convertJupyterNotebookToHtml(blob.getContent());
-    } else if (NotebookUtils.isRstudioNotebook(notebookName)) {
-      return convertRstudioNotebookToHtml(blob.getContent());
-    } else {
-      throw new NotImplementedException(
-          String.format("Converting %s to read-only HTML is not supported", notebookName));
-    }
+    return converter.apply(blob.getContent());
   }
 
   @Override
   public String adminGetReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookNameWithFileExtension) {
-    if (!NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)) {
+    if (!(NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
+        || NotebookUtils.isRStudioFile(notebookNameWithFileExtension))) {
       throw new NotImplementedException(
           String.format(
               "%s is a type of file that is not yet supported", notebookNameWithFileExtension));
@@ -355,7 +356,9 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookNameWithFileExtension);
-    return convertJupyterNotebookToHtml(blob.getContent());
+    return NotebookUtils.isJupyterNotebook(notebookNameWithFileExtension)
+        ? convertJupyterNotebookToHtml(blob.getContent())
+        : convertRstudioNotebookToHtml(blob.getContent());
   }
 
   private GoogleCloudLocators getNotebookLocators(

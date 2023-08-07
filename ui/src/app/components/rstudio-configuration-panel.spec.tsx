@@ -46,7 +46,7 @@ export const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
     reload: jest.fn(),
     updateCache: jest.fn(),
   },
-  gkeAppsInWorkspace: [],
+  app: undefined,
   disk: undefined,
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
@@ -87,7 +87,8 @@ describe('RStudioConfigurationPanel', () => {
 
   it('start button should create rstudio and close panel', async () => {
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
+      disk: undefined,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -105,6 +106,28 @@ describe('RStudioConfigurationPanel', () => {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       defaultRStudioConfig
     );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should use the existing PD when creating', async () => {
+    const disk = stubDisk();
+    const wrapper = await component({
+      app: undefined,
+      disk,
+    });
+    await waitOneTickAndUpdate(wrapper);
+
+    const spyCreateApp = jest
+      .spyOn(appsApi(), 'createApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
+    const startButton = wrapper
+      .find('#RStudio-cloud-environment-create-button')
+      .first();
+
+    startButton.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(spyCreateApp).toHaveBeenCalledTimes(1);
+    expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -126,7 +149,7 @@ describe('RStudioConfigurationPanel', () => {
     const disk = stubDisk();
     const onClickDeleteUnattachedPersistentDisk = jest.fn();
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk,
       onClickDeleteUnattachedPersistentDisk,
     });
@@ -141,7 +164,7 @@ describe('RStudioConfigurationPanel', () => {
   it('should not render a DeletePersistentDiskButton when an app is present', async () => {
     const disk = stubDisk();
     const wrapper = await component({
-      gkeAppsInWorkspace: [createListAppsRStudioResponse()],
+      app: createListAppsRStudioResponse(),
       disk,
     });
     const deleteButton = wrapper.find('DeletePersistentDiskButton');
@@ -150,7 +173,7 @@ describe('RStudioConfigurationPanel', () => {
 
   it('should not render a DeletePersistentDiskButton no disk is present', async () => {
     const wrapper = await component({
-      gkeAppsInWorkspace: [],
+      app: undefined,
       disk: undefined,
     });
     const deleteButton = wrapper.find('DeletePersistentDiskButton');

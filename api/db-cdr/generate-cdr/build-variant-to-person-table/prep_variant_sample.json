@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "vid",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "STRING"
+  }
+]

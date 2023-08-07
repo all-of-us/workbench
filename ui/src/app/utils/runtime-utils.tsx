@@ -7,6 +7,7 @@ import {
   DiskType,
   ErrorCode,
   GpuConfig,
+  ListRuntimeResponse,
   PersistentDiskRequest,
   Runtime,
   RuntimeConfigurationType,
@@ -40,6 +41,7 @@ import {
   registerCompoundRuntimeOperation,
   runtimeDiskStore,
   runtimeStore,
+  userAppsStore,
   useStore,
 } from 'app/utils/stores';
 
@@ -1243,6 +1245,14 @@ export const withRuntimeStore = () => (WrappedComponent) => {
   };
 };
 
+export const withUserAppsStore = () => (WrappedComponent) => {
+  return (props) => {
+    const value = useStore(userAppsStore);
+
+    return <WrappedComponent {...props} userAppsStore={value} />;
+  };
+};
+
 export enum SparkConsolePath {
   Yarn = 'yarn',
   YarnTimeline = 'apphistory',
@@ -1270,3 +1280,6 @@ export const isVisible = (status: RuntimeStatus) =>
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
   [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);
+
+export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
+  runtime?.labels?.creator;

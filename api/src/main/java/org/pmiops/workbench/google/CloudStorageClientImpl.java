@@ -7,7 +7,6 @@ import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.List;
@@ -51,19 +50,17 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public List<Blob> getBlobPage(String bucketName) {
-    Iterable<Blob> blobList = storageProvider.get().get(bucketName).list().getValues();
-    return ImmutableList.copyOf(blobList);
+    return storageProvider.get().get(bucketName).list().streamValues().collect(Collectors.toList());
   }
 
   @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
-    Iterable<Blob> blobList =
-        storageProvider
-            .get()
-            .get(bucketName)
-            .list(Storage.BlobListOption.prefix(directory))
-            .getValues();
-    return ImmutableList.copyOf(blobList);
+    return storageProvider
+        .get()
+        .get(bucketName)
+        .list(Storage.BlobListOption.prefix(directory))
+        .streamValues()
+        .collect(Collectors.toList());
   }
 
   private String getCredentialsBucketName() {

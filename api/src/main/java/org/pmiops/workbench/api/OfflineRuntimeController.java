@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.leonardo.ApiException;
+import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
@@ -71,6 +73,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private final MailService mailService;
   private final Provider<RuntimesApi> runtimesApiProvider;
   private final Provider<DisksApi> disksApiProvider;
+  private final LeonardoApiClient leonardoApiClient;
   private final Provider<WorkbenchConfig> configProvider;
   private final WorkspaceDao workspaceDao;
   private final UserDao userDao;
@@ -84,6 +87,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       MailService mailService,
       @Qualifier(LeonardoConfig.SERVICE_RUNTIMES_API) Provider<RuntimesApi> runtimesApiProvider,
       @Qualifier(LeonardoConfig.SERVICE_DISKS_API) Provider<DisksApi> disksApiProvider,
+      LeonardoApiClient leonardoApiClient,
       Provider<WorkbenchConfig> configProvider,
       WorkspaceDao workspaceDao,
       UserDao userDao,
@@ -93,6 +97,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     this.freeTierBillingService = freeTierBillingService;
     this.mailService = mailService;
     this.runtimesApiProvider = runtimesApiProvider;
+    this.leonardoApiClient = leonardoApiClient;
     this.disksApiProvider = disksApiProvider;
     this.workspaceDao = workspaceDao;
     this.userDao = userDao;
@@ -102,8 +107,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   /**
-   * checkRuntimes deletes older runtimes in order to force an upgrade on the next researcher login.
-   * This method is meant to be restricted to invocation by App Engine cron.
+   * deleteOldRuntimes deletes older runtimes in order to force an upgrade on the next researcher
+   * login. This method is meant to be restricted to invocation by App Engine cron.
    *
    * <p>The runtime deletion policy here aims to strike a balance between enforcing upgrades, cost
    * savings, and minimizing user disruption. To this point, our goal is to only upgrade idle
@@ -118,7 +123,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
    * <p>As an App Engine cron endpoint, the runtime of this method may not exceed 10 minutes.
    */
   @Override
-  public ResponseEntity<Void> checkRuntimes() {
+  public ResponseEntity<Void> deleteOldRuntimes() {
     final Instant now = clock.instant();
     final WorkbenchConfig config = configProvider.get();
     final Duration maxAge = Duration.ofDays(config.firecloud.notebookRuntimeMaxAgeDays);
@@ -292,6 +297,16 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
+    final boolean attached;
+    try {
+      attached = isDiskAttached(disk, googleProject);
+    } catch (ApiException | NullPointerException ex) {
+      log.warning(
+          String.format(
+              "skipping disk '%s' error while getting disk status", disk.getName(), googleProject));
+      return false;
+    }
+
     Optional<DbWorkspace> workspace = workspaceDao.getByGoogleProject(googleProject);
     if (workspace.isEmpty()) {
       log.warning(
@@ -338,7 +353,21 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     }
 
     mailService.alertUsersUnusedDiskWarningThreshold(
-        dbUsers, workspace.get(), disk, daysUnused, initialCreditsRemaining);
+        dbUsers, workspace.get(), disk, attached, daysUnused, initialCreditsRemaining);
     return true;
+  }
+
+  private boolean isDiskAttached(
+      LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+    final String diskName = diskResponse.getName();
+
+    if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
+      return runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false).stream()
+          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
+          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
+    } else {
+      return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
+          .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));
+    }
   }
 }

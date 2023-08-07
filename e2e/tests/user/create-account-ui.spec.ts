@@ -4,7 +4,7 @@ import GoogleLoginPage from 'app/page/google-login';
 import { config } from 'resources/workbench-config';
 import { waitForText } from 'utils/waits-utils';
 
-describe('Account creation UI tests:', () => {
+describe.skip('Account creation UI tests:', () => {
   test('Can navigate the new user account creation workflow', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();

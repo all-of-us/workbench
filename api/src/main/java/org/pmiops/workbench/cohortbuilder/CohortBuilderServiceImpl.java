@@ -7,6 +7,7 @@ import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.cache.MySQLStopWords;
@@ -55,6 +57,9 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
+import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.utils.FieldValues;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -66,6 +71,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
+  private static final int DEFAULT_VARIANT_PAGE_SIZE = 25;
+  private static final int MAX_VARIANT_PAGE_SIZE = 100;
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
       ImmutableList.of("\"", "+", "-", "*");
   private static final List<String> CONDITION_PROCEDURE_SOURCE_DOMAINS =
@@ -590,6 +597,42 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public ImmutableTriple<String, Integer, List<Variant>> findVariants(
+      String searchTerm, String pageToken, Integer pageSize) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildCountQuery(searchTerm));
+    FieldValueList row = result.iterateAll().iterator().next();
+    int count = Integer.parseInt(row.get("count").getStringValue());
+
+    int limit = DEFAULT_VARIANT_PAGE_SIZE;
+    if (pageSize != null && pageSize > 0) {
+      limit = Math.min(pageSize, MAX_VARIANT_PAGE_SIZE);
+    }
+
+    int offset = 0;
+    if (!Strings.isNullOrEmpty(pageToken)) {
+      PaginationToken token = PaginationToken.fromBase64(pageToken);
+      offset = (int) token.getOffset();
+    }
+
+    result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildQuery(searchTerm, limit, offset));
+    List<Variant> variants =
+        StreamSupport.stream(result.iterateAll().spliterator(), false)
+            .map(this::fieldValueListToVariant)
+            .collect(ImmutableList.toImmutableList());
+
+    String nextPageToken = null;
+    if ((offset + limit) < count) {
+      nextPageToken = PaginationToken.of(offset + limit).toBase64();
+    }
+
+    return ImmutableTriple.of(nextPageToken, count, variants);
+  }
+
+  @Override
   public List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys) {
     List<String> searchDomains =
         ImmutableList.of(
@@ -611,6 +654,20 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return dbCriteria.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private Variant fieldValueListToVariant(FieldValueList row) {
+    Variant variant = new Variant();
+    FieldValues.getString(row, "vid").ifPresent(variant::setVid);
+    FieldValues.getString(row, "genes").ifPresent(variant::setGene);
+    FieldValues.getString(row, "cons_str").ifPresent(variant::setConsequence);
+    FieldValues.getString(row, "protein_change").ifPresent(variant::setProteinChange);
+    FieldValues.getString(row, "clinical_significance").ifPresent(variant::setClinVarSignificance);
+    FieldValues.getLong(row, "allele_count").ifPresent(variant::setAlleleCount);
+    FieldValues.getLong(row, "allele_number").ifPresent(variant::setAlleleNumber);
+    FieldValues.getDouble(row, "allele_frequency").ifPresent(variant::setAlleleFrequency);
+    FieldValues.getLong(row, "participant_count").ifPresent(variant::setParticipantCount);
+    return variant;
   }
 
   private CriteriaListWithCountResponse getTopCountsSearchWithStandard(

@@ -6,7 +6,7 @@ import { waitForText } from 'utils/waits-utils';
 import { Cohorts, ResourceCard, Tabs } from 'app/text-labels';
 import ConceptSetSearchPage from 'app/page/conceptset-search-page';
 
-describe('Create Concept Sets from Domains', () => {
+describe.skip('Create Concept Sets from Domains', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

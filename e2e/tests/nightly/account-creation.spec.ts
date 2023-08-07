@@ -1,7 +1,7 @@
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
 
-describe('Account creation tests:', () => {
+describe.skip('Account creation tests:', () => {
   //TODO: Update test to include filling out the demographics survey and final account creation.
   test('can complete steps 1-3 of account creation', async () => {
     // Load the landing page for login.

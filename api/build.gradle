@@ -51,7 +51,7 @@ plugins {
     // are overridden with forked templates within this repo; they will likely need to be re-copied from
     // the newer release version and have AoU-specific modifications re-applied.
     id 'org.hidetake.swagger.generator' version '2.19.2'
-    id 'org.owasp.dependencycheck' version '7.4.4'
+    id 'org.owasp.dependencycheck' version '8.3.1'
     id 'org.springframework.boot' version '2.7.4'
 }
 
@@ -421,7 +421,7 @@ dependencies {
     implementation 'com.google.cloud:google-cloud-storage:2.13.0'
     implementation 'com.google.cloud:google-cloud-tasks:2.3.11'
     implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:32.0.1-jre'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
     implementation 'com.google.protobuf:protobuf-java:3.21.7'
     implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'

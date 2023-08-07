@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 
 import { CdrVersionTiersResponse, Workspace } from 'generated/fetch';
 
-import { environment } from 'environments/environment';
 import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
@@ -18,6 +17,7 @@ import {
 } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import { CdrVersionUpgradeModal } from './cdr-version-upgrade-modal';
 
@@ -142,8 +142,10 @@ const CdrVersion = (props: {
 
 const tabs = [
   { name: 'Data', link: 'data' },
-  { name: 'Analysis', link: 'notebooks' },
-  // { name: 'Analysis (New)', link: 'apps' },
+  {
+    name: 'Analysis',
+    link: analysisTabName,
+  },
   { name: 'About', link: 'about' },
 ];
 
@@ -167,23 +169,27 @@ export const WorkspaceNavBar = fp.flow(
   withCdrVersions()
 )((props) => {
   const { tabPath, workspace, cdrVersionTiersResponse } = props;
-  const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+  // default to Data tab if the tabPath is not set
+  const activeTabIndex = fp.findIndex(['link', tabPath ?? 'data'], tabs);
   const [navigate] = useNavigation();
   const { ns, wsid } = useParams<MatchParams>();
 
   useEffect(() => {
-    if (environment.showNewAnalysisTab && tabs.length === 3) {
-      tabs.push({ name: 'Analysis (New)', link: 'apps' });
-    }
     if (
       serverConfigStore.get().config.enableDataExplorer &&
       !tabs.find((tab) => tab.name === 'Data Explorer')
     ) {
       tabs.push({ name: 'Data Explorer', link: 'data-explorer' });
     }
+    if (
+      serverConfigStore.get().config.enableTanagra &&
+      !tabs.find((tab) => tab.name === 'Tanagra')
+    ) {
+      tabs.push({ name: 'Tanagra', link: 'tanagra' });
+    }
   }, []);
 
-  const appsTabStyle = (selected) => {
+  const experimentalTabStyle = (selected) => {
     return selected
       ? { backgroundColor: colorWithWhiteness(colors.danger, 0.3) }
       : { backgroundColor: colors.danger };
@@ -191,9 +197,10 @@ export const WorkspaceNavBar = fp.flow(
 
   const navTab = (currentTab, disabled) => {
     const { name, link } = currentTab;
-    const selected = tabPath === link;
-    const hideSeparator =
-      selected || activeTabIndex === tabs.indexOf(currentTab) + 1;
+    const currentTabIndex = tabs.indexOf(currentTab);
+    const selected = activeTabIndex === currentTabIndex;
+    const hideSeparator = selected || activeTabIndex === currentTabIndex + 1;
+
     return (
       <React.Fragment key={name}>
         <Clickable
@@ -205,7 +212,9 @@ export const WorkspaceNavBar = fp.flow(
             ...styles.tab,
             ...(selected ? styles.active : {}),
             ...(disabled ? styles.disabled : {}),
-            ...(link === 'apps' ? appsTabStyle(selected) : {}),
+            ...(['data-explorer', 'tanagra'].includes(link)
+              ? experimentalTabStyle(selected)
+              : {}),
           }}
           onClick={() => navigate(['workspaces', ns, wsid, link])}
         >

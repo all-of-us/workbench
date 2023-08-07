@@ -6,6 +6,7 @@ import { mockNavigate } from 'setupTests';
 import { WorkspaceNavBar } from 'app/pages/workspace/workspace-nav-bar';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { cdrVersionStore, serverConfigStore } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 
 import {
   CdrVersionsStubVariables,
@@ -44,9 +45,12 @@ describe('WorkspaceNavBar', () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
-  it('should render', () => {
+  it('should render the Data tab by default', () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
+    expect(
+      wrapper.find({ 'data-test-id': 'Data', 'aria-selected': true }).exists()
+    ).toBeTruthy();
   });
 
   it('should highlight the active tab', () => {
@@ -65,7 +69,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      analysisTabName,
     ]);
 
     wrapper.find({ 'data-test-id': 'Data' }).first().simulate('click');
@@ -116,7 +120,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      analysisTabName,
     ]);
   });
 
@@ -138,7 +142,7 @@ describe('WorkspaceNavBar', () => {
       'workspaces',
       workspaceDataStub.namespace,
       workspaceDataStub.id,
-      'notebooks',
+      analysisTabName,
     ]);
   });
 

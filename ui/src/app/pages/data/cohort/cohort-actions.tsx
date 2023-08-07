@@ -21,6 +21,7 @@ import {
 } from 'app/utils';
 import { NavigationProps } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
+import { analysisTabName } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -161,7 +162,7 @@ export const CohortActions = fp.flow(
           url += `data/cohorts/${cohort.id}/reviews`;
           break;
         case 'notebook':
-          url += 'notebooks';
+          url += analysisTabName;
           break;
         case 'dataSet':
           url += 'data/data-sets';

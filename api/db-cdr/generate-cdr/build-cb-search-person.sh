@@ -341,3 +341,71 @@ FROM
             ) b on a.person_id = b.person_id
     ) y
 WHERE x.person_id = y.person_id"
+
+################################################
+# set fitbit tables flags
+################################################
+echo "set fitbit table flags in cb_search_person"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
+SET x.has_fitbit_activity_summary = y.has_fitbit_activity_summary,
+    x.has_fitbit_heart_rate_level = y.has_fitbit_heart_rate_level,
+    x.has_fitbit_heart_rate_summary = y.has_fitbit_heart_rate_summary,
+    x.has_fitbit_steps_intraday = y.has_fitbit_steps_intraday,
+    x.has_fitbit_sleep_daily_summary = y.has_fitbit_sleep_daily_summary,
+    x.has_fitbit_sleep_level = y.has_fitbit_sleep_level
+FROM
+    (
+        SELECT
+              p.person_id
+            , CASE
+                WHEN asum.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_activity_summary
+            , CASE
+                WHEN hrml.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_heart_rate_level
+            , CASE
+                WHEN hrs.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_heart_rate_summary
+            , CASE
+                WHEN si.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_steps_intraday
+            , CASE
+                WHEN sds.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_sleep_daily_summary
+            , CASE
+                WHEN sl.person_id is null THEN 0
+                ELSE 1
+              END has_fitbit_sleep_level
+        FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
+            ) asum on (p.person_id = asum.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+            ) hrml on (p.person_id = hrml.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
+            ) hrs on (p.person_id = hrs.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+            ) si on (p.person_id = si.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_daily_summary\`
+            ) sds on (p.person_id = sds.person_id)
+        LEFT JOIN
+            (
+                SELECT distinct person_id FROM \`$BQ_PROJECT.$BQ_DATASET.sleep_level\`
+            ) sl on (p.person_id = sl.person_id)
+    ) y
+WHERE x.person_id = y.person_id"

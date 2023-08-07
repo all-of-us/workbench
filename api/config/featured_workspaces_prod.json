@@ -140,7 +140,7 @@
     },
     {
       "name": "How to Get Started with Registered Tier Data (v7)",
-      "namespace": "aou-rw-80b0f6ac",
+      "namespace": "aou-rw-ce076159",
       "id": "howtogetstartedwithregisteredtierdatav7",
       "category": "TUTORIAL_WORKSPACES"
     },
@@ -190,6 +190,12 @@
       "name": "Genomics Undergrad Lesson Plan Exemplar (v6)",
       "namespace": "aou-rw-e88a6e91",
       "id": "duplicateofcontroltierusersupportcontentv6",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "genomics-workshop-07122023",
+      "namespace": "aou-rw-393498d0",
+      "id": "genomicsworkshop07122023",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
@@ -244,6 +250,24 @@
       "name": "Demo-Geographic Variation in Obesity (V4)",
       "namespace": "aou-rw-808a79c0",
       "id": "demogeographicvariationinobesityv4",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "All of Us v6 GWAS on LDL Cholesterol with Regenie and dsub",
+      "namespace": "aou-rw-5981f9dc",
+      "id": "aouldlgwasregeniedsubctv6duplicate",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Polygenic_Risk_Score_Genetic_Ancestry_Calibration",
+      "namespace": "aou-rw-bef5bf62",
+      "id": "demopolygenicriskscoregeneticancestrycalibration",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - General Health and Well-Being of SGM Participants",
+      "namespace": "aou-rw-7278c55d",
+      "id": "duplicateofgeneralhealthandwellbeingofsgmparticipants",
       "category": "DEMO_PROJECTS"
     }
   ]

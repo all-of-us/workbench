@@ -2,9 +2,9 @@ package org.pmiops.workbench.api;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,7 +27,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation;
 import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationStatus;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -61,7 +60,6 @@ import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
-import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -158,10 +156,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
   }
 
-  private FirecloudWorkspaceId generateFirecloudWorkspaceId(String namespace, String name) {
-    return new FirecloudWorkspaceId(namespace, FireCloudService.toFirecloudName(name));
-  }
-
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     validateWorkspaceApiModel(workspace);
@@ -171,12 +165,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    FirecloudWorkspaceId workspaceId = createTerraBillingProject(accessTier, workspace);
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
+
     RawlsWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
-            workspaceId.getWorkspaceNamespace(),
-            workspaceId.getWorkspaceName(),
-            accessTier.getAuthDomainName());
+            billingProject, firecloudName, accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
     try {
       dbWorkspace = workspaceDao.save(dbWorkspace);
@@ -562,13 +556,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
     // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
-    FirecloudWorkspaceId toFcWorkspaceId = createTerraBillingProject(accessTier, toWorkspace);
+    String billingProject = createTerraBillingProject(accessTier);
+    String firecloudName = FireCloudService.toFirecloudName(toWorkspace.getName());
     RawlsWorkspaceDetails toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
-            toFcWorkspaceId.getWorkspaceNamespace(),
-            toFcWorkspaceId.getWorkspaceName(),
+            billingProject,
+            firecloudName,
             accessTier.getAuthDomainName());
     DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
     try {
@@ -584,21 +579,30 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
-    Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
     if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
-      Map<String, RawlsWorkspaceAccessEntry> fromAclsMap =
-          workspaceAuthService.getFirecloudWorkspaceAcls(
+      var fromAcl =
+          workspaceAuthService.getFirecloudWorkspaceAcl(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
-      for (Map.Entry<String, RawlsWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
-        if (!entry.getKey().equals(user.getUsername())) {
-          clonedRoles.put(
-              entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
-        } else {
-          clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
-        }
-      }
-      dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, clonedRoles);
+
+      final String cloningUser = user.getUsername();
+      final String publishedGroup = workspaceService.getPublishedWorkspacesGroupEmail();
+      var toAcl =
+          Maps.transformEntries(
+              fromAcl,
+              (username, accessEntry) -> {
+                // RW-9501: cloned workspaces should not be published
+                if (username.equals(publishedGroup)) return WorkspaceAccessLevel.NO_ACCESS;
+                // the cloning user is the creator of the new workspace (hence also an OWNER)
+                if (username.equals(cloningUser)) return WorkspaceAccessLevel.OWNER;
+                // all other users retain the same access
+                return WorkspaceAccessLevel.fromValue(accessEntry.getAccessLevel());
+              });
+
+      dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, toAcl);
     }
+
+    // RW-9501: cloned workspaces should not be published
+    dbWorkspace = dbWorkspace.setPublished(false);
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, user);
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
@@ -610,8 +614,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   /** Creates a Terra (FireCloud) Billing project and adds the current user as owner. */
-  private FirecloudWorkspaceId createTerraBillingProject(
-      DbAccessTier accessTier, Workspace workspace) {
+  private String createTerraBillingProject(DbAccessTier accessTier) {
     DbUser user = userProvider.get();
     String billingProject = fireCloudService.createBillingProjectName();
     fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
@@ -620,7 +623,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // as an additional owner.  In this way, we can make sure that the AoU App SA is an owner on
     // all billing projects.
     fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
-    return generateFirecloudWorkspaceId(billingProject, workspace.getName());
+    return billingProject;
   }
 
   @Override
@@ -707,7 +710,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    dbWorkspace = workspaceAuthService.patchWorkspaceAcls(dbWorkspace, aclsByEmail);
+    dbWorkspace = workspaceAuthService.patchWorkspaceAcl(dbWorkspace, aclsByEmail);
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
     List<UserRole> userRolesAfterShare =

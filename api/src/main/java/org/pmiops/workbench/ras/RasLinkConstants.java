@@ -40,6 +40,8 @@ public class RasLinkConstants {
   static final String IDENTITY_USERID = "userid";
 
   // The identifier that indicate users login using login.gov account.
+  static final String ID_ME_IDENTIFIER_LOWER_CASE = "@id.me";
+  // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";
 
   // The string in ACR claim that we can use to identify user IAL status.

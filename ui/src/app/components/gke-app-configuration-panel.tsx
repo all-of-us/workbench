@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
 
+import { findApp, toUIAppType } from 'app/components/apps-panel/utils';
 import {
   CromwellConfigurationPanel,
   CromwellConfigurationPanelProps,
@@ -11,27 +12,29 @@ import {
   RStudioConfigurationPanel,
   RStudioConfigurationPanelProps,
 } from 'app/components/rstudio-configuration-panel';
+import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
 import { switchCase } from 'app/utils';
 import { notificationStore } from 'app/utils/stores';
-import { findDisk } from 'app/utils/user-apps-utils';
+import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 
-type InjectedProps =
-  | 'gkeAppsInWorkspace'
-  | 'disk'
-  | 'onClickDeleteUnattachedPersistentDisk';
+import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
+
+type InjectedProps = 'app' | 'disk' | 'onClickDeleteUnattachedPersistentDisk';
 
 export type GkeAppConfigurationPanelProps = {
   type: AppType;
   workspaceNamespace: string;
   onClose: () => void;
+  initialPanelContent: GKEAppPanelContent | null;
 } & Omit<CreateGKEAppPanelProps, InjectedProps>;
 
 export enum GKEAppPanelContent {
   CREATE,
   DELETE_UNATTACHED_PD,
+  DELETE_GKE_APP,
 }
 
 type CreateGKEAppPanelProps = {
@@ -50,6 +53,7 @@ export const GKEAppConfigurationPanel = ({
   type,
   workspaceNamespace,
   onClose,
+  initialPanelContent,
   ...props
 }: GkeAppConfigurationPanelProps) => {
   const [gkeAppsInWorkspace, setGkeAppsInWorkspace] = useState<
@@ -65,7 +69,7 @@ export const GKEAppConfigurationPanel = ({
     useState<Error>();
 
   const [panelContent, setPanelContent] = useState<GKEAppPanelContent>(
-    GKEAppPanelContent.CREATE
+    initialPanelContent ?? GKEAppPanelContent.CREATE
   );
 
   useEffect(() => {
@@ -103,6 +107,7 @@ export const GKEAppConfigurationPanel = ({
     return <Spinner />;
   }
 
+  const app = findApp(gkeAppsInWorkspace, toUIAppType[type]);
   const disk = findDisk(ownedDisksInWorkspace, type);
 
   const onClickDeleteUnattachedPersistentDisk = () => {
@@ -129,6 +134,11 @@ export const GKEAppConfigurationPanel = ({
     setPanelContent(GKEAppPanelContent.CREATE);
   };
 
+  const onConfirmDeleteGKEApp = async (deletePDSelected) => {
+    await deleteUserApp(workspaceNamespace, app.appName, deletePDSelected);
+    onClose();
+  };
+
   return switchCase(
     panelContent,
     [
@@ -138,7 +148,7 @@ export const GKEAppConfigurationPanel = ({
           {...{
             ...props,
             type,
-            gkeAppsInWorkspace,
+            app,
             disk,
             onClickDeleteUnattachedPersistentDisk,
             onClose,
@@ -154,6 +164,28 @@ export const GKEAppConfigurationPanel = ({
           onCancel={onCancelDeleteUnattachedPersistentDisk}
         />
       ),
+    ],
+    [
+      GKEAppPanelContent.DELETE_GKE_APP,
+      () =>
+        // currently (July 2023) we do not expose detaching PDs to users, but it's possible to get into
+        // an error state where the disk is missing, so we need to account for this
+        disk ? (
+          <ConfirmDeleteEnvironmentWithPD
+            onConfirm={onConfirmDeleteGKEApp}
+            onCancel={onClose}
+            appType={toUIAppType[app.appType]}
+            usingDataproc={false}
+            disk={disk}
+          />
+        ) : (
+          <ConfirmDelete
+            onCancel={onClose}
+            onConfirm={() =>
+              onConfirmDeleteGKEApp(false /* deletePdSelected */)
+            }
+          />
+        ),
     ]
   );
 };

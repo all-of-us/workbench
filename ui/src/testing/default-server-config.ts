@@ -67,13 +67,13 @@ const defaultServerConfig: ConfigResponse = {
   defaultFreeCreditsDollarLimit: 300,
   rasHost: 'https://stsstg.nih.gov/',
   rasClientId: '903cfaeb-57d9-4ef6-5659-04377794ed65',
+  enableRasIdMeLinking: false,
   enableRasLoginGovLinking: true,
   accessRenewalLookback: 330,
   complianceTrainingRenewalLookback: 30,
   freeTierBillingAccountId: 'freetier',
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
-  enableCromwellGKEApp: true,
   enableRStudioGKEApp: true,
 };
 

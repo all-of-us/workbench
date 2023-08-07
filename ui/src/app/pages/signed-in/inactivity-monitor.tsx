@@ -4,6 +4,7 @@ import { environment } from 'environments/environment';
 import { withErrorModal } from 'app/components/modals';
 import { TextModal } from 'app/components/text-modal';
 import { debouncer } from 'app/utils';
+import { AnalyticsTracker } from 'app/utils/analytics';
 import { signOut } from 'app/utils/authentication';
 
 const { useState, useEffect } = React;
@@ -42,6 +43,7 @@ const secondsToText = (seconds: number) => {
 };
 
 const invalidateInactivityCookieAndSignOut = (continuePath?: string): void => {
+  AnalyticsTracker.User.InactivitySignOut();
   window.localStorage.setItem(
     INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE,
     null

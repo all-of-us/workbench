@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -34,39 +33,6 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 public class DbWorkspace {
   private String firecloudUuid;
 
-  public static class FirecloudWorkspaceId {
-    private final String workspaceNamespace;
-    private final String workspaceName;
-
-    public FirecloudWorkspaceId(String workspaceNamespace, String workspaceName) {
-      this.workspaceNamespace = workspaceNamespace;
-      this.workspaceName = workspaceName;
-    }
-
-    public String getWorkspaceNamespace() {
-      return workspaceNamespace;
-    }
-
-    public String getWorkspaceName() {
-      return workspaceName;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(workspaceNamespace, workspaceName);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof FirecloudWorkspaceId)) {
-        return false;
-      }
-      FirecloudWorkspaceId that = (FirecloudWorkspaceId) obj;
-      return this.workspaceNamespace.equals(that.workspaceNamespace)
-          && this.workspaceName.equals(that.workspaceName);
-    }
-  }
-
   private long workspaceId;
   private int version;
   private String name;
@@ -77,7 +43,6 @@ public class DbWorkspace {
   private String lastModifiedBy;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Timestamp lastAccessedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
   private Set<DbConceptSet> conceptSets = new HashSet<>();
   private Set<DbDataset> dataSets = new HashSet<>();
@@ -231,16 +196,6 @@ public class DbWorkspace {
 
   public DbWorkspace setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
-    return this;
-  }
-
-  @Column(name = "last_accessed_time")
-  public Timestamp getLastAccessedTime() {
-    return lastAccessedTime;
-  }
-
-  public DbWorkspace setLastAccessedTime(Timestamp lastAccessedTime) {
-    this.lastAccessedTime = lastAccessedTime;
     return this;
   }
 
@@ -633,11 +588,6 @@ public class DbWorkspace {
 
   public void addDataSet(DbDataset dataSet) {
     this.dataSets.add(dataSet);
-  }
-
-  @Transient
-  public FirecloudWorkspaceId getFirecloudWorkspaceId() {
-    return new FirecloudWorkspaceId(workspaceNamespace, firecloudName);
   }
 
   @Column(name = "firecloud_uuid")

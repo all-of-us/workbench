@@ -350,7 +350,7 @@ export default class CohortParticipantsGroup {
   }
 
   async includeFitbit(): Promise<number> {
-    await this.addCriteria([MenuOption.Fitbit]);
+    await this.addCriteria([MenuOption.Fitbit, MenuOption.FitbitAny]);
     return this.getGroupCount();
   }
 

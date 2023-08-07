@@ -1,27 +1,33 @@
 import * as React from 'react';
 import { mount, ReactWrapper, ShallowWrapper } from 'enzyme';
-import { Dropdown } from 'primereact/dropdown';
 
-import { ConfigApi, InstitutionApi, Profile } from 'generated/fetch';
-import { InstitutionalRole } from 'generated/fetch';
+import {
+  ConfigApi,
+  InstitutionalRole,
+  InstitutionApi,
+  Profile,
+} from 'generated/fetch';
 
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
-import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { institutionApi } from 'app/services/swagger-fetch-clients';
+import {
+  institutionApi,
+  registerApiClient,
+} from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
 import { ConfigApiStub } from 'testing/stubs/config-api-stub';
-import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
-import { defaultInstitutions } from 'testing/stubs/institution-api-stub';
+import {
+  defaultInstitutions,
+  InstitutionApiStub,
+} from 'testing/stubs/institution-api-stub';
 
 import {
   AccountCreationInstitution,
   AccountCreationInstitutionProps,
 } from './account-creation-institution';
-
 import SpyInstance = jest.SpyInstance;
 
 let mockGetPublicInstitutionDetails: SpyInstance;
@@ -39,10 +45,12 @@ function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
     .instance() as AccountCreationInstitution;
 }
 
-function getInstitutionDropdown(wrapper: AnyWrapper): Dropdown {
-  return wrapper
+function getInstitutionDropdown(wrapper: AnyWrapper) {
+  const matchedElements = wrapper
     .find('Dropdown[data-test-id="institution-dropdown"]')
-    .instance() as Dropdown;
+    ?.getElements();
+
+  return matchedElements?.[0];
 }
 
 function getEmailInput(wrapper: AnyWrapper): AnyWrapper {
@@ -53,10 +61,12 @@ function getEmailErrorMessage(wrapper: AnyWrapper): AnyWrapper {
   return wrapper.find('[data-test-id="email-error-message"]');
 }
 
-function getRoleDropdown(wrapper: AnyWrapper): Dropdown {
-  return wrapper
+function getRoleDropdown(wrapper: AnyWrapper) {
+  const matchedElements = wrapper
     .find('Dropdown[data-test-id="role-dropdown"]')
-    .instance() as Dropdown;
+    ?.getElements();
+
+  return matchedElements ? matchedElements[0] : undefined;
 }
 
 function getSubmitButton(wrapper: AnyWrapper): AnyWrapper {
@@ -142,7 +152,7 @@ it('should reset role value & options when institution is selected', async () =>
   });
   await waitOneTickAndUpdate(wrapper);
 
-  const roleDropdown = getRoleDropdown(wrapper);
+  let roleDropdown = getRoleDropdown(wrapper);
   // Broad is an academic institution, which should contain the undergrad role.
   expect(roleDropdown.props.options).toContain(academicSpecificRoleOption);
 
@@ -153,6 +163,8 @@ it('should reset role value & options when institution is selected', async () =>
     value: academicSpecificRoleOption.value,
     target: { name: '', id: '', value: academicSpecificRoleOption.value },
   });
+  await waitOneTickAndUpdate(wrapper);
+  roleDropdown = getRoleDropdown(wrapper);
   expect(roleDropdown.props.value).toEqual(academicSpecificRoleOption.value);
 
   // Simulate switching to Verily.
@@ -162,6 +174,9 @@ it('should reset role value & options when institution is selected', async () =>
     value: 'Verily',
     target: { name: '', id: '', value: 'Verily' },
   });
+
+  await waitOneTickAndUpdate(wrapper);
+  roleDropdown = getRoleDropdown(wrapper);
 
   // Role value should be cleared when institution changes.
   expect(roleDropdown.props.value).toBeNull();
