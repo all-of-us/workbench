@@ -46,7 +46,7 @@ const createRStudioListAppsResponseDefaults: UserAppEnvironment = {
   appName: 'all-of-us-2-rstudio-1234',
   appType: AppType.RSTUDIO,
   proxyUrls: {
-    'app':
+    PROXY_PATH_SUFFIX:
       'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-rstudio-1234/rstudio',
   },
   diskName: 'all-of-us-pd-2-rstudio-1234',

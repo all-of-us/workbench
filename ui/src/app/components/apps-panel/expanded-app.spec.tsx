@@ -42,6 +42,7 @@ import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
 import { UIAppType } from './utils';
+import {PROXY_PATH_SUFFIX} from "../../utils/constants";
 
 const googleProject = 'project-for-test';
 const workspace = {
@@ -355,7 +356,7 @@ describe('ExpandedApp', () => {
       appType: AppType.RSTUDIO,
       status: AppStatus.RUNNING,
       proxyUrls: {
-        'app': proxyUrl,
+        PROXY_PATH_SUFFIX: proxyUrl,
       },
     });
     const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');

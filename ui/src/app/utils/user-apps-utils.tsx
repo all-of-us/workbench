@@ -15,6 +15,7 @@ import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
+import {PROXY_PATH_SUFFIX} from "./constants";
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
@@ -120,7 +121,7 @@ export const openRStudio = (
     [],
     false
   );
-  window.open(userApp.proxyUrls['app'], '_blank').focus();
+  window.open(userApp.proxyUrls[PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
 export const openRStudioOrConfigPanel = (

@@ -19,6 +19,7 @@ import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { InteractiveNotebook } from './interactive-notebook';
+import {PROXY_PATH_SUFFIX} from "../../utils/constants";
 
 let mockAppsApi;
 let mockNotebooksApi;
@@ -79,7 +80,7 @@ test('Edit Rmd file with running RStudio', async () => {
   await waitFor(() => {
     expect(spyWindowOpen).toHaveBeenCalledTimes(1);
     expect(spyWindowOpen).toHaveBeenCalledWith(
-      rStudioApp.proxyUrls['app'],
+      rStudioApp.proxyUrls[PROXY_PATH_SUFFIX],
       '_blank'
     );
   });
