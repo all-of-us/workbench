@@ -7,8 +7,10 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -62,17 +64,20 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     final StringBuilder sb =
         new StringBuilder(
             String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
+
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
-    Level detailsLogLevel = Level.INFO;
-    boolean verified = true;
-    for (final ReportingUploadResult result : uploadDetails.getUploads()) {
-      if (!verifyCount(
-          result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
+
+    boolean verified =
+        uploadDetails.getUploads().stream()
+            .allMatch(
+                result ->
+                    verifyCount(
+                        result.getTableName(),
+                        result.getSourceRowCount(),
+                        result.getDestinationRowCount(),
+                        sb));
+
+    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
   }
 
@@ -80,56 +85,34 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   public boolean verifyBatchesAndLog(Set<String> batchTables, long captureSnapshotTime) {
     final StringBuilder sb =
         new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));
-    Level detailsLogLevel = Level.INFO;
-    boolean verified = true;
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
-    if (batchTables.contains(WorkspaceColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getWorkspacesCount();
-      if (!verifyCount(
-          WorkspaceColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(WorkspaceColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(UserColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getUserCount();
-      if (!verifyCount(
-          UserColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(UserColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(CohortColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getCohortsCount();
-      if (!verifyCount(
-          CohortColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(CohortColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getNewUserSatisfactionSurveysCount();
-      if (!verifyCount(
-          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(
-              NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
+
+    // alt: this could be a Map, but we don't need to reference it in that way
+    List<Map.Entry<String, Supplier<Long>>> tableCounters =
+        List.of(
+            Map.entry(
+                WorkspaceColumnValueExtractor.TABLE_NAME,
+                reportingQueryService::getWorkspacesCount),
+            Map.entry(UserColumnValueExtractor.TABLE_NAME, reportingQueryService::getUsersCount),
+            Map.entry(
+                CohortColumnValueExtractor.TABLE_NAME, reportingQueryService::getCohortsCount),
+            Map.entry(
+                NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+                reportingQueryService::getNewUserSatisfactionSurveysCount));
+
+    // fails-fast due to allMatch() so logs may be incomplete on failure
+    boolean verified =
+        tableCounters.stream()
+            .allMatch(
+                entry -> {
+                  final String tableName = entry.getKey();
+                  long sourceCount = entry.getValue().get();
+                  long actualCount = getActualRowCount(tableName, captureSnapshotTime);
+                  return verifyCount(tableName, sourceCount, actualCount, sb);
+                });
+
+    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
   }
 
@@ -197,7 +180,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   }
 
   private ReportingUploadResult getUploadResult(
-      String tableName, long snapshotTimestamp, long sourceRowCount) {
+      String tableName, long sourceRowCount, long snapshotTimestamp) {
     return new ReportingUploadResult()
         .tableName(tableName)
         .sourceRowCount(sourceRowCount)
@@ -210,8 +193,8 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
       Function<ReportingSnapshot, List<T>> collectionExtractor) {
     return getUploadResult(
         getBigQueryTableName(extractorClass),
-        snapshot.getCaptureTimestamp(),
-        collectionExtractor.apply(snapshot).size());
+        collectionExtractor.apply(snapshot).size(),
+        snapshot.getCaptureTimestamp());
   }
 
   private Long getActualRowCount(String tableName, long snapshotTimestamp) {

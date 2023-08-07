@@ -512,7 +512,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testUserCount() {
     createUsers(3);
-    assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
+    assertThat(reportingQueryService.getUsersCount()).isEqualTo(3);
   }
 
   @Test

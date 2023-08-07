@@ -516,7 +516,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getWorkspacesCount() {
+  public long getWorkspacesCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
             + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
@@ -524,17 +524,17 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getUserCount() {
+  public long getUsersCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 
   @Override
-  public int getCohortsCount() {
+  public long getCohortsCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
   }
 
   @Override
-  public int getNewUserSatisfactionSurveysCount() {
+  public long getNewUserSatisfactionSurveysCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM new_user_satisfaction_survey", Integer.class);
   }
