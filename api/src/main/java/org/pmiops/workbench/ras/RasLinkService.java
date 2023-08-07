@@ -161,7 +161,7 @@ public class RasLinkService {
     String username = getUsername(userInfoResponse);
     DbUser user;
     if (username.toLowerCase().contains(ID_ME_IDENTIFIER_LOWER_CASE)) {
-      user = userService.updateRasLinkIdMeStatus(username);
+      user = userService.updateIdentityStatus(username);
       identityVerificationService.updateIdentityVerificationSystem(
           user, DbIdentityVerificationSystem.ID_ME);
     } else if (username.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
