@@ -169,5 +169,8 @@
   },
   "termsOfService": {
     "latestAouVersion": 1
+  },
+  "tanagra": {
+    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
   }
 }
