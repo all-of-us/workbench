@@ -170,5 +170,8 @@
   },
   "termsOfService": {
     "latestAouVersion": 1
+  },
+  "tanagra": {
+    "baseUrl": "http:\/\/localhost:3000"
   }
 }

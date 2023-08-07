@@ -4866,6 +4866,9 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable Tanagra.
+      tanagraBaseUrl:
+        type: string
+        description: The tanagra base url
 
   RuntimeImage:
     type: object
