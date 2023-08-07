@@ -10,6 +10,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFrom
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
@@ -464,7 +465,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
                 + "WHERE active_status = "
-                + WorkspaceActiveStatus.ACTIVE.ordinal()
+                + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
                 + "\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
@@ -516,7 +517,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   public int getWorkspacesCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
-            + WorkspaceActiveStatus.ACTIVE.ordinal(),
+            + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
         Integer.class);
   }
 
