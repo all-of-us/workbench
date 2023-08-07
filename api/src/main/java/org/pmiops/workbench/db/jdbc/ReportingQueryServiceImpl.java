@@ -510,7 +510,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public int getWorkspacesCount() {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace WHERE active_status = 0", Integer.class);
+    return jdbcTemplate.queryForObject(
+        "SELECT count(*) FROM workspace WHERE active_status = 0", Integer.class);
   }
 
   @Override
