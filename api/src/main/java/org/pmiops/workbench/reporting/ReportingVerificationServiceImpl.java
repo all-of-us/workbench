@@ -67,6 +67,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
 
+    // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =
         uploadDetails.getUploads().stream()
             .allMatch(
@@ -92,14 +93,12 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     List<Map.Entry<String, Supplier<Integer>>> tableCounters =
         List.of(
             Map.entry(
-                WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService::getWorkspacesCount),
-            Map.entry(UserColumnValueExtractor.TABLE_NAME, reportingQueryService::getUsersCount),
-            Map.entry(
-                CohortColumnValueExtractor.TABLE_NAME, reportingQueryService::getCohortsCount),
+                WorkspaceColumnValueExtractor.TABLE_NAME, reportingQueryService::getWorkspaceCount),
+            Map.entry(UserColumnValueExtractor.TABLE_NAME, reportingQueryService::getUserCount),
+            Map.entry(CohortColumnValueExtractor.TABLE_NAME, reportingQueryService::getCohortCount),
             Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
-                reportingQueryService::getNewUserSatisfactionSurveysCount));
+                reportingQueryService::getNewUserSatisfactionSurveyCount));
 
     // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =

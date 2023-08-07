@@ -65,16 +65,16 @@ public class ReportingServiceImpl implements ReportingService {
 
     // Second: Obtain data on smaller batches for larger data.
     reportingQueryService
-        .getWorkspacesStream()
+        .getWorkspaceStream()
         .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
     reportingQueryService
         .getUserStream()
         .forEach(b -> reportingUploadService.uploadBatchUser(b, captureTimestamp));
     reportingQueryService
-        .getCohortsStream()
+        .getCohortStream()
         .forEach(b -> reportingUploadService.uploadBatchCohort(b, captureTimestamp));
     reportingQueryService
-        .getNewUserSatisfactionSurveysStream()
+        .getNewUserSatisfactionSurveyStream()
         .forEach(
             b -> reportingUploadService.uploadBatchNewUserSatisfactionSurveys(b, captureTimestamp));
 
