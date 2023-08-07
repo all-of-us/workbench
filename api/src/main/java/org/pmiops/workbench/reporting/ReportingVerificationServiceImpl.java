@@ -1,7 +1,5 @@
 package org.pmiops.workbench.reporting;
 
-import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
-
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
@@ -22,7 +20,6 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
@@ -127,27 +124,27 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 ImmutableList.of(
                     getUploadResult(
                         snapshot,
-                        WorkspaceFreeTierUsageColumnValueExtractor.class,
+                        WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getWorkspaceFreeTierUsage),
                     getUploadResult(
                         snapshot,
-                        InstitutionColumnValueExtractor.class,
+                        InstitutionColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getInstitutions),
                     getUploadResult(
                         snapshot,
-                        DatasetColumnValueExtractor.class,
+                        DatasetColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasets),
                     getUploadResult(
                         snapshot,
-                        DatasetCohortColumnValueExtractor.class,
+                        DatasetCohortColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetCohorts),
                     getUploadResult(
                         snapshot,
-                        DatasetDomainColumnValueExtractor.class,
+                        DatasetDomainColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetDomainIdValues),
                     getUploadResult(
                         snapshot,
-                        DatasetConceptSetColumnValueExtractor.class,
+                        DatasetConceptSetColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetConceptSets)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
@@ -178,12 +175,10 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     return workbenchConfigProvider.get().server.projectId;
   }
 
-  private <T, E extends Enum<E> & ColumnValueExtractor<T>> ReportingUploadResult getUploadResult(
+  private <T> ReportingUploadResult getUploadResult(
       ReportingSnapshot snapshot,
-      Class<E> extractorClass,
+      String tableName,
       Function<ReportingSnapshot, List<T>> collectionExtractor) {
-
-    String tableName = getBigQueryTableName(extractorClass);
 
     return new ReportingUploadResult()
         .tableName(tableName)

@@ -83,9 +83,10 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   YEAR_OF_BIRTH(
       "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue());
 
+  public static final String TABLE_NAME = "user";
+
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  public static final String TABLE_NAME = "user";
   private final String parameterName;
   private final Function<ReportingUser, Object> objectValueFunction;
 

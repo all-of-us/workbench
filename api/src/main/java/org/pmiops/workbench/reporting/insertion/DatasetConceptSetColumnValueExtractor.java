@@ -8,9 +8,10 @@ public enum DatasetConceptSetColumnValueExtractor
   CONCEPT_SET_ID("concept_set_id", ReportingDatasetConceptSet::getConceptSetId),
   DATASET_ID("dataset_id", ReportingDatasetConceptSet::getDatasetId);
 
+  public static final String TABLE_NAME = "dataset_concept_set";
+
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  private static final String TABLE_NAME = "dataset_concept_set";
   private final String parameterName;
   private final Function<ReportingDatasetConceptSet, Object> objectValueFunction;
 

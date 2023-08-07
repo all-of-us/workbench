@@ -15,9 +15,10 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
   REGISTERED_TIER_REQUIREMENT(
       "registered_tier_requirement", i -> enumToString(i.getRegisteredTierRequirement()));
 
+  public static final String TABLE_NAME = "institution";
+
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  private static final String TABLE_NAME = "institution";
   private final String parameterName;
   private final Function<ReportingInstitution, Object> objectValueFunction;
 
