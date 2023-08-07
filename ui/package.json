@@ -6,7 +6,7 @@
     "build-terra-deps": "./src/terraui/build.sh",
     "deps": "yarn run codegen && yarn run build-terra-deps",
     "start": "BROWSER='none' PORT=4200 react-app-rewired start",
-    "start-tanagra": "npm install --prefix ../tanagra/ui && npm run codegen --prefix ../tanagra/ui && BROWSER='none' npm start --prefix ../tanagra/ui",
+    "start-tanagra": "npm install --prefix ../tanagra/ui && npm run codegen --prefix ../tanagra/ui && BROWSER='none' REACT_APP_POST_MESSAGE_ORIGIN=http://localhost:4200 npm start --prefix ../tanagra/ui",
     "dev-up": "yarn && yarn run deps && yarn start",
     "dev-up-test": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start",
     "dev-up-local": "yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start",
