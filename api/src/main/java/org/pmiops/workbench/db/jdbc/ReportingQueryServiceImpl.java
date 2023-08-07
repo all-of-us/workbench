@@ -33,6 +33,7 @@ import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -462,11 +463,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
-                + "WHERE active_status = 0\n"
+                + "WHERE active_status = "
+                + WorkspaceActiveStatus.ACTIVE.ordinal()
+                + "\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
-            limit, offset),
+            limit,
+            offset),
         (rs, unused) ->
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
@@ -511,7 +515,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getWorkspacesCount() {
     return jdbcTemplate.queryForObject(
-        "SELECT count(*) FROM workspace WHERE active_status = 0", Integer.class);
+        "SELECT count(*) FROM workspace WHERE active_status = "
+            + WorkspaceActiveStatus.ACTIVE.ordinal(),
+        Integer.class);
   }
 
   @Override
