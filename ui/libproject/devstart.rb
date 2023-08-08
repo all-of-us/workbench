@@ -5,8 +5,9 @@ require "set"
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
-require_relative "../../api/libproject/wboptionsparser"
+require_relative "../../api/libproject/environments"
 require_relative "../../api/libproject/gcloudcontext"
+require_relative "../../api/libproject/wboptionsparser"
 
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
@@ -117,8 +118,9 @@ def deploy_tanagra_ui(cmd_name, args)
     common.run_inline("npm ci")
     common.status "npm run codegen"
     common.run_inline("npm run codegen")
-    common.status "npm run build --if-present"
-    common.run_inline("npm run build --if-present")
+    ui_base_url = get_config(op.opts.project)["server"]["uiBaseUrl"]
+    common.status "REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present"
+    common.run_inline("REACT_APP_POST_MESSAGE_ORIGIN=#{ui_base_url} npm run build --if-present")
 
     common.status "Copying build into appengine folder..."
     common.run_inline("mkdir -p ../../tanagra-aou-utils/appengine && cp -av ./build ../../tanagra-aou-utils/appengine/")
