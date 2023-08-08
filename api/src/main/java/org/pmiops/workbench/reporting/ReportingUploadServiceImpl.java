@@ -30,7 +30,6 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
@@ -210,7 +209,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     return reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
-  private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(String tableName) {
+  private TableId getTableId(String tableName) {
     final String projectId = configProvider.get().server.projectId;
     final String dataset = configProvider.get().reporting.dataset;
 
