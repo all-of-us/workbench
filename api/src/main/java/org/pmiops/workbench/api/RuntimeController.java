@@ -23,8 +23,8 @@ import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -83,7 +83,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
     try {
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
+      GetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
       if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
@@ -107,7 +107,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private Runtime getOverrideFromListRuntimes(String googleProject) {
-    Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
+    Optional<ListRuntimeResponse> mostRecentRuntimeMaybe =
         leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
             .min(
                 (a, b) -> {
@@ -127,7 +127,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                   return bCreatedDate.compareTo(aCreatedDate);
                 });
 
-    LeonardoListRuntimeResponse mostRecentRuntime =
+    ListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
     @SuppressWarnings("unchecked")
@@ -147,7 +147,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         return runtime.status(RuntimeStatus.DELETED);
       } catch (RuntimeException e) {
         log.warning(
-            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
+            "RuntimeException during ListRuntimeResponse -> Runtime mapping "
                 + e.toString());
       }
     }

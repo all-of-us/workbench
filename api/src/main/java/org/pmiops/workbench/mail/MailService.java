@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.model.SendBillingSetupEmailRequest;
 
 public interface MailService {
@@ -47,7 +47,7 @@ public interface MailService {
   void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
-      LeonardoListPersistentDiskResponse disk,
+      ListPersistentDiskResponse disk,
       boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)

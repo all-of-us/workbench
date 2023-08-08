@@ -36,10 +36,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
@@ -262,8 +262,8 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse rstudioDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
                 new LeonardoCloudContext()

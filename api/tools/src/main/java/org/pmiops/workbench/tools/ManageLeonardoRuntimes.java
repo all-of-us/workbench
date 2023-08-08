@@ -27,8 +27,8 @@ import org.pmiops.workbench.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.ApiResponse;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
@@ -87,11 +87,11 @@ public class ManageLeonardoRuntimes {
     return api;
   }
 
-  private String runtimeId(LeonardoListRuntimeResponse r) {
+  private String runtimeId(ListRuntimeResponse r) {
     return leonardoMapper.toGoogleProject(r.getCloudContext()) + "/" + r.getRuntimeName();
   }
 
-  private String formatTabular(LeonardoListRuntimeResponse r) {
+  private String formatTabular(ListRuntimeResponse r) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(r.getLabels()).getAsJsonObject();
     String creator = "unknown";
@@ -107,10 +107,10 @@ public class ManageLeonardoRuntimes {
         runtimeId(r), creator, status, r.getAuditInfo().getCreatedDate());
   }
 
-  private void printFormatted(List<LeonardoListRuntimeResponse> runtimes, OutputFormat fmt) {
-    Function<LeonardoListRuntimeResponse, String> toGoogle =
+  private void printFormatted(List<ListRuntimeResponse> runtimes, OutputFormat fmt) {
+    Function<ListRuntimeResponse, String> toGoogle =
         r -> leonardoMapper.toGoogleProject(r.getCloudContext());
-    Stream<LeonardoListRuntimeResponse> stream =
+    Stream<ListRuntimeResponse> stream =
         runtimes.stream()
             .sorted(
                 Comparator.comparing(toGoogle)
@@ -137,7 +137,7 @@ public class ManageLeonardoRuntimes {
       throws IOException, ApiException {
     RuntimesApi api = newApiClient(apiUrl);
 
-    List<LeonardoListRuntimeResponse> runtimes;
+    List<ListRuntimeResponse> runtimes;
     if (googleProjectId.isPresent()) {
       runtimes = api.listRuntimesByProject(googleProjectId.get(), null, includeDeleted);
     } else {
@@ -172,8 +172,8 @@ public class ManageLeonardoRuntimes {
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
 
     // Parse the response as well so we can log specific structured fields.
-    LeonardoGetRuntimeResponse runtime =
-        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), LeonardoGetRuntimeResponse.class);
+    GetRuntimeResponse runtime =
+        PRETTY_GSON.fromJson(PRETTY_GSON.toJson(resp.getData()), GetRuntimeResponse.class);
 
     System.out.println(PRETTY_GSON.toJson(resp.getData()));
     System.out.printf("\n\nTo inspect logs in cloud storage, run the following:\n\n");
@@ -194,7 +194,7 @@ public class ManageLeonardoRuntimes {
     AtomicInteger deleted = new AtomicInteger();
     RuntimesApi api = newApiClient(apiUrl);
     api.listRuntimes(null, false).stream()
-        .sorted(Comparator.comparing(LeonardoListRuntimeResponse::getRuntimeName))
+        .sorted(Comparator.comparing(ListRuntimeResponse::getRuntimeName))
         .filter(
             (r) -> {
               Instant createdDate = Instant.parse(r.getAuditInfo().getCreatedDate());

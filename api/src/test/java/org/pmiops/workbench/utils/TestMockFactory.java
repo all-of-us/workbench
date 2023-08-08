@@ -41,15 +41,14 @@ import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
@@ -171,8 +170,8 @@ public class TestMockFactory {
         .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
-  public static LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
-    return new LeonardoListRuntimeResponse()
+  public static ListRuntimeResponse createLeonardoListRuntimesResponse() {
+    return new ListRuntimeResponse()
         .runtimeName("runtime")
         .cloudContext(
             new LeonardoCloudContext()
@@ -379,15 +378,15 @@ public class TestMockFactory {
     assertThat(normalizeLists(survey1)).isEqualTo(normalizeLists(survey2));
   }
 
-  public static LeonardoListPersistentDiskResponse createLeonardoListPersistentDiskResponse(
+  public static ListPersistentDiskResponse createListPersistentDiskResponse(
       String pdName,
-      LeonardoDiskStatus status,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
       String date,
       String googleProjectId,
       DbUser user,
       @Nullable AppType appType) {
-    LeonardoListPersistentDiskResponse response =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse response =
+        new ListPersistentDiskResponse()
             .name(pdName)
             .size(300)
             .diskType(LeonardoDiskType.STANDARD)
@@ -405,9 +404,9 @@ public class TestMockFactory {
     return response;
   }
 
-  public static LeonardoListPersistentDiskResponse createLeonardoListRuntimePDResponse(
-      String pdName, LeonardoDiskStatus status, String date, String googleProjectId, DbUser user) {
-    return createLeonardoListPersistentDiskResponse(
+  public static ListPersistentDiskResponse createLeonardoListRuntimePDResponse(
+      String pdName, org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status, String date, String googleProjectId, DbUser user) {
+    return createListPersistentDiskResponse(
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }
 

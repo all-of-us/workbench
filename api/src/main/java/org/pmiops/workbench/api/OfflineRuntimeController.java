@@ -34,10 +34,10 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -130,7 +130,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final Duration idleMaxAge = Duration.ofDays(config.firecloud.notebookRuntimeIdleMaxAgeDays);
 
     final RuntimesApi runtimesApi = runtimesApiProvider.get();
-    final List<LeonardoListRuntimeResponse> listRuntimeResponses;
+    final List<ListRuntimeResponse> listRuntimeResponses;
     try {
       listRuntimeResponses = runtimesApi.listRuntimes(null, false);
     } catch (ApiException e) {
@@ -141,12 +141,12 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (LeonardoListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
+    for (ListRuntimeResponse listRuntimeResponse : listRuntimeResponses) {
       final String googleProject =
           leonardoMapper.toGoogleProject(listRuntimeResponse.getCloudContext());
       final String runtimeId =
           String.format("%s/%s", googleProject, listRuntimeResponse.getRuntimeName());
-      final LeonardoGetRuntimeResponse runtime;
+      final GetRuntimeResponse runtime;
       try {
         // Refetch the runtime to ensure freshness as this iteration may take
         // some time.
@@ -219,7 +219,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   @Override
   public ResponseEntity<Void> checkPersistentDisks() {
     // Fetch disks as the service, which gets all disks for all workspaces.
-    final List<LeonardoListPersistentDiskResponse> disks;
+    final List<ListPersistentDiskResponse> disks;
     try {
       disks =
           disksApiProvider
@@ -232,7 +232,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
 
     // Bucket disks by days since last access.
     final Instant now = clock.instant();
-    Map<Integer, List<LeonardoListPersistentDiskResponse>> disksByDaysUnused =
+    Map<Integer, List<ListPersistentDiskResponse>> disksByDaysUnused =
         disks.stream()
             .filter(disk -> LeonardoDiskStatus.READY.equals(disk.getStatus()))
             .collect(
@@ -258,7 +258,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         continue;
       }
 
-      for (LeonardoListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
+      for (ListPersistentDiskResponse disk : disksByDaysUnused.get(daysUnused)) {
         try {
           if (notifyForUnusedDisk(disk, daysUnused)) {
             notifySuccess++;
@@ -294,7 +294,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   // Returns true if an email is sent.
-  private boolean notifyForUnusedDisk(LeonardoListPersistentDiskResponse disk, int daysUnused)
+  private boolean notifyForUnusedDisk(ListPersistentDiskResponse disk, int daysUnused)
       throws MessagingException {
     String googleProject = leonardoMapper.toGoogleProject(disk.getCloudContext());
     final boolean attached;
@@ -358,7 +358,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
   }
 
   private boolean isDiskAttached(
-      LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+      ListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
