@@ -71,7 +71,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(
+  public List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
@@ -98,7 +98,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingCohort> getCohorts(long limit, long offset) {
+  public List<ReportingCohort> getCohortBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -211,7 +211,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingUser> getUsers(long limit, long offset) {
+  public List<ReportingUser> getUserBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -424,7 +424,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingWorkspace> getWorkspaces(long limit, long offset) {
+  public List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -516,7 +516,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getWorkspacesCount() {
+  public int getWorkspaceCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM workspace WHERE active_status = "
             + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
@@ -529,12 +529,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getCohortsCount() {
+  public int getCohortCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
   }
 
   @Override
-  public int getNewUserSatisfactionSurveysCount() {
+  public int getNewUserSatisfactionSurveyCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM new_user_satisfaction_survey", Integer.class);
   }

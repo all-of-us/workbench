@@ -13,7 +13,8 @@ public enum WorkspaceFreeTierUsageColumnValueExtractor
   USER_ID("user_id", ReportingWorkspaceFreeTierUsage::getUserId),
   WORKSPACE_ID("workspace_id", ReportingWorkspaceFreeTierUsage::getWorkspaceId);
 
-  private static final String TABLE_NAME = "workspace_free_tier_usage";
+  public static final String TABLE_NAME = "workspace_free_tier_usage";
+
   private final String parameterName;
   private final Function<ReportingWorkspaceFreeTierUsage, Object> rowToInsertValueFunction;
 
@@ -22,11 +23,6 @@ public enum WorkspaceFreeTierUsageColumnValueExtractor
       Function<ReportingWorkspaceFreeTierUsage, Object> rowToInsertValueFunction) {
     this.parameterName = parameterName;
     this.rowToInsertValueFunction = rowToInsertValueFunction;
-  }
-
-  @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
   }
 
   @Override

@@ -246,8 +246,7 @@ public class ReportingQueryServiceTest {
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     List<ReportingWorkspace> firstBatch = iterator.next();
@@ -290,8 +289,7 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_noEntries() {
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isFalse();
   }
 
@@ -299,8 +297,7 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceIIterator_twoAndAHalfBatches() {
     createWorkspaces(5);
 
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingWorkspace> batch1 = iterator.next();
@@ -322,16 +319,17 @@ public class ReportingQueryServiceTest {
     final int numWorkspaces = 5;
     createWorkspaces(numWorkspaces);
 
-    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces);
 
-    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getWorkspacesStream()
+            .getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -346,16 +344,17 @@ public class ReportingQueryServiceTest {
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
 
-    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces - 1);
 
-    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getWorkspacesStream()
+            .getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -365,17 +364,18 @@ public class ReportingQueryServiceTest {
   @Test
   public void testEmptyStream() {
     workspaceDao.deleteAll();
-    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(0);
 
-    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo(0);
   }
 
   @Test
   public void testWorkspaceCount() {
     createWorkspaces(5);
-    assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(5);
   }
 
   @Test
@@ -384,14 +384,14 @@ public class ReportingQueryServiceTest {
     workspaceDao.save(
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
-    assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(4);
+    assertThat(reportingQueryService.getWorkspaceCount()).isEqualTo(4);
   }
 
   @Test
   public void testUserIterator_twoAndAHalfBatches() {
     createUsers(5);
 
-    final Iterator<List<ReportingUser>> iterator = reportingQueryService.getUserBatchIterator();
+    final Iterator<List<ReportingUser>> iterator = getUserBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingUser> batch1 = iterator.next();
@@ -413,7 +413,7 @@ public class ReportingQueryServiceTest {
     createUsers(1);
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
     userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
   }
@@ -426,7 +426,7 @@ public class ReportingQueryServiceTest {
     entityManager.flush();
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
 
     ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
@@ -452,7 +452,7 @@ public class ReportingQueryServiceTest {
     entityManager.flush();
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
 
     // regression test against one row per user/tier pair (i.e. we don't want 2 here)
     assertThat(stream.size()).isEqualTo(1);
@@ -467,7 +467,7 @@ public class ReportingQueryServiceTest {
     createUsers(5);
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(3);
   }
 
@@ -494,7 +494,7 @@ public class ReportingQueryServiceTest {
                 .setAdditionalInfo(additionalInfo));
 
     final List<ReportingNewUserSatisfactionSurvey> newUserSatisfactionSurveys =
-        reportingQueryService.getNewUserSatisfactionSurveys(1, 0);
+        reportingQueryService.getNewUserSatisfactionSurveyBatch(1, 0);
 
     assertThat(newUserSatisfactionSurveys.size()).isEqualTo(1);
     final ReportingNewUserSatisfactionSurvey newUserSatisfactionSurvey =
@@ -519,8 +519,7 @@ public class ReportingQueryServiceTest {
   public void testCohortIterator_twoAndAHalfBatches() {
     createCohorts(5);
 
-    final Iterator<List<ReportingCohort>> iterator =
-        reportingQueryService.getCohortsBatchIterator();
+    final Iterator<List<ReportingCohort>> iterator = getCohortsBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingCohort> batch1 = iterator.next();
@@ -542,14 +541,14 @@ public class ReportingQueryServiceTest {
     createCohorts(5);
 
     final List<List<ReportingCohort>> stream =
-        reportingQueryService.getCohortsStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedCohortStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(3);
   }
 
   @Test
   public void testCohortsCount() {
     createCohorts(3);
-    assertThat(reportingQueryService.getCohortsCount()).isEqualTo(3);
+    assertThat(reportingQueryService.getCohortCount()).isEqualTo(3);
   }
 
   @Test
@@ -557,7 +556,7 @@ public class ReportingQueryServiceTest {
     createNewUserSatisfactionSurveys(5);
 
     final Iterator<List<ReportingNewUserSatisfactionSurvey>> iterator =
-        reportingQueryService.getNewUserSatisfactionSurveyBatchIterator();
+        getNewUserSatisfactionSurveyBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingNewUserSatisfactionSurvey> batch1 = iterator.next();
@@ -580,17 +579,21 @@ public class ReportingQueryServiceTest {
     createNewUserSatisfactionSurveys(numNewUserSatisfactionSurveys);
 
     final int totalRows =
-        reportingQueryService.getNewUserSatisfactionSurveysStream().mapToInt(List::size).sum();
+        reportingQueryService
+            .getBatchedNewUserSatisfactionSurveyStream()
+            .mapToInt(List::size)
+            .sum();
     assertThat(totalRows).isEqualTo(numNewUserSatisfactionSurveys);
 
-    final long totalBatches = reportingQueryService.getNewUserSatisfactionSurveysStream().count();
+    final long totalBatches =
+        reportingQueryService.getBatchedNewUserSatisfactionSurveyStream().count();
     assertThat(totalBatches)
         .isEqualTo((long) Math.ceil(1.0 * numNewUserSatisfactionSurveys / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getNewUserSatisfactionSurveysStream()
+            .getBatchedNewUserSatisfactionSurveyStream()
             .flatMap(List::stream)
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());
@@ -600,7 +603,25 @@ public class ReportingQueryServiceTest {
   @Test
   public void testNewUserSatisfactionSurveysCount() {
     createNewUserSatisfactionSurveys(5);
-    assertThat(reportingQueryService.getNewUserSatisfactionSurveysCount()).isEqualTo(5);
+    assertThat(reportingQueryService.getNewUserSatisfactionSurveyCount()).isEqualTo(5);
+  }
+
+  private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getWorkspaceBatch);
+  }
+
+  private Iterator<List<ReportingUser>> getUserBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch);
+  }
+
+  private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getCohortBatch);
+  }
+
+  private Iterator<List<ReportingNewUserSatisfactionSurvey>>
+      getNewUserSatisfactionSurveyBatchIterator() {
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getNewUserSatisfactionSurveyBatch);
   }
 
   private List<DbWorkspace> createWorkspaces(int count) {

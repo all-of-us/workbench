@@ -1,14 +1,14 @@
 package org.pmiops.workbench.reporting;
 
-import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
-
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -20,7 +20,6 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
@@ -62,17 +61,21 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     final StringBuilder sb =
         new StringBuilder(
             String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
+
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
-    Level detailsLogLevel = Level.INFO;
-    boolean verified = true;
-    for (final ReportingUploadResult result : uploadDetails.getUploads()) {
-      if (!verifyCount(
-          result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
+
+    // fails-fast due to allMatch() so logs may be incomplete on failure
+    boolean verified =
+        uploadDetails.getUploads().stream()
+            .allMatch(
+                result ->
+                    verifyCount(
+                        result.getTableName(),
+                        result.getSourceRowCount(),
+                        result.getDestinationRowCount(),
+                        sb));
+
+    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
   }
 
@@ -80,56 +83,32 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   public boolean verifyBatchesAndLog(Set<String> batchTables, long captureSnapshotTime) {
     final StringBuilder sb =
         new StringBuilder(String.format("Verifying batches at %d:\n", captureSnapshotTime));
-    Level detailsLogLevel = Level.INFO;
-    boolean verified = true;
 
     sb.append("Table\tSource\tDestination\tDifference(%)\n");
-    if (batchTables.contains(WorkspaceColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getWorkspacesCount();
-      if (!verifyCount(
-          WorkspaceColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(WorkspaceColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(UserColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getUserCount();
-      if (!verifyCount(
-          UserColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(UserColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(CohortColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getCohortsCount();
-      if (!verifyCount(
-          CohortColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(CohortColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    if (batchTables.contains(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)) {
-      int sourceCount = reportingQueryService.getNewUserSatisfactionSurveysCount();
-      if (!verifyCount(
-          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
-          (long) sourceCount,
-          getActualRowCount(
-              NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
-          sb)) {
-        detailsLogLevel = Level.WARNING;
-        verified = false;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
+
+    // alt: this could be a Map, but we don't need to reference it in that way
+    List<Map.Entry<String, Supplier<Integer>>> tableCounters =
+        List.of(
+            Map.entry(
+                WorkspaceColumnValueExtractor.TABLE_NAME, reportingQueryService::getWorkspaceCount),
+            Map.entry(UserColumnValueExtractor.TABLE_NAME, reportingQueryService::getUserCount),
+            Map.entry(CohortColumnValueExtractor.TABLE_NAME, reportingQueryService::getCohortCount),
+            Map.entry(
+                NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+                reportingQueryService::getNewUserSatisfactionSurveyCount));
+
+    // fails-fast due to allMatch() so logs may be incomplete on failure
+    boolean verified =
+        tableCounters.stream()
+            .allMatch(
+                entry -> {
+                  final String tableName = entry.getKey();
+                  long sourceCount = entry.getValue().get();
+                  long actualCount = getActualRowCount(tableName, captureSnapshotTime);
+                  return verifyCount(tableName, sourceCount, actualCount, sb);
+                });
+
+    logger.log(verified ? Level.INFO : Level.WARNING, sb.toString());
     return verified;
   }
 
@@ -145,27 +124,27 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 ImmutableList.of(
                     getUploadResult(
                         snapshot,
-                        WorkspaceFreeTierUsageColumnValueExtractor.class,
+                        WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getWorkspaceFreeTierUsage),
                     getUploadResult(
                         snapshot,
-                        InstitutionColumnValueExtractor.class,
+                        InstitutionColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getInstitutions),
                     getUploadResult(
                         snapshot,
-                        DatasetColumnValueExtractor.class,
+                        DatasetColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasets),
                     getUploadResult(
                         snapshot,
-                        DatasetCohortColumnValueExtractor.class,
+                        DatasetCohortColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetCohorts),
                     getUploadResult(
                         snapshot,
-                        DatasetDomainColumnValueExtractor.class,
+                        DatasetDomainColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetDomainIdValues),
                     getUploadResult(
                         snapshot,
-                        DatasetConceptSetColumnValueExtractor.class,
+                        DatasetConceptSetColumnValueExtractor.TABLE_NAME,
                         ReportingSnapshot::getDatasetConceptSets)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
@@ -196,22 +175,15 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     return workbenchConfigProvider.get().server.projectId;
   }
 
-  private ReportingUploadResult getUploadResult(
-      String tableName, long snapshotTimestamp, long sourceRowCount) {
+  private <T> ReportingUploadResult getUploadResult(
+      ReportingSnapshot snapshot,
+      String tableName,
+      Function<ReportingSnapshot, List<T>> collectionExtractor) {
+
     return new ReportingUploadResult()
         .tableName(tableName)
-        .sourceRowCount(sourceRowCount)
-        .destinationRowCount(getActualRowCount(tableName, snapshotTimestamp));
-  }
-
-  private <T, E extends Enum<E> & ColumnValueExtractor<T>> ReportingUploadResult getUploadResult(
-      ReportingSnapshot snapshot,
-      Class<E> extractorClass,
-      Function<ReportingSnapshot, List<T>> collectionExtractor) {
-    return getUploadResult(
-        getBigQueryTableName(extractorClass),
-        snapshot.getCaptureTimestamp(),
-        collectionExtractor.apply(snapshot).size());
+        .sourceRowCount((long) collectionExtractor.apply(snapshot).size())
+        .destinationRowCount(getActualRowCount(tableName, snapshot.getCaptureTimestamp()));
   }
 
   private Long getActualRowCount(String tableName, long snapshotTimestamp) {
