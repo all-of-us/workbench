@@ -22,10 +22,10 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
@@ -85,7 +85,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     try {
       GetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      if (ClusterStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
                 "Observed Leonardo runtime with unexpected error status:\n%s",
@@ -97,7 +97,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
   }
 
-  private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
+  private String formatRuntimeErrors(@Nullable List<ClusterError> errors) {
     if (errors == null || errors.isEmpty()) {
       return "no error messages";
     }
@@ -127,7 +127,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                   return bCreatedDate.compareTo(aCreatedDate);
                 });
 
-    ListRuntimeResponse mostRecentRuntime =
+    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
     @SuppressWarnings("unchecked")

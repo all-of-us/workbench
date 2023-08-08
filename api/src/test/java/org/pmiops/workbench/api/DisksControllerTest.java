@@ -27,12 +27,12 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateDiskRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -120,8 +120,8 @@ public class DisksControllerTest {
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID));
 
     Disk disk =
@@ -151,8 +151,8 @@ public class DisksControllerTest {
             .status(LeonardoDiskStatus.READY)
             .auditInfo(new LeonardoAuditInfo().createdDate(createDate).creator(user.getUsername()))
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID));
 
     when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))

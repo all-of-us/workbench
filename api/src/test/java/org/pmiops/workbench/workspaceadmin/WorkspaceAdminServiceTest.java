@@ -55,10 +55,10 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -193,37 +193,37 @@ public class WorkspaceAdminServiceTest {
         new GetRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.DELETING)
+            .status(ClusterStatus.DELETING)
             .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
     testLeoListRuntimeResponse =
         new org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.RUNNING);
+            .status(ClusterStatus.RUNNING);
 
     testLeoListRuntimeResponse2 =
         new org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse()
             .runtimeName(RUNTIME_NAME_2)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.RUNNING);
+            .status(ClusterStatus.RUNNING);
 
     testLeoRuntimeDifferentProject =
         new GetRuntimeResponse()
             .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID_2))
-            .status(LeonardoRuntimeStatus.RUNNING)
+            .status(ClusterStatus.RUNNING)
             .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
   }
 

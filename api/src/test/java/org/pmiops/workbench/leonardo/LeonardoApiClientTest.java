@@ -30,17 +30,17 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AppType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.DiskType;
@@ -266,8 +266,8 @@ public class LeonardoApiClientTest {
         new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(LeonardoDiskStatus.READY)
             .labels(diskLabels);

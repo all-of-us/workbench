@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+
+import org.broadinstitute.dsde.workbench.client.leonardo.model.*;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,27 +17,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
@@ -60,77 +42,92 @@ public interface LeonardoMapper {
           RuntimeConfigurationType.GENERALANALYSIS, "preset-general-analysis",
           RuntimeConfigurationType.HAILGENOMICANALYSIS, "preset-hail-genomic-analysis");
 
-  DataprocConfig toDataprocConfig(LeonardoMachineConfig leonardoMachineConfig);
+  DataprocConfig toDataprocConfig(org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig leonardoMachineConfig);
 
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "properties", ignore = true)
   @Mapping(target = "componentGatewayEnabled", ignore = true)
   @Mapping(target = "workerPrivateAccess", ignore = true)
-  LeonardoMachineConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
+  @Mapping(target = "region", ignore = true)
+  @Mapping(target = "configType", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig toLeonardoMachineConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
   default void addMachineConfigDefaults(
-      @MappingTarget LeonardoMachineConfig leonardoMachineConfig) {
+      @MappingTarget org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig leonardoMachineConfig) {
     leonardoMachineConfig
-        .cloudService(LeonardoMachineConfig.CloudServiceEnum.DATAPROC)
+        .cloudService(org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.CloudServiceEnum.DATAPROC)
         .componentGatewayEnabled(true);
   }
 
-  GceConfig toGceConfig(LeonardoGceConfig leonardoGceConfig);
+  GceConfig toGceConfig(org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
-  LeonardoGceConfig toLeonardoGceConfig(GceConfig gceConfig);
+  @Mapping(target = "configType", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig toLeonardoGceConfig(GceConfig gceConfig);
 
-  @Mapping(target = "persistentDisk", source = "leonardoDiskConfig")
+  @Mapping(target = "persistentDisk", source = "DiskConfig")
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
   GceWithPdConfig toGceWithPdConfig(
-      LeonardoGceConfig leonardoGceConfig, LeonardoDiskConfig leonardoDiskConfig);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig, DiskConfig DiskConfig);
 
   @Mapping(target = "labels", ignore = true)
-  PersistentDiskRequest diskConfigToPersistentDiskRequest(LeonardoDiskConfig leonardoDiskConfig);
+  @Mapping(target = "diskType", ignore = true)
+  PersistentDiskRequest diskConfigToPersistentDiskRequest(DiskConfig DiskConfig);
 
+  @Mapping(target = "diskType", ignore = true)
   PersistentDiskRequest toPersistentDiskRequest(
-      LeonardoPersistentDiskRequest leonardoPersistentDiskRequest);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest leonardoPersistentDiskRequest);
 
-  LeonardoPersistentDiskRequest toLeonardoPersistentDiskRequest(
+  org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest toLeonardoPersistentDiskRequest(
       PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
-  LeonardoGceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
+  @Mapping(target = "configType", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig toLeonardoGceWithPdConfig(GceWithPdConfig gceWithPdConfig);
+
+  @Mapping(target = "cloudService", constant = "GCE")
+  @Mapping(target = "diskSize", source = "persistentDisk.size")
+  UpdateGceConfig toLeonardoUpdateGceConfig(GceWithPdConfig gceWithPdConfig);
+
+  @Mapping(target = "cloudService", constant = "DATAPROC")
+  UpdateDataprocConfig toLeonardoUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
-  default void addCloudServiceEnum(@MappingTarget LeonardoGceConfig leonardoGceConfig) {
-    leonardoGceConfig.setCloudService(LeonardoGceConfig.CloudServiceEnum.GCE);
+  default void addCloudServiceEnum(@MappingTarget org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig) {
+    leonardoGceConfig.setCloudService(org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.CloudServiceEnum.GCE);
   }
 
   @AfterMapping
   default void addPdCloudServiceEnum(
-      @MappingTarget LeonardoGceWithPdConfig leonardoGceWithPdConfig) {
-    leonardoGceWithPdConfig.setCloudService(LeonardoGceWithPdConfig.CloudServiceEnum.GCE);
+      @MappingTarget org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig leonardoGceWithPdConfig) {
+    leonardoGceWithPdConfig.setCloudService(org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.CloudServiceEnum.GCE);
   }
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "diskType", ignore = true)
   @Mapping(target = "isGceRuntime", ignore = true)
-  Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
+  Disk toApiGetDiskResponse(GetPersistentDiskResponse disk);
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
+  @Mapping(target = "diskType", ignore = true)
   @Mapping(target = "isGceRuntime", ignore = true)
   Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
 
   @AfterMapping
   default void getDiskAfterMapper(
-      @MappingTarget Disk disk, LeonardoGetPersistentDiskResponse leoGetDiskResponse) {
+      @MappingTarget Disk disk, GetPersistentDiskResponse leoGetDiskResponse) {
     setDiskEnvironmentType(disk, leoGetDiskResponse.getLabels());
   }
 
@@ -146,15 +143,16 @@ public interface LeonardoMapper {
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
-  ListRuntimeResponse toListRuntimeResponse(GetRuntimeResponse runtime);
+  @Mapping(target = "workspaceId", ignore = true)
+  org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse toListRuntimeResponse(GetRuntimeResponse runtime);
 
   @Nullable
   @Named("cloudContextToGoogleProject")
-  default String toGoogleProject(@Nullable LeonardoCloudContext lcc) {
+  default String toGoogleProject(@Nullable CloudContext lcc) {
     return Optional.ofNullable(lcc)
-        // we don't support LeonardoCloudProvider.AZURE so don't attempt to map it
-        .filter(c -> c.getCloudProvider() == LeonardoCloudProvider.GCP)
-        .map(LeonardoCloudContext::getCloudResource)
+        // we don't support CloudProvider.AZURE so don't attempt to map it
+        .filter(c -> c.getCloudProvider() == CloudProvider.GCP)
+        .map(CloudContext::getCloudResource)
         .orElse(null);
   }
 
@@ -165,7 +163,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   ListRuntimeResponse toApiListRuntimeResponse(
-      ListRuntimeResponse ListRuntimeResponse);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse ListRuntimeResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
@@ -187,13 +185,9 @@ public interface LeonardoMapper {
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
-  @Mapping(
-      target = "googleProject",
-      source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
-  Runtime toApiRuntime(ListRuntimeResponse runtime);
+  Runtime toApiRuntime(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse runtime);
 
-  RuntimeError toApiRuntimeError(LeonardoClusterError err);
+  RuntimeError toApiRuntimeError(ClusterError err);
 
   @AfterMapping
   default void getRuntimeAfterMapper(
@@ -205,16 +199,6 @@ public interface LeonardoMapper {
         GetRuntimeResponse.getDiskConfig());
   }
 
-  @AfterMapping
-  default void listRuntimeAfterMapper(
-      @MappingTarget Runtime runtime, ListRuntimeResponse ListRuntimeResponse) {
-    mapLabels(runtime, ListRuntimeResponse.getLabels());
-    mapRuntimeConfig(
-        runtime,
-        ListRuntimeResponse.getRuntimeConfig(),
-        ListRuntimeResponse.getDiskConfig());
-  }
-
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "creator", source = "auditInfo.creator")
@@ -224,7 +208,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(target = "autopauseThreshold", ignore = true)
-  UserAppEnvironment toApiApp(LeonardoGetAppResponse app);
+  UserAppEnvironment toApiApp(GetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
@@ -234,22 +218,24 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  UserAppEnvironment toApiApp(LeonardoListAppResponse app);
+  UserAppEnvironment toApiApp(ListAppResponse app);
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
-      LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig leonardoKubernetesRuntimeConfig);
 
-  LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
+  org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  LeonardoAppType toLeonardoAppType(AppType appType);
+  org.broadinstitute.dsde.workbench.client.leonardo.model.AppType toLeonardoAppType(AppType appType);
 
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
   @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
+  @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS apps
+  @ValueMapping(source = "HAIL_BATCH", target = MappingConstants.NULL) // we don't support HAIL_BATCH apps
   @ValueMapping(
-      source = "ALLOWED",
-      target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
-  AppType toApiAppType(LeonardoAppType appType);
+          source = "ALLOWED",
+          target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
+  AppType toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
@@ -268,24 +254,24 @@ public interface LeonardoMapper {
   }
 
   default void mapRuntimeConfig(
-      Runtime runtime, Object runtimeConfigObj, @Nullable LeonardoDiskConfig diskConfig) {
+      Runtime runtime, Object runtimeConfigObj, @Nullable DiskConfig diskConfig) {
     if (runtimeConfigObj == null) {
       return;
     }
 
     Gson gson = new Gson();
     String runtimeConfigJson = gson.toJson(runtimeConfigObj);
-    LeonardoRuntimeConfig runtimeConfig =
-        gson.fromJson(runtimeConfigJson, LeonardoRuntimeConfig.class);
+    RuntimeConfig runtimeConfig =
+        gson.fromJson(runtimeConfigJson, RuntimeConfig.class);
 
     if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
       runtime.dataprocConfig(
-          toDataprocConfig(gson.fromJson(runtimeConfigJson, LeonardoMachineConfig.class)));
+          toDataprocConfig(gson.fromJson(runtimeConfigJson, org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.class)));
     } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
       // Unfortunately the discriminator does not allow us to distinguish plain GCE config
       // from GceWithPd; use the diskConfig to help differentiate.
-      LeonardoGceConfig leonardoGceConfig =
-          gson.fromJson(runtimeConfigJson, LeonardoGceConfig.class);
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig =
+          gson.fromJson(runtimeConfigJson, org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.class);
       if (diskConfig != null) {
         runtime.gceWithPdConfig(toGceWithPdConfig(leonardoGceConfig, diskConfig));
       } else {
@@ -298,21 +284,21 @@ public interface LeonardoMapper {
     }
   }
 
-  default RuntimeStatus toApiRuntimeStatus(LeonardoRuntimeStatus leonardoRuntimeStatus) {
-    if (leonardoRuntimeStatus == null) {
+  default RuntimeStatus toApiRuntimeStatus(ClusterStatus ClusterStatus) {
+    if (ClusterStatus == null) {
       return RuntimeStatus.UNKNOWN;
     }
-    return RuntimeStatus.fromValue(leonardoRuntimeStatus.toString());
+    return RuntimeStatus.fromValue(ClusterStatus.toString());
   }
 
-  default DiskStatus toApiDiskStatus(LeonardoDiskStatus leonardoDiskStatus) {
+  default DiskStatus toApiDiskStatus(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus leonardoDiskStatus) {
     if (leonardoDiskStatus == null) {
       return DiskStatus.UNKNOWN;
     }
     return DiskStatus.fromValue(leonardoDiskStatus.toString());
   }
 
-  default String getJupyterImage(List<LeonardoRuntimeImage> images) {
+  default String getJupyterImage(List<RuntimeImage> images) {
     return images.stream()
         .filter(image -> "Jupyter".equals(image.getImageType()))
         .findFirst()
