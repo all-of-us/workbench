@@ -246,8 +246,7 @@ public class ReportingQueryServiceTest {
     final DbCdrVersion cdrVersion = createCdrVersion(registeredTier);
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     List<ReportingWorkspace> firstBatch = iterator.next();
@@ -290,8 +289,7 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_noEntries() {
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isFalse();
   }
 
@@ -299,8 +297,7 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceIIterator_twoAndAHalfBatches() {
     createWorkspaces(5);
 
-    final Iterator<List<ReportingWorkspace>> iterator =
-        reportingQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator = getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingWorkspace> batch1 = iterator.next();
@@ -394,7 +391,7 @@ public class ReportingQueryServiceTest {
   public void testUserIterator_twoAndAHalfBatches() {
     createUsers(5);
 
-    final Iterator<List<ReportingUser>> iterator = reportingQueryService.getUserBatchIterator();
+    final Iterator<List<ReportingUser>> iterator = getUserBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingUser> batch1 = iterator.next();
@@ -522,8 +519,7 @@ public class ReportingQueryServiceTest {
   public void testCohortIterator_twoAndAHalfBatches() {
     createCohorts(5);
 
-    final Iterator<List<ReportingCohort>> iterator =
-        reportingQueryService.getCohortsBatchIterator();
+    final Iterator<List<ReportingCohort>> iterator = getCohortsBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingCohort> batch1 = iterator.next();
@@ -560,7 +556,7 @@ public class ReportingQueryServiceTest {
     createNewUserSatisfactionSurveys(5);
 
     final Iterator<List<ReportingNewUserSatisfactionSurvey>> iterator =
-        reportingQueryService.getNewUserSatisfactionSurveyBatchIterator();
+        getNewUserSatisfactionSurveyBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingNewUserSatisfactionSurvey> batch1 = iterator.next();
@@ -608,6 +604,24 @@ public class ReportingQueryServiceTest {
   public void testNewUserSatisfactionSurveysCount() {
     createNewUserSatisfactionSurveys(5);
     assertThat(reportingQueryService.getNewUserSatisfactionSurveyCount()).isEqualTo(5);
+  }
+
+  private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getWorkspaceBatch);
+  }
+
+  private Iterator<List<ReportingUser>> getUserBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getUserBatch);
+  }
+
+  private Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
+    return reportingQueryService.getBatchIterator(reportingQueryService::getCohortBatch);
+  }
+
+  private Iterator<List<ReportingNewUserSatisfactionSurvey>>
+      getNewUserSatisfactionSurveyBatchIterator() {
+    return reportingQueryService.getBatchIterator(
+        reportingQueryService::getNewUserSatisfactionSurveyBatch);
   }
 
   private List<DbWorkspace> createWorkspaces(int count) {

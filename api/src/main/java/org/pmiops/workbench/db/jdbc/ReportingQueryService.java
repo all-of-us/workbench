@@ -80,7 +80,7 @@ public interface ReportingQueryService {
    * @return
    */
   default <T> Iterator<List<T>> getBatchIterator(BiFunction<Long, Long, List<T>> getter) {
-    return new Iterator<List<T>>() {
+    return new Iterator<>() {
       private long batchIndex = 0;
       private long lastResultSetSize = -1; // first call to hasNext() should return true
 
@@ -116,23 +116,6 @@ public interface ReportingQueryService {
         return result;
       }
     };
-  }
-
-  default Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
-    return getBatchIterator(this::getWorkspaceBatch);
-  }
-
-  default Iterator<List<ReportingUser>> getUserBatchIterator() {
-    return getBatchIterator(this::getUserBatch);
-  }
-
-  default Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
-    return getBatchIterator(this::getCohortBatch);
-  }
-
-  default Iterator<List<ReportingNewUserSatisfactionSurvey>>
-      getNewUserSatisfactionSurveyBatchIterator() {
-    return getBatchIterator(this::getNewUserSatisfactionSurveyBatch);
   }
 
   /**
