@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting.insertion;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -36,7 +37,8 @@ public interface ColumnValueExtractor<MODEL_T> {
 
   // A friendly method to call the instance-provided rowToInsertValueFunction. Returns
   // a map entry for a RowToInsert object.
-  default Entry<String, Object> getRowToInsertEntry(@NotNull MODEL_T model) {
-    return Map.entry(getParameterName(), getRowToInsertValueFunction().apply(model));
+  default Stream<Entry<String, Object>> getRowToInsertEntry(@NotNull MODEL_T model) {
+    return Stream.ofNullable(getRowToInsertValueFunction().apply(model))
+        .map(insertValue -> Map.entry(getParameterName(), insertValue));
   }
 }
