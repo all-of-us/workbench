@@ -17,7 +17,7 @@ public interface ColumnValueExtractor<MODEL_T> {
   /**
    * Name for the table in BigQuery. This will be the same for all columns in the table, so the way
    * to grab it statically is just CohortColumnValueExtractor.values()[0].getBigQueryTableName(),;
-   * This shoule always work, since a a useful enum must always have at least one entry.
+   * This should always work, since a useful enum must always have at least one entry.
    */
   String getBigQueryTableName();
 
@@ -29,7 +29,7 @@ public interface ColumnValueExtractor<MODEL_T> {
   // Provide a function to map the target model to a column-specific Java type corresponding to the
   // conventions of BQ InsertAllRequests. There are some small differences with this representation
   // and
-  // QueryParameterValue types. The function should return return null if the value is not present
+  // QueryParameterValue types. The function should return null if the value is not present
   // on the model.
   Function<MODEL_T, Object> getRowToInsertValueFunction();
 
