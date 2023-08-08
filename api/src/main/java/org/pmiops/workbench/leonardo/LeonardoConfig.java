@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
-import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.ServiceInfoApi;
+import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.auth.UserAuthentication;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,7 +106,8 @@ public class LeonardoConfig {
   @Bean(name = USER_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public RuntimesApi runtimesApi(
-      @Qualifier(USER_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(USER_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
@@ -115,7 +116,8 @@ public class LeonardoConfig {
   @Bean(name = USER_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi disksApi(
-      @Qualifier(USER_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(USER_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
@@ -124,7 +126,8 @@ public class LeonardoConfig {
   @Bean(name = SERVICE_DISKS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public DisksApi serviceDisksApi(
-      @Qualifier(SERVICE_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(SERVICE_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     DisksApi api = new DisksApi();
     api.setApiClient(apiClient);
     return api;
@@ -151,7 +154,8 @@ public class LeonardoConfig {
   @Bean(name = SERVICE_RUNTIMES_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public RuntimesApi serviceRuntimesApi(
-      @Qualifier(SERVICE_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(SERVICE_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     RuntimesApi api = new RuntimesApi();
     api.setApiClient(apiClient);
     return api;
@@ -160,7 +164,8 @@ public class LeonardoConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ServiceInfoApi serviceInfoApi(
-      @Qualifier(SERVICE_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(SERVICE_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     ServiceInfoApi api = new ServiceInfoApi();
     api.setApiClient(apiClient);
     return api;
@@ -169,7 +174,8 @@ public class LeonardoConfig {
   @Bean(name = USER_APPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public AppsApi appsApi(
-      @Qualifier(USER_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(USER_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     AppsApi api = new AppsApi();
     api.setApiClient(apiClient);
     return api;
@@ -178,7 +184,8 @@ public class LeonardoConfig {
   @Bean(name = SERVICE_APPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public AppsApi serviceAppsApi(
-      @Qualifier(SERVICE_LEONARDO_CLIENT) org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
+      @Qualifier(SERVICE_LEONARDO_CLIENT)
+          org.broadinstitute.dsde.workbench.client.leonardo.ApiClient apiClient) {
     AppsApi api = new AppsApi();
     api.setApiClient(apiClient);
     return api;

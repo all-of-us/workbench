@@ -28,6 +28,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -68,26 +84,8 @@ import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
@@ -854,9 +852,7 @@ public class RuntimeControllerTest {
             gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoMachineConfig.class);
 
     assertThat(
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.DATAPROC);
     assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
@@ -890,9 +886,7 @@ public class RuntimeControllerTest {
             gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
 
     assertThat(
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
@@ -934,9 +928,7 @@ public class RuntimeControllerTest {
             gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
 
@@ -1097,9 +1089,7 @@ public class RuntimeControllerTest {
             gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
 
     assertThat(
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
@@ -1139,9 +1129,7 @@ public class RuntimeControllerTest {
             gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())

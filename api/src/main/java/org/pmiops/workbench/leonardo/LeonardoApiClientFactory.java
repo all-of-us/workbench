@@ -4,11 +4,11 @@ import com.google.auth.oauth2.OAuth2Credentials;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 
 @Service
 public class LeonardoApiClientFactory {

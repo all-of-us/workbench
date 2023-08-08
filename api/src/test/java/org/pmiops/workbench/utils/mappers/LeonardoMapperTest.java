@@ -7,19 +7,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.pmiops.workbench.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -41,12 +41,15 @@ public class LeonardoMapperTest {
 
   private UserAppEnvironment app;
   private KubernetesRuntimeConfig kubernetesRuntimeConfig;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+      leonardoKubernetesRuntimeConfig;
   private PersistentDiskRequest persistentDiskRequest;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
   private AuditInfo leonardoAuditInfo;
   private List<KubernetesError> kubernetesErrors = new ArrayList<>();
-  private List<org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError> leonardoKubernetesErrors = new ArrayList<>();
+  private List<org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError>
+      leonardoKubernetesErrors = new ArrayList<>();
   private Map<String, String> proxyUrls = new HashMap<>();
   private Map<String, String> labels = new HashMap<>();
 
@@ -55,10 +58,14 @@ public class LeonardoMapperTest {
     kubernetesRuntimeConfig =
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig()
+            .autoscalingEnabled(false)
+            .machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest().diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD).size(10);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
     leonardoAuditInfo =
         new AuditInfo()
             .createdDate("2022-10-10")
@@ -68,9 +75,13 @@ public class LeonardoMapperTest {
     kubernetesErrors.add(new KubernetesError().errorMessage("error1").googleErrorCode(404));
     kubernetesErrors.add(new KubernetesError().errorMessage("error2").googleErrorCode(401));
     leonardoKubernetesErrors.add(
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError().errorMessage("error1").googleErrorCode(404));
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError()
+            .errorMessage("error1")
+            .googleErrorCode(404));
     leonardoKubernetesErrors.add(
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError().errorMessage("error2").googleErrorCode(401));
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesError()
+            .errorMessage("error2")
+            .googleErrorCode(401));
 
     proxyUrls.put("cromwell", "cromwell url");
     proxyUrls.put("rstudio", "rstudio url");
@@ -120,16 +131,30 @@ public class LeonardoMapperTest {
 
   @Test
   public void testToApiAppType() {
-    assertThat(mapper.toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL)).isEqualTo(AppType.CROMWELL);
-    assertThat(mapper.toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO)).isEqualTo(AppType.RSTUDIO);
-    assertThat(mapper.toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.GALAXY)).isNull();
-    assertThat(mapper.toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CUSTOM)).isNull();
+    assertThat(
+            mapper.toApiAppType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL))
+        .isEqualTo(AppType.CROMWELL);
+    assertThat(
+            mapper.toApiAppType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO))
+        .isEqualTo(AppType.RSTUDIO);
+    assertThat(
+            mapper.toApiAppType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.GALAXY))
+        .isNull();
+    assertThat(
+            mapper.toApiAppType(
+                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CUSTOM))
+        .isNull();
   }
 
   @Test
   public void testToLeonardoAppType() {
-    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO);
-    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL);
+    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO))
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO);
+    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL))
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL);
   }
 
   @Test
@@ -145,9 +170,7 @@ public class LeonardoMapperTest {
             .errors(leonardoKubernetesErrors)
             .proxyUrls(proxyUrls)
             .cloudContext(
-                new CloudContext()
-                    .cloudProvider(CloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT))
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
             .labels(labels);
     assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app);
   }
@@ -166,9 +189,7 @@ public class LeonardoMapperTest {
             .labels(labels)
             .appName(APP_NAME)
             .cloudContext(
-                new CloudContext()
-                    .cloudProvider(CloudProvider.GCP)
-                    .cloudResource(GOOGLE_PROJECT));
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT));
     assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app);
   }
 
