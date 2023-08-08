@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -45,7 +45,7 @@ public class DiskService {
   public List<Disk> getAllDisksInWorkspaceNamespace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    List<LeonardoListPersistentDiskResponse> responseList =
+    List<ListPersistentDiskResponse> responseList =
         leonardoNotebooksClient.listDisksByProjectAsService(googleProject);
     return responseList.stream()
         .map(leonardoMapper::toApiListDisksResponse)
@@ -70,7 +70,7 @@ public class DiskService {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<LeonardoListPersistentDiskResponse> responseList =
+    List<ListPersistentDiskResponse> responseList =
         leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
 
     return PersistentDiskUtils.findTheMostRecentActiveDisks(

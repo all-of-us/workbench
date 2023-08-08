@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.db.model.DbAccessModule;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig.CloudServiceEnum;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.CloudServiceEnum;
 import org.pmiops.workbench.model.AccessModuleConfig;
 import org.pmiops.workbench.model.ConfigResponse;
 import org.pmiops.workbench.model.RuntimeImage;

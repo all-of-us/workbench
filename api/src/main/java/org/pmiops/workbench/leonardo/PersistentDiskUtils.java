@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -36,7 +36,7 @@ public final class PersistentDiskUtils {
   private PersistentDiskUtils() {}
 
   // Keep in sync with ui/src/app/utils/machines.ts
-  public static double costPerMonth(LeonardoListPersistentDiskResponse disk, String googleProject) {
+  public static double costPerMonth(ListPersistentDiskResponse disk, String googleProject) {
     Double pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(disk.getDiskType());
     if (pricePerGbMonth == null) {
       pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(LeonardoDiskType.STANDARD);

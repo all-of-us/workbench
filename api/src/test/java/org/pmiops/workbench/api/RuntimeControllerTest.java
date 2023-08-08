@@ -76,13 +76,13 @@ import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
@@ -245,7 +245,7 @@ public class RuntimeControllerTest {
   @Autowired FirecloudMapper firecloudMapper;
 
   private DbCdrVersion cdrVersion;
-  private LeonardoGetRuntimeResponse testLeoRuntime;
+  private GetRuntimeResponse testLeoRuntime;
 
   private Runtime testRuntime;
   private DbWorkspace testWorkspace;
@@ -304,7 +304,7 @@ public class RuntimeControllerTest {
     gceConfig = tmpRuntime.getGceConfig();
 
     testLeoRuntime =
-        new LeonardoGetRuntimeResponse()
+        new GetRuntimeResponse()
             .runtimeName(getRuntimeName())
             .cloudContext(
                 new LeonardoCloudContext()
@@ -514,7 +514,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .cloudContext(
                         new LeonardoCloudContext()
                             .cloudProvider(LeonardoCloudProvider.GCP)
@@ -541,7 +541,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeConfig(dataprocConfigObj)
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
@@ -557,7 +557,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeConfig(gceConfigObj)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
@@ -587,7 +587,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeConfig(dataProcConfigObj)
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
@@ -614,11 +614,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
@@ -636,11 +636,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
@@ -657,11 +657,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(null))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
@@ -679,11 +679,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(""))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
@@ -702,11 +702,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("override-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
@@ -724,10 +724,10 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("override-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
@@ -744,7 +744,7 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("preset-runtime")
                     .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
@@ -953,8 +953,8 @@ public class RuntimeControllerTest {
   public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    LeonardoListPersistentDiskResponse gceDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse gceDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
                 new LeonardoCloudContext()

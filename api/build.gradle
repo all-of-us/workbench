@@ -177,10 +177,6 @@ swaggerSources {
     captcha swagger3JavaClient("captcha.yaml", "captcha")
     shibboleth swagger3JavaClient("shibboleth.yaml", "shibboleth")
 
-    leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
-            '--model-name-prefix', 'Leonardo'
-    ])
-
     calhoun swagger3JavaClient("calhoun.yaml", "calhoun", [
             '--model-name-prefix', 'Calhoun'
     ])
@@ -482,6 +478,8 @@ dependencies {
     implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-00d8cfd-SNAP") {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
+
+    implementation("org.broadinstitute.dsde.workbench:leonardo-client_2.13:1.3.6-370226e")
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)

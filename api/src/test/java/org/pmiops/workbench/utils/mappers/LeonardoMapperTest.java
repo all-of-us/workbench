@@ -14,19 +14,18 @@ import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesError;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.KubernetesError;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
@@ -181,11 +180,11 @@ public class LeonardoMapperTest {
 
   @Test
   public void testToApiDiskFromListDiskResponse() {
-    LeonardoListPersistentDiskResponse listPersistentDiskResponse =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse listPersistentDiskResponse =
+        new ListPersistentDiskResponse()
             .diskType(LeonardoDiskType.SSD)
             .auditInfo(leonardoAuditInfo)
-            .status(LeonardoDiskStatus.READY);
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY);
 
     Disk disk =
         new Disk()
@@ -210,7 +209,7 @@ public class LeonardoMapperTest {
         new LeonardoGetPersistentDiskResponse()
             .diskType(LeonardoDiskType.SSD)
             .auditInfo(leonardoAuditInfo)
-            .status(LeonardoDiskStatus.READY);
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY);
 
     Disk disk =
         new Disk()

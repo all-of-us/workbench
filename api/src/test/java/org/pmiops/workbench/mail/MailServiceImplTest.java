@@ -30,7 +30,7 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -282,7 +282,7 @@ public class MailServiceImplTest {
     mailService.alertUsersUnusedDiskWarningThreshold(
         ImmutableList.of(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
+        new ListPersistentDiskResponse()
             .diskType(LeonardoDiskType.SSD)
             .labels(labelsMap)
             .size(123)
@@ -323,7 +323,7 @@ public class MailServiceImplTest {
     mailService.alertUsersUnusedDiskWarningThreshold(
         ImmutableList.of(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
-        new LeonardoListPersistentDiskResponse()
+        new ListPersistentDiskResponse()
             .diskType(LeonardoDiskType.SSD)
             .labels(labelsMap)
             .size(123)

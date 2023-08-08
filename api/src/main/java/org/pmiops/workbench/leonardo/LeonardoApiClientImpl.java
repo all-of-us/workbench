@@ -38,10 +38,10 @@ import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
@@ -268,14 +268,14 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
+  public List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject) {
     RuntimesApi runtimesApi = serviceRuntimesApiProvider.get();
     return leonardoRetryHandler.run(
         (context) -> runtimesApi.listRuntimesByProject(googleProject, null, false));
   }
 
   @Override
-  public List<LeonardoListRuntimeResponse> listRuntimesByProject(
+  public List<ListRuntimeResponse> listRuntimesByProject(
       String googleProject, boolean includeDeleted) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     return leonardoRetryHandler.run(
@@ -293,7 +293,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
+  public GetRuntimeResponse getRuntime(String googleProject, String runtimeName) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
     try {
       return leonardoRetryHandler.runAndThrowChecked(
@@ -316,7 +316,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   @Override
   public int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException {
     RuntimesApi runtimesApiAsService = serviceRuntimesApiProvider.get();
-    List<LeonardoListRuntimeResponse> runtimes =
+    List<ListRuntimeResponse> runtimes =
         leonardoRetryHandler.run(
             (context) ->
                 runtimesApiAsService.listRuntimes(
@@ -480,7 +480,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+  public List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject) {
 
     DisksApi disksApi = disksApiProvider.get();
@@ -495,7 +495,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   @Override
-  public List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(
+  public List<ListPersistentDiskResponse> listDisksByProjectAsService(
       String googleProject) {
 
     DisksApi disksApi = serviceDisksApiProvider.get();

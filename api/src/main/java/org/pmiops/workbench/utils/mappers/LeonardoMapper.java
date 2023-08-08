@@ -20,16 +20,16 @@ import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
 import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoListAppResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
@@ -126,7 +126,7 @@ public interface LeonardoMapper {
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
   @Mapping(target = "isGceRuntime", ignore = true)
-  Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
+  Disk toApiListDisksResponse(ListPersistentDiskResponse disk);
 
   @AfterMapping
   default void getDiskAfterMapper(
@@ -136,7 +136,7 @@ public interface LeonardoMapper {
 
   @AfterMapping
   default void listDisksAfterMapper(
-      @MappingTarget Disk disk, LeonardoListPersistentDiskResponse leoListDisksResponse) {
+      @MappingTarget Disk disk, ListPersistentDiskResponse leoListDisksResponse) {
     setDiskEnvironmentType(disk, leoListDisksResponse.getLabels());
   }
 
@@ -146,7 +146,7 @@ public interface LeonardoMapper {
   }
 
   @Mapping(target = "patchInProgress", ignore = true)
-  LeonardoListRuntimeResponse toListRuntimeResponse(LeonardoGetRuntimeResponse runtime);
+  ListRuntimeResponse toListRuntimeResponse(GetRuntimeResponse runtime);
 
   @Nullable
   @Named("cloudContextToGoogleProject")
@@ -165,7 +165,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   ListRuntimeResponse toApiListRuntimeResponse(
-      LeonardoListRuntimeResponse leonardoListRuntimeResponse);
+      ListRuntimeResponse ListRuntimeResponse);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
@@ -177,7 +177,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  Runtime toApiRuntime(LeonardoGetRuntimeResponse runtime);
+  Runtime toApiRuntime(GetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "autopauseThreshold", ignore = true)
@@ -191,28 +191,28 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
-  Runtime toApiRuntime(LeonardoListRuntimeResponse runtime);
+  Runtime toApiRuntime(ListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(LeonardoClusterError err);
 
   @AfterMapping
   default void getRuntimeAfterMapper(
-      @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapLabels(runtime, leonardoGetRuntimeResponse.getLabels());
+      @MappingTarget Runtime runtime, GetRuntimeResponse GetRuntimeResponse) {
+    mapLabels(runtime, GetRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
-        leonardoGetRuntimeResponse.getRuntimeConfig(),
-        leonardoGetRuntimeResponse.getDiskConfig());
+        GetRuntimeResponse.getRuntimeConfig(),
+        GetRuntimeResponse.getDiskConfig());
   }
 
   @AfterMapping
   default void listRuntimeAfterMapper(
-      @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapLabels(runtime, leonardoListRuntimeResponse.getLabels());
+      @MappingTarget Runtime runtime, ListRuntimeResponse ListRuntimeResponse) {
+    mapLabels(runtime, ListRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
-        leonardoListRuntimeResponse.getRuntimeConfig(),
-        leonardoListRuntimeResponse.getDiskConfig());
+        ListRuntimeResponse.getRuntimeConfig(),
+        ListRuntimeResponse.getDiskConfig());
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -293,7 +293,7 @@ public interface LeonardoMapper {
       }
     } else {
       throw new IllegalArgumentException(
-          "Invalid LeonardoGetRuntimeResponse.RuntimeConfig.cloudService : "
+          "Invalid GetRuntimeResponse.RuntimeConfig.cloudService : "
               + runtimeConfig.getCloudService());
     }
   }

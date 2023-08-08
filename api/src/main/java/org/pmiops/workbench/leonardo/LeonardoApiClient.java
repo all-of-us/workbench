@@ -5,9 +5,9 @@ import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.UserAppEnvironment;
@@ -19,9 +19,9 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  */
 public interface LeonardoApiClient {
   /** lists all notebook runtimes as the appengine SA, to be used only for admin operations */
-  List<LeonardoListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
+  List<ListRuntimeResponse> listRuntimesByProjectAsService(String googleProject);
 
-  List<LeonardoListRuntimeResponse> listRuntimesByProject(
+  List<ListRuntimeResponse> listRuntimesByProject(
       String googleProject, boolean includeDeleted);
 
   /**
@@ -51,7 +51,7 @@ public interface LeonardoApiClient {
   int stopAllUserRuntimesAsService(String userEmail) throws WorkbenchException;
 
   /** Gets information about a notebook runtime */
-  LeonardoGetRuntimeResponse getRuntime(String googleProject, String runtimeName)
+  GetRuntimeResponse getRuntime(String googleProject, String runtimeName)
       throws WorkbenchException;
 
   /** Send files over to notebook runtime */
@@ -86,7 +86,7 @@ public interface LeonardoApiClient {
       throws WorkbenchException;
 
   /** List all persistent disks owned by authenticated user in google project */
-  List<LeonardoListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
+  List<ListPersistentDiskResponse> listPersistentDiskByProjectCreatedByCreator(
       String googleProject);
 
   /**
@@ -131,5 +131,5 @@ public interface LeonardoApiClient {
   int stopAllUserAppsAsService(String userEmail);
 
   /** List all persistent disks in google project */
-  List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
+  List<ListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);
 }

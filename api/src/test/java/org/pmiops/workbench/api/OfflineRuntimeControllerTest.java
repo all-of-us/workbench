@@ -43,11 +43,11 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -148,14 +148,14 @@ public class OfflineRuntimeControllerTest {
     userDao.deleteAll();
   }
 
-  private LeonardoGetRuntimeResponse runtimeWithAge(Duration age) {
+  private GetRuntimeResponse runtimeWithAge(Duration age) {
     return runtimeWithAgeAndIdle(age, Duration.ZERO);
   }
 
-  private LeonardoGetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
+  private GetRuntimeResponse runtimeWithAgeAndIdle(Duration age, Duration idleTime) {
     // There should only be one runtime per project, so increment an index for
     // each runtime created per test.
-    return new LeonardoGetRuntimeResponse()
+    return new GetRuntimeResponse()
         .runtimeName("all-of-us")
         .cloudContext(
             new LeonardoCloudContext()
@@ -168,32 +168,32 @@ public class OfflineRuntimeControllerTest {
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private List<LeonardoListRuntimeResponse> toListRuntimeResponseList(
-      List<LeonardoGetRuntimeResponse> runtimes) {
+  private List<ListRuntimeResponse> toListRuntimeResponseList(
+      List<GetRuntimeResponse> runtimes) {
     return runtimes.stream()
         .map(leonardoMapper::toListRuntimeResponse)
         .collect(Collectors.toList());
   }
 
-  private void stubRuntimes(List<LeonardoGetRuntimeResponse> runtimes) throws Exception {
+  private void stubRuntimes(List<GetRuntimeResponse> runtimes) throws Exception {
     when(mockRuntimesApi.listRuntimes(any(), any()))
         .thenReturn(toListRuntimeResponseList(runtimes));
 
-    for (LeonardoGetRuntimeResponse runtime : runtimes) {
+    for (GetRuntimeResponse runtime : runtimes) {
       when(mockRuntimesApi.getRuntime(
               leonardoMapper.toGoogleProject(runtime.getCloudContext()), runtime.getRuntimeName()))
           .thenReturn(runtime);
     }
   }
 
-  private LeonardoListPersistentDiskResponse idleDisk(Duration idleTime) {
+  private ListPersistentDiskResponse idleDisk(Duration idleTime) {
     return idleDiskForProjectAndCreator(
         workspace.getGoogleProject(), user1.getUsername(), idleTime);
   }
 
-  private LeonardoListPersistentDiskResponse idleDiskForProjectAndCreator(
+  private ListPersistentDiskResponse idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
-    return new LeonardoListPersistentDiskResponse()
+    return new ListPersistentDiskResponse()
         .diskType(LeonardoDiskType.STANDARD)
         .status(LeonardoDiskStatus.READY)
         .cloudContext(
@@ -209,7 +209,7 @@ public class OfflineRuntimeControllerTest {
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
 
-  private void stubDisks(List<LeonardoListPersistentDiskResponse> disks) throws Exception {
+  private void stubDisks(List<ListPersistentDiskResponse> disks) throws Exception {
     when(mockDisksApi.listDisks(any(), any(), anyString(), any())).thenReturn(disks);
   }
 
@@ -371,7 +371,7 @@ public class OfflineRuntimeControllerTest {
   public void testCheckPersistentDisksSkipsUnknownUser() throws Exception {
     stubWorkspaceOwners(workspace, ImmutableList.of(user1));
 
-    LeonardoListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
+    ListPersistentDiskResponse mysteryDisk = idleDisk(Duration.ofDays(14L));
     mysteryDisk.getAuditInfo().setCreator("404@aou.org");
     stubDisks(ImmutableList.of(mysteryDisk, idleDisk(Duration.ofDays(30L))));
 
