@@ -97,11 +97,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   }
 
   @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
-  }
-
-  @Override
   public String getParameterName() {
     return parameterName;
   }

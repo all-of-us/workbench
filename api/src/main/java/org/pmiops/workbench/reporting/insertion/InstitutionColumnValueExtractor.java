@@ -29,11 +29,6 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
   }
 
   @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
-  }
-
-  @Override
   public String getParameterName() {
     return parameterName;
   }

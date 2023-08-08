@@ -23,11 +23,6 @@ public enum DatasetDomainColumnValueExtractor
   }
 
   @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
-  }
-
-  @Override
   public String getParameterName() {
     return parameterName;
   }
