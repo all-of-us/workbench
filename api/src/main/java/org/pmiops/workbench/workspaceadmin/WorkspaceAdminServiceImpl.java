@@ -40,7 +40,7 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminLockingRequest;
@@ -262,8 +262,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     // DELETED is an acceptable status from an implementation standpoint, but we will never
     // receive runtimes with that status from Leo. We don't want to because we reuse runtime
     // names and thus could have >1 deleted runtimes with the same name in the project.
-    List<LeonardoRuntimeStatus> acceptableStates =
-        ImmutableList.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
+    List<ClusterStatus> acceptableStates =
+        ImmutableList.of(ClusterStatus.DELETING, ClusterStatus.ERROR);
     runtimesInProjectAffected.stream()
         .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
         .forEach(

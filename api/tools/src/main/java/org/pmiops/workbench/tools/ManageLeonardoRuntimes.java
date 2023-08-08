@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.leonardo.ApiClient;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.ApiResponse;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.CommandLineRunner;
@@ -98,7 +98,7 @@ public class ManageLeonardoRuntimes {
     if (labels.has("created-by")) {
       creator = labels.get("created-by").getAsString();
     }
-    LeonardoRuntimeStatus status = LeonardoRuntimeStatus.UNKNOWN;
+    ClusterStatus status = ClusterStatus.UNKNOWN;
     if (r.getStatus() != null) {
       status = r.getStatus();
     }
@@ -215,7 +215,7 @@ public class ManageLeonardoRuntimes {
                       leonardoMapper.toGoogleProject(r.getCloudContext()),
                       r.getRuntimeName(), /* deleteDisk */
                       false);
-                } catch (ApiException e) {
+                } catch (org.broadinstitute.dsde.workbench.client.leonardo.ApiException e) {
                   log.log(Level.SEVERE, "failed to deleted runtime " + cid, e);
                   return;
                 }

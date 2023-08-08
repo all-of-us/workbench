@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.leonardo.model.LeonardoGetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -71,7 +71,7 @@ public interface LeonardoApiClient {
       String googleProject, String appName, StorageLink storageLink);
 
   /** Gets information about a persistent disk */
-  LeonardoGetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
+  GetPersistentDiskResponse getPersistentDisk(String googleProject, String diskName)
       throws WorkbenchException;
 
   /** Deletes a persistent disk */

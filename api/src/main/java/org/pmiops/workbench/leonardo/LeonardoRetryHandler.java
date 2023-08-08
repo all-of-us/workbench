@@ -12,6 +12,7 @@ import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 
 @Service
 public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {

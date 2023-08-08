@@ -39,13 +39,13 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
@@ -174,10 +174,10 @@ public class TestMockFactory {
     return new ListRuntimeResponse()
         .runtimeName("runtime")
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
+            new CloudContext()
+                .cloudProvider(CloudProvider.GCP)
                 .cloudResource("google-project"))
-        .status(LeonardoRuntimeStatus.STOPPED);
+        .status(ClusterStatus.STOPPED);
   }
 
   public static void stubCreateFcWorkspace(FireCloudService fireCloudService) {
@@ -393,8 +393,8 @@ public class TestMockFactory {
             .status(status)
             .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(googleProjectId));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();

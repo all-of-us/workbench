@@ -29,16 +29,16 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.pmiops.workbench.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -156,13 +156,13 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         errors++;
         continue;
       }
-      if (LeonardoRuntimeStatus.UNKNOWN.equals(runtime.getStatus())
+      if (ClusterStatus.UNKNOWN.equals(runtime.getStatus())
           || runtime.getStatus() == null) {
         log.warning(String.format("unknown runtime status for runtime '%s'", runtimeId));
         continue;
       }
-      if (!LeonardoRuntimeStatus.RUNNING.equals(runtime.getStatus())
-          && !LeonardoRuntimeStatus.STOPPED.equals(runtime.getStatus())) {
+      if (!ClusterStatus.RUNNING.equals(runtime.getStatus())
+          && !ClusterStatus.STOPPED.equals(runtime.getStatus())) {
         // For now, we only handle running or stopped (suspended) runtimes.
         continue;
       }
@@ -234,7 +234,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     final Instant now = clock.instant();
     Map<Integer, List<ListPersistentDiskResponse>> disksByDaysUnused =
         disks.stream()
-            .filter(disk -> LeonardoDiskStatus.READY.equals(disk.getStatus()))
+            .filter(disk -> DiskStatus.READY.equals(disk.getStatus()))
             .collect(
                 Collectors.groupingBy(
                     disk -> {
@@ -363,7 +363,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
       return runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false).stream()
-          .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
+          .flatMap(runtime -> Stream.ofNullable(runtime.getRuntimeConfig().getGceWithPdConfig().getPersistentDisk()))
           .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()

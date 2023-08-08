@@ -8,6 +8,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
 
 @Service
 public class LeonardoApiClientFactory {
@@ -56,9 +57,7 @@ public class LeonardoApiClientFactory {
             .setDebugging(workbenchConfig.firecloud.debugEndpoints)
             .addDefaultHeader(
                 FirecloudApiClientFactory.X_APP_ID_HEADER, workbenchConfig.firecloud.xAppIdValue);
-    apiClient
-        .getHttpClient()
-        .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
+    apiClient.setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds * 1000);
     return apiClient;
   }
 

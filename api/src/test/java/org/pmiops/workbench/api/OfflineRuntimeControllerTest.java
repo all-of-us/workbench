@@ -38,17 +38,17 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -158,10 +158,10 @@ public class OfflineRuntimeControllerTest {
     return new GetRuntimeResponse()
         .runtimeName("all-of-us")
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
+            new CloudContext()
+                .cloudProvider(CloudProvider.GCP)
                 .cloudResource(String.format("proj-%d", runtimeProjectIdIndex++)))
-        .status(LeonardoRuntimeStatus.RUNNING)
+        .status(ClusterStatus.RUNNING)
         .auditInfo(
             new LeonardoAuditInfo()
                 .createdDate(NOW.minus(age).toString())
@@ -197,8 +197,8 @@ public class OfflineRuntimeControllerTest {
         .diskType(LeonardoDiskType.STANDARD)
         .status(LeonardoDiskStatus.READY)
         .cloudContext(
-            new LeonardoCloudContext()
-                .cloudProvider(LeonardoCloudProvider.GCP)
+            new CloudContext()
+                .cloudProvider(CloudProvider.GCP)
                 .cloudResource(googleProject))
         .name("my-disk")
         .size(200)
@@ -289,7 +289,7 @@ public class OfflineRuntimeControllerTest {
   public void testDeleteOldRuntimesOtherStatusFiltered() throws Exception {
     stubRuntimes(
         ImmutableList.of(
-            runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(LeonardoRuntimeStatus.DELETING)));
+            runtimeWithAge(RUNTIME_MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
     assertThat(controller.deleteOldRuntimes().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verify(mockRuntimesApi, never()).deleteRuntime(any(), any(), any());
