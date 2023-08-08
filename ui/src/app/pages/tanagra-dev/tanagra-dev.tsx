@@ -7,11 +7,11 @@ import { serverConfigStore } from 'app/utils/stores';
 
 const { useCallback, useEffect, useState } = React;
 
-const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
 
 export function useExitActionListener(callback: () => void) {
   const listener = useCallback(
     (event: MessageEvent) => {
+      const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
       if (
         event.origin !== tanagraUrl ||
         typeof event.data !== 'object' ||
@@ -47,6 +47,7 @@ export const TanagraDev = withSpinnerOverlay()(({ hideSpinner }) => {
   const studyId =
     process.env.REACT_APP_ENVIRONMENT === 'local' ? 'tqmXfZ4qzu' : 'UslvvbIYxk';
 
+  const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
   return showIframe ? (
     <div
       style={{
