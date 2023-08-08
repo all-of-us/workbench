@@ -139,12 +139,13 @@ public class ReportingVerificationServiceTest {
     assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
 
     // TEMP - these do not appear in the log anymore after the shift to fail-fast
-//    String expectedUserLogPart = "user\t4\t2\t-2 (-50.000%)";
-//    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
-//    String expectedCohortLogPart = "cohort\t4\t2\t-2 (-50.000%)";
-//    assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
-//    String expectedNewUserSatisfactionSurveyLogPart = "cohort\t4\t2\t-2 (-50.000%)";
-//    assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
+    //    String expectedUserLogPart = "user\t4\t2\t-2 (-50.000%)";
+    //    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
+    //    String expectedCohortLogPart = "cohort\t4\t2\t-2 (-50.000%)";
+    //    assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
+    //    String expectedNewUserSatisfactionSurveyLogPart = "cohort\t4\t2\t-2 (-50.000%)";
+    //
+    // assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
   }
 
   /** This creates equal amount of table entries for all batch-uploaded tables. */
