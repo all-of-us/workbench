@@ -4592,6 +4592,8 @@ definitions:
         type: boolean
       bigqueryDataset:
         type: string
+      tanagraEnabled:
+        type: boolean
   DomainCard:
     type: object
     required:

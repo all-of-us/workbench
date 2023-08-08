@@ -32,6 +32,7 @@ public class DbCdrVersion {
   private Boolean hasCopeSurveyData;
   private Boolean hasFitbitSleepData;
   private Boolean hasSurveyConductData;
+  private Boolean tanagraEnabled;
   private String storageBasePath;
   private String wgsVcfMergedStoragePath;
   private String wgsHailStoragePath;
@@ -248,6 +249,16 @@ public class DbCdrVersion {
 
   public DbCdrVersion setHasSurveyConductData(Boolean hasSurveyConductData) {
     this.hasSurveyConductData = hasSurveyConductData;
+    return this;
+  }
+
+  @Column(name = "tanagra_enabled")
+  public Boolean getTanagraEnabled() {
+    return tanagraEnabled == null ? false : tanagraEnabled;
+  }
+
+  public DbCdrVersion setTanagraEnabled(Boolean tanagraEnabled) {
+    this.tanagraEnabled = tanagraEnabled;
     return this;
   }
 
@@ -492,6 +503,7 @@ public class DbCdrVersion {
         hasCopeSurveyData,
         hasFitbitSleepData,
         hasSurveyConductData,
+            tanagraEnabled,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
@@ -529,6 +541,7 @@ public class DbCdrVersion {
         && Objects.equals(hasFitbitSleepData, that.hasFitbitSleepData)
         && Objects.equals(hasSurveyConductData, that.hasSurveyConductData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData)
+        && Objects.equals(tanagraEnabled, that.tanagraEnabled)
         && Objects.equals(storageBasePath, that.storageBasePath)
         && Objects.equals(wgsVcfMergedStoragePath, that.wgsVcfMergedStoragePath)
         && Objects.equals(wgsHailStoragePath, that.wgsHailStoragePath)
