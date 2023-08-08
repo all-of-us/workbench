@@ -3,10 +3,11 @@ import * as React from 'react';
 import { Button } from 'app/components/buttons';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
+import { serverConfigStore } from 'app/utils/stores';
 
 const { useCallback, useEffect, useState } = React;
 
-const tanagraUrl = 'http://localhost:3000';
+const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
 
 export function useExitActionListener(callback: () => void) {
   const listener = useCallback(
@@ -67,7 +68,7 @@ export const TanagraDev = withSpinnerOverlay()(({ hideSpinner }) => {
     <div style={{ padding: '2rem' }}>
       <div style={{ marginBottom: '1rem' }}>
         This is a temporary interface to demonstrate the transition from the
-        Workbench to Tanagra and back. This transition will eventually take
+        Workbench to the Tanagra iframe and back. This transition will eventually take
         place on the Data tab page.
       </div>
       <Button
