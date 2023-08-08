@@ -1,7 +1,8 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -34,8 +35,9 @@ public interface ColumnValueExtractor<MODEL_T> {
   Function<MODEL_T, Object> getRowToInsertValueFunction();
 
   // A friendly method to call the instance-provided rowToInsertValueFunction. Returns
-  // a map value (or null) for a RowToInsert object.
-  default @Nullable Object getRowToInsertValue(@NotNull MODEL_T model) {
-    return getRowToInsertValueFunction().apply(model);
+  // a map entry for a RowToInsert object.
+  default SimpleImmutableEntry<String, Object> getRowToInsertEntry(@NotNull MODEL_T model) {
+    return new AbstractMap.SimpleImmutableEntry<>(
+        getParameterName(), getRowToInsertValueFunction().apply(model));
   }
 }
