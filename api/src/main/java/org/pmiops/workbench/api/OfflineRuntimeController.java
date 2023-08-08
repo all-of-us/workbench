@@ -19,6 +19,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -29,16 +37,8 @@ import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -156,8 +156,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
         errors++;
         continue;
       }
-      if (ClusterStatus.UNKNOWN.equals(runtime.getStatus())
-          || runtime.getStatus() == null) {
+      if (ClusterStatus.UNKNOWN.equals(runtime.getStatus()) || runtime.getStatus() == null) {
         log.warning(String.format("unknown runtime status for runtime '%s'", runtimeId));
         continue;
       }
@@ -357,13 +356,16 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
     return true;
   }
 
-  private boolean isDiskAttached(
-      ListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
+  private boolean isDiskAttached(ListPersistentDiskResponse diskResponse, String googleProject)
+      throws ApiException {
     final String diskName = diskResponse.getName();
 
     if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
       return runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false).stream()
-          .flatMap(runtime -> Stream.ofNullable(runtime.getRuntimeConfig().getGceWithPdConfig().getPersistentDisk()))
+          .flatMap(
+              runtime ->
+                  Stream.ofNullable(
+                      runtime.getRuntimeConfig().getGceWithPdConfig().getPersistentDisk()))
           .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()

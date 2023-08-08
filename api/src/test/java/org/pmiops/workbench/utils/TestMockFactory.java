@@ -25,6 +25,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -39,16 +44,11 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
+import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.DiskType;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.EducationV2;
@@ -174,9 +174,7 @@ public class TestMockFactory {
     return new ListRuntimeResponse()
         .runtimeName("runtime")
         .cloudContext(
-            new CloudContext()
-                .cloudProvider(CloudProvider.GCP)
-                .cloudResource("google-project"))
+            new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource("google-project"))
         .status(ClusterStatus.STOPPED);
   }
 
@@ -392,9 +390,7 @@ public class TestMockFactory {
             .status(status)
             .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
             .cloudContext(
-                new CloudContext()
-                    .cloudProvider(CloudProvider.GCP)
-                    .cloudResource(googleProjectId));
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProjectId));
     if (appType != null) {
       Map<String, String> label = new HashMap<>();
       label.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appType));
@@ -404,7 +400,11 @@ public class TestMockFactory {
   }
 
   public static ListPersistentDiskResponse createLeonardoListRuntimePDResponse(
-      String pdName, org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status, String date, String googleProjectId, DbUser user) {
+      String pdName,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus status,
+      String date,
+      String googleProjectId,
+      DbUser user) {
     return createListPersistentDiskResponse(
         pdName, status, date, googleProjectId, user, /*appType*/ null);
   }

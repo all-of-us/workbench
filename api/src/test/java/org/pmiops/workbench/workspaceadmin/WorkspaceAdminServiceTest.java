@@ -27,6 +27,10 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -55,10 +59,6 @@ import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -107,8 +107,10 @@ public class WorkspaceAdminServiceTest {
   private DbWorkspace dbWorkspace;
   private GetRuntimeResponse testLeoRuntime;
   private GetRuntimeResponse testLeoRuntimeDifferentProject;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse testLeoListRuntimeResponse;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse testLeoListRuntimeResponse2;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+      testLeoListRuntimeResponse;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+      testLeoListRuntimeResponse2;
 
   @MockBean private AdminAuditor mockAdminAuditor;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
@@ -397,8 +399,8 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject() {
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -412,14 +414,17 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_DeleteSome() {
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList =
+            ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -434,8 +439,9 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList =
+            ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete =
         ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -451,8 +457,8 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject_NoRuntimes() {
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -464,14 +470,16 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_NullRuntimesList() {
-    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -483,7 +491,9 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 

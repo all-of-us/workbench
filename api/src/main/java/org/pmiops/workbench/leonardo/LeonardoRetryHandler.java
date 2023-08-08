@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.TermsOfServiceApi;
@@ -12,7 +13,6 @@ import org.pmiops.workbench.utils.TerraServiceRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 
 @Service
 public class LeonardoRetryHandler extends TerraServiceRetryHandler<ApiException> {
