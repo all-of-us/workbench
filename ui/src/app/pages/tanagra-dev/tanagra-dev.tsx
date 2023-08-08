@@ -7,7 +7,6 @@ import { serverConfigStore } from 'app/utils/stores';
 
 const { useCallback, useEffect, useState } = React;
 
-
 export function useExitActionListener(callback: () => void) {
   const listener = useCallback(
     (event: MessageEvent) => {
@@ -69,8 +68,8 @@ export const TanagraDev = withSpinnerOverlay()(({ hideSpinner }) => {
     <div style={{ padding: '2rem' }}>
       <div style={{ marginBottom: '1rem' }}>
         This is a temporary interface to demonstrate the transition from the
-        Workbench to the Tanagra iframe and back. This transition will eventually take
-        place on the Data tab page.
+        Workbench to the Tanagra iframe and back. This transition will
+        eventually take place on the Data tab page.
       </div>
       <Button
         onClick={() => {
