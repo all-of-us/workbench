@@ -322,16 +322,17 @@ public class ReportingQueryServiceTest {
     final int numWorkspaces = 5;
     createWorkspaces(numWorkspaces);
 
-    final int totalRows = reportingQueryService.getWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces);
 
-    final long totalBatches = reportingQueryService.getWorkspaceStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getWorkspaceStream()
+            .getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -346,16 +347,17 @@ public class ReportingQueryServiceTest {
         workspaces.get(0).setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED));
     entityManager.flush();
 
-    final int totalRows = reportingQueryService.getWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(numWorkspaces - 1);
 
-    final long totalBatches = reportingQueryService.getWorkspaceStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getWorkspaceStream()
+            .getBatchedWorkspaceStream()
             .flatMap(List::stream)
             .map(ReportingWorkspace::getWorkspaceId)
             .collect(ImmutableSet.toImmutableSet());
@@ -365,10 +367,11 @@ public class ReportingQueryServiceTest {
   @Test
   public void testEmptyStream() {
     workspaceDao.deleteAll();
-    final int totalRows = reportingQueryService.getWorkspaceStream().mapToInt(List::size).sum();
+    final int totalRows =
+        reportingQueryService.getBatchedWorkspaceStream().mapToInt(List::size).sum();
     assertThat(totalRows).isEqualTo(0);
 
-    final long totalBatches = reportingQueryService.getWorkspaceStream().count();
+    final long totalBatches = reportingQueryService.getBatchedWorkspaceStream().count();
     assertThat(totalBatches).isEqualTo(0);
   }
 
@@ -413,7 +416,7 @@ public class ReportingQueryServiceTest {
     createUsers(1);
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
     userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
   }
@@ -426,7 +429,7 @@ public class ReportingQueryServiceTest {
     entityManager.flush();
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
 
     ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
@@ -452,7 +455,7 @@ public class ReportingQueryServiceTest {
     entityManager.flush();
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
 
     // regression test against one row per user/tier pair (i.e. we don't want 2 here)
     assertThat(stream.size()).isEqualTo(1);
@@ -467,7 +470,7 @@ public class ReportingQueryServiceTest {
     createUsers(5);
 
     final List<List<ReportingUser>> stream =
-        reportingQueryService.getUserStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(3);
   }
 
@@ -494,7 +497,7 @@ public class ReportingQueryServiceTest {
                 .setAdditionalInfo(additionalInfo));
 
     final List<ReportingNewUserSatisfactionSurvey> newUserSatisfactionSurveys =
-        reportingQueryService.getNewUserSatisfactionSurveys(1, 0);
+        reportingQueryService.getNewUserSatisfactionSurveyBatch(1, 0);
 
     assertThat(newUserSatisfactionSurveys.size()).isEqualTo(1);
     final ReportingNewUserSatisfactionSurvey newUserSatisfactionSurvey =
@@ -542,7 +545,7 @@ public class ReportingQueryServiceTest {
     createCohorts(5);
 
     final List<List<ReportingCohort>> stream =
-        reportingQueryService.getCohortStream().collect(Collectors.toList());
+        reportingQueryService.getBatchedCohortStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(3);
   }
 
@@ -580,17 +583,21 @@ public class ReportingQueryServiceTest {
     createNewUserSatisfactionSurveys(numNewUserSatisfactionSurveys);
 
     final int totalRows =
-        reportingQueryService.getNewUserSatisfactionSurveyStream().mapToInt(List::size).sum();
+        reportingQueryService
+            .getBatchedNewUserSatisfactionSurveyStream()
+            .mapToInt(List::size)
+            .sum();
     assertThat(totalRows).isEqualTo(numNewUserSatisfactionSurveys);
 
-    final long totalBatches = reportingQueryService.getNewUserSatisfactionSurveyStream().count();
+    final long totalBatches =
+        reportingQueryService.getBatchedNewUserSatisfactionSurveyStream().count();
     assertThat(totalBatches)
         .isEqualTo((long) Math.ceil(1.0 * numNewUserSatisfactionSurveys / BATCH_SIZE));
 
     // verify that we get all of them and they're distinct in terms of their PKs
     final Set<Long> ids =
         reportingQueryService
-            .getNewUserSatisfactionSurveyStream()
+            .getBatchedNewUserSatisfactionSurveyStream()
             .flatMap(List::stream)
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());

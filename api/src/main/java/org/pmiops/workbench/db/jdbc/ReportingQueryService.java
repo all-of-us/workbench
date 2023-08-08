@@ -33,34 +33,36 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
 
-  List<ReportingWorkspace> getWorkspaces(long limit, long offset);
+  List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
   int getWorkspaceCount();
 
-  default Stream<List<ReportingWorkspace>> getWorkspaceStream() {
-    return getStream(this::getWorkspaces);
+  default Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
+    return getBatchedStream(this::getWorkspaceBatch);
   }
 
-  List<ReportingUser> getUsers(long limit, long offset);
+  List<ReportingUser> getUserBatch(long limit, long offset);
 
-  default Stream<List<ReportingUser>> getUserStream() {
-    return getStream(this::getUsers);
+  default Stream<List<ReportingUser>> getBatchedUserStream() {
+    return getBatchedStream(this::getUserBatch);
   }
 
   int getUserCount();
 
-  List<ReportingCohort> getCohorts(long limit, long offset);
+  List<ReportingCohort> getCohortBatch(long limit, long offset);
 
-  default Stream<List<ReportingCohort>> getCohortStream() {
-    return getStream(this::getCohorts);
+  default Stream<List<ReportingCohort>> getBatchedCohortStream() {
+    return getBatchedStream(this::getCohortBatch);
   }
 
   int getCohortCount();
 
-  List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(long limit, long offset);
+  List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
+      long limit, long offset);
 
-  default Stream<List<ReportingNewUserSatisfactionSurvey>> getNewUserSatisfactionSurveyStream() {
-    return getStream(this::getNewUserSatisfactionSurveys);
+  default Stream<List<ReportingNewUserSatisfactionSurvey>>
+      getBatchedNewUserSatisfactionSurveyStream() {
+    return getBatchedStream(this::getNewUserSatisfactionSurveyBatch);
   }
 
   int getNewUserSatisfactionSurveyCount();
@@ -117,25 +119,20 @@ public interface ReportingQueryService {
   }
 
   default Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
-    return getBatchIterator(this::getWorkspaces);
+    return getBatchIterator(this::getWorkspaceBatch);
   }
 
   default Iterator<List<ReportingUser>> getUserBatchIterator() {
-    return getBatchIterator(this::getUsers);
+    return getBatchIterator(this::getUserBatch);
   }
 
   default Iterator<List<ReportingCohort>> getCohortsBatchIterator() {
-    return getBatchIterator(this::getCohorts);
+    return getBatchIterator(this::getCohortBatch);
   }
 
   default Iterator<List<ReportingNewUserSatisfactionSurvey>>
       getNewUserSatisfactionSurveyBatchIterator() {
-    return getBatchIterator(this::getNewUserSatisfactionSurveys);
-  }
-
-  /** Use the maximum batch to get in single batch */
-  default <T> List<T> getAll(BiFunction<Long, Long, List<T>> getter) {
-    return getter.apply(Long.MAX_VALUE, 0L);
+    return getBatchIterator(this::getNewUserSatisfactionSurveyBatch);
   }
 
   /**
@@ -145,7 +142,7 @@ public interface ReportingQueryService {
    * @param <T> - DTO type
    * @return
    */
-  default <T> Stream<List<T>> getStream(BiFunction<Long, Long, List<T>> getter) {
+  default <T> Stream<List<T>> getBatchedStream(BiFunction<Long, Long, List<T>> getter) {
     final Iterator<List<T>> batchIterator = getBatchIterator(getter);
     final Iterable<List<T>> iterable = () -> batchIterator;
     return StreamSupport.stream(iterable.spliterator(), false);
