@@ -31,6 +31,25 @@ module.exports = {
     
     config.optimization.minimizer = removeCssMinimizer(config.optimization.minimizer);
 
+    // Workaround for:
+    /*
+      ERROR in ./node_modules/@terra-ui-packages/components/lib/es/index.js 1:0-44
+      Module not found: Error: Can't resolve './Interactive' in '/home/dmohs/b/r/aou/interactive/ui/node_modules/@terra-ui-packages/components/lib/es'
+      Did you mean 'Interactive.js'?
+      BREAKING CHANGE: The request './Interactive' failed to resolve only because it was resolved as fully specified
+      (probably because the origin is strict EcmaScript Module, e. g. a module with javascript mimetype, a '*.mjs' file, or a '*.js' file where the package.json contains '"type": "module"').
+      The extension in the request is mandatory for it to be fully specified.
+      Add the extension to the request.
+    */
+    config.module.rules[1].oneOf.forEach(rule => {
+      if (rule.loader && rule.loader.includes('babel-loader')) {
+        rule.resolve = { fullySpecified: false }
+      }
+    })
+
+    // Useful for debugging if you're fast with Ctrl-C and can hit it before the screen is cleared.
+    // console.dir(config.module.rules, {depth:10})
+
     return config;
   },
   jest: function(config) {

@@ -6,6 +6,7 @@ import { HashLink } from 'react-router-hash-link';
 import * as fp from 'lodash/fp';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { Interactive as TerraUIInteractive } from '@terra-ui-packages/components';
 import { RouteLink } from 'app/components/app-router';
 import { styles as cardStyles } from 'app/components/card';
 import {
@@ -13,7 +14,6 @@ import {
   KebabCircleMenuIcon,
   SnowmanIcon,
 } from 'app/components/icons';
-import { Interactive as LocalInteractive } from 'app/components/interactive';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
@@ -427,7 +427,7 @@ export const IconButton = ({
 }) => {
   return (
     <TooltipTrigger side='left' content={tooltip}>
-      <LocalInteractive
+      <TerraUIInteractive
         tagName='div'
         style={{
           color: disabled ? colors.disabled : colors.accent,
@@ -442,7 +442,7 @@ export const IconButton = ({
         {...props}
       >
         <Icon disabled={disabled} style={style} />
-      </LocalInteractive>
+      </TerraUIInteractive>
     </TooltipTrigger>
   );
 };
