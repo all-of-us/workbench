@@ -4564,6 +4564,7 @@ definitions:
     - name
     - accessTierShortName
     - creationTime
+    - bigqueryDataset
     properties:
       cdrVersionId:
         type: string
@@ -4589,6 +4590,8 @@ definitions:
         type: boolean
       hasSurveyConductData:
         type: boolean
+      bigqueryDataset:
+        type: string
   DomainCard:
     type: object
     required:
