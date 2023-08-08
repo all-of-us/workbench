@@ -134,18 +134,17 @@ public class ReportingVerificationServiceTest {
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isFalse();
-    // 4 entities in database, and we uploaded 2.
-    String expectedWorkspaceLogPart = "workspace\t4\t2\t-2 (-50.000%)";
+    // 4 workspace entities, instead of the expected 2.
+    String expectedWorkspaceLogPart = "workspace\t4\t2\t-2";
     assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
 
-    // TEMP - these do not appear in the log anymore after the shift to fail-fast
-    //    String expectedUserLogPart = "user\t4\t2\t-2 (-50.000%)";
-    //    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
-    //    String expectedCohortLogPart = "cohort\t4\t2\t-2 (-50.000%)";
-    //    assertThat(getTestCapturedLog().contains(expectedCohortLogPart)).isTrue();
-    //    String expectedNewUserSatisfactionSurveyLogPart = "cohort\t4\t2\t-2 (-50.000%)";
-    //
-    // assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
+    // other tables do not appear in the log because we fail-fast after workspace
+    String unexpectedUserLogPart = "user\t4\t2\t-2";
+    assertThat(getTestCapturedLog().contains(unexpectedUserLogPart)).isFalse();
+    String unexpectedCohortLogPart = "cohort\t4\t2\t-2";
+    assertThat(getTestCapturedLog().contains(unexpectedCohortLogPart)).isFalse();
+    String unexpectedSurveyLogPart = "new_user_satisfaction_survey\t4\t2\t-2";
+    assertThat(getTestCapturedLog().contains(unexpectedSurveyLogPart)).isFalse();
   }
 
   /** This creates equal amount of table entries for all batch-uploaded tables. */
