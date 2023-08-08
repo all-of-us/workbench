@@ -15,6 +15,7 @@ export default {
   warning: '#F7981C',
   danger: '#DB3214',
   dark: '#4A4A4A',
+  tableBorder: '#c8c8c8',
   // Text links and Icon links
   accent: '#216FB4',
   disabled: '#9B9B9B',

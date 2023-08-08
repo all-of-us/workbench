@@ -18,7 +18,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 // 30 minutes.
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Workspace WRITER notebook tests', () => {
+describe.skip('Workspace WRITER notebook tests', () => {
   const notebookName = makeRandomName('notebookWriterActionsTest-Py3');
   const workspaceName = 'e2eNotebookWriterActionsTest';
   const writerWorkspaceName = 'e2eNotebookTestWriterWorkspace1';

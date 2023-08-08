@@ -44,8 +44,10 @@ public final class VariantQueryBuilder {
 
   private static final String LIMIT_OFFSET = "LIMIT @limit\n OFFSET @offset";
 
+  private static final String PARTICIPANT_COUNT = "AND participant_count > 0\n";
+
   private static final String VID_SQL =
-      "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n WHERE vid = @vid";
+      "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n WHERE vid = @vid\n";
 
   private static final String CONTIG_POSITION_SQL =
       "FROM `${projectId}.${dataSetId}.cb_variant_attribute_contig_position`\n"
@@ -86,19 +88,25 @@ public final class VariantQueryBuilder {
   private static String generateSQL(String searchTerm, boolean isCount) {
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID:
-        return isCount ? SELECT_COUNT + VID_SQL : SELECT_ALL_COLUMNS + VID_SQL;
+        return isCount
+            ? SELECT_COUNT + VID_SQL + PARTICIPANT_COUNT
+            : SELECT_ALL_COLUMNS + VID_SQL + PARTICIPANT_COUNT;
       case CONTIG:
         return isCount
-            ? SELECT_COUNT + CONTIG_POSITION_SQL
-            : SELECT_ALL_COLUMNS + CONTIG_POSITION_SQL + ORDER_BY + LIMIT_OFFSET;
+            ? SELECT_COUNT + CONTIG_POSITION_SQL + PARTICIPANT_COUNT
+            : SELECT_ALL_COLUMNS
+                + CONTIG_POSITION_SQL
+                + PARTICIPANT_COUNT
+                + ORDER_BY
+                + LIMIT_OFFSET;
       case GENE:
         return isCount
-            ? SELECT_COUNT + GENE_SQL
-            : SELECT_ALL_COLUMNS + GENE_SQL + ORDER_BY + LIMIT_OFFSET;
+            ? SELECT_COUNT + GENE_SQL + PARTICIPANT_COUNT
+            : SELECT_ALL_COLUMNS + GENE_SQL + PARTICIPANT_COUNT + ORDER_BY + LIMIT_OFFSET;
       case RS_NUMBER:
         return isCount
-            ? SELECT_COUNT + RS_NUMBER_SQL
-            : SELECT_ALL_COLUMNS + RS_NUMBER_SQL + ORDER_BY + LIMIT_OFFSET;
+            ? SELECT_COUNT + RS_NUMBER_SQL + PARTICIPANT_COUNT
+            : SELECT_ALL_COLUMNS + RS_NUMBER_SQL + PARTICIPANT_COUNT + ORDER_BY + LIMIT_OFFSET;
       default:
         throw new BadRequestException("Search term not supported");
     }
@@ -110,13 +118,13 @@ public final class VariantQueryBuilder {
     Map<String, QueryParameterValue> params = new HashMap<>();
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID:
-        params.put("vid", QueryParameterValue.string(searchTerm));
+        params.put("vid", QueryParameterValue.string(searchTerm.toUpperCase()));
         return params;
       case CONTIG:
         // chr13:32355000-32375000
         String[] chr = searchTerm.split(":");
         String[] position = chr[1].split("-");
-        params.put("contig", QueryParameterValue.string(chr[0]));
+        params.put("contig", QueryParameterValue.string(chr[0].toLowerCase()));
         params.put("start", QueryParameterValue.int64(Integer.valueOf(position[0])));
         params.put("end", QueryParameterValue.int64(Integer.valueOf(position[1])));
         if (limit != null) {
@@ -127,7 +135,7 @@ public final class VariantQueryBuilder {
         }
         return params;
       case GENE:
-        params.put("gene", QueryParameterValue.string(searchTerm));
+        params.put("gene", QueryParameterValue.string(searchTerm.toUpperCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
         }
@@ -136,7 +144,7 @@ public final class VariantQueryBuilder {
         }
         return params;
       case RS_NUMBER:
-        params.put("rs_number", QueryParameterValue.string(searchTerm));
+        params.put("rs_number", QueryParameterValue.string(searchTerm.toLowerCase()));
         if (limit != null) {
           params.put("limit", QueryParameterValue.int64(limit));
         }

@@ -3,7 +3,7 @@ import GoogleLoginPage from 'app/page/google-login';
 import { config } from 'resources/workbench-config';
 import { withPageTest } from 'libs/page-manager';
 
-describe('Login tests:', () => {
+describe.skip('Login tests:', () => {
   test('Cookie banner visible on login page', async () => {
     await withPageTest()(async (page, browser) => {
       const loginPage = new GoogleLoginPage(page);

@@ -5,7 +5,7 @@ import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import { cond } from 'app/utils';
 import {
   JUPYTER_FILE_EXT,
-  R_FILE_EXT,
+  R_SCRIPT_EXT,
   RMD_FILE_EXT,
 } from 'app/utils/constants';
 
@@ -25,7 +25,7 @@ export function appendJupyterNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export function appendRstudioNotebookFileSuffix(filename: string) {
+export function appendRStudioNotebookFileSuffix(filename: string) {
   if (filename && !filename.endsWith(RMD_FILE_EXT)) {
     return filename + RMD_FILE_EXT;
   }
@@ -33,15 +33,15 @@ export function appendRstudioNotebookFileSuffix(filename: string) {
   return filename;
 }
 
-export function appendRNotebookFileSuffix(filename: string) {
-  if (filename && !filename.endsWith(R_FILE_EXT)) {
-    return filename + R_FILE_EXT;
+export function appendRScriptSuffix(filename: string) {
+  if (filename && !filename.endsWith(R_SCRIPT_EXT)) {
+    return filename + R_SCRIPT_EXT;
   }
 
   return filename;
 }
 
-export function appendNotebookFileSuffixByOldName(
+export function appendAnalysisFileSuffixByOldName(
   filename: string,
   oldFileName: string
 ) {
@@ -52,12 +52,9 @@ export function appendNotebookFileSuffixByOldName(
     ],
     [
       oldFileName.endsWith(RMD_FILE_EXT),
-      () => appendRstudioNotebookFileSuffix(filename),
+      () => appendRStudioNotebookFileSuffix(filename),
     ],
-    [
-      oldFileName.endsWith(R_FILE_EXT),
-      () => appendRNotebookFileSuffix(filename),
-    ],
+    [oldFileName.endsWith(R_SCRIPT_EXT), () => appendRScriptSuffix(filename)],
     () => filename
   );
 }
@@ -86,7 +83,7 @@ const appsExtensionMap = [
     canPlayground: false,
   },
   {
-    extension: R_FILE_EXT,
+    extension: R_SCRIPT_EXT,
     appType: UIAppType.RSTUDIO,
     canPlayground: false,
   },

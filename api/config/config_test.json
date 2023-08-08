@@ -120,7 +120,7 @@
     "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
     "enableDataExplorer": false,
-    "enableTanagra": false
+    "enableTanagra": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -188,5 +188,8 @@
   },
   "termsOfService": {
     "latestAouVersion": 1
+  },
+  "tanagra": {
+    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
   }
 }

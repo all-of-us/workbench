@@ -184,6 +184,7 @@ swaggerSources {
     calhoun swagger3JavaClient("calhoun.yaml", "calhoun", [
             '--model-name-prefix', 'Calhoun'
     ])
+    tanagra swagger3JavaClient("tanagra.yaml", "tanagra")
 
     // Workbench needs a special configuration style, as we generate Spring server
     // bindings in this case.

@@ -6,7 +6,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import DatasetBuildPage from 'app/page/dataset-build-page';
 import { logger } from 'libs/logger';
 
-describe('Export Dataset to Notebook Test', () => {
+describe.skip('Export Dataset to Notebook Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

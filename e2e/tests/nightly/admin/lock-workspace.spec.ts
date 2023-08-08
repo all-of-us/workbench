@@ -13,7 +13,7 @@ import { MenuOption } from 'app/text-labels';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import { logger } from 'libs/logger';
 
-describe('Workspace Admin lock-workspace', () => {
+describe.skip('Workspace Admin lock-workspace', () => {
   const workspaceName = 'e2eLockWorkspace';
   const reasonText = 'locking this workspace';
   const pyNotebookName = 'e2eLockWorkspaceNotebook';

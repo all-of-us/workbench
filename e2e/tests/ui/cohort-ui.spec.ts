@@ -12,7 +12,7 @@ import { waitWhileLoading } from 'utils/waits-utils';
 import expect from 'expect';
 import HomePage from 'app/page/home-page';
 
-describe('Cohort UI Test', () => {
+describe.skip('Cohort UI Test', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

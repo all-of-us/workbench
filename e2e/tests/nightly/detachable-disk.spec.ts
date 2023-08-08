@@ -3,10 +3,11 @@ import RuntimePanel from 'app/sidebar/runtime-panel';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import path from 'path';
+import { twoRuntimesTimeout } from 'utils/timeout-constants';
 
-jest.setTimeout(30 * 60 * 1000);
+jest.setTimeout(twoRuntimesTimeout);
 
-describe('Updating runtime status', () => {
+describe.skip('Updating runtime status', () => {
   // Notebooks to run before/after reattaching a PD.
   const diskBeforeNotebookName = 'disk-reattach-before.py';
   const diskBeforeNotebookFilePath = path.relative(

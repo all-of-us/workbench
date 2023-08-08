@@ -220,6 +220,11 @@ public final class SearchGroupItemQueryBuilder {
   private static final String CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE =
       "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
+  private static final String VARIANT_SQL =
+      "SELECT person_id\n"
+          + "FROM `${projectId}.${dataSetId}.cb_variant_to_person`\n"
+          + "CROSS JOIN UNNEST(person_ids) AS person_id\n"
+          + "WHERE vid IN UNNEST(%s)";
 
   /** Build the innermost sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -264,6 +269,10 @@ public final class SearchGroupItemQueryBuilder {
 
     Domain domain = Domain.fromValue(searchGroupItem.getType());
 
+    // When building sql for SNP Indel Variant
+    if (Domain.SNP_INDEL_VARIANT.equals(domain)) {
+      return buildVariantSql(queryParams, searchGroupItem);
+    }
     // When building sql for demographics - we query against the person table
     if (Domain.PERSON.equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
@@ -402,6 +411,19 @@ public final class SearchGroupItemQueryBuilder {
         throw new BadRequestException(
             "Search unsupported for demographics type " + param.getType());
     }
+  }
+
+  /** Build sql statement for SNP Indel Variants */
+  private static String buildVariantSql(
+      Map<String, QueryParameterValue> queryParams, SearchGroupItem searchGroupItem) {
+    String[] variantIds =
+        searchGroupItem.getSearchParameters().stream()
+            .map(SearchParameter::getVariantId)
+            .toArray(String[]::new);
+    String namedParameter =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.array(variantIds, String.class));
+    return String.format(VARIANT_SQL, namedParameter);
   }
 
   /**

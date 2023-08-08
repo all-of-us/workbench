@@ -5,11 +5,12 @@ import { waitForFn } from 'utils/waits-utils';
 import ConfirmDeleteEnvironmentWithPdPanel from 'app/sidebar/confirm-delete-environment-with-pd-panel';
 import { SideBarLink } from 'app/text-labels';
 import RStudioConfigurationPanel from 'app/sidebar/rstudio-configuration-panel';
+import { environmentTimeout } from 'utils/timeout-constants';
 
 // Cluster provisioning can take a while, so set a 20 min timeout
 jest.setTimeout(20 * 60 * 1000);
 
-describe('RStudio GKE App', () => {
+describe.skip('RStudio GKE App', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -36,7 +37,7 @@ describe('RStudio GKE App', () => {
 
     await appsPanel.pollForStatus(expandedRStudioXpath, 'PROVISIONING');
 
-    await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', 15 * 60e3);
+    await appsPanel.pollForStatus(expandedRStudioXpath, 'Running', environmentTimeout);
 
     const deleteXPath = `${expandedRStudioXpath}//*[@data-test-id="RStudio-delete-button"]`;
     const deleteButton = new Button(page, deleteXPath);

@@ -10,7 +10,6 @@ import {
   RuntimeIcon,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
-import thunderstorm from 'assets/icons/thunderstorm-solid.svg';
 import cromwellIcon from 'assets/images/Cromwell-icon.png';
 import jupyterIcon from 'assets/images/Jupyter-icon.png';
 import rstudioIcon from 'assets/images/RStudio-icon.png';
@@ -109,22 +108,10 @@ describe('CompoundIcons', () => {
     expect(statusIndicator.exists()).toBeTruthy();
   });
 
-  test.each([
-    [true, jupyterIcon],
-    [false, thunderstorm],
-  ])('RuntimeIcon renders when appsPanel is %s', (enableAppsPanel, icon) => {
+  test('RuntimeIcon renders', () => {
     const iconId = 'runtimeConfig';
     const label = 'Jupyter Icon';
     const iconConfig = getIconConfig(iconId, label);
-
-    if (enableAppsPanel) {
-      serverConfigStore.set({
-        config: {
-          ...serverConfigStore.get().config,
-          enableCromwellGKEApp: enableAppsPanel,
-        },
-      });
-    }
 
     const wrapper = mount(
       <RuntimeIcon
@@ -134,7 +121,12 @@ describe('CompoundIcons', () => {
       />
     );
 
-    verifySidebarIcon(wrapper, `help-sidebar-icon-${iconId}`, icon, label);
+    verifySidebarIcon(
+      wrapper,
+      `help-sidebar-icon-${iconId}`,
+      jupyterIcon,
+      label
+    );
 
     const statusIndicator = wrapper.find(
       `[data-test-id="runtime-status-icon-container"]`

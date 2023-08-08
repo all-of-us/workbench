@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Calendar } from 'primereact/calendar';
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
@@ -146,7 +146,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             showTime
             hourFormat='12'
             minDate={new Date()}
-            onChange={(e) => {
+            onChange={(e: CalendarChangeEvent) => {
               setApiError(false);
               setStartTime(maybeToSingleDate(e.value));
             }}

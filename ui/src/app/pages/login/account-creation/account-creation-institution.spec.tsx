@@ -179,7 +179,7 @@ it('should reset role value & options when institution is selected', async () =>
   roleDropdown = getRoleDropdown(wrapper);
 
   // Role value should be cleared when institution changes.
-  expect(roleDropdown.props.value).toBeNull();
+  expect(roleDropdown.props.value).toBeUndefined();
   // Role options should have been swapped out w/ industry options.
   expect(roleDropdown.props.options).toContain(industrySpecificRoleOption);
 });

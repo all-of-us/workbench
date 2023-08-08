@@ -23,7 +23,7 @@ export TANAGRA_DB_USERNAME=workbench
 export TANAGRA_DB_PASSWORD=wb-notasecret
 
 echo "Using AoU underlays."
-export TANAGRA_UNDERLAY_FILES=broad/aou_synthetic/expanded/aou_synthetic.json
+export TANAGRA_UNDERLAY_FILES=aou/test/SC2022Q4R6/expanded/SC2022Q4R6.json,aou/test/SR2022Q4R6/expanded/SR2022Q4R6.json
 
 
 export TANAGRA_FEATURE_ARTIFACT_STORAGE_ENABLED=true
@@ -45,6 +45,8 @@ if [[ ${dropDbIfExists} ]]; then
 else
   source init_new_tanagra_db.sh &
 fi
+echo "Using default application credentials from:"
+env | grep GOOGLE_APPLICATION_CREDENTIALS
 
 # run from tanagra sub-module under workbench
 cd ../tanagra
