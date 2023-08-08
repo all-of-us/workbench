@@ -1,11 +1,13 @@
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
-import { Button } from 'app/components/buttons';
-import { SpinnerOverlay } from 'app/components/spinners';
 import { withSpinnerOverlay } from 'app/components/with-spinner-overlay';
+import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
+import { findCdrVersion } from 'app/utils/cdr-versions';
+import { useNavigation } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 
-const { useCallback, useEffect, useState } = React;
+const { useCallback, useEffect } = React;
 
 export function useExitActionListener(callback: () => void) {
   const listener = useCallback(
@@ -31,54 +33,44 @@ export function useExitActionListener(callback: () => void) {
   }, [listener]);
 }
 
-export const TanagraDev = withSpinnerOverlay()(({ hideSpinner }) => {
-  const [loadingIframe, setLoadingIframe] = useState(false);
-  const [showIframe, setShowIframe] = useState(false);
-  useEffect(() => {
-    hideSpinner();
-  }, []);
+export const TanagraDev = fp.flow(
+  withCdrVersions(),
+  withCurrentWorkspace(),
+  withSpinnerOverlay()
+)(
+  ({
+    cdrVersionTiersResponse,
+    hideSpinner,
+    workspace: { cdrVersionId, id, namespace },
+  }) => {
+    const [navigate] = useNavigation();
 
-  useExitActionListener(() => {
-    setShowIframe(false);
-  });
+    useExitActionListener(() => {
+      // Navigate to Data tab when exiting Tanagra iframe
+      navigate(['workspaces', namespace, id, 'data']);
+    });
 
-  // Temporary variable to hardcode existing study ids until we have a link between workspaces and studies
-  const studyId =
-    process.env.REACT_APP_ENVIRONMENT === 'local' ? 'tqmXfZ4qzu' : 'UslvvbIYxk';
-
-  const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
-  return showIframe ? (
-    <div
-      style={{
-        height: '95vh',
-      }}
-    >
-      {loadingIframe && <SpinnerOverlay />}
-      <iframe
-        onLoad={() => setLoadingIframe(false)}
+    const { bigqueryDataset } = findCdrVersion(
+      cdrVersionId,
+      cdrVersionTiersResponse
+    );
+    const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
+    return (
+      <div
         style={{
-          border: 0,
-          height: '100%',
-          width: '100%',
-        }}
-        src={`${tanagraUrl}/#/tanagra/underlays/SR2022Q4R6/studies/${studyId}/export`}
-      />
-    </div>
-  ) : (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        This is a temporary interface to demonstrate the transition from the
-        Workbench to the Tanagra iframe and back. This transition will
-        eventually take place on the Data tab page.
-      </div>
-      <Button
-        onClick={() => {
-          setLoadingIframe(true);
-          setShowIframe(true);
+          height: '95vh',
         }}
       >
-        Show Tanagra iframe
-      </Button>
-    </div>
-  );
-});
+        <iframe
+          onLoad={() => hideSpinner()}
+          style={{
+            border: 0,
+            height: '100%',
+            width: '100%',
+          }}
+          src={`${tanagraUrl}/#/tanagra/underlays/${bigqueryDataset}/studies/${namespace}/export`}
+        />
+      </div>
+    );
+  }
+);
