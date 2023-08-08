@@ -19,15 +19,30 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponseAuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfigInResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequestRuntimeConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -60,7 +75,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
-import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
@@ -68,31 +82,12 @@ import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.api.RuntimesApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGceWithPdConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoMachineConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeImage;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.GceWithPdConfigInResponse;
+import org.pmiops.workbench.model.GetRuntimeResponse;
 import org.pmiops.workbench.model.GpuConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
@@ -153,8 +148,11 @@ public class RuntimeControllerTest {
   private static final String LEONARDO_URL = "https://leonardo.dsde-dev.broadinstitute.org";
   private static final String BIGQUERY_DATASET = "dataset-name";
   private static final String TOOL_DOCKER_IMAGE = "docker-image";
-  private static final LeonardoRuntimeImage RUNTIME_IMAGE =
-      new LeonardoRuntimeImage().imageType("Jupyter").imageUrl(TOOL_DOCKER_IMAGE);
+  private static final org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage
+      RUNTIME_IMAGE =
+          new org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage()
+              .imageType("Jupyter")
+              .imageUrl(TOOL_DOCKER_IMAGE);
   private static final int AUTOPAUSE_THRESHOLD = 10;
 
   private static WorkbenchConfig config = new WorkbenchConfig();
@@ -208,8 +206,12 @@ public class RuntimeControllerTest {
     }
   }
 
-  @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
-  @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
+  @Captor private ArgumentCaptor<CreateRuntimeRequest> createRuntimeRequestCaptor;
+
+  @Captor
+  private ArgumentCaptor<
+          org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest>
+      updateRuntimeRequestCaptor;
 
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean ComplianceService mockComplianceService;
@@ -245,16 +247,18 @@ public class RuntimeControllerTest {
   @Autowired FirecloudMapper firecloudMapper;
 
   private DbCdrVersion cdrVersion;
-  private LeonardoGetRuntimeResponse testLeoRuntime;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse testLeoRuntime;
 
   private Runtime testRuntime;
+  private GetRuntimeResponse testGetRuntimeResponse;
   private DbWorkspace testWorkspace;
 
   private DataprocConfig dataprocConfig;
-  private LinkedTreeMap<String, Object> dataprocConfigObj;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig dataprocConfigObj;
 
-  private GceConfig gceConfig;
-  private LinkedTreeMap<String, Object> gceConfigObj;
+  private GceWithPdConfigInResponse gceConfig;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse
+      gceConfigObj;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -283,41 +287,59 @@ public class RuntimeControllerTest {
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
 
-    Runtime tmpRuntime = new Runtime();
+    GetRuntimeResponse tmpGetRuntimeResp = new GetRuntimeResponse();
 
-    dataprocConfigObj = new LinkedTreeMap<>();
-    dataprocConfigObj.put("cloudService", "DATAPROC");
-    dataprocConfigObj.put("numberOfWorkers", 0);
-    dataprocConfigObj.put("masterMachineType", "n1-standard-4");
-    dataprocConfigObj.put("masterDiskSize", 50.0);
+    dataprocConfigObj =
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig();
+    dataprocConfigObj.setCloudService(
+        org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.CloudServiceEnum
+            .DATAPROC);
+    dataprocConfigObj.setNumberOfWorkers(0);
+    dataprocConfigObj.setMasterMachineType("n1-standard-4");
+    dataprocConfigObj.setMasterDiskSize(50);
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj, null);
-    dataprocConfig = tmpRuntime.getDataprocConfig();
+    leonardoMapper.mapRuntimeConfig(
+        tmpGetRuntimeResp, new OneOfRuntimeConfigInResponse(dataprocConfigObj));
+    dataprocConfig = tmpGetRuntimeResp.getDataprocConfig();
 
-    gceConfigObj = new LinkedTreeMap<>();
-    gceConfigObj.put("cloudService", "GCE");
-    gceConfigObj.put("bootDiskSize", 10.0);
-    gceConfigObj.put("diskSize", 100.0);
-    gceConfigObj.put("machineType", "n1-standard-2");
+    gceConfigObj =
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse();
+    gceConfigObj.setCloudService(
+        org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse
+            .CloudServiceEnum.GCE);
+    gceConfigObj.setPersistentDiskId(10);
+    gceConfigObj.machineType("n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
-    gceConfig = tmpRuntime.getGceConfig();
+    leonardoMapper.mapRuntimeConfig(
+        tmpGetRuntimeResp, new OneOfRuntimeConfigInResponse(gceConfigObj));
+    gceConfig = tmpGetRuntimeResp.getGceWithPdConfig();
 
     testLeoRuntime =
-        new LeonardoGetRuntimeResponse()
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse()
             .runtimeName(getRuntimeName())
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.DELETING)
+            .status(ClusterStatus.DELETING)
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
-            .runtimeConfig(dataprocConfigObj)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
+            .runtimeConfig(new OneOfRuntimeConfigInResponse(dataprocConfigObj))
+            .auditInfo(new AuditInfo().createdDate(createdDate));
 
     testRuntime =
         new Runtime()
+            .runtimeName(getRuntimeName())
+            .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
+            .googleProject(GOOGLE_PROJECT_ID)
+            .status(RuntimeStatus.DELETING)
+            .toolDockerImage(TOOL_DOCKER_IMAGE)
+            .autopauseThreshold(AUTOPAUSE_THRESHOLD)
+            .dataprocConfig(dataprocConfig)
+            .createdDate(createdDate);
+
+    testGetRuntimeResponse =
+        new GetRuntimeResponse()
             .runtimeName(getRuntimeName())
             .configurationType(RuntimeConfigurationType.HAILGENOMICANALYSIS)
             .googleProject(GOOGLE_PROJECT_ID)
@@ -397,7 +419,8 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime);
 
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody()).isEqualTo(testRuntime);
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
+        .isEqualTo(testGetRuntimeResponse);
   }
 
   @Test
@@ -405,15 +428,15 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
-                .status(LeonardoRuntimeStatus.ERROR)
+                .status(ClusterStatus.ERROR)
                 .errors(
                     ImmutableList.of(
-                        new LeonardoClusterError().errorCode(1).errorMessage("foo"),
-                        new LeonardoClusterError().errorCode(2).errorMessage(null))));
+                        new ClusterError().errorCode(1).errorMessage("foo"),
+                        new ClusterError().errorCode(2).errorMessage(null))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(
-            testRuntime
+            testGetRuntimeResponse
                 .status(RuntimeStatus.ERROR)
                 .errors(
                     ImmutableList.of(
@@ -424,10 +447,10 @@ public class RuntimeControllerTest {
   @Test
   public void testGetRuntime_errorNoMessages() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
+        .thenReturn(testLeoRuntime.status(ClusterStatus.ERROR).errors(List.of()));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
+        .isEqualTo(testGetRuntimeResponse.status(RuntimeStatus.ERROR));
   }
 
   @Test
@@ -514,38 +537,24 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .cloudContext(
-                        new LeonardoCloudContext()
-                            .cloudProvider(LeonardoCloudProvider.GCP)
+                        new CloudContext()
+                            .cloudProvider(CloudProvider.GCP)
                             .cloudResource("google-project"))
                     .runtimeName("expected-runtime")
-                    .status(LeonardoRuntimeStatus.CREATING)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .status(ClusterStatus.CREATING)
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+    org.pmiops.workbench.model.GetRuntimeResponse runtime =
+        runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getRuntimeName()).isEqualTo("expected-runtime");
     assertThat(runtime.getGoogleProject()).isEqualTo("google-project");
     assertThat(runtime.getStatus()).isEqualTo(RuntimeStatus.DELETED);
     assertThat(runtime.getConfigurationType()).isEqualTo(RuntimeConfigurationType.USEROVERRIDE);
     assertThat(runtime.getCreatedDate()).isEqualTo(timestamp);
-  }
-
-  @Test
-  public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
-    dataprocConfigObj.put("cloudService", "notACloudService");
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenThrow(new ApiException(404, "Not found"));
-    when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
-        .thenReturn(
-            ImmutableList.of(
-                new LeonardoListRuntimeResponse()
-                    .runtimeConfig(dataprocConfigObj)
-                    .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
-
-    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
   }
 
   @Test
@@ -557,14 +566,14 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
-                    .runtimeConfig(gceConfigObj)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                new ListRuntimeResponse()
+                    .runtimeConfig(new OneOfRuntimeConfigInResponse(gceConfigObj))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+    GetRuntimeResponse runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
-    assertThat(runtime.getGceConfig()).isEqualTo(gceConfig);
+    assertThat(runtime.getGceWithPdConfig()).isEqualTo(gceConfig);
     assertThat(runtime.getDataprocConfig()).isNull();
   }
 
@@ -572,27 +581,31 @@ public class RuntimeControllerTest {
   public void testGetRuntime_fromListRuntimes_dataprocConfig() throws ApiException {
     String timestamp = "2020-09-13T19:19:57.347Z";
 
-    LinkedTreeMap<String, Object> dataProcConfigObj = new LinkedTreeMap<>();
-    dataProcConfigObj.put("cloudService", "DATAPROC");
-    dataProcConfigObj.put("masterDiskSize", 50.0);
-    dataProcConfigObj.put("masterMachineType", "n1-standard-4");
-    dataProcConfigObj.put("numberOfPreemptibleWorkers", 4);
-    dataProcConfigObj.put("numberOfWorkerLocalSSDs", 8);
-    dataProcConfigObj.put("numberOfWorkers", 3);
-    dataProcConfigObj.put("workerDiskSize", 30);
-    dataProcConfigObj.put("workerMachineType", "n1-standard-2");
+    org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig dataProcConfigObj =
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig();
+
+    dataProcConfigObj.setCloudService(
+        org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.CloudServiceEnum
+            .DATAPROC);
+    dataProcConfigObj.setMasterDiskSize(50);
+    dataProcConfigObj.setMasterMachineType("n1-standard-4");
+    dataProcConfigObj.setNumberOfPreemptibleWorkers(4);
+    dataProcConfigObj.setNumberOfWorkerLocalSSDs(8);
+    dataProcConfigObj.setNumberOfWorkers(3);
+    dataProcConfigObj.setWorkerDiskSize(30);
+    dataProcConfigObj.setWorkerMachineType("n1-standard-2");
 
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
-                    .runtimeConfig(dataProcConfigObj)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                new ListRuntimeResponse()
+                    .runtimeConfig(new OneOfRuntimeConfigInResponse(dataProcConfigObj))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+    GetRuntimeResponse runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getDataprocConfig().getMasterDiskSize()).isEqualTo(50);
     assertThat(runtime.getDataprocConfig().getMasterMachineType()).isEqualTo("n1-standard-4");
@@ -601,7 +614,6 @@ public class RuntimeControllerTest {
     assertThat(runtime.getDataprocConfig().getNumberOfWorkers()).isEqualTo(3);
     assertThat(runtime.getDataprocConfig().getWorkerDiskSize()).isEqualTo(30);
     assertThat(runtime.getDataprocConfig().getWorkerMachineType()).isEqualTo("n1-standard-2");
-    assertThat(runtime.getGceConfig()).isNull();
   }
 
   @Test
@@ -614,13 +626,13 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -636,11 +648,11 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
@@ -657,13 +669,13 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(null))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(null))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -679,13 +691,13 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(""))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(""))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -702,13 +714,13 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("override-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -724,12 +736,12 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("override-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
-                new LeonardoListRuntimeResponse()
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(newerTimestamp)),
+                new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -744,41 +756,13 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.listRuntimesByProject(GOOGLE_PROJECT_ID, null, true))
         .thenReturn(
             ImmutableList.of(
-                new LeonardoListRuntimeResponse()
+                new ListRuntimeResponse()
                     .runtimeName("preset-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
         .isEqualTo("preset-runtime");
-  }
-
-  @Test
-  public void testGetRuntime_gceConfig() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(testLeoRuntime.runtimeConfig(gceConfigObj));
-
-    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
-        .isEqualTo(testRuntime.dataprocConfig(null).gceConfig(gceConfig));
-  }
-
-  @Test
-  public void testGetRuntime_diskConfig() throws ApiException {
-    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
-        .thenReturn(
-            testLeoRuntime
-                .runtimeConfig(gceConfigObj)
-                .diskConfig(
-                    new LeonardoDiskConfig()
-                        .diskType(LeonardoDiskType.SSD)
-                        .name("pd")
-                        .blockSize(100)
-                        .size(200)));
-
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
-
-    assertThat(runtime.getGceWithPdConfig().getPersistentDisk())
-        .isEqualTo(new PersistentDiskRequest().diskType(DiskType.SSD).name("pd").size(200));
   }
 
   @Test
@@ -820,7 +804,10 @@ public class RuntimeControllerTest {
                 WORKSPACE_NS,
                 new Runtime()
                     .dataprocConfig(new DataprocConfig().masterMachineType("standard"))
-                    .gceConfig(new GceConfig().machineType("standard"))));
+                    .gceWithPdConfig(
+                        new GceWithPdConfig()
+                            .machineType("standard")
+                            .persistentDisk(new PersistentDiskRequest().labels(new HashMap<>())))));
   }
 
   @Test
@@ -846,19 +833,19 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoMachineConfig createLeonardoMachineConfig =
-        gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoMachineConfig.class);
+    String jsonString = gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
 
-    assertThat(
+    org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig
+        createLeonardoMachineConfig =
             gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    LeonardoRuntimeConfig.class)
-                .getCloudService())
-        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.DATAPROC);
+                jsonString,
+                org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.class);
+
+    assertThat(gson.fromJson(jsonString, RuntimeConfig.class).getCloudService())
+        .isEqualTo(RuntimeConfig.CloudServiceEnum.DATAPROC);
     assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
     assertThat(createLeonardoMachineConfig.getWorkerMachineType()).isEqualTo("worker");
     assertThat(createLeonardoMachineConfig.getWorkerDiskSize()).isEqualTo(10);
@@ -876,26 +863,30 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoGceConfig createLeonardoGceConfig =
-        gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
-
-    assertThat(
+    String jsonString = gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
+    org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
+        createLeonardoGceConfig =
             gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    LeonardoRuntimeConfig.class)
-                .getCloudService())
-        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
-    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+                jsonString,
+                org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
+
+    assertThat(gson.fromJson(jsonString, RuntimeConfig.class).getCloudService())
+        .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getPersistentDisk().getSize()).isEqualTo(50);
 
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceConfig.getZone()).isEqualTo("us-central-1");
@@ -926,23 +917,25 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
-        gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+    org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
+        createLeonardoGceWithPdConfig =
+            gson.fromJson(
+                gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
     assertThat(
             gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    LeonardoRuntimeConfig.class)
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                    RuntimeConfig.class)
                 .getCloudService())
-        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+        .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
 
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
-        .isEqualTo(LeonardoDiskType.SSD);
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
@@ -953,14 +946,14 @@ public class RuntimeControllerTest {
   public void testCreateRuntimeFail_newPdp_pdAlreadyExist() throws ApiException {
     when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    LeonardoListPersistentDiskResponse gceDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse gceDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY);
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY);
     when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(ImmutableList.of(gceDisk));
 
@@ -1025,7 +1018,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("preset-hail-genomic-analysis");
   }
@@ -1045,7 +1038,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("preset-general-analysis");
   }
@@ -1065,7 +1058,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("user-override");
   }
@@ -1079,30 +1072,33 @@ public class RuntimeControllerTest {
     runtimeController.createRuntime(
         WORKSPACE_NS,
         new Runtime()
-            .gceConfig(
-                new GceConfig()
-                    .diskSize(50)
+            .gceWithPdConfig(
+                new GceWithPdConfig()
                     .machineType("standard")
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))
                     .gpuConfig(new GpuConfig().gpuType("nvidia-tesla-t4").numOfGpus(2))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoGceConfig createLeonardoGceConfig =
-        gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceConfig.class);
+    org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
+        createLeonardoGceConfig =
+            gson.fromJson(
+                gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
     assertThat(
             gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    LeonardoRuntimeConfig.class)
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                    RuntimeConfig.class)
                 .getCloudService())
-        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
-    assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
+        .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(createLeonardoGceConfig.getPersistentDisk().getSize()).isEqualTo(50);
     assertThat(createLeonardoGceConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceConfig.getGpuConfig().getGpuType()).isEqualTo("nvidia-tesla-t4");
     assertThat(createLeonardoGceConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
@@ -1131,19 +1127,20 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
-        gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()), LeonardoGceWithPdConfig.class);
+    String gsonRuntimeConfigString =
+        gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
 
-    assertThat(
+    org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
+        createLeonardoGceWithPdConfig =
             gson.fromJson(
-                    gson.toJson(createRuntimeRequest.getRuntimeConfig()),
-                    LeonardoRuntimeConfig.class)
-                .getCloudService())
-        .isEqualTo(LeonardoRuntimeConfig.CloudServiceEnum.GCE);
+                gsonRuntimeConfigString,
+                org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
+
+    RuntimeConfig runtimeConfig = gson.fromJson(gsonRuntimeConfigString, RuntimeConfig.class);
+    assertThat(runtimeConfig.getCloudService()).isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())
         .isEqualTo("nvidia-tesla-t4");
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);
@@ -1159,7 +1156,13 @@ public class RuntimeControllerTest {
         () ->
             runtimeController.createRuntime(
                 WORKSPACE_NS,
-                new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard"))));
+                new Runtime()
+                    .gceWithPdConfig(
+                        new GceWithPdConfig()
+                            .persistentDisk(
+                                new PersistentDiskRequest()
+                                    .size(50)
+                                    .diskType(DiskType.STANDARD)))));
   }
 
   @Test
@@ -1171,13 +1174,17 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1195,13 +1202,17 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1220,13 +1231,17 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1245,13 +1260,17 @@ public class RuntimeControllerTest {
 
     runtimeController.createRuntime(
         WORKSPACE_NS,
-        new Runtime().gceConfig(new GceConfig().diskSize(50).machineType("standard")));
+        new Runtime()
+            .gceWithPdConfig(
+                new GceWithPdConfig()
+                    .persistentDisk(
+                        new PersistentDiskRequest().size(50).diskType(DiskType.STANDARD))));
 
     verify(userRuntimesApi)
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     JsonObject envVars =
         new Gson()
             .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1277,14 +1296,16 @@ public class RuntimeControllerTest {
         .updateRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), updateRuntimeRequestCaptor.capture());
 
-    LeonardoMachineConfig actualRuntimeConfig =
-        (LeonardoMachineConfig) updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
-    assertThat(actualRuntimeConfig.getCloudService().getValue()).isEqualTo("DATAPROC");
-    assertThat(actualRuntimeConfig.getNumberOfWorkers())
+    UpdateRuntimeRequestRuntimeConfig actualRuntimeConfig =
+        (UpdateRuntimeRequestRuntimeConfig)
+            updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
+    assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getCloudService().getValue())
+        .isEqualTo("dataproc");
+    assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getNumberOfWorkers())
         .isEqualTo(dataprocConfig.getNumberOfWorkers());
-    assertThat(actualRuntimeConfig.getMasterMachineType())
+    assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getMasterMachineType())
         .isEqualTo(dataprocConfig.getMasterMachineType());
-    assertThat(actualRuntimeConfig.getMasterDiskSize())
+    assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getMasterDiskSize())
         .isEqualTo(dataprocConfig.getMasterDiskSize());
 
     assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())

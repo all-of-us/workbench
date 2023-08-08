@@ -6,13 +6,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListPersistentDiskResponse;
 import static org.pmiops.workbench.utils.TestMockFactory.createLeonardoListRuntimePDResponse;
+import static org.pmiops.workbench.utils.TestMockFactory.createListPersistentDiskResponse;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,6 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -55,30 +54,30 @@ public class DiskServiceTest {
   @Test
   public void test_getAllDisksInWorkspaceNamespace() {
     DbWorkspace dbWorkspace = new DbWorkspace().setGoogleProject(GOOGLE_PROJECT_ID);
-    LeonardoListPersistentDiskResponse firstLPDR =
-        createLeonardoListPersistentDiskResponse(
+    ListPersistentDiskResponse firstLPDR =
+        createListPersistentDiskResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(200).toString(),
             GOOGLE_PROJECT_ID,
             user,
             AppType.CROMWELL);
-    LeonardoListPersistentDiskResponse secondLPDR =
-        createLeonardoListPersistentDiskResponse(
+    ListPersistentDiskResponse secondLPDR =
+        createListPersistentDiskResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(20000).toString(),
             GOOGLE_PROJECT_ID,
             user,
             AppType.RSTUDIO);
-    LeonardoListPersistentDiskResponse thirdLPDR =
+    ListPersistentDiskResponse thirdLPDR =
         createLeonardoListRuntimePDResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(2000000).toString(),
             GOOGLE_PROJECT_ID,
             user);
-    List<LeonardoListPersistentDiskResponse> responseList =
+    List<ListPersistentDiskResponse> responseList =
         new ArrayList<>(Arrays.asList(firstLPDR, secondLPDR, thirdLPDR));
     Disk firstDisk = new Disk();
     firstDisk.setName(firstLPDR.getName());

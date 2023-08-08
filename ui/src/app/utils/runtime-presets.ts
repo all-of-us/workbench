@@ -64,12 +64,11 @@ export const applyPresetOverride = (runtime) => {
     );
 
   if (runtimePresetKey) {
-    const { gceConfig, gceWithPdConfig, dataprocConfig } =
+    const { gceWithPdConfig, dataprocConfig } =
       runtimePresets[runtimePresetKey].runtimeTemplate;
 
     return {
       ...runtime,
-      gceConfig,
       // restore the original PD name, which will cause a creation request to attach it to the new runtime
       gceWithPdConfig:
         gceWithPdConfig &&

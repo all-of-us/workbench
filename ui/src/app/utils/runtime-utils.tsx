@@ -660,9 +660,8 @@ export const maybeWithExistingDisk = (
 
   return {
     ...runtime,
-    gceConfig: null,
     gceWithPdConfig: {
-      ...runtime.gceConfig,
+      ...runtime.gceWithPdConfig,
       persistentDisk: {
         name: existingDisk.name,
         size: existingDisk.size,

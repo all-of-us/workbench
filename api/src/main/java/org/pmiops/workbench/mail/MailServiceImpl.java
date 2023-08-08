@@ -34,6 +34,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.CaseUtils;
 import org.apache.commons.text.StringSubstitutor;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.EgressAlertRemediationPolicy;
 import org.pmiops.workbench.db.model.DbUser;
@@ -43,7 +44,6 @@ import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
@@ -298,7 +298,7 @@ public class MailServiceImpl implements MailService {
   public void alertUsersUnusedDiskWarningThreshold(
       List<DbUser> users,
       DbWorkspace diskWorkspace,
-      LeonardoListPersistentDiskResponse disk,
+      ListPersistentDiskResponse disk,
       boolean isDiskAttached,
       int daysUnused,
       @Nullable Double workspaceInitialCreditsRemaining)

@@ -11,10 +11,18 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfigInResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,18 +38,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.leonardo.api.AppsApi;
-import org.pmiops.workbench.leonardo.api.DisksApi;
-import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
-import org.pmiops.workbench.leonardo.model.LeonardoAppType;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskStatus;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoKubernetesRuntimeConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoPersistentDiskRequest;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
 import org.pmiops.workbench.model.DiskType;
@@ -116,7 +112,9 @@ public class LeonardoApiClientTest {
   @Autowired LeonardoApiClient leonardoApiClient;
   @Autowired FirecloudMapper firecloudMapper;
 
-  @Captor private ArgumentCaptor<LeonardoCreateAppRequest> createAppRequestArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest>
+      createAppRequestArgumentCaptor;
 
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String WORKSPACE_ID = "myfirstworkspace";
@@ -136,8 +134,10 @@ public class LeonardoApiClientTest {
   private DbWorkspace testWorkspace;
   private UserAppEnvironment testApp;
   private CreateAppRequest createAppRequest;
-  private LeonardoKubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
-  private LeonardoPersistentDiskRequest leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+      leonardoKubernetesRuntimeConfig;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
   private PersistentDiskRequest persistentDiskRequest;
   private Map<String, String> appLabels = new HashMap<>();
   private Map<String, String> customEnvironmentVariables = new HashMap<>();
@@ -152,10 +152,14 @@ public class LeonardoApiClientTest {
     KubernetesRuntimeConfig kubernetesRuntimeConfig =
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
-        new LeonardoKubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig()
+            .autoscalingEnabled(false)
+            .machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new LeonardoPersistentDiskRequest().diskType(LeonardoDiskType.STANDARD).size(10);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
     testApp =
         new UserAppEnvironment()
             .appType(AppType.RSTUDIO)
@@ -221,17 +225,19 @@ public class LeonardoApiClientTest {
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
     customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
     customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
     customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
-    LeonardoCreateAppRequest expectedAppRequest =
-        new LeonardoCreateAppRequest()
-            .appType(LeonardoAppType.ALLOWED)
+
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest expectedAppRequest =
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest()
+            .appType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
-            .allowedChartName(LeonardoAllowedChartName.RSTUDIO_CHART)
+            .allowedChartName(AllowedChartName.RSTUDIO_CHART)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .customEnvironmentVariables(customEnvironmentVariables);
@@ -251,7 +257,8 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    LeonardoCreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
     assertThat(createAppRequest.getDiskConfig().getName())
         .startsWith("all-of-us-pd-" + user.getUserId() + "-" + "rstudio");
@@ -264,14 +271,14 @@ public class LeonardoApiClientTest {
     diskLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
-    LeonardoListPersistentDiskResponse rstudioDisk =
-        new LeonardoListPersistentDiskResponse()
+    ListPersistentDiskResponse rstudioDisk =
+        new ListPersistentDiskResponse()
             .name("123")
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoDiskStatus.READY)
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
             .labels(diskLabels);
     when(userDisksApi.listDisksByProject(any(), any(), any(), any(), any()))
         .thenReturn(ImmutableList.of(rstudioDisk));
@@ -303,6 +310,18 @@ public class LeonardoApiClientTest {
     boolean deleteDisk = true;
     leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
     verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+  }
+
+  @Test
+  public void testRuntimeConfigDeserializer() throws Exception {
+    JsonObject instance = new JsonObject();
+    instance.addProperty("machineType", "n1-standard-4");
+    instance.addProperty("persistentDiskId", 21535);
+    instance.addProperty("cloudService", "GCE");
+    instance.addProperty("bootDiskSize", 120);
+    instance.addProperty("zone", "us-central1-c");
+    instance.addProperty("configType", "GceWithPdConfig");
+    OneOfRuntimeConfigInResponse.validateJsonObject(instance);
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {
