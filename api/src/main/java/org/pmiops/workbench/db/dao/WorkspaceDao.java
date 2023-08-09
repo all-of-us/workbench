@@ -116,10 +116,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
-  Set<DbWorkspace> findAllByActiveStatus(short activeStatus);
-
-  List<DbWorkspace> findAllByNeedsResearchPurposeReviewPrompt(short researchPurposeReviewed);
-
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
     DbWorkspace toUpdate =
         findById(workspaceId)
@@ -130,13 +126,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     toUpdate.setBillingStatus(status);
     save(toUpdate);
   }
-
-  @Query(
-      "SELECT w.creator FROM DbWorkspace w "
-          + "WHERE w.billingStatus = (:status) AND w.billingAccountName in (:billingAccountNames)")
-  Set<DbUser> findAllCreatorsByBillingStatusAndBillingAccountNameIn(
-      @Param("status") BillingStatus status,
-      @Param("billingAccountNames") List<String> billingAccountNames);
 
   @Query(
       "SELECT w.creator FROM DbWorkspace w "
