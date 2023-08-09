@@ -2048,21 +2048,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/updateResearchPurposeReviewPrompt":
-    get:
-      tags:
-      - offlineWorkspace
-      - cron
-      description: Show review research prompt if Workspace has been created 15 days/an year earlier
-      operationId: updateResearchPurposeReviewPrompt
-      security: []
-      responses:
-        204:
-          description: No content
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/checkPendingEgressEvents":
     get:
       security: []
