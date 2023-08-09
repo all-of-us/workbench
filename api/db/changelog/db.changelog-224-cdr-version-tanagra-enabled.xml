@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="freemabd" id="changelog-224-cdr-version-tanagra-enabled">
     <addColumn tableName="cdr_version">
-      <column name="tanagraEnabled" type="boolean" defaultValueBoolean="false"/>
+      <column name="tanagra_enabled" type="boolean" defaultValueBoolean="false"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
