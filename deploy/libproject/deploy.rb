@@ -136,7 +136,7 @@ def validate_arguments(cmd_name, args)
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
-    "default service account."
+      "default service account."
   )
   op.add_option(
     "--key-file [key file]",
@@ -148,26 +148,26 @@ def validate_arguments(cmd_name, args)
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
     "Don't actually deploy, just log the command lines which would be " +
-    "executed on a real invocation."
+      "executed on a real invocation."
   )
   op.add_option(
     "--git-version [git version]",
     ->(opts, v) { opts.git_version = v},
     "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/main'. Branch names " +
-    "must be prefixed with 'origin/'. By default, uses the current live " +
-    "staging release tag (if staging is in a good state)"
+      "must be prefixed with 'origin/'. By default, uses the current live " +
+      "staging release tag (if staging is in a good state)"
   )
   op.add_option(
     "--app-version [app version]",
     ->(opts, v) { opts.app_version = v},
     "App Engine version to deploy as. By default, uses the current live " +
-    "staging release version (if staging is in a good state)"
+      "staging release version (if staging is in a good state)"
   )
   op.add_option(
     "--no-update-jira",
     ->(opts, _) { opts.update_jira = false},
     "Don't update or create a ticket in JIRA; by default will pick " +
-    "depending on the target project. On --no-promote JIRA is never updated"
+      "depending on the target project. On --no-promote JIRA is never updated"
   )
   op.add_option(
     "--promote",
@@ -178,13 +178,13 @@ def validate_arguments(cmd_name, args)
     "--no-promote",
     ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations " +
-    "are still applied"
+      "are still applied"
   )
   op.add_option(
     "--circle-url [circle url]",
     ->(opts, v) { opts.circle_url = v},
     "Circle test output URL to attach to the release tracker; only " +
-    "relevant for runs where a release ticket is created (staging)"
+      "relevant for runs where a release ticket is created (staging)"
   )
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
@@ -198,17 +198,20 @@ def validate_arguments(cmd_name, args)
     # could probably be fixed but the circle deploy account is a better
     # simulation anyways.
     raise ArgumentError.new(
-        "Invalid --account: '#{op.opts.account}' is currently incompatible " +
+      "Invalid --account: '#{op.opts.account}' is currently incompatible " +
         "with the deploy script. Consider using " +
         "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
         "instead, which has similar permissions.")
   end
 
   if op.opts.update_jira.nil?
-     op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
+    op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
+end
 
+def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
+  validate_arguments(cmd_name, args)
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
