@@ -197,10 +197,10 @@ def validate_arguments(op)
     # could probably be fixed but the circle deploy account is a better
     # simulation anyways.
     raise ArgumentError.new(
-      "Invalid --account: '#{op.opts.account}' is currently incompatible " +
-      "with the deploy script. Consider using " +
-      "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
-      "instead, which has similar permissions.")
+        "Invalid --account: '#{op.opts.account}' is currently incompatible " +
+        "with the deploy script. Consider using " +
+        "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
+        "instead, which has similar permissions.")
   end
 
   if op.opts.update_jira.nil?
