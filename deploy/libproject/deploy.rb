@@ -135,7 +135,7 @@ def validate_arguments(op)
     "--account [account]",
     ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
-      "default service account."
+    "default service account."
   )
   op.add_option(
     "--key-file [key file]",
@@ -147,26 +147,26 @@ def validate_arguments(op)
     "--dry-run",
     ->(opts, _) { opts.dry_run = true},
     "Don't actually deploy, just log the command lines which would be " +
-      "executed on a real invocation."
+    "executed on a real invocation."
   )
   op.add_option(
     "--git-version [git version]",
     ->(opts, v) { opts.git_version = v},
     "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/main'. Branch names " +
-      "must be prefixed with 'origin/'. By default, uses the current live " +
-      "staging release tag (if staging is in a good state)"
+    "must be prefixed with 'origin/'. By default, uses the current live " +
+    "staging release tag (if staging is in a good state)"
   )
   op.add_option(
     "--app-version [app version]",
     ->(opts, v) { opts.app_version = v},
     "App Engine version to deploy as. By default, uses the current live " +
-      "staging release version (if staging is in a good state)"
+    "staging release version (if staging is in a good state)"
   )
   op.add_option(
     "--no-update-jira",
     ->(opts, _) { opts.update_jira = false},
     "Don't update or create a ticket in JIRA; by default will pick " +
-      "depending on the target project. On --no-promote JIRA is never updated"
+    "depending on the target project. On --no-promote JIRA is never updated"
   )
   op.add_option(
     "--promote",
@@ -177,13 +177,13 @@ def validate_arguments(op)
     "--no-promote",
     ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations " +
-      "are still applied"
+    "are still applied"
   )
   op.add_option(
     "--circle-url [circle url]",
     ->(opts, v) { opts.circle_url = v},
     "Circle test output URL to attach to the release tracker; only " +
-      "relevant for runs where a release ticket is created (staging)"
+    "relevant for runs where a release ticket is created (staging)"
   )
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
@@ -198,13 +198,13 @@ def validate_arguments(op)
     # simulation anyways.
     raise ArgumentError.new(
       "Invalid --account: '#{op.opts.account}' is currently incompatible " +
-        "with the deploy script. Consider using " +
-        "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
-        "instead, which has similar permissions.")
+      "with the deploy script. Consider using " +
+      "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
+      "instead, which has similar permissions.")
   end
 
   if op.opts.update_jira.nil?
-    op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
+     op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
 end
@@ -241,10 +241,10 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     if not VERSION_RE.match(op.opts.app_version) or
       op.opts.app_version != op.opts.git_version
       raise RuntimeError.new "for releases, the --git_version and " +
-                               "--app_version should be equal and should be a " +
-                               "release tag (e.g. v0-1-rc1); you shouldn't " +
-                               "bypass this, but if you need to you can pass " +
-                               "--no-update-jira"
+                             "--app_version should be equal and should be a " +
+                             "release tag (e.g. v0-1-rc1); you shouldn't " +
+                             "bypass this, but if you need to you can pass " +
+                             "--no-update-jira"
     end
 
     # We're either creating a new ticket (staging), or commenting on an existing
@@ -256,9 +256,9 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
       unless from_version
         # Alternatively, we could support a --from_version flag
         raise RuntimeError "could not determine live staging version, and " +
-                             "therefore could not generate a delta commit log; " +
-                             "please manually deploy staging with the old " +
-                             "version and supply --no-update-jira, then retry"
+                           "therefore could not generate a delta commit log; " +
+                           "please manually deploy staging with the old " +
+                           "version and supply --no-update-jira, then retry"
       end
     else
       maybe_log_jira = lambda { |msg|
@@ -275,34 +275,36 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
   # optional log writer. Also rescue and log if deployment fails.
 
   if justAPI or not justUI
-  api_deploy_flags = %W{
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --creds-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
+    api_deploy_flags = %W{
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --creds-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+    } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
                         "service (including DB updates)"
-  common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+    common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
-  maybe_log_jira.call "'#{op.opts.project}': completed api service "
+    maybe_log_jira.call "'#{op.opts.project}': completed api service deployment "
   end
+
   if justUI or not justAPI
-    maybe_log_jira.call "'#{op.opts.project}':deployment; beginning deploy of UI service"
-  common.run_inline %W{
-    ../ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
-  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-    end
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
+    common.run_inline %W{
+      ../ui/project.rb deploy-ui
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+        --quiet
+    } + (op.opts.dry_run ? %W{--dry-run} : [])
+    maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+  end
+
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)
