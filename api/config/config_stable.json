@@ -117,7 +117,6 @@
     "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": false,
     "enableDataExplorer": false,
     "enableTanagra": false

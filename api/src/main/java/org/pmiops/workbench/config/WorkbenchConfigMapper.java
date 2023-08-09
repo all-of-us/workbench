@@ -40,8 +40,6 @@ public interface WorkbenchConfigMapper {
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
-  // always true, soon to be removed
-  @Mapping(target = "enableCromwellGKEApp", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
