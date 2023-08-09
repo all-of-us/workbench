@@ -110,8 +110,7 @@ public class WorkspaceAuditorTest {
             .timeRequested(1000L)
             .timeReviewed(10000L)
             .disseminateResearchFindingList(Collections.emptyList())
-            .researchOutcomeList(Collections.emptyList())
-            .needsReviewPrompt(false);
+            .researchOutcomeList(Collections.emptyList());
     final long now = System.currentTimeMillis();
 
     workspace1 =
@@ -349,7 +348,6 @@ public class WorkspaceAuditorTest {
         .timeReviewed(in.getTimeReviewed())
         .disseminateResearchFindingList(in.getDisseminateResearchFindingList())
         .otherDisseminateResearchFindings(in.getOtherDisseminateResearchFindings())
-        .researchOutcomeList(in.getResearchOutcomeList())
-        .needsReviewPrompt(in.getNeedsReviewPrompt());
+        .researchOutcomeList(in.getResearchOutcomeList());
   }
 }
