@@ -83,10 +83,6 @@ public class DbWorkspace {
   private boolean adminLocked;
   private String adminLockedReason;
 
-  // no longer used, can be deleted
-  @Deprecated(forRemoval = true)
-  private Short needsRPReviewPrompt;
-
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
@@ -645,30 +641,6 @@ public class DbWorkspace {
 
   public DbWorkspace setBillingAccountName(String billingAccountName) {
     this.billingAccountName = billingAccountName;
-    return this;
-  }
-
-  @Column(name = "needs_rp_review_prompt")
-  public Short getNeedsResearchPurposeReviewPrompt() {
-    if (needsRPReviewPrompt == null) return (short) 1;
-    return needsRPReviewPrompt;
-  }
-
-  public DbWorkspace setNeedsResearchPurposeReviewPrompt(Short needsReviewRPPrompt) {
-    this.needsRPReviewPrompt = needsReviewRPPrompt;
-    return this;
-  }
-
-  @Transient
-  public Boolean getNeedsReviewPrompt() {
-    if (needsRPReviewPrompt == null) {
-      return false;
-    }
-    return needsRPReviewPrompt == 0;
-  }
-
-  public DbWorkspace setNeedsReviewPrompt(Boolean needsReviewRPPrompt) {
-    this.needsRPReviewPrompt = (short) (needsReviewRPPrompt ? 0 : 1);
     return this;
   }
 
