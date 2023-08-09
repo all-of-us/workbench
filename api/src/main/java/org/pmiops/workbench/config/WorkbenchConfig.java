@@ -313,11 +313,6 @@ public class WorkbenchConfig {
     public boolean unsafeAllowDeleteUser;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
-    // DEPRECATED - now always false
-    // Flag to indicate whether to show the Update Research Purpose prompt one year after
-    // workspace creation
-    @Deprecated(forRemoval = true)
-    public boolean enableResearchPurposePrompt;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
