@@ -503,7 +503,7 @@ public class DbCdrVersion {
         hasCopeSurveyData,
         hasFitbitSleepData,
         hasSurveyConductData,
-            tanagraEnabled,
+        tanagraEnabled,
         storageBasePath,
         wgsVcfMergedStoragePath,
         wgsHailStoragePath,
