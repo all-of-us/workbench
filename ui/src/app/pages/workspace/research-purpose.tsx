@@ -3,24 +3,19 @@ import * as fp from 'lodash/fp';
 
 import { Clickable } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
-import { FlexColumn, FlexRow } from 'app/components/flex';
-import { ClrIcon } from 'app/components/icons';
 import { EditComponentReact } from 'app/icons/edit';
 import {
   disseminateFindings,
   researchOutcomes,
   researchPurposeQuestions,
 } from 'app/pages/workspace/workspace-edit-text';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
-import { AnalyticsTracker } from 'app/utils/analytics';
 import { useNavigation } from 'app/utils/navigation';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems,
 } from 'app/utils/research-purpose';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -101,30 +96,6 @@ export const ResearchPurpose = fp.flow(
     false
   );
 
-  const updateWorkspaceEvent = () => {
-    AnalyticsTracker.WorkspaceUpdatePrompt.UpdateWorkspace();
-    navigate(['workspaces', workspace.namespace, workspace.id, 'edit']);
-  };
-
-  const updateWorkspaceRPReviewPrompt = () => {
-    workspacesApi()
-      .markResearchPurposeReviewed(workspace.namespace, workspace.id)
-      .then((markedWorkspace) => {
-        workspace.researchPurpose.needsReviewPrompt = false;
-        navigate([
-          'workspaces',
-          markedWorkspace.namespace,
-          markedWorkspace.id,
-          'about',
-        ]);
-      });
-  };
-
-  const looksGoodEvent = () => {
-    AnalyticsTracker.WorkspaceUpdatePrompt.LooksGood();
-    updateWorkspaceRPReviewPrompt();
-  };
-
   return (
     <FadeBox>
       <div style={styles.mainHeader}>
@@ -148,55 +119,6 @@ export const ResearchPurpose = fp.flow(
           />
         </Clickable>
       </div>
-      {serverConfigStore.get().config.enableResearchReviewPrompt &&
-        isOwner &&
-        workspace.researchPurpose.needsReviewPrompt && (
-          <FlexRow style={styles.reviewPurposeReminder}>
-            <ClrIcon
-              style={{ color: colors.warning, marginLeft: '0.45rem' }}
-              className='is-solid'
-              shape='exclamation-triangle'
-              size='25'
-            />
-            <FlexColumn
-              style={{
-                paddingRight: '0.75rem',
-                paddingLeft: '0.75rem',
-                color: colors.primary,
-              }}
-            >
-              <label style={{ fontWeight: 600, fontSize: '14px', flex: 1 }}>
-                Please review your workspace description to make sure it is
-                accurate.
-              </label>
-              <label>
-                Project descriptions are publicly cataloged in the{' '}
-                <a
-                  href='https://www.researchallofus.org/research-projects-directory/'
-                  target='_blank'
-                >
-                  Research Project Directory
-                </a>{' '}
-                for participants and public to review.
-              </label>
-            </FlexColumn>
-            <div style={{ marginLeft: 'auto', marginRight: '0.75rem' }}>
-              <a
-                style={{ marginRight: '0.75rem' }}
-                onClick={() => looksGoodEvent()}
-              >
-                Looks Good
-              </a>
-              |
-              <a
-                style={{ marginLeft: '0.75rem' }}
-                onClick={() => updateWorkspaceEvent()}
-              >
-                Update
-              </a>
-            </div>
-          </FlexRow>
-        )}
       <div style={styles.sectionContentContainer}>
         {selectedResearchPurposeItems &&
           selectedResearchPurposeItems.length > 0 && (
