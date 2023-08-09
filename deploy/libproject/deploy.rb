@@ -322,3 +322,187 @@ Common.register_command({
     "be necessary outside of deploy script development",
   :fn => ->() { docker_clean() }
 })
+
+def deploy_api(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project to deploy to."
+  )
+  op.add_option(
+    "--account [account]",
+    ->(opts, v) { opts.account = v},
+    "Service account to act as for deployment, if any. Defaults to the GAE " +
+      "default service account."
+  )
+  op.add_option(
+    "--key-file [key file]",
+    ->(opts, v) { opts.key_file = v},
+    "Path to a service account key file to be used for deployment"
+  )
+  op.opts.dry_run = false
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+      "executed on a real invocation."
+  )
+  op.add_option(
+    "--git-version [git version]",
+    ->(opts, v) { opts.git_version = v},
+    "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/main'. Branch names " +
+      "must be prefixed with 'origin/'. By default, uses the current live " +
+      "staging release tag (if staging is in a good state)"
+  )
+  op.add_option(
+    "--app-version [app version]",
+    ->(opts, v) { opts.app_version = v},
+    "App Engine version to deploy as. By default, uses the current live " +
+      "staging release version (if staging is in a good state)"
+  )
+  op.add_option(
+    "--no-update-jira",
+    ->(opts, _) { opts.update_jira = false},
+    "Don't update or create a ticket in JIRA; by default will pick " +
+      "depending on the target project. On --no-promote JIRA is never updated"
+  )
+  op.add_option(
+    "--promote",
+    ->(opts, _) { opts.promote = true},
+    "Promote this version to immediately begin serving traffic"
+  )
+  op.add_option(
+    "--no-promote",
+    ->(opts, _) { opts.promote = false},
+    "Deploy, but do not yet serve traffic from this version - DB migrations " +
+      "are still applied"
+  )
+  op.add_option(
+    "--circle-url [circle url]",
+    ->(opts, v) { opts.circle_url = v},
+    "Circle test output URL to attach to the release tracker; only " +
+      "relevant for runs where a release ticket is created (staging)"
+  )
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
+  op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
+
+  op.parse.validate
+
+  if op.opts.account == "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    # This is due to some special-cased handling of the test service account
+    # credential in our tooling (where we try to avoid redownloading it). It
+    # could probably be fixed but the circle deploy account is a better
+    # simulation anyways.
+    raise ArgumentError.new(
+      "Invalid --account: '#{op.opts.account}' is currently incompatible " +
+        "with the deploy script. Consider using " +
+        "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
+        "instead, which has similar permissions.")
+  end
+
+  if op.opts.update_jira.nil?
+    op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
+  end
+  op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
+
+  unless Workbench.in_docker?
+    return setup_and_enter_docker(cmd_name, op.opts)
+  end
+
+  # Everything following runs only within Docker.
+  # Only require Jira stuff within Docker to avoid burdening the user with local
+  # workstation Ruby gem setup.
+  require_relative 'jirarelease'
+
+  if op.opts.key_file.nil?
+    raise ArgumentError.new("--key-file is required when running within docker")
+  end
+  if op.opts.app_version.nil?
+    raise ArgumentError.new("--app-version is required when running within docker")
+  end
+  if op.opts.git_version.nil?
+    raise ArgumentError.new("--git-version is required when running within docker")
+  end
+  common = Common.new
+  common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
+
+  jira_client = nil
+  create_ticket = false
+  from_version = nil
+  maybe_log_jira = ->(msg) { common.status msg }
+  if op.opts.update_jira
+    if not VERSION_RE.match(op.opts.app_version) or
+      op.opts.app_version != op.opts.git_version
+      raise RuntimeError.new "for releases, the --git_version and " +
+                               "--app_version should be equal and should be a " +
+                               "release tag (e.g. v0-1-rc1); you shouldn't " +
+                               "bypass this, but if you need to you can pass " +
+                               "--no-update-jira"
+    end
+
+    # We're either creating a new ticket (staging), or commenting on an existing
+    # release ticket (stable, prod).
+    jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
+    if op.opts.update_jira and op.opts.project == STAGING_PROJECT
+      create_ticket = true
+      from_version = get_live_gae_version(STAGING_PROJECT)
+      unless from_version
+        # Alternatively, we could support a --from_version flag
+        raise RuntimeError "could not determine live staging version, and " +
+                             "therefore could not generate a delta commit log; " +
+                             "please manually deploy staging with the old " +
+                             "version and supply --no-update-jira, then retry"
+      end
+    else
+      maybe_log_jira = lambda { |msg|
+        begin
+          jira_client.comment_ticket(op.opts.app_version, msg)
+        rescue StandardError => e
+          common.error "comment_ticket failed: #{e}"
+        end
+      }
+    end
+  end
+
+  # TODO: Add more granular logging, e.g. call deploy natively and pass an
+  # optional log writer. Also rescue and log if deployment fails.
+
+  # api_deploy_flags = %W{
+  #     --project #{op.opts.project}
+  #     --account #{op.opts.account}
+  #     --key-file #{op.opts.key_file}
+  #     --creds-file #{op.opts.key_file}
+  #     --version #{op.opts.app_version}
+  #     #{op.opts.promote ? "--promote" : "--no-promote"}
+  # } + (op.opts.dry_run ? %W{--dry-run} : [])
+  #
+  # maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+  #                       "service (including DB updates)"
+  # common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+
+  maybe_log_jira.call "'#{op.opts.project}': completed api service " +
+                        "deployment; beginning deploy of UI service"
+  common.run_inline %W{
+    ../ui/project.rb deploy-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
+      --version #{op.opts.app_version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  } + (op.opts.dry_run ? %W{--dry-run} : [])
+  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+
+  if create_ticket
+    jira_client.create_ticket(op.opts.project, from_version,
+                              op.opts.git_version, op.opts.circle_url)
+  end
+end
+
+Common.register_command({
+  :invocation => "deploy-api",
+  :description => "",
+  :fn => ->(*args) { deploy_api("deploy-api", args) }
+})
