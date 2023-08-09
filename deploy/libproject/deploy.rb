@@ -488,7 +488,7 @@ end
 Common.register_command({
   :invocation => "deploy-ui",
   :description => "",
-  :fn => ->(*args) { deploy_api("deploy-api", args) }
+  :fn => ->(*args) { deploy_ui("deploy-ui", args) }
 })
 
 def deploy_api(cmd_name, args)
