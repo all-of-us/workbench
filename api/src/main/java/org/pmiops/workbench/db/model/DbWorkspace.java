@@ -79,10 +79,13 @@ public class DbWorkspace {
   private Timestamp timeRequested;
   private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private String billingAccountName;
-  private Short needsRPReviewPrompt;
   private String googleProject;
   private boolean adminLocked;
   private String adminLockedReason;
+
+  // no longer used, can be deleted
+  @Deprecated(forRemoval = true)
+  private Short needsRPReviewPrompt;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);

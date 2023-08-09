@@ -1171,7 +1171,6 @@ export const WorkspaceEdit = fp.flow(
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           workspace = await this.apiDuplicateWorkspaceAsync();
         } else {
-          workspace.researchPurpose.needsReviewPrompt = false;
           workspace = await workspacesApi().updateWorkspace(
             this.state.workspace.namespace,
             this.state.workspace.id,

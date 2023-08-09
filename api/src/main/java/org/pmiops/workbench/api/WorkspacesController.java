@@ -757,11 +757,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(resp);
   }
 
+  // no longer referenced by the UI - can be removed after one release cycle
+  @Deprecated(forRemoval = true)
   @Override
   public ResponseEntity<Workspace> markResearchPurposeReviewed(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    dbWorkspace.setNeedsReviewPrompt(false);
     try {
       dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace, userProvider.get());
     } catch (Exception e) {

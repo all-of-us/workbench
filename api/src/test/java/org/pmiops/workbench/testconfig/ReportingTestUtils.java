@@ -46,7 +46,6 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__LAST_MODIFIED_TIME =
       Timestamp.from(Instant.parse("2015-05-13T00:00:00.00Z"));
   public static final String WORKSPACE__NAME = "foo_9";
-  public static final Short WORKSPACE__NEEDS_RP_REVIEW_PROMPT = 10;
   public static final Boolean WORKSPACE__PUBLISHED = false;
   public static final String WORKSPACE__RP_ADDITIONAL_NOTES = "foo_12";
   public static final Boolean WORKSPACE__RP_ANCESTRY = false;
@@ -130,7 +129,6 @@ public class ReportingTestUtils {
         .disseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
         .lastModifiedTime(offsetDateTimeUtc(WORKSPACE__LAST_MODIFIED_TIME))
         .name(WORKSPACE__NAME)
-        .needsRpReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT.intValue()) // manual adjustment
         .published(WORKSPACE__PUBLISHED)
         .rpAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES)
         .rpAncestry(WORKSPACE__RP_ANCESTRY)
@@ -166,7 +164,6 @@ public class ReportingTestUtils {
     workspace.setDisseminateResearchOther(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
     workspace.setLastModifiedTime(WORKSPACE__LAST_MODIFIED_TIME);
     workspace.setName(WORKSPACE__NAME);
-    workspace.setNeedsResearchPurposeReviewPrompt(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
     workspace.setPublished(WORKSPACE__PUBLISHED);
     workspace.setAdditionalNotes(WORKSPACE__RP_ADDITIONAL_NOTES);
     workspace.setAncestry(WORKSPACE__RP_ANCESTRY);
