@@ -68,7 +68,7 @@ describe('DataSetPage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     serverConfigStore.set({
-      config: { enableGenomicExtraction: true, gsuiteDomain: '' },
+      config: { gsuiteDomain: '' },
     });
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -608,26 +608,6 @@ describe('DataSetPage', () => {
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
     ).toBe(10);
-  });
-
-  it('should display Pre packaged concept set per genomics extraction flag', async () => {
-    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = true;
-    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
-
-    let wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
-
-    serverConfigStore.set({
-      config: { enableGenomicExtraction: false, gsuiteDomain: '' },
-    });
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
   });
 
   it('should open Export modal if Analyze is clicked and WGS concept is not selected', async () => {

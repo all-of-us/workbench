@@ -75,11 +75,9 @@ export const DatasetResourceCard = fp.flow(
 
     get actions(): Action[] {
       const { resource, inactiveBilling } = this.props;
-      const enableExtraction =
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        (resource.dataSet.prePackagedConceptSet || []).includes(
-          PrePackagedConceptSetEnum.WHOLEGENOME
-        );
+      const enableExtraction = (
+        resource.dataSet.prePackagedConceptSet || []
+      ).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
       return [
         {
           icon: 'pencil',

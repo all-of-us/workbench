@@ -867,10 +867,7 @@ export const DatasetPage = fp.flow(
       // Only allow selection of genomics prepackaged concept sets if genomics
       // data extraction is possible, since extraction is the only action that
       // can be taken on genomics variant data from the dataset builder.
-      if (
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        hasWgsData
-      ) {
+      if (hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME,

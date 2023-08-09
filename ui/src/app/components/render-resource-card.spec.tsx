@@ -20,7 +20,7 @@ describe('renderResourceCard', () => {
 
   beforeEach(() => {
     serverConfigStore.set({
-      config: { enableGenomicExtraction: true, gsuiteDomain: '' },
+      config: { gsuiteDomain: '' },
     });
   });
 
