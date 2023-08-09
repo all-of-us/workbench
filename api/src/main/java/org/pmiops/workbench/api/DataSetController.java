@@ -61,7 +61,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -444,9 +443,6 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<GenomicExtractionJob> extractGenomicData(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
-    }
     DbWorkspace workspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);

@@ -67,7 +67,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortDefinition;
@@ -1008,10 +1007,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
     if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
       return new ArrayList<>();
-    }
-
-    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-      throw new NotImplementedException();
     }
 
     if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {

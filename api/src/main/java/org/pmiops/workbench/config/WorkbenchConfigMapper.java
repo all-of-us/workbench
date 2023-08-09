@@ -38,6 +38,8 @@ public interface WorkbenchConfigMapper {
 
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
+  // true in all environments: hard-code for imminent deletion
+  @Mapping(target = "enableGenomicExtraction", constant = "false")
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
@@ -66,9 +68,6 @@ public interface WorkbenchConfigMapper {
       source = "config.featureFlags.enableResearchPurposePrompt")
   @Mapping(target = "enableRasIdMeLinking", source = "config.access.enableRasIdMeLinking")
   @Mapping(target = "enableRasLoginGovLinking", source = "config.access.enableRasLoginGovLinking")
-  @Mapping(
-      target = "enableGenomicExtraction",
-      source = "config.featureFlags.enableGenomicExtraction")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
