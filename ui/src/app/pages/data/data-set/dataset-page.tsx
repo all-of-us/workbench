@@ -67,7 +67,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { apiCallWithGatewayTimeoutRetries } from 'app/utils/retry';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
