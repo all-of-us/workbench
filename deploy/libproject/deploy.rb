@@ -125,8 +125,7 @@ def setup_and_enter_docker(cmd_name, opts)
   end
 end
 
-def validate_arguments(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
+def validate_arguments(op)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -211,7 +210,8 @@ def validate_arguments(cmd_name, args)
 end
 
 def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
-  validate_arguments(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  validate_arguments(op)
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
