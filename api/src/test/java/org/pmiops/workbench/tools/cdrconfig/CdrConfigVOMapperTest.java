@@ -58,6 +58,7 @@ public class CdrConfigVOMapperTest {
     testVersionJson.hasFitbitSleepData = false;
     testVersionJson.hasSurveyConductData = false;
     testVersionJson.hasCopeSurveyData = true;
+    testVersionJson.tanagraEnabled = true;
     testVersionJson.wgsFilterSetName = "my_filter";
     testVersionJson.storageBasePath = "20";
     testVersionJson.microarrayHailStoragePath = "hail/mt";
@@ -164,8 +165,9 @@ public class CdrConfigVOMapperTest {
             .setCdrDbName(testVersionJson.cdrDbName)
             .setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset)
             .setHasFitbitData(testVersionJson.hasFitbitData)
-            .setHasFitbitSleepData(testVersionJson.hasFitbitData)
-            .setHasSurveyConductData(testVersionJson.hasFitbitData)
+            .setHasFitbitSleepData(testVersionJson.hasFitbitSleepData)
+            .setHasSurveyConductData(testVersionJson.hasSurveyConductData)
+            .setTanagraEnabled(testVersionJson.tanagraEnabled)
             .setHasCopeSurveyData(testVersionJson.hasCopeSurveyData)
             .setWgsFilterSetName(testVersionJson.wgsFilterSetName)
             .setWgsVcfMergedStoragePath(testVersionJson.wgsVcfMergedStoragePath)
