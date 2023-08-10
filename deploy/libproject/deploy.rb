@@ -209,8 +209,7 @@ def validate_arguments(op)
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
 end
 
-def deploy_code(cmd_name, args, common, maybe_log_jira)
-  op = WbOptionsParser.new(cmd_name, args)
+def deploy_code(cmd_name, common, maybe_log_jira, op)
   validate_arguments(op)
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
@@ -273,8 +272,9 @@ def deploy_code(cmd_name, args, common, maybe_log_jira)
 end
 def deploy(cmd_name, args)
   common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
   maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name, args, common, maybe_log_jira)
+  create_ticket = deploy_code(cmd_name, common, maybe_log_jira, op)
     api_deploy_flags = %W{
         --project #{op.opts.project}
         --account #{op.opts.account}
@@ -310,9 +310,10 @@ def deploy(cmd_name, args)
 end
 
 def deploy_ui(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
   common = Common.new
   maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name, args,common, maybe_log_jira)
+  create_ticket = deploy_code(cmd_name,common, maybe_log_jira, op)
   maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
 
   common.run_inline %W{
@@ -334,9 +335,10 @@ def deploy_ui(cmd_name, args)
 end
 
 def deploy_api(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
   common = Common.new
   maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name, args,common, maybe_log_jira)
+  create_ticket = deploy_code(cmd_name,common, maybe_log_jira, op)
   api_deploy_flags = %W{
         --project #{op.opts.project}
         --account #{op.opts.account}
