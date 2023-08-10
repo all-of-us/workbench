@@ -7,7 +7,7 @@ if [[ -z "${WORKBENCH_VERSION}" ]]; then
 fi
 
 if [[ ! -d ~/workbench/.git ]]; then
-  git clone https://github.com/all-of-us/workbench/ ~/workbench
+  git clone https://github.com/all-of-us/workbench ~/workbench
 fi
 cd ~/workbench
 
@@ -19,7 +19,9 @@ git fetch --tags
 # Drop any untracked/ignored files which may have carried over, to ensure a clean build.
 git clean -fdx
 
-git checkout "nsaxena/deployUi"
+# To test deploy scripts push changes to a branch and use it as
+# git checkout "<your branch name>"
+git checkout "${WORKBENCH_VERSION}"
 git submodule update -f --init --recursive
 git status
 
