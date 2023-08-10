@@ -195,7 +195,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     if (cdrVersion.getTanagraEnabled()) {
       try {
-        workspaceService.createTanagraStudy(createdWorkspace.getNamespace(), createdWorkspace.getName());
+        workspaceService.createTanagraStudy(
+            createdWorkspace.getNamespace(), createdWorkspace.getName());
       } catch (Exception e) {
         log.log(Level.SEVERE, "Could not create a Tanagra Study.", e);
       }

@@ -76,7 +76,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException {
+  public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
+      throws ApiException {
     return null;
   }
 }

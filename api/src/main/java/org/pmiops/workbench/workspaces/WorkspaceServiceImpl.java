@@ -62,7 +62,6 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -480,9 +479,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException {
-    StudyCreateInfo studyCreateInfo =
-        new StudyCreateInfo().displayName(workspaceName);
+  public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
+      throws ApiException {
+    StudyCreateInfo studyCreateInfo = new StudyCreateInfo().displayName(workspaceName);
     return tanagraApiProvider.get().createStudy(studyCreateInfo);
   }
 }

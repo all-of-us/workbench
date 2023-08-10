@@ -17,7 +17,9 @@ public class TanagraConfig {
     TanagraApi api = new TanagraApi();
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.tanagra.baseUrl);
-    apiClient.setApiKey("Bearer " + SecurityContextHolder.getContext().getAuthentication().getCredentials().toString());
+    apiClient.setApiKey(
+        "Bearer "
+            + SecurityContextHolder.getContext().getAuthentication().getCredentials().toString());
     api.setApiClient(apiClient);
     return api;
   }
