@@ -329,7 +329,7 @@ def deploy_ui(cmd_name, args)
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
-                              op.opts.git_version +' UI', op.opts.circle_url)
+                              "#{op.opts.git_version} UI", op.opts.circle_url)
   end
 end
 
@@ -353,7 +353,7 @@ def deploy_api(cmd_name, args)
   maybe_log_jira.call "'#{op.opts.project}': completed api service deployment "
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
-                              op.opts.git_version  +' API', op.opts.circle_url)
+                              "#{op.opts.git_version} API", op.opts.circle_url)
   end
 end
 
