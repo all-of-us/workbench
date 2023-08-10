@@ -18,7 +18,7 @@ RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT, PREPROD_PROJECT, PR
 
 VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
-def get_live_gae_version(project, validate_version=true)
+def get_live_gae_version(project, services, validate_version=true)
   common = Common.new
   versions = common.capture_stdout %W{
     gcloud app
@@ -31,7 +31,6 @@ def get_live_gae_version(project, validate_version=true)
     exit 1
   end
 
-  services = Set["api", "default"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
@@ -68,7 +67,7 @@ def setup_and_enter_docker(cmd_name, opts)
                    "documentation for details"
       exit 1
     end
-    live_staging_version = get_live_gae_version(STAGING_PROJECT)
+    live_staging_version = get_live_gae_version(STAGING_PROJECT, opts.services)
     unless live_staging_version
       common.error "No default staging version could be determined for " +
                    "promotion; please investigate or else be explicit in " +
@@ -209,8 +208,16 @@ def validate_arguments(op)
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
 end
 
-def deploy_code(cmd_name, common, maybe_log_jira, op)
+def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
+  op = WbOptionsParser.new(cmd_name, args)
   validate_arguments(op)
+  op.opts.services = Set["api", "default"]
+  if justUI and not justAPI
+    op.opts.services = Set["default"]
+  end
+  if justAPI and not justUI
+    op.opts.services = Set["api"]
+  end
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
@@ -229,11 +236,13 @@ def deploy_code(cmd_name, common, maybe_log_jira, op)
   if op.opts.git_version.nil?
     raise ArgumentError.new("--git-version is required when running within docker")
   end
+  common = Common.new
   common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
 
   jira_client = nil
   create_ticket = false
   from_version = nil
+  maybe_log_jira = ->(msg) { common.status msg }
   if op.opts.update_jira
     if not VERSION_RE.match(op.opts.app_version) or
       op.opts.app_version != op.opts.git_version
@@ -268,13 +277,10 @@ def deploy_code(cmd_name, common, maybe_log_jira, op)
     end
   end
 
-  return create_ticket
-end
-def deploy(cmd_name, args)
-  common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name, common, maybe_log_jira, op)
+  # TODO: Add more granular logging, e.g. call deploy natively and pass an
+  # optional log writer. Also rescue and log if deployment fails.
+
+  if justAPI or not justUI
     api_deploy_flags = %W{
         --project #{op.opts.project}
         --account #{op.opts.account}
@@ -285,12 +291,14 @@ def deploy(cmd_name, args)
     } + (op.opts.dry_run ? %W{--dry-run} : [])
 
     maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
-                          "service (including DB updates)"
+                        "service (including DB updates)"
     common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
     maybe_log_jira.call "'#{op.opts.project}': completed api service deployment "
-    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
+  end
 
+  if justUI or not justAPI
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
     common.run_inline %W{
       ../ui/project.rb deploy-ui
         --project #{op.opts.project}
@@ -300,63 +308,24 @@ def deploy(cmd_name, args)
         #{op.opts.promote ? "--promote" : "--no-promote"}
         --quiet
     } + (op.opts.dry_run ? %W{--dry-run} : [])
-
     maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+  end
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)
   end
 end
+def deploy(cmd_name, args)
+  deploy_code(cmd_name, args)
+end
 
 def deploy_ui(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-  common = Common.new
-  maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name,common, maybe_log_jira, op)
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
-
-  common.run_inline %W{
-      ../ui/project.rb deploy-ui
-        --project #{op.opts.project}
-        --account #{op.opts.account}
-        --key-file #{op.opts.key_file}
-        --version #{op.opts.app_version}
-        #{op.opts.promote ? "--promote" : "--no-promote"}
-        --quiet
-    } + (op.opts.dry_run ? %W{--dry-run} : [])
-
-  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-
-  if create_ticket
-    jira_client.create_ticket(op.opts.project, from_version,
-                              "#{op.opts.git_version} UI", op.opts.circle_url)
-  end
+  deploy_code(cmd_name, args,true)
 end
 
 def deploy_api(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
-  common = Common.new
-  maybe_log_jira = ->(msg) { common.status msg }
-  create_ticket = deploy_code(cmd_name,common, maybe_log_jira, op)
-  api_deploy_flags = %W{
-        --project #{op.opts.project}
-        --account #{op.opts.account}
-        --key-file #{op.opts.key_file}
-        --creds-file #{op.opts.key_file}
-        --version #{op.opts.app_version}
-        #{op.opts.promote ? "--promote" : "--no-promote"}
-    } + (op.opts.dry_run ? %W{--dry-run} : [])
-
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
-                        "service (including DB updates)"
-  common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
-
-  maybe_log_jira.call "'#{op.opts.project}': completed api service deployment "
-  if create_ticket
-    jira_client.create_ticket(op.opts.project, from_version,
-                              "#{op.opts.git_version} API", op.opts.circle_url)
-  end
+  deploy_code(cmd_name, args,nil,true)
 end
 
 def docker_clean()
