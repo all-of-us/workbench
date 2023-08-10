@@ -436,7 +436,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  disseminate_research_other,\n"
                 + "  last_modified_time,\n"
                 + "  w.name AS name,\n"
-                + "  needs_rp_review_prompt,\n"
                 + "  published,\n"
                 + "  rp_additional_notes,\n"
                 + "  rp_ancestry,\n"
@@ -487,7 +486,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .disseminateResearchOther(rs.getString("disseminate_research_other"))
                 .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
                 .name(rs.getString("name"))
-                .needsRpReviewPrompt((int) rs.getShort("needs_rp_review_prompt"))
                 .published(rs.getBoolean("published"))
                 .rpAdditionalNotes(rs.getString("rp_additional_notes"))
                 .rpAncestry(rs.getBoolean("rp_ancestry"))

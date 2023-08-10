@@ -313,8 +313,10 @@ public class WorkbenchConfig {
     public boolean unsafeAllowDeleteUser;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
-    // Flag to indicate whether to show Update research purpose prompt after an year of workspace
-    // creation
+    // DEPRECATED.
+    // Flag to indicate whether to show the Update Research Purpose prompt one year after
+    // workspace creation
+    @Deprecated(forRemoval = true)
     public boolean enableResearchPurposePrompt;
     // DEPRECATED - now always true
     // If true, enable genomic extraction functionality for datasets which have genomics data
