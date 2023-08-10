@@ -31,12 +31,10 @@ def get_live_gae_version(project, services, validate_version=true)
     exit 1
   end
 
-  currectact = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
-  common.status "#{currectact.to_a.join(',')}"
-  actives =  currectact.select{|v| services.include?(v["service"])}
+  actives =  JSON.parse(versions).select{|v| v["traffic_split"] == 1.0 and services.include?(v["service"])}
   common.status "#{actives.to_a.join(',')}"
 
-  active_services = actives.map{|v| v["service"]}.to_set
+  active_services = selected_version.map{|v| v["service"]}.to_set
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
@@ -316,25 +314,13 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
   end
 
-  common.status "#{create_ticket}"
-  common.status "saxena"
-  common.status "saxena hey"
-  summary = op.opts.git_version
-  if justUI and not justAPI
-    summary = summary + '_UI '
-  end
-  if justAPI and not justUI
-    summary = summary + '_API'
-  end
-  common.status "#{summary}"
   if create_ticket
-    common.status "saxena hey"
     summary = op.opts.git_version
     if justUI and not justAPI
-      summary = summary + '_UI '
+      summary = summary + ' UI '
     end
     if justAPI and not justUI
-      summary = summary + '_API'
+      summary = summary + ' API'
     end
     common.status "#{summary}"
     jira_client.create_ticket(op.opts.project, from_version,
