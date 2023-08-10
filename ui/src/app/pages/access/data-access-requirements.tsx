@@ -359,9 +359,9 @@ const handleRasCallback = (
   reloadProfile: Function
 ) => {
   const handler = withErrorModal({
-    title: 'Error saving RAS Login.Gov linkage status.',
+    title: 'Error saving identity verification status.',
     message:
-      'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
+      'An error occurred trying to save your identity verification status. Please try again.',
     onDismiss: () => {
       spinnerProps.hideSpinner();
     },
