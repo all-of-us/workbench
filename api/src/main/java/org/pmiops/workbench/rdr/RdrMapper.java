@@ -80,15 +80,17 @@ public interface RdrMapper {
     }
   }
 
+  // RW-10592 - 6 address fields to be removed in coordination with the RDR team
+  @Deprecated(forRemoval = true)
+  @Mapping(target = "streetAddress1", constant = "")
+  @Mapping(target = "streetAddress2", constant = "")
+  @Mapping(target = "city", constant = "")
+  @Mapping(target = "state", constant = "")
+  @Mapping(target = "country", constant = "")
+  @Mapping(target = "zipCode", constant = "")
   @Mapping(source = "dbUser.lastModifiedTime", target = "modifiedTime")
   @Mapping(source = "dbUser.contactEmail", target = "email")
   @Mapping(source = "dbUser.degreesEnum", target = "degrees")
-  @Mapping(source = "dbUser.address.streetAddress1", target = "streetAddress1")
-  @Mapping(source = "dbUser.address.streetAddress2", target = "streetAddress2")
-  @Mapping(source = "dbUser.address.city", target = "city")
-  @Mapping(source = "dbUser.address.state", target = "state")
-  @Mapping(source = "dbUser.address.country", target = "country")
-  @Mapping(source = "dbUser.address.zipCode", target = "zipCode")
   @Mapping(source = "dbUser.demographicSurvey.disabilityEnum", target = "disability")
   @Mapping(source = "dbUser.demographicSurvey.educationEnum", target = "education")
   @Mapping(source = "dbUser.demographicSurvey.ethnicityEnum", target = "ethnicity")

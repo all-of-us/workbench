@@ -196,12 +196,6 @@ public class RdrMapperTest {
                 .modifiedTime(rdrMapper.toModelOffsetTime(TIME2))
                 .givenName("falco")
                 .familyName("lombardi")
-                .streetAddress1("123 fake st")
-                .streetAddress2("apt 2")
-                .city("Mountain View")
-                .state("CA")
-                .zipCode("12345")
-                .country("US")
                 .ethnicity(RdrEthnicity.PREFER_NOT_TO_ANSWER)
                 .gender(ImmutableList.of(RdrGender.PREFER_NOT_TO_ANSWER))
                 .race(ImmutableList.of(RdrRace.PREFER_NOT_TO_ANSWER))
@@ -214,6 +208,13 @@ public class RdrMapperTest {
                 .email("contact@asdf.com")
                 .accessTierShortNames(
                     ImmutableList.of(RdrAccessTier.REGISTERED, RdrAccessTier.CONTROLLED))
+                // RW-10592 - 6 address fields to be removed in coordination with the RDR team
+                .streetAddress1("")
+                .streetAddress2("")
+                .city("")
+                .state("")
+                .zipCode("")
+                .country("")
                 .verifiedInstitutionalAffiliation(
                     new RdrResearcherVerifiedInstitutionalAffiliation()
                         .institutionShortName("Foo")
