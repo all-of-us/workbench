@@ -114,7 +114,6 @@
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
     "enableRStudioGKEApp": false,
