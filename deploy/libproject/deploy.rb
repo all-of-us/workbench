@@ -34,7 +34,7 @@ def get_live_gae_version(project, services, validate_version=true)
   actives =  JSON.parse(versions).select{|v| v["traffic_split"] == 1.0 and services.include?(v["service"])}
   common.status "#{actives.to_a.join(',')}"
 
-  active_services = selected_version.map{|v| v["service"]}.to_set
+  active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
