@@ -82,7 +82,12 @@ export const IdentityHelpText = (props: {
               <div>
                 For <b>U.S. residents only</b>
               </div>
-              <ViewRequiredDocuments />
+              <a
+                href='https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/'
+                target='_blank'
+              >
+                View required documents
+              </a>
             </div>
             <div style={styles.identityProviderDescription}>
               <img
@@ -93,7 +98,12 @@ export const IdentityHelpText = (props: {
               <div>
                 For <b>U.S. residents and international users</b>
               </div>
-              <ViewRequiredDocuments />
+              <a
+                href='https://help.id.me/hc/en-us/articles/4415460350871-Documents-to-verify-your-identity'
+                target='_blank'
+              >
+                View required documents
+              </a>
             </div>
           </FlexRow>
         </FlexColumn>
