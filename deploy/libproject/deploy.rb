@@ -93,7 +93,7 @@ def setup_and_enter_docker(cmd_name, opts)
 
   # TODO: Might be nice to emit the last version creation time here as a
   # sanity check (need to pick which service to do that for...).
-  live_version = get_live_gae_version(opts.project, false)
+  live_version = get_live_gae_version(opts.project, opts.services,false)
   common.status "Current live version is '#{live_version}' (project " +
                 "#{opts.project})"
   log_prefix = opts.dry_run ? "[DRY_RUN] " : ""
@@ -262,7 +262,7 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
     if op.opts.update_jira and op.opts.project == STAGING_PROJECT
       create_ticket = true
-      from_version = get_live_gae_version(STAGING_PROJECT)
+      from_version = get_live_gae_version(STAGING_PROJECT, opts.services)
       unless from_version
         # Alternatively, we could support a --from_version flag
         raise RuntimeError "could not determine live staging version, and " +
