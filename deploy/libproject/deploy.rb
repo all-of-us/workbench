@@ -30,7 +30,7 @@ def get_live_gae_version(project, services, validate_version=true)
     common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
-  common.status services.length()
+
   if services.length() == 1
     actives =  JSON.parse(versions).select{|v| services.include?(v["service"]) and v["traffic_split"] == 1.0}
     common.status "Neha"
