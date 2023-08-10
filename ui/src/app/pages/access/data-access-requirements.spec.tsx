@@ -58,11 +58,20 @@ const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
+const savedLocation = window.location;
+
 describe('DataAccessRequirements', () => {
   const component = (pageMode?: string) => {
     const path = pageMode
       ? `${DATA_ACCESS_REQUIREMENTS_PATH}?pageMode=${pageMode}`
       : DATA_ACCESS_REQUIREMENTS_PATH;
+    delete window.location;
+    window.location = Object.assign(new URL('https://example.org' + path), {
+      ancestorOrigins: '',
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn(),
+    });
     return mount(
       <MemoryRouter initialEntries={[path]}>
         <DataAccessRequirements hideSpinner={() => {}} showSpinner={() => {}} />
