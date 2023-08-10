@@ -695,7 +695,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     keys.push('runtimeConfig', 'terminal');
   }
 
-  if (getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData) {
+  if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
     keys.push('genomicExtractions');
   }
 
