@@ -318,6 +318,15 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
 
   common.status "#{create_ticket}"
   common.status "saxena"
+  common.status "saxena hey"
+  summary = op.opts.git_version
+  if justUI and not justAPI
+    summary = summary + '_UI '
+  end
+  if justAPI and not justUI
+    summary = summary + '_API'
+  end
+  common.status "#{summary}"
   if create_ticket
     common.status "saxena hey"
     summary = op.opts.git_version
