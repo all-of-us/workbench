@@ -259,7 +259,6 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     # release ticket (stable, prod).
     jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
     if op.opts.update_jira and op.opts.project == STAGING_PROJECT
-      common.status "we are going to create ticket"
       create_ticket = true
       from_version = get_live_gae_version(STAGING_PROJECT, opts.services)
       unless from_version
@@ -322,7 +321,6 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     if justAPI and not justUI
       summary = summary + ' API'
     end
-    common.status "#{summary}"
     jira_client.create_ticket(op.opts.project, from_version,
                               summary, op.opts.circle_url)
   end
