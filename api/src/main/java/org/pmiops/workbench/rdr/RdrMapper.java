@@ -81,7 +81,6 @@ public interface RdrMapper {
   }
 
   // RW-10592 - 6 address fields to be removed in coordination with the RDR team
-  @Deprecated(forRemoval = true)
   @Mapping(target = "streetAddress1", constant = "")
   @Mapping(target = "streetAddress2", constant = "")
   @Mapping(target = "city", constant = "")
