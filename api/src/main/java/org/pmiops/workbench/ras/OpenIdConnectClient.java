@@ -19,7 +19,6 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Set;
 
 /**
