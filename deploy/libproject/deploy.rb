@@ -33,7 +33,7 @@ def get_live_gae_version(project, services, validate_version=true)
 
   currectact = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   common.status "#{currectact.to_a.join(',')}"
-  actives =  JSON.parse(currectact).select{|v| services.include?(v["service"])}
+  actives =  currectact.select{|v| services.include?(v["service"])}
   common.status "#{actives.to_a.join(',')}"
 
   active_services = actives.map{|v| v["service"]}.to_set
