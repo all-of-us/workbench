@@ -32,9 +32,9 @@ def get_live_gae_version(project, services, validate_version=true)
   end
   common.status services.length()
   if services.length() == 1
-    versions =  JSON.parse(versions).select{|v| services.include?(v["service"])}
+    actives123 =  JSON.parse(versions).select{|v| services.include?(v["service"]) and v["traffic_split"] == 1.0}
     common.status "Neha"
-    common.status "#{versions}"
+    common.status "#{actives123}"
   end
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   common.status "#{actives.to_a.join(',')}"
