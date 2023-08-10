@@ -261,6 +261,7 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     # release ticket (stable, prod).
     jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
     if op.opts.update_jira and op.opts.project == STAGING_PROJECT
+      common.status "we are going to create ticket"
       create_ticket = true
       from_version = get_live_gae_version(STAGING_PROJECT, opts.services)
       unless from_version
@@ -315,9 +316,20 @@ def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
     maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
   end
 
+  common.status "#{create_ticket}"
+  common.status "saxena"
   if create_ticket
+    common.status "saxena hey"
+    summary = op.opts.git_version
+    if justUI and not justAPI
+      summary = summary + '_UI '
+    end
+    if justAPI and not justUI
+      summary = summary + '_API'
+    end
+    common.status "#{summary}"
     jira_client.create_ticket(op.opts.project, from_version,
-                              op.opts.git_version, op.opts.circle_url)
+                              summary, op.opts.circle_url)
   end
 end
 def deploy(cmd_name, args)
