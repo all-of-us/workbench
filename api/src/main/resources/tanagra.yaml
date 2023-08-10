@@ -23,13 +23,12 @@ paths:
         - Tanagra
       summary: Save a Study(equivalent to AoU workspace) in Tanagra.
       operationId: createStudy
-      parameters:
-        - in: body
-          description: Format of the response which will be json for AoU
-          name: body
-          required: true
-          schema:
-            $ref: '#/components/schemas/StudyCreateInfo'
+      requestBody:
+        description: Format of the response which will be json for AoU
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyCreateInfo'
       responses:
         200:
           description: Newly created Study / Error response
@@ -42,13 +41,18 @@ paths:
 ## COMPONENTS
 ##########################################################################################
 components:
+  securitySchemes:
+    oauth:
+      type: apiKey
+      in: header
+      name: Authorization
   schemas:
     StudyCreateInfo:
       type: object
       properties:
         id:
           type: string
-          description: Unique identifier for this studay
+          description: Unique identifier for this study
         displayName:
           type: string
           description: Human readable name of the study
@@ -71,3 +75,5 @@ components:
         lastModified:
           type: string
           format: date-time
+security:
+  - oauth: []
