@@ -64,15 +64,7 @@ public class OpenIdConnectClient {
    */
   public JsonNode fetchUserInfo(String accessToken) throws IOException {
     HttpResponse response = executeGet(httpTransport, accessToken, new GenericUrl(userInfoUrl));
-    InputStream content = response.getContent();
-    JsonNode userInfo;
-    try{
-      userInfo = objectMapper.readTree(content);
-    } finally {
-      content.close();
-    }
-
-    return userInfo;
+    return objectMapper.readTree(response.getContent());
   }
 
   /** Helper method to decode a JWT into {@link DecodedJWT} object. */
