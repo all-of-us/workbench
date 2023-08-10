@@ -211,15 +211,10 @@ public class RdrExportServiceImpl implements RdrExportService {
 
   private RdrResearcher toRdrResearcher(long userId) {
     DbUser dbUser = userDao.findUserByUserId(userId);
-    RdrResearcher researcher =
-        rdrMapper.toRdrResearcher(
+    return rdrMapper.toRdrResearcher(
             dbUser,
             accessTierService.getAccessTiersForUser(dbUser),
             verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
-    return Optional.ofNullable(workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2)
-            .orElse(false)
-        ? researcher
-        : researcher.demographicSurveyV2(null);
   }
 
   @Nullable

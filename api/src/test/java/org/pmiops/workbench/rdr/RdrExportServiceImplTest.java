@@ -236,7 +236,6 @@ public class RdrExportServiceImplTest {
 
   @Test
   public void exportUsers_DemoSurveyV2Export() throws ApiException {
-    workbenchConfig.rdrExport.exportDemoSurveyV2 = true;
     boolean backfill = false;
 
     dbUserWithEmail =
@@ -259,33 +258,7 @@ public class RdrExportServiceImplTest {
   }
 
   @Test
-  public void exportUsers_DemoSurveyV2NoExport() throws ApiException {
-    workbenchConfig.rdrExport.exportDemoSurveyV2 = false;
-    boolean backfill = false;
-
-    dbUserWithEmail =
-        userDao.save(
-            dbUserWithEmail.setDemographicSurveyV2(
-                new DbDemographicSurveyV2()
-                    .setUser(dbUserWithEmail)
-                    .setEducation(DbEducationV2.DOCTORATE)));
-
-    List<Long> userIds = Collections.singletonList(dbUserWithEmail.getUserId());
-    rdrExportService.exportUsers(userIds, backfill);
-
-    RdrResearcher expectedNoSurvey =
-        rdrMapper
-            .toRdrResearcher(dbUserWithEmail, Collections.emptyList(), null)
-            .demographicSurveyV2(null);
-    // test sanity check
-    assertThat(expectedNoSurvey.getDemographicSurveyV2()).isNull();
-
-    verify(rdrExportService, times(1)).updateDbRdrExport(RdrEntity.USER, userIds);
-    verify(mockRdrApi).exportResearchers(Collections.singletonList(expectedNoSurvey), backfill);
-  }
-
-  @Test
-  public void exportUsers_DemoSurveyV2NoExport_nullBoolean() throws ApiException {
+  public void exportUsers_DemoSurveyV2NoExport_nullBoolean() {
     boolean backfill = false;
 
     dbUserWithEmail =
