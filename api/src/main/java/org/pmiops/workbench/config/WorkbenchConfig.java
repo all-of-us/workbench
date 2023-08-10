@@ -316,8 +316,10 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
+    // DEPRECATED - now always true
     // If true, enable genomic extraction functionality for datasets which have genomics data
     // associated with their CDRs.
+    @Deprecated(forRemoval = true)
     public boolean enableGenomicExtraction;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
