@@ -193,16 +193,7 @@ export const getAccessModuleConfig = (
         DARTitleComponent: (props: DARTitleComponentConfig) => {
           return enableRasIdMeLinking ? (
             <>
-              <div>
-                Verify your identity{' '}
-                <TooltipTrigger
-                  content={
-                    'For additional security, we require you to verify your identity by uploading a photo of your ID.'
-                  }
-                >
-                  <InfoIcon style={{ margin: '0 0.45rem' }} />
-                </TooltipTrigger>
-              </div>
+              <div>Verify your identity</div>
               <IdentityHelpText {...props} />
             </>
           ) : (

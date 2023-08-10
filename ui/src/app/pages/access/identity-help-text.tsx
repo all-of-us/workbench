@@ -65,6 +65,14 @@ export const IdentityHelpText = (props: {
       <FlexColumn
         style={{ ...styles.helpContainer, gap: '1rem', marginTop: '1rem' }}
       >
+        <FlexRow>
+          <div>
+            <a href='/' target='blank'>
+              Click here
+            </a>{' '}
+            to review the verification steps.
+          </div>
+        </FlexRow>
         <FlexColumn
           style={{
             padding: '1rem',
