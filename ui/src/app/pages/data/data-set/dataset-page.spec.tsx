@@ -579,6 +579,8 @@ describe('DataSetPage', () => {
     ).toBeFalsy();
   });
 
+  // TODO: rewrite this so it's not dependent on modifying global test state!
+
   it('should display Prepackaged concept set as per CDR data', async () => {
     // this test needs to modify a CDR version.
     // Let's save the original so we can restore it later.
