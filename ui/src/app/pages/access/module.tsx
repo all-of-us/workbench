@@ -13,6 +13,7 @@ import {
   getStatusText,
   isCompliant,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 import { styles } from './data-access-requirements';
 import { ModuleIcon } from './module-icon';
@@ -66,6 +67,7 @@ export const Module = (props: {
     status,
     style,
   } = props;
+  const { enableRasIdMeLinking } = serverConfigStore.get().config;
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
@@ -87,7 +89,10 @@ export const Module = (props: {
         )}
       </FlexRow>
       <ModuleBox
-        clickable={active && moduleName !== AccessModule.IDENTITY}
+        clickable={
+          active &&
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
+        }
         action={() => {
           setShowRefresh(true);
           moduleAction();
