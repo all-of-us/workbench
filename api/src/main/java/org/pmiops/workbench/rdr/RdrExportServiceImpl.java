@@ -7,7 +7,6 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -212,9 +211,9 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrResearcher toRdrResearcher(long userId) {
     DbUser dbUser = userDao.findUserByUserId(userId);
     return rdrMapper.toRdrResearcher(
-            dbUser,
-            accessTierService.getAccessTiersForUser(dbUser),
-            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+        dbUser,
+        accessTierService.getAccessTiersForUser(dbUser),
+        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
   }
 
   @Nullable
