@@ -142,8 +142,6 @@ public interface UserService {
 
   DbUser updateIdentityStatus(String userName);
 
-  DbUser updateRasLinkIdMeStatus(String idMeUserName);
-
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 
   /** Link eRA commons account in RW using RAS as source of truth. */
