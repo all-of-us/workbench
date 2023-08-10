@@ -39,7 +39,7 @@ public interface WorkbenchConfigMapper {
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
   // true in all environments: hard-code for imminent deletion
-  @Mapping(target = "enableGenomicExtraction", constant = "false")
+  @Mapping(target = "enableGenomicExtraction", constant = "true")
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
