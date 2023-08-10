@@ -622,11 +622,11 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
-    const query = useQuery();
-    const code = query.get('code');
-    const token = query.get('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const token = urlParams.get('token');
 
-    const pageModeParam = query.get('pageMode');
+    const pageModeParam = urlParams.get('pageMode');
     const pageMode =
       pageModeParam &&
       Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
