@@ -246,6 +246,7 @@ public interface LeonardoMapper {
 
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
   @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
+  @ValueMapping(source = "ALLOWED", target = "RSTUDIO") // we don't support CUSTOM apps
   AppType toApiAppType(LeonardoAppType appType);
 
   default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
