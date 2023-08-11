@@ -363,6 +363,7 @@ public class WorkbenchConfig {
     // Number of ids per task
     public Integer exportObjectsPerTask;
     // feature flag: do we export V2 of the Demographic Survey to RDR
+    @Deprecated(forRemoval = true) // always true - will remove soon
     public Boolean exportDemoSurveyV2;
   }
 
