@@ -210,10 +210,9 @@ public class RdrExportServiceImpl implements RdrExportService {
 
   private RdrResearcher toRdrResearcher(long userId) {
     DbUser dbUser = userDao.findUserByUserId(userId);
-    return rdrMapper.toRdrResearcher(
-        dbUser,
-        accessTierService.getAccessTiersForUser(dbUser),
-        verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
+    var tiers = accessTierService.getAccessTiersForUser(dbUser);
+    var maybeAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser);
+    return rdrMapper.toRdrResearcher(dbUser, tiers, maybeAffiliation.orElse(null));
   }
 
   @Nullable
