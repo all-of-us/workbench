@@ -253,16 +253,21 @@ To deploy the Tanagra api locally:
 ```
 The normal `./project.rb dev-up` will still need to be run to deploy the Workbench api
 
-To deploy the Tanagra UI and the Workbench UI together:
+To deploy the Tanagra UI and the Workbench UI together locally:
 ```
 yarn dev-up-tanagra-local
 ```
 
 ### Tanagra Deploy to test
 
-To deploy Tanagra api to test:
+To deploy Tanagra api to test (run from `api` directory):
 ```
 ./project.rb deploy-tanagra --project all-of-us-workbench-test --version my-version --promote --quiet
+```
+
+To deploy Tanagra UI to test (run from `ui` directory):
+```
+./project.rb deploy-tanagra-ui --project all-of-us-workbench-test --version my-version --promote --quiet
 ```
 
 ## Building a new CDR Database
