@@ -88,12 +88,6 @@ export const AdminUserEgressBypass = (props: Props) => {
       });
   };
 
-  const displayTime = (row, opt) => {
-    const value: number | undefined = row[opt.field];
-    const display: string = value ? displayDate(value) : 'N/A';
-    return <div style={{ width: '7rem' }}>{display}</div>;
-  };
-
   return (
     <FlexRow style={{ minWidth: '100rem' }}>
       <FlexColumn style={{ width: '60%', justifyContent: 'space-between' }}>
@@ -138,8 +132,8 @@ export const AdminUserEgressBypass = (props: Props) => {
               paddingBottom: '0.45rem',
             }}
           >
-            Bypass starting date and time. (end date is 48 hours after starting
-            time)
+            <div>Bypass starting date and time (in your local time zone)</div>
+            <div>Note: the end time is 48 hours after the start time.</div>
           </div>
         </FlexRow>
         <FlexRow>
@@ -169,19 +163,19 @@ export const AdminUserEgressBypass = (props: Props) => {
           </TooltipTrigger>
         </FlexRow>
         <FlexRow>
-          <h3>Large File Download Requests</h3>
+          <h3>Large File Download Requests (all times local)</h3>
         </FlexRow>
-        <FlexRow style={{ paddingTop: '1rem' }}>
+        <FlexRow style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
           <DataTable value={bypassWindowsList}>
             <Column
-              field={'startTime'}
-              header={'Start Time'}
-              body={(date, opt) => displayTime(date, opt)}
+              field='startTime'
+              header='Start Time'
+              body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
             <Column
-              field={'endTime'}
-              header={'End Time'}
-              body={(date, opt) => displayTime(date, opt)}
+              field='endTime'
+              header='End Time'
+              body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
             <Column field={'description'} header={'Description'} />
           </DataTable>
