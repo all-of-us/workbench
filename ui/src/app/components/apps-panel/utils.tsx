@@ -24,7 +24,7 @@ import rStudioIcon from 'assets/images/RStudio-icon.png';
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
   JUPYTER = 'Jupyter',
-  RSTUDIO = 'RStudio',
+  RSTUDIO = 'Allowed',
   CROMWELL = 'Cromwell',
 }
 
