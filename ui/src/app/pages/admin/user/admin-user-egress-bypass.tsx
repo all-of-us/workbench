@@ -15,7 +15,7 @@ import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { formatDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
+import { displayDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -89,7 +89,9 @@ export const AdminUserEgressBypass = (props: Props) => {
   };
 
   const displayTime = (row, opt) => {
-    return <div style={{ width: '7rem' }}>{formatDate(row[opt.field])}</div>;
+    const value: number | undefined = row[opt.field];
+    const display: string = value ? displayDate(value) : 'N/A';
+    return <div style={{ width: '7rem' }}>{display}</div>;
   };
 
   return (
