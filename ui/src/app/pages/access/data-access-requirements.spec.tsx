@@ -58,8 +58,6 @@ const oneYearAgo = () => nowPlusDays(-EXPIRY_DAYS);
 const oneYearFromNow = () => nowPlusDays(EXPIRY_DAYS);
 const oneHourAgo = () => Date.now() - 1000 * 60 * 60;
 
-const savedLocation = window.location;
-
 describe('DataAccessRequirements', () => {
   const component = (pageMode?: string) => {
     const path = pageMode
