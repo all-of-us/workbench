@@ -245,6 +245,9 @@ public interface LeonardoMapper {
   org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
       toLeonardoKubernetesRuntimeConfig(KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
+  @ValueMapping(
+      source = "RSTUDIO",
+      target = "ALLOWED") // TODO: Update this once we use new leo client to support SAS
   org.broadinstitute.dsde.workbench.client.leonardo.model.AppType toLeonardoAppType(
       AppType appType);
 
@@ -252,8 +255,8 @@ public interface LeonardoMapper {
   @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
   @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS apps
   @ValueMapping(
-          source = "ALLOWED",
-          target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
+      source = "ALLOWED",
+      target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
   @ValueMapping(
       source = "HAIL_BATCH",
       target = MappingConstants.NULL) // we don't support HAIL_BATCH apps

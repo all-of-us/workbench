@@ -22,16 +22,15 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-
 import okhttp3.Call;
 import org.broadinstitute.dsde.workbench.client.leonardo.ApiClient;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiResponse;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.springframework.boot.CommandLineRunner;
@@ -165,11 +164,7 @@ public class ManageLeonardoRuntimes {
     // Leo's getRuntime API swagger tends to be outdated; issue a raw getRuntime request to ensure
     // we get all available information for debugging.
     RuntimesApi client = newApiClient(apiUrl);
-    Call call =
-        client.getRuntimeCall(
-            googleProject,
-            runtimeName,
-            /* progressListener */ null);
+    Call call = client.getRuntimeCall(googleProject, runtimeName, /* progressListener */ null);
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
 
     // Parse the response as well so we can log specific structured fields.

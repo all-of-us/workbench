@@ -6519,6 +6519,7 @@ definitions:
     enum:
       - CROMWELL
       - RSTUDIO
+      - ALLOWED
   DiskStatus:
     type: string
     enum:
