@@ -508,6 +508,17 @@ public class UserDaoTest {
     assertThat(users).containsExactly(userWithoutSurvey);
   }
 
+  @Test
+  public void testSatisfyCAPSRequirementToStoreUserAddresses() {
+    // https://docs.google.com/document/d/1jK66dh7qP9VOL3e4GoFATFZMLvgBl81hvvTL6WKklYo
+    DbUser user = new DbUser();
+    DbAddress address = createAddress();
+    user.setAddress(address);
+    user = userDao.save(user);
+
+    assertThat(user.getAddress().getId()).isEqualTo(address.getId());
+  }
+
   private List<DbUser> insertTestUsers(
       boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
 
@@ -519,8 +530,7 @@ public class UserDaoTest {
       user.setFamilyName("Foo");
       user.setUsername("jaycarlton@aou.biz");
       final DbAddress address = createAddress();
-      address.setUser(user);
-      user.setAddress(address); // ?
+      user.setAddress(address);
       user.setDisabled(isDisabled);
       user = userDao.save(user);
 
