@@ -137,7 +137,7 @@ public class LeonardoMapperTest {
         .isEqualTo(AppType.CROMWELL);
     assertThat(
             mapper.toApiAppType(
-                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO))
+                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED))
         .isEqualTo(AppType.RSTUDIO);
     assertThat(
             mapper.toApiAppType(
