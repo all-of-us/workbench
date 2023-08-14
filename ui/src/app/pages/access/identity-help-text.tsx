@@ -36,10 +36,6 @@ const ContactUs = (props: { profile: Profile }) => {
   );
 };
 
-const ViewRequiredDocuments = () => (
-  <a href='google.com'>View required documents</a>
-);
-
 export const IdentityHelpText = (props: {
   profile: Profile;
   afterInitialClick: boolean;

@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
-import { useQuery } from 'app/components/app-router';
 import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
