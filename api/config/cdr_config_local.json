@@ -156,6 +156,46 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 10,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier v4 - Tanagra",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "SC2023Q3R1",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "wgsFilterSetName": "example",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 10,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "storageBasePath": "v7",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled",
+      "enabledTanagra": true
+    },
+    {
+      "cdrVersionId": 11,
+      "isDefault": true,
+      "name": "Synthetic Dataset v4 - Tanagra",
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2023Q3R1",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 11,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "registered",
+      "enabledTanagra": true
     }
   ]
 }
