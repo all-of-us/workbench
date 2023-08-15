@@ -516,6 +516,9 @@ public class UserDaoTest {
     user.setAddress(address);
     user = userDao.save(user);
 
+    // To meet the CAPS requirement an address is required for every user. This test attempts
+    // to enforce that 1:1 mapping. However, this test is imperfect as we do not currently enforce
+    // this requirement at the hibernate level.
     assertThat(user.getAddress().getId()).isEqualTo(address.getId());
   }
 
