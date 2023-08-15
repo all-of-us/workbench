@@ -8,7 +8,6 @@ import { render, screen } from '@testing-library/react';
 import * as accessUtils from 'app/utils/access-utils';
 
 import { IdentityHelpText } from './identity-help-text';
-import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 describe('IdentityHelpText', () => {
   let profile;
@@ -30,9 +29,7 @@ describe('IdentityHelpText', () => {
 
   it('should render when Identity module is incompliant and user has not clicked on component', () => {
     jest.spyOn(accessUtils, 'isCompliant').mockReturnValue(false);
-    const wrapper = render(
-      <IdentityHelpText {...{ profile }} afterInitialClick={false} />
-    );
+    render(<IdentityHelpText {...{ profile }} afterInitialClick={false} />);
 
     expect(
       screen.getByText('to review the verification steps.')
@@ -41,9 +38,7 @@ describe('IdentityHelpText', () => {
 
   it('should render when Identity module is incompliant and user has clicked on component', () => {
     jest.spyOn(accessUtils, 'isCompliant').mockReturnValue(false);
-    const wrapper = render(
-      <IdentityHelpText {...{ profile }} afterInitialClick={true} />
-    );
+    render(<IdentityHelpText {...{ profile }} afterInitialClick={true} />);
 
     expect(
       screen.getByText(
