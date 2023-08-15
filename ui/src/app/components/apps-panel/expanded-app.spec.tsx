@@ -19,7 +19,6 @@ import {
   registerApiClient as leoRegisterApiClient,
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
-import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import {
   AppsApi as LeoAppsApi,
@@ -356,7 +355,7 @@ describe('ExpandedApp', () => {
       appType: AppType.RSTUDIO,
       status: AppStatus.RUNNING,
       proxyUrls: {
-        [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
+        'rstudio-service': proxyUrl,
       },
     });
     const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');

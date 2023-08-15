@@ -1497,7 +1497,6 @@ components:
         - CUSTOM
         - GALAXY
         - RSTUDIO
-        - ALLOWED
     AppStatus:
       type: string
       enum:

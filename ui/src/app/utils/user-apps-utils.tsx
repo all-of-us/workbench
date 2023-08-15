@@ -13,7 +13,6 @@ import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
-import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
 import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
 
@@ -121,7 +120,7 @@ export const openRStudio = (
     [],
     false
   );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+  window.open(userApp.proxyUrls['rstudio-service'], '_blank').focus();
 };
 
 export const openRStudioOrConfigPanel = (
