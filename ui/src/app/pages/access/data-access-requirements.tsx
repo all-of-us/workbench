@@ -267,6 +267,8 @@ export const styles = reactStyles({
   helpContainer: {
     fontSize: '12px',
     lineHeight: '22px',
+    gap: '1rem',
+    marginTop: '1rem',
   },
   renewalInnerHeaderContainer: {
     display: 'grid',

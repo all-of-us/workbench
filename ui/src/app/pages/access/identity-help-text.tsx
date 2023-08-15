@@ -52,80 +52,77 @@ export const IdentityHelpText = (props: {
     return null;
   }
 
-  return afterInitialClick ? (
-    <div style={styles.helpContainer}>
-      <div>
-        Looks like you still need to complete this action, please try again.
-      </div>
-      <ContactUs {...{ profile }} />
-    </div>
-  ) : (
-    <FlexColumn
-      style={{ ...styles.helpContainer, gap: '1rem', marginTop: '1rem' }}
-    >
-      <FlexRow>
+  return (
+    <FlexColumn style={styles.helpContainer}>
+      {afterInitialClick ? (
         <div>
-          <a href='/' target='blank'>
-            Click here
-          </a>{' '}
-          to review the verification steps.
+          Looks like you still need to complete this action, please try again.
         </div>
-      </FlexRow>
-      <FlexColumn
-        style={{
-          padding: '1rem',
-          backgroundColor: '#E8F1F8',
-          borderRadius: '3px',
-        }}
-      >
-        <FlexRow>
-          <div style={styles.identityProviderDescription}>
-            <img
-              src={loginGovLogo}
-              alt='Login Gov Logo'
-              style={{ height: '16px' }}
-            />
-            <div>
-              For <b>U.S. residents only</b>
-            </div>
-            <a
-              href='https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/'
-              target='_blank'
-            >
-              View required documents
-            </a>
+      ) : (
+        <>
+          <div>
+            <a href='/' target='blank'>
+              Click here
+            </a>{' '}
+            to review the verification steps.
           </div>
-          <div style={styles.identityProviderDescription}>
-            <img
-              src={idMeLogo}
-              alt='all of us logo'
-              style={{ height: '16px' }}
-            />
+          <FlexColumn
+            style={{
+              padding: '1rem',
+              backgroundColor: '#E8F1F8',
+              borderRadius: '3px',
+            }}
+          >
+            <FlexRow>
+              <div style={styles.identityProviderDescription}>
+                <img
+                  src={loginGovLogo}
+                  alt='Login Gov Logo'
+                  style={{ height: '16px' }}
+                />
+                <div>
+                  For <b>U.S. residents only</b>
+                </div>
+                <a
+                  href='https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/'
+                  target='_blank'
+                >
+                  View required documents
+                </a>
+              </div>
+              <div style={styles.identityProviderDescription}>
+                <img
+                  src={idMeLogo}
+                  alt='all of us logo'
+                  style={{ height: '16px' }}
+                />
+                <div>
+                  For <b>U.S. residents and international users</b>
+                </div>
+                <a
+                  href='https://help.id.me/hc/en-us/articles/4415460350871-Documents-to-verify-your-identity'
+                  target='_blank'
+                >
+                  View required documents
+                </a>
+              </div>
+            </FlexRow>
+          </FlexColumn>
+          <FlexRow style={{ gap: '1rem' }}>
+            <img src={hhsLogo} alt='HHS logo' style={{ height: '3rem' }} />
             <div>
-              For <b>U.S. residents and international users</b>
+              During the ID.ME verification process, you will be directed to a
+              secure webpage hosted by the U.S.. Department of Health and Human
+              Services external management system (<b>HHS XMS</b>). To proceed
+              with data access, click on the <b>'Allow'</b> button to grant the
+              necessary permissions.
             </div>
-            <a
-              href='https://help.id.me/hc/en-us/articles/4415460350871-Documents-to-verify-your-identity'
-              target='_blank'
-            >
-              View required documents
-            </a>
-          </div>
-        </FlexRow>
-      </FlexColumn>
-      <FlexRow style={{ gap: '1rem' }}>
-        <img src={hhsLogo} alt='HHS logo' style={{ height: '3rem' }} />
-        <div>
-          During the ID.ME verification process, you will be directed to a
-          secure webpage hosted by the U.S.. Department of Health and Human
-          Services external management system (<b>HHS XMS</b>). To proceed with
-          data access, click on the <b>'Allow'</b> button to grant the necessary
-          permissions.
-        </div>
-      </FlexRow>
-      <Button style={{ alignSelf: 'end' }} onClick={onClick}>
-        Get Started
-      </Button>
+          </FlexRow>
+          <Button style={{ alignSelf: 'end' }} onClick={onClick}>
+            Get Started
+          </Button>
+        </>
+      )}
       <ContactUs {...{ profile }} />
     </FlexColumn>
   );
