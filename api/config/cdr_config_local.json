@@ -178,7 +178,7 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "enabledTanagra": true
+      "tanagraEnabled": true
     },
     {
       "cdrVersionId": 11,
@@ -195,7 +195,7 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
-      "enabledTanagra": true
+      "tanagraEnabled": true
     }
   ]
 }

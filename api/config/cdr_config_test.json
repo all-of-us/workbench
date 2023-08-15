@@ -160,7 +160,7 @@
       "hasCopeSurveyData": true,
       "hasSurveyConductData": true,
       "accessTier": "registered",
-      "enabledTanagra": true
+      "tanagraEnabled": true
     },
     {
       "cdrVersionId": 10,
@@ -183,7 +183,7 @@
       "wgsCramManifestPath": "wgs/cram/manifest.csv",
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
-      "enabledTanagra": true
+      "tanagraEnabled": true
     }
   ]
 }
