@@ -159,7 +159,7 @@
     },
     {
       "cdrVersionId": 10,
-      "isDefault": true,
+      "isDefault": false,
       "name": "Synthetic Dataset in the Controlled Tier v4 - Tanagra",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "SC2023Q3R1",
@@ -182,7 +182,7 @@
     },
     {
       "cdrVersionId": 11,
-      "isDefault": true,
+      "isDefault": false,
       "name": "Synthetic Dataset v4 - Tanagra",
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "SR2023Q3R1",
