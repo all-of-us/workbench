@@ -50,6 +50,7 @@ public interface LeonardoMapper {
   @Mapping(target = "workerPrivateAccess", ignore = true)
   @Mapping(target = "region", ignore = true)
   @Mapping(target = "configType", ignore = true)
+  @Mapping(target = "additionalProperties", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig toLeonardoMachineConfig(
       DataprocConfig dataprocConfig);
 
@@ -68,13 +69,6 @@ public interface LeonardoMapper {
   GceConfig toGceConfig(
       org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig);
 
-  @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
-  @Mapping(target = "zone", ignore = true)
-  @Mapping(target = "configType", ignore = true)
-  org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig toLeonardoGceConfig(
-      GceConfig gceConfig);
-
   @Mapping(target = "persistentDisk", source = "DiskConfig")
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
@@ -91,6 +85,7 @@ public interface LeonardoMapper {
       org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
           leonardoPersistentDiskRequest);
 
+  @Mapping(target = "additionalProperties", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
       toLeonardoPersistentDiskRequest(PersistentDiskRequest persistentDiskRequest);
 
@@ -98,14 +93,18 @@ public interface LeonardoMapper {
   @Mapping(target = "cloudService", ignore = true)
   @Mapping(target = "zone", ignore = true)
   @Mapping(target = "configType", ignore = true)
+  @Mapping(target = "additionalProperties", ignore = true)
+  @Mapping(target = "gpuConfig.additionalProperties", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig toLeonardoGceWithPdConfig(
       GceWithPdConfig gceWithPdConfig);
 
   @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "diskSize", source = "persistentDisk.size")
+  @Mapping(target = "additionalProperties", ignore = true)
   UpdateGceConfig toLeonardoUpdateGceConfig(GceWithPdConfig gceWithPdConfig);
 
   @Mapping(target = "cloudService", constant = "DATAPROC")
+  @Mapping(target = "additionalProperties", ignore = true)
   UpdateDataprocConfig toLeonardoUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
   @AfterMapping
@@ -187,7 +186,6 @@ public interface LeonardoMapper {
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
   @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(
@@ -200,7 +198,6 @@ public interface LeonardoMapper {
   @Mapping(target = "autopauseThreshold", ignore = true)
   @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceConfig", ignore = true)
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
@@ -238,10 +235,12 @@ public interface LeonardoMapper {
       qualifiedByName = "cloudContextToGoogleProject")
   UserAppEnvironment toApiApp(ListAppResponse app);
 
+  @Mapping(target = "autoscalingEnabled", ignore = true)
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
       org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
           leonardoKubernetesRuntimeConfig);
 
+  @Mapping(target = "additionalProperties", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
       toLeonardoKubernetesRuntimeConfig(KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
@@ -304,7 +303,7 @@ public interface LeonardoMapper {
       if (diskConfig != null) {
         runtime.gceWithPdConfig(toGceWithPdConfig(leonardoGceConfig, diskConfig));
       } else {
-        runtime.gceConfig(toGceConfig(leonardoGceConfig));
+        throw new IllegalArgumentException("Disk config should always exist");
       }
     } else {
       throw new IllegalArgumentException(

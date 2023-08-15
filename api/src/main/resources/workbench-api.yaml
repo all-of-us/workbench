@@ -6534,9 +6534,6 @@ definitions:
         type: string
         description: The tool docker image to install. May be Dockerhub or GCR. If not
           set, a default Jupyter image will be installed.
-      gceConfig:
-        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
-        "$ref": "#/definitions/GceConfig"
       gceWithPdConfig:
         description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceWithPdConfig"
@@ -6703,25 +6700,6 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
-  GceConfig:
-    description: Configuration for Google Compute Engine instances.
-    properties:
-      diskSize:
-        type: integer
-        description: >
-          Optional, the size in gigabytes of the disk on the GCE VM.
-          Minimum size is 50GB. If unspecified, default size is 100GB.
-      machineType:
-        type: string
-        description: >
-          Optional, the machine type determines the number of CPUs and memory
-          for the master node. For example "n1-standard-16"
-          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
-          see https://cloud.google.com/compute/docs/machine-types
-      gpuConfig:
-        $ref: "#/definitions/GpuConfig"
-        description: >
-          Optional, a config that describes the gpus associated with a runtime
   GceWithPdConfig:
     description: Configuration for Google Compute Engine instances with Persistent Disk.
     properties:
