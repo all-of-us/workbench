@@ -61,7 +61,10 @@ export const IdentityHelpText = (props: {
       ) : (
         <>
           <div>
-            <a href='/' target='blank'>
+            <a
+              href='https://support.researchallofus.org/hc/en-us/articles/18278298730644--Placeholder-ID-me-Article-'
+              target='blank'
+            >
               Click here
             </a>{' '}
             to review the verification steps.
