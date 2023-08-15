@@ -96,7 +96,7 @@ export const IdentityHelpText = (props: {
               <div style={styles.identityProviderDescription}>
                 <img
                   src={idMeLogo}
-                  alt='all of us logo'
+                  alt='ID Me logo'
                   style={{ height: '16px' }}
                 />
                 <div>
