@@ -668,7 +668,6 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     userSuspended,
   } = props;
   const { loadingError } = useStore(runtimeStore);
-  const { enableGenomicExtraction } = serverConfigStore.get().config;
   const { config } = useStore(serverConfigStore);
   const defaultIcons: SidebarIconId[] = [
     'criteria',
@@ -696,10 +695,7 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     keys.push('runtimeConfig', 'terminal');
   }
 
-  if (
-    enableGenomicExtraction &&
-    getCdrVersion(workspace, cdrVersionTiersResponse).hasWgsData
-  ) {
+  if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {
     keys.push('genomicExtractions');
   }
 

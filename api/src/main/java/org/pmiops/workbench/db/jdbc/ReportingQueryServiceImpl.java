@@ -10,6 +10,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFrom
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.workspaceActiveStatusToStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 import static org.pmiops.workbench.workspaces.WorkspaceUtils.getBillingAccountType;
 
@@ -33,6 +34,7 @@ import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +71,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveys(
+  public List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
@@ -96,7 +98,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingCohort> getCohorts(long limit, long offset) {
+  public List<ReportingCohort> getCohortBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -209,7 +211,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingUser> getUsers(long limit, long offset) {
+  public List<ReportingUser> getUserBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -226,8 +228,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.disabled,\n"
                 + "  uame.era_commons_bypass_time,\n"
                 + "  uame.era_commons_completion_time,\n"
-                + "  uaml.ras_login_gov_bypass_time,\n"
-                + "  uaml.ras_login_gov_completion_time,\n"
+                + "  uami.identity_bypass_time,\n"
+                + "  uami.identity_completion_time,\n"
+                + "  iv.identity_verification_system,\n"
                 + "  u.family_name,\n"
                 // temporary solution for RW-6566
                 + "  uat.first_enabled AS first_registration_completion_time,\n"
@@ -318,12 +321,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  ) uame ON u.user_id = uame.user_id "
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
-                + "      uam.bypass_time AS ras_login_gov_bypass_time, "
-                + "      uam.completion_time AS ras_login_gov_completion_time "
+                + "      uam.bypass_time AS identity_bypass_time, "
+                + "      uam.completion_time AS identity_completion_time "
                 + "    FROM user_access_module uam "
                 + "    JOIN access_module am ON am.access_module_id=uam.access_module_id "
-                + "    WHERE am.name = 'RAS_LOGIN_GOV' "
-                + "  ) uaml ON u.user_id = uaml.user_id "
+                + "    WHERE am.name = 'IDENTITY' "
+                + "  ) uami ON u.user_id = uami.user_id "
+                + "  LEFT OUTER JOIN identity_verification AS iv on u.user_id = iv.user_id"
                 + "  LEFT OUTER JOIN ( "
                 + "    SELECT uam.user_id, "
                 + "      uam.bypass_time AS two_factor_auth_bypass_time, "
@@ -371,10 +375,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .eraCommonsBypassTime(offsetDateTimeUtc(rs.getTimestamp("era_commons_bypass_time")))
                 .eraCommonsCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("era_commons_completion_time")))
-                .rasLoginGovBypassTime(
-                    offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_bypass_time")))
-                .rasLoginGovCompletionTime(
-                    offsetDateTimeUtc(rs.getTimestamp("ras_login_gov_completion_time")))
+                .identityBypassTime(offsetDateTimeUtc(rs.getTimestamp("identity_bypass_time")))
+                .identityCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("identity_completion_time")))
+                .identityVerificationSystem(rs.getString("identity_verification_system"))
                 .familyName(rs.getString("family_name"))
                 .firstRegistrationCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))
@@ -420,7 +424,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingWorkspace> getWorkspaces(long limit, long offset) {
+  public List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset) {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
@@ -462,10 +466,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
                 + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
+                + "WHERE active_status = "
+                + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE)
+                + "\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
-            limit, offset),
+            limit,
+            offset),
         (rs, unused) ->
             new ReportingWorkspace()
                 .accessTierShortName(rs.getString("access_tier_short_name"))
@@ -508,8 +516,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getWorkspacesCount() {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace", Integer.class);
+  public int getWorkspaceCount() {
+    return jdbcTemplate.queryForObject(
+        "SELECT count(*) FROM workspace WHERE active_status = "
+            + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
+        Integer.class);
   }
 
   @Override
@@ -518,12 +529,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getCohortsCount() {
+  public int getCohortCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
   }
 
   @Override
-  public int getNewUserSatisfactionSurveysCount() {
+  public int getNewUserSatisfactionSurveyCount() {
     return jdbcTemplate.queryForObject(
         "SELECT count(*) FROM new_user_satisfaction_survey", Integer.class);
   }

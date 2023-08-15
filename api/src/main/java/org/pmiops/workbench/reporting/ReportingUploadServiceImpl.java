@@ -1,6 +1,5 @@
 package org.pmiops.workbench.reporting;
 
-import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
 import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer.generateInsertId;
 
 import com.google.cloud.bigquery.BigQueryError;
@@ -31,7 +30,6 @@ import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
@@ -115,37 +113,41 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /** Batch uploads {@link ReportingWorkspace}. */
   @Override
-  public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
+  public void uploadWorkspaceBatch(List<ReportingWorkspace> batch, long captureTimestamp) {
     uploadBatchTable(
         workspaceRequestBuilder.build(
-            getTableId(WorkspaceColumnValueExtractor.class),
+            getTableId(WorkspaceColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
   }
 
   /** Batch uploads {@link ReportingUser}. */
   @Override
-  public void uploadBatchUser(List<ReportingUser> batch, long captureTimestamp) {
+  public void uploadUserBatch(List<ReportingUser> batch, long captureTimestamp) {
     uploadBatchTable(
         userRequestBuilder.build(
-            getTableId(UserColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
+            getTableId(UserColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
   }
 
   /** Batch uploads {@link ReportingCohort}. */
   @Override
-  public void uploadBatchCohort(List<ReportingCohort> batch, long captureTimestamp) {
+  public void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp) {
     uploadBatchTable(
         cohortRequestBuilder.build(
-            getTableId(CohortColumnValueExtractor.class), batch, getFixedValues(captureTimestamp)));
+            getTableId(CohortColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
   }
 
   /** Batch uploads {@link ReportingNewUserSatisfactionSurvey}. */
   @Override
-  public void uploadBatchNewUserSatisfactionSurveys(
+  public void uploadNewUserSatisfactionSurveyBatch(
       List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp) {
     uploadBatchTable(
         newUserSatisfactionSurveyRequestBuilder.build(
-            getTableId(NewUserSatisfactionSurveyColumnValueExtractor.class),
+            getTableId(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
   }
@@ -207,15 +209,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     return reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
-  private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(
-      Class<E> columnValueExtractorClass) {
-    final String projectId = configProvider.get().server.projectId;
-    final String dataset = configProvider.get().reporting.dataset;
-
-    return TableId.of(projectId, dataset, getBigQueryTableName(columnValueExtractorClass));
-  }
-
-  private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(String tableName) {
+  private TableId getTableId(String tableName) {
     final String projectId = configProvider.get().server.projectId;
     final String dataset = configProvider.get().reporting.dataset;
 
@@ -229,43 +223,43 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
     resultBuilder.addAll(
         datasetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetColumnValueExtractor.class),
+            getTableId(DatasetColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getDatasets(),
             fixedValues,
             batchSize));
     resultBuilder.addAll(
         datasetCohortRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetCohortColumnValueExtractor.class),
+            getTableId(DatasetCohortColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getDatasetCohorts(),
             fixedValues,
             batchSize));
     resultBuilder.addAll(
         datasetConceptSetRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetConceptSetColumnValueExtractor.class),
+            getTableId(DatasetConceptSetColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getDatasetConceptSets(),
             fixedValues,
             batchSize));
     resultBuilder.addAll(
         datasetDomainIIdValueRequestBuilder.buildBatchedRequests(
-            getTableId(DatasetDomainColumnValueExtractor.class),
+            getTableId(DatasetDomainColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getDatasetDomainIdValues(),
             fixedValues,
             batchSize));
     resultBuilder.addAll(
         institutionRequestBuilder.buildBatchedRequests(
-            getTableId(InstitutionColumnValueExtractor.class),
+            getTableId(InstitutionColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getInstitutions(),
             fixedValues,
             batchSize));
     resultBuilder.addAll(
         workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
-            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.class),
+            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.TABLE_NAME),
             reportingSnapshot.getWorkspaceFreeTierUsage(),
             fixedValues,
             batchSize));
 
     return resultBuilder.build().stream()
-        .filter(r -> r.getRows().size() > 0)
+        .filter(r -> !r.getRows().isEmpty())
         .collect(ImmutableList.toImmutableList());
   }
 

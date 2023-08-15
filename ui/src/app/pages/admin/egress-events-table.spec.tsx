@@ -39,7 +39,7 @@ describe('EgressEventsTable', () => {
       .find('.p-dropdown-item')
       .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
       .simulate('click');
-    wrapper.find('.p-row-editor-save-icon').simulate('click');
+    wrapper.find('[type="button"]').find('[name="row-save"]').simulate('click');
     await waitForFakeTimersAndUpdate(wrapper);
   };
 

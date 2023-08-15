@@ -26,6 +26,7 @@ public enum NewUserSatisfactionSurveyColumnValueExtractor
   ADDITIONAL_INFO("additional_info", ReportingNewUserSatisfactionSurvey::getAdditionalInfo);
 
   public static final String TABLE_NAME = "new_user_satisfaction_survey";
+
   private final String parameterName;
   private final Function<ReportingNewUserSatisfactionSurvey, Object> rowToInsertValueFunction;
 
@@ -34,11 +35,6 @@ public enum NewUserSatisfactionSurveyColumnValueExtractor
       Function<ReportingNewUserSatisfactionSurvey, Object> rowToInsertValueFunction) {
     this.parameterName = parameterName;
     this.rowToInsertValueFunction = rowToInsertValueFunction;
-  }
-
-  @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
   }
 
   @Override

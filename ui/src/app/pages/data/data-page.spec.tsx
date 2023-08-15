@@ -39,7 +39,7 @@ describe('DataPage', () => {
     registerApiClient(DataSetApi, new DataSetApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     serverConfigStore.set({
-      config: { enableGenomicExtraction: true, gsuiteDomain: '' },
+      config: { gsuiteDomain: '' },
     });
     currentWorkspaceStore.next(workspaceDataStub);
   });

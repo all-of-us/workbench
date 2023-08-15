@@ -9,6 +9,8 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
+
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 const listAppsAppResponseSharedDefaults = {
@@ -46,8 +48,8 @@ const createRStudioListAppsResponseDefaults: UserAppEnvironment = {
   appName: 'all-of-us-2-rstudio-1234',
   appType: AppType.RSTUDIO,
   proxyUrls: {
-    'rstudio-service':
-      'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-rstudio-1234/rstudio',
+    [GKE_APP_PROXY_PATH_SUFFIX]:
+      'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-rstudio-1234/app',
   },
   diskName: 'all-of-us-pd-2-rstudio-1234',
   labels: {

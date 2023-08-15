@@ -117,7 +117,6 @@
     "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
-    "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
     "enableDataExplorer": false,
     "enableTanagra": true
@@ -188,5 +187,8 @@
   },
   "termsOfService": {
     "latestAouVersion": 1
+  },
+  "tanagra": {
+    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
   }
 }

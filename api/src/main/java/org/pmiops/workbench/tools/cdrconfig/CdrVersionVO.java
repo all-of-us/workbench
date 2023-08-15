@@ -25,6 +25,7 @@ public class CdrVersionVO {
   public Boolean hasCopeSurveyData;
   public Boolean hasFitbitSleepData;
   public Boolean hasSurveyConductData;
+  public Boolean tanagraEnabled;
   public String storageBasePath;
   public String wgsVcfMergedStoragePath;
   public String wgsHailStoragePath;

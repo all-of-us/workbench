@@ -6,12 +6,10 @@ import com.google.cloud.bigquery.TableId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /**
@@ -70,11 +68,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T>
     final ImmutableMap.Builder<String, Object> columnToValueBuilder = ImmutableMap.builder();
     columnToValueBuilder.putAll(fixedValues); // assumed to have non-null values
     Arrays.stream(getQueryParameterColumns())
-        .map(
-            col ->
-                new AbstractMap.SimpleImmutableEntry<>(
-                    col.getParameterName(), col.getRowToInsertValue(model)))
-        .filter(e -> Objects.nonNull(e.getValue()))
+        .flatMap(col -> col.getRowToInsertEntry(model))
         .forEach(columnToValueBuilder::put);
 
     return RowToInsert.of(generateInsertId(), columnToValueBuilder.build());

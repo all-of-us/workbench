@@ -68,7 +68,7 @@ describe('DataSetPage', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(NotebooksApi, new NotebooksApiStub());
     serverConfigStore.set({
-      config: { enableGenomicExtraction: true, gsuiteDomain: '' },
+      config: { gsuiteDomain: '' },
     });
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
@@ -579,55 +579,53 @@ describe('DataSetPage', () => {
     ).toBeFalsy();
   });
 
-  it('should display Pre packaged concept set as per CDR data', async () => {
+  // TODO: rewrite this so it's not dependent on modifying global test state!
+
+  it('should display Prepackaged concept set as per CDR data', async () => {
+    // this test needs to modify a CDR version.
+    // Let's save the original so we can restore it later.
+    const originalCdrVersion = cdrVersionTiersResponse.tiers[0].versions[0];
+
     let wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
     ).toBe(15);
 
-    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0] = {
+      ...originalCdrVersion,
+      hasWgsData: false,
+    };
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
     ).toBe(14);
 
-    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
-    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
+    cdrVersionTiersResponse.tiers[0].versions[0] = {
+      ...originalCdrVersion,
+      hasFitbitData: false,
+      hasWgsData: true,
+    };
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
     ).toBe(11);
 
-    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
-    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0] = {
+      ...originalCdrVersion,
+      hasFitbitData: false,
+      hasWgsData: false,
+    };
     wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(
       wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
     ).toBe(10);
-  });
 
-  it('should display Pre packaged concept set per genomics extraction flag', async () => {
-    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = true;
-    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
-
-    let wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(15);
-
-    serverConfigStore.set({
-      config: { enableGenomicExtraction: false, gsuiteDomain: '' },
-    });
-    wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(
-      wrapper.find('[data-test-id="prePackage-concept-set-item"]').length
-    ).toBe(14);
+    // restore original CDR Version for other tests
+    cdrVersionTiersResponse.tiers[0].versions[0] = originalCdrVersion;
   });
 
   it('should open Export modal if Analyze is clicked and WGS concept is not selected', async () => {
