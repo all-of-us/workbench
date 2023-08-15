@@ -11,8 +11,8 @@ import { MaybeModule } from './maybe-module';
 interface InitialCardProps {
   profile: Profile;
   modules: AccessModule[];
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  focusedModule: AccessModule;
+  activeModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
   children?: string | React.ReactNode;
 }
@@ -21,8 +21,8 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
   const {
     profile,
     modules,
-    activeModule,
-    clickableModules,
+    focusedModule,
+    activeModules,
     spinnerProps,
     children,
   } = props;
@@ -33,8 +33,8 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
         <MaybeModule
           {...{ moduleName, profile, spinnerProps }}
           key={moduleName}
-          active={activeModule === moduleName}
-          clickable={clickableModules.includes(moduleName)}
+          focused={focusedModule === moduleName}
+          active={activeModules.includes(moduleName)}
           style={{
             marginTop:
               index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING

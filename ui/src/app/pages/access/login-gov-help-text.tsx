@@ -39,20 +39,20 @@ export const LoginGovHelpText = (props: {
 
   // don't return help text if complete or bypassed
   const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.RASLINKLOGINGOV)
+    getAccessModuleStatusByName(profile, AccessModule.IDENTITY)
   );
 
   return (
     needsHelp &&
     (afterInitialClick ? (
-      <div style={styles.loginGovHelp}>
+      <div style={styles.helpContainer}>
         <div>
           Looks like you still need to complete this action, please try again.
         </div>
         <ContactUs {...{ profile }} />
       </div>
     ) : (
-      <div style={styles.loginGovHelp}>
+      <div style={styles.helpContainer}>
         <div>
           Verifying your identity helps us keep participant data safe. You’ll
           need to provide your state ID, social security number, and phone

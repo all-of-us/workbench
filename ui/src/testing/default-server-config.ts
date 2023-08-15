@@ -12,7 +12,7 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.RASLINKLOGINGOV,
+    name: AccessModule.IDENTITY,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,

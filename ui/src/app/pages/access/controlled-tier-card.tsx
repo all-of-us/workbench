@@ -49,12 +49,12 @@ const ControlledTierEraModule = (props: {
   const status = getAccessModuleStatusByName(profile, moduleName);
 
   // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const clickable = eligible && !isCompliant(status);
+  const active = eligible && !isCompliant(status);
 
   return (
     <Module
-      {...{ clickable, eligible, moduleName, profile, spinnerProps, status }}
-      active={false}
+      {...{ active, eligible, moduleName, profile, spinnerProps, status }}
+      focused={false}
       moduleAction={redirectToNiH}
     />
   );
@@ -93,13 +93,13 @@ const ControlledTierStep = (props: {
 
 export const ControlledTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  focusedModule: AccessModule;
+  activeModules: AccessModule[];
   reload: Function;
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+  const { profile, focusedModule, activeModules, spinnerProps, pageMode } =
     props;
   const controlledTierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
@@ -190,7 +190,7 @@ export const ControlledTierCard = (props: {
         {enableComplianceTraining &&
           pageMode === DARPageMode.INITIAL_REGISTRATION && (
             <ModulesForInitialRegistration
-              {...{ profile, activeModule, clickableModules, spinnerProps }}
+              {...{ profile, focusedModule, activeModules, spinnerProps }}
               modules={[ctModule]}
             />
           )}

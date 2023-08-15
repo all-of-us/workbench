@@ -23,7 +23,7 @@ import { ModulesForInitialRegistration } from './modules-for-initial-registratio
 
 // Sep 16 hack while we work out some RAS bugs
 const TemporaryRASModule = (props: { profile: Profile }) => {
-  const moduleName = AccessModule.RASLINKLOGINGOV;
+  const moduleName = AccessModule.IDENTITY;
   const { DARTitleComponent } = getAccessModuleConfig(moduleName);
   return (
     <FlexRow data-test-id={`module-${moduleName}`}>
@@ -71,12 +71,12 @@ const RtDataDetailHeader = (props: { pageMode: DARPageMode }) => {
 
 export const RegisteredTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  focusedModule: AccessModule;
+  activeModules: AccessModule[];
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+  const { profile, focusedModule, activeModules, spinnerProps, pageMode } =
     props;
   const rtDisplayName = AccessTierDisplayNames.Registered;
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
@@ -104,7 +104,7 @@ export const RegisteredTierCard = (props: {
       </FlexColumn>
       {pageMode === DARPageMode.INITIAL_REGISTRATION ? (
         <ModulesForInitialRegistration
-          {...{ profile, activeModule, clickableModules, spinnerProps }}
+          {...{ profile, focusedModule, activeModules, spinnerProps }}
           modules={getEligibleModules(initialRtModules, profile)}
         >
           {!enableRasLoginGovLinking && <TemporaryRASModule {...{ profile }} />}

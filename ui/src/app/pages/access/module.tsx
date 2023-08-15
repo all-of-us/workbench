@@ -13,6 +13,7 @@ import {
   getStatusText,
   isCompliant,
 } from 'app/utils/access-utils';
+import { serverConfigStore } from 'app/utils/stores';
 
 import { styles } from './data-access-requirements';
 import { ModuleIcon } from './module-icon';
@@ -43,9 +44,9 @@ const ModuleBox = (props: {
 };
 
 export const Module = (props: {
-  active: boolean;
+  focused: boolean;
   children?: ReactNode;
-  clickable: boolean;
+  active: boolean;
   eligible: boolean;
   moduleAction: Function;
   moduleName: AccessModule;
@@ -55,9 +56,9 @@ export const Module = (props: {
   style?;
 }) => {
   const {
-    active,
+    focused,
     children,
-    clickable,
+    active,
     eligible,
     moduleAction,
     moduleName,
@@ -66,6 +67,7 @@ export const Module = (props: {
     status,
     style,
   } = props;
+  const { enableRasIdMeLinking } = serverConfigStore.get().config;
   const { showSpinner } = spinnerProps;
   // whether to show the refresh button: this module has been clicked
   const [showRefresh, setShowRefresh] = useState(false);
@@ -78,16 +80,19 @@ export const Module = (props: {
       <FlexRow style={styles.moduleCTA}>
         {cond(
           [
-            (clickable || moduleName === AccessModule.ERACOMMONS) &&
+            (active || moduleName === AccessModule.ERACOMMONS) &&
               showRefresh &&
               !!refreshAction,
             () => <Refresh {...{ refreshAction, showSpinner }} />,
           ],
-          [active, () => <Next />]
+          [focused, () => <Next />]
         )}
       </FlexRow>
       <ModuleBox
-        {...{ clickable }}
+        clickable={
+          active &&
+          !(enableRasIdMeLinking && moduleName === AccessModule.IDENTITY)
+        }
         action={() => {
           setShowRefresh(true);
           moduleAction();
@@ -97,13 +102,13 @@ export const Module = (props: {
           {...{ moduleName, eligible }}
           completedOrBypassed={isCompliant(status)}
         />
-        <FlexColumn>
+        <FlexColumn style={{ flex: 1 }}>
           <div
             data-test-id={`module-${moduleName}-${
-              clickable ? 'clickable' : 'unclickable'
+              active ? 'clickable' : 'unclickable'
             }-text`}
             style={{
-              ...(clickable
+              ...(active
                 ? styles.clickableModuleText
                 : styles.backgroundModuleText),
               ...{ fontWeight: 500 },
@@ -112,6 +117,10 @@ export const Module = (props: {
             <DARTitleComponent
               {...{ profile }}
               afterInitialClick={showRefresh}
+              onClick={() => {
+                setShowRefresh(true);
+                moduleAction();
+              }}
             />
           </div>
           {isCompliant(status) && (

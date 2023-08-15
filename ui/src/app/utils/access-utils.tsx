@@ -15,6 +15,7 @@ import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
+import { IdentityHelpText } from 'app/pages/access/identity-help-text';
 import { LoginGovHelpText } from 'app/pages/access/login-gov-help-text';
 import { userIsDisabled } from 'app/routing/guards';
 import { profileApi } from 'app/services/swagger-fetch-clients';
@@ -137,6 +138,7 @@ export const ACCESS_RENEWAL_PATH =
 interface DARTitleComponentConfig {
   profile: Profile;
   afterInitialClick: boolean;
+  onClick?: Function;
 }
 
 interface AccessModuleUIConfig extends AccessModuleConfig {
@@ -161,6 +163,7 @@ export const getAccessModuleConfig = (
   moduleName: AccessModule
 ): AccessModuleUIConfig => {
   const {
+    enableRasIdMeLinking,
     enableRasLoginGovLinking,
     enableEraCommons,
     enableComplianceTraining,
@@ -183,12 +186,17 @@ export const getAccessModuleConfig = (
       }),
     ],
     [
-      AccessModule.RASLINKLOGINGOV,
+      AccessModule.IDENTITY,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableRasLoginGovLinking,
         DARTitleComponent: (props: DARTitleComponentConfig) => {
-          return (
+          return enableRasIdMeLinking ? (
+            <>
+              <div>Verify your identity</div>
+              <IdentityHelpText {...props} />
+            </>
+          ) : (
             <>
               <div>
                 Verify your identity with Login.gov{' '}
