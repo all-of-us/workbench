@@ -82,7 +82,7 @@ export const IdentityHelpText = (props: {
           <div style={styles.identityProviderDescription}>
             <img
               src={loginGovLogo}
-              alt='all of us logo'
+              alt='Login Gov Logo'
               style={{ height: '16px' }}
             />
             <div>
