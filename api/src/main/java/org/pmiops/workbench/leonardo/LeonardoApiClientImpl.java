@@ -172,13 +172,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
   }
 
   private OneOfRuntimeConfig buildRuntimeConfig(Runtime runtime) {
-    if (runtime.getGceConfig() != null) {
-      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig instance =
-          leonardoMapper
-              .toLeonardoGceConfig(runtime.getGceConfig())
-              .zone(workbenchConfigProvider.get().firecloud.gceVmZone);
-      return new OneOfRuntimeConfig(instance);
-    } else if (runtime.getGceWithPdConfig() != null) {
+    if (runtime.getGceWithPdConfig() != null) {
       org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig instance =
           leonardoMapper
               .toLeonardoGceWithPdConfig(runtime.getGceWithPdConfig())

@@ -193,7 +193,7 @@ public class RuntimeController implements RuntimeApiDelegate {
               LEONARDO_LABEL_IS_RUNTIME_TRUE));
     }
     long configCount =
-        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
+        Stream.of(runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
             .filter(c -> c != null)
             .count();
     if (configCount != 1) {
@@ -223,11 +223,9 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Runtime cannot be empty for an update request");
     }
 
-    if (!(runtimeRequest.getRuntime().getGceConfig() != null
-        ^ runtimeRequest.getRuntime().getGceWithPdConfig() != null
-        ^ runtimeRequest.getRuntime().getDataprocConfig() != null)) {
+    if ((runtimeRequest.getRuntime().getGceWithPdConfig() != null) || (runtimeRequest.getRuntime().getDataprocConfig() != null)) {
       throw new BadRequestException(
-          "Exactly one of GceConfig, GceWithPdConfig, or DataprocConfig must be provided");
+          "Exactly one of GceWithPdConfig, or DataprocConfig must be provided");
     }
 
     DbUser user = userProvider.get();
