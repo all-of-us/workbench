@@ -152,7 +152,7 @@ public class LeonardoMapperTest {
   @Test
   public void testToLeonardoAppType() {
     assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO))
-        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.RSTUDIO);
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED);
     assertThat(mapper.toLeonardoAppType(AppType.CROMWELL))
         .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL);
   }

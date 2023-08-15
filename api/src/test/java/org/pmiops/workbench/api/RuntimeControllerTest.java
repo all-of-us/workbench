@@ -34,16 +34,14 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CreateRuntimeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -76,7 +74,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
-import org.pmiops.workbench.leonardo.ApiException;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClientFactory;
 import org.pmiops.workbench.leonardo.LeonardoApiClientImpl;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
@@ -84,8 +82,7 @@ import org.pmiops.workbench.leonardo.LeonardoConfig;
 import org.pmiops.workbench.leonardo.LeonardoCustomEnvVarUtils;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
@@ -206,8 +203,8 @@ public class RuntimeControllerTest {
     }
   }
 
-  @Captor private ArgumentCaptor<LeonardoCreateRuntimeRequest> createRuntimeRequestCaptor;
-  @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
+  @Captor private ArgumentCaptor<CreateRuntimeRequest> createRuntimeRequestCaptor;
+  @Captor private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
   @MockBean ComplianceService mockComplianceService;
@@ -312,7 +309,7 @@ public class RuntimeControllerTest {
             .runtimeImages(Collections.singletonList(RUNTIME_IMAGE))
             .autopauseThreshold(AUTOPAUSE_THRESHOLD)
             .runtimeConfig(dataprocConfigObj)
-            .auditInfo(new LeonardoAuditInfo().createdDate(createdDate));
+            .auditInfo(new AuditInfo().createdDate(createdDate));
 
     testRuntime =
         new Runtime()
@@ -519,7 +516,7 @@ public class RuntimeControllerTest {
                             .cloudResource("google-project"))
                     .runtimeName("expected-runtime")
                     .status(ClusterStatus.CREATING)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .auditInfo(new AuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
@@ -557,7 +554,7 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeConfig(gceConfigObj)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .auditInfo(new AuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
@@ -587,7 +584,7 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeConfig(dataProcConfigObj)
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .auditInfo(new AuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
     Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
@@ -614,11 +611,11 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -636,7 +633,7 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
@@ -657,11 +654,11 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(null))
+                    .auditInfo(new AuditInfo().createdDate(null))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -679,11 +676,11 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("expected-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(""))
+                    .auditInfo(new AuditInfo().createdDate(""))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -702,11 +699,11 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("override-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override")),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -724,10 +721,10 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("override-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(newerTimestamp)),
+                    .auditInfo(new AuditInfo().createdDate(newerTimestamp)),
                 new ListRuntimeResponse()
                     .runtimeName("default-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
+                    .auditInfo(new AuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -744,7 +741,7 @@ public class RuntimeControllerTest {
             ImmutableList.of(
                 new ListRuntimeResponse()
                     .runtimeName("preset-runtime")
-                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .auditInfo(new AuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody().getRuntimeName())
@@ -768,7 +765,7 @@ public class RuntimeControllerTest {
                 .runtimeConfig(gceConfigObj)
                 .diskConfig(
                     new DiskConfig()
-                        .diskType(LeonardoDiskType.SSD)
+                        .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD)
                         .name("pd")
                         .blockSize(100)
                         .size(200)));
@@ -844,7 +841,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoMachineConfig createLeonardoMachineConfig =
@@ -878,7 +875,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoGceConfig createLeonardoGceConfig =
@@ -920,7 +917,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
@@ -934,7 +931,7 @@ public class RuntimeControllerTest {
 
     assertThat(createLeonardoGceWithPdConfig.getMachineType()).isEqualTo("standard");
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getDiskType())
-        .isEqualTo(LeonardoDiskType.SSD);
+        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.SSD);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getName()).isEqualTo(getPdName());
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getSize()).isEqualTo(500);
     assertThat(createLeonardoGceWithPdConfig.getPersistentDisk().getLabels()).isEqualTo(diskLabels);
@@ -1017,7 +1014,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("preset-hail-genomic-analysis");
   }
@@ -1037,7 +1034,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("preset-general-analysis");
   }
@@ -1057,7 +1054,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     assertThat(((Map<String, String>) createRuntimeRequest.getLabels()).get("all-of-us-config"))
         .isEqualTo("user-override");
   }
@@ -1081,7 +1078,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoGceConfig createLeonardoGceConfig =
@@ -1121,7 +1118,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
     LeonardoGceWithPdConfig createLeonardoGceWithPdConfig =
@@ -1165,7 +1162,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1189,7 +1186,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1214,7 +1211,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     Gson gson = new Gson();
     assertThat(
             gson.toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())
@@ -1239,7 +1236,7 @@ public class RuntimeControllerTest {
         .createRuntime(
             eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
 
-    LeonardoCreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
+    CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
     JsonObject envVars =
         new Gson()
             .toJsonTree(createRuntimeRequest.getCustomEnvironmentVariables())

@@ -43,8 +43,7 @@ import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudBillingClient;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DemographicSurveyV2;
 import org.pmiops.workbench.model.Disk;
@@ -386,9 +385,9 @@ public class TestMockFactory {
         new ListPersistentDiskResponse()
             .name(pdName)
             .size(300)
-            .diskType(LeonardoDiskType.STANDARD)
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
             .status(status)
-            .auditInfo(new LeonardoAuditInfo().createdDate(date).creator(user.getUsername()))
+            .auditInfo(new AuditInfo().createdDate(date).creator(user.getUsername()))
             .cloudContext(
                 new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProjectId));
     if (appType != null) {

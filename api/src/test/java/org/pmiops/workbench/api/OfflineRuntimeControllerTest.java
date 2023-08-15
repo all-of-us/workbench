@@ -46,8 +46,8 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -162,7 +162,7 @@ public class OfflineRuntimeControllerTest {
                 .cloudResource(String.format("proj-%d", runtimeProjectIdIndex++)))
         .status(ClusterStatus.RUNNING)
         .auditInfo(
-            new LeonardoAuditInfo()
+            new AuditInfo()
                 .createdDate(NOW.minus(age).toString())
                 .dateAccessed(NOW.minus(idleTime).toString()));
   }
@@ -192,14 +192,14 @@ public class OfflineRuntimeControllerTest {
   private ListPersistentDiskResponse idleDiskForProjectAndCreator(
       String googleProject, String creatorEmail, Duration idleTime) {
     return new ListPersistentDiskResponse()
-        .diskType(LeonardoDiskType.STANDARD)
-        .status(LeonardoDiskStatus.READY)
+        .diskType(DiskType.STANDARD)
+        .status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY)
         .cloudContext(
             new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(googleProject))
         .name("my-disk")
         .size(200)
         .auditInfo(
-            new LeonardoAuditInfo()
+            new AuditInfo()
                 .creator(creatorEmail)
                 .createdDate(NOW.minus(idleTime.plus(Duration.ofDays(1L))).toString())
                 .dateAccessed(NOW.minus(idleTime).toString()));
@@ -315,7 +315,7 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testCheckPersistentDisksSkipsNonReady() throws Exception {
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L)).status(LeonardoDiskStatus.FAILED)));
+    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L)).status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED)));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verifyNoInteractions(mockMailService);
