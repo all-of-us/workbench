@@ -1402,7 +1402,6 @@ describe('DataAccessRequirements', () => {
       findIncompleteModule(wrapper, AccessModule.IDENTITY).exists()
     ).toBeFalsy();
 
-    console.error(wrapper.debug());
     expect(findContactUs(wrapper).exists()).toBeFalsy();
   });
 
