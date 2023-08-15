@@ -29,8 +29,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -283,11 +283,11 @@ public class MailServiceImplTest {
         ImmutableList.of(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
         new ListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()
@@ -324,11 +324,11 @@ public class MailServiceImplTest {
         ImmutableList.of(user),
         new DbWorkspace().setName("my workspace").setCreator(user),
         new ListPersistentDiskResponse()
-            .diskType(LeonardoDiskType.SSD)
+            .diskType(DiskType.SSD)
             .labels(labelsMap)
             .size(123)
             .auditInfo(
-                new LeonardoAuditInfo()
+                new AuditInfo()
                     .createdDate(
                         FakeClockConfiguration.NOW
                             .toInstant()

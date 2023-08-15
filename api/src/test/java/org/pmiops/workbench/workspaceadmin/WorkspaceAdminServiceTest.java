@@ -58,7 +58,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -199,7 +199,7 @@ public class WorkspaceAdminServiceTest {
                     .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
             .status(ClusterStatus.DELETING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
+            .auditInfo(new AuditInfo().createdDate(CREATED_DATE));
     testLeoListRuntimeResponse =
         new org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
@@ -226,7 +226,7 @@ public class WorkspaceAdminServiceTest {
                     .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID_2))
             .status(ClusterStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
+            .auditInfo(new AuditInfo().createdDate(CREATED_DATE));
   }
 
   @Test

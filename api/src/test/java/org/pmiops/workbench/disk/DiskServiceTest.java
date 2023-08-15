@@ -57,7 +57,7 @@ public class DiskServiceTest {
     ListPersistentDiskResponse firstLPDR =
         createListPersistentDiskResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(200).toString(),
             GOOGLE_PROJECT_ID,
             user,
@@ -65,7 +65,7 @@ public class DiskServiceTest {
     ListPersistentDiskResponse secondLPDR =
         createListPersistentDiskResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(20000).toString(),
             GOOGLE_PROJECT_ID,
             user,
@@ -73,7 +73,7 @@ public class DiskServiceTest {
     ListPersistentDiskResponse thirdLPDR =
         createLeonardoListRuntimePDResponse(
             user.generatePDName(),
-            LeonardoDiskStatus.READY,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.READY,
             NOW.minusMillis(2000000).toString(),
             GOOGLE_PROJECT_ID,
             user);
