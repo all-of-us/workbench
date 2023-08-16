@@ -1741,10 +1741,10 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
-"@terra-ui-packages/components@^0.0.2":
-  version "0.0.2"
-  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/components/-/@terra-ui-packages/components-0.0.2.tgz#29410aacec654dae590bbe0371d3693555ccf92b"
-  integrity sha512-FHeYZH34TsGMlyjsD4ITEFm6EN6jc9JhaJEOnZNI0mAkhMfhcfNlrgvvdjgBereRCUGiasbxHIf/38H9Xred8w==
+"@terra-ui-packages/components@0.0.4":
+  version "0.0.4"
+  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/components/-/@terra-ui-packages/components-0.0.4.tgz#66f6ac4efe7f9253336670a192ad80a4ea96769c"
+  integrity sha512-Lix/vzPOeFsVqyv9QdCHSABfQB2tzTThV5j7VNdWTDO2EOdLiI09GnDx8zTgWPQMppkSDuC0vMScZP/3H4W6Yg==
   dependencies:
     lodash "^4.17.21"
 

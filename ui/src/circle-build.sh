@@ -4,8 +4,8 @@
 set -euo pipefail
 set -v
 
-gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
-echo "@terra-ui-packages:registry=https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages" >> .npmrc
+gsutil cat gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt \
+  >> .npmrc
 
 yarn install
 yarn deps
