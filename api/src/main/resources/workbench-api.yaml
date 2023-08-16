@@ -1181,6 +1181,21 @@ paths:
           description: Returns true if the notebooks have been copied to the workspace
           schema:
             type: boolean
+  "/v1/workspaces/access/{workspaceNamespace}":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+    get:
+      tags:
+        - workspaces
+      description: Returns the WorkspaceAccessLevel Enum as String for  workspace namespace
+      operationId: getWorkspaceAccess
+      responses:
+        200:
+          description: A workspace access level string
+          schema:
+            type: string
+        403:
+          description: Forbidden
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"

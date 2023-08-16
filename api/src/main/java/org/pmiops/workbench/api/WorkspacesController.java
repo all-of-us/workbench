@@ -436,6 +436,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
+  public ResponseEntity<String> getWorkspaceAccess(String workspaceNamespace) {
+    DbWorkspace workspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    WorkspaceAccessLevel accessLevel =
+        workspaceAuthService.getWorkspaceAccessLevel(
+            workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+    return ResponseEntity.ok(accessLevel.toString());
+  }
+
+  @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
     return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
