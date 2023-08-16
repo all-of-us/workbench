@@ -13,6 +13,7 @@ import static org.pmiops.workbench.utils.TestMockFactory.createRuntimeDisk;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Instant;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
@@ -29,7 +30,6 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -80,7 +80,9 @@ public class DisksControllerTest {
     }
   }
 
-  @Captor private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest> updateDiskRequestCaptor;
+  @Captor
+  private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDiskRequest>
+      updateDiskRequestCaptor;
 
   @MockBean LeonardoApiClient mockLeonardoApiClient;
   @MockBean WorkspaceService mockWorkspaceService;

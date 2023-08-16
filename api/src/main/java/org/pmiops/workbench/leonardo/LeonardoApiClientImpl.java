@@ -574,8 +574,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
         .customEnvironmentVariables(appCustomEnvVars)
         .labels(appLabels);
 
-    //TODO: this needs to be updated once we start SAS integration
-    if(appType == AppType.RSTUDIO)
+    // TODO: this needs to be updated once we start SAS integration
+    if (appType == AppType.RSTUDIO)
       leonardoCreateAppRequest.allowedChartName(AllowedChartName.AOU_RSTUDIO_CHART);
 
     leonardoRetryHandler.run(
