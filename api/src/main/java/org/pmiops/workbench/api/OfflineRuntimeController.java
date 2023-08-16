@@ -8,12 +8,8 @@ import jakarta.mail.MessagingException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -365,8 +361,8 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
           .flatMap(
               runtime ->
                   Stream.ofNullable(
-                      runtime.getRuntimeConfig().getGceWithPdConfig().getPersistentDisk()))
-          .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
+                      runtime.getRuntimeConfig().getGceWithPdConfigInResponse().getPersistentDiskId()))
+          .anyMatch(Objects::nonNull);
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()
           .anyMatch(userAppEnvironment -> diskName.equals(userAppEnvironment.getDiskName()));

@@ -15,11 +15,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.google.gson.JsonObject;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfigInResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -295,6 +298,19 @@ public class LeonardoApiClientTest {
     boolean deleteDisk = true;
     leonardoApiClient.deleteApp(appName, testWorkspace, deleteDisk);
     verify(userAppsApi).deleteApp(GOOGLE_PROJECT_ID, appName, deleteDisk);
+  }
+
+  @Test
+  public void testRuntimeConfigDeserializer() throws Exception {
+//    OneOfRuntimeConfigInResponse resp = new OneOfRuntimeConfigInResponse().getGceWithPdConfigInResponse();
+    JsonObject instance = new JsonObject();
+    instance.addProperty("machineType", "n1-standard-4");
+    instance.addProperty("persistentDiskId", 21535);
+    instance.addProperty("cloudService", "GCE");
+    instance.addProperty("bootDiskSize", 120);
+    instance.addProperty("zone", "us-central1-c");
+    instance.addProperty("configType", "GceWithPdConfig");
+    OneOfRuntimeConfigInResponse.validateJsonObject(instance);
   }
 
   private void stubGetFcWorkspace(WorkspaceAccessLevel accessLevel) {
