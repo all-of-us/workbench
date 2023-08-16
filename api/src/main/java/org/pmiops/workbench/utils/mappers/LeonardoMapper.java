@@ -66,14 +66,11 @@ public interface LeonardoMapper {
         .componentGatewayEnabled(true);
   }
 
-  GceConfig toGceConfig(
-      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig);
-
   @Mapping(target = "persistentDisk", source = "DiskConfig")
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
   GceWithPdConfig toGceWithPdConfig(
-      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse leonardoGceConfig,
       DiskConfig DiskConfig);
 
   @Mapping(target = "labels", ignore = true)
@@ -208,10 +205,11 @@ public interface LeonardoMapper {
 
   @AfterMapping
   default void getRuntimeAfterMapper(
-      @MappingTarget Runtime runtime, GetRuntimeResponse GetRuntimeResponse) {
-    mapLabels(runtime, GetRuntimeResponse.getLabels());
+      @MappingTarget Runtime runtime, GetRuntimeResponse getRuntimeResponse) {
+    mapLabels(runtime, getRuntimeResponse.getLabels());
+
     mapRuntimeConfig(
-        runtime, GetRuntimeResponse.getRuntimeConfig(), GetRuntimeResponse.getDiskConfig());
+        runtime, getRuntimeResponse.getRuntimeConfig(), getRuntimeResponse.getDiskConfig());
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -253,6 +251,8 @@ public interface LeonardoMapper {
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
   @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
   @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS apps
+  @ValueMapping(source = "WORKFLOWS_APP", target = MappingConstants.NULL) // we don't support WDS apps
+  @ValueMapping(source = "CROMWELL_RUNNER_APP", target = MappingConstants.NULL) // we don't support WDS apps
   @ValueMapping(
       source = "ALLOWED",
       target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
@@ -278,37 +278,20 @@ public interface LeonardoMapper {
   }
 
   default void mapRuntimeConfig(
-      Runtime runtime, Object runtimeConfigObj, @Nullable DiskConfig diskConfig) {
+      Runtime runtime, OneOfRuntimeConfigInResponse runtimeConfigObj, @Nullable DiskConfig diskConfig) {
     if (runtimeConfigObj == null) {
       return;
     }
 
-    Gson gson = new Gson();
-    String runtimeConfigJson = gson.toJson(runtimeConfigObj);
-    RuntimeConfig runtimeConfig = gson.fromJson(runtimeConfigJson, RuntimeConfig.class);
-
-    if (CloudServiceEnum.DATAPROC.equals(runtimeConfig.getCloudService())) {
+    if (runtimeConfigObj.getActualInstance() instanceof org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig) {
       runtime.dataprocConfig(
-          toDataprocConfig(
-              gson.fromJson(
-                  runtimeConfigJson,
-                  org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.class)));
-    } else if (CloudServiceEnum.GCE.equals(runtimeConfig.getCloudService())) {
-      // Unfortunately the discriminator does not allow us to distinguish plain GCE config
-      // from GceWithPd; use the diskConfig to help differentiate.
-      org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig =
-          gson.fromJson(
-              runtimeConfigJson,
-              org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.class);
-      if (diskConfig != null) {
-        runtime.gceWithPdConfig(toGceWithPdConfig(leonardoGceConfig, diskConfig));
-      } else {
-        throw new IllegalArgumentException("Disk config should always exist");
-      }
+          toDataprocConfig(runtimeConfigObj.getDataprocConfig()));
+    } else if (runtimeConfigObj.getActualInstance() instanceof org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse) {
+       runtime.gceWithPdConfig(toGceWithPdConfig(runtimeConfigObj.getGceWithPdConfigInResponse(), diskConfig));
     } else {
       throw new IllegalArgumentException(
           "Invalid GetRuntimeResponse.RuntimeConfig.cloudService : "
-              + runtimeConfig.getCloudService());
+              + runtimeConfigObj);
     }
   }
 

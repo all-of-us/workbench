@@ -302,7 +302,6 @@ public class LeonardoApiClientTest {
 
   @Test
   public void testRuntimeConfigDeserializer() throws Exception {
-//    OneOfRuntimeConfigInResponse resp = new OneOfRuntimeConfigInResponse().getGceWithPdConfigInResponse();
     JsonObject instance = new JsonObject();
     instance.addProperty("machineType", "n1-standard-4");
     instance.addProperty("persistentDiskId", 21535);
