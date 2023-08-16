@@ -11,12 +11,11 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createControlledTier;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import com.google.gson.JsonObject;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
@@ -112,7 +111,9 @@ public class LeonardoApiClientTest {
   @Autowired LeonardoApiClient leonardoApiClient;
   @Autowired FirecloudMapper firecloudMapper;
 
-  @Captor private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest> createAppRequestArgumentCaptor;
+  @Captor
+  private ArgumentCaptor<org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest>
+      createAppRequestArgumentCaptor;
 
   private static final String WORKSPACE_NS = "workspace-ns";
   private static final String WORKSPACE_ID = "myfirstworkspace";
@@ -132,8 +133,10 @@ public class LeonardoApiClientTest {
   private DbWorkspace testWorkspace;
   private UserAppEnvironment testApp;
   private CreateAppRequest createAppRequest;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig leonardoKubernetesRuntimeConfig;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest leonardoPersistentDiskRequest;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
+      leonardoKubernetesRuntimeConfig;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest
+      leonardoPersistentDiskRequest;
   private PersistentDiskRequest persistentDiskRequest;
   private Map<String, String> appLabels = new HashMap<>();
   private Map<String, String> customEnvironmentVariables = new HashMap<>();
@@ -148,10 +151,14 @@ public class LeonardoApiClientTest {
     KubernetesRuntimeConfig kubernetesRuntimeConfig =
         new KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
     leonardoKubernetesRuntimeConfig =
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig().autoscalingEnabled(false).machineType(MACHINE_TYPE);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig()
+            .autoscalingEnabled(false)
+            .machineType(MACHINE_TYPE);
     persistentDiskRequest = new PersistentDiskRequest().diskType(DiskType.STANDARD).size(10);
     leonardoPersistentDiskRequest =
-        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest().diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD).size(10);
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest()
+            .diskType(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType.STANDARD)
+            .size(10);
     testApp =
         new UserAppEnvironment()
             .appType(AppType.RSTUDIO)
@@ -217,7 +224,8 @@ public class LeonardoApiClientTest {
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE,
         LeonardoLabelHelper.appTypeToLabelValue(AppType.RSTUDIO));
 
-    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
     appLabels.put(
         LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, AppType.RSTUDIO.toString().toLowerCase());
     customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
@@ -246,7 +254,8 @@ public class LeonardoApiClientTest {
             startsWith(getAppName(AppType.RSTUDIO)),
             createAppRequestArgumentCaptor.capture());
 
-    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest = createAppRequestArgumentCaptor.getValue();
+    org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest createAppRequest =
+        createAppRequestArgumentCaptor.getValue();
 
     assertThat(createAppRequest.getDiskConfig().getName())
         .startsWith("all-of-us-pd-" + user.getUserId() + "-" + "rstudio");

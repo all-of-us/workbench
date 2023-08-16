@@ -361,7 +361,10 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
           .flatMap(
               runtime ->
                   Stream.ofNullable(
-                      runtime.getRuntimeConfig().getGceWithPdConfigInResponse().getPersistentDiskId()))
+                      runtime
+                          .getRuntimeConfig()
+                          .getGceWithPdConfigInResponse()
+                          .getPersistentDiskId()))
           .anyMatch(Objects::nonNull);
     } else {
       return leonardoApiClient.listAppsInProjectAsService(googleProject).stream()

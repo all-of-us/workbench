@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.RuntimesApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
@@ -46,8 +48,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoConfig;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
@@ -315,7 +315,11 @@ public class OfflineRuntimeControllerTest {
 
   @Test
   public void testCheckPersistentDisksSkipsNonReady() throws Exception {
-    stubDisks(ImmutableList.of(idleDisk(Duration.ofDays(14L)).status(org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED)));
+    stubDisks(
+        ImmutableList.of(
+            idleDisk(Duration.ofDays(14L))
+                .status(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.DiskStatus.FAILED)));
     assertThat(controller.checkPersistentDisks().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
     verifyNoInteractions(mockMailService);

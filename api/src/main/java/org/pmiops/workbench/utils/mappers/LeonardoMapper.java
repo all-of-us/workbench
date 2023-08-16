@@ -2,13 +2,11 @@ package org.pmiops.workbench.utils.mappers;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.gson.Gson;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.*;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeConfig.CloudServiceEnum;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,7 +19,6 @@ import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
@@ -70,7 +67,8 @@ public interface LeonardoMapper {
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
   GceWithPdConfig toGceWithPdConfig(
-      org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse leonardoGceConfig,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse
+          leonardoGceConfig,
       DiskConfig DiskConfig);
 
   @Mapping(target = "labels", ignore = true)
@@ -251,8 +249,12 @@ public interface LeonardoMapper {
   @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
   @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
   @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS apps
-  @ValueMapping(source = "WORKFLOWS_APP", target = MappingConstants.NULL) // we don't support WDS apps
-  @ValueMapping(source = "CROMWELL_RUNNER_APP", target = MappingConstants.NULL) // we don't support WDS apps
+  @ValueMapping(
+      source = "WORKFLOWS_APP",
+      target = MappingConstants.NULL) // we don't support WDS apps
+  @ValueMapping(
+      source = "CROMWELL_RUNNER_APP",
+      target = MappingConstants.NULL) // we don't support WDS apps
   @ValueMapping(
       source = "ALLOWED",
       target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
@@ -278,20 +280,24 @@ public interface LeonardoMapper {
   }
 
   default void mapRuntimeConfig(
-      Runtime runtime, OneOfRuntimeConfigInResponse runtimeConfigObj, @Nullable DiskConfig diskConfig) {
+      Runtime runtime,
+      OneOfRuntimeConfigInResponse runtimeConfigObj,
+      @Nullable DiskConfig diskConfig) {
     if (runtimeConfigObj == null) {
       return;
     }
 
-    if (runtimeConfigObj.getActualInstance() instanceof org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig) {
-      runtime.dataprocConfig(
-          toDataprocConfig(runtimeConfigObj.getDataprocConfig()));
-    } else if (runtimeConfigObj.getActualInstance() instanceof org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse) {
-       runtime.gceWithPdConfig(toGceWithPdConfig(runtimeConfigObj.getGceWithPdConfigInResponse(), diskConfig));
+    if (runtimeConfigObj.getActualInstance()
+        instanceof org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig) {
+      runtime.dataprocConfig(toDataprocConfig(runtimeConfigObj.getDataprocConfig()));
+    } else if (runtimeConfigObj.getActualInstance()
+        instanceof
+        org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse) {
+      runtime.gceWithPdConfig(
+          toGceWithPdConfig(runtimeConfigObj.getGceWithPdConfigInResponse(), diskConfig));
     } else {
       throw new IllegalArgumentException(
-          "Invalid GetRuntimeResponse.RuntimeConfig.cloudService : "
-              + runtimeConfigObj);
+          "Invalid GetRuntimeResponse.RuntimeConfig.cloudService : " + runtimeConfigObj);
     }
   }
 

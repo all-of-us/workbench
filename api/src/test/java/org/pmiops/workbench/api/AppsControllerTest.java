@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -16,7 +17,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
-import org.broadinstitute.dsde.workbench.client.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppType;
