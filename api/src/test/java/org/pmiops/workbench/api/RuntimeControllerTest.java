@@ -75,7 +75,6 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.DiskType;
-import org.pmiops.workbench.model.GceConfig;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.GpuConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
@@ -238,7 +237,7 @@ public class RuntimeControllerTest {
   private org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig dataprocConfigObj;
 
   private GceWithPdConfig gceConfig;
-  private org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig gceConfigObj;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse gceConfigObj;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -275,15 +274,15 @@ public class RuntimeControllerTest {
     dataprocConfigObj.setMasterMachineType("n1-standard-4");
     dataprocConfigObj.setMasterDiskSize(50);
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, dataprocConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, new OneOfRuntimeConfigInResponse(dataprocConfigObj), null);
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
-    gceConfigObj = new org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig();
-    gceConfigObj.setCloudService(org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.CloudServiceEnum.GCE);
-    gceConfigObj.setPersistentDisk(new org.broadinstitute.dsde.workbench.client.leonardo.model.PersistentDiskRequest().size(50));
+    gceConfigObj = new org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse();
+    gceConfigObj.setCloudService(org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse.CloudServiceEnum.GCE);
+    gceConfigObj.setPersistentDiskId(10);
     gceConfigObj.machineType("n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(tmpRuntime, gceConfigObj, null);
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, new OneOfRuntimeConfigInResponse(gceConfigObj), null);
     gceConfig = tmpRuntime.getGceWithPdConfig();
 
     testLeoRuntime =
