@@ -1028,6 +1028,12 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
   }
 
+  @Test
+  public void testGetWorkspaceAccessNotFound() {
+    assertThat(workspacesController.getWorkspaceAccess("none").getBody())
+        .isEqualTo("404 NOT_FOUND");
+  }
+
   @ParameterizedTest(name = "testGetWorkspaceAccess({0} user access, expected access {1})")
   @MethodSource("workspaceAccessLevels")
   public void testGetWorkspaceAccess(RawlsWorkspaceAccessLevel accessLevel, String expected) {
