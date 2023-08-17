@@ -118,8 +118,7 @@
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": false,
-    "enableDataExplorer": false,
-    "enableTanagra": false
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
