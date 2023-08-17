@@ -50,9 +50,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.access.AccessTierService;
@@ -313,6 +317,8 @@ public class WorkspacesControllerTest {
   @MockBean
   @Qualifier(EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER)
   EgressRemediationService egressRemediationService;
+
+  @MockBean private FireCloudService mockFireCloudService;
 
   private static DbUser currentUser;
   private static WorkbenchConfig workbenchConfig;
@@ -1022,6 +1028,41 @@ public class WorkspacesControllerTest {
     assertThat(operation3.getStatus()).isEqualTo(WorkspaceOperationStatus.SUCCESS);
     assertThat(operation3.getWorkspace()).isNotNull();
     assertThat(operation3.getWorkspace().getName()).isEqualTo(workspace.getName());
+  }
+
+  @Test
+  public void testGetWorkspaceAccessNotFound() {
+    assertThat(workspacesController.getWorkspaceAccess("none").getBody())
+        .startsWith("Workspace not found");
+  }
+
+  @ParameterizedTest(name = "testGetWorkspaceAccess({0} user access, expected access {1})")
+  @MethodSource("workspaceAccessLevels")
+  public void testGetWorkspaceAccess(RawlsWorkspaceAccessLevel accessLevel, String expected) {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubFcGetWorkspace(workspace.getNamespace(), workspace.getId(), accessLevel);
+    assertThat(workspacesController.getWorkspaceAccess(workspace.getNamespace()).getBody())
+        .startsWith(expected);
+  }
+
+  private void stubFcGetWorkspace(
+      String namespace, String fcName, RawlsWorkspaceAccessLevel accessLevel) {
+    final RawlsWorkspaceResponse toReturn =
+        new RawlsWorkspaceResponse()
+            .workspace(new RawlsWorkspaceDetails().namespace(namespace).name(fcName))
+            .accessLevel(accessLevel);
+    when(mockFireCloudService.getWorkspace(namespace, fcName)).thenReturn(toReturn);
+  }
+
+  private static Stream<Arguments> workspaceAccessLevels() {
+    return Stream.of(
+        Arguments.of(RawlsWorkspaceAccessLevel.OWNER, "OWNER"),
+        Arguments.of(RawlsWorkspaceAccessLevel.WRITER, "WRITER"),
+        Arguments.of(RawlsWorkspaceAccessLevel.READER, "READER"),
+        Arguments.of(
+            RawlsWorkspaceAccessLevel.NO_ACCESS,
+            "You do not have sufficient permissions to access workspace"));
   }
 
   @Test

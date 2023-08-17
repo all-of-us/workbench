@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationSt
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
@@ -67,6 +68,7 @@ import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.resources.WorkspaceResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -433,6 +435,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceAuditor.fireDeleteAction(dbWorkspace);
 
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<String> getWorkspaceAccess(String workspaceNamespace) {
+    try {
+      DbWorkspace workspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+      return ResponseEntity.ok(
+          workspaceAuthService
+              .enforceWorkspaceAccessLevel(
+                  workspace.getWorkspaceNamespace(),
+                  workspace.getFirecloudName(),
+                  WorkspaceAccessLevel.READER)
+              .toString());
+    } catch (NotFoundException nfe) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(nfe.getMessage());
+    } catch (ForbiddenException uae) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(uae.getMessage());
+    }
   }
 
   @Override
