@@ -317,6 +317,7 @@ public class TestMockFactory {
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
     cdrVersion.setAccessTier(createRegisteredTier());
+    cdrVersion.setTanagraEnabled(Boolean.TRUE);
     return cdrVersion;
   }
 

@@ -481,7 +481,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
       throws ApiException {
-    StudyCreateInfo studyCreateInfo = new StudyCreateInfo().displayName(workspaceName);
+    StudyCreateInfo studyCreateInfo =
+        new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
     return tanagraApiProvider.get().createStudy(studyCreateInfo);
   }
 }
