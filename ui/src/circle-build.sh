@@ -5,7 +5,7 @@ set -euo pipefail
 set -v
 
 gsutil cat gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt \
-  >> .npmrc
+  >> ~/.npmrc
 
 yarn install
 yarn deps
