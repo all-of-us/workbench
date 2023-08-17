@@ -99,20 +99,28 @@ describe('DataAccessRequirements', () => {
 
   const findControlledSignedStepEligible = (container) =>
     container
-      ?.querySelector('[data-test-id="controlled-signed"]')
+      ?.querySelector(
+        '[alt="Section describing whether an institutional agreement has been signed for controlled tier access"]'
+      )
       ?.querySelector('[data-test-id="eligible"]');
   const findControlledSignedStepIneligible = (container) =>
     container
-      ?.querySelector('[data-test-id="controlled-signed"]')
+      ?.querySelector(
+        '[alt="Section describing whether an institutional agreement has been signed for controlled tier access"]'
+      )
       ?.querySelector('[data-test-id="ineligible"]');
 
   const findControlledUserEligible = (container) =>
     container
-      ?.querySelector('[data-test-id="controlled-user-email"]')
+      ?.querySelector(
+        '[alt="Section describing whether an institution has granted controlled tier access to the current user"]'
+      )
       ?.querySelector('[data-test-id="eligible"]');
   const findControlledUserIneligible = (container) =>
     container
-      ?.querySelector('[data-test-id="controlled-user-email"]')
+      ?.querySelector(
+        '[alt="Section describing whether an institution has granted controlled tier access to the current user"]'
+      )
       ?.querySelector('[data-test-id="ineligible"]');
 
   const findControlledTierCard = (container) =>

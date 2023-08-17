@@ -63,15 +63,17 @@ const ControlledTierEraModule = (props: {
 const ControlledTierStep = (props: {
   enabled: boolean;
   text: String;
+  description: String;
   style?;
 }) => {
+  const { enabled, text, description, style } = props;
   return (
-    <FlexRow style={props.style}>
+    <FlexRow alt={description} style={style}>
       <FlexRow style={styles.moduleCTA} />
       {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
       <FlexRow style={styles.backgroundModuleBox}>
         <div style={styles.moduleIcon}>
-          {props.enabled ? (
+          {enabled ? (
             <CheckCircle
               data-test-id='eligible'
               style={{ color: colors.success }}
@@ -170,12 +172,12 @@ export const ControlledTierCard = (props: {
       </FlexColumn>
       <FlexColumn style={styles.modulesContainer}>
         <ControlledTierStep
-          data-test-id='controlled-signed'
+          description='Section describing whether an institutional agreement has been signed for controlled tier access'
           enabled={isSigned}
           text={`${institutionDisplayName} must sign an institutional agreement`}
         />
         <ControlledTierStep
-          data-test-id='controlled-user-email'
+          description='Section describing whether an institution has granted controlled tier access to the current user'
           enabled={isEligible}
           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
           style={{ marginTop: '1.9em' }}
