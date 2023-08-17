@@ -32,10 +32,10 @@ import org.pmiops.workbench.db.model.DbWorkspaceOperation.DbWorkspaceOperationSt
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
-import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.iam.IamService;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -443,14 +443,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       DbWorkspace workspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
       return ResponseEntity.ok(
           workspaceAuthService
-              .getWorkspaceAccessLevel(
-                  workspace.getWorkspaceNamespace(), workspace.getFirecloudName())
+              .enforceWorkspaceAccessLevel(
+                  workspace.getWorkspaceNamespace(),
+                  workspace.getFirecloudName(),
+                  WorkspaceAccessLevel.READER)
               .toString());
     } catch (NotFoundException nfe) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(HttpStatus.NOT_FOUND.toString());
-    } catch (UnauthorizedException uae) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(HttpStatus.UNAUTHORIZED.toString());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(nfe.getMessage());
+    } catch (ForbiddenException uae) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(uae.getMessage());
     }
   }
 

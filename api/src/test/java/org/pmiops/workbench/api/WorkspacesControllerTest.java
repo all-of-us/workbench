@@ -1041,7 +1041,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspace(workspace.getNamespace(), workspace.getId(), accessLevel);
     assertThat(workspacesController.getWorkspaceAccess(workspace.getNamespace()).getBody())
-        .isEqualTo(expected);
+        .startsWith(expected);
   }
 
   private void stubFcGetWorkspace(
@@ -1058,7 +1058,9 @@ public class WorkspacesControllerTest {
         Arguments.of(RawlsWorkspaceAccessLevel.OWNER, "OWNER"),
         Arguments.of(RawlsWorkspaceAccessLevel.WRITER, "WRITER"),
         Arguments.of(RawlsWorkspaceAccessLevel.READER, "READER"),
-        Arguments.of(RawlsWorkspaceAccessLevel.NO_ACCESS, "NO ACCESS"));
+        Arguments.of(
+            RawlsWorkspaceAccessLevel.NO_ACCESS,
+            "You do not have sufficient permissions to access workspace"));
   }
 
   @Test
