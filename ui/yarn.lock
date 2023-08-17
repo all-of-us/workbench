@@ -1741,6 +1741,13 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
+"@terra-ui-packages/components@0.0.4":
+  version "0.0.4"
+  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/components/-/@terra-ui-packages/components-0.0.4.tgz#66f6ac4efe7f9253336670a192ad80a4ea96769c"
+  integrity sha512-Lix/vzPOeFsVqyv9QdCHSABfQB2tzTThV5j7VNdWTDO2EOdLiI09GnDx8zTgWPQMppkSDuC0vMScZP/3H4W6Yg==
+  dependencies:
+    lodash "^4.17.21"
+
 "@testing-library/dom@^8.0.0":
   version "8.20.1"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-8.20.1.tgz#2e52a32e46fc88369eef7eef634ac2a192decd9f"
