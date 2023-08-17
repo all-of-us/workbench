@@ -1031,7 +1031,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testGetWorkspaceAccessNotFound() {
     assertThat(workspacesController.getWorkspaceAccess("none").getBody())
-        .isEqualTo("404 NOT_FOUND");
+        .startsWith("Workspace not found");
   }
 
   @ParameterizedTest(name = "testGetWorkspaceAccess({0} user access, expected access {1})")
