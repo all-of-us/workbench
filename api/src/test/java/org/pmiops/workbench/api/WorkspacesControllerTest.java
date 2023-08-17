@@ -187,6 +187,7 @@ import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessLevel;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceListResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
 import org.pmiops.workbench.test.CohortDefinitions;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -384,6 +385,7 @@ public class WorkspacesControllerTest {
     MailService.class,
     MonitoringService.class,
     NotebooksService.class,
+    TanagraApi.class,
     TaskQueueService.class,
     UserRecentResourceService.class,
     UserService.class,
