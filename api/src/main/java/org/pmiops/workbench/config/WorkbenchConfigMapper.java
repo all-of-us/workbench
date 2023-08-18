@@ -77,6 +77,5 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
-  @Mapping(target = "enableTanagra", source = "config.featureFlags.enableTanagra")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
