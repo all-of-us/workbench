@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
@@ -14,6 +14,8 @@ describe('TwoFactorAuthModal', () => {
 
   it('should render', () => {
     const { container } = component();
-    expect(container).toBeTruthy();
+    expect(
+      screen.queryByText('Redirecting to turn on Google 2-step Verification')
+    ).toBeTruthy();
   });
 });
