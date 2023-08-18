@@ -86,7 +86,7 @@ const ControlledTierStep = (props: {
           )}
         </div>
         <FlexColumn style={styles.backgroundModuleText}>
-          <div>{props.text}</div>
+          <div>{text}</div>
         </FlexColumn>
       </FlexRow>
     </FlexRow>
