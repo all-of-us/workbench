@@ -36,6 +36,7 @@ import {
   expectButtonEnabled,
   findNodesByExactText,
   findNodesContainingText,
+  waitAndExecute,
   waitForFakeTimersAndUpdate,
   waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
@@ -663,9 +664,6 @@ describe('DataAccessRequirements', () => {
 
   // RAS launch bug (no JIRA ticket)
   it('should render all modules as complete by transitioning to all complete', async () => {
-    // this test is subject to flakiness using real timers
-    jest.useFakeTimers();
-
     // initially, the user has completed all required modules except Identity (the standard case at Identity launch time)
 
     const allExceptIdentity = initialRequiredModules.filter(
@@ -718,6 +716,8 @@ describe('DataAccessRequirements', () => {
       reload,
       updateCache,
     });
+
+    await waitAndExecute();
 
     initialRequiredModules.forEach((module) => {
       expect(findCompleteModule(container, module)).toBeTruthy();
@@ -1908,7 +1908,6 @@ describe('DataAccessRequirements', () => {
 
     expectButtonElementEnabled(screen.queryByText('Review'));
 
-    screen.logTestingPlaygroundURL();
     // not yet - need to click a radio button
     expectButtonElementDisabled(screen.queryByText('Confirm'));
 
