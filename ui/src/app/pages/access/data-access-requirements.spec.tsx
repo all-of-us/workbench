@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom/extend-expect';
+
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
@@ -29,6 +31,8 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonDisabled,
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
   expectButtonEnabled,
   findNodesByExactText,
   findNodesContainingText,
@@ -1900,11 +1904,13 @@ describe('DataAccessRequirements', () => {
     expect(screen.queryAllByText('Complete Training').length).toBe(1);
 
     expectNoCompletionBanner();
+    const x = screen.queryByText('Review');
 
-    expect(screen.queryAllByText('Review')[0].parentElement).not.toBeDisabled();
+    expectButtonElementEnabled(screen.queryByText('Review'));
 
+    screen.logTestingPlaygroundURL();
     // not yet - need to click a radio button
-    expect(screen.queryAllByText('Confirm')[0].parentElement).toBeDisabled();
+    expectButtonElementDisabled(screen.queryByText('Confirm'));
 
     (
       container.querySelectorAll(
@@ -1912,6 +1918,6 @@ describe('DataAccessRequirements', () => {
       )[0] as HTMLElement
     ).click();
 
-    expect(screen.queryAllByText('Confirm')[0].parentElement).toBeDisabled();
+    expectButtonElementEnabled(screen.queryByText('Confirm'));
   });
 });
