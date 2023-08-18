@@ -68,7 +68,7 @@ const ControlledTierStep = (props: {
 }) => {
   const { enabled, text, description, style } = props;
   return (
-    <FlexRow alt={description} style={style}>
+    <FlexRow title={description} style={style}>
       <FlexRow style={styles.moduleCTA} />
       {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
       <FlexRow style={styles.backgroundModuleBox}>

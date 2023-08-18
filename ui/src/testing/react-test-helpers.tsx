@@ -49,7 +49,7 @@ export async function waitForFakeTimersAndUpdate(
 }
 
 export async function waitAndExecute(timeMs?: number) {
-  await new Promise((resolve) => setTimeout(resolve, timeMs && 100));
+  await new Promise((resolve) => setTimeout(resolve, timeMs || 100));
 }
 
 export async function simulateSelection(
