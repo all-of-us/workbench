@@ -3,7 +3,6 @@ import '@testing-library/jest-dom/extend-expect';
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AccessModule,
@@ -30,15 +29,9 @@ import { profileStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
 import {
-  expectButtonDisabled,
   expectButtonElementDisabled,
   expectButtonElementEnabled,
-  expectButtonEnabled,
-  findNodesByExactText,
-  findNodesContainingText,
   waitAndExecute,
-  waitForFakeTimersAndUpdate,
-  waitOneTickAndUpdate,
 } from 'testing/react-test-helpers';
 import { InstitutionApiStub } from 'testing/stubs/institution-api-stub';
 import {
@@ -899,7 +892,7 @@ describe('DataAccessRequirements', () => {
       'syncComplianceTrainingStatus'
     );
 
-    const { container } = component();
+    component();
 
     expect(spy2FA).toHaveBeenCalledTimes(1);
     expect(spyERA).toHaveBeenCalledTimes(1);
@@ -929,7 +922,7 @@ describe('DataAccessRequirements', () => {
       'syncComplianceTrainingStatus'
     );
 
-    const { container } = component();
+    component();
 
     expect(spy2FA).toHaveBeenCalledTimes(0);
     expect(spyERA).toHaveBeenCalledTimes(0);
@@ -1595,7 +1588,7 @@ describe('DataAccessRequirements', () => {
 
     setCompletionTimes(() => Date.now());
 
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     expectCompletionBanner();
   });
@@ -1603,7 +1596,7 @@ describe('DataAccessRequirements', () => {
   it('should show the correct state when all RT modules are expired', async () => {
     setCompletionTimes(oneYearAgo);
     expireAllRTModules();
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     expect(screen.queryAllByText('Review').length).toBe(1);
     expect(screen.queryAllByText('Confirm').length).toBe(1);
@@ -1614,7 +1607,7 @@ describe('DataAccessRequirements', () => {
   });
 
   it('should show the correct state when all RT modules are incomplete', async () => {
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     expect(screen.queryAllByText('Review').length).toBe(1);
     expect(screen.queryAllByText('Confirm').length).toBe(1);
@@ -1700,7 +1693,7 @@ describe('DataAccessRequirements', () => {
       AccessModule.PROFILECONFIRMATION,
       oneYearFromNow()
     );
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     // Complete
     expect(screen.queryAllByText('Confirmed').length).toBe(1);
@@ -1725,7 +1718,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
 
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     // Complete
     expect(screen.queryAllByText('Confirmed').length).toBe(2);
@@ -1753,7 +1746,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
 
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     // Complete
     expect(screen.queryAllByText('Confirmed').length).toBe(2);
@@ -1817,7 +1810,7 @@ describe('DataAccessRequirements', () => {
 
     setBypassTimes(() => Date.now());
 
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     expect(screen.queryAllByText('Bypassed').length).toBe(4);
     expect(screen.queryAllByText('(bypassed)', { exact: false }).length).toBe(
@@ -1853,7 +1846,7 @@ describe('DataAccessRequirements', () => {
     // this module will not be returned in AccessModules because it is disabled
     removeOneModule(AccessModule.COMPLIANCETRAINING);
 
-    const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+    component(DARPageMode.ANNUAL_RENEWAL);
 
     // profileConfirmation, publicationConfirmation, and DUCC are complete
     expect(screen.queryAllByText('Confirmed').length).toBe(2);
@@ -1885,7 +1878,7 @@ describe('DataAccessRequirements', () => {
         expirationTime
       );
 
-      const { container } = component(DARPageMode.ANNUAL_RENEWAL);
+      component(DARPageMode.ANNUAL_RENEWAL);
 
       expect(spy).toHaveBeenCalledTimes(expected);
     }
@@ -1904,8 +1897,6 @@ describe('DataAccessRequirements', () => {
     expect(screen.queryAllByText('Complete Training').length).toBe(1);
 
     expectNoCompletionBanner();
-    const x = screen.queryByText('Review');
-
     expectButtonElementEnabled(screen.queryByText('Review'));
 
     // not yet - need to click a radio button
