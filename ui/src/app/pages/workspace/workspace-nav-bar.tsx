@@ -182,7 +182,7 @@ export const WorkspaceNavBar = fp.flow(
       tabs.push({ name: 'Data Explorer', link: 'data-explorer' });
     }
     if (
-        getCdrVersion(workspace, cdrVersionTiersResponse).tanagraEnabled &&
+      getCdrVersion(workspace, cdrVersionTiersResponse).tanagraEnabled &&
       !tabs.find((tab) => tab.name === 'Tanagra')
     ) {
       tabs.push({ name: 'Tanagra', link: 'tanagra' });
