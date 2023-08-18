@@ -13,7 +13,7 @@ describe('TwoFactorAuthModal', () => {
     );
 
   it('should render', () => {
-    const { container } = component();
+    component();
     expect(
       screen.queryByText('Redirecting to turn on Google 2-step Verification')
     ).toBeTruthy();
