@@ -1,5 +1,3 @@
-import '@testing-library/jest-dom/extend-expect';
-
 import * as React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
