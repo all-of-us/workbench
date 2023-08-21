@@ -1116,14 +1116,17 @@ public class RuntimeControllerTest {
     CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
+    String gsonRuntimeConfigString= gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
+
     org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
         createLeonardoGceWithPdConfig =
             gson.fromJson(
-                gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                    gsonRuntimeConfigString,
                 org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
+    RuntimeConfig runtimeConfig = gson.fromJson(gsonRuntimeConfigString, RuntimeConfig.class);
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
+            runtimeConfig
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())

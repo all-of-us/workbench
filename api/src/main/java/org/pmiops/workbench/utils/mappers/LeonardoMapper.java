@@ -63,6 +63,7 @@ public interface LeonardoMapper {
         .componentGatewayEnabled(true);
   }
 
+  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "persistentDisk", source = "DiskConfig")
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
@@ -85,7 +86,7 @@ public interface LeonardoMapper {
       toLeonardoPersistentDiskRequest(PersistentDiskRequest persistentDiskRequest);
 
   @Mapping(target = "bootDiskSize", ignore = true)
-  @Mapping(target = "cloudService", ignore = true)
+  @Mapping(target = "cloudService", constant = "GCE")
   @Mapping(target = "zone", ignore = true)
   @Mapping(target = "configType", ignore = true)
   @Mapping(target = "additionalProperties", ignore = true)
@@ -102,29 +103,28 @@ public interface LeonardoMapper {
   @Mapping(target = "additionalProperties", ignore = true)
   UpdateDataprocConfig toLeonardoUpdateDataprocConfig(DataprocConfig dataprocConfig);
 
-  @AfterMapping
-  default void addCloudServiceEnum(
-      @MappingTarget
-          org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig) {
-    leonardoGceConfig.setCloudService(
-        org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.CloudServiceEnum.GCE);
-  }
+//  @AfterMapping
+//  default void addCloudServiceEnum(
+//      @MappingTarget
+//          org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig leonardoGceConfig) {
+//    leonardoGceConfig.setCloudService(
+//        org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.CloudServiceEnum.GCE);
+//  }
 
-  @AfterMapping
-  default void addPdCloudServiceEnum(
-      @MappingTarget
-          org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
-              leonardoGceWithPdConfig) {
-    leonardoGceWithPdConfig.setCloudService(
-        org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.CloudServiceEnum
-            .GCE);
-  }
+//  @AfterMapping
+//  default void addPdCloudServiceEnum(
+//      @MappingTarget
+//          org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
+//              leonardoGceWithPdConfig) {
+//    leonardoGceWithPdConfig.setCloudService(
+//        org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.CloudServiceEnum
+//            .GCE);
+//  }
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "diskType", ignore = true)
   @Mapping(target = "isGceRuntime", ignore = true)
   Disk toApiGetDiskResponse(GetPersistentDiskResponse disk);
 
