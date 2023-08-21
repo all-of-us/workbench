@@ -101,6 +101,8 @@ public interface WorkspaceMapper {
         .collect(Collectors.toList());
   }
 
+  // always false: hard-code for imminent deletion
+  @Mapping(target = "needsReviewPrompt", constant = "false")
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")
@@ -153,7 +155,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "lastModifiedBy", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
-  @Mapping(target = "needsResearchPurposeReviewPrompt", ignore = true)
   @Mapping(target = "published", ignore = true)
   @Mapping(target = "researchOutcomeSet", ignore = true)
   @Mapping(target = "reviewRequested", ignore = true)
