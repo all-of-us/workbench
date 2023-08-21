@@ -356,9 +356,10 @@ public class WorkbenchConfig {
   }
 
   public static class RdrExportConfig {
-    // RDR Host to connect to to export data
+    // RDR Host to connect to for exporting data
     public String host;
-    // Google cloud Queue name to which the task will be pushed to
+    // Google cloud Queue name where tasks are pushed
+    @Deprecated(forRemoval = true) // hardcoded to RDR_EXPORT_QUEUE_NAME
     public String queueName;
     // Number of ids per task
     public Integer exportObjectsPerTask;

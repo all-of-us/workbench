@@ -32,8 +32,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskQueueService {
   private static final String BASE_PATH = "/v1/cloudTask";
-  private static final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
-  private static final String EXPORT_WORKSPACE_PATH = BASE_PATH + "/exportWorkspaceData";
+  private static final String RDR_EXPORT_QUEUE_NAME = "rdrExportQueue";
+  private static final String RDR_EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
+  private static final String RDR_EXPORT_WORKSPACE_PATH = BASE_PATH + "/exportWorkspaceData";
   private static final String AUDIT_PROJECTS_PATH = BASE_PATH + "/auditProjectAccess";
   private static final String SYNCHRONIZE_ACCESS_PATH = BASE_PATH + "/synchronizeUserAccess";
   private static final String EGRESS_EVENT_PATH = BASE_PATH + "/processEgressEvent";
@@ -71,19 +72,19 @@ public class TaskQueueService {
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds) {
-    groupAndPushRdrTasks(workspaceIds, EXPORT_WORKSPACE_PATH, false);
+    groupAndPushRdrTasks(workspaceIds, RDR_EXPORT_WORKSPACE_PATH, false);
   }
 
   public void groupAndPushRdrWorkspaceTasks(List<Long> workspaceIds, boolean backfill) {
-    groupAndPushRdrTasks(workspaceIds, EXPORT_WORKSPACE_PATH, backfill);
+    groupAndPushRdrTasks(workspaceIds, RDR_EXPORT_WORKSPACE_PATH, backfill);
   }
 
   public void groupAndPushRdrResearcherTasks(List<Long> userIds) {
-    groupAndPushRdrTasks(userIds, EXPORT_RESEARCHER_PATH, false);
+    groupAndPushRdrTasks(userIds, RDR_EXPORT_RESEARCHER_PATH, false);
   }
 
   public void groupAndPushRdrResearcherTasks(List<Long> userIds, boolean backfill) {
-    groupAndPushRdrTasks(userIds, EXPORT_RESEARCHER_PATH, backfill);
+    groupAndPushRdrTasks(userIds, RDR_EXPORT_RESEARCHER_PATH, backfill);
   }
 
   public void groupAndPushRdrTasks(List<Long> ids, String pathBase, boolean backfill) {
@@ -96,7 +97,7 @@ public class TaskQueueService {
     String path = backfill ? pathBase + "?backfill=true" : pathBase;
 
     CloudTasksUtils.partitionList(ids, rdrConfig.exportObjectsPerTask)
-        .forEach(batch -> createAndPushTask(rdrConfig.queueName, path, batch));
+        .forEach(batch -> createAndPushTask(RDR_EXPORT_QUEUE_NAME, path, batch));
   }
 
   public void groupAndPushAuditProjectsTasks(List<Long> userIds) {
