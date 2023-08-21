@@ -360,14 +360,8 @@ public class WorkbenchConfig {
   public static class RdrExportConfig {
     // RDR Host to connect to for exporting data
     public String host;
-    // Google cloud Queue name where tasks are pushed
-    @Deprecated(forRemoval = true) // hardcoded to RDR_EXPORT_QUEUE_NAME
-    public String queueName;
     // Number of ids per task
     public Integer exportObjectsPerTask;
-    // feature flag: do we export V2 of the Demographic Survey to RDR
-    @Deprecated(forRemoval = true) // always true - will remove soon
-    public Boolean exportDemoSurveyV2;
   }
 
   public static class CaptchaConfig {
