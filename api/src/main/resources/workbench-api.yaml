@@ -4817,10 +4817,6 @@ definitions:
         type: boolean
         default: false
         description: Whether users are given the option to link their RAS/Login.gov account to AoU
-      enableGenomicExtraction:
-        type: boolean
-        default: false
-        description: Whether to enable genomic data extraction for eligible datasets.
       rasHost:
         type: string
         description: The RAS base host name.

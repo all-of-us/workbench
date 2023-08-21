@@ -40,8 +40,6 @@ public interface WorkbenchConfigMapper {
 
   // false in all environments: hard-code for imminent deletion
   @Mapping(target = "enableResearchReviewPrompt", constant = "false")
-  // true in all environments: hard-code for imminent deletion
-  @Mapping(target = "enableGenomicExtraction", constant = "true")
 
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)

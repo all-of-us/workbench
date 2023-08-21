@@ -318,11 +318,6 @@ public class WorkbenchConfig {
     // workspace creation
     @Deprecated(forRemoval = true)
     public boolean enableResearchPurposePrompt;
-    // DEPRECATED - now always true
-    // If true, enable genomic extraction functionality for datasets which have genomics data
-    // associated with their CDRs.
-    @Deprecated(forRemoval = true)
-    public boolean enableGenomicExtraction;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
