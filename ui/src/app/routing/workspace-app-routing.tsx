@@ -22,7 +22,7 @@ import { QueryReport } from 'app/pages/data/cohort-review/query-report.component
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
-import { DataComponent } from 'app/pages/data/data-component';
+import { DataComponentSplitter } from 'app/pages/data/data-component-splitter';
 import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
 import { TanagraDev } from 'app/pages/tanagra-dev/tanagra-dev';
@@ -61,9 +61,8 @@ const DataExplorerPage = fp.flow(
   withRoutingSpinner
 )(DataExplorer);
 const DataComponentPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(DataComponent);
+  withRouteData
+)(DataComponentSplitter);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner

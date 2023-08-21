@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
 
 import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
@@ -20,6 +19,7 @@ import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
+import * as fp from 'lodash/fp';
 
 const styles = {
   cardButtonArea: {
@@ -89,7 +89,10 @@ interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
-export const DataComponent = fp.flow(withCurrentWorkspace(), withRoutingSpinner)((props: Props) => {
+export const DataComponentTanagra = fp.flow(
+  withCurrentWorkspace(),
+  withRoutingSpinner
+)((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [navigate] = useNavigation();
