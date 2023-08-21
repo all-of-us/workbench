@@ -30,10 +30,7 @@ import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
-import org.pmiops.workbench.model.AppType;
-import org.pmiops.workbench.model.Disk;
-import org.pmiops.workbench.model.DiskStatus;
-import org.pmiops.workbench.model.DiskType;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,7 +262,8 @@ public class DisksControllerTest {
                 oldInactiveCromwellDisk,
                 newerCromwellDisk));
 
-    assertThat(disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody())
+    ListDisksResponse resp = disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody();
+    assertThat(resp)
         .containsExactly(expectedGceDisk, expectedRStudioDisk);
   }
 

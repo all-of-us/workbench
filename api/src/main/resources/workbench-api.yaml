@@ -5001,6 +5001,7 @@ definitions:
     enum:
       - pd-standard
       - pd-ssd
+      - pd-balanced
   Disk:
     description: The configuration of a persistent disk, returned in disk responses
     type: object
@@ -6535,10 +6536,10 @@ definitions:
         description: The tool docker image to install. May be Dockerhub or GCR. If not
           set, a default Jupyter image will be installed.
       gceWithPdConfig:
-        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be returned
+        description: oneOf dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceWithPdConfig"
       dataprocConfig:
-        description: oneOf gceConfig, dataprocConfig, gceWithPdConfig will be provided
+        description: oneOf dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"
       errors:
         type: array
@@ -6703,6 +6704,8 @@ definitions:
   GceWithPdConfig:
     description: Configuration for Google Compute Engine instances with Persistent Disk.
     properties:
+      cloudService:
+        type: string
       persistentDisk:
         $ref: "#/definitions/PersistentDiskRequest"
       machineType:
