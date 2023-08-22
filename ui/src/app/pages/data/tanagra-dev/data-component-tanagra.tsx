@@ -5,11 +5,11 @@ import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
+import { CreateModal } from 'app/components/create-modal';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -19,7 +19,6 @@ import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
-import * as fp from 'lodash/fp';
 
 const styles = {
   cardButtonArea: {
@@ -89,16 +88,14 @@ interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
-export const DataComponentTanagra = fp.flow(
-  withCurrentWorkspace(),
-  withRoutingSpinner
-)((props: Props) => {
+export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [navigate] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
-  const [resourceList, setResourceList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [resourceList, setResourceList] = useState([]);
+  const [showCohortModal, setShowCohortModal] = useState(false);
 
   const { workspace } = props;
 
@@ -107,6 +104,7 @@ export const DataComponentTanagra = fp.flow(
   }
 
   const loadResources = async () => {
+    // TODO call Tanagra endpoints to get resources
     try {
       setIsLoading(true);
       setResourceList(
@@ -146,6 +144,21 @@ export const DataComponentTanagra = fp.flow(
     }
   });
 
+  const getCohortNames = async () => [];
+
+  const createCohort = async (name: string, description: string) => {
+    // TODO call Tanagra's createCohort endpoint, then navigate to new cohort in iframe
+    navigate([
+      'workspaces',
+      workspace.namespace,
+      workspace.id,
+      'data',
+      'tanagra',
+      'export',
+      'cohorts',
+    ]);
+  };
+
   return (
     <React.Fragment>
       <div style={{ paddingLeft: '2.25rem' }}>
@@ -159,16 +172,7 @@ export const DataComponentTanagra = fp.flow(
             <CardButton
               style={styles.resourceTypeButton}
               disabled={!writePermission}
-              onClick={() => {
-                navigate([
-                  'workspaces',
-                  workspace.namespace,
-                  workspace.id,
-                  'data',
-                  'cohorts',
-                  'build',
-                ]);
-              }}
+              onClick={() => setShowCohortModal(true)}
             >
               <div style={styles.cardHeader}>
                 <h2 style={styles.cardHeaderText(!writePermission)}>Cohorts</h2>
@@ -212,7 +216,8 @@ export const DataComponentTanagra = fp.flow(
                   workspace.namespace,
                   workspace.id,
                   'data',
-                  'data-sets',
+                  'tanagra',
+                  'export',
                 ]);
               }}
             >
@@ -318,6 +323,15 @@ export const DataComponentTanagra = fp.flow(
           {isLoading && <SpinnerOverlay />}
         </div>
       </FadeBox>
+      {showCohortModal && (
+        <CreateModal
+          entityName='Cohort'
+          title='Save Cohort as'
+          getExistingNames={() => getCohortNames()}
+          save={(name, desc) => createCohort(name, desc)}
+          close={() => setShowCohortModal(false)}
+        />
+      )}
     </React.Fragment>
   );
 });

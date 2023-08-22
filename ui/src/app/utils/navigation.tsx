@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as querystring from 'querystring-es3';
 
@@ -12,6 +13,7 @@ import {
 
 import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { Selection } from 'app/pages/data/cohort/selection-list';
+import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -130,3 +132,27 @@ export const stringifyUrl = (url: UrlObj) => {
     (url.queryParams ? '?' + querystring.stringify(url.queryParams) : '')
   );
 };
+
+export function useExitActionListener(callback: () => void) {
+  const listener = useCallback(
+    (event: MessageEvent) => {
+      const tanagraUrl = serverConfigStore.get().config.tanagraBaseUrl;
+      if (
+        event.origin !== tanagraUrl ||
+        typeof event.data !== 'object' ||
+        event.data.message !== 'CLOSE'
+      ) {
+        return;
+      }
+      callback();
+    },
+    [callback]
+  );
+
+  useEffect(() => {
+    window.addEventListener('message', listener);
+    return () => {
+      window.removeEventListener('message', listener);
+    };
+  }, [listener]);
+}

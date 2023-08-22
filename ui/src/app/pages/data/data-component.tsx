@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import * as fp from 'lodash/fp';
 
 import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
 
@@ -10,7 +9,6 @@ import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
-import { withRoutingSpinner } from 'app/components/with-routing-spinner';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -89,7 +87,7 @@ interface Props extends WithSpinnerOverlayProps {
   workspace: WorkspaceData;
 }
 
-export const DataComponent = fp.flow(withCurrentWorkspace(), withRoutingSpinner)((props: Props) => {
+export const DataComponent = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
 
   const [navigate] = useNavigation();
