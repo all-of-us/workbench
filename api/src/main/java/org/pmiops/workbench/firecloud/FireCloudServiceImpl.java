@@ -210,6 +210,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void registerUser() {
     // TODO: make these fields not required in Firecloud and stop passing them in, or prompt for
     // them (RW-29)
+    // August 2023 note: Attempting to register a user without setting these fields does not work.
     FirecloudProfile profile =
         new FirecloudProfile()
             .firstName("None")
