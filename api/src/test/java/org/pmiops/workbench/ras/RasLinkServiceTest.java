@@ -238,7 +238,7 @@ public class RasLinkServiceTest {
 
     DbUser expectedUser = userDao.findUserByUserId(userId);
     assertThat(expectedUser.getRasLinkUsername()).isEqualTo(ID_ME_USERNAME);
-    assertModuleCompletionTime(DbAccessModuleName.RAS_ID_ME, NOW);
+    assertModuleCompletionTime(DbAccessModuleName.IDENTITY, NOW);
     assertModuleCompletionTime(DbAccessModuleName.ERA_COMMONS, null);
     verify(mockIdentityVerificationService)
         .updateIdentityVerificationSystem(expectedUser, DbIdentityVerificationSystem.ID_ME);

@@ -20,7 +20,6 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
       "disseminate_research_other", ReportingWorkspace::getDisseminateResearchOther),
   LAST_MODIFIED_TIME("last_modified_time", w -> toInsertRowString(w.getLastModifiedTime())),
   NAME("name", ReportingWorkspace::getName),
-  NEEDS_RP_REVIEW_PROMPT("needs_rp_review_prompt", ReportingWorkspace::getNeedsRpReviewPrompt),
   PUBLISHED("published", ReportingWorkspace::getPublished),
   RP_ADDITIONAL_NOTES("rp_additional_notes", ReportingWorkspace::getRpAdditionalNotes),
   RP_ANCESTRY("rp_ancestry", ReportingWorkspace::getRpAncestry),
@@ -51,6 +50,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace);
 
   public static final String TABLE_NAME = "workspace";
+
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
 
@@ -58,11 +58,6 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
       String parameterName, Function<ReportingWorkspace, Object> rowToInsertValueFunction) {
     this.parameterName = parameterName;
     this.rowToInsertValueFunction = rowToInsertValueFunction;
-  }
-
-  @Override
-  public String getBigQueryTableName() {
-    return TABLE_NAME;
   }
 
   @Override

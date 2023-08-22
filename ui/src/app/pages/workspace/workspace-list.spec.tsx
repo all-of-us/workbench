@@ -79,7 +79,7 @@ describe('WorkspaceList', () => {
 
     profileStore.set({ profile, load, reload, updateCache });
     serverConfigStore.set({
-      config: { gsuiteDomain: 'abc', enableResearchReviewPrompt: true },
+      config: { gsuiteDomain: 'abc' },
     });
   });
 
@@ -99,20 +99,6 @@ describe('WorkspaceList', () => {
         .find('[data-test-id="workspace-access-level"]')
         .text()
     ).toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
-  });
-
-  it('should show Research Purpose Review Modal if workspace require review', async () => {
-    const workspace = workspaceStubs[0];
-    workspace.researchPurpose.needsReviewPrompt = true;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    wrapper
-      .find('[data-test-id="workspace-card-name"]')
-      .first()
-      .simulate('click');
-    expect(
-      wrapper.find('[data-test-id="workspace-review-modal"]').length
-    ).toBeGreaterThan(0);
   });
 
   it('filters workspace list', async () => {

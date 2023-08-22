@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Calendar } from 'primereact/calendar';
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 
@@ -15,7 +15,7 @@ import { TextAreaWithLengthValidationMessage } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { formatDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
+import { displayDate, isDateValid, maybeToSingleDate } from 'app/utils/dates';
 const MIN_BYPASS_DESCRIPTION = 10;
 const MAX_BYPASS_DESCRIPTION = 4000;
 
@@ -88,10 +88,6 @@ export const AdminUserEgressBypass = (props: Props) => {
       });
   };
 
-  const displayTime = (row, opt) => {
-    return <div style={{ width: '7rem' }}>{formatDate(row[opt.field])}</div>;
-  };
-
   return (
     <FlexRow style={{ minWidth: '100rem' }}>
       <FlexColumn style={{ width: '60%', justifyContent: 'space-between' }}>
@@ -136,8 +132,8 @@ export const AdminUserEgressBypass = (props: Props) => {
               paddingBottom: '0.45rem',
             }}
           >
-            Bypass starting date and time. (end date is 48 hours after starting
-            time)
+            <div>Bypass starting date and time (in your local time zone)</div>
+            <div>Note: the end time is 48 hours after the start time.</div>
           </div>
         </FlexRow>
         <FlexRow>
@@ -146,7 +142,7 @@ export const AdminUserEgressBypass = (props: Props) => {
             showTime
             hourFormat='12'
             minDate={new Date()}
-            onChange={(e) => {
+            onChange={(e: CalendarChangeEvent) => {
               setApiError(false);
               setStartTime(maybeToSingleDate(e.value));
             }}
@@ -167,19 +163,19 @@ export const AdminUserEgressBypass = (props: Props) => {
           </TooltipTrigger>
         </FlexRow>
         <FlexRow>
-          <h3>Large File Download Requests</h3>
+          <h3>Large File Download Requests (all times local)</h3>
         </FlexRow>
-        <FlexRow style={{ paddingTop: '1rem' }}>
+        <FlexRow style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
           <DataTable value={bypassWindowsList}>
             <Column
-              field={'startTime'}
-              header={'Start Time'}
-              body={(date, opt) => displayTime(date, opt)}
+              field='startTime'
+              header='Start Time'
+              body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
             <Column
-              field={'endTime'}
-              header={'End Time'}
-              body={(date, opt) => displayTime(date, opt)}
+              field='endTime'
+              header='End Time'
+              body={(row, opt) => <div>{displayDate(row[opt.field])}</div>}
             />
             <Column field={'description'} header={'Description'} />
           </DataTable>

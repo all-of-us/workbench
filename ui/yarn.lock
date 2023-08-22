@@ -1741,6 +1741,13 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
+"@terra-ui-packages/components@0.0.4":
+  version "0.0.4"
+  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/components/-/@terra-ui-packages/components-0.0.4.tgz#66f6ac4efe7f9253336670a192ad80a4ea96769c"
+  integrity sha512-Lix/vzPOeFsVqyv9QdCHSABfQB2tzTThV5j7VNdWTDO2EOdLiI09GnDx8zTgWPQMppkSDuC0vMScZP/3H4W6Yg==
+  dependencies:
+    lodash "^4.17.21"
+
 "@testing-library/dom@^8.0.0":
   version "8.20.1"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-8.20.1.tgz#2e52a32e46fc88369eef7eef634ac2a192decd9f"
@@ -7837,10 +7844,10 @@ primeicons@^5.0.0:
   resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-5.0.0.tgz#73a0b6028a77c58a9eeb331ad13aaf085e8451ee"
   integrity sha512-heygWF0X5HFI1otlZE62pp6ye7sZ8om78J9au2BRkg8O7Y8AHTZ9qKMRzchZUHLe8zUAvdi6hZzzm9XxgwIExw==
 
-primereact@^8.0.0:
-  version "8.7.3"
-  resolved "https://registry.yarnpkg.com/primereact/-/primereact-8.7.3.tgz#07144aeb2b7999b599515b319ecda2c0af479b8a"
-  integrity sha512-BjlIOOsVcUqX9edn7HewN/U28aUqREOvPP3fnpk7X6S7k5JTM570Dm7Z/TEPH1x/Mko1NL6iDaYWnkjKiBrtPQ==
+primereact@^9.0.0:
+  version "9.6.0"
+  resolved "https://registry.yarnpkg.com/primereact/-/primereact-9.6.0.tgz#79dd3413f935da70663ec16584013c5b17c077f7"
+  integrity sha512-+9nhZkh914aSDh2phuSm3BQNKQW0kpcBZqUd+Jdlpg+f6fvgNGGUr2wgZiqfXljkHeCEHdWO/wqB8WvfzqjOVw==
   dependencies:
     "@types/react-transition-group" "^4.4.1"
     react-transition-group "^4.4.1"

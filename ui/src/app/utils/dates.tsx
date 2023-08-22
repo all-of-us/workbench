@@ -1,5 +1,3 @@
-import { CalendarValueType } from 'primereact/calendar';
-
 import { isBlank } from './index';
 
 export const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -53,10 +51,11 @@ export function isDateValid(date: Date): boolean {
   );
 }
 
-// CalendarValueType is a union type of Date | Date[] | string | undefined | null
 // if Date or string: return a Date
 // if Date[], undefined, or null: return undefined
-export const maybeToSingleDate = (c: CalendarValueType): Date | undefined => {
+export const maybeToSingleDate = (
+  c: Date | Date[] | string | null
+): Date | undefined => {
   // can't use cond() here because type narrowing isn't supported
   if (c instanceof Date) {
     return c;

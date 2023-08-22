@@ -83,6 +83,10 @@ const moduleToToggleProps: Record<
     name: 'RAS Login.gov Link',
     'data-test-id': 'ras-link-login-gov-toggle',
   },
+  [AccessModule.IDENTITY]: {
+    name: 'Identity Verification',
+    'data-test-id': 'identity-toggle',
+  },
   [AccessModule.PROFILECONFIRMATION]: {
     name: 'Profile Confirmation',
     'data-test-id': 'profile-confirmation-toggle',

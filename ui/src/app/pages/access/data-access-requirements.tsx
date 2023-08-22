@@ -4,7 +4,6 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
-import { useQuery } from 'app/components/app-router';
 import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -265,10 +264,11 @@ export const styles = reactStyles({
     cursor: 'pointer',
     textDecoration: 'underline',
   },
-  loginGovHelp: {
-    opacity: '0.5',
+  helpContainer: {
     fontSize: '12px',
     lineHeight: '22px',
+    gap: '1rem',
+    marginTop: '1rem',
   },
   renewalInnerHeaderContainer: {
     display: 'grid',
@@ -281,6 +281,12 @@ export const styles = reactStyles({
   renewalInnerHeaderIcon: {
     gridArea: 'icon',
     marginRight: '0.75rem',
+  },
+  identityProviderDescription: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
 });
 
@@ -296,7 +302,7 @@ const RenewalRequirementsText = () => (
 // in display order
 export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
+  AccessModule.IDENTITY,
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCETRAINING,
 ];
@@ -354,9 +360,9 @@ const handleRasCallback = (
   reloadProfile: Function
 ) => {
   const handler = withErrorModal({
-    title: 'Error saving RAS Login.Gov linkage status.',
+    title: 'Error saving identity verification status.',
     message:
-      'An error occurred trying to save your RAS Login.Gov linkage status. Please try again.',
+      'An error occurred trying to save your identity verification status. Please try again.',
     onDismiss: () => {
       spinnerProps.hideSpinner();
     },
@@ -440,17 +446,17 @@ const incompleteModules = (
   );
 
 // exported for test
-export const getActiveModule = (
+export const getFocusedModule = (
   modules: AccessModule[],
   profile: Profile,
   pageMode: DARPageMode
 ): AccessModule => incompleteModules(modules, profile, pageMode)[0];
 
-const getNextActive = (
+const getNextFocused = (
   modules: AccessModule[],
   profile: Profile,
   pageMode: DARPageMode
-) => getActiveModule(getEligibleModules(modules, profile), profile, pageMode);
+) => getFocusedModule(getEligibleModules(modules, profile), profile, pageMode);
 
 // the header(s) outside the Fadebox
 
@@ -604,12 +610,12 @@ export const DataDetail = (props: { icon: string; text: string }) => {
 export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
   (spinnerProps: WithSpinnerOverlayProps) => {
     // Local State
-    // At any given time, at most two modules will be clickable during initial registration:
-    //  1. The active module, which we visually direct the user to with a CTA
-    //  2. The next required module, which may diverge when the active module is optional.
+    // At any given time, at most two modules will be active during initial registration:
+    //  1. The focused module, which we visually direct the user to with a CTA
+    //  2. The next required module, which may diverge when the focused module is optional.
     // This configuration allows the user to skip the optional CT section.
-    const [activeModule, setActiveModule] = useState(null);
-    const [clickableModules, setClickableModules] = useState([]);
+    const [focusedModule, setFocusedModule] = useState(null);
+    const [activeModules, setActiveModules] = useState([]);
 
     // Local Variables
     const { profile, reload } = useStore(profileStore);
@@ -617,19 +623,19 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       config: { unsafeAllowSelfBypass },
     } = useStore(serverConfigStore);
 
-    const query = useQuery();
-    const code = query.get('code');
-    const token = query.get('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const token = urlParams.get('token');
 
-    const pageModeParam = query.get('pageMode');
+    const pageModeParam = urlParams.get('pageMode');
     const pageMode =
       pageModeParam &&
       Object.values(DARPageMode).includes(DARPageMode[pageModeParam])
         ? DARPageMode[pageModeParam]
         : DARPageMode.INITIAL_REGISTRATION;
 
-    const nextActive = getNextActive(allInitialModules, profile, pageMode);
-    const nextRequired = getNextActive(
+    const nextFocused = getNextFocused(allInitialModules, profile, pageMode);
+    const nextRequired = getNextFocused(
       pageMode === DARPageMode.INITIAL_REGISTRATION
         ? initialRequiredModules
         : renewalRequiredModules,
@@ -647,7 +653,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     const rtCard = (
       <RegisteredTierCard
-        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
+        {...{
+          profile,
+          focusedModule,
+          activeModules,
+          spinnerProps,
+          pageMode,
+        }}
         key='rt'
       />
     );
@@ -655,8 +667,8 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
       <ControlledTierCard
         {...{
           profile,
-          activeModule,
-          clickableModules,
+          focusedModule,
+          activeModules,
           reload,
           spinnerProps,
           pageMode,
@@ -666,7 +678,13 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     );
     const dCard = (
       <DuccCard
-        {...{ profile, activeModule, clickableModules, spinnerProps, pageMode }}
+        {...{
+          profile,
+          focusedModule,
+          activeModules,
+          spinnerProps,
+          pageMode,
+        }}
         key='dt'
         stepNumber={3}
       />
@@ -714,14 +732,14 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
 
     // whenever the profile changes, update the next modules to complete
     useEffect(() => {
-      setActiveModule(nextActive);
-      setClickableModules(
+      setFocusedModule(nextFocused);
+      setActiveModules(
         fp.flow(
           fp.filter((m) => !!m),
           fp.uniq
-        )([nextActive, nextRequired])
+        )([nextFocused, nextRequired])
       );
-    }, [nextActive, nextRequired]);
+    }, [nextFocused, nextRequired]);
 
     const daysRemaining = maybeDaysRemaining(profile);
     const hasExpired = daysRemaining && daysRemaining <= 0;
@@ -731,7 +749,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
         <OuterHeader {...{ pageMode }} />
         {ctNeedsRenewal && <ControlledTierRenewalBanner />}
         {showCompletionBanner && <CompletionBanner />}
-        {unsafeAllowSelfBypass && clickableModules.length > 0 && (
+        {unsafeAllowSelfBypass && activeModules.length > 0 && (
           <SelfBypass onClick={async () => selfBypass(spinnerProps, reload)} />
         )}
         <FadeBox style={styles.fadeBox}>

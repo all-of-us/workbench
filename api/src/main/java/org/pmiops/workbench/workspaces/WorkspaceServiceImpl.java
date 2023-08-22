@@ -54,6 +54,10 @@ import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
+import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.api.TanagraApi;
+import org.pmiops.workbench.tanagra.model.Study;
+import org.pmiops.workbench.tanagra.model.StudyCreateInfo;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
@@ -91,6 +95,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<TanagraApi> tanagraApiProvider;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -111,7 +116,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      Provider<TanagraApi> tanagraApiProvider) {
     this.accessTierService = accessTierService;
     this.cloudBillingClient = cloudBillingClient;
     this.billingProjectAuditor = billingProjectAuditor;
@@ -130,6 +136,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceAuthService = workspaceAuthService;
+    this.tanagraApiProvider = tanagraApiProvider;
   }
 
   @Override
@@ -469,5 +476,13 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceDao
         .getByNamespace(workspaceNamespace)
         .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
+  }
+
+  @Override
+  public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
+      throws ApiException {
+    StudyCreateInfo studyCreateInfo =
+        new StudyCreateInfo().id(workspaceNamespace).displayName(workspaceName);
+    return tanagraApiProvider.get().createStudy(studyCreateInfo);
   }
 }

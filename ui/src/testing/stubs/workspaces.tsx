@@ -52,7 +52,6 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       reviewRequested: false,
       socialBehavioral: false,
       reasonForAllOfUs: '',
-      needsReviewPrompt: false,
     },
     published: false,
     billingAccountName: 'billing-account',

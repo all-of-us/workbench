@@ -15,13 +15,13 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 public interface ReportingUploadService {
   boolean uploadSnapshot(ReportingSnapshot reportingSnapshot);
 
-  void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp);
+  void uploadWorkspaceBatch(List<ReportingWorkspace> batch, long captureTimestamp);
 
-  void uploadBatchUser(List<ReportingUser> batch, long captureTimestamp);
+  void uploadUserBatch(List<ReportingUser> batch, long captureTimestamp);
 
-  void uploadBatchCohort(List<ReportingCohort> batch, long captureTimestamp);
+  void uploadCohortBatch(List<ReportingCohort> batch, long captureTimestamp);
 
-  void uploadBatchNewUserSatisfactionSurveys(
+  void uploadNewUserSatisfactionSurveyBatch(
       List<ReportingNewUserSatisfactionSurvey> batch, long captureTimestamp);
 
   /** Uploads a record into VerifiedSnapshot table if upload result is verified. */

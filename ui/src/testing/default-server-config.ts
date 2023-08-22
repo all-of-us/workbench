@@ -12,7 +12,7 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.RASLINKLOGINGOV,
+    name: AccessModule.IDENTITY,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
@@ -75,6 +75,7 @@ const defaultServerConfig: ConfigResponse = {
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   enableRStudioGKEApp: true,
+  tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
 };
 
 export default defaultServerConfig;

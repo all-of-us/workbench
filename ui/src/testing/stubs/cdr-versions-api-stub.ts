@@ -39,6 +39,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasFitbitSleepData: false,
           hasWgsData: true,
           creationTime: 0,
+          bigqueryDataset: '',
         },
         {
           name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
@@ -49,6 +50,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasFitbitSleepData: false,
           hasWgsData: false,
           creationTime: 0,
+          bigqueryDataset: '',
         },
       ],
     },
@@ -68,6 +70,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           hasFitbitSleepData: false,
           hasWgsData: true,
           creationTime: 0,
+          bigqueryDataset: '',
         },
       ],
     },

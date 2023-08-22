@@ -1,7 +1,9 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -14,13 +16,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface ColumnValueExtractor<MODEL_T> {
 
-  /**
-   * Name for the table in BigQuery. This will be the same for all columns in the table, so the way
-   * to grab it statically is just CohortColumnValueExtractor.values()[0].getBigQueryTableName(),;
-   * This shoule always work, since a a useful enum must always have at least one entry.
-   */
-  String getBigQueryTableName();
-
   // Parameter name (without any @ sign). The convention is snake_case. This value is used in
   // creating named parameter keys (with a numerical suffix) for DML statements and map keys for
   // RowToInsert objects.
@@ -29,13 +24,14 @@ public interface ColumnValueExtractor<MODEL_T> {
   // Provide a function to map the target model to a column-specific Java type corresponding to the
   // conventions of BQ InsertAllRequests. There are some small differences with this representation
   // and
-  // QueryParameterValue types. The function should return return null if the value is not present
+  // QueryParameterValue types. The function should return null if the value is not present
   // on the model.
   Function<MODEL_T, Object> getRowToInsertValueFunction();
 
-  // A friendly method to call the instance-provided rowToInsertValueFunction. Returns
-  // a map value (or null) for a RowToInsert object.
-  default @Nullable Object getRowToInsertValue(@NotNull MODEL_T model) {
-    return getRowToInsertValueFunction().apply(model);
+  // A friendly method to call the instance-provided rowToInsertValueFunction.  Returns a Stream of
+  // a map entry for a RowToInsert object, or an empty Stream if the value is null.
+  default Stream<Entry<String, Object>> getRowToInsertEntry(@NotNull MODEL_T model) {
+    return Stream.ofNullable(getRowToInsertValueFunction().apply(model))
+        .map(insertValue -> Map.entry(getParameterName(), insertValue));
   }
 }

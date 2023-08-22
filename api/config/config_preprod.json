@@ -101,7 +101,7 @@
     "unsafeAllowUserCreationFromGSuiteData": false,
     "enableRasIdMeLinking": false,
     "enableRasLoginGovLinking": false,
-    "currentDuccVersions": [3, 4],
+    "currentDuccVersions": [3, 4, 5],
     "renewal": {
       "expiryDays": 3650,
       "expiryDaysWarningThresholds": [1, 7, 15],
@@ -114,13 +114,10 @@
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableGenomicExtraction": true,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": true,
-    "enableCromwellGKEApp": true,
     "enableRStudioGKEApp": true,
-    "enableDataExplorer": false,
-    "enableTanagra": false
+    "enableDataExplorer": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
@@ -152,5 +149,8 @@
   },
   "termsOfService": {
     "latestAouVersion": 1
+  },
+  "tanagra": {
+    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
   }
 }

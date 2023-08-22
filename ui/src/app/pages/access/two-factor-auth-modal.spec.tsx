@@ -1,14 +1,21 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
+
+import { render, RenderResult, screen } from '@testing-library/react';
 
 import { TwoFactorAuthModal } from './two-factor-auth-modal';
 
 describe('TwoFactorAuthModal', () => {
-  const component = () =>
-    mount(<TwoFactorAuthModal onCancel={() => {}} onClick={() => {}} />);
+  const component = (): RenderResult =>
+    render(
+      <div id='popup-root'>
+        <TwoFactorAuthModal onCancel={() => {}} onClick={() => {}} />
+      </div>
+    );
 
   it('should render', () => {
-    const wrapper = component();
-    expect(wrapper).toBeTruthy();
+    component();
+    expect(
+      screen.queryByText('Redirecting to turn on Google 2-step Verification')
+    ).toBeTruthy();
   });
 });

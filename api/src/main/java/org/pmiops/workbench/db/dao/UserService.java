@@ -140,7 +140,7 @@ public interface UserService {
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
 
-  DbUser updateRasLinkIdMeStatus(String idMeUserName);
+  DbUser updateIdentityStatus(String userName);
 
   DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 

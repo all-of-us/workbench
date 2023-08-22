@@ -62,10 +62,7 @@ describe('WorkspaceLibrary', () => {
     }));
 
     serverConfigStore.set({
-      config: {
-        ...defaultServerConfig,
-        enableResearchReviewPrompt: false,
-      },
+      config: defaultServerConfig,
     });
 
     PHENOTYPE_LIBRARY_WORKSPACES = publishedWorkspaceStubs[0];

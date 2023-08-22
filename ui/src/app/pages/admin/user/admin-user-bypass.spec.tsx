@@ -44,7 +44,7 @@ describe('AdminUserBypassSpec', () => {
         'ducc-toggle',
         'era-commons-toggle',
         'two-factor-auth-toggle',
-        'ras-link-login-gov-toggle',
+        'identity-toggle',
         'profile-confirmation-toggle',
         'publication-confirmation-toggle',
       ]
@@ -82,7 +82,7 @@ describe('AdminUserBypassSpec', () => {
         'rt-compliance-training-toggle',
         'ct-compliance-training-toggle',
         'era-commons-toggle',
-        'ras-link-login-gov-toggle',
+        'identity-toggle',
       ]
         .filter((id) => wrapper.find(`[data-test-id="${id}"]`).exists())
         .map((id) => console.log(`Failed to find data-test-id: ${id}`)).length

@@ -48,6 +48,10 @@ export async function waitForFakeTimersAndUpdate(
   }
 }
 
+export async function waitAndExecute(timeMs?: number) {
+  await new Promise((resolve) => setTimeout(resolve, timeMs || 100));
+}
+
 export async function simulateSelection(
   selectElement: ReactWrapper,
   selection: string
@@ -117,6 +121,18 @@ export const expectButtonState = (wrapper: ReactWrapper, enabled: boolean) => {
   const buttonStyle: React.CSSProperties = wrapper.prop('style');
   expect(buttonStyle.cursor).toEqual(enabled ? 'pointer' : 'not-allowed');
 };
+
+export const expectButtonElementState = (
+  element: HTMLElement,
+  enabled: boolean
+) => {
+  expect(element?.style?.cursor).toEqual(enabled ? 'pointer' : 'not-allowed');
+};
+
+export const expectButtonElementEnabled = (buttonElement: HTMLElement) =>
+  expectButtonElementState(buttonElement, true);
+export const expectButtonElementDisabled = (buttonElement: HTMLElement) =>
+  expectButtonElementState(buttonElement, false);
 
 export const expectButtonEnabled = (buttonWrapper: ReactWrapper) =>
   expectButtonState(buttonWrapper, true);

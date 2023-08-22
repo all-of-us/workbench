@@ -383,10 +383,10 @@ public class UserServiceTest {
   @Test
   public void testUpdateRasLinkIdMeStatus() {
     String idMeName = "idMe@email.com";
-    userService.updateRasLinkIdMeStatus(idMeName);
+    userService.updateIdentityStatus(idMeName);
     assertThat(providedDbUser.getRasLinkUsername()).isEqualTo(idMeName);
     assertModuleCompletionEqual(
-        DbAccessModuleName.RAS_ID_ME, providedDbUser, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.IDENTITY, providedDbUser, Timestamp.from(START_INSTANT));
   }
 
   @Test

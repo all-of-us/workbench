@@ -8,6 +8,8 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.model.Study;
 
 public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
@@ -70,6 +72,12 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   @Override
   public DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace)
       throws NotFoundException {
+    return null;
+  }
+
+  @Override
+  public Study createTanagraStudy(String workspaceNamespace, String workspaceName)
+      throws ApiException {
     return null;
   }
 }

@@ -49,12 +49,12 @@ const ControlledTierEraModule = (props: {
   const status = getAccessModuleStatusByName(profile, moduleName);
 
   // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const clickable = eligible && !isCompliant(status);
+  const active = eligible && !isCompliant(status);
 
   return (
     <Module
-      {...{ clickable, eligible, moduleName, profile, spinnerProps, status }}
-      active={false}
+      {...{ active, eligible, moduleName, profile, spinnerProps, status }}
+      focused={false}
       moduleAction={redirectToNiH}
     />
   );
@@ -63,15 +63,17 @@ const ControlledTierEraModule = (props: {
 const ControlledTierStep = (props: {
   enabled: boolean;
   text: String;
+  description: String;
   style?;
 }) => {
+  const { enabled, text, description, style } = props;
   return (
-    <FlexRow style={props.style}>
+    <FlexRow title={description} style={style}>
       <FlexRow style={styles.moduleCTA} />
       {/* Since Institution access steps does not require user interaction, will display them as inactive*/}
       <FlexRow style={styles.backgroundModuleBox}>
         <div style={styles.moduleIcon}>
-          {props.enabled ? (
+          {enabled ? (
             <CheckCircle
               data-test-id='eligible'
               style={{ color: colors.success }}
@@ -84,7 +86,7 @@ const ControlledTierStep = (props: {
           )}
         </div>
         <FlexColumn style={styles.backgroundModuleText}>
-          <div>{props.text}</div>
+          <div>{text}</div>
         </FlexColumn>
       </FlexRow>
     </FlexRow>
@@ -93,13 +95,13 @@ const ControlledTierStep = (props: {
 
 export const ControlledTierCard = (props: {
   profile: Profile;
-  activeModule: AccessModule;
-  clickableModules: AccessModule[];
+  focusedModule: AccessModule;
+  activeModules: AccessModule[];
   reload: Function;
   spinnerProps: WithSpinnerOverlayProps;
   pageMode: DARPageMode;
 }) => {
-  const { profile, activeModule, clickableModules, spinnerProps, pageMode } =
+  const { profile, focusedModule, activeModules, spinnerProps, pageMode } =
     props;
   const controlledTierEligibility = profile.tierEligibilities.find(
     (tier) => tier.accessTierShortName === AccessTierShortNames.Controlled
@@ -170,12 +172,12 @@ export const ControlledTierCard = (props: {
       </FlexColumn>
       <FlexColumn style={styles.modulesContainer}>
         <ControlledTierStep
-          data-test-id='controlled-signed'
+          description='Section describing whether an institutional agreement has been signed for controlled tier access'
           enabled={isSigned}
           text={`${institutionDisplayName} must sign an institutional agreement`}
         />
         <ControlledTierStep
-          data-test-id='controlled-user-email'
+          description='Section describing whether an institution has granted controlled tier access to the current user'
           enabled={isEligible}
           text={`${institutionDisplayName} must allow you to access ${ctDisplayName} data`}
           style={{ marginTop: '1.9em' }}
@@ -190,7 +192,7 @@ export const ControlledTierCard = (props: {
         {enableComplianceTraining &&
           pageMode === DARPageMode.INITIAL_REGISTRATION && (
             <ModulesForInitialRegistration
-              {...{ profile, activeModule, clickableModules, spinnerProps }}
+              {...{ profile, focusedModule, activeModules, spinnerProps }}
               modules={[ctModule]}
             />
           )}

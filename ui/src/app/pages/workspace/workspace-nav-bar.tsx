@@ -140,7 +140,11 @@ const CdrVersion = (props: {
   );
 };
 
-const tabs = [
+interface Tab {
+  name: string;
+  link: string;
+}
+const tabs: Tab[] = [
   { name: 'Data', link: 'data' },
   {
     name: 'Analysis',
@@ -151,18 +155,8 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator} />;
 
-function restrictTab(workspace, tab) {
-  // restrict tab if workspace owner and this workspace needs a review
-  const needsReview =
-    serverConfigStore.get().config.enableResearchReviewPrompt &&
-    workspace?.accessLevel === 'OWNER' &&
-    workspace?.researchPurpose.needsReviewPrompt;
-
-  // also restrict if the ws is admin-locked
-  const shouldRestrictToAboutTab = needsReview || workspace?.adminLocked;
-
-  return shouldRestrictToAboutTab && tab.name !== 'About';
-}
+const restrictTab = (workspace: Workspace, tab: Tab) =>
+  workspace?.adminLocked && tab.name !== 'About';
 
 export const WorkspaceNavBar = fp.flow(
   withCurrentWorkspace(),
@@ -182,7 +176,7 @@ export const WorkspaceNavBar = fp.flow(
       tabs.push({ name: 'Data Explorer', link: 'data-explorer' });
     }
     if (
-      serverConfigStore.get().config.enableTanagra &&
+      getCdrVersion(workspace, cdrVersionTiersResponse).tanagraEnabled &&
       !tabs.find((tab) => tab.name === 'Tanagra')
     ) {
       tabs.push({ name: 'Tanagra', link: 'tanagra' });

@@ -39,12 +39,6 @@ cron:
   timezone: America/Chicago
   target: api
 - description: >
-    For each workspace update the attribute need_rp_prompt if it has been created 15 days/an Year earlier
-  url: /v1/cron/updateResearchPurposeReviewPrompt
-  schedule: every day 21:00
-  timezone: America/Chicago
-  target: api
-- description: >
     Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
   url: /v1/cron/uploadReportingSnapshot
   schedule: every day 19:00

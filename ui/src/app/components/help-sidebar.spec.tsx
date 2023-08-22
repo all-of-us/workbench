@@ -209,7 +209,7 @@ describe('HelpSidebar', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     currentCohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.set({
-      config: { ...defaultServerConfig, enableGenomicExtraction: true },
+      config: defaultServerConfig,
     });
     runtimeStore.set({
       workspaceNamespace: workspaceDataStub.namespace,

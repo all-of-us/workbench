@@ -1,0 +1,79 @@
+#This file provide the end points for Tanagra interactions
+# Tanagra API information can be found at :
+# https://github.com/DataBiosphere/tanagra
+
+openapi: 3.0.1
+info:
+  title: Tanagra
+  description: |
+    Service for Tanagra Interactions.
+  version: "0.1"
+
+# We use localhost:3000 for Local
+servers:
+  - url: http://localhost:3000
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+  /v2/studies:
+    post:
+      tags:
+        - Tanagra
+      summary: Save a Study(equivalent to AoU workspace) in Tanagra.
+      operationId: createStudy
+      requestBody:
+        description: Format of the response which will be json for AoU
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyCreateInfo'
+      responses:
+        200:
+          description: Newly created Study / Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Study'
+
+##########################################################################################
+## COMPONENTS
+##########################################################################################
+components:
+  securitySchemes:
+    oauth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    StudyCreateInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this study
+        displayName:
+          type: string
+          description: Human readable name of the study
+    Study:
+      type: object
+      required: [ id, created, createdBy, lastModified ]
+      properties:
+        id:
+          description: ID of the study, immutable
+          type: string
+        displayName:
+          type: string
+          description: Human readable name of the study
+        created:
+          type: string
+          format: date-time
+        createdBy:
+          description: Email of user who created the study
+          type: string
+        lastModified:
+          type: string
+          format: date-time
+security:
+  - oauth: []

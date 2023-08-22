@@ -5,24 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Workspace, WorkspaceAccessLevel } from 'generated/fetch';
 
-import {
-  Button,
-  SnowmanButton,
-  StyledRouterLink,
-} from 'app/components/buttons';
+import { SnowmanButton, StyledRouterLink } from 'app/components/buttons';
 import { WorkspaceCardBase } from 'app/components/card';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ClrIcon, ControlledTierBadge } from 'app/components/icons';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-  withErrorModal,
-} from 'app/components/modals';
+import { withErrorModal } from 'app/components/modals';
 import { PopupTrigger, TooltipTrigger } from 'app/components/popups';
-import { AouTitle } from 'app/components/text-wrappers';
 import { WorkspaceShare } from 'app/pages/workspace/workspace-share';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
@@ -34,7 +23,6 @@ import {
 import { AnalyticsTracker, triggerEvent } from 'app/utils/analytics';
 import { displayDate } from 'app/utils/dates';
 import { currentWorkspaceStore, NavigationProps } from 'app/utils/navigation';
-import { serverConfigStore } from 'app/utils/stores';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 
 import { WorkspaceActionsMenu } from './workspace-actions-menu';
@@ -91,7 +79,6 @@ const styles = reactStyles({
 interface WorkspaceCardState {
   confirmDeleting: boolean;
   showShareModal: boolean;
-  showResearchPurposeReviewModal: boolean;
 }
 
 interface WorkspaceCardProps extends NavigationProps {
@@ -111,7 +98,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       this.state = {
         confirmDeleting: false,
         showShareModal: false,
-        showResearchPurposeReviewModal: false,
       };
     }
 
@@ -149,23 +135,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       await this.props.reload();
     }
 
-    handleReviewResearchPurpose() {
-      const { workspace } = this.props;
-      this.props.navigate([
-        'workspaces',
-        workspace.namespace,
-        workspace.id,
-        'about',
-      ]);
-    }
-
-    requiresReviewPrompt() {
-      return (
-        serverConfigStore.get().config.enableResearchReviewPrompt &&
-        this.props.workspace.researchPurpose.needsReviewPrompt
-      );
-    }
-
     trackWorkspaceNavigation() {
       const {
         workspace: { name, published },
@@ -173,13 +142,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
       published
         ? AnalyticsTracker.Workspaces.NavigateToFeatured(name)
         : triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-    }
-
-    onClick(e) {
-      if (this.requiresReviewPrompt()) {
-        this.setState({ showResearchPurposeReviewModal: true });
-        e.preventDefault();
-      }
     }
 
     render() {
@@ -190,11 +152,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         tierAccessDisabled,
         navigate,
       } = this.props;
-      const {
-        confirmDeleting,
-        showShareModal,
-        showResearchPurposeReviewModal,
-      } = this.state;
+      const { confirmDeleting, showShareModal } = this.state;
       return (
         <React.Fragment>
           <WorkspaceCardBase>
@@ -263,7 +221,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                           ? styles.workspaceNameDisabled
                           : styles.workspaceName
                       }
-                      onClick={(e) => this.onClick(e)}
                       analyticsFn={() => this.trackWorkspaceNavigation()}
                       data-test-id={'workspace-card-link'}
                       propagateDataTestId
@@ -294,20 +251,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       </TooltipTrigger>
                     </StyledRouterLink>
                   </FlexRow>
-                  {this.requiresReviewPrompt() && (
-                    <div style={{ color: colors.warning }}>
-                      <ClrIcon
-                        shape={'warning-standard'}
-                        class={'is-solid'}
-                        size={20}
-                        style={{
-                          color: colors.warning,
-                          flex: '0 0 auto',
-                        }}
-                      />
-                      Needs Review
-                    </div>
-                  )}
                   {workspace.researchPurpose.reviewRequested === true &&
                     workspace.researchPurpose.approved === false && (
                       <div style={{ color: colors.danger }}>
@@ -383,47 +326,6 @@ export const WorkspaceCard = fp.flow(withNavigation)(
               workspace={{ ...workspace, accessLevel }}
               onClose={() => this.handleShareDialogClose()}
             />
-          )}
-          {showResearchPurposeReviewModal && (
-            <Modal data-test-id='workspace-review-modal'>
-              <ModalTitle>
-                Please review Research Purpose for Workspace '{workspace.name}'
-              </ModalTitle>
-              <ModalBody style={{ display: 'flex', flexDirection: 'column' }}>
-                <div>
-                  Now that you have had some time to explore the Researcher
-                  Workbench for your project, please review your workspace
-                  description to make sure it is accurate. As a reminder,
-                  project descriptions are publicly cataloged in the{' '}
-                  <AouTitle />
-                  's{' '}
-                  <a
-                    href='https://www.researchallofus.org/research-projects-directory/'
-                    target='_blank'
-                  >
-                    Research Project Directory
-                  </a>{' '}
-                  for participants and public to review.
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button
-                  type='primary'
-                  style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}
-                  onClick={() => this.handleReviewResearchPurpose()}
-                >
-                  REVIEW NOW
-                </Button>
-                <Button
-                  type='secondary'
-                  onClick={() =>
-                    this.setState({ showResearchPurposeReviewModal: false })
-                  }
-                >
-                  REVIEW LATER
-                </Button>
-              </ModalFooter>
-            </Modal>
           )}
         </React.Fragment>
       );

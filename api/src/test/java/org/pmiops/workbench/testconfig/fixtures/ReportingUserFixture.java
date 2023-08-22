@@ -42,10 +42,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   //  type in the model class. An example of such a manual fix is the following:
   // .duccSignedVersion(USER__DATA_USER_CODE_OF_CONDUCT_SIGNED_VERSION.longValue())
 
-  // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
   public static final String USER__AREA_OF_RESEARCH = "foo_1";
   public static final Timestamp USER__COMPLIANCE_TRAINING_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-07T00:00:00.00Z"));
@@ -68,9 +64,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       Timestamp.from(Instant.parse("2015-05-19T00:00:00.00Z"));
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-20T00:00:00.00Z"));
-  public static final Timestamp USER__RAS_LOGIN_GOV_BYPASS_TIME =
+  public static final Timestamp USER__IDENTITY_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-21T00:00:00.00Z"));
-  public static final Timestamp USER__RAS_LOGIN_GOV_COMPLETION_TIME =
+  public static final Timestamp USER__IDENTITY_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
   public static final String USER__FAMILY_NAME = "foo_16";
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =

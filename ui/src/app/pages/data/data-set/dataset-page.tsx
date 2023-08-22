@@ -67,7 +67,7 @@ import { AnalyticsTracker } from 'app/utils/analytics';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';
 import { apiCallWithGatewayTimeoutRetries } from 'app/utils/retry';
-import { MatchParams, serverConfigStore } from 'app/utils/stores';
+import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
@@ -867,10 +867,7 @@ export const DatasetPage = fp.flow(
       // Only allow selection of genomics prepackaged concept sets if genomics
       // data extraction is possible, since extraction is the only action that
       // can be taken on genomics variant data from the dataset builder.
-      if (
-        serverConfigStore.get().config.enableGenomicExtraction &&
-        hasWgsData
-      ) {
+      if (hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME,

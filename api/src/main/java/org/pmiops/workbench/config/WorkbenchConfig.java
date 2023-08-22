@@ -24,6 +24,7 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public MandrillConfig mandrill;
   public MoodleConfig moodle;
+  public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
   public AccessConfig access;
   public FeatureFlagsConfig featureFlags;
@@ -64,6 +65,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.reporting = new ReportingConfig();
     config.server = new ServerConfig();
+    config.tanagra = new TanagraConfig();
     config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.zendesk = new ZendeskConfig();
     config.bucketAudit = new BucketAuditConfig();
@@ -257,6 +259,10 @@ public class WorkbenchConfig {
     public String credentialsKeyV2;
   }
 
+  public static class TanagraConfig {
+    public String baseUrl;
+  }
+
   public static class ZendeskConfig {
     public String host;
   }
@@ -307,24 +313,19 @@ public class WorkbenchConfig {
     public boolean unsafeAllowDeleteUser;
     // Flag to indicate whether to show the Event Date modifier in cohort builder
     public boolean enableEventDateModifier;
-    // Flag to indicate whether to show Update research purpose prompt after an year of workspace
-    // creation
+    // DEPRECATED - now always false
+    // Flag to indicate whether to show the Update Research Purpose prompt one year after
+    // workspace creation
+    @Deprecated(forRemoval = true)
     public boolean enableResearchPurposePrompt;
-    // If true, enable genomic extraction functionality for datasets which have genomics data
-    // associated with their CDRs.
-    public boolean enableGenomicExtraction;
     // If true, ask Leo to set dataproc worker VMs not having internet access.
     public boolean enablePrivateDataprocWorker;
     // If true, copy the support staff when sending Admin Locking emails.
     public boolean ccSupportWhenAdminLocking;
-    // If true, enable using the Cromwell GKE app
-    public boolean enableCromwellGKEApp;
-    // If true, enable using the RStudio GKE app
+    // If true, enable user creation of RStudio GKE apps
     public boolean enableRStudioGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
-    // If true, enable Tanagra
-    public boolean enableTanagra;
   }
 
   public static class ActionAuditConfig {

@@ -7,6 +7,8 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.tanagra.ApiException;
+import org.pmiops.workbench.tanagra.model.Study;
 
 /*
  * WorkspaceService is primarily an interface for coordinating the three Workspace models.
@@ -58,4 +60,10 @@ public interface WorkspaceService {
   Map<String, DbWorkspace> getWorkspacesByGoogleProject(Set<String> keySet);
 
   DbWorkspace lookupWorkspaceByNamespace(String workspaceNamespace);
+
+  /**
+   * This call will create a Study in the Tanagra application. A Tanagra Study is equivalent to a
+   * AoU workspace.
+   */
+  Study createTanagraStudy(String workspaceNamespace, String workspaceName) throws ApiException;
 }

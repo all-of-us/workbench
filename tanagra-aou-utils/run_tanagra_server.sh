@@ -23,7 +23,7 @@ export TANAGRA_DB_USERNAME=workbench
 export TANAGRA_DB_PASSWORD=wb-notasecret
 
 echo "Using AoU underlays."
-export TANAGRA_UNDERLAY_FILES=aou/test/SC2022Q4R6/expanded/SC2022Q4R6.json,aou/test/SR2022Q4R6/expanded/SR2022Q4R6.json
+export TANAGRA_UNDERLAY_FILES=aou/test/SC2023Q3R1/SC2023Q3R1.json,aou/test/SR2023Q3R1/SR2023Q3R1.json
 
 
 export TANAGRA_FEATURE_ARTIFACT_STORAGE_ENABLED=true

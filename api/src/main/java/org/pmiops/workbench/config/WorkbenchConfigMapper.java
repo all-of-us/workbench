@@ -38,10 +38,11 @@ public interface WorkbenchConfigMapper {
 
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
+  // false in all environments: hard-code for imminent deletion
+  @Mapping(target = "enableResearchReviewPrompt", constant = "false")
+
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
-  // always true, soon to be removed
-  @Mapping(target = "enableCromwellGKEApp", constant = "true")
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
   @Mapping(target = "gsuiteDomain", source = "config.googleDirectoryService.gSuiteDomain")
   @Mapping(target = "projectId", source = "config.server.projectId")
@@ -63,22 +64,16 @@ public interface WorkbenchConfigMapper {
   @Mapping(
       target = "enableEventDateModifier",
       source = "config.featureFlags.enableEventDateModifier")
-  @Mapping(
-      target = "enableResearchReviewPrompt",
-      source = "config.featureFlags.enableResearchPurposePrompt")
   @Mapping(target = "enableRasIdMeLinking", source = "config.access.enableRasIdMeLinking")
   @Mapping(target = "enableRasLoginGovLinking", source = "config.access.enableRasLoginGovLinking")
-  @Mapping(
-      target = "enableGenomicExtraction",
-      source = "config.featureFlags.enableGenomicExtraction")
   @Mapping(target = "rasHost", source = "config.ras.host")
   @Mapping(target = "rasClientId", source = "config.ras.clientId")
   @Mapping(target = "rasLogoutUrl", source = "config.ras.logoutUrl")
+  @Mapping(target = "tanagraBaseUrl", source = "config.tanagra.baseUrl")
   @Mapping(target = "freeTierBillingAccountId", source = "config.billing.accountId")
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
-  @Mapping(target = "enableTanagra", source = "config.featureFlags.enableTanagra")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }
