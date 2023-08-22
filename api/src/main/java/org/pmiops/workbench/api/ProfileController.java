@@ -153,7 +153,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (dbUser.getFirstSignInTime() == null) {
       // This call should be idempotent. If the user is already registered, their profile will get
       // updated.
-      fireCloudService.registerUser(dbUser.getGivenName(), dbUser.getFamilyName());
+      fireCloudService.registerUser();
 
       // By approving the latest AOU Terms of Service, the user also approves the latest Terra TOS
       // In case user has not accepted latest AoU version, getUserTermsOfServiceStatus and acceptTos
