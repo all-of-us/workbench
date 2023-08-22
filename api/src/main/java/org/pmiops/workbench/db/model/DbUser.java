@@ -16,6 +16,8 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -79,6 +81,45 @@ public class DbUser {
   private DbDemographicSurvey demographicSurvey;
   private DbDemographicSurveyV2 demographicSurveyV2;
   private DbAddress address;
+
+  public enum DbGeneralDiscoverySource {
+    RESEARCH_ALL_OF_US_WEBSITE,
+    SOCIAL_MEDIA,
+    JOURNAL_OR_NEWS_ARTICLE,
+    ACTIVITY_PRESENTATION_OR_EVENT,
+    FRIENDS_OR_COLLEAGUES,
+    OTHER_WEBSITE,
+    OTHER
+  }
+
+  private Set<DbGeneralDiscoverySource> generalDiscoverySources;
+
+  private String generalDiscoverySourceOtherText;
+
+  public enum DbPartnerDiscoverySource {
+    ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+    ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM_BAYLOR_COLLEGE_OF_MEDICINE_DEPARTMENT_OF_MOLECULAR_AND_HUMAN_GENETICS,
+    AMERICAN_ASSOCIATION_ON_HEALTH_AND_DISABILITY_AAHD,
+    ASIAN_HEALTH_COALITION,
+    CTSA_PACER_COMMUNITY_NETWORK_CPCN,
+    DATA_AND_RESEARCH_CENTER_DRC,
+    DELTA_RESEARCH_AND_EDUCATIONAL_FOUNDATION_DREF,
+    FIFTYFORWARD_SENIOR_CITIZENS_INC,
+    IGNITE_NORTHWELL_HEALTH_FEINSTEIN_INSTITUTE_FOR_MEDICAL_RESEARCH,
+    NATIONAL_ALLIANCE_FOR_HISPANIC_HEALTH_NAHH,
+    NATIONAL_BAPTIST_CONVENTION_USA_INC,
+    NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM,
+    PYXIS_PARTNERS,
+    ALL_OF_US_RESEARCHER_ACADEMY_RTI_INTERNATIONAL,
+    PRIDENET_STANFORD_UNIVERSITY,
+    SCRIPPS_RESEARCH_INSTITUTE,
+    OTHER,
+    NONE_OF_THE_ABOVE,
+  }
+
+  private Set<DbPartnerDiscoverySource> partnerDiscoverySources;
+
+  private String partnerDiscoverySourceOtherText;
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
 
@@ -462,6 +503,56 @@ public class DbUser {
 
   public DbUser setDemographicSurveyV2(DbDemographicSurveyV2 demographicSurveyV2) {
     this.demographicSurveyV2 = demographicSurveyV2;
+    return this;
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @Enumerated(EnumType.STRING)
+  @CollectionTable(
+      name = "user_general_discovery_source",
+      joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "source")
+  public Set<DbGeneralDiscoverySource> getGeneralDiscoverySources() {
+    return generalDiscoverySources;
+  }
+
+  public DbUser setGeneralDiscoverySources(Set<DbGeneralDiscoverySource> generalDiscoverySources) {
+    this.generalDiscoverySources = generalDiscoverySources;
+    return this;
+  }
+
+  @Column(name = "user_general_discovery_source_other_text")
+  public String getGeneralDiscoverySourceOtherText() {
+    return generalDiscoverySourceOtherText;
+  }
+
+  public DbUser setGeneralDiscoverySourceOtherText(String generalDiscoverySourceOtherText) {
+    this.generalDiscoverySourceOtherText = generalDiscoverySourceOtherText;
+    return this;
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @Enumerated(EnumType.STRING)
+  @CollectionTable(
+      name = "user_partner_discovery_source",
+      joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "source")
+  public Set<DbPartnerDiscoverySource> getPartnerDiscoverySources() {
+    return partnerDiscoverySources;
+  }
+
+  public DbUser setPartnerDiscoverySources(Set<DbPartnerDiscoverySource> partnerDiscoverySources) {
+    this.partnerDiscoverySources = partnerDiscoverySources;
+    return this;
+  }
+
+  @Column(name = "user_partner_discovery_source_other_text")
+  public String getPartnerDiscoverySourceOtherText() {
+    return partnerDiscoverySourceOtherText;
+  }
+
+  public DbUser setPartnerDiscoverySourceOtherText(String partnerDiscoverySourceOtherText) {
+    this.partnerDiscoverySourceOtherText = partnerDiscoverySourceOtherText;
     return this;
   }
 
