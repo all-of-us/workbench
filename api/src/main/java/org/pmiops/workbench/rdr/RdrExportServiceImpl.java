@@ -7,7 +7,6 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -211,15 +210,9 @@ public class RdrExportServiceImpl implements RdrExportService {
 
   private RdrResearcher toRdrResearcher(long userId) {
     DbUser dbUser = userDao.findUserByUserId(userId);
-    RdrResearcher researcher =
-        rdrMapper.toRdrResearcher(
-            dbUser,
-            accessTierService.getAccessTiersForUser(dbUser),
-            verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser).orElse(null));
-    return Optional.ofNullable(workbenchConfigProvider.get().rdrExport.exportDemoSurveyV2)
-            .orElse(false)
-        ? researcher
-        : researcher.demographicSurveyV2(null);
+    var tiers = accessTierService.getAccessTiersForUser(dbUser);
+    var maybeAffiliation = verifiedInstitutionalAffiliationDao.findFirstByUser(dbUser);
+    return rdrMapper.toRdrResearcher(dbUser, tiers, maybeAffiliation.orElse(null));
   }
 
   @Nullable
