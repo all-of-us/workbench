@@ -49,7 +49,7 @@ interface State {
   showRenameModal: boolean;
 }
 
-export const NotebookResourceCard = fp.flow(
+export const NotebookActionMenu = fp.flow(
   withErrorModalWrapper(),
   withConfirmDeleteModal(),
   withSpinnerOverlay()

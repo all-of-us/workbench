@@ -13,7 +13,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ListPageHeader } from 'app/components/headers';
 import { withErrorModal } from 'app/components/modals';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
+import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { getAppInfoFromFileName, listNotebooks } from 'app/pages/analysis/util';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
@@ -89,7 +89,7 @@ export const AppFilesList = withCurrentWorkspace()(
 
     const displayMenu = (row) => {
       return (
-        <NotebookResourceCard
+        <NotebookActionMenu
           resource={convertToResources([row], props.workspace)[0]}
           workspace
           menuOnly

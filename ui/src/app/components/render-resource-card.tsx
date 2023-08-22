@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 
 import { BillingStatus, WorkspaceResource } from 'generated/fetch';
 
-import { NotebookResourceCard } from 'app/pages/analysis/notebook-resource-card';
+import { NotebookActionMenu } from 'app/pages/analysis/notebook-action-menu';
 import { CohortResourceCard } from 'app/pages/data/cohort/cohort-resource-card';
 import { CohortReviewResourceCard } from 'app/pages/data/cohort-review/cohort-review-resource-card';
 import { ConceptSetResourceCard } from 'app/pages/data/concept/concept-set-resource-card';
@@ -41,7 +41,7 @@ function renderResourceCard(props: RenderResourceCardProps) {
     [
       isNotebook,
       () => (
-        <NotebookResourceCard {...props} disableDuplicate={inactiveBilling} />
+        <NotebookActionMenu {...props} disableDuplicate={inactiveBilling} />
       ),
     ],
   ])(resource);
