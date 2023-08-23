@@ -276,6 +276,8 @@ class DeployUI
         "all-of-us-rw-preprod" => "preprod",
         "all-of-us-rw-prod" => "prod",
     }
+    require_relative 'jira'
+
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     if @opts.create_ticket
