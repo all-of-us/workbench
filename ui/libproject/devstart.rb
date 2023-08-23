@@ -241,15 +241,15 @@ class DeployUI
       @opts.quiet = true
     end
     @parser.on("--create-jiraticket",
-               "Whether to create a jira ticket") do |jira|
+               "Whether to create a jira ticket")
       @opts.create_ticket = jira
     end
     @parser.on("--from-version",
-               "From version") do |from_version|
+               "From version")
       @opts.from_version = from_version
     end
     @parser.on("--to-version",
-               "To version") do |to_version|
+               "To version")
       @opts.to_version = to_version
     end
     @parser.on("--circle-url",
