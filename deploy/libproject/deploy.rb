@@ -285,7 +285,9 @@ def deploy(cmd_name, args)
   # common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
   maybe_log_jira.call "'#{op.opts.project}': completed api service "
-
+  common.status "The value of from-version in main '#{from_version}'"
+  common.status "The value of to version in main '#{op.opts.git_version}'"
+  common.status "The value of @opts.circle_url in main'#{op.opts.circle_url}'"
   common.run_inline %W{
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
