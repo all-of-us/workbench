@@ -292,7 +292,7 @@ class DeployUI
       }
     end
     environment_name = project_names_to_environment_names[@opts.project]
-    common.status "The value of update jira '#{create_ticket}'"
+    common.status "The value of update jira '#{@opts.create_ticket}'"
     maybe_log_jira.call "'#{@opts.project}'Beginning deploy of UI service"
     common.run_inline(%W{yarn deps})
     build(@cmd_name, %W{--environment #{environment_name}})
