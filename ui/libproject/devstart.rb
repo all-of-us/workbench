@@ -242,7 +242,7 @@ class DeployUI
     end
     @parser.on("--create-jiraticket",
                "Whether to create a jira ticket") do
-      @opts.create_ticket = jira
+      @opts.create_ticket = create_jiraticket
     end
     @parser.on("--from-version",
                "From version") do
