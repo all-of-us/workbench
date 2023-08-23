@@ -207,25 +207,26 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void registerUser(String firstName, String lastName) {
-    ProfileApi profileApi = profileApiProvider.get();
-    FirecloudProfile profile = new FirecloudProfile();
-    profile.setFirstName(firstName);
-    profile.setLastName(lastName);
+  public void registerUser() {
     // TODO: make these fields not required in Firecloud and stop passing them in, or prompt for
     // them (RW-29)
-    profile.setTitle("None");
-    profile.setInstitute("None");
-    profile.setInstitutionalProgram("None");
-    profile.setProgramLocationCity("None");
-    profile.setProgramLocationState("None");
-    profile.setProgramLocationCountry("None");
-    profile.setPi("None");
-    profile.setNonProfitStatus("None");
+    // August 2023 note: Attempting to register a user without setting these fields does not work.
+    FirecloudProfile profile =
+        new FirecloudProfile()
+            .firstName("None")
+            .lastName("None")
+            .title("None")
+            .institute("None")
+            .institutionalProgram("None")
+            .programLocationCity("None")
+            .programLocationState("None")
+            .programLocationCountry("None")
+            .pi("None")
+            .nonProfitStatus("None");
 
     retryHandler.run(
         (context) -> {
-          profileApi.setProfile(profile);
+          profileApiProvider.get().setProfile(profile);
           return null;
         });
   }

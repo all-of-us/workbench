@@ -33,13 +33,8 @@ public interface FireCloudService {
   /** @return the FireCloud profile for the requesting user. */
   FirecloudMe getMe();
 
-  /**
-   * Registers the user in Firecloud.
-   *
-   * @param firstName the user's first name
-   * @param lastName the user's last name
-   */
-  void registerUser(String firstName, String lastName);
+  /** Registers the user in Firecloud. */
+  void registerUser();
 
   /** Creates a billing project owned by AllOfUs. */
   String createAllOfUsBillingProject(String billingProjectName, String servicePerimeter);
