@@ -292,14 +292,14 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-      --update-jira #{op.opts.update_jira}
+      --create-jiraticket #{create_ticket}
       --from-version #{from_version}
       --circle-url #{op.opts.circle_url}
       --to-version #{op.opts.git_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
-  
+
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)
