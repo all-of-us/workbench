@@ -241,8 +241,8 @@ class DeployUI
       @opts.quiet = true
     end
     @parser.on("--create-jiraticket",
-               "Whether to create a jira ticket") do |create_jiraticket|
-      @opts.create_ticket = create_jiraticket
+               "Whether to create a jira ticket") do |jira|
+      @opts.create_ticket = jira
     end
     @parser.on("--from-version",
                "From version") do |from_version|
@@ -280,35 +280,38 @@ class DeployUI
 
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
-    if @opts.create_ticket
-      jira_client = JiraReleaseClient.from_gcs_creds(@opts.project)
-    else
-      maybe_log_jira = lambda { |msg|
-        begin
-          jira_client.comment_ticket(@opts.version, msg)
-        rescue StandardError => e
-          common.error "comment_ticket failed: #{e}"
-        end
-      }
-    end
-    environment_name = project_names_to_environment_names[@opts.project]
-    common.status "The value of update jira '#{@opts.create_ticket}'"
-    maybe_log_jira.call "'#{@opts.project}'Beginning deploy of UI service"
-    common.run_inline(%W{yarn deps})
-    build(@cmd_name, %W{--environment #{environment_name}})
-    ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
-      cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
-      common.run_inline(cmd_prefix + %W{gcloud app deploy
-       --project #{@opts.project}
-       --version #{@opts.version}
-       #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : []))
-    end
-    maybe_log_jira.call "'#{@opts.project}': completed UI service deployment"
-    if @opts.create_ticket
-      jira_client.create_ticket(@opts.project, @opts.from_version,
-                                @opts.to_version, @opts.circle_url)
-    end
-  end
+    common.status "The value of from-version '#{@opts.from_version}'"
+    common.status "The value of to version '#{@opts.to_version}'"
+    common.status "The value of @opts.circle_url '#{@opts.circle_url}'"
+    # if @opts.create_ticket
+    #   jira_client = JiraReleaseClient.from_gcs_creds(@opts.project)
+    # else
+    #   maybe_log_jira = lambda { |msg|
+    #     begin
+    #       jira_client.comment_ticket(@opts.version, msg)
+    #     rescue StandardError => e
+    #       common.error "comment_ticket failed: #{e}"
+  #       end
+  #     }
+  #   end
+  #   environment_name = project_names_to_environment_names[@opts.project]
+  #   common.status "The value of update jira '#{@opts.create_ticket}'"
+  #   maybe_log_jira.call "'#{@opts.project}'Beginning deploy of UI service"
+  #   common.run_inline(%W{yarn deps})
+  #   build(@cmd_name, %W{--environment #{environment_name}})
+  #   ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
+  #     cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
+  #     common.run_inline(cmd_prefix + %W{gcloud app deploy
+  #      --project #{@opts.project}
+  #      --version #{@opts.version}
+  #      #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : []))
+  #   end
+  #   maybe_log_jira.call "'#{@opts.project}': completed UI service deployment"
+  #   if @opts.create_ticket
+  #     jira_client.create_ticket(@opts.project, @opts.from_version,
+  #                               @opts.to_version, @opts.circle_url)
+  #   end
+  # end
 end
 
 DevStart.new.register_commands
