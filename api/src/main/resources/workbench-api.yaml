@@ -4418,6 +4418,37 @@ definitions:
     - BS
     - BSN
     - NONE
+  GeneralDiscoverySource:
+    type: string
+    enum:
+    - RESEARCH_ALL_OF_US_WEBSITE
+    - SOCIAL_MEDIA
+    - JOURNAL_OR_NEWS_ARTICLE
+    - ACTIVITY_PRESENTATION_OR_EVENT
+    - FRIENDS_OR_COLLEAGUES
+    - OTHER_WEBSITE
+    - OTHER
+  PartnerDiscoverySource:
+    type: string
+    enum:
+    - ALL_OF_US_RESEARCH_PROGRAM_STAFF
+    - ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM_BAYLOR_COLLEGE_OF_MEDICINE_DEPARTMENT_OF_MOLECULAR_AND_HUMAN_GENETICS
+    - AMERICAN_ASSOCIATION_ON_HEALTH_AND_DISABILITY_AAHD
+    - ASIAN_HEALTH_COALITION
+    - CTSA_PACER_COMMUNITY_NETWORK_CPCN
+    - DATA_AND_RESEARCH_CENTER_DRC
+    - DELTA_RESEARCH_AND_EDUCATIONAL_FOUNDATION_DREF
+    - FIFTYFORWARD_SENIOR_CITIZENS_INC
+    - IGNITE_NORTHWELL_HEALTH_FEINSTEIN_INSTITUTE_FOR_MEDICAL_RESEARCH
+    - NATIONAL_ALLIANCE_FOR_HISPANIC_HEALTH_NAHH
+    - NATIONAL_BAPTIST_CONVENTION_USA_INC
+    - NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM
+    - PYXIS_PARTNERS
+    - ALL_OF_US_RESEARCHER_ACADEMY_RTI_INTERNATIONAL
+    - PRIDENET_STANFORD_UNIVERSITY
+    - SCRIPPS_RESEARCH_INSTITUTE
+    - OTHER
+    - NONE_OF_THE_ABOVE
   Domain:
     type: string
     description: a domain for concepts corresponding to a table in the OMOP schema
@@ -6231,6 +6262,8 @@ definitions:
     type: object
     required:
     - username
+    - generalDiscoverySources
+    - partnerDiscoverySources
     properties:
       userId:
         description: researchallofus userId
@@ -6266,6 +6299,20 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Degree"
+      generalDiscoverySources:
+        type: array
+        items:
+          "$ref": "#/definitions/GeneralDiscoverySource"
+      generalDiscoverySourceOtherText:
+        type: string
+        description: "Additional information about the 'OTHER' general discovery source. Present iff generalDiscoverySources contains 'OTHER'."
+      partnerDiscoverySources:
+        type: array
+        items:
+          "$ref": "#/definitions/PartnerDiscoverySource"
+      partnerDiscoverySourceOtherText:
+        type: string
+        description: "Additional information about the 'OTHER' partner discovery source. Present iff partnerDiscoverySources contains 'OTHER'."
       givenName:
         description: the user's given name (e.g. Alice)
         type: string

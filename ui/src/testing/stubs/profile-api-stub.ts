@@ -25,6 +25,8 @@ export class ProfileStubVariables {
     pageVisits: [{ page: 'test' }],
     eraCommonsLinkedNihUsername: null,
     areaOfResearch: 'things',
+    generalDiscoverySources: [],
+    partnerDiscoverySources: [],
     complianceTrainingCompletionTime: null,
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,

@@ -103,6 +103,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
 import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
+import org.pmiops.workbench.profile.DiscoverySourceMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
@@ -209,6 +210,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     WorkspaceFreeTierUsageService.class,
+    DiscoverySourceMapperImpl.class,
   })
   @MockBean({
     BigQueryService.class,
@@ -273,6 +275,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USER_PREFIX);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setGeneralDiscoverySources(List.of());
+    profile.setGeneralDiscoverySourceOtherText(null);
+    profile.setPartnerDiscoverySources(List.of());
+    profile.setPartnerDiscoverySourceOtherText(null);
     profile.setAddress(
         new Address()
             .streetAddress1(STREET_ADDRESS)
