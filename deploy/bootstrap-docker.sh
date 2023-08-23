@@ -19,7 +19,8 @@ git fetch --tags
 # Drop any untracked/ignored files which may have carried over, to ensure a clean build.
 git clean -fdx
 
-git checkout "${WORKBENCH_VERSION}"
+#git checkout "${WORKBENCH_VERSION}"
+git checkout "nsaxena/moveJiraCode"
 git submodule update -f --init --recursive
 git status
 

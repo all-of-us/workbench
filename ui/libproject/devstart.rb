@@ -240,6 +240,10 @@ class DeployUI
                "Whether to suppress user prompts; shown by default") do
       @opts.quiet = true
     end
+    @parser.on("--update-jira",
+               "Whether to create a jira ticket") do
+      @opts.update_jira = true
+    end
   end
 
   def validate_options
@@ -271,6 +275,7 @@ class DeployUI
        --version #{@opts.version}
        #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : []))
     end
+  #   Add logic for creating a ticket or just adding comments to jira
   end
 end
 

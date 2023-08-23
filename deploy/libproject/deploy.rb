@@ -271,18 +271,18 @@ def deploy(cmd_name, args)
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
 
-  api_deploy_flags = %W{
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --creds-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
-
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
-                      "service (including DB updates)"
-  common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+  # api_deploy_flags = %W{
+  #     --project #{op.opts.project}
+  #     --account #{op.opts.account}
+  #     --key-file #{op.opts.key_file}
+  #     --creds-file #{op.opts.key_file}
+  #     --version #{op.opts.app_version}
+  #     #{op.opts.promote ? "--promote" : "--no-promote"}
+  # } + (op.opts.dry_run ? %W{--dry-run} : [])
+  #
+  # maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+  #                     "service (including DB updates)"
+  # common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
   maybe_log_jira.call "'#{op.opts.project}': completed api service " +
                       "deployment; beginning deploy of UI service"
@@ -292,6 +292,7 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
+      --update-jira #{op.opts.update_jira}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
