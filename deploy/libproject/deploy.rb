@@ -284,8 +284,8 @@ def deploy(cmd_name, args)
   #                     "service (including DB updates)"
   # common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
-  maybe_log_jira.call "'#{op.opts.project}': completed api service " +
-                      "deployment; beginning deploy of UI service"
+  maybe_log_jira.call "'#{op.opts.project}': completed api service "
+
   common.run_inline %W{
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
@@ -293,11 +293,13 @@ def deploy(cmd_name, args)
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       --update-jira #{op.opts.update_jira}
+      --from-version #{from_version}
+      --circle-url #{op.opts.circle_url}
+      --to-version #{op.opts.git_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
-  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-
+  
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)

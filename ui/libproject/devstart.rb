@@ -240,9 +240,21 @@ class DeployUI
                "Whether to suppress user prompts; shown by default") do
       @opts.quiet = true
     end
-    @parser.on("--update-jira",
+    @parser.on("--create-jiraticket",
                "Whether to create a jira ticket") do
-      @opts.update_jira = true
+      @opts.create_ticket = create_jiraticket
+    end
+    @parser.on("--from-version",
+               "From version") do
+      @opts.from_version = from_version
+    end
+    @parser.on("--to-version",
+               "To version") do
+      @opts.to_version = to_version
+    end
+    @parser.on("--circle-url",
+               "To version") do
+      @opts.circle_url = circle_url
     end
   end
 
@@ -264,8 +276,22 @@ class DeployUI
         "all-of-us-rw-preprod" => "preprod",
         "all-of-us-rw-prod" => "prod",
     }
+    jira_client = nil
+    maybe_log_jira = ->(msg) { common.status msg }
+    if @opts.create_ticket
+      jira_client = JiraReleaseClient.from_gcs_creds(@opts.project)
+    else
+      maybe_log_jira = lambda { |msg|
+        begin
+          jira_client.comment_ticket(@opts.version, msg)
+        rescue StandardError => e
+          common.error "comment_ticket failed: #{e}"
+        end
+      }
+    end
     environment_name = project_names_to_environment_names[@opts.project]
-
+    common.status "The value of update jira '#{update_jira}'"
+    maybe_log_jira.call "'#{@opts.project}'Beginning deploy of UI service"
     common.run_inline(%W{yarn deps})
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
@@ -275,7 +301,11 @@ class DeployUI
        --version #{@opts.version}
        #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : []))
     end
-  #   Add logic for creating a ticket or just adding comments to jira
+    maybe_log_jira.call "'#{@opts.project}': completed UI service deployment"
+    if @opts.create_ticket
+      jira_client.create_ticket(@opts.project, @opts.from_version,
+                                @opts.to_version, @opts.circle_url)
+    end
   end
 end
 
