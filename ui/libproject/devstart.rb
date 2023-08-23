@@ -240,17 +240,17 @@ class DeployUI
                "Whether to suppress user prompts; shown by default") do
       @opts.quiet = true
     end
-    @parser.on("--create-jiraticket",
-               "Whether to create a jira ticket") do
-      @opts.create_ticket = create_jiraticket
+    @parser.on("--createticket",
+               "Create a jira ticket") do
+      @opts.create_ticket = createticket
     end
     @parser.on("--from-version",
                "From version") do
       @opts.from_version = from_version
     end
-    @parser.on("--to-version",
+    @parser.on("--toversion",
                "To version") do
-      @opts.to_version = to_version
+      @opts.to_version = toversion
     end
     @parser.on("--circle-url",
                "To version") do |circle_url|
