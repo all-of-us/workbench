@@ -631,6 +631,7 @@ export function TextInputWithLabel(props) {
       {props.labelContent}
       {props.labelText && (
         <label
+          htmlFor={props.inputId}
           style={{
             fontSize: 14,
             color: colors.primary,
