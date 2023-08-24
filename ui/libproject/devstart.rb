@@ -277,7 +277,12 @@ class DeployUI
         "all-of-us-rw-prod" => "prod",
     }
     require_relative 'jira'
-    <%= javascript_include_tag 'hello' %>
+    require 'execjs'
+    js_code = File.read('hello.js')
+    context = ExecJS.compile(js_code)
+
+    result = context.call('hellotry', 'John')
+
 
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }

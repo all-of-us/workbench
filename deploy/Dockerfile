@@ -47,3 +47,4 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN gem install activesupport -v 6.1.4.6
 RUN gem install jira-ruby
+RUN gem install execjs
