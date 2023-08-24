@@ -245,7 +245,7 @@ class DeployUI
       @opts.create_ticket = createticket
     end
     @parser.on("--from-version",
-               "From version") do
+               "From version") do |from_version|
       @opts.from_version = from_version
     end
     @parser.on("--toversion",
