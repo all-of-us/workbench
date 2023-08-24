@@ -3,7 +3,11 @@ import * as fp from 'lodash/fp';
 import { MultiSelect } from 'primereact/multiselect';
 import validate from 'validate.js';
 
-import { Profile } from 'generated/fetch';
+import {
+  GeneralDiscoverySource,
+  PartnerDiscoverySource,
+  Profile,
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -19,6 +23,7 @@ import {
   TextInputWithLabel,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
+import { MultipleChoiceQuestion } from 'app/components/multiple-choice-question';
 import { TooltipTrigger } from 'app/components/popups';
 import { AoU } from 'app/components/text-wrappers';
 import { PubliclyDisplayed } from 'app/icons/publicly-displayed-icon';
@@ -851,6 +856,179 @@ export class AccountCreation extends React.Component<
                 containerStyle={{ width: '39rem', marginTop: '.375rem' }}
                 onChange={(value) =>
                   this.updateProfileObject('professionalUrl', value)
+                }
+              />
+            </Section>
+            <Section style={{ marginTop: '3rem' }}>
+              <MultipleChoiceQuestion
+                question={
+                  'How did you learn about the All of Us Researcher\n' +
+                  '                      Workbench?'
+                }
+                options={[
+                  {
+                    label: 'Research All of Us Website',
+                    value: GeneralDiscoverySource.RESEARCHALLOFUSWEBSITE,
+                  },
+                  {
+                    label: 'Social Media',
+                    value: GeneralDiscoverySource.SOCIALMEDIA,
+                  },
+                  {
+                    label: 'Journal or News Article',
+                    value: GeneralDiscoverySource.JOURNALORNEWSARTICLE,
+                  },
+                  {
+                    label: 'Activity, Presentation, or Event',
+                    value: GeneralDiscoverySource.ACTIVITYPRESENTATIONOREVENT,
+                  },
+                  {
+                    label: 'Friends or Colleagues',
+                    value: GeneralDiscoverySource.FRIENDSORCOLLEAGUES,
+                  },
+                  {
+                    label: 'Other Website',
+                    value: GeneralDiscoverySource.OTHERWEBSITE,
+                  },
+                  {
+                    label: 'Other',
+                    value: GeneralDiscoverySource.OTHER,
+                    showInput: true,
+                    otherText:
+                      this.state.profile.generalDiscoverySourceOtherText,
+                    otherTextMaxLength: 100,
+                    otherTextPlaceholder: 'Please Describe',
+                    onChange: (value) => {
+                      this.updateProfileObject(
+                        'generalDiscoverySourceOtherText',
+                        value ? '' : null
+                      );
+                    },
+                    onChangeOtherText: (value) =>
+                      this.updateProfileObject(
+                        'generalDiscoverySourceOtherText',
+                        value
+                      ),
+                  },
+                ]}
+                multiple
+                selected={this.state.profile.generalDiscoverySources}
+                onChange={(value) =>
+                  this.updateProfileObject('generalDiscoverySources', value)
+                }
+              />
+            </Section>
+            <Section style={{ marginTop: '3rem' }}>
+              <MultipleChoiceQuestion
+                question={
+                  'Did you learn about the All of Us Researcher Workbench from any of these program partners?'
+                }
+                options={[
+                  {
+                    label:
+                      'All of Us Evenings with Genetics Research Program, Baylor College \n' +
+                      'of Medicine, Department of Molecular and Human Genetics',
+                    value:
+                      PartnerDiscoverySource.ALLOFUSEVENINGSWITHGENETICSRESEARCHPROGRAMBAYLORCOLLEGEOFMEDICINEDEPARTMENTOFMOLECULARANDHUMANGENETICS,
+                  },
+                  {
+                    label: 'All of Us Research Program Staff',
+                    value: PartnerDiscoverySource.ALLOFUSRESEARCHPROGRAMSTAFF,
+                  },
+                  {
+                    label: 'All of Us Researcher Academy/RTI International',
+                    value:
+                      PartnerDiscoverySource.ALLOFUSRESEARCHERACADEMYRTIINTERNATIONAL,
+                  },
+                  {
+                    label:
+                      'American Association on Health and Disability (AAHD)',
+                    value:
+                      PartnerDiscoverySource.AMERICANASSOCIATIONONHEALTHANDDISABILITYAAHD,
+                  },
+                  {
+                    label: 'Asian Health Coalition',
+                    value: PartnerDiscoverySource.ASIANHEALTHCOALITION,
+                  },
+                  {
+                    label: 'CTSA/PACER Community Network (CPCN)',
+                    value: PartnerDiscoverySource.CTSAPACERCOMMUNITYNETWORKCPCN,
+                  },
+                  {
+                    label: 'Data and Research Center (DRC)',
+                    value: PartnerDiscoverySource.DATAANDRESEARCHCENTERDRC,
+                  },
+                  {
+                    label: 'Delta Research and Educational Foundation (DREF)',
+                    value:
+                      PartnerDiscoverySource.DELTARESEARCHANDEDUCATIONALFOUNDATIONDREF,
+                  },
+                  {
+                    label: 'FiftyForward (Senior Citizens, Inc.)',
+                    value: PartnerDiscoverySource.FIFTYFORWARDSENIORCITIZENSINC,
+                  },
+                  {
+                    label:
+                      'IGNITE Northwell Health, Feinstein Institute for Medical Research',
+                    value:
+                      PartnerDiscoverySource.IGNITENORTHWELLHEALTHFEINSTEININSTITUTEFORMEDICALRESEARCH,
+                  },
+                  {
+                    label: 'National Alliance for Hispanic Health (NAHH)',
+                    value:
+                      PartnerDiscoverySource.NATIONALALLIANCEFORHISPANICHEALTHNAHH,
+                  },
+                  {
+                    label: 'National Baptist Convention, USA, Inc.',
+                    value:
+                      PartnerDiscoverySource.NATIONALBAPTISTCONVENTIONUSAINC,
+                  },
+                  {
+                    label: 'Network of the National Library of Medicine (NNLM)',
+                    value:
+                      PartnerDiscoverySource.NETWORKOFTHENATIONALLIBRARYOFMEDICINENNLM,
+                  },
+                  {
+                    label: 'PRIDEnet/Stanford University',
+                    value: PartnerDiscoverySource.PRIDENETSTANFORDUNIVERSITY,
+                  },
+                  {
+                    label: 'Pyxis Partners',
+                    value: PartnerDiscoverySource.PYXISPARTNERS,
+                  },
+                  {
+                    label: 'Scripps Research Institute',
+                    value: PartnerDiscoverySource.SCRIPPSRESEARCHINSTITUTE,
+                  },
+                  {
+                    label: 'Other',
+                    value: PartnerDiscoverySource.OTHER,
+                    showInput: true,
+                    otherText:
+                      this.state.profile.partnerDiscoverySourceOtherText,
+                    otherTextMaxLength: 100,
+                    otherTextPlaceholder: 'Please Describe',
+                    onChange: (value) => {
+                      this.updateProfileObject(
+                        'partnerDiscoverySourceOtherText',
+                        value ? '' : null
+                      );
+                    },
+                    onChangeOtherText: (value) =>
+                      this.updateProfileObject(
+                        'partnerDiscoverySourceOtherText',
+                        value
+                      ),
+                  },
+                  {
+                    label: 'None of the Above',
+                    value: PartnerDiscoverySource.NONEOFTHEABOVE,
+                  },
+                ]}
+                multiple
+                selected={this.state.profile.partnerDiscoverySources}
+                onChange={(value) =>
+                  this.updateProfileObject('partnerDiscoverySources', value)
                 }
               />
             </Section>
