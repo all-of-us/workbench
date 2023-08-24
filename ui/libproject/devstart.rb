@@ -249,7 +249,7 @@ class DeployUI
       @opts.from_version = from_version
     end
     @parser.on("--toversion",
-               "To version") do
+               "To version") do |toversion|
       @opts.to_version = toversion
     end
     @parser.on("--circle-url",
