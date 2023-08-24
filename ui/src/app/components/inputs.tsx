@@ -654,6 +654,7 @@ export function TextInputWithLabel(props) {
           onBlur={props.onBlur}
           invalid={props.invalid ? props.invalid.toString() : undefined}
           style={{ ...commonStyles.sectionInput, ...style }}
+          aria-label={props.ariaLabel}
         />
         {props.children}
       </div>

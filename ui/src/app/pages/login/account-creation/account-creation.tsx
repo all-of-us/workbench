@@ -641,7 +641,7 @@ export class AccountCreation extends React.Component<
                   />
                   <FlexColumn>
                     <TextInputWithLabel
-                      dataTestId='state'
+                      ariaLabel='State'
                       inputName='state'
                       placeholder='State'
                       value={state}
@@ -679,6 +679,7 @@ export class AccountCreation extends React.Component<
                       Country
                     </label>
                     <Select
+                      aria-label='Country dropdown'
                       value={this.state.countryDropdownSelection}
                       options={[
                         {
@@ -693,15 +694,14 @@ export class AccountCreation extends React.Component<
                       onChange={(value) =>
                         this.updateCountryDropdownSelection(value)
                       }
-                      data-test-id='country-dropdown'
                     />
                     {this.state.countryDropdownSelection ===
                       countryDropdownOption.other && (
                       <div style={{ marginTop: '0.3rem' }}>
                         <TextInput
-                          data-test-id='non-usa-country-input'
                           id='country'
                           name='country'
+                          aria-label='Country input'
                           placeholder='Please specify'
                           value={country}
                           onChange={(value) =>
