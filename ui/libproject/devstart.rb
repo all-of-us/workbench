@@ -278,11 +278,12 @@ class DeployUI
     }
     require_relative 'jira'
     require 'execjs'
-    js_code = File.read('hello.js')
-    context = ExecJS.compile(js_code)
+    current_directory = Dir.pwd
+    # js_code = File.read('hello.js')
+    # context = ExecJS.compile(js_code)
 
-    result = context.call('hellotry', 'John')
-
+    # result = context.call('hellotry', 'John')
+    common.status "The current directory is '#{current_directory}'"
 
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
