@@ -3,3 +3,5 @@ function hellotry(name) {
   console.log(greeting);
   alert(greeting);
 }
+
+hellotry('neha');

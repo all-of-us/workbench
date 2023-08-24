@@ -277,8 +277,7 @@ class DeployUI
         "all-of-us-rw-prod" => "prod",
     }
     require_relative 'jira'
-    require_relative 'hello'
-    hellotry('neha')
+    <%= javascript_include_tag 'hello' %>
 
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
