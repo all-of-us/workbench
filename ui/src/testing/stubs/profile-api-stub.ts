@@ -4,6 +4,7 @@ import {
   InstitutionalRole,
   Profile,
   ProfileApi,
+  UsernameTakenResponse,
 } from 'generated/fetch';
 import { AdminUserListResponse } from 'generated/fetch/api';
 
@@ -148,6 +149,12 @@ export class ProfileApiStub extends ProfileApi {
           username: ProfileStubVariables.PROFILE_STUB.username,
         },
       ],
+    });
+  }
+
+  public isUsernameTaken(_username: string): Promise<UsernameTakenResponse> {
+    return Promise.resolve({
+      isTaken: false,
     });
   }
 }
