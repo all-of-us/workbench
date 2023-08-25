@@ -20,10 +20,10 @@ afterEach(() => {
 });
 
 const wsNs = 'can be anything - not testing the navigation here';
-const expectedNavigation = ['admin/workspaces/' + wsNs];
+const expectedNavigation = ['admin', 'workspaces', wsNs];
 
 describe('AdminWorkspaceSearch', () => {
-  it('navigates to an existing workspace by typing enter', async () => {
+  it('navigates to a workspace by typing enter', async () => {
     const user = userEvent.setup();
     const { container } = render(
       <AdminWorkspaceSearch {...{ showSpinner, hideSpinner }} />
@@ -39,7 +39,7 @@ describe('AdminWorkspaceSearch', () => {
     expect(mockNavigate).toHaveBeenCalledWith(expectedNavigation);
   });
 
-  it('navigates to an existing workspace by clicking the button', async () => {
+  it('navigates to a workspace by clicking the load button', async () => {
     const user = userEvent.setup();
     const { container } = render(
       <AdminWorkspaceSearch {...{ showSpinner, hideSpinner }} />
