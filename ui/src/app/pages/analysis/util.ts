@@ -112,3 +112,12 @@ export const getExistingJupyterNotebookNames = async (
     )
     .map((fd: FileDetail) => dropJupyterNotebookFileSuffix(fd.name));
 };
+
+export const parseLocation = (file: FileDetail, bucket: string): string => {
+  const prefixLength = bucket.length;
+  const start = prefixLength + 1; // slash after bucket name
+  const suffixPos = file.path.lastIndexOf(file.name);
+  const end = suffixPos - 1; // slash before filename
+
+  return file.path.substring(start, end);
+};
