@@ -59,7 +59,6 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
-import org.pmiops.workbench.profile.DiscoverySourceMapperImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.PresetData;
@@ -117,7 +116,6 @@ public class UserServiceTest {
     AccessModuleServiceImpl.class,
     CommonMappers.class,
     UserAccessModuleMapperImpl.class,
-    DiscoverySourceMapperImpl.class,
   })
   @MockBean({
     MailService.class,

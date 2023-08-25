@@ -103,7 +103,6 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.profile.AddressMapperImpl;
 import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
-import org.pmiops.workbench.profile.DiscoverySourceMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
@@ -210,7 +209,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
     WorkspaceFreeTierUsageService.class,
-    DiscoverySourceMapperImpl.class,
   })
   @MockBean({
     BigQueryService.class,

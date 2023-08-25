@@ -8,6 +8,7 @@ import org.pmiops.workbench.institution.InstitutionServiceImpl;
 import org.pmiops.workbench.institution.InstitutionTierConfigMapperImpl;
 import org.pmiops.workbench.institution.InstitutionUserInstructionsMapperImpl;
 import org.pmiops.workbench.institution.PublicInstitutionDetailsMapperImpl;
+import org.pmiops.workbench.profile.DiscoverySourceMapperImpl;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 
@@ -25,5 +26,6 @@ import org.springframework.context.annotation.Import;
   InstitutionTierConfigMapperImpl.class,
   AccessModuleNameMapperImpl.class,
   AccessSyncServiceImpl.class,
+  DiscoverySourceMapperImpl.class,
 })
 public class UserServiceTestConfiguration {}
