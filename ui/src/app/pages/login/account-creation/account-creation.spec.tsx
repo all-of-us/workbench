@@ -20,13 +20,11 @@ import {
   stateCodeErrorMessage,
 } from './account-creation';
 
-const createProps = (): AccountCreationProps => {
-  return {
-    profile: createEmptyProfile(),
-    onComplete: () => {},
-    onPreviousClick: () => {},
-  };
-};
+const createProps = (): AccountCreationProps => ({
+  profile: createEmptyProfile(),
+  onComplete: () => {},
+  onPreviousClick: () => {},
+});
 
 const component = (props = createProps()) => {
   return render(<AccountCreation {...props} />);
