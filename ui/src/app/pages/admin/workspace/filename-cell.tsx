@@ -3,7 +3,7 @@ import { FileDetail } from 'generated/fetch';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
-import { parseLocation } from 'app/pages/analysis/util';
+import { parseDirectory } from 'app/pages/analysis/util';
 import { cond, reactStyles } from 'app/utils';
 import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
@@ -74,7 +74,7 @@ export const FilenameCell = (props: Props) => {
 
   // remove first check after RW-5626
   const isNotebook =
-    NOTEBOOKS_DIRECTORY === parseLocation(file, storageBucketPath) &&
+    NOTEBOOKS_DIRECTORY === parseDirectory(file, storageBucketPath) &&
     filename.endsWith(JUPYTER_FILE_EXT);
 
   const isTooLargeNotebook =
