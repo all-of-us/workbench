@@ -11,7 +11,7 @@ import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
-import { parseLocation } from 'app/pages/analysis/util';
+import { parseDirectory } from 'app/pages/analysis/util';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { reactStyles } from 'app/utils';
@@ -67,7 +67,7 @@ export const FileTable = (props: Props) => {
     return fileDetails
       .map((file) => {
         return {
-          location: parseLocation(file, storageBucketPath),
+          location: parseDirectory(file, storageBucketPath),
           rawName: file.name,
           nameCell: (
             <FilenameCell
