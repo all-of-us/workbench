@@ -511,7 +511,7 @@ export class AccountCreation extends React.Component<
                       value={username}
                       inputId='username'
                       inputName='username'
-                      placeholder='New Username'
+                      placeholder={FORM_LABELS.username}
                       invalid={
                         this.state.usernameConflictError ||
                         this.usernameInvalidError()
@@ -560,7 +560,7 @@ export class AccountCreation extends React.Component<
                     value={givenName}
                     inputId='givenName'
                     inputName='givenName'
-                    placeholder='First Name'
+                    placeholder={FORM_LABELS.givenName}
                     invalid={givenName.length > nameLength}
                     labelText={FORM_LABELS.givenName}
                     onChange={(value) =>
@@ -576,7 +576,7 @@ export class AccountCreation extends React.Component<
                     value={familyName}
                     inputId='familyName'
                     inputName='familyName'
-                    placeholder='Last Name'
+                    placeholder={FORM_LABELS.familyName}
                     invalid={familyName.length > nameLength}
                     containerStyle={styles.multiInputSpacing}
                     onChange={(v) => this.updateProfileObject('familyName', v)}
@@ -624,7 +624,7 @@ export class AccountCreation extends React.Component<
                     inputId='streetAddress'
                     dataTestId='streetAddress'
                     inputName='streetAddress'
-                    placeholder='Street Address'
+                    placeholder={FORM_LABELS.streetAddress1}
                     value={streetAddress1}
                     labelText={FORM_LABELS.streetAddress1}
                     onChange={(value) =>
@@ -635,7 +635,7 @@ export class AccountCreation extends React.Component<
                     inputId='streetAddress2'
                     dataTestId='streetAddress2'
                     inputName='streetAddress2'
-                    placeholder='Street Address 2'
+                    placeholder={FORM_LABELS.streetAddress2}
                     value={streetAddress2}
                     labelText={FORM_LABELS.streetAddress2}
                     containerStyle={styles.multiInputSpacing}
@@ -649,7 +649,7 @@ export class AccountCreation extends React.Component<
                     inputId='city'
                     dataTestId='city'
                     inputName='city'
-                    placeholder='City'
+                    placeholder={FORM_LABELS.city}
                     value={city}
                     labelText={FORM_LABELS.city}
                     onChange={(value) => this.updateAddress('city', value)}
@@ -659,7 +659,7 @@ export class AccountCreation extends React.Component<
                       inputId='state'
                       ariaLabel='State'
                       inputName='state'
-                      placeholder='State'
+                      placeholder={FORM_LABELS.state}
                       value={state}
                       labelText={FORM_LABELS.state}
                       containerStyle={styles.multiInputSpacing}
@@ -684,7 +684,7 @@ export class AccountCreation extends React.Component<
                     inputId='zip'
                     dataTestId='zip'
                     inputName='zip'
-                    placeholder='Zip code'
+                    placeholder={FORM_LABELS.zipCode}
                     value={zipCode}
                     labelText={FORM_LABELS.zipCode}
                     onChange={(value) => this.updateAddress('zipCode', value)}
