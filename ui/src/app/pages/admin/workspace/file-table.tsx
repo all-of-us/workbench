@@ -58,7 +58,7 @@ export const FileTable = (props: Props) => {
   const [fileDetail, setFileDetail] = useState<Array<FileDetail>>();
   const [tableData, setTable] = useState<Array<TableEntry>>();
   const [loading, setLoading] = useState<boolean>();
-  const [showOnlyAppFiles, setShowOnlyAppFiles] = useState<boolean>(true);
+  const [showAllFiles, setShowAllFiles] = useState<boolean>(false);
 
   const initTable = (
     fileDetails: Array<FileDetail>,
@@ -95,7 +95,7 @@ export const FileTable = (props: Props) => {
     setLoading(true);
     const files = await workspaceAdminApi().listFiles(
       workspaceNamespace,
-      showOnlyAppFiles
+      !showAllFiles
     );
     setFileDetail(files);
     setTable(initTable(files));
@@ -105,15 +105,15 @@ export const FileTable = (props: Props) => {
   useEffect(() => {
     setLoading(true);
     getWorkspaceFiles().finally(() => setLoading(false));
-  }, [showOnlyAppFiles]);
+  }, [showAllFiles]);
 
   return (
     <div>
       <FlexRow>
         <InputSwitch
-          checked={!showOnlyAppFiles}
+          checked={showAllFiles}
           onChange={() => {
-            setShowOnlyAppFiles(!showOnlyAppFiles);
+            setShowAllFiles(!showAllFiles);
           }}
           style={{
             marginRight: '1.5rem',

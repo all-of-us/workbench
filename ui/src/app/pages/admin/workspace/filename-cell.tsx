@@ -10,7 +10,7 @@ import { useNavigation } from 'app/utils/navigation';
 
 import { formatMB } from './file-table';
 
-const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
+const MAX_NOTEBOOK_READ_SIZE_BYTES = 5e6; // 5 MB, see NotebooksServiceImpl
 const NOTEBOOKS_DIRECTORY = 'notebooks';
 
 const styles = reactStyles({
@@ -31,9 +31,11 @@ export const FilenameCell = (props: Props) => {
   const { file, storageBucketPath, workspaceNamespace, accessReason } = props;
   const filename = file.name.trim();
 
-  const fileTooLarge = () => (
+  const FileSpan = () => <span id={file.path}>{filename}</span>;
+
+  const FileTooLarge = () => (
     <FlexRow>
-      <span>{filename}</span>
+      <FileSpan />
       <TooltipTrigger
         content={`Files larger than ${formatMB(
           MAX_NOTEBOOK_READ_SIZE_BYTES
@@ -49,12 +51,12 @@ export const FilenameCell = (props: Props) => {
   const navigateToPreview = () =>
     navigate(
       ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
-      { queryParams: { accessReason: accessReason } }
+      { queryParams: { accessReason } }
     );
 
-  const fileWithPreviewButton = () => (
+  const FileWithPreviewButton = () => (
     <FlexRow>
-      <span>{filename}</span>
+      <FileSpan />
       <TooltipTrigger
         content='Please enter an access reason below'
         disabled={accessReason?.trim()}
@@ -78,12 +80,9 @@ export const FilenameCell = (props: Props) => {
   const isTooLargeNotebook =
     isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
-  // if (tooLarge()) fileTooLarge();
-  // else if (isNotebook()) fileWithPreviewButton();
-  // else filenameSpan();
   return cond(
-    [isTooLargeNotebook, fileTooLarge],
-    [isNotebook, fileWithPreviewButton],
-    () => <span>{filename}</span>
+    [isTooLargeNotebook, FileTooLarge],
+    [isNotebook, FileWithPreviewButton],
+    FileSpan
   );
 };
