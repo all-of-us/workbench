@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import * as React from 'react';
 
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 
@@ -58,7 +58,7 @@ describe('AdminLockWorkspace', () => {
 
   it('unlocks a locked workspace', async () => {
     const user = userEvent.setup();
-    const { container } = renderModal(
+    const { container } = render(
       <AdminLockWorkspace
         {...{ reload }}
         workspace={{ ...workspace, adminLocked: true }}
