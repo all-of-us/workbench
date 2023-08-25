@@ -27,7 +27,8 @@ beforeEach(() => {
   notebookFile = {
     name: notebookFilename,
     path: `${storageBucketPath}/notebooks/${notebookFilename}`,
-    lastModifiedTime: 0,
+    lastModifiedTime: new Date().valueOf(),
+    sizeInBytes: 1e6, // 1 MB
   };
   accessReason = 'no reason, just being nosy';
   workspaceNamespace = 'some fake value';
@@ -129,7 +130,8 @@ describe('FilenameCell', () => {
     const textFile: FileDetail = {
       name: textFilename,
       path: `${storageBucketPath}/notebooks/${textFilename}`,
-      lastModifiedTime: 0,
+      lastModifiedTime: new Date().valueOf(),
+      sizeInBytes: 1e6, // 1 MB
     };
 
     const { container } = render(
