@@ -283,7 +283,7 @@ class DeployUI
     context = ExecJS.compile(js_code)
 
     common.status "The current directory is '#{current_directory}'"
-    result = context.call('hellotry', 'John')
+    result = context.call('annotate_commit_risk', 'John')
 
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
