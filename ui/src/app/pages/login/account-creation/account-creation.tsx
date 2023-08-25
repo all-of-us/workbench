@@ -88,6 +88,8 @@ export const FORM_LABELS = {
   country: 'Country',
 };
 
+const areaOfResearchId = 'areaOfResearch';
+
 export enum countryDropdownOption {
   unitedStates = 'United States of America',
   other = 'Other',
@@ -736,10 +738,13 @@ export class AccountCreation extends React.Component<
               header={
                 <React.Fragment>
                   <FlexRow style={{ alignItems: 'flex-start' }}>
-                    <div style={{ maxWidth: '60%' }}>
+                    <label
+                      style={{ maxWidth: '60%' }}
+                      htmlFor={areaOfResearchId}
+                    >
                       Your research background, experience, and research
                       interests
-                    </div>
+                    </label>
                     <PubliclyDisplayed style={{ marginLeft: '1.5rem' }} />
                   </FlexRow>
                   <div style={{ ...styles.asideText, marginTop: '.125px' }}>
@@ -791,7 +796,7 @@ export class AccountCreation extends React.Component<
               sectionHeaderStyles={{ borderBottom: null }}
             >
               <TextAreaWithLengthValidationMessage
-                id={'areaOfResearch'}
+                id={areaOfResearchId}
                 initialText={areaOfResearch}
                 maxCharacters={2000}
                 onChange={(s: string) =>

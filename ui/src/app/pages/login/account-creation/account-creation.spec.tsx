@@ -44,8 +44,10 @@ function findCountryInputField() {
   return screen.getByLabelText('Country input') as HTMLInputElement;
 }
 
-function getAreaOfResearchTextBox(container: HTMLElement) {
-  return container.querySelector('textarea#areaOfResearch');
+function getAreaOfResearchTextBox() {
+  return screen.getByLabelText(
+    'Your research background, experience, and research interests'
+  );
 }
 
 const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
@@ -58,7 +60,7 @@ beforeEach(() => {
 it('should allow completing the account creation form', async () => {
   const user = userEvent.setup();
   const onComplete = jest.fn();
-  const { container } = component({
+  component({
     ...createProps(),
     onComplete,
   });
@@ -78,7 +80,7 @@ it('should allow completing the account creation form', async () => {
   await user.paste(countryDropdownOption.unitedStates);
   await user.keyboard('{enter}');
 
-  await user.click(getAreaOfResearchTextBox(container));
+  await user.click(getAreaOfResearchTextBox());
   await user.paste('I am an undergraduate learning genomics.');
 
   await user.click(screen.getByLabelText('Next'));
@@ -194,13 +196,13 @@ it('should display characters over message if research purpose character length 
   expect(screen.queryByText('2000 characters remaining')).not.toBeNull();
 
   let testInput = fp.repeat(2000, 'a');
-  await user.click(getAreaOfResearchTextBox(container));
+  await user.click(getAreaOfResearchTextBox());
   await user.paste(testInput);
   expect(screen.queryByText('0 characters remaining')).not.toBeNull();
 
   testInput = fp.repeat(2010, 'a');
-  await user.clear(getAreaOfResearchTextBox(container));
-  await user.click(getAreaOfResearchTextBox(container));
+  await user.clear(getAreaOfResearchTextBox());
+  await user.click(getAreaOfResearchTextBox());
   await user.paste(testInput);
   expect(screen.queryByText('10 characters over')).not.toBeNull();
 
