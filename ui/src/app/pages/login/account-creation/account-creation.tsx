@@ -929,7 +929,7 @@ export class AccountCreation extends React.Component<
                       'All of Us Evenings with Genetics Research Program, Baylor College \n' +
                       'of Medicine, Department of Molecular and Human Genetics',
                     value:
-                      PartnerDiscoverySource.ALLOFUSEVENINGSWITHGENETICSRESEARCHPROGRAMBAYLORCOLLEGEOFMEDICINEDEPARTMENTOFMOLECULARANDHUMANGENETICS,
+                      PartnerDiscoverySource.ALLOFUSEVENINGSWITHGENETICSRESEARCHPROGRAM,
                   },
                   {
                     label: 'All of Us Research Program Staff',
