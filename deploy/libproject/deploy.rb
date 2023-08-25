@@ -18,7 +18,7 @@ RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT, PREPROD_PROJECT, PR
 
 VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
-def get_live_gae_version(project, validate_version=true)
+def get_live_gae_version(project, services, validate_version=true)
   common = Common.new
   versions = common.capture_stdout %W{
     gcloud app
@@ -31,8 +31,8 @@ def get_live_gae_version(project, validate_version=true)
     exit 1
   end
 
-  services = Set["api", "default"]
-  actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
+  actives =  JSON.parse(versions).select{|v| v["traffic_split"] == 1.0 and services.include?(v["service"])}
+
   active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
@@ -68,7 +68,7 @@ def setup_and_enter_docker(cmd_name, opts)
                    "documentation for details"
       exit 1
     end
-    live_staging_version = get_live_gae_version(STAGING_PROJECT)
+    live_staging_version = get_live_gae_version(STAGING_PROJECT, opts.services)
     unless live_staging_version
       common.error "No default staging version could be determined for " +
                    "promotion; please investigate or else be explicit in " +
@@ -90,7 +90,7 @@ def setup_and_enter_docker(cmd_name, opts)
 
   # TODO: Might be nice to emit the last version creation time here as a
   # sanity check (need to pick which service to do that for...).
-  live_version = get_live_gae_version(opts.project, false)
+  live_version = get_live_gae_version(opts.project, opts.services,false)
   common.status "Current live version is '#{live_version}' (project " +
                 "#{opts.project})"
   log_prefix = opts.dry_run ? "[DRY_RUN] " : ""
@@ -125,8 +125,7 @@ def setup_and_enter_docker(cmd_name, opts)
   end
 end
 
-def deploy(cmd_name, args)
-  op = WbOptionsParser.new(cmd_name, args)
+def validate_arguments(op)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
@@ -208,7 +207,18 @@ def deploy(cmd_name, args)
      op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
+end
 
+def deploy_code(cmd_name, args, justUI=nil, justAPI=nil)
+  op = WbOptionsParser.new(cmd_name, args)
+  validate_arguments(op)
+  op.opts.services = Set["api", "default"]
+  if justUI and not justAPI
+    op.opts.services = Set["default"]
+  end
+  if justAPI and not justUI
+    op.opts.services = Set["api"]
+  end
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
@@ -249,7 +259,7 @@ def deploy(cmd_name, args)
     jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
     if op.opts.update_jira and op.opts.project == STAGING_PROJECT
       create_ticket = true
-      from_version = get_live_gae_version(STAGING_PROJECT)
+      from_version = get_live_gae_version(STAGING_PROJECT, opts.services)
       unless from_version
         # Alternatively, we could support a --from_version flag
         raise RuntimeError "could not determine live staging version, and " +
@@ -271,36 +281,64 @@ def deploy(cmd_name, args)
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
 
-  api_deploy_flags = %W{
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --creds-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
+  if justAPI or not justUI
+    api_deploy_flags = %W{
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --creds-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+    } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
-                      "service (including DB updates)"
-  common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+                        "service (including DB updates)"
+    common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
-  maybe_log_jira.call "'#{op.opts.project}': completed api service " +
-                      "deployment; beginning deploy of UI service"
-  common.run_inline %W{
-    ../ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
-  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+    maybe_log_jira.call "'#{op.opts.project}': completed api service deployment "
+  end
+
+  if justUI or not justAPI
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of UI service"
+    common.run_inline %W{
+      ../ui/project.rb deploy-ui
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+        --quiet
+    } + (op.opts.dry_run ? %W{--dry-run} : [])
+    maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+  end
 
   if create_ticket
+    summary = op.opts.git_version
+    if justUI and not justAPI
+      summary = summary + ' UI '
+    end
+    if justAPI and not justUI
+      summary = summary + ' API'
+    end
     jira_client.create_ticket(op.opts.project, from_version,
-                              op.opts.git_version, op.opts.circle_url)
+                              summary, op.opts.circle_url)
   end
+end
+def deploy(cmd_name, args)
+  deploy_code(cmd_name, args)
+end
+
+def deploy_ui(cmd_name, args)
+  deploy_code(cmd_name, args,true)
+end
+
+def deploy_api(cmd_name, args)
+  deploy_code(cmd_name, args,nil,true)
+end
+
+def docker_clean()
+  common = Common.new
+  common.run_inline %W{docker-compose down --volumes}
 end
 
 Common.register_command({
@@ -309,10 +347,17 @@ Common.register_command({
   :fn => ->(*args) { deploy("deploy", args) }
 })
 
-def docker_clean()
-  common = Common.new
-  common.run_inline %W{docker-compose down --volumes}
-end
+Common.register_command({
+  :invocation => "deploy-ui",
+  :description => "",
+  :fn => ->(*args) { deploy_ui("deploy-ui", args) }
+})
+
+Common.register_command({
+  :invocation => "deploy-api",
+  :description => "",
+  :fn => ->(*args) { deploy_api("deploy-api", args) }
+ })
 
 Common.register_command({
   :invocation => "docker-clean",
