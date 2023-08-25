@@ -15,6 +15,8 @@ import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.GeneralDiscoverySource;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.springframework.data.domain.Sort;
 
 public interface UserService {
@@ -41,6 +43,10 @@ public interface UserService {
       String contactEmail,
       String areaOfResearch,
       String professionalUrl,
+      List<GeneralDiscoverySource> generalDiscoverySources,
+      String generalDiscoverySourceOtherText,
+      List<PartnerDiscoverySource> partnerDiscoverySources,
+      String partnerDiscoverySourceOtherText,
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,

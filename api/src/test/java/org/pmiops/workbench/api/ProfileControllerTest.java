@@ -273,6 +273,10 @@ public class ProfileControllerTest extends BaseControllerTest {
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USER_PREFIX);
     profile.setAreaOfResearch(RESEARCH_PURPOSE);
+    profile.setGeneralDiscoverySources(List.of());
+    profile.setGeneralDiscoverySourceOtherText(null);
+    profile.setPartnerDiscoverySources(List.of());
+    profile.setPartnerDiscoverySourceOtherText(null);
     profile.setAddress(
         new Address()
             .streetAddress1(STREET_ADDRESS)

@@ -45,6 +45,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -53,11 +54,14 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.GeneralDiscoverySource;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +106,7 @@ public class UserServiceTest {
 
   // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
+  @Autowired private InstitutionDao institutionDao;
 
   @Import({
     FakeClockConfiguration.class,
@@ -467,6 +472,76 @@ public class UserServiceTest {
   }
 
   @Test
+  public void testCreateUser_otherTextRequiredForOtherDiscoverySource() {
+    var institution = institutionDao.save(PresetData.createDbInstitution());
+    var incompleteAffiliation =
+        PresetData.createDbVerifiedInstitutionalAffiliation(institution, null);
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            createUserWithDiscoverySources(
+                List.of(GeneralDiscoverySource.OTHER),
+                null,
+                List.of(),
+                null,
+                incompleteAffiliation));
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            createUserWithDiscoverySources(
+                List.of(),
+                null,
+                List.of(PartnerDiscoverySource.OTHER),
+                null,
+                incompleteAffiliation));
+
+    // Should not throw
+    createUserWithDiscoverySources(
+        List.of(GeneralDiscoverySource.OTHER),
+        "other",
+        List.of(PartnerDiscoverySource.OTHER),
+        "other",
+        incompleteAffiliation);
+  }
+
+  @Test
+  public void testCreateUser_otherTextMustBeNullForNonOtherDiscoverySource() {
+    var institution = institutionDao.save(PresetData.createDbInstitution());
+    var incompleteAffiliation =
+        PresetData.createDbVerifiedInstitutionalAffiliation(institution, null);
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            createUserWithDiscoverySources(
+                List.of(GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES),
+                "other",
+                List.of(),
+                null,
+                incompleteAffiliation));
+
+    assertThrows(
+        BadRequestException.class,
+        () ->
+            createUserWithDiscoverySources(
+                List.of(),
+                null,
+                List.of(PartnerDiscoverySource.ASIAN_HEALTH_COALITION),
+                "other",
+                incompleteAffiliation));
+
+    // Should not throw
+    createUserWithDiscoverySources(
+        List.of(GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES),
+        null,
+        List.of(PartnerDiscoverySource.ASIAN_HEALTH_COALITION),
+        null,
+        incompleteAffiliation);
+  }
+
+  @Test
   public void testSyncDuccVersionStatus_correctVersions() {
     providedWorkbenchConfig.access.currentDuccVersions = ImmutableList.of(3, 4, 5);
 
@@ -693,5 +768,29 @@ public class UserServiceTest {
     userTermsOfServiceDao.save(
         new DbUserTermsOfService().setUserId(dbUser.getUserId()).setTosVersion(tosVersion));
     return dbUser;
+  }
+
+  private DbUser createUserWithDiscoverySources(
+      List<GeneralDiscoverySource> generalDiscoverySources,
+      String generalDiscoverySourceOtherText,
+      List<PartnerDiscoverySource> partnerDiscoverySources,
+      String partnerDiscoverySourceOtherText,
+      DbVerifiedInstitutionalAffiliation incompleteAffiliation) {
+    return userService.createUser(
+        "",
+        "",
+        "",
+        "",
+        null,
+        null,
+        generalDiscoverySources,
+        generalDiscoverySourceOtherText,
+        partnerDiscoverySources,
+        partnerDiscoverySourceOtherText,
+        null,
+        null,
+        null,
+        null,
+        incompleteAffiliation);
   }
 }

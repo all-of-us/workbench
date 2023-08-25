@@ -56,11 +56,14 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.GeneralDiscoverySource;
+import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
+import org.pmiops.workbench.profile.DiscoverySourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -100,6 +103,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
+  private final DiscoverySourceMapper discoverySourceMapper;
   private final AccessSyncService accessSyncService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
@@ -121,7 +125,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
-      AccessSyncService accessSyncService) {
+      AccessSyncService accessSyncService,
+      DiscoverySourceMapper discoverySourceMapper) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -138,6 +143,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.accessTierService = accessTierService;
     this.mailService = mailService;
     this.accessSyncService = accessSyncService;
+    this.discoverySourceMapper = discoverySourceMapper;
   }
 
   /**
@@ -261,6 +267,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         contactEmail,
         null,
         null,
+        List.of(),
+        null,
+        List.of(),
+        null,
         null,
         null,
         null,
@@ -277,6 +287,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String contactEmail,
       String areaOfResearch,
       String professionalUrl,
+      List<GeneralDiscoverySource> generalDiscoverySources,
+      String generalDiscoverySourceOtherText,
+      List<PartnerDiscoverySource> partnerDiscoverySources,
+      String partnerDiscoverySourceOtherText,
       List<Degree> degrees,
       DbAddress dbAddress,
       DbDemographicSurvey dbDemographicSurvey,
@@ -290,6 +304,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);
     dbUser.setProfessionalUrl(professionalUrl);
+    setDiscoverySources(
+        dbUser,
+        generalDiscoverySources,
+        generalDiscoverySourceOtherText,
+        partnerDiscoverySources,
+        partnerDiscoverySourceOtherText);
     dbUser.setDisabled(false);
     dbUser.setAddress(dbAddress);
     if (degrees != null) {
@@ -327,6 +347,41 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       // just return it.
     }
     return dbUser;
+  }
+
+  private void setDiscoverySources(
+      DbUser dbUser,
+      List<GeneralDiscoverySource> generalDiscoverySources,
+      String generalDiscoverySourceOtherText,
+      List<PartnerDiscoverySource> partnerDiscoverySources,
+      String partnerDiscoverySourceOtherText) {
+    dbUser.setGeneralDiscoverySources(
+        discoverySourceMapper.toDbGeneralDiscoverySources(generalDiscoverySources));
+    dbUser.setGeneralDiscoverySourceOtherText(generalDiscoverySourceOtherText);
+    if (dbUser.getGeneralDiscoverySources().contains(DbUser.DbGeneralDiscoverySource.OTHER)
+        && generalDiscoverySourceOtherText == null) {
+      throw new BadRequestException(
+          "General discovery source other text is required when the OTHER general discovery source is provided");
+    }
+    if (!dbUser.getGeneralDiscoverySources().contains(DbUser.DbGeneralDiscoverySource.OTHER)
+        && generalDiscoverySourceOtherText != null) {
+      throw new BadRequestException(
+          "General discovery source other text must be null when the OTHER general discovery source is not provided");
+    }
+
+    dbUser.setPartnerDiscoverySources(
+        discoverySourceMapper.toDbPartnerDiscoverySources(partnerDiscoverySources));
+    dbUser.setPartnerDiscoverySourceOtherText(partnerDiscoverySourceOtherText);
+    if (dbUser.getPartnerDiscoverySources().contains(DbUser.DbPartnerDiscoverySource.OTHER)
+        && partnerDiscoverySourceOtherText == null) {
+      throw new BadRequestException(
+          "Partner discovery source other text is required when the OTHER partner discovery source is provided");
+    }
+    if (!dbUser.getPartnerDiscoverySources().contains(DbUser.DbPartnerDiscoverySource.OTHER)
+        && partnerDiscoverySourceOtherText != null) {
+      throw new BadRequestException(
+          "Partner discovery source other text must be null when the OTHER partner discovery source is not provided");
+    }
   }
 
   @Override

@@ -114,6 +114,8 @@ describe('WorkspaceShare', () => {
     profileStore.set({
       profile: {
         username: 'harry.potter@hogwarts.edu',
+        generalDiscoverySources: [],
+        partnerDiscoverySources: [],
       },
       load: jest.fn(),
       reload: jest.fn(),

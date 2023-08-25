@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="Peter-Lavigne" id="changelog-225-add-user-discovery-source">
+    <addColumn tableName="user">
+      <column name="user_general_discovery_source_other_text" type="varchar(255)"/>
+      <column name="user_partner_discovery_source_other_text" type="varchar(255)"/>
+    </addColumn>
+
+    <createTable tableName="user_general_discovery_source">
+      <column name="user_id" type="bigint">
+        <constraints
+                nullable="false"
+                foreignKeyName="fk_user_general_discovery_source_user"
+                references="user(user_id)"
+                deleteCascade="true"
+        />
+      </column>
+
+      <column name="source" type="ENUM('RESEARCH_ALL_OF_US_WEBSITE','SOCIAL_MEDIA','JOURNAL_OR_NEWS_ARTICLE','ACTIVITY_PRESENTATION_OR_EVENT','FRIENDS_OR_COLLEAGUES','OTHER_WEBSITE','OTHER')">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="user_partner_discovery_source">
+      <column name="user_id" type="bigint">
+        <constraints
+                nullable="false"
+                foreignKeyName="fk_user_partner_discovery_source_user"
+                references="user(user_id)"
+                deleteCascade="true"
+        />
+      </column>
+      <column name="source" type="ENUM(
+        'ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM',
+        'ALL_OF_US_RESEARCH_PROGRAM_STAFF',
+        'ALL_OF_US_RESEARCHER_ACADEMY_RTI_INTERNATIONAL',
+        'AMERICAN_ASSOCIATION_ON_HEALTH_AND_DISABILITY_AAHD',
+        'ASIAN_HEALTH_COALITION',
+        'CTSA_PACER_COMMUNITY_NETWORK_CPCN',
+        'DATA_AND_RESEARCH_CENTER_DRC',
+        'DELTA_RESEARCH_AND_EDUCATIONAL_FOUNDATION_DREF',
+        'FIFTYFORWARD_SENIOR_CITIZENS_INC',
+        'IGNITE_NORTHWELL_HEALTH_FEINSTEIN_INSTITUTE_FOR_MEDICAL_RESEARCH',
+        'NATIONAL_ALLIANCE_FOR_HISPANIC_HEALTH_NAHH',
+        'NATIONAL_BAPTIST_CONVENTION_USA_INC',
+        'NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM',
+        'PRIDENET_STANFORD_UNIVERSITY',
+        'PYXIS_PARTNERS',
+        'SCRIPPS_RESEARCH_INSTITUTE',
+        'OTHER',
+        'NONE_OF_THE_ABOVE',
+      )">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <rollback>
+      <dropTable tableName="user_partner_discovery_source"/>
+      <dropTable tableName="user_general_discovery_source"/>
+      <dropColumn tableName="user" columnName="user_partner_discovery_source_other_text"/>
+      <dropColumn tableName="user" columnName="user_general_discovery_source_other_text"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

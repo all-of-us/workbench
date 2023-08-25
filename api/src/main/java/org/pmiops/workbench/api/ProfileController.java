@@ -240,6 +240,10 @@ public class ProfileController implements ProfileApiDelegate {
               profile.getContactEmail(),
               profile.getAreaOfResearch(),
               profile.getProfessionalUrl(),
+              profile.getGeneralDiscoverySources(),
+              profile.getGeneralDiscoverySourceOtherText(),
+              profile.getPartnerDiscoverySources(),
+              profile.getPartnerDiscoverySourceOtherText(),
               profile.getDegrees(),
               addressMapper.addressToDbAddress(profile.getAddress()),
               demographicSurveyMapper.demographicSurveyToDbDemographicSurvey(

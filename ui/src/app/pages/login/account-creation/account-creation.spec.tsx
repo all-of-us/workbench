@@ -1,11 +1,17 @@
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
-import { ProfileApi } from 'generated/fetch';
+import {
+  GeneralDiscoverySource,
+  PartnerDiscoverySource,
+  Profile,
+  ProfileApi,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
@@ -26,8 +32,11 @@ const createProps = (): AccountCreationProps => ({
   onPreviousClick: () => {},
 });
 
-const component = (props = createProps()) => {
-  return render(<AccountCreation {...props} />);
+const setup = (props = createProps()) => {
+  return {
+    container: render(<AccountCreation {...props} />).container,
+    user: userEvent.setup(),
+  };
 };
 
 function findStateField() {
@@ -55,14 +64,7 @@ beforeEach(() => {
   registerApiClient(ProfileApi, new ProfileApiStub());
 });
 
-it('should allow completing the account creation form', async () => {
-  const user = userEvent.setup();
-  const onComplete = jest.fn();
-  component({
-    ...createProps(),
-    onComplete,
-  });
-
+const fillInMinimalFields = async (user: UserEvent) => {
   await user.type(screen.getByLabelText(formLabels.username), 'username');
   await user.type(screen.getByLabelText(formLabels.givenName), 'Firstname');
   await user.type(screen.getByLabelText(formLabels.familyName), 'Lastname');
@@ -80,11 +82,21 @@ it('should allow completing the account creation form', async () => {
 
   await user.click(getAreaOfResearchTextBox());
   await user.paste('I am an undergraduate learning genomics.');
+};
+
+it('should allow completing the account creation form', async () => {
+  const onComplete = jest.fn();
+  const { user } = setup({
+    ...createProps(),
+    onComplete,
+  });
+
+  await fillInMinimalFields(user);
 
   await user.click(screen.getByLabelText('Next'));
 
   expect(onComplete).toHaveBeenCalled();
-  const profile = onComplete.mock.calls[0][0];
+  const profile: Profile = onComplete.mock.calls[0][0];
 
   expect(profile.username).toEqual('username');
   expect(profile.givenName).toEqual('Firstname');
@@ -100,8 +112,7 @@ it('should allow completing the account creation form', async () => {
 });
 
 it('should handle given name validity', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#givenName')).not.toBeNull();
   expect(container.querySelector('#givenNameError')).toBeNull();
@@ -110,8 +121,7 @@ it('should handle given name validity', async () => {
 });
 
 it('should handle family name validity', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#familyName')).not.toBeNull();
   expect(container.querySelector('#familyNameError')).toBeNull();
@@ -120,8 +130,7 @@ it('should handle family name validity', async () => {
 });
 
 it('should handle username validity starts with .', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   expect(container.querySelector('#usernameConflictError')).toBeNull();
@@ -130,8 +139,7 @@ it('should handle username validity starts with .', async () => {
 });
 
 it('should handle username validity ends with .', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   await user.type(screen.getByLabelText(formLabels.username), 'endswith.');
@@ -149,8 +157,7 @@ test.each([
   'ælfred',
   'money$man',
 ])('should mark username %s as invalid', async (username) => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   await user.type(screen.getByLabelText(formLabels.username), username);
@@ -158,8 +165,7 @@ test.each([
 });
 
 it('should handle username validity long but has mismatch at end', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   // if username is long (not too long) but has a mismatch at end
@@ -170,8 +176,7 @@ it('should handle username validity long but has mismatch at end', async () => {
 });
 
 it('should handle username validity length less than 3 characters', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   await user.type(screen.getByLabelText(formLabels.username), 'a');
@@ -179,8 +184,7 @@ it('should handle username validity length less than 3 characters', async () => 
 });
 
 it('should handle username validity if name is valid', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   await user.type(screen.getByLabelText(formLabels.username), 'username');
@@ -188,8 +192,7 @@ it('should handle username validity if name is valid', async () => {
 });
 
 it('should display characters over message if research purpose character length is more than 2000', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
 
   expect(screen.queryByText('2000 characters remaining')).not.toBeNull();
 
@@ -209,8 +212,7 @@ it('should display characters over message if research purpose character length 
 });
 
 it('should display a text input field for non-US countries', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
   await user.click(findCountryDropdownField());
   await user.paste(countryDropdownOption.unitedStates);
@@ -226,8 +228,7 @@ it('should display a text input field for non-US countries', async () => {
 });
 
 it('should capitalize a state code when selecting USA', async () => {
-  const user = userEvent.setup();
-  component();
+  const { user } = setup();
   await user.type(findStateField(), 'ny');
   expect(findStateField().value).toEqual('ny');
   await user.click(findCountryDropdownField());
@@ -237,8 +238,7 @@ it('should capitalize a state code when selecting USA', async () => {
 });
 
 it('should change a state name to a state code after selecting USA', async () => {
-  const user = userEvent.setup();
-  component();
+  const { user } = setup();
   await user.type(findStateField(), 'new york');
   expect(findStateField().value).toEqual('new york');
   await user.click(findCountryDropdownField());
@@ -248,8 +248,7 @@ it('should change a state name to a state code after selecting USA', async () =>
 });
 
 it('should mark US states as invalid if not a 2-letter code', async () => {
-  const user = userEvent.setup();
-  const { container } = component();
+  const { container, user } = setup();
   expect(container.querySelector('#stateError')).toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).toBeNull();
   await user.click(findCountryDropdownField());
@@ -258,4 +257,109 @@ it('should mark US states as invalid if not a 2-letter code', async () => {
   await user.type(findStateField(), 'new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
+});
+
+it('should allow entering discovery sources', async () => {
+  const onComplete = jest.fn();
+  const { user } = setup({
+    ...createProps(),
+    onComplete,
+  });
+
+  await fillInMinimalFields(user);
+
+  await user.click(screen.getByRole('checkbox', { name: /social media/i }));
+  await user.click(
+    screen.getByRole('checkbox', { name: /friends or colleagues/i })
+  );
+  await user.click(
+    screen.getByRole('checkbox', { name: /all of us research program staff/i })
+  );
+  await user.click(
+    screen.getByRole('checkbox', { name: /asian health coalition/i })
+  );
+
+  await user.click(screen.getByLabelText('Next'));
+  expect(onComplete).toHaveBeenCalled();
+  const profile: Profile = onComplete.mock.calls[0][0];
+
+  expect(profile.generalDiscoverySources).toEqual([
+    GeneralDiscoverySource.SOCIALMEDIA,
+    GeneralDiscoverySource.FRIENDSORCOLLEAGUES,
+  ]);
+  expect(profile.partnerDiscoverySources).toEqual([
+    PartnerDiscoverySource.ALLOFUSRESEARCHPROGRAMSTAFF,
+    PartnerDiscoverySource.ASIANHEALTHCOALITION,
+  ]);
+});
+
+it('should allow entering details for "other" discovery sources', async () => {
+  const onComplete = jest.fn();
+  const { user } = setup({
+    ...createProps(),
+    onComplete,
+  });
+
+  await fillInMinimalFields(user);
+
+  // Both forms contain an "Other" checkbox
+  const otherCheckboxes = screen.getAllByRole('checkbox', { name: 'Other' });
+  expect(otherCheckboxes.length).toEqual(2);
+
+  await user.click(otherCheckboxes[0]);
+  await user.type(
+    screen.getByPlaceholderText('Please Describe'),
+    'general discovery source - other'
+  );
+  await user.click(otherCheckboxes[1]);
+  await user.type(
+    screen.getAllByPlaceholderText('Please Describe')[1],
+    'partner discovery source - other'
+  );
+
+  await user.click(screen.getByLabelText('Next'));
+  expect(onComplete).toHaveBeenCalled();
+  const profile: Profile = onComplete.mock.calls[0][0];
+
+  expect(profile.generalDiscoverySourceOtherText).toEqual(
+    'general discovery source - other'
+  );
+  expect(profile.partnerDiscoverySourceOtherText).toEqual(
+    'partner discovery source - other'
+  );
+});
+
+it('should reset "other" discovery source details to null if "other" is unselected', async () => {
+  const onComplete = jest.fn();
+  const { user } = setup({
+    ...createProps(),
+    onComplete,
+  });
+
+  await fillInMinimalFields(user);
+
+  // Both forms contain an "Other" checkbox
+  const otherCheckboxes = screen.getAllByRole('checkbox', { name: 'Other' });
+  expect(otherCheckboxes.length).toEqual(2);
+
+  await user.click(otherCheckboxes[0]);
+  await user.type(
+    screen.getByPlaceholderText('Please Describe'),
+    'general discovery source - other'
+  );
+  await user.click(otherCheckboxes[1]);
+  await user.type(
+    screen.getAllByPlaceholderText('Please Describe')[1],
+    'partner discovery source - other'
+  );
+
+  await user.click(otherCheckboxes[0]);
+  await user.click(otherCheckboxes[1]);
+
+  await user.click(screen.getByLabelText('Next'));
+  expect(onComplete).toHaveBeenCalled();
+  const profile: Profile = onComplete.mock.calls[0][0];
+
+  expect(profile.generalDiscoverySourceOtherText).toBeNull();
+  expect(profile.partnerDiscoverySourceOtherText).toBeNull();
 });

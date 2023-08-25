@@ -198,6 +198,8 @@ export const createEmptyProfile = (): Profile => {
       yearOfBirthPreferNot: false,
     },
     degrees: [] as Degree[],
+    generalDiscoverySources: [],
+    partnerDiscoverySources: [],
   };
 
   profile.verifiedInstitutionalAffiliation = {
