@@ -11,6 +11,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
+import { useTanagraSource } from 'app/pages/data/tanagra-dev/tanagra-source';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCurrentWorkspace } from 'app/utils';
@@ -90,7 +91,7 @@ interface Props extends WithSpinnerOverlayProps {
 
 export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
-
+  const tanagraSource = useTanagraSource();
   const [navigate] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +149,8 @@ export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
 
   const createCohort = async (name: string, description: string) => {
     // TODO call Tanagra's createCohort endpoint, then navigate to new cohort in iframe
+
+    const newCohort = await tanagraSource.createCohort(workspace.namespace, name, description, 'SC2023Q3R1');
     navigate([
       'workspaces',
       workspace.namespace,
@@ -156,6 +159,8 @@ export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
       'tanagra',
       'export',
       'cohorts',
+      newCohort.id,
+      'first'
     ]);
   };
 

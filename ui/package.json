@@ -15,10 +15,11 @@
     "test:debug": "react-app-rewired --inspect-brk test --watchAll=false --run-in-band",
     "test": "react-app-rewired test --watchAll=false",
     "lint": "yarn eslint src --ext .ts,.tsx",
-    "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger",
-    "codegen-clean": "rm -rf src/generated src/notebooks-generated",
+    "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger && yarn run tanagra-codegen-openapi",
+    "codegen-clean": "rm -rf src/generated src/notebooks-generated src/tanagra-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
-    "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch"
+    "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",
+    "tanagra-codegen-openapi": "openapi-generator-cli generate -i ../tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch --additional-properties=typescriptThreePlus=true -o src/tanagra-generated"
   },
   "browserslist": [
     "chrome >= 67"
@@ -34,6 +35,7 @@
     "@fortawesome/pro-regular-svg-icons": "^6.1.2",
     "@fortawesome/pro-solid-svg-icons": "^6.1.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "@terra-ui-packages/components": "0.0.4",
     "@types/color": "^3.0.2",
     "@types/enzyme": "^3.10.10",
@@ -51,6 +53,7 @@
     "color": "^3.1.1",
     "highcharts": "^9.0.0",
     "highcharts-react-official": "3.0.0",
+    "http-proxy-middleware": "^2.0.6",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",

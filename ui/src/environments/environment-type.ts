@@ -63,6 +63,10 @@ export interface EnvironmentBase {
   allowTestAccessTokenOverride: boolean;
   // Show the new Analysis Tab in the UI
   showNewAnalysisTab: boolean;
+  // The URL to use when making API requests against the Tanagra API. This is used
+  // by the core API / fetch modules and shouldn't be needed by most other components.
+  // Example value: 'https://aou-tanagra.dev.pmi-ops.org'
+  tanagraApiUrl?: string;
 }
 
 export interface Environment extends EnvironmentBase {

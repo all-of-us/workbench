@@ -39,6 +39,7 @@ cron-emulator-err.log
 /libproject/swagger-codegen-cli.jar
 /ui/src/generated/*
 /ui/src/notebooks-generated/*
+/ui/src/tanagra-generated/*
 /ui/src/publicGenerated/*
 cloud_sql_proxy
 node_modules
