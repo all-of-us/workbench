@@ -896,7 +896,7 @@ export class AccountCreation extends React.Component<
                     showInput: true,
                     otherText:
                       this.state.profile.generalDiscoverySourceOtherText,
-                    otherTextMaxLength: 100,
+                    otherTextMaxLength: 250,
                     otherTextPlaceholder: 'Please Describe',
                     onChange: (value) => {
                       this.updateProfileObject(
@@ -1006,7 +1006,7 @@ export class AccountCreation extends React.Component<
                     showInput: true,
                     otherText:
                       this.state.profile.partnerDiscoverySourceOtherText,
-                    otherTextMaxLength: 100,
+                    otherTextMaxLength: 250,
                     otherTextPlaceholder: 'Please Describe',
                     onChange: (value) => {
                       this.updateProfileObject(
