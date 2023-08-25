@@ -16,7 +16,7 @@ import {
   AccountCreation,
   AccountCreationProps,
   countryDropdownOption,
-  FORM_LABELS,
+  formLabels,
   stateCodeErrorMessage,
 } from './account-creation';
 
@@ -31,7 +31,7 @@ const component = (props = createProps()) => {
 };
 
 function findStateField() {
-  return screen.getByLabelText(FORM_LABELS.state) as HTMLInputElement;
+  return screen.getByLabelText(formLabels.state) as HTMLInputElement;
 }
 
 function findCountryDropdownField() {
@@ -63,17 +63,17 @@ it('should allow completing the account creation form', async () => {
     onComplete,
   });
 
-  await user.type(screen.getByLabelText(FORM_LABELS.username), 'username');
-  await user.type(screen.getByLabelText(FORM_LABELS.givenName), 'Firstname');
-  await user.type(screen.getByLabelText(FORM_LABELS.familyName), 'Lastname');
+  await user.type(screen.getByLabelText(formLabels.username), 'username');
+  await user.type(screen.getByLabelText(formLabels.givenName), 'Firstname');
+  await user.type(screen.getByLabelText(formLabels.familyName), 'Lastname');
 
   await user.type(
-    screen.getByLabelText(FORM_LABELS.streetAddress1),
+    screen.getByLabelText(formLabels.streetAddress1),
     '1 Main Street'
   );
-  await user.type(screen.getByLabelText(FORM_LABELS.city), 'Boston');
+  await user.type(screen.getByLabelText(formLabels.city), 'Boston');
   await user.type(findStateField(), 'MA');
-  await user.type(screen.getByLabelText(FORM_LABELS.zipCode), '02115');
+  await user.type(screen.getByLabelText(formLabels.zipCode), '02115');
   await user.click(findCountryDropdownField());
   await user.paste(countryDropdownOption.unitedStates);
   await user.keyboard('{enter}');
@@ -105,7 +105,7 @@ it('should handle given name validity', async () => {
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#givenName')).not.toBeNull();
   expect(container.querySelector('#givenNameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.givenName), testInput);
+  await user.type(screen.getByLabelText(formLabels.givenName), testInput);
   expect(container.querySelector('#givenNameError')).not.toBeNull();
 });
 
@@ -115,7 +115,7 @@ it('should handle family name validity', async () => {
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#familyName')).not.toBeNull();
   expect(container.querySelector('#familyNameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.familyName), testInput);
+  await user.type(screen.getByLabelText(formLabels.familyName), testInput);
   expect(container.querySelector('#familyNameError')).not.toBeNull();
 });
 
@@ -125,7 +125,7 @@ it('should handle username validity starts with .', async () => {
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   expect(container.querySelector('#usernameConflictError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.username), '.startswith');
+  await user.type(screen.getByLabelText(formLabels.username), '.startswith');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -134,7 +134,7 @@ it('should handle username validity ends with .', async () => {
   const { container } = component();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.username), 'endswith.');
+  await user.type(screen.getByLabelText(formLabels.username), 'endswith.');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -153,7 +153,7 @@ test.each([
   const { container } = component();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.username), username);
+  await user.type(screen.getByLabelText(formLabels.username), username);
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -165,7 +165,7 @@ it('should handle username validity long but has mismatch at end', async () => {
   // if username is long (not too long) but has a mismatch at end
   let testInput = fp.repeat(50, 'abc');
   testInput = testInput + ' abc';
-  await user.type(screen.getByLabelText(FORM_LABELS.username), testInput);
+  await user.type(screen.getByLabelText(formLabels.username), testInput);
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -174,7 +174,7 @@ it('should handle username validity length less than 3 characters', async () => 
   const { container } = component();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.username), 'a');
+  await user.type(screen.getByLabelText(formLabels.username), 'a');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -183,7 +183,7 @@ it('should handle username validity if name is valid', async () => {
   const { container } = component();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(FORM_LABELS.username), 'username');
+  await user.type(screen.getByLabelText(formLabels.username), 'username');
   expect(container.querySelector('#usernameError')).toBeNull();
 });
 

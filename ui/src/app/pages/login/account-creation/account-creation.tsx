@@ -76,7 +76,7 @@ const researchPurposeList = [
 
 const nameLength = 80;
 
-export const FORM_LABELS = {
+export const formLabels = {
   username: 'New Username',
   givenName: 'First Name',
   familyName: 'Last Name',
@@ -442,7 +442,7 @@ export class AccountCreation extends React.Component<
 
     const usernameLabelText = (
       <div>
-        {FORM_LABELS.username}
+        {formLabels.username}
         <TooltipTrigger
           side='top'
           content={
@@ -513,7 +513,7 @@ export class AccountCreation extends React.Component<
                       value={username}
                       inputId='username'
                       inputName='username'
-                      placeholder={FORM_LABELS.username}
+                      placeholder={formLabels.username}
                       invalid={
                         this.state.usernameConflictError ||
                         this.usernameInvalidError()
@@ -562,9 +562,9 @@ export class AccountCreation extends React.Component<
                     value={givenName}
                     inputId='givenName'
                     inputName='givenName'
-                    placeholder={FORM_LABELS.givenName}
+                    placeholder={formLabels.givenName}
                     invalid={givenName.length > nameLength}
-                    labelText={FORM_LABELS.givenName}
+                    labelText={formLabels.givenName}
                     onChange={(value) =>
                       this.updateProfileObject('givenName', value)
                     }
@@ -578,11 +578,11 @@ export class AccountCreation extends React.Component<
                     value={familyName}
                     inputId='familyName'
                     inputName='familyName'
-                    placeholder={FORM_LABELS.familyName}
+                    placeholder={formLabels.familyName}
                     invalid={familyName.length > nameLength}
                     containerStyle={styles.multiInputSpacing}
                     onChange={(v) => this.updateProfileObject('familyName', v)}
-                    labelText={FORM_LABELS.familyName}
+                    labelText={formLabels.familyName}
                   />
                   {familyName.length > nameLength && (
                     <ErrorMessage id='familyNameError'>
@@ -626,9 +626,9 @@ export class AccountCreation extends React.Component<
                     inputId='streetAddress'
                     dataTestId='streetAddress'
                     inputName='streetAddress'
-                    placeholder={FORM_LABELS.streetAddress1}
+                    placeholder={formLabels.streetAddress1}
                     value={streetAddress1}
-                    labelText={FORM_LABELS.streetAddress1}
+                    labelText={formLabels.streetAddress1}
                     onChange={(value) =>
                       this.updateAddress('streetAddress1', value)
                     }
@@ -637,9 +637,9 @@ export class AccountCreation extends React.Component<
                     inputId='streetAddress2'
                     dataTestId='streetAddress2'
                     inputName='streetAddress2'
-                    placeholder={FORM_LABELS.streetAddress2}
+                    placeholder={formLabels.streetAddress2}
                     value={streetAddress2}
-                    labelText={FORM_LABELS.streetAddress2}
+                    labelText={formLabels.streetAddress2}
                     containerStyle={styles.multiInputSpacing}
                     onChange={(value) =>
                       this.updateAddress('streetAddress2', value)
@@ -651,9 +651,9 @@ export class AccountCreation extends React.Component<
                     inputId='city'
                     dataTestId='city'
                     inputName='city'
-                    placeholder={FORM_LABELS.city}
+                    placeholder={formLabels.city}
                     value={city}
-                    labelText={FORM_LABELS.city}
+                    labelText={formLabels.city}
                     onChange={(value) => this.updateAddress('city', value)}
                   />
                   <FlexColumn>
@@ -661,9 +661,9 @@ export class AccountCreation extends React.Component<
                       inputId='state'
                       ariaLabel='State'
                       inputName='state'
-                      placeholder={FORM_LABELS.state}
+                      placeholder={formLabels.state}
                       value={state}
-                      labelText={FORM_LABELS.state}
+                      labelText={formLabels.state}
                       containerStyle={styles.multiInputSpacing}
                       onChange={(value) => this.updateAddress('state', value)}
                     />
@@ -686,16 +686,16 @@ export class AccountCreation extends React.Component<
                     inputId='zip'
                     dataTestId='zip'
                     inputName='zip'
-                    placeholder={FORM_LABELS.zipCode}
+                    placeholder={formLabels.zipCode}
                     value={zipCode}
-                    labelText={FORM_LABELS.zipCode}
+                    labelText={formLabels.zipCode}
                     onChange={(value) => this.updateAddress('zipCode', value)}
                   />
                   <FlexColumn
                     style={{ width: '18rem', ...styles.multiInputSpacing }}
                   >
                     <label style={{ fontWeight: 600, color: colors.primary }}>
-                      {FORM_LABELS.country}
+                      {formLabels.country}
                     </label>
                     <Select
                       aria-label='Country dropdown'
