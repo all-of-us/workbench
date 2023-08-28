@@ -55,7 +55,7 @@ const styles = reactStyles({
     width: '100%',
     minWidth: '45rem',
   },
-  optionalText: {
+  optionalText: {q
     fontSize: 12,
     fontStyle: 'italic',
     fontWeight: 400,
@@ -88,8 +88,8 @@ export const formLabels = {
   streetAddress1: 'Street Address 1',
   streetAddress2: 'Street Address 2',
   city: 'City',
-  state: 'State',
-  zipCode: 'Zip code',
+  state: 'State/Province/Region',
+  zipCode: 'Zip/Postal Code',
   country: 'Country',
 };
 
@@ -361,11 +361,11 @@ export class AccountCreation extends React.Component<
       'address.state': {
         presence: {
           allowEmpty: false,
-          message: '^State cannot be blank',
+          message: '^State/province/region cannot be blank',
         },
         length: {
           maximum: 95,
-          message: '^State must be 95 characters or fewer',
+          message: '^State/province/region must be 95 characters or fewer',
         },
         inclusion: (_value, attributes) => {
           if (
@@ -382,11 +382,11 @@ export class AccountCreation extends React.Component<
       'address.zipCode': {
         presence: {
           allowEmpty: false,
-          message: '^Zip code cannot be blank',
+          message: '^Zip/postal code cannot be blank',
         },
         length: {
           maximum: 10,
-          message: '^Zip code must be 10 characters or fewer',
+          message: '^Zip/postal code must be 10 characters or fewer',
         },
       },
       'address.country': {
