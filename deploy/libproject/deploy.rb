@@ -289,22 +289,20 @@ def deploy(cmd_name, args)
   common.status "The value of from-version in main '#{from_version}'"
   common.status "The value of to version in main '#{op.opts.git_version}'"
   common.status "The value of @opts.circle_url in main'#{op.opts.circle_url}'"
-  # common.run_inline %W{
-  #   ../ui/project.rb deploy-ui
-  #     --project #{op.opts.project}
-  #     --account #{op.opts.account}
-  #     --key-file #{op.opts.key_file}
-  #     --version #{op.opts.app_version}
-  #     --createticket #{create_ticket}
-  #     --from-version #{from_version}
-  #     --circle-url #{op.opts.circle_url}
-  #     --toversion #{op.opts.git_version}
-  #     #{op.opts.promote ? "--promote" : "--no-promote"}
-  #     --quiet
-  # } + (op.opts.dry_run ? %W{--dry-run} : [])
   common.run_inline %W{
-  ../ui/libproject/try.js checking `neha`
-  }
+    ../ui/project.rb deploy-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
+      --version #{op.opts.app_version}
+      --createticket #{create_ticket}
+      --from-version #{from_version}
+      --circle-url #{op.opts.circle_url}
+      --toversion #{op.opts.git_version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  } + (op.opts.dry_run ? %W{--dry-run} : [])
+
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,

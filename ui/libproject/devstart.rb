@@ -277,18 +277,14 @@ class DeployUI
         "all-of-us-rw-prod" => "prod",
     }
     require_relative 'jira'
-    require 'execjs'
     current_directory = Dir.pwd
     js_code = File.read('./libproject/try.js')
-    context = ExecJS.compile(js_code)
 
     common.status "The current directory is '#{current_directory}'"
     result = context.call('checking', 'John')
 
-    common.status "result `#{result}`"
-    check = context.call('example', 'all-of-us-rw-staging', exec)
-    common.status "result `#{check}`"
-
+    common.run_inline %W{
+    ../ui/libproject/try.js checking `neha`}
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     common.status "The value of from-version '#{@opts.from_version}'"
