@@ -268,7 +268,15 @@ class DeployUI
   def run
     add_options
     @parser.parse @args
-    validate_options
+    require 'execjs'
+    current_directory = Dir.pwd
+    js_code = File.read('./libproject/try.js')
+    context = ExecJS.compile(js_code)
+
+    common.status "The current directory is '#{current_directory}'"
+    result = context.call('validate_options', @args)
+    common.status `#{result}`
+    # validate_options
     project_names_to_environment_names = {
         "all-of-us-workbench-test" => "test",
         "all-of-us-rw-staging" => "staging",
@@ -277,10 +285,8 @@ class DeployUI
         "all-of-us-rw-prod" => "prod",
     }
     require_relative 'jira'
-    current_directory = Dir.pwd
-    File.chmod(0777,"./libproject/try.js")
-    common.run_inline %W{
-    ./libproject/try.js getName()}
+
+
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     common.status "The value of from-version '#{@opts.from_version}'"

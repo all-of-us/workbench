@@ -1,7 +1,7 @@
-const someObject = {
-  "getName": function (name) {
-    return name;
+function validate_options(arg) {
+  'use strict';
+  if (!!arg.project || !!arg.version || !!arg.promote) {
+    return false;
   }
-};
-
-exports.defult = someObject;
+  return true;
+}
