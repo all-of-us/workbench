@@ -344,7 +344,7 @@ public class WorkspaceAdminServiceTest {
                 .sizeInBytes(1000L * 1000L)
                 .lastModifiedTime(dummyTime));
 
-    when(mockNotebooksService.getNotebooks(anyString(), anyString()))
+    when(mockNotebooksService.getNotebooksAsService(anyString(), anyString(), anyString()))
         .thenReturn(expectedNotebookFiles);
 
     final List<FileDetail> files = workspaceAdminService.listFiles(WORKSPACE_NAMESPACE, true);
