@@ -48,3 +48,6 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 RUN gem install activesupport -v 6.1.4.6
 RUN gem install jira-ruby
 RUN gem install execjs
+
+
+chmod +x deploy/libporject/some.js
