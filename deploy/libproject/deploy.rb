@@ -109,10 +109,10 @@ def setup_and_enter_docker(cmd_name, opts)
     common.status "Running the script actually"
     common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
-      sudo docker-compose run --rm
+      docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
-      deploy deploy/libproject/some.js #{cmd_name}
+      deploy deploy/project.rb #{cmd_name}
       --account #{opts.account}
       --project #{opts.project}
       #{opts.promote ? "--promote" : "--no-promote"}
@@ -305,8 +305,6 @@ def deploy(cmd_name, args)
   common.run_inline %W{
   ../ui/libproject/try.js checking `neha`
   }
-
-  common.status "done"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
