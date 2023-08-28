@@ -286,7 +286,6 @@ class DeployUI
     result = context.call('checking', 'John')
 
     common.status "result `#{result}`"
-     exec = require('child_process');
     check = context.call('example', 'all-of-us-rw-staging', exec)
     common.status "result `#{check}`"
 
