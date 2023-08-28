@@ -26,6 +26,10 @@ module.exports = {
       version: 'detect',
     },
   },
+  env: {
+    browser: true,
+    node: true,
+  },
 
   // Some of these rules were ported over from our common-ui/tslint.json file
   // The rules found here were ported and categorized using the tslint migration roadmap:
