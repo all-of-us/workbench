@@ -112,7 +112,7 @@ def setup_and_enter_docker(cmd_name, opts)
       docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
-      deploy deploy/libproject/some.js someFunction `nehacheck`}
+      deploy deploy/libproject/some.rb someFunction `nehacheck`}
   end
 end
 
