@@ -55,7 +55,7 @@ const styles = reactStyles({
     width: '100%',
     minWidth: '45rem',
   },
-  optionalText: {q
+  optionalText: {
     fontSize: 12,
     fontStyle: 'italic',
     fontWeight: 400,
