@@ -109,7 +109,7 @@ def setup_and_enter_docker(cmd_name, opts)
     common.status "Running the script actually"
     common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
-      docker-compose run --rm
+      sudo docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
       deploy deploy/some.js #{cmd_name}
