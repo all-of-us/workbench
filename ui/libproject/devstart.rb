@@ -285,6 +285,7 @@ class DeployUI
     common.status "The current directory is '#{current_directory}'"
     result = context.call('checking', 'John')
 
+    common.status "result `#{result}`"
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     common.status "The value of from-version '#{@opts.from_version}'"
