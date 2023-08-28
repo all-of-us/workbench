@@ -6519,6 +6519,7 @@ definitions:
     enum:
       - CROMWELL
       - RSTUDIO
+      - SAS
   DiskStatus:
     type: string
     enum:

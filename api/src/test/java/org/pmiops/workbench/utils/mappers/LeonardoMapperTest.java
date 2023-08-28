@@ -2,13 +2,18 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -56,6 +61,13 @@ public class LeonardoMapperTest {
   private List<LeonardoKubernetesError> leonardoKubernetesErrors = new ArrayList<>();
   private Map<String, String> proxyUrls = new HashMap<>();
   private Map<String, String> labels = new HashMap<>();
+
+  private static Stream<Map.Entry<AppType, LeonardoAppType>> allAppTypesMap() {
+    return Stream.of(
+        Map.entry(AppType.CROMWELL, LeonardoAppType.CROMWELL),
+        Map.entry(AppType.RSTUDIO, LeonardoAppType.ALLOWED),
+        Map.entry(AppType.SAS, LeonardoAppType.ALLOWED));
+  }
 
   @BeforeEach
   public void setUp() {
@@ -126,24 +138,21 @@ public class LeonardoMapperTest {
   }
 
   @Test
-  public void testToApiAppType() {
-    assertThat(mapper.toApiAppType(LeonardoAppType.CROMWELL)).isEqualTo(AppType.CROMWELL);
-    assertThat(mapper.toApiAppType(LeonardoAppType.RSTUDIO)).isEqualTo(AppType.RSTUDIO);
-    assertThat(mapper.toApiAppType(LeonardoAppType.GALAXY)).isNull();
-    assertThat(mapper.toApiAppType(LeonardoAppType.CUSTOM)).isNull();
-  }
-
-  @Test
   public void testToLeonardoAppType() {
-    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.RSTUDIO);
+    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.ALLOWED);
+    assertThat(mapper.toLeonardoAppType(AppType.SAS)).isEqualTo(LeonardoAppType.ALLOWED);
     assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(LeonardoAppType.CROMWELL);
   }
 
-  @Test
-  public void testToAppFromGetResponse() {
+  @ParameterizedTest(name = "appType {0} can be mapped for getApp call")
+  @MethodSource("allAppTypesMap")
+  public void testToAppFromGetResponse(Map.Entry<AppType, LeonardoAppType> appTypeMapEntry)
+      throws Exception {
+    labels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
     LeonardoGetAppResponse getAppResponse =
         new LeonardoGetAppResponse()
-            .appType(LeonardoAppType.CROMWELL)
+            .appType(appTypeMapEntry.getValue())
             .status(LeonardoAppStatus.RUNNING)
             .auditInfo(leonardoAuditInfo)
             .diskName(DISK_NAME)
@@ -156,14 +165,17 @@ public class LeonardoMapperTest {
                     .cloudProvider(LeonardoCloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT))
             .labels(labels);
-    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app);
+    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
   }
 
-  @Test
-  public void testToAppFromListResponse() {
+  @ParameterizedTest(name = "appType {0} can be mapped for listApp call")
+  @MethodSource("allAppTypesMap")
+  public void testToAppFromListResponse(Map.Entry<AppType, LeonardoAppType> appTypeMapEntry) {
+    labels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
     LeonardoListAppResponse listAppResponse =
         new LeonardoListAppResponse()
-            .appType(LeonardoAppType.CROMWELL)
+            .appType(appTypeMapEntry.getValue())
             .status(LeonardoAppStatus.RUNNING)
             .auditInfo(leonardoAuditInfo)
             .diskName(DISK_NAME)
@@ -176,7 +188,7 @@ public class LeonardoMapperTest {
                 new LeonardoCloudContext()
                     .cloudProvider(LeonardoCloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT));
-    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app);
+    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
   }
 
   @Test
