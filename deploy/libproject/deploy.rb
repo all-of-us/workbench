@@ -112,7 +112,7 @@ def setup_and_enter_docker(cmd_name, opts)
       sudo docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
-      deploy deploy/some.js #{cmd_name}
+      deploy deploy/libproject/some.js #{cmd_name}
       --account #{opts.account}
       --project #{opts.project}
       #{opts.promote ? "--promote" : "--no-promote"}
