@@ -278,9 +278,9 @@ class DeployUI
     }
     require_relative 'jira'
     current_directory = Dir.pwd
-
+    File.chmod(0777,"./libproject/try.js")
     common.run_inline %W{
-    ../ui/libproject/try.js checking `neha`}
+    ./libproject/try.js checking `neha`}
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     common.status "The value of from-version '#{@opts.from_version}'"
