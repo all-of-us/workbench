@@ -12,7 +12,8 @@ h2. deployed to %{project}, listing changes since %{prev}
 const JIRA_INSTANCE_URL = 'https://precisionmedicineinitiative.atlassian.net/';
 const JIRA_PROJECT_NAME = 'PD';
 
-export function linkifyPullRequestIds(text) {
+
+function linkifyPullRequestIds(text) {
   return text.replace(/\(#([0-9]+)\)/g, `([#$1|${REPO_BASE_URL}/pull/$1])`);
 }
 
