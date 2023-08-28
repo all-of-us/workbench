@@ -318,9 +318,10 @@ export const ListOverview = fp.flow(
 
     get hasTemporalError() {
       const { searchRequest } = this.props;
-      const activeGroups = searchRequest.includes.filter(
-        (grp) => grp.temporal && grp.status === 'active'
-      );
+      const activeGroups = [
+        ...searchRequest.includes,
+        ...searchRequest.excludes,
+      ].filter((grp) => grp.temporal && grp.status === 'active');
       return activeGroups.some((grp) => {
         const activeItems = grp.items.reduce(
           (acc, it) => {
