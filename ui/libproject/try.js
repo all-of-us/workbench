@@ -4,8 +4,7 @@ function checking(text) {
   return text.replace(/\(#([0-9]+)\)/g, `([#$1|${REPO_BASE_URL}/pull/$1])`);
 }
 
-const { exec } = require('child_process');
-function example(project) {
+function example(project, exec) {
   let gcs_uri = `gs://${project}-credentials/jira-login.json`
   exec(`gsutil cat ${gcsUri}`, (error, stdout, stderr) => {
     if (error) {

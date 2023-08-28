@@ -286,7 +286,8 @@ class DeployUI
     result = context.call('checking', 'John')
 
     common.status "result `#{result}`"
-    check = context.call('example', 'all-of-us-rw-staging')
+     exec = require('child_process');
+    check = context.call('example', 'all-of-us-rw-staging', exec)
     common.status "result `#{check}`"
 
     jira_client = nil
