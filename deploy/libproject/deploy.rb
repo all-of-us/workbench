@@ -106,13 +106,23 @@ def setup_and_enter_docker(cmd_name, opts)
   key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
+    common.status "Running the script actually"
     common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
       docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
       deploy deploy/some.js #{cmd_name}
-    }
+      --account #{opts.account}
+      --project #{opts.project}
+      #{opts.promote ? "--promote" : "--no-promote"}
+      --app-version #{opts.app_version}
+      --git-version #{opts.git_version}
+      --key-file #{DOCKER_KEY_FILE_PATH}
+    } +
+      (opts.circle_url.nil? ? [] : %W{--circle-url #{opts.circle_url}}) +
+      (opts.update_jira ? [] : %W{--no-update-jira}) +
+      (opts.dry_run ? %W{--dry-run} : [])
   end
 end
 
