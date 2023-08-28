@@ -337,7 +337,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         workspaceAuthService.getFirecloudWorkspaceAcl(workspaceNamespace, workspaceName).keySet();
     // If onlyAppFiles is true get all Apps (Jupyter/Rmd/R) files, else return all files from bucket
     return onlyAppFiles
-        ? notebooksService.getNotebooks(workspaceNamespace, workspaceName)
+        ? notebooksService.getNotebooksAsService(bucketName, workspaceNamespace, workspaceName)
         : cloudStorageClient.getBlobPage(bucketName).stream()
             .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName, workspaceUsers))
             .collect(Collectors.toList());
