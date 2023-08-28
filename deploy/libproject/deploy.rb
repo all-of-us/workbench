@@ -112,7 +112,17 @@ def setup_and_enter_docker(cmd_name, opts)
       docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
-      deploy deploy/libproject/some.rb someFunction `nehacheck`}
+      deploy deploy/some.js #{cmd_name}
+      --account #{opts.account}
+      --project #{opts.project}
+      #{opts.promote ? "--promote" : "--no-promote"}
+      --app-version #{opts.app_version}
+      --git-version #{opts.git_version}
+      --key-file #{DOCKER_KEY_FILE_PATH}
+    } +
+      (opts.circle_url.nil? ? [] : %W{--circle-url #{opts.circle_url}}) +
+      (opts.update_jira ? [] : %W{--no-update-jira}) +
+      (opts.dry_run ? %W{--dry-run} : [])
   end
 end
 
@@ -279,19 +289,24 @@ def deploy(cmd_name, args)
   common.status "The value of from-version in main '#{from_version}'"
   common.status "The value of to version in main '#{op.opts.git_version}'"
   common.status "The value of @opts.circle_url in main'#{op.opts.circle_url}'"
+  # common.run_inline %W{
+  #   ../ui/project.rb deploy-ui
+  #     --project #{op.opts.project}
+  #     --account #{op.opts.account}
+  #     --key-file #{op.opts.key_file}
+  #     --version #{op.opts.app_version}
+  #     --createticket #{create_ticket}
+  #     --from-version #{from_version}
+  #     --circle-url #{op.opts.circle_url}
+  #     --toversion #{op.opts.git_version}
+  #     #{op.opts.promote ? "--promote" : "--no-promote"}
+  #     --quiet
+  # } + (op.opts.dry_run ? %W{--dry-run} : [])
   common.run_inline %W{
-    ../ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      --createticket #{create_ticket}
-      --from-version #{from_version}
-      --circle-url #{op.opts.circle_url}
-      --toversion #{op.opts.git_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
+  ../ui/libproject/try.js checking `neha`
+  }
+
+  common.status "done"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
