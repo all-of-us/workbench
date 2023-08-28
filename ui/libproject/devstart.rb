@@ -286,6 +286,9 @@ class DeployUI
     result = context.call('checking', 'John')
 
     common.status "result `#{result}`"
+    check = context.call('example', 'all-of-us-rw-staging')
+    common.status "result `#{check}`"
+
     jira_client = nil
     maybe_log_jira = ->(msg) { common.status msg }
     common.status "The value of from-version '#{@opts.from_version}'"
