@@ -112,17 +112,7 @@ def setup_and_enter_docker(cmd_name, opts)
       docker-compose run --rm
       -e WORKBENCH_VERSION=#{opts.git_version}
       -v #{key_file.path}:#{DOCKER_KEY_FILE_PATH}
-      deploy deploy/some.js #{cmd_name}
-      --account #{opts.account}
-      --project #{opts.project}
-      #{opts.promote ? "--promote" : "--no-promote"}
-      --app-version #{opts.app_version}
-      --git-version #{opts.git_version}
-      --key-file #{DOCKER_KEY_FILE_PATH}
-    } +
-      (opts.circle_url.nil? ? [] : %W{--circle-url #{opts.circle_url}}) +
-      (opts.update_jira ? [] : %W{--no-update-jira}) +
-      (opts.dry_run ? %W{--dry-run} : [])
+      deploy deploy/some.js someFunction `nehacheck`}
   end
 end
 
