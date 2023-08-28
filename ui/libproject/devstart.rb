@@ -278,10 +278,6 @@ class DeployUI
     }
     require_relative 'jira'
     current_directory = Dir.pwd
-    js_code = File.read('./libproject/try.js')
-
-    common.status "The current directory is '#{current_directory}'"
-    result = context.call('checking', 'John')
 
     common.run_inline %W{
     ../ui/libproject/try.js checking `neha`}
