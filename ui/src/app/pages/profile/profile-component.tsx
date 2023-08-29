@@ -40,7 +40,6 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
-import countries from 'app/utils/countries';
 import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { canonicalizeUrl } from 'app/utils/urls';
