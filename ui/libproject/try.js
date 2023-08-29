@@ -1,6 +1,6 @@
 function validate_options(arg) {
   'use strict';
-  alert('hey');
+  console.log('hey');
   if (!!arg.project || !!arg.version || !!arg.promote) {
     return false;
   }
