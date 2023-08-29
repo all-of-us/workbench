@@ -38,6 +38,7 @@ import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { STATE_CODE_MAPPING } from 'app/utils/constants';
+import Country from 'app/utils/countries';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -95,11 +96,6 @@ export const formLabels = {
 
 const areaOfResearchId = 'areaOfResearch';
 
-export enum countryDropdownOption {
-  unitedStates = 'United States of America',
-  other = 'Other',
-}
-
 export const stateCodeErrorMessage =
   'State must be a valid 2-letter code (CA, TX, etc.)';
 
@@ -140,7 +136,7 @@ export interface AccountCreationState {
   showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
-  countryDropdownSelection: countryDropdownOption | null;
+  countryDropdownSelection: Country | null;
 }
 
 export class AccountCreation extends React.Component<
@@ -163,7 +159,7 @@ export class AccountCreation extends React.Component<
       showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
-      countryDropdownSelection: null,
+      countryDropdownSelection: Country.US,
     };
 
     return state;
@@ -242,7 +238,7 @@ export class AccountCreation extends React.Component<
       countryDropdownSelection: value,
     });
 
-    if (value === countryDropdownOption.unitedStates) {
+    if (value === Country.US) {
       this.updateAddress('country', value);
 
       const stateCodeGuess = this.autoSelectStateCode(
@@ -258,7 +254,7 @@ export class AccountCreation extends React.Component<
 
   stateInvalidError(): boolean {
     const { state, country } = this.state.profile.address;
-    if (country !== countryDropdownOption.unitedStates) {
+    if (country !== Country.US) {
       return false;
     }
     return !Object.values(STATE_CODE_MAPPING).includes(state);
@@ -368,9 +364,7 @@ export class AccountCreation extends React.Component<
           message: '^State/province/region must be 95 characters or fewer',
         },
         inclusion: (_value, attributes) => {
-          if (
-            attributes.address.country === countryDropdownOption.unitedStates
-          ) {
+          if (attributes.address.country === Country.US) {
             return {
               within: Object.values(STATE_CODE_MAPPING),
               message: `^${stateCodeErrorMessage}`,
@@ -705,22 +699,14 @@ export class AccountCreation extends React.Component<
                     <Select
                       aria-label='Country dropdown'
                       value={this.state.countryDropdownSelection}
-                      options={[
-                        {
-                          value: countryDropdownOption.unitedStates,
-                          label: countryDropdownOption.unitedStates,
-                        },
-                        {
-                          value: countryDropdownOption.other,
-                          label: countryDropdownOption.other,
-                        },
-                      ]}
+                      options={Object.values(Country).map((country) => {
+                        return { value: country, label: country };
+                      })}
                       onChange={(value) =>
                         this.updateCountryDropdownSelection(value)
                       }
                     />
-                    {this.state.countryDropdownSelection ===
-                      countryDropdownOption.other && (
+                    {this.state.countryDropdownSelection === Country.GB && (
                       <div style={{ marginTop: '0.3rem' }}>
                         <TextInput
                           id='country'
