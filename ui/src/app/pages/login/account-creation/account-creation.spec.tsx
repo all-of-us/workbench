@@ -208,7 +208,7 @@ it('should display characters over message if research purpose character length 
 });
 
 it('should be able to change default country value in dropdown', async () => {
-  const { container, user } = setup();
+  const { user } = setup();
   expect(screen.queryByText(Country.US)).not.toBeNull();
   expect(screen.queryByText(Country.CA)).toBeNull();
   await user.click(findCountryDropdownField());
