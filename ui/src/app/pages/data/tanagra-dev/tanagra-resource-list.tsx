@@ -139,23 +139,6 @@ export const TanagraResourceList = fp.flow(
     );
   };
 
-  const actions = (resource): Action[] => {
-    return [
-      {
-        icon: 'trash',
-        displayName: 'Delete',
-        onClick: () => {
-          props.showConfirmDeleteModal(
-            getDisplayName(resource),
-            getType(resource),
-            () => deleteResource(resource)
-          );
-        },
-        disabled: !canDelete(resource),
-      },
-    ];
-  };
-
   const deleteResource = async (resource: TanagraWorkspaceResource) => {
     try {
       if (resource.cohortV2) {
@@ -179,6 +162,23 @@ export const TanagraResourceList = fp.flow(
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const actions = (resource): Action[] => {
+    return [
+      {
+        icon: 'trash',
+        displayName: 'Delete',
+        onClick: () => {
+          props.showConfirmDeleteModal(
+            getDisplayName(resource),
+            getType(resource),
+            () => deleteResource(resource)
+          );
+        },
+        disabled: !canDelete(resource),
+      },
+    ];
   };
 
   useEffect(() => {

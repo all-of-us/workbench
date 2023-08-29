@@ -229,7 +229,6 @@ export const DataComponentTanagra = fp.flow(
       workspace.id,
       'data',
       'tanagra',
-      'export',
       'cohorts',
       newCohort.id,
       'first',
