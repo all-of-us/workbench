@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es2022",
-    "lib": ["dom"],
+    "lib": ["dom", "ES6"],
     "module": "esnext",
     "baseUrl": "./src",
     "jsx": "react-jsx",
@@ -23,6 +23,10 @@
     "noEmit": true,
     "strict": false,
     "isolatedModules": true,
+    "types": [
+      // other types...
+      "jest"
+    ]
   },
   "include": [
     "src"
