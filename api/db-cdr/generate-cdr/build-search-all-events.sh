@@ -304,7 +304,7 @@ then
           , survey_concept_id
           , cati_concept_id
       )
-  SELECT
+  SELECT DISTINCT
         b.person_id
       , a.observation_date as entry_date
       , a.observation_datetime as entry_datetime
@@ -352,7 +352,7 @@ else
           , survey_concept_id
           , cati_concept_id
       )
-  SELECT
+  SELECT DISTINCT
         b.person_id
       , a.observation_date as entry_date
       , a.observation_datetime as entry_datetime
