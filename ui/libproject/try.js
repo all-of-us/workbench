@@ -1,18 +1,20 @@
 function validate_options1(arg) {
   'use strict';
   console.log(arg.project);
-  if (isEmpty(arg) || isEmpty(arg.project)) {// || isEmpty(arg.version)) {
-    return false;
-  }
-  return true;
+  // if (isEmpty(arg) || isEmpty(arg.project)) {// || isEmpty(arg.version)) {
+  //   return false;
+  // }
+  // return true;
 }
 
-function  isEmpty(value) {
-  if (value !== 'undefined' && value !== null) {
-    return false;
-  }
-  return true;
-}
+
+validate_options1(process.argv)
+// function  isEmpty(value) {
+//   if (value !== 'undefined' && value !== null) {
+//     return false;
+//   }
+//   return true;
+// }
 // const { spawn } = require("child_process");
 // const listening = spawn('gcloud', ['app', 'deploy']);
 //

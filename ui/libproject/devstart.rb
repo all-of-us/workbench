@@ -272,13 +272,12 @@ class DeployUI
     current_directory = Dir.pwd
     js_code = File.read('./libproject/try.js')
     context = ExecJS.compile(js_code)
+    common.run_inline %W{node ./libproject/try.js --'#{@opts}'}
 
     common.status "The current directory is '#{current_directory}'"
     common.status "arguments '#{@opts}'"
     common.status "project '#{@opts.project}'"
     common.status "project '#{@opts.version}'"
-    result = context.call('validate_options1', @opts)
-    common.status `neha#{result}`
     # validate_options
     project_names_to_environment_names = {
         "all-of-us-workbench-test" => "test",
