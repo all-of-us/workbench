@@ -256,8 +256,6 @@ export const ProfileComponent = fp.flow(
         },
       } = currentProfile;
 
-      console.log('What are the countries? ', countries);
-
       const profileConfirmationAccessModule = fp.find(
         { moduleName: AccessModule.PROFILECONFIRMATION },
         profile.accessModules.modules
