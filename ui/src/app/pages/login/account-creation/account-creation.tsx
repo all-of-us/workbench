@@ -149,7 +149,7 @@ export class AccountCreation extends React.Component<
   }
 
   createInitialState(): AccountCreationState {
-    const state: AccountCreationState = {
+    return {
       creatingAccount: false,
       errors: undefined,
       profile: this.props.profile,
@@ -158,8 +158,6 @@ export class AccountCreation extends React.Component<
       usernameCheckInProgress: false,
       usernameConflictError: false,
     };
-
-    return state;
   }
 
   // Returns whether the current username is considered valid. Undefined is returned when the
@@ -688,7 +686,7 @@ export class AccountCreation extends React.Component<
                     </label>
                     <Select
                       aria-label='Country dropdown'
-                      value={country || Country.US}
+                      value={country}
                       options={Object.values(Country).map((c) => {
                         return { value: c, label: c };
                       })}

@@ -1,6 +1,5 @@
 const config = require('../src/config')
 const tu = require('../src/test-utils')
-const u = require('../src/utils')
 
 const browserTest = tu.browserTest(__filename)
 
@@ -62,8 +61,6 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Tab')
   await page.keyboard.type('12345')
   await page.keyboard.press('Tab')
-  await page.keyboard.type('United')
-  await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Testing the system.')
   await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
