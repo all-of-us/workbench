@@ -706,21 +706,6 @@ export class AccountCreation extends React.Component<
                         this.updateCountryDropdownSelection(value)
                       }
                     />
-                    {this.state.countryDropdownSelection === Country.GB && (
-                      <div style={{ marginTop: '0.3rem' }}>
-                        <TextInput
-                          id='country'
-                          name='country'
-                          aria-label='Country input'
-                          placeholder='Please specify'
-                          value={country}
-                          onChange={(value) =>
-                            this.updateAddress('country', value)
-                          }
-                          style={{ ...commonStyles.sectionInput }}
-                        />
-                      </div>
-                    )}
                   </FlexColumn>
                 </FlexRow>
               </FlexColumn>
