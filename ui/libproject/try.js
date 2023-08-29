@@ -1,11 +1,13 @@
 function validate_options1(arg) {
   'use strict';
-  return false;
-  if (!!arg.project || !!arg.version || !!arg.promote) {
-    return false;
+  if (arg && !!arg.project) {
+    return true
+  }
+  if (!!arg.version || !!arg.promote) {
+    return true;
   }
   console.log('hey there');
-  return true;
+  return false;
 }
 
 // const { spawn } = require("child_process");
