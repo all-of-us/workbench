@@ -1,13 +1,17 @@
 function validate_options1(arg) {
   'use strict';
-  if (arg && arg.project && arg.version) {
-    return true
+  if (isEmpty(arg) || isEmpty(arg.project) || isEmpty(arg.version)) {
+    return false
   }
-
-  // console.log('hey there');
-  return false;
+  return true;
 }
 
+function  isEmpty(value) {
+  if (typeof value !== 'undefined' && value) {
+    return false;
+  }
+  return true;
+}
 // const { spawn } = require("child_process");
 // const listening = spawn('gcloud', ['app', 'deploy']);
 //
