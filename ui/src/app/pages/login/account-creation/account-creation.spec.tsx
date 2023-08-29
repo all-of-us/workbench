@@ -47,10 +47,6 @@ function findCountryDropdownField() {
   return screen.getByLabelText('Country dropdown') as HTMLSelectElement;
 }
 
-function findCountryInputField() {
-  return screen.getByLabelText('Country input') as HTMLInputElement;
-}
-
 function getAreaOfResearchTextBox() {
   return screen.getByLabelText(
     'Your research background, experience, and research interests'
@@ -105,7 +101,7 @@ it('should allow completing the account creation form', async () => {
   expect(profile.address.city).toEqual('Boston');
   expect(profile.address.state).toEqual('MA');
   expect(profile.address.zipCode).toEqual('02115');
-  expect(profile.address.country).toEqual('United States of America');
+  expect(profile.address.country).toEqual(Country.US);
   expect(profile.areaOfResearch).toEqual(
     'I am an undergraduate learning genomics.'
   );
@@ -211,20 +207,15 @@ it('should display characters over message if research purpose character length 
   expect(container.querySelector('[data-test-id="charRemaining"]')).toBeNull();
 });
 
-it('should display a text input field for non-US countries', async () => {
+it('should be able to change default country value in dropdown', async () => {
   const { container, user } = setup();
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
+  expect(screen.queryByText(Country.US)).not.toBeNull();
+  expect(screen.queryByText(Country.CA)).toBeNull();
   await user.click(findCountryDropdownField());
-  await user.paste(Country.US);
+  await user.paste(Country.CA);
   await user.keyboard('{enter}');
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
-  await user.clear(findCountryDropdownField());
-  await user.click(findCountryDropdownField());
-  await user.paste(Country.GB);
-  await user.keyboard('{enter}');
-  expect(findCountryInputField()).not.toBeNull();
-  await user.type(findCountryInputField(), 'Canada');
-  expect(findCountryInputField().value).toEqual('Canada');
+  expect(screen.queryByText(Country.US)).toBeNull();
+  expect(screen.queryByText(Country.CA)).not.toBeNull();
 });
 
 it('should capitalize a state code when selecting USA', async () => {
