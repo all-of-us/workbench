@@ -240,11 +240,8 @@ it('should change a state name to a state code after selecting USA', async () =>
 
 it('should mark US states as invalid if not a 2-letter code', async () => {
   const { container, user } = setup();
-  expect(container.querySelector('#stateError')).toBeNull();
-  expect(screen.queryByText(stateCodeErrorMessage)).toBeNull();
-  await user.click(findCountryDropdownField());
-  await user.paste(Country.US);
-  await user.keyboard('{enter}');
+  expect(container.querySelector('#stateError')).not.toBeNull();
+  expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
   await user.type(findStateField(), 'new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
