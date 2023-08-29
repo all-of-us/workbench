@@ -1,14 +1,14 @@
 function validate_options1(arg) {
   'use strict';
-  return true;
-  if (isEmpty(arg) || isEmpty(arg.project) || isEmpty(arg.version)) {
-    return false
+//  console.log(arg.project);
+  if (isEmpty(arg)){ // || isEmpty(arg.project) || isEmpty(arg.version)) {
+    return false;
   }
   return true;
 }
 
 function  isEmpty(value) {
-  if (typeof value !== 'undefined' && value) {
+  if (value !== 'undefined' && value !== null) {
     return false;
   }
   return true;
