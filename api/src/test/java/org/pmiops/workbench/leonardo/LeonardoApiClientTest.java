@@ -32,6 +32,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.api.AppsApi;
 import org.pmiops.workbench.leonardo.api.DisksApi;
+import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
@@ -230,6 +231,7 @@ public class LeonardoApiClientTest {
         new LeonardoCreateAppRequest()
             .appType(LeonardoAppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .allowedChartName(LeonardoAllowedChartName.RSTUDIO_CHART)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .customEnvironmentVariables(customEnvironmentVariables);
