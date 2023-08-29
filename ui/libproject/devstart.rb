@@ -276,7 +276,8 @@ class DeployUI
     common.status "The current directory is '#{current_directory}'"
     common.status "arguments '#{@opts}'"
     result = context.call('validate_options', @opts)
-    common.status `#{result}`
+    str = result ? 'true' : 'false'
+    common.status `#{str}`
     # validate_options
     project_names_to_environment_names = {
         "all-of-us-workbench-test" => "test",
