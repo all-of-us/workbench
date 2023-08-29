@@ -274,6 +274,7 @@ class DeployUI
     context = ExecJS.compile(js_code)
 
     common.status "The current directory is '#{current_directory}'"
+    common.status "arguments '#{@args}'"
     result = context.call('validate_options', @args)
     common.status `#{result}`
     # validate_options
