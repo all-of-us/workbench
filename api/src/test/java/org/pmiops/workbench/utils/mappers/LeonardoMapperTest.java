@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
+import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
@@ -142,6 +143,15 @@ public class LeonardoMapperTest {
     assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(LeonardoAppType.ALLOWED);
     assertThat(mapper.toLeonardoAppType(AppType.SAS)).isEqualTo(LeonardoAppType.ALLOWED);
     assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(LeonardoAppType.CROMWELL);
+  }
+
+  @Test
+  public void testToLeonardoAllowedAppChart() {
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.RSTUDIO))
+        .isEqualTo(LeonardoAllowedChartName.RSTUDIO_CHART);
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS))
+        .isEqualTo(LeonardoAllowedChartName.SAS_CHART);
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
   }
 
   @ParameterizedTest(name = "appType {0} can be mapped for getApp call")

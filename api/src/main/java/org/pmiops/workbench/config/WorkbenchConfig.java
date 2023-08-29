@@ -324,6 +324,8 @@ public class WorkbenchConfig {
     public boolean ccSupportWhenAdminLocking;
     // If true, enable user creation of RStudio GKE apps
     public boolean enableRStudioGKEApp;
+    // If true, enable user creation of SAS GKE apps
+    public boolean enableSasGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
   }

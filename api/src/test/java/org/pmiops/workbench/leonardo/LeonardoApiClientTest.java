@@ -228,7 +228,7 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
     LeonardoCreateAppRequest expectedAppRequest =
         new LeonardoCreateAppRequest()
-            .appType(LeonardoAppType.RSTUDIO)
+            .appType(LeonardoAppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))

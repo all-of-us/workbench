@@ -10,11 +10,13 @@ import javax.annotation.Nullable;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
+import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
@@ -247,6 +249,11 @@ public interface LeonardoMapper {
   @ValueMapping(source = "RSTUDIO", target = "ALLOWED") // we don't support Galaxy
   @ValueMapping(source = "SAS", target = "ALLOWED") // we don't support CUSTOM apps
   LeonardoAppType toLeonardoAppType(AppType appType);
+
+  @ValueMapping(source = "RSTUDIO", target = "RSTUDIO_CHART")
+  @ValueMapping(source = "SAS", target = "SAS_CHART")
+  @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
+  LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
 
   @AfterMapping
   default void listAppsAfterMapper(

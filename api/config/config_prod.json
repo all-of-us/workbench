@@ -117,6 +117,7 @@
     "enablePrivateDataprocWorker": false,
     "ccSupportWhenAdminLocking": true,
     "enableRStudioGKEApp": false,
+    "enableSasGKEApp": false,
     "enableDataExplorer": false
   },
   "actionAudit": {

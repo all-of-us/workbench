@@ -1498,6 +1498,11 @@ components:
         - GALAXY
         - RSTUDIO
         - ALLOWED
+    AllowedChartName:
+      type: string
+      enum:
+        - aou-rstudio-chart
+        - aou-sas-chart
     AppStatus:
       type: string
       enum:
@@ -2463,6 +2468,8 @@ components:
           $ref: '#/components/schemas/PersistentDiskRequest'
         appType:
           $ref: '#/components/schemas/AppType'
+        allowedChartName:
+          $ref: '#/components/schemas/AllowedChartName'
         kubernetesRuntimeConfig:
           $ref: '#/components/schemas/KubernetesRuntimeConfig'
         labels:
