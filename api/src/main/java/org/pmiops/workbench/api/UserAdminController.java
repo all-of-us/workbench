@@ -74,7 +74,7 @@ public class UserAdminController implements UserAdminApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<UserAuditLogQueryResponse> getAuditLogEntries(
+  public ResponseEntity<UserAuditLogQueryResponse> getUserAuditLogEntries(
       String usernameWithoutGsuiteDomain,
       Integer limit,
       Long afterMillis,
