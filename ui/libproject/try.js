@@ -1,12 +1,10 @@
 function validate_options1(arg) {
   'use strict';
-  if (arg && !!arg.project) {
+  if (arg && arg.project && arg.version) {
     return true
   }
-  if (!!arg.version || !!arg.promote) {
-    return true;
-  }
-  console.log('hey there');
+
+  // console.log('hey there');
   return false;
 }
 
