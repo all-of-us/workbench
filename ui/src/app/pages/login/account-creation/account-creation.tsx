@@ -19,7 +19,6 @@ import {
   Select,
   styles as inputStyles,
   TextAreaWithLengthValidationMessage,
-  TextInput,
   TextInputWithLabel,
 } from 'app/components/inputs';
 import { BulletAlignedUnorderedList } from 'app/components/lists';
@@ -136,7 +135,6 @@ export interface AccountCreationState {
   showMostInterestedInKnowingBlurb: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
-  countryDropdownSelection: Country | null;
 }
 
 export class AccountCreation extends React.Component<
@@ -159,7 +157,6 @@ export class AccountCreation extends React.Component<
       showMostInterestedInKnowingBlurb: false,
       usernameCheckInProgress: false,
       usernameConflictError: false,
-      countryDropdownSelection: Country.US,
     };
 
     return state;
@@ -234,21 +231,14 @@ export class AccountCreation extends React.Component<
   }
 
   updateCountryDropdownSelection(value) {
-    this.setState({
-      countryDropdownSelection: value,
-    });
-
+    this.updateAddress('country', value);
     if (value === Country.US) {
-      this.updateAddress('country', value);
-
       const stateCodeGuess = this.autoSelectStateCode(
         this.state.profile.address.state
       );
       if (stateCodeGuess != null) {
         this.updateAddress('state', stateCodeGuess);
       }
-    } else {
-      this.updateAddress('country', '');
     }
   }
 
@@ -698,9 +688,9 @@ export class AccountCreation extends React.Component<
                     </label>
                     <Select
                       aria-label='Country dropdown'
-                      value={this.state.countryDropdownSelection}
-                      options={Object.values(Country).map((country) => {
-                        return { value: country, label: country };
+                      value={country || Country.US}
+                      options={Object.values(Country).map((c) => {
+                        return { value: c, label: c };
                       })}
                       onChange={(value) =>
                         this.updateCountryDropdownSelection(value)
