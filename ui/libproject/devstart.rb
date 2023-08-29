@@ -273,7 +273,6 @@ class DeployUI
     js_code = File.read('./libproject/try.js')
     context = ExecJS.compile(js_code)
 
-    common.run_inline("npm i -D @types/node");
     common.status "The current directory is '#{current_directory}'"
     common.status "arguments '#{@opts}'"
     result = context.call('validate_options1', @opts)
