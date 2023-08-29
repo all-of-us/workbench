@@ -1,25 +1,40 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import * as fp from 'lodash/fp';
 
-import { ResourceType, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  WorkspaceAccessLevel,
+  WorkspaceResource,
+} from 'generated/fetch';
 
 import { CardButton, TabButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { CreateModal } from 'app/components/create-modal';
 import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
-import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { useTanagraSource } from 'app/pages/data/tanagra-dev/tanagra-source';
-import { workspacesApi } from 'app/services/swagger-fetch-clients';
+import { TanagraResourceList } from 'app/pages/data/tanagra-dev/tanagra-resource-list';
+import {
+  cohortsV2Api,
+  conceptSetsV2Api,
+  reviewsV2Api,
+} from 'app/services/tanagra-swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { withCurrentWorkspace } from 'app/utils';
+import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useNavigation } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
+import {
+  CohortV2,
+  ConceptSetV2,
+  CreateCohortRequest,
+  ReviewV2,
+} from 'tanagra-generated';
 
 const styles = {
   cardButtonArea: {
@@ -78,43 +93,94 @@ const descriptions = {
   cohorts: 'A cohort is a group of participants based on specific criteria.',
 };
 
-const resourceTypesToFetch = [
-  ResourceType.COHORT.toString(),
-  ResourceType.COHORTREVIEW.toString(),
-  ResourceType.CONCEPTSET.toString(),
-  ResourceType.DATASET.toString(),
-];
+export interface TanagraWorkspaceResource extends WorkspaceResource {
+  cohortV2?: CohortV2;
+  conceptSetV2?: ConceptSetV2;
+  reviewV2?: ReviewV2;
+}
+
+const mapTanagraWorkspaceResource = ({
+  cohort,
+  conceptSet,
+  review,
+  workspace,
+}: {
+  cohort?: CohortV2;
+  conceptSet?: ConceptSetV2;
+  review?: ReviewV2;
+  workspace: WorkspaceData;
+}): TanagraWorkspaceResource => ({
+  workspaceNamespace: workspace.namespace,
+  workspaceFirecloudName: workspace.id, // TODO verify this is the correct value to set
+  workspaceBillingStatus: workspace.billingStatus,
+  cdrVersionId: workspace.cdrVersionId,
+  accessTierShortName: workspace.accessTierShortName,
+  permission: workspace.accessLevel.toString(),
+  cohortV2: cohort,
+  conceptSetV2: conceptSet,
+  reviewV2: review,
+  lastModifiedEpochMillis: workspace.lastModifiedTime,
+  adminLocked: workspace.adminLocked,
+});
 
 interface Props extends WithSpinnerOverlayProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
 }
 
-export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
+export const DataComponentTanagra = fp.flow(
+  withCdrVersions(),
+  withCurrentWorkspace()
+)((props: Props) => {
   useEffect(() => props.hideSpinner(), []);
-  const tanagraSource = useTanagraSource();
   const [navigate] = useNavigation();
   const [activeTab, setActiveTab] = useState(Tabs.SHOWALL);
   const [isLoading, setIsLoading] = useState(true);
   const [resourceList, setResourceList] = useState([]);
   const [showCohortModal, setShowCohortModal] = useState(false);
 
-  const { workspace } = props;
+  const { cdrVersionTiersResponse, workspace } = props;
+  const { bigqueryDataset } = findCdrVersion(
+    workspace.cdrVersionId,
+    cdrVersionTiersResponse
+  );
 
   if (!workspace) {
     return;
   }
 
   const loadResources = async () => {
-    // TODO call Tanagra endpoints to get resources
     try {
       setIsLoading(true);
-      setResourceList(
-        await workspacesApi().getWorkspaceResourcesV2(
-          workspace.namespace,
-          workspace.id,
-          resourceTypesToFetch
-        )
-      );
+      const [cohorts, conceptSets] = await Promise.all([
+        cohortsV2Api().listCohorts({ studyId: workspace.namespace }),
+        conceptSetsV2Api().listConceptSets({ studyId: workspace.namespace }),
+      ]);
+      let reviews = [];
+      if (cohorts.length > 0) {
+        reviews = await Promise.all(
+          cohorts.map((cohort) =>
+            reviewsV2Api().listReviews({
+              studyId: workspace.namespace,
+              cohortId: cohort.id,
+            })
+          )
+        );
+        // This is a kind of hacky way to consolidate the array of arrays of reviews.
+        // TODO Use Array.prototype.flat() if we upgrade to ES2019
+        reviews = [].concat(...reviews);
+      }
+      setResourceList([
+        ...cohorts.map((cohort) =>
+          mapTanagraWorkspaceResource({ cohort, workspace })
+        ),
+        ...conceptSets.map((conceptSet) =>
+          mapTanagraWorkspaceResource({ conceptSet, workspace })
+        ),
+        ...reviews.map((review) =>
+          mapTanagraWorkspaceResource({ review, workspace })
+        ),
+      ]);
     } catch (error) {
       console.log(error);
     } finally {
@@ -135,22 +201,28 @@ export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
       case Tabs.SHOWALL:
         return true;
       case Tabs.COHORTS:
-        return resource.cohort;
+        return resource.cohortV2;
       case Tabs.COHORTREVIEWS:
-        return resource.cohortReview;
+        return resource.reviewV2;
       case Tabs.CONCEPTSETS:
-        return resource.conceptSet;
+        return resource.conceptSetV2;
       case Tabs.DATASETS:
-        return resource.dataSet;
+        return false; // Currently no saved datasets in Tanagra
     }
   });
 
   const getCohortNames = async () => [];
 
-  const createCohort = async (name: string, description: string) => {
-    // TODO call Tanagra's createCohort endpoint, then navigate to new cohort in iframe
-
-    const newCohort = await tanagraSource.createCohort(workspace.namespace, name, description, 'SC2023Q3R1');
+  const createCohort = async (name: string, desc: string) => {
+    const createCohortRequest: CreateCohortRequest = {
+      studyId: workspace.namespace,
+      cohortCreateInfoV2: {
+        description: desc,
+        displayName: name,
+        underlayName: bigqueryDataset,
+      },
+    };
+    const newCohort = await cohortsV2Api().createCohort(createCohortRequest);
     navigate([
       'workspaces',
       workspace.namespace,
@@ -160,7 +232,7 @@ export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
       'export',
       'cohorts',
       newCohort.id,
-      'first'
+      'first',
     ]);
   };
 
@@ -319,7 +391,7 @@ export const DataComponentTanagra = withCurrentWorkspace()((props: Props) => {
           }}
         >
           {
-            <ResourceList
+            <TanagraResourceList
               workspaces={[workspace]}
               workspaceResources={filteredList}
               onUpdate={() => loadResources()}
