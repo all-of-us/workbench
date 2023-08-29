@@ -1,7 +1,7 @@
 function validate_options1(arg) {
   'use strict';
 //  console.log(arg.project);
-  if (isEmpty(arg)){ // || isEmpty(arg.project) || isEmpty(arg.version)) {
+  if (isEmpty(arg) || isEmpty(arg.project)) {// || isEmpty(arg.version)) {
     return false;
   }
   return true;
