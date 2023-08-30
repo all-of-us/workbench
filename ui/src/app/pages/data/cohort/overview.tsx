@@ -25,6 +25,7 @@ import {
   CreateNewCohortModal,
   DiscardCohortChangesModal,
 } from 'app/pages/data/cohort/clear-cohort-modals';
+import { FunnelPlotTest } from 'app/pages/data/cohort/funnel-plot-test';
 import { GenderChart } from 'app/pages/data/cohort/gender-chart';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import {
@@ -171,6 +172,7 @@ interface State {
   showDiscardCohortChangesModal: boolean;
   stackChart: boolean;
   total: number;
+  showFunnelPlot: boolean;
 }
 
 export const ListOverview = fp.flow(
@@ -207,6 +209,7 @@ export const ListOverview = fp.flow(
         showDiscardCohortChangesModal: false,
         stackChart: true,
         total: undefined,
+        showFunnelPlot: false,
       };
     }
 
@@ -569,6 +572,7 @@ export const ListOverview = fp.flow(
         cohortChanged,
         onCreateNewCohort,
         onDiscardCohortChanges,
+        searchRequest,
       } = this.props;
       const {
         ageType,
@@ -583,6 +587,7 @@ export const ListOverview = fp.flow(
         saveModalOpen,
         showCreateNewCohortModal,
         showDiscardCohortChangesModal,
+        showFunnelPlot,
         stackChart,
         total,
       } = this.state;
@@ -635,13 +640,17 @@ export const ListOverview = fp.flow(
                     />
                   </TooltipTrigger>
                 )}
-                <TooltipTrigger content={<div>Export to notebook</div>}>
+                <TooltipTrigger content={<div>View Funnel Plot</div>}>
                   <Clickable
-                    style={{ ...styles.actionIcon, ...styles.disabled }}
-                    onClick={() => this.navigateTo('notebook')}
-                    disabled
+                    style={styles.actionIcon}
+                    disabled={showFunnelPlot}
+                    onClick={() => this.setState({ showFunnelPlot: true })}
                   >
-                    <ClrIcon shape='export' className='is-solid' size={30} />
+                    <ClrIcon
+                      shape='filter-grid-circle'
+                      className='is-solid'
+                      size={30}
+                    />
                   </Clickable>
                 </TooltipTrigger>
                 <TooltipTrigger content={<div>Delete cohort</div>}>
@@ -749,97 +758,109 @@ export const ListOverview = fp.flow(
                 contact Support in the left hand navigation.
               </div>
             )}
-            {!!total && !this.definitionErrors && !loading && !!chartData && (
-              <div style={styles.cardContainer}>
-                <div style={styles.card}>
-                  <div style={styles.cardHeader}>Results by</div>
-                  <div style={refreshing ? styles.disabled : {}}>
-                    <Menu
-                      appendTo={document.body}
-                      model={this.chartTypeItems}
-                      popup={true}
-                      ref={(el) => (this.genderOrSexMenu = el)}
-                    />
-                    <button
-                      style={styles.menuButton}
-                      onClick={(event) => this.genderOrSexMenu.toggle(event)}
-                    >
-                      {genderSexRaceOrEthTypeToText(chartType)}{' '}
-                      <ClrIcon
-                        style={{ float: 'right' }}
-                        shape='caret down'
-                        size={12}
+            {!!total &&
+              !this.definitionErrors &&
+              !loading &&
+              !!chartData &&
+              (showFunnelPlot ? (
+                <FunnelPlotTest
+                  onExit={() => this.setState({ showFunnelPlot: false })}
+                  searchRequest={searchRequest}
+                  totalCount={total}
+                />
+              ) : (
+                <div style={styles.cardContainer}>
+                  <div style={styles.card}>
+                    <div style={styles.cardHeader}>Results by</div>
+                    <div style={refreshing ? styles.disabled : {}}>
+                      <Menu
+                        appendTo={document.body}
+                        model={this.chartTypeItems}
+                        popup={true}
+                        ref={(el) => (this.genderOrSexMenu = el)}
                       />
-                    </button>
-                    <Menu
-                      appendTo={document.body}
-                      model={this.ageItems}
-                      popup={true}
-                      ref={(el) => (this.ageMenu = el)}
-                    />
-                    <button
-                      style={styles.menuButton}
-                      onClick={(event) => this.ageMenu.toggle(event)}
-                    >
-                      {ageTypeToText(ageType)}{' '}
-                      <ClrIcon
-                        style={{ float: 'right' }}
-                        shape='caret down'
-                        size={12}
-                      />
-                    </button>
-                    <button
-                      style={
-                        this.disableRefreshButton
-                          ? { ...styles.refreshButton, ...styles.disabled }
-                          : styles.refreshButton
-                      }
-                      onClick={() => this.refreshGraphs()}
-                    >
-                      REFRESH
-                    </button>
-                  </div>
-                  {refreshing ? (
-                    <div style={{ height: '22.5rem' }}>
-                      <Spinner style={styles.chartSpinner} size={75} />
-                    </div>
-                  ) : (
-                    <React.Fragment>
-                      <div style={styles.cardHeader}>
-                        {genderSexRaceOrEthTypeToText(
-                          currentGraphOptions.chartType
-                        )}
-                      </div>
-                      <div style={{ padding: '0.75rem 1.125rem' }}>
-                        {!!chartData.length && <GenderChart data={chartData} />}
-                      </div>
-                      <div style={styles.cardHeader}>
-                        {genderSexRaceOrEthTypeToText(
-                          currentGraphOptions.chartType
-                        )}{' '}
-                        and {ageTypeToText(currentGraphOptions.ageType)}
+                      <button
+                        style={styles.menuButton}
+                        onClick={(event) => this.genderOrSexMenu.toggle(event)}
+                      >
+                        {genderSexRaceOrEthTypeToText(chartType)}{' '}
                         <ClrIcon
-                          shape='sort-by'
-                          className={stackChart ? 'is-info' : ''}
-                          onClick={() => this.toggleChartMode()}
+                          style={{ float: 'right' }}
+                          shape='caret down'
+                          size={12}
                         />
+                      </button>
+                      <Menu
+                        appendTo={document.body}
+                        model={this.ageItems}
+                        popup={true}
+                        ref={(el) => (this.ageMenu = el)}
+                      />
+                      <button
+                        style={styles.menuButton}
+                        onClick={(event) => this.ageMenu.toggle(event)}
+                      >
+                        {ageTypeToText(ageType)}{' '}
+                        <ClrIcon
+                          style={{ float: 'right' }}
+                          shape='caret down'
+                          size={12}
+                        />
+                      </button>
+                      <button
+                        style={
+                          this.disableRefreshButton
+                            ? { ...styles.refreshButton, ...styles.disabled }
+                            : styles.refreshButton
+                        }
+                        onClick={() => this.refreshGraphs()}
+                      >
+                        REFRESH
+                      </button>
+                    </div>
+                    {refreshing ? (
+                      <div style={{ height: '22.5rem' }}>
+                        <Spinner style={styles.chartSpinner} size={75} />
                       </div>
-                      <div style={{ padding: '0.75rem 1.125rem' }}>
-                        {!!chartData.length && (
-                          <ComboChart
-                            data={chartData}
-                            legendTitle={ageTypeToText(
-                              currentGraphOptions.ageType
-                            )}
-                            mode={stackChart ? 'stacked' : 'normalized'}
+                    ) : (
+                      <React.Fragment>
+                        <div style={styles.cardHeader}>
+                          {genderSexRaceOrEthTypeToText(
+                            currentGraphOptions.chartType
+                          )}
+                        </div>
+                        <div style={{ padding: '0.75rem 1.125rem' }}>
+                          {!!chartData.length && (
+                            <GenderChart data={chartData} />
+                          )}
+                        </div>
+                        <div style={styles.cardHeader}>
+                          {genderSexRaceOrEthTypeToText(
+                            currentGraphOptions.chartType
+                          )}{' '}
+                          and {ageTypeToText(currentGraphOptions.ageType)}
+                          <ClrIcon
+                            shape='sort-by'
+                            className={stackChart ? 'is-info' : ''}
+                            onClick={() => this.toggleChartMode()}
                           />
-                        )}
-                      </div>
-                    </React.Fragment>
-                  )}
+                        </div>
+                        <div style={{ padding: '0.75rem 1.125rem' }}>
+                          {!!chartData.length && (
+                            <ComboChart
+                              data={chartData}
+                              legendTitle={ageTypeToText(
+                                currentGraphOptions.ageType
+                              )}
+                              mode={stackChart ? 'stacked' : 'normalized'}
+                            />
+                          )}
+                        </div>
+                      </React.Fragment>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
           </div>
 
           {saveModalOpen && (
