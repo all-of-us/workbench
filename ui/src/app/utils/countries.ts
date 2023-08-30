@@ -1,4 +1,5 @@
 enum Country {
+  US = 'United States',
   AF = 'Afghanistan',
   AX = '\u00c5land Islands',
   AL = 'Albania',
@@ -234,7 +235,6 @@ enum Country {
   UA = 'Ukraine',
   AE = 'United Arab Emirates',
   GB = 'United Kingdom',
-  US = 'United States',
   UM = 'United States Minor Outlying Islands',
   UY = 'Uruguay',
   UZ = 'Uzbekistan',

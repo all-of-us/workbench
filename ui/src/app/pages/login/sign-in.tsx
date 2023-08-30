@@ -171,7 +171,7 @@ export const createEmptyProfile = (): Profile => {
       streetAddress2: '',
       city: '',
       state: '',
-      country: Country.US,
+      country: null,
       zipCode: '',
     },
     demographicSurvey: {},
