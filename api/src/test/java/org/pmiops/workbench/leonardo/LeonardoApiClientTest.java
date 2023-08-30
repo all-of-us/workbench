@@ -238,7 +238,7 @@ public class LeonardoApiClientTest {
 
     assertThat(createAppRequest).isEqualTo(expectedAppRequest);
   }
-  https://604508422.jupyter-dev.firecloud.org
+
   @Test
   public void testCreateAppSuccess_newPd() throws Exception {
     stubGetFcWorkspace(WorkspaceAccessLevel.OWNER);
