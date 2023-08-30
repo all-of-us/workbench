@@ -61,6 +61,8 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Tab')
   await page.keyboard.type('12345')
   await page.keyboard.press('Tab')
+  await page.keyboard.type('United')
+  await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Testing the system.')
   await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
