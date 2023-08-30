@@ -6543,6 +6543,7 @@ definitions:
         "$ref": "#/definitions/DataprocConfig"
       errors:
         type: array
+        default: []
         description: The list of errors that were encountered on runtime create, if any.
         items:
           $ref: "#/definitions/RuntimeError"
