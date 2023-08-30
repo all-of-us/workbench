@@ -282,7 +282,7 @@ public class RuntimeControllerTest {
     dataprocConfigObj.setMasterDiskSize(50);
 
     leonardoMapper.mapRuntimeConfig(
-        tmpRuntime, new OneOfRuntimeConfigInResponse(dataprocConfigObj), null);
+        tmpRuntime, new OneOfRuntimeConfigInResponse(dataprocConfigObj));
     dataprocConfig = tmpRuntime.getDataprocConfig();
 
     gceConfigObj =
@@ -294,7 +294,7 @@ public class RuntimeControllerTest {
     gceConfigObj.machineType("n1-standard-2");
 
     leonardoMapper.mapRuntimeConfig(
-        tmpRuntime, new OneOfRuntimeConfigInResponse(gceConfigObj), null);
+        tmpRuntime, new OneOfRuntimeConfigInResponse(gceConfigObj));
     gceConfig = tmpRuntime.getGceWithPdConfig();
 
     testLeoRuntime =
@@ -831,14 +831,16 @@ public class RuntimeControllerTest {
     CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
+    String jsonString = gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
+
     org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig
         createLeonardoMachineConfig =
             gson.fromJson(
-                gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                jsonString,
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
+            gson.fromJson(jsonString, RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.DATAPROC);
     assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
@@ -875,7 +877,7 @@ public class RuntimeControllerTest {
         gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), GceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getPersistentDisk().getSize()).isEqualTo(50);
@@ -915,11 +917,11 @@ public class RuntimeControllerTest {
     org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
         createLeonardoGceWithPdConfig =
             gson.fromJson(
-                gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+                gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
                 org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
 
@@ -1077,11 +1079,11 @@ public class RuntimeControllerTest {
     Gson gson = new Gson();
     org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig createLeonardoGceConfig =
         gson.fromJson(
-            gson.toJson(createRuntimeRequest.getRuntimeConfig()),
+            gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
             org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), RuntimeConfig.class)
+            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
@@ -1288,7 +1290,7 @@ public class RuntimeControllerTest {
         (UpdateRuntimeRequestRuntimeConfig)
             updateRuntimeRequestCaptor.getValue().getRuntimeConfig();
     assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getCloudService().getValue())
-        .isEqualTo("DATAPROC");
+        .isEqualTo("dataproc");
     assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getNumberOfWorkers())
         .isEqualTo(dataprocConfig.getNumberOfWorkers());
     assertThat(actualRuntimeConfig.getUpdateDataprocConfig().getMasterMachineType())
