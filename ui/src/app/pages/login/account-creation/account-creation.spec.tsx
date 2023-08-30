@@ -209,12 +209,10 @@ it('should display characters over message if research purpose character length 
 
 it('should be able to change default country value in dropdown', async () => {
   const { user } = setup();
-  expect(screen.queryByText(Country.US)).not.toBeNull();
   expect(screen.queryByText(Country.CA)).toBeNull();
   await user.click(findCountryDropdownField());
   await user.paste(Country.CA);
   await user.keyboard('{enter}');
-  expect(screen.queryByText(Country.US)).toBeNull();
   expect(screen.queryByText(Country.CA)).not.toBeNull();
 });
 
@@ -240,8 +238,11 @@ it('should change a state name to a state code after selecting USA', async () =>
 
 it('should mark US states as invalid if not a 2-letter code', async () => {
   const { container, user } = setup();
-  expect(container.querySelector('#stateError')).not.toBeNull();
-  expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
+  expect(container.querySelector('#stateError')).toBeNull();
+  expect(screen.queryByText(stateCodeErrorMessage)).toBeNull();
+  await user.click(findCountryDropdownField());
+  await user.paste(Country.US);
+  await user.keyboard('{enter}');
   await user.type(findStateField(), 'new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
