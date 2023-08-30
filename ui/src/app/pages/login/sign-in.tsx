@@ -27,7 +27,6 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import Country from 'app/utils/countries';
 import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
