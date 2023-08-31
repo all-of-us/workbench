@@ -65,13 +65,12 @@ browserTest('create user', async browser => {
   await page.keyboard.press('Enter')
   await page.keyboard.press('Tab')
   await page.keyboard.type('Testing the system.')
-
   await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
     page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
     return sel
-  }).then(sel => Promise.all([page.click(sel),  page.waitForSelector('#demographics-survey') ]))
+  }).then(sel => tu.jsClick(page,sel))
 
-
+  await page.waitForSelector('#demographics-survey') // Demographics Survey Page
   await pressKey(page, 'Tab', 10)
   await page.keyboard.press('Space')
   await pressKey(page, 'Tab', 9)
