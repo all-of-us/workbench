@@ -7,7 +7,19 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-import org.broadinstitute.dsde.workbench.client.leonardo.model.*;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfigInResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDataprocConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateGceConfig;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,6 +33,7 @@ import org.pmiops.workbench.model.DataprocConfig;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.GetRuntimeResponse;
 import org.pmiops.workbench.model.KubernetesRuntimeConfig;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
@@ -145,7 +158,7 @@ public interface LeonardoMapper {
   @Mapping(target = "patchInProgress", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse toListRuntimeResponse(
-      GetRuntimeResponse runtime);
+          org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse runtime);
 
   @Nullable
   @Named("cloudContextToGoogleProject")
@@ -166,35 +179,28 @@ public interface LeonardoMapper {
       org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
           ListRuntimeResponse);
 
-  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "toolDockerImage", source = "runtimeImages")
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
+  @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(
       target = "googleProject",
-      source = "cloudContext",
-      qualifiedByName = "cloudContextToGoogleProject")
-  Runtime toApiRuntime(GetRuntimeResponse runtime);
+      source = "cloudContext.cloudResource")
+  GetRuntimeResponse toApiRuntime(org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse runtime);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "autopauseThreshold", ignore = true)
-  @Mapping(target = "toolDockerImage", ignore = true)
-  @Mapping(target = "configurationType", ignore = true)
-  @Mapping(target = "gceWithPdConfig", ignore = true)
-  @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
+  @Mapping(target = "toolDockerImage", ignore = true)
   @Mapping(
           target = "googleProject",
           source = "cloudContext.cloudResource")
-  Runtime toApiRuntime(
+  GetRuntimeResponse toApiRuntime(
       org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse runtime);
 
   RuntimeError toApiRuntimeError(ClusterError err);
 
   @AfterMapping
   default void getRuntimeAfterMapper(
-      @MappingTarget Runtime runtime, GetRuntimeResponse getRuntimeResponse) {
+      @MappingTarget Runtime runtime, org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse getRuntimeResponse) {
     mapLabels(runtime, getRuntimeResponse.getLabels());
 
     mapRuntimeConfig(

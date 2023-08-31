@@ -692,7 +692,7 @@ paths:
         200:
           description: The runtime for this user and workspace.
           schema:
-            "$ref": "#/definitions/Runtime"
+            "$ref": "#/definitions/GetRuntimeResponse"
         404:
           description: No runtime exists for this user and workspace.
           schema:
@@ -6538,6 +6538,48 @@ definitions:
       gceWithPdConfig:
         description: oneOf dataprocConfig, gceWithPdConfig will be returned
         "$ref": "#/definitions/GceWithPdConfig"
+      dataprocConfig:
+        description: oneOf dataprocConfig, gceWithPdConfig will be provided
+        "$ref": "#/definitions/DataprocConfig"
+      errors:
+        type: array
+        default: []
+        description: The list of errors that were encountered on runtime create, if any.
+        items:
+          $ref: "#/definitions/RuntimeError"
+  GetRuntimeResponse:
+    properties:
+      googleProject:
+        type: string
+        description: The Google Project used to create the runtime. Read only.
+      runtimeName:
+        type: string
+        description: The user-supplied name for the runtime. Read only.
+      createdDate:
+        type: string
+        description: The date and time the runtime was created, in ISO-8601 format. Read only.
+      status:
+        "$ref": "#/definitions/RuntimeStatus"
+        description: Runtime status. Read only.
+      autopauseThreshold:
+        type: integer
+        description: The number of minutes of idle time to elapse before the cluster is
+          autopaused. If autopause is set to false, this value is disregarded.
+          A value of 0 is equivalent to autopause being turned off.
+      configurationType:
+        description: >
+          This field is primarily for provenance purposes. Regardless of the
+          configuration type, other configuration parameters should still be
+          provided during creation. The API will only perform limited validation
+          that the configuration type and configuration details are consistent.
+        "$ref": "#/definitions/RuntimeConfigurationType"
+      toolDockerImage:
+        type: string
+        description: The tool docker image to install. May be Dockerhub or GCR. If not
+          set, a default Jupyter image will be installed.
+      gceWithPdConfig:
+        description: oneOf dataprocConfig, gceWithPdConfig will be returned
+        "$ref": "#/definitions/GceWithPdConfigInResponse"
       dataprocConfig:
         description: oneOf dataprocConfig, gceWithPdConfig will be provided
         "$ref": "#/definitions/DataprocConfig"

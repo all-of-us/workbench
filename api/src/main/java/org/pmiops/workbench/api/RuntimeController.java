@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
-import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -31,6 +30,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.GetRuntimeResponse;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -76,14 +76,14 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
+  public ResponseEntity<GetRuntimeResponse> getRuntime(String workspaceNamespace) {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
     try {
-      GetRuntimeResponse leoRuntimeResponse =
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse leoRuntimeResponse =
           leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
       if (ClusterStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
@@ -106,7 +106,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         .collect(Collectors.joining("\n"));
   }
 
-  private Runtime getOverrideFromListRuntimes(String googleProject) {
+  private GetRuntimeResponse getOverrideFromListRuntimes(String googleProject) {
     Optional<ListRuntimeResponse> mostRecentRuntimeMaybe =
         leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
             .min(
@@ -138,7 +138,7 @@ public class RuntimeController implements RuntimeApiDelegate {
             .values()
             .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
       try {
-        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        GetRuntimeResponse runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
           log.warning(
               "Runtimes returned from ListRuntimes should be DELETED but found "

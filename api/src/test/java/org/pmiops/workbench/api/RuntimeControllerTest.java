@@ -518,7 +518,7 @@ public class RuntimeControllerTest {
                     .auditInfo(new ListRuntimeResponseAuditInfo().createdDate(timestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "user-override"))));
 
-    Runtime runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
+    org.pmiops.workbench.model.GetRuntimeResponse runtime = runtimeController.getRuntime(WORKSPACE_NS).getBody();
 
     assertThat(runtime.getRuntimeName()).isEqualTo("expected-runtime");
     assertThat(runtime.getGoogleProject()).isEqualTo("google-project");
