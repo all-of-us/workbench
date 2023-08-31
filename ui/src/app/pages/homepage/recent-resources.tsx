@@ -8,13 +8,14 @@ import {
   WorkspaceResponse,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { AlertWarning } from 'app/components/alert';
 import { SmallHeader } from 'app/components/headers';
 import { ClrIcon } from 'app/components/icons';
 import { ResourceList } from 'app/components/resource-list';
 import { SpinnerOverlay } from 'app/components/spinners';
 import { userMetricsApi } from 'app/services/swagger-fetch-clients';
-import { cond, withCdrVersions } from 'app/utils';
+import { withCdrVersions } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 // these types contain the same data in a slightly different shape

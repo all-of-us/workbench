@@ -5,6 +5,7 @@ import { DataTable } from 'primereact/datatable';
 
 import { AdminTableUser, Profile } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { AdminUserLink } from 'app/components/admin/admin-user-link';
 import { StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -14,12 +15,7 @@ import { TierBadge } from 'app/components/tier-badge';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminUserBypass } from 'app/pages/admin/user/admin-user-bypass';
 import { userAdminApi } from 'app/services/swagger-fetch-clients';
-import {
-  cond,
-  reactStyles,
-  usernameWithoutDomain,
-  withUserProfile,
-} from 'app/utils';
+import { reactStyles, usernameWithoutDomain, withUserProfile } from 'app/utils';
 import {
   AuthorityGuardedAction,
   hasAuthorityForAction,

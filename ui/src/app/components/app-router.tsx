@@ -12,7 +12,7 @@ import {
 } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
-import { cond } from 'app/utils';
+import { cond } from '@terra-ui-packages/core-utils';
 import { routeDataStore } from 'app/utils/stores';
 import { buildPageTitleForEnvironment } from 'app/utils/title';
 

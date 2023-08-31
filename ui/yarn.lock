@@ -1812,6 +1812,13 @@
   dependencies:
     lodash "^4.17.21"
 
+"@terra-ui-packages/core-utils@0.0.5":
+  version "0.0.5"
+  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/core-utils/-/@terra-ui-packages/core-utils-0.0.5.tgz#27ec336f8cb766bad1e23c3bc26c74db5be893de"
+  integrity sha512-VugXZvgFyYvj8gtNby5RRMBANJdghUs6brUNB1zoZmaea1GlxoqU/dhmIQQ//9lxnBpASdOAY5D2aVB4tlOdqg==
+  dependencies:
+    lodash "^4.17.21"
+
 "@testing-library/dom@^8.0.0":
   version "8.20.1"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-8.20.1.tgz#2e52a32e46fc88369eef7eef634ac2a192decd9f"

@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { BillingStatus, Runtime, RuntimeStatus } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { IconButton } from 'app/components/buttons';
 import { ClrIcon, PlaygroundIcon } from 'app/components/icons';
@@ -16,12 +17,7 @@ import { ConfirmPlaygroundModeModal } from 'app/pages/analysis/confirm-playgroun
 import { NotebookInUseModal } from 'app/pages/analysis/notebook-in-use-modal';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import {
-  cond,
-  hasNewValidProps,
-  reactStyles,
-  withCurrentWorkspace,
-} from 'app/utils';
+import { hasNewValidProps, reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';

@@ -20,6 +20,7 @@ import {
   VerifiedInstitutionalAffiliation,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   ClrIcon,
@@ -34,7 +35,7 @@ import {
   userAdminApi,
 } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { cond, formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
+import { formatInitialCreditsUSD, isBlank, reactStyles } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,

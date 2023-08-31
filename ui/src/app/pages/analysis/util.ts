@@ -1,8 +1,8 @@
 import { FileDetail } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { notebooksApi } from 'app/services/swagger-fetch-clients';
-import { cond } from 'app/utils';
 import {
   JUPYTER_FILE_EXT,
   R_SCRIPT_EXT,
