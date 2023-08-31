@@ -105,7 +105,7 @@ it('should allow completing the account creation form', async () => {
   expect(profile.address.city).toEqual('Boston');
   expect(profile.address.state).toEqual('MA');
   expect(profile.address.zipCode).toEqual('02115');
-  expect(profile.address.country).toEqual('United States of America');
+  expect(profile.address.country).toEqual(Country.US);
   expect(profile.areaOfResearch).toEqual(
     'I am an undergraduate learning genomics.'
   );
