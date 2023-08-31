@@ -68,7 +68,7 @@ browserTest('create user', async browser => {
   await Promise.resolve('[role="button"][aria-label="Next"]').then(sel => {
     page.waitForFunction(sel => document.querySelector(sel).style.cursor !== 'not-allowed', {}, sel)
     return sel
-  }).then(sel => page.click(sel))
+  }).then(sel => tu.jsClick(page,sel))
 
   await page.waitForSelector('#demographics-survey') // Demographics Survey Page
   await pressKey(page, 'Tab', 10)
