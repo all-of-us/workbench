@@ -34,7 +34,7 @@ public class LeonardoLabelHelper {
   // a limitation in the Leo Swagger client code generation means that the labels come in as Object
   // rather than their true type of Map<String, String>
   @SuppressWarnings("unchecked")
-  public static Optional<AppType> maybeMapDiskLabelsToGkeApp(@Nullable Object diskLabels) {
+  public static Optional<AppType> maybeMapLeonardoLabelsToGkeApp(@Nullable Object diskLabels) {
     return Optional.ofNullable((Map<String, String>) diskLabels)
         .flatMap(m -> Optional.ofNullable(m.get(LEONARDO_LABEL_APP_TYPE)))
         .map(LeonardoLabelHelper::labelValueToAppType);

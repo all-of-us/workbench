@@ -14,7 +14,9 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ValueMapping;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
+import org.pmiops.workbench.leonardo.model.LeonardoAllowedChartName;
 import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
 import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
@@ -141,7 +143,7 @@ public interface LeonardoMapper {
   }
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
-    LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(diskLabels)
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(diskLabels)
         .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
   }
 
@@ -198,7 +200,7 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoGetRuntimeResponse leonardoGetRuntimeResponse) {
-    mapLabels(runtime, leonardoGetRuntimeResponse.getLabels());
+    mapRuntimeLabels(runtime, leonardoGetRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoGetRuntimeResponse.getRuntimeConfig(),
@@ -208,7 +210,7 @@ public interface LeonardoMapper {
   @AfterMapping
   default void listRuntimeAfterMapper(
       @MappingTarget Runtime runtime, LeonardoListRuntimeResponse leonardoListRuntimeResponse) {
-    mapLabels(runtime, leonardoListRuntimeResponse.getLabels());
+    mapRuntimeLabels(runtime, leonardoListRuntimeResponse.getLabels());
     mapRuntimeConfig(
         runtime,
         leonardoListRuntimeResponse.getRuntimeConfig(),
@@ -224,6 +226,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(LeonardoGetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -234,6 +237,7 @@ public interface LeonardoMapper {
       target = "googleProject",
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
+  @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(LeonardoListAppResponse app);
 
   KubernetesRuntimeConfig toKubernetesRuntimeConfig(
@@ -242,16 +246,38 @@ public interface LeonardoMapper {
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
+  @ValueMapping(source = "RSTUDIO", target = "ALLOWED") // we don't support Galaxy
+  @ValueMapping(source = "SAS", target = "ALLOWED") // we don't support CUSTOM apps
   LeonardoAppType toLeonardoAppType(AppType appType);
 
-  @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
-  @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
-  @ValueMapping(
-      source = "ALLOWED",
-      target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
-  AppType toApiAppType(LeonardoAppType appType);
+  @ValueMapping(source = "RSTUDIO", target = "RSTUDIO_CHART")
+  @ValueMapping(source = "SAS", target = "SAS_CHART")
+  @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
+  LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
 
-  default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
+  @AfterMapping
+  default void listAppsAfterMapper(
+      @MappingTarget UserAppEnvironment appEnvironment, LeonardoListAppResponse listAppResponse) {
+    setAppType(appEnvironment, listAppResponse.getLabels());
+  }
+
+  @AfterMapping
+  default void getAppAfterMapper(
+      @MappingTarget UserAppEnvironment appEnvironment, LeonardoGetAppResponse getAppResponse) {
+    setAppType(appEnvironment, getAppResponse.getLabels());
+  }
+
+  default void setAppType(UserAppEnvironment appEnvironment, @Nullable Object appLabels) {
+    appEnvironment.setAppType(
+        LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
+            .orElseThrow(
+                () ->
+                    new ServerErrorException(
+                        String.format(
+                            "Missing app type labels for app with labels %s", appLabels))));
+  }
+
+  default void mapRuntimeLabels(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
     if (runtimeLabels == null

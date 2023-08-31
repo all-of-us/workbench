@@ -60,6 +60,10 @@ public class AppsController implements AppsApiDelegate {
         && !configProvider.get().featureFlags.enableRStudioGKEApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
+    if (createAppRequest.getAppType() == AppType.SAS
+        && !configProvider.get().featureFlags.enableSasGKEApp) {
+      throw new UnsupportedOperationException("API not supported.");
+    }
 
     leonardoApiClient.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
