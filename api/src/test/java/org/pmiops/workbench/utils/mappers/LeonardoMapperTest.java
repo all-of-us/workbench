@@ -2,11 +2,17 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE;
+import static org.pmiops.workbench.leonardo.LeonardoLabelHelper.appTypeToLabelValue;
+import static org.pmiops.workbench.leonardo.model.LeonardoAppType.ALLOWED;
+import static org.pmiops.workbench.leonardo.model.LeonardoAppType.CROMWELL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
@@ -16,6 +22,8 @@ import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.pmiops.workbench.model.AppStatus;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
@@ -52,6 +60,20 @@ public class LeonardoMapperTest {
       leonardoKubernetesErrors = new ArrayList<>();
   private Map<String, String> proxyUrls = new HashMap<>();
   private Map<String, String> labels = new HashMap<>();
+
+  private static Stream<
+          Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>>
+      allAppTypesMap() {
+    return Stream.of(
+        Map.entry(
+            AppType.CROMWELL,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL),
+        Map.entry(
+            AppType.RSTUDIO,
+            org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED),
+        Map.entry(
+            AppType.SAS, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED));
+  }
 
   @BeforeEach
   public void setUp() {
@@ -130,31 +152,10 @@ public class LeonardoMapperTest {
   }
 
   @Test
-  public void testToApiAppType() {
-    assertThat(
-            mapper.toApiAppType(
-                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL))
-        .isEqualTo(AppType.CROMWELL);
-    assertThat(
-            mapper.toApiAppType(
-                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED))
-        .isEqualTo(AppType.RSTUDIO);
-    assertThat(
-            mapper.toApiAppType(
-                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.GALAXY))
-        .isNull();
-    assertThat(
-            mapper.toApiAppType(
-                org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CUSTOM))
-        .isNull();
-  }
-
-  @Test
   public void testToLeonardoAppType() {
-    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO))
-        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED);
-    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL))
-        .isEqualTo(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.CROMWELL);
+    assertThat(mapper.toLeonardoAppType(AppType.RSTUDIO)).isEqualTo(ALLOWED);
+    assertThat(mapper.toLeonardoAppType(AppType.SAS)).isEqualTo(ALLOWED);
+    assertThat(mapper.toLeonardoAppType(AppType.CROMWELL)).isEqualTo(CROMWELL);
   }
 
   @Test
@@ -173,6 +174,61 @@ public class LeonardoMapperTest {
                 new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
             .labels(labels);
     assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app);
+  }
+
+  @Test
+  public void testToLeonardoAllowedAppChart() {
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.RSTUDIO))
+        .isEqualTo(AllowedChartName.AOU_RSTUDIO_CHART);
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.SAS))
+        .isEqualTo(AllowedChartName.AOU_SAS_CHART);
+    assertThat(mapper.toLeonardoAllowedChartName(AppType.CROMWELL)).isNull();
+  }
+
+  @ParameterizedTest(name = "appType {0} can be mapped for getApp call")
+  @MethodSource("allAppTypesMap")
+  public void testToAppFromGetResponse(
+      Map.Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>
+          appTypeMapEntry)
+      throws Exception {
+    labels.put(
+        LeonardoLabelHelper.LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
+    GetAppResponse getAppResponse =
+        new GetAppResponse()
+            .appType(appTypeMapEntry.getValue())
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
+            .auditInfo(leonardoAuditInfo)
+            .diskName(DISK_NAME)
+            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .appName(APP_NAME)
+            .errors(leonardoKubernetesErrors)
+            .proxyUrls(proxyUrls)
+            .cloudContext(
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT))
+            .labels(labels);
+    assertThat(mapper.toApiApp(getAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
+  }
+
+  @ParameterizedTest(name = "appType {0} can be mapped for listApp call")
+  @MethodSource("allAppTypesMap")
+  public void testToAppFromListResponse(
+      Map.Entry<AppType, org.broadinstitute.dsde.workbench.client.leonardo.model.AppType>
+          appTypeMapEntry) {
+    labels.put(LEONARDO_LABEL_APP_TYPE, appTypeToLabelValue(appTypeMapEntry.getKey()));
+    ListAppResponse listAppResponse =
+        new ListAppResponse()
+            .appType(appTypeMapEntry.getValue())
+            .status(org.broadinstitute.dsde.workbench.client.leonardo.model.AppStatus.RUNNING)
+            .auditInfo(leonardoAuditInfo)
+            .diskName(DISK_NAME)
+            .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .errors(leonardoKubernetesErrors)
+            .proxyUrls(proxyUrls)
+            .labels(labels)
+            .appName(APP_NAME)
+            .cloudContext(
+                new CloudContext().cloudProvider(CloudProvider.GCP).cloudResource(GOOGLE_PROJECT));
+    assertThat(mapper.toApiApp(listAppResponse)).isEqualTo(app.appType(appTypeMapEntry.getKey()));
   }
 
   @Test

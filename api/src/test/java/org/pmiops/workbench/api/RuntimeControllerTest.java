@@ -293,8 +293,7 @@ public class RuntimeControllerTest {
     gceConfigObj.setPersistentDiskId(10);
     gceConfigObj.machineType("n1-standard-2");
 
-    leonardoMapper.mapRuntimeConfig(
-        tmpRuntime, new OneOfRuntimeConfigInResponse(gceConfigObj));
+    leonardoMapper.mapRuntimeConfig(tmpRuntime, new OneOfRuntimeConfigInResponse(gceConfigObj));
     gceConfig = tmpRuntime.getGceWithPdConfig();
 
     testLeoRuntime =
@@ -839,9 +838,7 @@ public class RuntimeControllerTest {
                 jsonString,
                 org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig.class);
 
-    assertThat(
-            gson.fromJson(jsonString, RuntimeConfig.class)
-                .getCloudService())
+    assertThat(gson.fromJson(jsonString, RuntimeConfig.class).getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.DATAPROC);
     assertThat(createLeonardoMachineConfig.getNumberOfWorkers()).isEqualTo(5);
     assertThat(createLeonardoMachineConfig.getWorkerMachineType()).isEqualTo("worker");
@@ -877,7 +874,9 @@ public class RuntimeControllerTest {
         gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig()), GceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                    RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getPersistentDisk().getSize()).isEqualTo(50);
@@ -921,7 +920,9 @@ public class RuntimeControllerTest {
                 org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                    RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
 
@@ -1083,7 +1084,9 @@ public class RuntimeControllerTest {
             org.broadinstitute.dsde.workbench.client.leonardo.model.GceConfig.class);
 
     assertThat(
-            gson.fromJson(gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()), RuntimeConfig.class)
+            gson.fromJson(
+                    gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance()),
+                    RuntimeConfig.class)
                 .getCloudService())
         .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceConfig.getDiskSize()).isEqualTo(50);
@@ -1118,19 +1121,17 @@ public class RuntimeControllerTest {
     CreateRuntimeRequest createRuntimeRequest = createRuntimeRequestCaptor.getValue();
 
     Gson gson = new Gson();
-    String gsonRuntimeConfigString= gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
+    String gsonRuntimeConfigString =
+        gson.toJson(createRuntimeRequest.getRuntimeConfig().getActualInstance());
 
     org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig
         createLeonardoGceWithPdConfig =
             gson.fromJson(
-                    gsonRuntimeConfigString,
+                gsonRuntimeConfigString,
                 org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfig.class);
 
     RuntimeConfig runtimeConfig = gson.fromJson(gsonRuntimeConfigString, RuntimeConfig.class);
-    assertThat(
-            runtimeConfig
-                .getCloudService())
-        .isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
+    assertThat(runtimeConfig.getCloudService()).isEqualTo(RuntimeConfig.CloudServiceEnum.GCE);
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getGpuType())
         .isEqualTo("nvidia-tesla-t4");
     assertThat(createLeonardoGceWithPdConfig.getGpuConfig().getNumOfGpus()).isEqualTo(2);

@@ -289,7 +289,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getEnvironmentType(Object labels) {
-    return LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(labels)
+    return LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(labels)
         .map(appType -> CaseUtils.toCamelCase(appType.toString(), true))
         .orElse("Jupyter");
   }

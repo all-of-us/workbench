@@ -263,8 +263,7 @@ public class DisksControllerTest {
                 newerCromwellDisk));
 
     ListDisksResponse resp = disksController.listOwnedDisksInWorkspace(WORKSPACE_NS).getBody();
-    assertThat(resp)
-        .containsExactly(expectedGceDisk, expectedRStudioDisk);
+    assertThat(resp).containsExactly(expectedGceDisk, expectedRStudioDisk);
   }
 
   @Test

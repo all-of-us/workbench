@@ -568,6 +568,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     leonardoCreateAppRequest
         .appType(leonardoMapper.toLeonardoAppType(appType))
+        .allowedChartName(leonardoMapper.toLeonardoAllowedChartName(appType))
         .kubernetesRuntimeConfig(
             leonardoMapper.toLeonardoKubernetesRuntimeConfig(kubernetesRuntimeConfig))
         .diskConfig(diskRequest)

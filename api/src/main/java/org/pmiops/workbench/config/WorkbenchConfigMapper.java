@@ -74,6 +74,7 @@ public interface WorkbenchConfigMapper {
   @Mapping(target = "currentDuccVersions", source = "config.access.currentDuccVersions")
   @Mapping(target = "enableCaptcha", source = "config.captcha.enableCaptcha")
   @Mapping(target = "enableRStudioGKEApp", source = "config.featureFlags.enableRStudioGKEApp")
+  @Mapping(target = "enableSasGKEApp", source = "config.featureFlags.enableSasGKEApp")
   @Mapping(target = "enableDataExplorer", source = "config.featureFlags.enableDataExplorer")
   ConfigResponse toModel(WorkbenchConfig config, List<DbAccessModule> accessModules);
 }

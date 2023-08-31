@@ -6,8 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
-
-import org.broadinstitute.dsde.workbench.client.leonardo.model.*;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.OneOfRuntimeConfigInResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.RuntimeImage;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateDataprocConfig;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.UpdateGceConfig;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,6 +27,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.ValueMapping;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.DataprocConfig;
@@ -57,12 +70,11 @@ public interface LeonardoMapper {
       @MappingTarget
           org.broadinstitute.dsde.workbench.client.leonardo.model.DataprocConfig
               leonardoMachineConfig) {
-    leonardoMachineConfig
-        .componentGatewayEnabled(true);
+    leonardoMachineConfig.componentGatewayEnabled(true);
   }
 
   @Mapping(target = "cloudService", constant = "GCE")
-  @Mapping(target = "persistentDisk", ignore = true) //TODO: Qi double check this is ok
+  @Mapping(target = "persistentDisk", ignore = true) // TODO: Qi double check this is ok
   @Mapping(target = "machineType", source = "leonardoGceConfig.machineType")
   @Mapping(target = "gpuConfig", source = "leonardoGceConfig.gpuConfig")
   GceWithPdConfig toGceWithPdConfig(
@@ -138,7 +150,7 @@ public interface LeonardoMapper {
   }
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
-    LeonardoLabelHelper.maybeMapDiskLabelsToGkeApp(diskLabels)
+    LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(diskLabels)
         .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
   }
 
@@ -159,9 +171,7 @@ public interface LeonardoMapper {
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
-  @Mapping(
-      target = "googleProject",
-      source = "cloudContext.cloudResource")
+  @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   ListRuntimeResponse toApiListRuntimeResponse(
       org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
           ListRuntimeResponse);
@@ -184,9 +194,7 @@ public interface LeonardoMapper {
   @Mapping(target = "gceWithPdConfig", ignore = true)
   @Mapping(target = "dataprocConfig", ignore = true)
   @Mapping(target = "errors", ignore = true)
-  @Mapping(
-          target = "googleProject",
-          source = "cloudContext.cloudResource")
+  @Mapping(target = "googleProject", source = "cloudContext.cloudResource")
   Runtime toApiRuntime(
       org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse runtime);
 
@@ -195,19 +203,18 @@ public interface LeonardoMapper {
   @AfterMapping
   default void getRuntimeAfterMapper(
       @MappingTarget Runtime runtime, GetRuntimeResponse getRuntimeResponse) {
-    mapLabels(runtime, getRuntimeResponse.getLabels());
+    mapRuntimeLabel(runtime, getRuntimeResponse.getLabels());
 
-    mapRuntimeConfig(
-        runtime, getRuntimeResponse.getRuntimeConfig());
+    mapRuntimeConfig(runtime, getRuntimeResponse.getRuntimeConfig());
   }
 
   @AfterMapping
   default void listRuntimeAfterMapper(
-          @MappingTarget Runtime runtime, org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse leonardoListRuntimeResponse) {
-    mapLabels(runtime, leonardoListRuntimeResponse.getLabels());
-    mapRuntimeConfig(
-            runtime,
-            leonardoListRuntimeResponse.getRuntimeConfig());
+      @MappingTarget Runtime runtime,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+          leonardoListRuntimeResponse) {
+    mapRuntimeLabel(runtime, leonardoListRuntimeResponse.getLabels());
+    mapRuntimeConfig(runtime, leonardoListRuntimeResponse.getRuntimeConfig());
   }
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -219,6 +226,7 @@ public interface LeonardoMapper {
       source = "cloudContext",
       qualifiedByName = "cloudContextToGoogleProject")
   @Mapping(target = "autopauseThreshold", ignore = true)
+  @Mapping(target = "appType", ignore = true)
   UserAppEnvironment toApiApp(GetAppResponse app);
 
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
@@ -240,30 +248,40 @@ public interface LeonardoMapper {
   org.broadinstitute.dsde.workbench.client.leonardo.model.KubernetesRuntimeConfig
       toLeonardoKubernetesRuntimeConfig(KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  @ValueMapping(
-      source = "RSTUDIO",
-      target = "ALLOWED") // TODO: Update this once we use new leo client to support SAS
+  @ValueMapping(source = "RSTUDIO", target = "ALLOWED") // we don't support Galaxy
+  @ValueMapping(source = "SAS", target = "ALLOWED") // we don't support CUSTOM apps
   org.broadinstitute.dsde.workbench.client.leonardo.model.AppType toLeonardoAppType(
       AppType appType);
 
-  @ValueMapping(source = "GALAXY", target = MappingConstants.NULL) // we don't support Galaxy
-  @ValueMapping(source = "CUSTOM", target = MappingConstants.NULL) // we don't support CUSTOM apps
-  @ValueMapping(source = "WDS", target = MappingConstants.NULL) // we don't support WDS apps
-  @ValueMapping(
-      source = "WORKFLOWS_APP",
-      target = MappingConstants.NULL) // we don't support WDS apps
-  @ValueMapping(
-      source = "CROMWELL_RUNNER_APP",
-      target = MappingConstants.NULL) // we don't support WDS apps
-  @ValueMapping(
-      source = "ALLOWED",
-      target = "RSTUDIO") // TODO: Update this once we use new leo client to support SAS
-  @ValueMapping(
-      source = "HAIL_BATCH",
-      target = MappingConstants.NULL) // we don't support HAIL_BATCH apps
-  AppType toApiAppType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType appType);
+  @ValueMapping(source = "RSTUDIO", target = "AOU_RSTUDIO_CHART")
+  @ValueMapping(source = "SAS", target = "SAS_RSTUDIO_CHART")
+  @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
+  AllowedChartName toLeonardoAllowedChartName(AppType appType);
 
-  default void mapLabels(Runtime runtime, Object runtimeLabelsObj) {
+  @AfterMapping
+  default void listAppsAfterMapper(
+      @MappingTarget UserAppEnvironment appEnvironment,
+      org.broadinstitute.dsde.workbench.client.leonardo.model.ListAppResponse listAppResponse) {
+    setAppType(appEnvironment, listAppResponse.getLabels());
+  }
+
+  @AfterMapping
+  default void getAppAfterMapper(
+      @MappingTarget UserAppEnvironment appEnvironment, GetAppResponse getAppResponse) {
+    setAppType(appEnvironment, getAppResponse.getLabels());
+  }
+
+  default void setAppType(UserAppEnvironment appEnvironment, @Nullable Object appLabels) {
+    appEnvironment.setAppType(
+        LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(appLabels)
+            .orElseThrow(
+                () ->
+                    new ServerErrorException(
+                        String.format(
+                            "Missing app type labels for app with labels %s", appLabels))));
+  }
+
+  default void mapRuntimeLabel(Runtime runtime, Object runtimeLabelsObj) {
     @SuppressWarnings("unchecked")
     final Map<String, String> runtimeLabels = (Map<String, String>) runtimeLabelsObj;
     if (runtimeLabels == null
@@ -279,9 +297,7 @@ public interface LeonardoMapper {
     }
   }
 
-  default void mapRuntimeConfig(
-      Runtime runtime,
-      OneOfRuntimeConfigInResponse runtimeConfigObj) {
+  default void mapRuntimeConfig(Runtime runtime, OneOfRuntimeConfigInResponse runtimeConfigObj) {
     if (runtimeConfigObj == null) {
       return;
     }
@@ -292,9 +308,9 @@ public interface LeonardoMapper {
     } else if (runtimeConfigObj.getActualInstance()
         instanceof
         org.broadinstitute.dsde.workbench.client.leonardo.model.GceWithPdConfigInResponse) {
-      GceWithPdConfig gceWithPdConfig = toGceWithPdConfig(runtimeConfigObj.getGceWithPdConfigInResponse());
-      runtime.gceWithPdConfig(gceWithPdConfig
-          );
+      GceWithPdConfig gceWithPdConfig =
+          toGceWithPdConfig(runtimeConfigObj.getGceWithPdConfigInResponse());
+      runtime.gceWithPdConfig(gceWithPdConfig);
     } else {
       throw new IllegalArgumentException(
           "Invalid GetRuntimeResponse.RuntimeConfig.cloudService : " + runtimeConfigObj);

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.AppsApi;
 import org.broadinstitute.dsde.workbench.client.leonardo.api.DisksApi;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AllowedChartName;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
 import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
@@ -231,10 +232,12 @@ public class LeonardoApiClientTest {
     customEnvironmentVariables.put("WORKSPACE_NAME", testWorkspace.getFirecloudName());
     customEnvironmentVariables.put("GOOGLE_PROJECT", testWorkspace.getGoogleProject());
     customEnvironmentVariables.put("OWNER_EMAIL", user.getUsername());
+
     org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest expectedAppRequest =
         new org.broadinstitute.dsde.workbench.client.leonardo.model.CreateAppRequest()
             .appType(org.broadinstitute.dsde.workbench.client.leonardo.model.AppType.ALLOWED)
             .kubernetesRuntimeConfig(leonardoKubernetesRuntimeConfig)
+            .allowedChartName(AllowedChartName.AOU_RSTUDIO_CHART)
             .labels(appLabels)
             .diskConfig(leonardoPersistentDiskRequest.labels(diskLabels).name("pd-name"))
             .customEnvironmentVariables(customEnvironmentVariables);
