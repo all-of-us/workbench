@@ -21,4 +21,5 @@ export const environment: Environment = {
   inactivityWarningBeforeSeconds: 5 * 60,
   allowTestAccessTokenOverride: true,
   showNewAnalysisTab: true,
+  tanagraBaseUrl: 'http://localhost:3000',
 };

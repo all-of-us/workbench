@@ -31,6 +31,7 @@ import {
   bindApiClients,
   getApiBaseUrl,
 } from 'app/services/swagger-fetch-clients';
+import { tanagraBindApiClients } from 'app/services/tanagra-swagger-fetch-clients';
 import {
   acceptTermsOfService,
   useIsUserDisabled,
@@ -49,6 +50,7 @@ import {
   useStore,
 } from 'app/utils/stores';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
+import { Configuration as TanagraConfiguration } from 'tanagra-generated';
 
 const CookiePolicyPage = fp.flow(
   withRouteData,
@@ -81,6 +83,12 @@ const bindClients = () => {
   notebooksBindApiClients(
     new Configuration({
       basePath: environment.leoApiUrl,
+      accessToken: () => getAccessToken(),
+    })
+  );
+  tanagraBindApiClients(
+    new TanagraConfiguration({
+      basePath: environment.tanagraBaseUrl,
       accessToken: () => getAccessToken(),
     })
   );

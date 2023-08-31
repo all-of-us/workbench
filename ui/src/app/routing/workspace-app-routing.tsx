@@ -22,10 +22,11 @@ import { QueryReport } from 'app/pages/data/cohort-review/query-report.component
 import { ConceptHomepage } from 'app/pages/data/concept/concept-homepage';
 import { ConceptSearch } from 'app/pages/data/concept/concept-search';
 import { ConceptSetActions } from 'app/pages/data/concept/concept-set-actions';
-import { DataComponent } from 'app/pages/data/data-component';
 import { DatasetPage } from 'app/pages/data/data-set/dataset-page';
+import { DataComponentSplitter } from 'app/pages/data/tanagra-dev/data-component-splitter';
+import { TanagraContainer } from 'app/pages/data/tanagra-dev/tanagra-container';
+import { TanagraDev } from 'app/pages/data/tanagra-dev/tanagra-dev';
 import { DataExplorer } from 'app/pages/data-explorer/data-explorer';
-import { TanagraDev } from 'app/pages/tanagra-dev/tanagra-dev';
 import { WorkspaceAbout } from 'app/pages/workspace/workspace-about';
 import {
   WorkspaceEdit,
@@ -60,14 +61,15 @@ const DataExplorerPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DataExplorer);
-const DataComponentPage = fp.flow(
-  withRouteData,
-  withRoutingSpinner
-)(DataComponent);
+const DataComponentPage = fp.flow(withRouteData)(DataComponentSplitter);
 const DataSetComponentPage = fp.flow(
   withRouteData,
   withRoutingSpinner
 )(DatasetPage);
+const TanagraContainerPage = fp.flow(
+  withRouteData,
+  withRoutingSpinner
+)(TanagraContainer);
 const DetailPagePage = fp.flow(withRouteData, withRoutingSpinner)(DetailPage);
 const InteractiveNotebookPage = fp.flow(
   withRouteData,
@@ -428,6 +430,20 @@ export const WorkspaceRoutes = () => {
             breadcrumb: BreadcrumbType.ConceptSet,
             workspaceNavBarTab: 'data',
             pageKey: 'conceptSetActions',
+          }}
+        />
+      </AppRoute>
+      <AppRoute
+        exact
+        path={`${path}/data/tanagra/*`}
+        guards={[adminLockedGuard(ns, wsid)]}
+      >
+        <TanagraContainerPage
+          routeData={{
+            title: 'Data Page',
+            breadcrumb: BreadcrumbType.Workspace,
+            workspaceNavBarTab: 'data',
+            pageKey: 'data',
           }}
         />
       </AppRoute>
