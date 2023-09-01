@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import Country from 'app/utils/countries';
+import { Country } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';

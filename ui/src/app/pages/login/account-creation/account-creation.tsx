@@ -38,11 +38,10 @@ import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { STATE_CODE_MAPPING } from 'app/utils/constants';
-import Country from 'app/utils/countries';
+import { Country } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
-
 const styles = reactStyles({
   ...commonStyles,
   multiInputSpacing: {
