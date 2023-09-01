@@ -697,8 +697,10 @@ export class AccountCreation extends React.Component<
                     <Select
                       aria-label='Country dropdown'
                       value={this.state.countryDropdownSelection}
-                      options={Object.values(Country).map((c) =>
-                        ({ value: c, label: c }))}
+                      options={Object.values(Country).map((c) => ({
+                        value: c,
+                        label: c,
+                      }))}
                       onChange={(value) =>
                         this.updateCountryDropdownSelection(value)
                       }
