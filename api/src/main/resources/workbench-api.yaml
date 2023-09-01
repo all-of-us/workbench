@@ -6287,7 +6287,7 @@ paths:
       tags:
       - diskAdmin
       description: Deletes a disk as an admin. Requires the RESEARCHER_DATA_VIEW authority.
-      operationId: deleteDisk
+      operationId: adminDeleteDisk
       parameters:
       - name: workspaceNamespace
         in: path
