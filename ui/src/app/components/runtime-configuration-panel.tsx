@@ -232,17 +232,23 @@ const PanelMain = fp.flow(
 
     const initializePanelContent = (): PanelContent =>
       cond(
-        [!!initialPanelContent, () => initialPanelContent],
+        [!!initialPanelContent, () => initialPanelContent] as [
+          boolean,
+          () => PanelContent
+        ],
         // If there's a pendingRuntime, this means there's already a create/update
         // in progress, even if the runtime store doesn't actively reflect this yet.
         // Show the customize panel in this event.
-        [!!pendingRuntime, () => PanelContent.Customize],
+        [!!pendingRuntime, () => PanelContent.Customize] as [
+          boolean,
+          () => PanelContent
+        ],
         [
           currentRuntime === null ||
             currentRuntime === undefined ||
             status === RuntimeStatus.Unknown,
           () => PanelContent.Create,
-        ],
+        ] as [boolean, () => PanelContent],
         [
           // General Analysis consist of GCE + PD. Display create page only if
           // 1) currentRuntime + pd both are deleted and
@@ -254,7 +260,7 @@ const PanelMain = fp.flow(
               RuntimeConfigurationType.HailGenomicAnalysis,
             ].includes(currentRuntime?.configurationType),
           () => PanelContent.Create,
-        ],
+        ] as [boolean, () => PanelContent],
         () => PanelContent.Customize
       );
 
@@ -304,7 +310,7 @@ const PanelMain = fp.flow(
       [
         analysisConfig.computeType === ComputeType.Dataproc,
         () => 'Reattachable disks are unsupported for this compute type',
-      ],
+      ] as [boolean, () => React.ReactNode],
       () => null
     );
 
@@ -551,7 +557,7 @@ const PanelMain = fp.flow(
                 and not shared with other users.
               </div>
             ),
-          ],
+          ] as [boolean, () => React.ReactNode],
           () => null
         )}
         {switchCase(
@@ -911,16 +917,19 @@ const PanelMain = fp.flow(
                       Delete Environment
                     </LinkButton>
                     {cond(
-                      [runtimeExists, () => renderNextUpdateButton()],
+                      [runtimeExists, () => renderNextUpdateButton()] as [
+                        boolean,
+                        () => React.ReactNode
+                      ],
                       [
                         unattachedDiskNeedsRecreate,
                         () => renderNextWithDiskDeleteButton(),
-                      ],
+                      ] as [boolean, () => React.ReactNode],
                       [
                         currentRuntime?.errors &&
                           currentRuntime.errors.length > 0,
                         () => renderTryAgainButton(),
-                      ],
+                      ] as [boolean, () => React.ReactNode],
                       () => renderCreateButton()
                     )}
                   </FlexRow>

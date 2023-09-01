@@ -19,7 +19,7 @@ $ curl https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@
 {"name":"@terra-ui-packages/core-utils","dist-tags":{"latest":"0.0.5"},...}
 ```
 
-The `gitHead` field contains the commit corresponding to the published version. I find it useful to browse the Terra UI source tree at the version's commit to see exactly which functions/components are available in the published version. For example, @terra-ui-packages/core-utils at version 0.0.5 has a gitHead (git hash) c79428c00ec8c32994294257ffb628e3d1d9b10f. The source tree at that commit is available here:
+The `gitHead` field contains the commit corresponding to the published version. I find it useful to browse the Terra UI source tree at the version's commit to see exactly which functions/components are available in the published version. For example, @terra-ui-packages/core-utils at version 0.0.5 has a gitHead (hash of a git commit) c79428c00ec8c32994294257ffb628e3d1d9b10f. The source tree at that commit is available here:
 
 https://github.com/DataBiosphere/terra-ui/tree/c79428c00ec8c32994294257ffb628e3d1d9b10f
 

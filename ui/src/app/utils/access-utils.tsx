@@ -554,7 +554,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: 'Unavailable (bypassed)',
         moduleStatus: AccessRenewalStatus.BYPASSED,
       }),
-    ],
+    ] as [boolean, () => RenewalDisplayDates],
     // Module is incomplete
     [
       !userCompletedModule && !userBypassedModule,
@@ -563,7 +563,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: 'Unavailable (not completed)',
         moduleStatus: AccessRenewalStatus.INCOMPLETE,
       }),
-    ],
+    ] as [boolean, () => RenewalDisplayDates],
     // After this point, we know the module is complete and not bypassed.  The remaining checks determine whether the
     // completion is expired, never expires, expires soon (within-lookback) or expires later (after lookback).
     [
@@ -573,7 +573,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: `Never Expires`,
         moduleStatus: AccessRenewalStatus.NEVER_EXPIRES,
       }),
-    ],
+    ] as [boolean, () => RenewalDisplayDates],
     [
       hasExpired(expirationEpochMillis),
       () => ({
@@ -581,7 +581,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: `${nextReviewDate} (expired)`,
         moduleStatus: AccessRenewalStatus.EXPIRED,
       }),
-    ],
+    ] as [boolean, () => RenewalDisplayDates],
     [
       isExpiringOrExpired(expirationEpochMillis, moduleName),
       () => ({
@@ -589,7 +589,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
         moduleStatus: AccessRenewalStatus.EXPIRING_SOON,
       }),
-    ],
+    ] as [boolean, () => RenewalDisplayDates],
     [
       userCompletedModule,
       () => ({
@@ -597,7 +597,7 @@ export const computeRenewalDisplayDates = (
         nextReviewDate: `${nextReviewDate} ${daysRemainingDisplay()}`,
         moduleStatus: AccessRenewalStatus.CURRENT,
       }),
-    ]
+    ] as [boolean, () => RenewalDisplayDates]
   );
 };
 

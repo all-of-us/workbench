@@ -386,7 +386,7 @@ export const InteractiveNotebook = fp.flow(
                   (error instanceof ComputeSecuritySuspendedError ||
                     error instanceof RuntimeStatusError),
                 () => null,
-              ],
+              ] as [boolean, () => React.ReactNode],
               [
                 userRequestedExecutableNotebook,
                 () => (
@@ -398,7 +398,7 @@ export const InteractiveNotebook = fp.flow(
                     {this.renderNotebookText()}
                   </div>
                 ),
-              ],
+              ] as [boolean, () => React.ReactNode],
               () => (
                 <div style={{ display: 'flex' }}>
                   <TooltipTrigger
