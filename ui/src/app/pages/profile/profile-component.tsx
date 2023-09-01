@@ -302,6 +302,8 @@ export const ProfileComponent = fp.flow(
                 givenName: 'First Name',
                 familyName: 'Last Name',
                 areaOfResearch: 'Current Research',
+                state: 'State/Province/Region',
+                zipCode: 'Zip/Postal Code',
               }[v] || validate.prettify(v)),
           }
         ),
@@ -529,14 +531,14 @@ export const ProfileComponent = fp.flow(
                       id: 'city',
                     })}
                     {makeProfileInput({
-                      title: 'State',
+                      title: 'State/Province/Region',
                       valueKey: ['address', 'state'],
                       id: 'state',
                     })}
                   </FlexRow>
                   <FlexRow>
                     {makeProfileInput({
-                      title: 'Zip Code',
+                      title: 'Zip/Postal Code',
                       valueKey: ['address', 'zipCode'],
                       id: 'zipCode',
                     })}

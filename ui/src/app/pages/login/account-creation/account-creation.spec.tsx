@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { createEmptyProfile } from 'app/pages/login/sign-in';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
+import Country from 'app/utils/countries';
 import { serverConfigStore } from 'app/utils/stores';
 
 import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
@@ -21,7 +22,6 @@ import { ProfileApiStub } from 'testing/stubs/profile-api-stub';
 import {
   AccountCreation,
   AccountCreationProps,
-  countryDropdownOption,
   formLabels,
   stateCodeErrorMessage,
 } from './account-creation';
@@ -77,7 +77,7 @@ const fillInMinimalFields = async (user: UserEvent) => {
   await user.type(findStateField(), 'MA');
   await user.type(screen.getByLabelText(formLabels.zipCode), '02115');
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.unitedStates);
+  await user.paste(Country.US);
   await user.keyboard('{enter}');
 
   await user.click(getAreaOfResearchTextBox());
@@ -105,7 +105,7 @@ it('should allow completing the account creation form', async () => {
   expect(profile.address.city).toEqual('Boston');
   expect(profile.address.state).toEqual('MA');
   expect(profile.address.zipCode).toEqual('02115');
-  expect(profile.address.country).toEqual('United States of America');
+  expect(profile.address.country).toEqual(Country.US);
   expect(profile.areaOfResearch).toEqual(
     'I am an undergraduate learning genomics.'
   );
@@ -215,12 +215,12 @@ it('should display a text input field for non-US countries', async () => {
   const { container, user } = setup();
   expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.unitedStates);
+  await user.paste(Country.US);
   await user.keyboard('{enter}');
   expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
   await user.clear(findCountryDropdownField());
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.other);
+  await user.paste(Country.OTHER);
   await user.keyboard('{enter}');
   expect(findCountryInputField()).not.toBeNull();
   await user.type(findCountryInputField(), 'Canada');
@@ -232,7 +232,7 @@ it('should capitalize a state code when selecting USA', async () => {
   await user.type(findStateField(), 'ny');
   expect(findStateField().value).toEqual('ny');
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.unitedStates);
+  await user.paste(Country.US);
   await user.keyboard('{enter}');
   expect(findStateField().value).toEqual('NY');
 });
@@ -242,7 +242,7 @@ it('should change a state name to a state code after selecting USA', async () =>
   await user.type(findStateField(), 'new york');
   expect(findStateField().value).toEqual('new york');
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.unitedStates);
+  await user.paste(Country.US);
   await user.keyboard('{enter}');
   expect(findStateField().value).toEqual('NY');
 });
@@ -252,7 +252,7 @@ it('should mark US states as invalid if not a 2-letter code', async () => {
   expect(container.querySelector('#stateError')).toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).toBeNull();
   await user.click(findCountryDropdownField());
-  await user.paste(countryDropdownOption.unitedStates);
+  await user.paste(Country.US);
   await user.keyboard('{enter}');
   await user.type(findStateField(), 'new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
