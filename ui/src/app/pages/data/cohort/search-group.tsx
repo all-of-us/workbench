@@ -33,6 +33,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
+import { currentGroupCountsStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -294,9 +295,17 @@ export const SearchGroup = withCurrentWorkspace()(
         .countParticipants(namespace, id, request, {
           signal: this.aborter.signal,
         })
-        .then((count) =>
-          this.setState({ count, initializing: false, loading: false })
-        )
+        .then((count) => {
+          this.setState({count, initializing: false, loading: false});
+          const currentGroupCounts = currentGroupCountsStore.getValue();
+          const groupCountIndex = currentGroupCounts.findIndex(({groupId}) => groupId === group.id);
+          if (groupCountIndex > -1) {
+            currentGroupCounts[groupCountIndex].groupCount = count;
+          } else {
+            currentGroupCounts.push({groupId: group.id, groupCount: count, role: group.role});
+          }
+          currentGroupCountsStore.next(currentGroupCounts);
+        })
         .catch((error) => {
           if (!isAbortError(error)) {
             console.error(error);
