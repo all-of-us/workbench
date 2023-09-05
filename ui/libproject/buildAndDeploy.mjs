@@ -31,9 +31,14 @@ async function build_and_deploy(arg) {
 }
 async function build(env) {
 
-  for (let index = 0; index < BUILD_CMDS.length; index++) {
-    await runCommand(BUILD_CMDS[index]);
-  }
+  await runCommand(YARN_DEPS);
+  await runCommand(CREDENTIALS_COPY);
+  await runCommand(YARN_INSTALL);
+  await runCommand(YARN_RUN_DEPS);
+
+  // for (let index = 0; index < BUILD_CMDS.length; index++) {
+  //   await runCommand(BUILD_CMDS[index]);
+  // }
 
   let optimize = "--aot";
   if (env === 'staging' || env ==='stable' || env === 'preprod' || env === 'prod') {
