@@ -101,7 +101,7 @@ test('delete disk', async () => {
   const mockListFunction = jest.fn(() => Promise.resolve(mockDisks));
 
   setup({
-    deleteDisk: mockDeleteFunction,
+    adminDeleteDisk: mockDeleteFunction,
     listDisksInWorkspace: mockListFunction,
   });
 
