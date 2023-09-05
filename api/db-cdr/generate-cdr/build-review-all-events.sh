@@ -77,27 +77,25 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, data_id, start_datetime, survey, question, answer)
 SELECT  DISTINCT a.person_id,
-        a.observation_id as data_id,
-        case when a.observation_datetime is null then CAST(a.observation_date AS TIMESTAMP) else a.observation_datetime end as survey_datetime,
+        case when a.entry_datetime is null then CAST(a.entry_date AS TIMESTAMP) else a.entry_datetime end as survey_datetime,
         'Personal and Family Health History' as survey,
         d.concept_name as question,
         case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else e.concept_name END as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
 JOIN
     (
-        SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-                JOIN (
-                        SELECT CAST(id AS STRING) AS id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        WHERE concept_id IN (1740639)
-                        AND domain_id = 'SURVEY'
-                    ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+        WHERE ancestor_concept_id in
+            (
+                SELECT concept_id
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
-                AND type = 'PPI'
-                AND subtype = 'ANSWER'
-    ) b on a.value_source_concept_id = b.answer_concept_id
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.observation_source_concept_id = d.concept_id
+                    AND parent_id = 0
+                    AND concept_id IN (1740639)
+            )
+    ) b on a.concept_id = b.descendant_concept_id
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id"
 
 }

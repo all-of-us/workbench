@@ -377,6 +377,87 @@ else
       and a.observation_source_concept_id != 0"
 fi
 
+##############################################################
+# Observation - Unify the PFHH survey
+##############################################################
+echo "cb_search_all_events - updating all questions to new pfhh survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` x
+SET x.concept_id = y.new_question,
+x.survey_concept_id = 1740639
+FROM (
+  SELECT DISTINCT se.person_id, se.entry_date, se.concept_id AS historic_question, se.value_source_concept_id AS answer, pfhh_mapping.pfhh_question_concept_id AS new_question
+  FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+  JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_mapping\` pfhh_mapping ON se.concept_id = pfhh_mapping.historic_question_concept_id AND CAST(se.value_source_concept_id AS INT64) = pfhh_mapping.pfhh_answer_concept_id
+  AND survey_concept_id IN (43528698, 43529712)
+  AND is_standard = 0
+) y
+WHERE x.concept_id = y.historic_question
+AND x.value_source_concept_id = y.answer
+AND x.person_id = y.person_id
+AND x.entry_date = y.entry_date
+AND x.is_standard = 0"
+
+echo "cb_search_all_events - updating all questions to new pfhh survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` x
+SET x.survey_concept_id = 1740639
+WHERE concept_id IN (
+  SELECT concept_id
+  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_question\`
+)
+AND x.survey_concept_id IN (43528698, 43529712)
+AND CAST(x.value_source_concept_id AS STRING) NOT LIKE '90%'"
+
+echo "cb_search_all_events - deleting deprecated questions"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"DELETE FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` se
+WHERE EXISTS (
+  SELECT 'x'
+  FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_remove_from_index\` x
+  WHERE x.concept_id = se.concept_id
+  AND x.value = se.value_source_concept_id
+)"
+
+echo "cb_search_all_events - insert skip into new pfhh survey"
+bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+    (
+      person_id
+    , entry_date
+    , entry_datetime
+    , is_standard
+    , concept_id
+    , domain
+    , age_at_event
+    , visit_concept_id
+    , visit_occurrence_id
+    , value_as_number
+    , value_as_concept_id
+    , value_source_concept_id
+    , survey_version_concept_id
+    , survey_concept_id
+    , cati_concept_id
+    )
+SELECT DISTINCT
+      a.person_id
+    , a.entry_date
+    , a.entry_datetime
+    , a.is_standard
+    , a.concept_id
+    , a.domain
+    , a.age_at_event
+    , a.visit_concept_id
+    , a.visit_occurrence_id
+    , a.value_as_number
+    , a.value_as_concept_id
+    , a.value_source_concept_id
+    , a.survey_version_concept_id
+    , a.survey_concept_id
+    , a.cati_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_pfhh_non_answer_insert\` a
+JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` b on a.person_id = b.person_id"
+
 ################################################################
 #   insert standard observation data into cb_search_all_events
 ################################################################

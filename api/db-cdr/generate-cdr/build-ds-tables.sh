@@ -331,18 +331,17 @@ function do_PFHH(){
   FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
   JOIN
       (
-          SELECT DISTINCT CAST(value AS INT64) as answer_concept_id
-          FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-          JOIN (
-                SELECT CAST(id AS STRING) AS id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE concept_id IN (1740639)
-                AND domain_id = 'SURVEY'
-              ) a ON (c.path LIKE CONCAT('%', a.id, '.%'))
-          WHERE domain_id = 'SURVEY'
-          AND type = 'PPI'
-          AND subtype = 'ANSWER'
-      ) b on a.value_source_concept_id = b.answer_concept_id
+          SELECT *
+          FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R9.prep_concept_ancestor\`
+          WHERE ancestor_concept_id in
+          (
+              SELECT concept_id
+              FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+              WHERE domain_id = 'SURVEY'
+              AND parent_id = 0
+              AND concept_id IN (1740639)
+          )
+      ) b on a.concept_id = b.descendant_concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on a.concept_id = d.concept_id
   LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e.concept_id
   WHERE a.is_standard = 0"
