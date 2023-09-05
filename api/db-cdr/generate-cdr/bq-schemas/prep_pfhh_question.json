@@ -1,0 +1,7 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id",
+    "type": "INTEGER"
+  }
+]
