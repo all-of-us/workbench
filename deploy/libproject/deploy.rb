@@ -210,7 +210,8 @@ def deploy(cmd_name, args)
         "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
         "instead, which has similar permissions.")
   end
-
+  common = Common.new
+  common.status "ui script '#{op.opts.script_ui}"
   if op.opts.update_jira.nil?
      op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
@@ -234,8 +235,6 @@ def deploy(cmd_name, args)
   if op.opts.git_version.nil?
     raise ArgumentError.new("--git-version is required when running within docker")
   end
-  common = Common.new
-  common.status "ui script '#{op.opts.script_ui}'"
   common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
 
   jira_client = nil
