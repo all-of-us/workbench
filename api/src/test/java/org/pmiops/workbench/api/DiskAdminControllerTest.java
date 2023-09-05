@@ -106,6 +106,7 @@ public class DiskAdminControllerTest {
         .when(mockDiskService)
         .deleteDiskAsService(WORKSPACE_NS, "disk name");
     assertThrows(
-        NotFoundException.class, () -> diskAdminController.adminDeleteDisk(WORKSPACE_NS, "disk name"));
+        NotFoundException.class,
+        () -> diskAdminController.adminDeleteDisk(WORKSPACE_NS, "disk name"));
   }
 }
