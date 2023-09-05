@@ -65,17 +65,21 @@ beforeEach(() => {
 });
 
 const fillInMinimalFields = async (user: UserEvent) => {
-  await user.type(screen.getByLabelText(formLabels.username), 'username');
-  await user.type(screen.getByLabelText(formLabels.givenName), 'Firstname');
-  await user.type(screen.getByLabelText(formLabels.familyName), 'Lastname');
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste('username');
+  await user.click(screen.getByLabelText(formLabels.givenName));
+  await user.paste('Firstname');
+  await user.click(screen.getByLabelText(formLabels.familyName));
+  await user.paste('Lastname');
 
-  await user.type(
-    screen.getByLabelText(formLabels.streetAddress1),
-    '1 Main Street'
-  );
-  await user.type(screen.getByLabelText(formLabels.city), 'Boston');
-  await user.type(findStateField(), 'MA');
-  await user.type(screen.getByLabelText(formLabels.zipCode), '02115');
+  await user.click(screen.getByLabelText(formLabels.streetAddress1));
+  await user.paste('1 Main Street');
+  await user.click(screen.getByLabelText(formLabels.city));
+  await user.paste('Boston');
+  await user.click(findStateField());
+  await user.paste('MA');
+  await user.click(screen.getByLabelText(formLabels.zipCode));
+  await user.paste('02115');
   await user.click(findCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
@@ -116,7 +120,8 @@ it('should handle given name validity', async () => {
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#givenName')).not.toBeNull();
   expect(container.querySelector('#givenNameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.givenName), testInput);
+  await user.click(screen.getByLabelText(formLabels.givenName));
+  await user.paste(testInput);
   expect(container.querySelector('#givenNameError')).not.toBeNull();
 });
 
@@ -125,7 +130,8 @@ it('should handle family name validity', async () => {
   const testInput = fp.repeat(101, 'a');
   expect(container.querySelector('#familyName')).not.toBeNull();
   expect(container.querySelector('#familyNameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.familyName), testInput);
+  await user.click(screen.getByLabelText(formLabels.familyName));
+  await user.paste(testInput);
   expect(container.querySelector('#familyNameError')).not.toBeNull();
 });
 
@@ -134,7 +140,8 @@ it('should handle username validity starts with .', async () => {
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
   expect(container.querySelector('#usernameConflictError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.username), '.startswith');
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste('.startswith');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -142,7 +149,8 @@ it('should handle username validity ends with .', async () => {
   const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.username), 'endswith.');
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste('endswith.');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -160,7 +168,8 @@ test.each([
   const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.username), username);
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste(username);
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -171,7 +180,8 @@ it('should handle username validity long but has mismatch at end', async () => {
   // if username is long (not too long) but has a mismatch at end
   let testInput = fp.repeat(50, 'abc');
   testInput = testInput + ' abc';
-  await user.type(screen.getByLabelText(formLabels.username), testInput);
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste(testInput);
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -179,7 +189,8 @@ it('should handle username validity length less than 3 characters', async () => 
   const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.username), 'a');
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste('a');
   expect(container.querySelector('#usernameError')).not.toBeNull();
 });
 
@@ -187,7 +198,8 @@ it('should handle username validity if name is valid', async () => {
   const { container, user } = setup();
   expect(container.querySelector('#username')).not.toBeNull();
   expect(container.querySelector('#usernameError')).toBeNull();
-  await user.type(screen.getByLabelText(formLabels.username), 'username');
+  await user.click(screen.getByLabelText(formLabels.username));
+  await user.paste('username');
   expect(container.querySelector('#usernameError')).toBeNull();
 });
 
@@ -223,13 +235,15 @@ it('should display a text input field for non-US countries', async () => {
   await user.paste(Country.OTHER);
   await user.keyboard('{enter}');
   expect(findCountryInputField()).not.toBeNull();
-  await user.type(findCountryInputField(), 'Canada');
+  await user.click(findCountryInputField());
+  await user.paste('Canada');
   expect(findCountryInputField().value).toEqual('Canada');
 });
 
 it('should capitalize a state code when selecting USA', async () => {
   const { user } = setup();
-  await user.type(findStateField(), 'ny');
+  await user.click(findStateField());
+  await user.paste('ny');
   expect(findStateField().value).toEqual('ny');
   await user.click(findCountryDropdownField());
   await user.paste(Country.US);
@@ -239,7 +253,8 @@ it('should capitalize a state code when selecting USA', async () => {
 
 it('should change a state name to a state code after selecting USA', async () => {
   const { user } = setup();
-  await user.type(findStateField(), 'new york');
+  await user.click(findStateField());
+  await user.paste('new york');
   expect(findStateField().value).toEqual('new york');
   await user.click(findCountryDropdownField());
   await user.paste(Country.US);
@@ -254,7 +269,8 @@ it('should mark US states as invalid if not a 2-letter code', async () => {
   await user.click(findCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
-  await user.type(findStateField(), 'new york');
+  await user.click(findStateField());
+  await user.paste('new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
 });
@@ -307,15 +323,11 @@ it('should allow entering details for "other" discovery sources', async () => {
   expect(otherCheckboxes.length).toEqual(2);
 
   await user.click(otherCheckboxes[0]);
-  await user.type(
-    screen.getByPlaceholderText('Please Describe'),
-    'general discovery source - other'
-  );
+  await user.click(screen.getByPlaceholderText('Please Describe'));
+  await user.paste('general discovery source - other');
   await user.click(otherCheckboxes[1]);
-  await user.type(
-    screen.getAllByPlaceholderText('Please Describe')[1],
-    'partner discovery source - other'
-  );
+  await user.click(screen.getAllByPlaceholderText('Please Describe')[1]);
+  await user.paste('partner discovery source - other');
 
   await user.click(screen.getByLabelText('Next'));
   expect(onComplete).toHaveBeenCalled();
@@ -343,15 +355,11 @@ it('should reset "other" discovery source details to null if "other" is unselect
   expect(otherCheckboxes.length).toEqual(2);
 
   await user.click(otherCheckboxes[0]);
-  await user.type(
-    screen.getByPlaceholderText('Please Describe'),
-    'general discovery source - other'
-  );
+  await user.click(screen.getByPlaceholderText('Please Describe'));
+  await user.paste('general discovery source - other');
   await user.click(otherCheckboxes[1]);
-  await user.type(
-    screen.getAllByPlaceholderText('Please Describe')[1],
-    'partner discovery source - other'
-  );
+  await user.click(screen.getAllByPlaceholderText('Please Describe')[1]);
+  await user.paste('partner discovery source - other');
 
   await user.click(otherCheckboxes[0]);
   await user.click(otherCheckboxes[1]);
