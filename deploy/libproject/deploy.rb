@@ -240,7 +240,7 @@ def deploy(cmd_name, args)
   # jira_client = nil
   # create_ticket = false
   # from_version = nil
-  # maybe_log_jira = ->(msg) { common.status msg }
+  maybe_log_jira = ->(msg) { common.status msg }
   # if op.opts.update_jira
   #   if not VERSION_RE.match(op.opts.app_version) or
   #     op.opts.app_version != op.opts.git_version
