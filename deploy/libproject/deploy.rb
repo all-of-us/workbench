@@ -117,6 +117,7 @@ def setup_and_enter_docker(cmd_name, opts)
       #{opts.promote ? "--promote" : "--no-promote"}
       --app-version #{opts.app_version}
       --git-version #{opts.git_version}
+      --ui-script #{opts.script_ui}
       --key-file #{DOCKER_KEY_FILE_PATH}
     } +
       (opts.circle_url.nil? ? [] : %W{--circle-url #{opts.circle_url}}) +
@@ -211,7 +212,6 @@ def deploy(cmd_name, args)
         "instead, which has similar permissions.")
   end
   common = Common.new
-  common.status "ui script '#{op.opts.script_ui}"
   if op.opts.update_jira.nil?
      op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
@@ -220,6 +220,7 @@ def deploy(cmd_name, args)
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
+  common.status "ui script '#{op.opts.script_ui}"
 
   # Everything following runs only within Docker.
   # Only require Jira stuff within Docker to avoid burdening the user with local
