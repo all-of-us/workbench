@@ -8,7 +8,7 @@ import { userAdminApi } from 'app/services/swagger-fetch-clients';
 
 const getAuditLog = (subject: string) => {
   const bqRowLimit = 1000; // Workspaces take many rows because of the Research Purpose fields
-  return userAdminApi().getAuditLogEntries(subject, bqRowLimit);
+  return userAdminApi().getUserAuditLogEntries(subject, bqRowLimit);
 };
 
 const queryAuditLog = (subject: string) => {
