@@ -187,6 +187,11 @@ def deploy(cmd_name, args)
     "Circle test output URL to attach to the release tracker; only " +
     "relevant for runs where a release ticket is created (staging)"
   )
+  op.add_option(
+    "--ui-script",
+    ->(opts, _) { opts.script_ui = true},
+    "Run deploy UI script as javascript"
+  )
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
@@ -289,6 +294,25 @@ def deploy(cmd_name, args)
   common.status "The value of from-version in main '#{from_version}'"
   common.status "The value of to version in main '#{op.opts.git_version}'"
   common.status "The value of @opts.circle_url in main'#{op.opts.circle_url}'"
+  common.status "Ui javascript: '#{op.script_ui}'"
+  if (op.script_ui)
+    common.status "Ui javascript is going to run"
+    common.run_inline %W{
+    ../ui/project.rb deploy-ui-js
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
+      --version #{op.opts.app_version}
+      --createticket #{create_ticket}
+      --from-version #{from_version}
+      --circle-url #{op.opts.circle_url}
+      --toversion #{op.opts.git_version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  } + (op.opts.dry_run ? %W{--dry-run} : [])
+
+  else
+    common.status "Ui ruby is going to run"
   common.run_inline %W{
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
@@ -302,7 +326,7 @@ def deploy(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
-
+  end
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
