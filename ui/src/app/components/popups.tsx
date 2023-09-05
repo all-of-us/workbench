@@ -4,7 +4,7 @@ import onClickOutside from 'react-onclickoutside';
 import * as fp from 'lodash/fp';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 
 const styles = {
   tooltip: {
@@ -277,7 +277,7 @@ export const Tooltip = withDynamicPosition()(
           element.height - 12,
           (target.top + target.bottom) / 2 - position.top
         );
-        return switchCase(
+        return switchCase<any, any>(
           finalSide,
           ['top', () => ({ bottom: 0, left, transform: 'rotate(180deg)' })],
           ['bottom', () => ({ top: 0, left })],

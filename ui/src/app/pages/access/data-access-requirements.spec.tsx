@@ -15,7 +15,7 @@ import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   DARPageMode,

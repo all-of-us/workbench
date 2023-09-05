@@ -35,10 +35,10 @@ import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   summarizeErrors,
-  switchCase,
   withCdrVersions,
   withCurrentWorkspace,
 } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import {
   AutopauseMinuteThresholds,

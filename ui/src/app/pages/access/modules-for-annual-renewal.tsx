@@ -13,7 +13,8 @@ import { SupportMailto } from 'app/components/support';
 import { AoU } from 'app/components/text-wrappers';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
-import { switchCase, useId } from 'app/utils';
+import { useId } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,

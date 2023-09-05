@@ -5,7 +5,7 @@ import { AccessModule, Profile } from 'generated/fetch';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { RegisteredTierBadge } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AccessTierDisplayNames } from 'app/utils/access-tiers';
 import { DARPageMode, getAccessModuleConfig } from 'app/utils/access-utils';
 import { serverConfigStore } from 'app/utils/stores';

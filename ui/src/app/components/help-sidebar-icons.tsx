@@ -23,7 +23,8 @@ import {
 } from 'generated/fetch';
 
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { DEFAULT, reactStyles, switchCase } from 'app/utils';
+import { reactStyles } from 'app/utils';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {
@@ -367,7 +368,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     icon,
   } = props;
 
-  return switchCase(
+  return switchCase<any, any>(
     icon.id,
     [
       'dataDictionary',

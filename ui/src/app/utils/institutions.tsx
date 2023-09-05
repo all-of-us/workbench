@@ -9,7 +9,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { AccountCreationOptions } from 'app/pages/login/account-creation/account-creation-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -17,7 +17,7 @@ import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { getCustomOrDefaultUrl } from 'app/utils/urls';
 
 import { isAbortError } from './errors';
-import { isBlank, switchCase } from './index';
+import { isBlank } from './index';
 
 /**
  * Checks that the entered email address is a valid member of the chosen institution.

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { RuntimeStatus } from 'generated/fetch';
 
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { machineRunningCost, machineStorageCost } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 import { isVisible, toAnalysisConfig } from 'app/utils/runtime-utils';
@@ -22,7 +22,7 @@ export const RuntimeCost = () => {
 
   // display running cost or stopped (storage) cost
   // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
-  const text: string = switchCase(
+  const text: string = switchCase<any, any>(
     runtime.status,
     // TODO: is it appropriate to assume full running cost in all these cases?
     [RuntimeStatus.Creating, () => `${runtime.status} ${runningCost} / hr`],

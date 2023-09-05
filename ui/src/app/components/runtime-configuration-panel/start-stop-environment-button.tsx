@@ -11,7 +11,7 @@ import { Clickable } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors, { addOpacity } from 'app/styles/colors';
-import { DEFAULT, switchCase } from 'app/utils';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import computeError from 'assets/icons/compute-error.svg';
 import computeNone from 'assets/icons/compute-none.svg';
 import computeRunning from 'assets/icons/compute-running.svg';
@@ -42,7 +42,7 @@ export const StartStopEnvironmentButton = ({
     dataTestId,
     styleOverrides = {},
     onClick = null,
-  } = switchCase(
+  } = switchCase<any, any>(
     userEnvironmentStatus,
     [
       UserEnvironmentStatus.CREATING,

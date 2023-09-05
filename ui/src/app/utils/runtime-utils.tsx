@@ -18,7 +18,8 @@ import {
 
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
-import { switchCase, withAsyncErrorHandling } from 'app/utils';
+import { withAsyncErrorHandling } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   ExceededActionCountError,
   ExceededErrorCountError,
@@ -1036,7 +1037,7 @@ export const useRuntimeStatus = (
   }, [runtimeStatus]);
 
   const setStatusRequest = async (req) => {
-    await switchCase(
+    await switchCase<any, Promise<any>>(
       req,
       [
         RuntimeStatusRequest.DeleteRuntime,

@@ -19,7 +19,8 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, switchCase } from 'app/utils';
+import { reactStyles } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 

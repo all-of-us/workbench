@@ -35,7 +35,8 @@ import {
 } from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, switchCase } from 'app/utils';
+import { reactStyles } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   AccessTierShortNames,
   displayNameForTier,

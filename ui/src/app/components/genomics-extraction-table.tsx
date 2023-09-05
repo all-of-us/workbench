@@ -19,7 +19,8 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { TextColumn } from 'app/components/text-column';
 import colors from 'app/styles/colors';
-import { DEFAULT, switchCase, withCurrentWorkspace } from 'app/utils';
+import { withCurrentWorkspace } from 'app/utils';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { useGenomicExtractionJobs } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import moment from 'moment';
@@ -119,7 +120,7 @@ const mapJobToTableRow = (
       </span>
     ),
     // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
-    statusOrdinal: switchCase(
+    statusOrdinal: switchCase<any, number>(
       job.status,
       [TerraJobStatus.RUNNING, () => 0],
       [TerraJobStatus.SUCCEEDED, () => 1],

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { AccessModule, Profile } from 'generated/fetch';
 
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   getAccessModuleStatusByName,
   isEligibleModule,

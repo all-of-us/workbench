@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 
 import { Disk, DiskType } from 'generated/fetch';
 
-import { DEFAULT, switchCase } from './index';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { formatUsd } from './numbers';
 import { AnalysisConfig, DiskConfig } from './runtime-utils';
 

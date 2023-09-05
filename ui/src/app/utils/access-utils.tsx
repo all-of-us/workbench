@@ -36,7 +36,7 @@ import {
   getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import { DEFAULT, switchCase } from './index';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',
@@ -171,7 +171,7 @@ export const getAccessModuleConfig = (
     accessModules,
   } = serverConfigStore.get().config;
   const apiConfig = accessModules.find((m) => m.name === moduleName);
-  return switchCase(
+  return switchCase<any, any>(
     moduleName,
 
     [

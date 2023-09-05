@@ -16,7 +16,7 @@ import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configura
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 

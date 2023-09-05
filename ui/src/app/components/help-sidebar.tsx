@@ -46,7 +46,6 @@ import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
-  switchCase,
   withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentCohortSearchContext,
@@ -54,6 +53,7 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   currentConceptStore,

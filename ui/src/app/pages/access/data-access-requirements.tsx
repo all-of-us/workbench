@@ -16,7 +16,8 @@ import { withProfileErrorModal } from 'app/components/with-error-modal-wrapper';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { reactStyles, switchCase } from 'app/utils';
+import { reactStyles } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,

@@ -23,10 +23,10 @@ import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
-  switchCase,
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';
