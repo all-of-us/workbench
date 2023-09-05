@@ -24,14 +24,12 @@ import {
 } from 'testing/stubs/workspaces';
 
 import { defaultRStudioConfig } from './apps-panel/utils';
-import {
-  RStudioConfigurationPanel,
-  RStudioConfigurationPanelProps,
-} from './rstudio-configuration-panel';
+import { CreateGKEAppPanelProps } from './gke-app-configuration-panels/create-gke-app-panel';
+import { RStudioConfigurationPanel } from './rstudio-configuration-panel';
 
 const onClose = jest.fn();
 const freeTierBillingAccountId = 'freetier';
-export const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
+export const DEFAULT_PROPS: CreateGKEAppPanelProps = {
   onClose,
   creatorFreeCreditsRemaining: null,
   workspace: {
@@ -54,9 +52,7 @@ export const DEFAULT_PROPS: RStudioConfigurationPanelProps = {
 describe('RStudioConfigurationPanel', () => {
   let disksApiStub: DisksApiStub;
 
-  const component = async (
-    propOverrides?: Partial<RStudioConfigurationPanelProps>
-  ) => {
+  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
     const c = mountWithRouter(<RStudioConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);

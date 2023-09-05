@@ -3,10 +3,6 @@ import * as React from 'react';
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import {
-  CromwellConfigurationPanel,
-  CromwellConfigurationPanelProps,
-} from 'app/components/cromwell-configuration-panel';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -28,12 +24,14 @@ import {
 } from 'testing/stubs/workspaces';
 
 import { defaultCromwellConfig } from './apps-panel/utils';
+import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
+import { CreateGKEAppPanelProps } from './gke-app-configuration-panels/create-gke-app-panel';
 
 describe('CromwellConfigurationPanel', () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
 
-  const DEFAULT_PROPS: CromwellConfigurationPanelProps = {
+  const DEFAULT_PROPS: CreateGKEAppPanelProps = {
     onClose,
     creatorFreeCreditsRemaining: null,
     workspace: {
@@ -55,9 +53,7 @@ describe('CromwellConfigurationPanel', () => {
 
   let disksApiStub: DisksApiStub;
 
-  const component = async (
-    propOverrides?: Partial<CromwellConfigurationPanelProps>
-  ) => {
+  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
     const c = mountWithRouter(<CromwellConfigurationPanel {...allProps} />);
     await waitOneTickAndUpdate(c);

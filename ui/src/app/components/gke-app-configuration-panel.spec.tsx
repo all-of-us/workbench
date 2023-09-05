@@ -68,7 +68,7 @@ describe(GKEAppConfigurationPanel.name, () => {
   });
 
   const DEFAULT_PROPS: GkeAppConfigurationPanelProps = {
-    type: AppType.RSTUDIO,
+    appType: AppType.RSTUDIO,
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
     initialPanelContent: null,
@@ -158,7 +158,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     const wrapper = createWrapper({
       workspaceNamespace,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -182,7 +182,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     const wrapper = createWrapper({
       workspaceNamespace,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -202,7 +202,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     const wrapper = createWrapper({
       workspaceNamespace,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -214,7 +214,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
   it('should display the CREATE panel if no initial panel is passed', async () => {
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       initialPanelContent: null,
     });
     await waitOneTickAndUpdate(wrapper);
@@ -234,7 +234,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([cromwellDisk]));
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
     await waitOneTickAndUpdate(wrapper);
@@ -244,7 +244,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
   it('should display the Cromwell panel when the type is Cromwell', async () => {
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -256,7 +256,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
   it('should display the RStudio panel when the type is RStudio', async () => {
     const wrapper = createWrapper({
-      type: AppType.RSTUDIO,
+      appType: AppType.RSTUDIO,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -268,7 +268,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
   it('should change panels from CREATE to DELETE_UNATTACHED_PD after clicking the delete PD button', async () => {
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
 
@@ -304,7 +304,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([app]));
     const wrapper = createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
@@ -348,7 +348,7 @@ describe(GKEAppConfigurationPanel.name, () => {
     const workspaceNamespace = 'aou-rw-1234';
     const wrapper = createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
@@ -388,7 +388,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([app]));
     const wrapper = createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
@@ -415,7 +415,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([disk]));
     const wrapper = createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
     });
     await waitOneTickAndUpdate(wrapper);
@@ -446,7 +446,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.reject());
 
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
     // Start with the DELETE_UNATTACHED_PD panel
@@ -468,7 +468,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
   it('should change panels from DELETE_UNATTACHED_PD to CREATE after cancelling delete PD', async () => {
     const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
     });
     await waitOneTickAndUpdate(wrapper);
     // Start with the DELETE_UNATTACHED_PD panel
