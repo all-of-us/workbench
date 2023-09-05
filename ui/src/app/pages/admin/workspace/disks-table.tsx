@@ -33,7 +33,10 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
   const onClickDelete = (disk) =>
     fetchWithErrorModal(() => {
       setDeleting(true);
-      return disksAdminApi().deleteDisk(sourceWorkspaceNamespace, disk.name);
+      return disksAdminApi().adminDeleteDisk(
+        sourceWorkspaceNamespace,
+        disk.name
+      );
     }).finally(() => {
       setDeleting(false);
       refreshDisks();
