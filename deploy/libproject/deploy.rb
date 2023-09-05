@@ -301,9 +301,6 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-      --from-version #{from_version}
-      --circle-url #{op.opts.circle_url}
-      --toversion #{op.opts.git_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
