@@ -21,7 +21,6 @@ RUN npm install --global yarn n
 # Upgrade to Node 14, above installs 10.
 RUN n 14
 
-RUN npm i -D @types/node
 ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root
