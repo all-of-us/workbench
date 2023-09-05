@@ -187,6 +187,7 @@ def deploy(cmd_name, args)
     "Circle test output URL to attach to the release tracker; only " +
     "relevant for runs where a release ticket is created (staging)"
   )
+  op.opts.script_ui = false
   op.add_option(
     "--ui-script",
     ->(opts, _) { opts.script_ui = true},
@@ -303,7 +304,6 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-      --createticket #{create_ticket}
       --from-version #{from_version}
       --circle-url #{op.opts.circle_url}
       --toversion #{op.opts.git_version}
@@ -319,7 +319,6 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-      --createticket #{create_ticket}
       --from-version #{from_version}
       --circle-url #{op.opts.circle_url}
       --toversion #{op.opts.git_version}
