@@ -113,7 +113,6 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
     "enableEventDateModifier": false,
-    "enableResearchPurposePrompt": false,
     "enablePrivateDataprocWorker": true,
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": false,

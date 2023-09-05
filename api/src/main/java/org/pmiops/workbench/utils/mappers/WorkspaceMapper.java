@@ -101,8 +101,6 @@ public interface WorkspaceMapper {
         .collect(Collectors.toList());
   }
 
-  // always false: hard-code for imminent deletion
-  @Mapping(target = "needsReviewPrompt", constant = "false")
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
   @Mapping(target = "researchOutcomeList", source = "researchOutcomeEnumSet")

@@ -38,9 +38,6 @@ public interface WorkbenchConfigMapper {
 
   AccessModuleConfig mapAccessModule(DbAccessModule accessModule);
 
-  // false in all environments: hard-code for imminent deletion
-  @Mapping(target = "enableResearchReviewPrompt", constant = "false")
-
   // handled by mapRuntimeImages()
   @Mapping(target = "runtimeImages", ignore = true)
   @Mapping(target = "accessRenewalLookback", source = "config.access.renewal.lookbackPeriod")
