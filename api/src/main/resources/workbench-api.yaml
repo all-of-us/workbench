@@ -1983,16 +1983,15 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/synchronizeUserAccess":
+  "/v1/cron/groupAndPushSynchronizeAccessTasks":
     get:
       security: []
       tags:
       - offlineUser
       - cron
       description: >
-        Check each user to ensure they still meet compliance guidelines. 
-        If they do not, remove them from access tiers.
-      operationId: synchronizeUserAccess
+        This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
+      operationId: groupAndPushSynchronizeAccessTasks
       responses:
         204:
           description: No Error
