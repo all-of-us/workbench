@@ -22,7 +22,10 @@ export const RuntimeCost = () => {
 
   // display running cost or stopped (storage) cost
   // Error and Deleted statuses are not included because they're not "visible" [isVisible() = false]
-  const text: string = switchCase<any, any>(
+  const text: RuntimeStatus | string = switchCase<
+    RuntimeStatus,
+    RuntimeStatus | string
+  >(
     runtime.status,
     // TODO: is it appropriate to assume full running cost in all these cases?
     [RuntimeStatus.Creating, () => `${runtime.status} ${runningCost} / hr`],

@@ -11,13 +11,13 @@ interface BackupFilesHelpSectionProps {
 export const BackupFilesHelpSection = ({
   appType,
 }: BackupFilesHelpSectionProps) => {
-  const savedFiles = switchCase<any, string>(
+  const savedFiles = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => 'Jupyter notebooks'],
     [UIAppType.RSTUDIO, () => '.Rmd and .R files'],
     [DEFAULT, () => null]
   );
-  const savedFilesReferenceText = switchCase<any, string>(
+  const savedFilesReferenceText = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => 'your notebooks'],
     [UIAppType.RSTUDIO, () => 'those files'],

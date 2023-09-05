@@ -171,7 +171,7 @@ export const getAccessModuleConfig = (
     accessModules,
   } = serverConfigStore.get().config;
   const apiConfig = accessModules.find((m) => m.name === moduleName);
-  return switchCase<any, any>(
+  return switchCase<AccessModule, any>(
     moduleName,
 
     [

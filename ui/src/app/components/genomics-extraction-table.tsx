@@ -120,7 +120,7 @@ const mapJobToTableRow = (
       </span>
     ),
     // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
-    statusOrdinal: switchCase<any, number>(
+    statusOrdinal: switchCase<TerraJobStatus, number>(
       job.status,
       [TerraJobStatus.RUNNING, () => 0],
       [TerraJobStatus.SUCCEEDED, () => 1],

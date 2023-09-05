@@ -36,7 +36,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
   const [deleting, setDeleting] = useState(false);
   const [deletePDSelected, setDeletePDSelected] = useState(false);
 
-  const volumeHome = switchCase<any, string>(
+  const volumeHome = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => '/home/jupyter'],
     [UIAppType.RSTUDIO, () => '/home/rstudio'],

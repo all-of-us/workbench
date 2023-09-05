@@ -5,6 +5,7 @@ import {
   DataprocConfig,
   Disk,
   DiskType,
+  EmptyResponse,
   ErrorCode,
   GpuConfig,
   ListRuntimeResponse,
@@ -1037,7 +1038,7 @@ export const useRuntimeStatus = (
   }, [runtimeStatus]);
 
   const setStatusRequest = async (req) => {
-    await switchCase<any, Promise<any>>(
+    await switchCase<RuntimeStatusRequest, Promise<Response | EmptyResponse>>(
       req,
       [
         RuntimeStatusRequest.DeleteRuntime,

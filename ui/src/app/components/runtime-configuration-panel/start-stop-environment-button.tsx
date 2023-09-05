@@ -42,7 +42,7 @@ export const StartStopEnvironmentButton = ({
     dataTestId,
     styleOverrides = {},
     onClick = null,
-  } = switchCase<any, any>(
+  } = switchCase<UserEnvironmentStatus, any>(
     userEnvironmentStatus,
     [
       UserEnvironmentStatus.CREATING,

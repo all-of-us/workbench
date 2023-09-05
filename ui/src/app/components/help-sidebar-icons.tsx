@@ -368,7 +368,7 @@ const DisplayIcon = (props: DisplayIconProps) => {
     icon,
   } = props;
 
-  return switchCase<any, any>(
+  return switchCase<SidebarIconId, React.ReactElement>(
     icon.id,
     [
       'dataDictionary',
