@@ -1,8 +1,8 @@
 import * as React from 'react';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { NotificationBanner } from 'app/components/notification-banner';
 import colors from 'app/styles/colors';
-import { cond } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   ACCESS_RENEWAL_PATH,

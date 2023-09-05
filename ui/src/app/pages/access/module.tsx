@@ -3,11 +3,11 @@ import { ReactNode, useState } from 'react';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Clickable } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { ArrowRight } from 'app/components/icons';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
-import { cond } from 'app/utils';
 import {
   getAccessModuleConfig,
   getStatusText,

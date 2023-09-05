@@ -1,7 +1,7 @@
 import { AccessModule, Profile } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Guard } from 'app/components/app-router';
-import { cond } from 'app/utils';
 import {
   AccessTierShortNames,
   hasRegisteredTierAccess,

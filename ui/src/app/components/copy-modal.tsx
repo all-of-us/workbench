@@ -9,6 +9,7 @@ import {
   Workspace,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
@@ -21,7 +22,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { cond, reactStyles, withCdrVersions } from 'app/utils';
+import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { NavigationProps } from 'app/utils/navigation';
 import { toDisplay } from 'app/utils/resources';

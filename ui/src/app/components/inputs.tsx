@@ -5,12 +5,13 @@ import RSelect from 'react-select';
 import Switch from 'react-switch';
 import * as fp from 'lodash/fp';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Clickable } from 'app/components/buttons';
 import { ClrIcon } from 'app/components/icons';
 import { PopupTrigger } from 'app/components/popups';
 import { commonStyles } from 'app/pages/login/account-creation/common';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { cond, withStyle } from 'app/utils';
+import { withStyle } from 'app/utils';
 import { isDateValid } from 'app/utils/dates';
 import moment from 'moment';
 

@@ -4,13 +4,14 @@ import * as fp from 'lodash/fp';
 
 import { BillingStatus } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { toAppType, UIAppType } from 'app/components/apps-panel/utils';
 import {
   GKEAppConfigurationPanel,
   GkeAppConfigurationPanelProps,
 } from 'app/components/gke-app-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
-import { cond, withCurrentWorkspace, withUserProfile } from 'app/utils';
+import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

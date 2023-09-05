@@ -11,6 +11,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -33,7 +34,6 @@ import { Spinner } from 'app/components/spinners';
 import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
-  cond,
   summarizeErrors,
   switchCase,
   withCdrVersions,
@@ -231,7 +231,7 @@ const PanelMain = fp.flow(
       });
 
     const initializePanelContent = (): PanelContent =>
-      cond(
+      cond<PanelContent>(
         [!!initialPanelContent, () => initialPanelContent],
         // If there's a pendingRuntime, this means there's already a create/update
         // in progress, even if the runtime store doesn't actively reflect this yet.
@@ -300,7 +300,7 @@ const PanelMain = fp.flow(
         gcePersistentDisk.diskType !==
           analysisConfig.diskConfig.detachableType);
 
-    const disableDetachableReason = cond(
+    const disableDetachableReason = cond<string>(
       [
         analysisConfig.computeType === ComputeType.Dataproc,
         () => 'Reattachable disks are unsupported for this compute type',
@@ -539,7 +539,7 @@ const PanelMain = fp.flow(
 
     return (
       <div id='runtime-panel'>
-        {cond(
+        {cond<React.ReactNode>(
           [
             [PanelContent.Create, PanelContent.Customize].includes(
               panelContent

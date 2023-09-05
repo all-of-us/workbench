@@ -1,6 +1,7 @@
 import { ErrorCode, ErrorResponse } from 'generated/fetch';
 
-import { cond } from './index';
+import { cond } from '@terra-ui-packages/core-utils';
+
 import { systemErrorStore } from './navigation';
 import {
   NotificationStore,

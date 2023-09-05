@@ -1,9 +1,10 @@
 import { CSSProperties } from 'react';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import colors from 'app/styles/colors';
-import { cond, reactStyles } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import {
   detachableDiskPricePerMonth,
   diskConfigPricePerMonth,

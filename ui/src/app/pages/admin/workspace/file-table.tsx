@@ -6,6 +6,7 @@ import { InputSwitch } from 'primereact/inputswitch';
 
 import { FileDetail } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
@@ -13,7 +14,7 @@ import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { PurpleLabel } from 'app/pages/admin/workspace/admin-workspace';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { cond, reactStyles } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl

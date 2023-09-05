@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
@@ -21,7 +22,7 @@ import {
 import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
-import { cond, reactStyles, switchCase } from 'app/utils';
+import { reactStyles, switchCase } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,
@@ -277,7 +278,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
               userSuspended={false}
             />
           </FlexRow>
-          {cond(
+          {cond<React.ReactNode>(
             [
               appType === UIAppType.CROMWELL,
               () => (

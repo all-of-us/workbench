@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { AccessModule } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { CheckCircle, MinusCircle } from 'app/components/icons';
 import colors from 'app/styles/colors';
-import { cond } from 'app/utils';
 
 import { styles } from './data-access-requirements';
 

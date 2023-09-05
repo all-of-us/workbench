@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 
-import { cond, switchCase } from 'app/utils';
+import { cond } from '@terra-ui-packages/core-utils';
+import { switchCase } from 'app/utils';
 
 import { AppsPanelButton } from './apps-panel-button';
 import { UserEnvironmentStatus } from './utils';

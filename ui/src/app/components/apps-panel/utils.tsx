@@ -10,7 +10,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { cond } from 'app/utils';
+import { cond } from '@terra-ui-packages/core-utils';
 import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
 import * as runtimeUitils from 'app/utils/runtime-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
