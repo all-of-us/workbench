@@ -278,7 +278,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
               userSuspended={false}
             />
           </FlexRow>
-          {cond(
+          {cond<React.ReactNode>(
             [
               appType === UIAppType.CROMWELL,
               () => (
@@ -287,7 +287,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                   workspaceNamespace={workspace.namespace}
                 />
               ),
-            ] as [boolean, () => React.ReactNode],
+            ],
             [
               appType === UIAppType.RSTUDIO,
               () => (
@@ -296,7 +296,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                   workspaceNamespace={workspace.namespace}
                 />
               ),
-            ] as [boolean, () => React.ReactNode],
+            ],
             () => null
           )}
         </FlexColumn>

@@ -146,15 +146,9 @@ export const AppRoute = ({
 
   return (
     <Route exact={exact} path={path}>
-      {cond(
-        [!!redirectPath, () => <Redirect to={redirectPath} />] as [
-          boolean,
-          () => React.ReactNode
-        ],
-        [!!renderBlocked, () => renderBlocked()] as [
-          boolean,
-          () => React.ReactNode
-        ],
+      {cond<React.ReactNode>(
+        [redirectPath, () => <Redirect to={redirectPath} />],
+        [renderBlocked, () => renderBlocked()],
         () => children
       )}
     </Route>

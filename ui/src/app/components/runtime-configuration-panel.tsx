@@ -231,24 +231,18 @@ const PanelMain = fp.flow(
       });
 
     const initializePanelContent = (): PanelContent =>
-      cond(
-        [!!initialPanelContent, () => initialPanelContent] as [
-          boolean,
-          () => PanelContent
-        ],
+      cond<PanelContent>(
+        [!!initialPanelContent, () => initialPanelContent],
         // If there's a pendingRuntime, this means there's already a create/update
         // in progress, even if the runtime store doesn't actively reflect this yet.
         // Show the customize panel in this event.
-        [!!pendingRuntime, () => PanelContent.Customize] as [
-          boolean,
-          () => PanelContent
-        ],
+        [!!pendingRuntime, () => PanelContent.Customize],
         [
           currentRuntime === null ||
             currentRuntime === undefined ||
             status === RuntimeStatus.Unknown,
           () => PanelContent.Create,
-        ] as [boolean, () => PanelContent],
+        ],
         [
           // General Analysis consist of GCE + PD. Display create page only if
           // 1) currentRuntime + pd both are deleted and
@@ -260,7 +254,7 @@ const PanelMain = fp.flow(
               RuntimeConfigurationType.HailGenomicAnalysis,
             ].includes(currentRuntime?.configurationType),
           () => PanelContent.Create,
-        ] as [boolean, () => PanelContent],
+        ],
         () => PanelContent.Customize
       );
 
@@ -306,11 +300,11 @@ const PanelMain = fp.flow(
         gcePersistentDisk.diskType !==
           analysisConfig.diskConfig.detachableType);
 
-    const disableDetachableReason = cond(
+    const disableDetachableReason = cond<string>(
       [
         analysisConfig.computeType === ComputeType.Dataproc,
         () => 'Reattachable disks are unsupported for this compute type',
-      ] as [boolean, () => React.ReactNode],
+      ],
       () => null
     );
 
@@ -545,7 +539,7 @@ const PanelMain = fp.flow(
 
     return (
       <div id='runtime-panel'>
-        {cond(
+        {cond<React.ReactNode>(
           [
             [PanelContent.Create, PanelContent.Customize].includes(
               panelContent
@@ -557,7 +551,7 @@ const PanelMain = fp.flow(
                 and not shared with other users.
               </div>
             ),
-          ] as [boolean, () => React.ReactNode],
+          ],
           () => null
         )}
         {switchCase(
@@ -917,19 +911,16 @@ const PanelMain = fp.flow(
                       Delete Environment
                     </LinkButton>
                     {cond(
-                      [runtimeExists, () => renderNextUpdateButton()] as [
-                        boolean,
-                        () => React.ReactNode
-                      ],
+                      [runtimeExists, () => renderNextUpdateButton()],
                       [
                         unattachedDiskNeedsRecreate,
                         () => renderNextWithDiskDeleteButton(),
-                      ] as [boolean, () => React.ReactNode],
+                      ],
                       [
                         currentRuntime?.errors &&
                           currentRuntime.errors.length > 0,
                         () => renderTryAgainButton(),
-                      ] as [boolean, () => React.ReactNode],
+                      ],
                       () => renderCreateButton()
                     )}
                   </FlexRow>

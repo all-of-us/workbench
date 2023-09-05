@@ -379,14 +379,14 @@ export const InteractiveNotebook = fp.flow(
             <div style={{ ...styles.navBarItem, ...styles.active }}>
               Preview (Read-Only)
             </div>
-            {cond(
+            {cond<React.ReactNode>(
               [
                 !!error &&
                   // don't show executable buttons (Edit and Run/Playground) when notebooks cannot be executed
                   (error instanceof ComputeSecuritySuspendedError ||
                     error instanceof RuntimeStatusError),
                 () => null,
-              ] as [boolean, () => React.ReactNode],
+              ],
               [
                 userRequestedExecutableNotebook,
                 () => (
@@ -398,7 +398,7 @@ export const InteractiveNotebook = fp.flow(
                     {this.renderNotebookText()}
                   </div>
                 ),
-              ] as [boolean, () => React.ReactNode],
+              ],
               () => (
                 <div style={{ display: 'flex' }}>
                   <TooltipTrigger
