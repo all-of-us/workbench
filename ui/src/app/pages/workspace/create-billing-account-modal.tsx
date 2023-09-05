@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { GoogleCloudLogoSvg, InfoIcon } from 'app/components/icons';
@@ -20,7 +21,6 @@ import { TextColumn } from 'app/components/text-column';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 import { supportUrls } from 'app/utils/zendesk';
 

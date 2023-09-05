@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, AccessModuleStatus, Profile } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexColumn } from 'app/components/flex';
 import { CheckCircle, Circle, Clock, ClrIcon } from 'app/components/icons';
@@ -14,7 +15,6 @@ import { AoU } from 'app/components/text-wrappers';
 import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity, colorWithWhiteness } from 'app/styles/colors';
 import { useId } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,

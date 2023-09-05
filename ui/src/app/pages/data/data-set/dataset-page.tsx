@@ -23,6 +23,7 @@ import {
   ResourceType,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AlertInfo } from 'app/components/alert';
 import {
   Button,
@@ -62,7 +63,6 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { currentWorkspaceStore, useNavigation } from 'app/utils/navigation';

@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppStatus, UserAppEnvironment, Workspace } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AppStatusIndicator } from 'app/components/app-status-indicator';
 import { DeleteCromwellConfirmationModal } from 'app/components/apps-panel/delete-cromwell-modal';
 import { Clickable } from 'app/components/buttons';
@@ -23,7 +24,6 @@ import { TooltipTrigger } from 'app/components/popups';
 import { RuntimeStatusIndicator } from 'app/components/runtime-status-indicator';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import {
   isActionable,

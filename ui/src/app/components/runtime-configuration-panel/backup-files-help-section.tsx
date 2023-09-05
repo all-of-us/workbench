@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { UIAppType } from 'app/components/apps-panel/utils';
 import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
+import { UIAppType } from 'app/components/apps-panel/utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 interface BackupFilesHelpSectionProps {

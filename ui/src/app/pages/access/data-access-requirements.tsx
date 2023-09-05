@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 
 import { AccessModule, Profile } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button, HashLinkButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -17,7 +18,6 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { profileApi, userAdminApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   buildRasRedirectUrl,

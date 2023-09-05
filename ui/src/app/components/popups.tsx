@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import onClickOutside from 'react-onclickoutside';
 import * as fp from 'lodash/fp';
 
-import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { switchCase } from '@terra-ui-packages/core-utils';
+import colors, { colorWithWhiteness } from 'app/styles/colors';
 
 const styles = {
   tooltip: {

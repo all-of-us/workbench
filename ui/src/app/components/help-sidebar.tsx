@@ -14,6 +14,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AppsPanel } from 'app/components/apps-panel';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
@@ -53,7 +54,6 @@ import {
   withCurrentWorkspace,
   withUserProfile,
 } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import {
   currentConceptStore,

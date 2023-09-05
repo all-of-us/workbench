@@ -11,6 +11,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -36,7 +37,6 @@ import {
   getWholeDaysFromNow,
   MILLIS_PER_DAY,
 } from './dates';
-import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 
 export enum AccessRenewalStatus {
   NEVER_EXPIRES = 'Complete (Never Expires)',

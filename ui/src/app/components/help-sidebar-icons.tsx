@@ -22,9 +22,9 @@ import {
   TerraJobStatus,
 } from 'generated/fetch';
 
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { getCdrVersion } from 'app/utils/cdr-versions';
 import { ComputeSecuritySuspendedError } from 'app/utils/runtime-utils';
 import {

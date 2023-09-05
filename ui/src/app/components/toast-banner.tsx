@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 
 import { FlexColumn, FlexRow } from './flex';
 import { ClrIcon } from './icons';

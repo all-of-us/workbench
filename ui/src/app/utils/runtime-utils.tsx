@@ -16,10 +16,10 @@ import {
   SecuritySuspendedErrorParameters,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
 import { withAsyncErrorHandling } from 'app/utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   ExceededActionCountError,
   ExceededErrorCountError,
