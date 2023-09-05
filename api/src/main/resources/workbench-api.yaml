@@ -3835,7 +3835,7 @@ paths:
           description: information about counts for EHR domains, physical Measurement CSS, and Surveys for all survey names
           schema:
             "$ref": "#/definitions/CardCountResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/search/term":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
