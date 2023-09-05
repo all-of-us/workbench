@@ -6,7 +6,7 @@ Terra UI publishes a [set of packages](https://github.com/DataBiosphere/terra-ui
 
 The [packages](https://github.com/DataBiosphere/terra-ui/tree/dev/packages) directory in the [Terra UI GitHub repo](https://github.com/DataBiosphere/terra-ui) contains a set of directories each with its own package.json file. Here is a current (2023-08-31) listing:
 ```
-$ grep -R \"name\": packages
+/git-repos/terra-ui $ grep -R \"name\": packages
 packages/test-utils/package.json:  "name": "@terra-ui-packages/test-utils",
 packages/components/package.json:  "name": "@terra-ui-packages/components",
 packages/core-utils/package.json:  "name": "@terra-ui-packages/core-utils",
