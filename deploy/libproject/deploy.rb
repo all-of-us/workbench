@@ -216,64 +216,64 @@ def deploy(cmd_name, args)
   end
   op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
 
-  # unless Workbench.in_docker?
-  #   return setup_and_enter_docker(cmd_name, op.opts)
-  # end
-  #
-  # # Everything following runs only within Docker.
-  # # Only require Jira stuff within Docker to avoid burdening the user with local
-  # # workstation Ruby gem setup.
-  # require_relative 'jirarelease'
-  #
-  # if op.opts.key_file.nil?
-  #   raise ArgumentError.new("--key-file is required when running within docker")
-  # end
-  # if op.opts.app_version.nil?
-  #   raise ArgumentError.new("--app-version is required when running within docker")
-  # end
-  # if op.opts.git_version.nil?
-  #   raise ArgumentError.new("--git-version is required when running within docker")
-  # end
+  unless Workbench.in_docker?
+    return setup_and_enter_docker(cmd_name, op.opts)
+  end
+
+  # Everything following runs only within Docker.
+  # Only require Jira stuff within Docker to avoid burdening the user with local
+  # workstation Ruby gem setup.
+  require_relative 'jirarelease'
+
+  if op.opts.key_file.nil?
+    raise ArgumentError.new("--key-file is required when running within docker")
+  end
+  if op.opts.app_version.nil?
+    raise ArgumentError.new("--app-version is required when running within docker")
+  end
+  if op.opts.git_version.nil?
+    raise ArgumentError.new("--git-version is required when running within docker")
+  end
   common = Common.new
-  # common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
-  #
-  # jira_client = nil
-  # create_ticket = false
-  # from_version = nil
+  common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
+
+  jira_client = nil
+  create_ticket = false
+  from_version = nil
   maybe_log_jira = ->(msg) { common.status msg }
-  # if op.opts.update_jira
-  #   if not VERSION_RE.match(op.opts.app_version) or
-  #     op.opts.app_version != op.opts.git_version
-  #     raise RuntimeError.new "for releases, the --git_version and " +
-  #                            "--app_version should be equal and should be a " +
-  #                            "release tag (e.g. v0-1-rc1); you shouldn't " +
-  #                            "bypass this, but if you need to you can pass " +
-  #                            "--no-update-jira"
-  #   end
-  #
-  #   # We're either creating a new ticket (staging), or commenting on an existing
-  #   # release ticket (stable, prod).
-  #   jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
-  #   if op.opts.update_jira and op.opts.project == STAGING_PROJECT
-  #     create_ticket = true
-  #     from_version = get_live_gae_version(STAGING_PROJECT)
-  #     unless from_version
-  #       # Alternatively, we could support a --from_version flag
-  #       raise RuntimeError "could not determine live staging version, and " +
-  #                          "therefore could not generate a delta commit log; " +
-  #                          "please manually deploy staging with the old " +
-  #                          "version and supply --no-update-jira, then retry"
-  #     end
-  #   else
-  #     maybe_log_jira = lambda { |msg|
-  #       begin
-  #         jira_client.comment_ticket(op.opts.app_version, msg)
-  #       rescue StandardError => e
-  #         common.error "comment_ticket failed: #{e}"
-  #       end
-  #     }
-  #   end
-  # end
+  if op.opts.update_jira
+    if not VERSION_RE.match(op.opts.app_version) or
+      op.opts.app_version != op.opts.git_version
+      raise RuntimeError.new "for releases, the --git_version and " +
+                             "--app_version should be equal and should be a " +
+                             "release tag (e.g. v0-1-rc1); you shouldn't " +
+                             "bypass this, but if you need to you can pass " +
+                             "--no-update-jira"
+    end
+
+    # We're either creating a new ticket (staging), or commenting on an existing
+    # release ticket (stable, prod).
+    jira_client = JiraReleaseClient.from_gcs_creds(op.opts.project)
+    if op.opts.update_jira and op.opts.project == STAGING_PROJECT
+      create_ticket = true
+      from_version = get_live_gae_version(STAGING_PROJECT)
+      unless from_version
+        # Alternatively, we could support a --from_version flag
+        raise RuntimeError "could not determine live staging version, and " +
+                           "therefore could not generate a delta commit log; " +
+                           "please manually deploy staging with the old " +
+                           "version and supply --no-update-jira, then retry"
+      end
+    else
+      maybe_log_jira = lambda { |msg|
+        begin
+          jira_client.comment_ticket(op.opts.app_version, msg)
+        rescue StandardError => e
+          common.error "comment_ticket failed: #{e}"
+        end
+      }
+    end
+  end
 
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
