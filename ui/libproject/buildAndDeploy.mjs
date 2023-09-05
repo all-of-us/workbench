@@ -1,5 +1,5 @@
 import { execSync} from "child_process";
-import {ServiceAccountContext} from "serviceaccounts.mjs"
+import {ServiceAccountContext} from "../libproject/serviceaccounts.mjs"
 
 const YARN_DEPS = 'yarn deps';
 const CREDENTIALS_COPY = 'gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
