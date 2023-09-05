@@ -1433,7 +1433,7 @@ paths:
       description: >
         Fetch audit logs involving this workspace as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
-      operationId: getAuditLogEntries
+      operationId: getWorkspaceAuditLogEntries
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1532,7 +1532,7 @@ paths:
       description: >
         Fetch audit logs involving this user as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
-      operationId: getAuditLogEntries
+      operationId: getUserAuditLogEntries
       parameters:
         - name: usernameWithoutGsuiteDomain
           in: path

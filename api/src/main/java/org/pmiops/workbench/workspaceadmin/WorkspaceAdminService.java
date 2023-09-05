@@ -27,7 +27,7 @@ public interface WorkspaceAdminService {
 
   WorkspaceAdminView getWorkspaceAdminView(String workspaceNamespace);
 
-  WorkspaceAuditLogQueryResponse getAuditLogEntries(
+  WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
       Long afterMillis,

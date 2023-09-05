@@ -294,7 +294,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   @Override
-  public WorkspaceAuditLogQueryResponse getAuditLogEntries(
+  public WorkspaceAuditLogQueryResponse getWorkspaceAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
       Long afterMillis,
