@@ -332,7 +332,7 @@ function do_PFHH(){
   JOIN
       (
           SELECT *
-          FROM \`$BQ_PROJECT.$BQ_DATASET.R2022Q4R9.prep_concept_ancestor\`
+          FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
           WHERE ancestor_concept_id in
           (
               SELECT concept_id
