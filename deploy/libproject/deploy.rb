@@ -294,8 +294,8 @@ def deploy(cmd_name, args)
   common.status "The value of from-version in main '#{from_version}'"
   common.status "The value of to version in main '#{op.opts.git_version}'"
   common.status "The value of @opts.circle_url in main'#{op.opts.circle_url}'"
-  common.status "Ui javascript: '#{op.script_ui}'"
-  if (op.script_ui)
+  common.status "Ui javascript: '#{op.opts.script_ui}'"
+  if (op.opts.script_ui)
     common.status "Ui javascript is going to run"
     common.run_inline %W{
     ../ui/project.rb deploy-ui-js
