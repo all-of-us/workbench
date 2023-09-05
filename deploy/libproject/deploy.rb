@@ -106,7 +106,6 @@ def setup_and_enter_docker(cmd_name, opts)
   key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     opts.project, opts.account, key_file.path).run do
-    common.status "Running the script actually"
     common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
       docker-compose run --rm
@@ -193,6 +192,7 @@ def deploy(cmd_name, args)
     ->(opts, _) { opts.script_ui = true},
     "Run deploy UI script as javascript"
   )
+
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --project") if opts.project.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing value: Must include a value for --account") if opts.account.nil?}
   op.add_validator ->(opts) { raise ArgumentError.new("Missing flag: Must include either --promote or --no-promote") if opts.promote.nil?}
@@ -319,13 +319,11 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-      --from-version #{from_version}
-      --circle-url #{op.opts.circle_url}
-      --toversion #{op.opts.git_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
   end
+  maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
