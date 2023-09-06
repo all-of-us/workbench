@@ -23,7 +23,7 @@ RUN n 14
 
 ENV CLOUD_SDK_VERSION 392.0.0
 
-WORKDIR /root/workbench/ui
+WORKDIR /root
 RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/
 RUN npm config set "//npm.fontawesome.com/:_authToken" "my token"
 
