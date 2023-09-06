@@ -36,7 +36,7 @@ async function build(env) {
   // await runCommand(YARN_DEPS);
   console.log("Current directory:", process.cwd());
 
-  await runCommand("cd ..\..\\");
+  await runCommand("cd ..\\..\\");
   // await runCommand("process.env");
   await runCommand(CREDENTIALS_COPY);
   await runCommand(YARN_INSTALL);
