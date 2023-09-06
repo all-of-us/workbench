@@ -4,7 +4,7 @@ import { env } from 'node:process';
 
 
 const YARN_DEPS = 'yarn deps';
-const CREDENTIALS_COPY = '/root/gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
+const CREDENTIALS_COPY = '~/gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
 const YARN_INSTALL = 'yarn install --frozen-lockfile';
 const YARN_RUN_DEPS = 'yarn run deps';
 
