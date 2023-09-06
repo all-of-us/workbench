@@ -12,8 +12,6 @@ import org.pmiops.workbench.model.FileDetail;
  * resources
  */
 class ResourceFields {
-
-  private Long recentlyModifiedId;
   private Cohort cohort;
   private CohortReview cohortReview;
   private FileDetail notebook;
@@ -64,15 +62,6 @@ class ResourceFields {
 
   public ResourceFields setDataSet(DataSet dataSet) {
     this.dataSet = dataSet;
-    return this;
-  }
-
-  public Long getRecentlyModifiedId() {
-    return recentlyModifiedId;
-  }
-
-  public ResourceFields setRecentlyModifiedId(Long recentlyModifiedId) {
-    this.recentlyModifiedId = recentlyModifiedId;
     return this;
   }
 
