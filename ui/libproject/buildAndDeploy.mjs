@@ -32,6 +32,7 @@ async function build_and_deploy(arg) {
 async function build(env) {
 
   await runCommand(YARN_DEPS);
+  await runCommand("env");
   await runCommand(CREDENTIALS_COPY);
   await runCommand(YARN_INSTALL);
   await runCommand(YARN_RUN_DEPS);
