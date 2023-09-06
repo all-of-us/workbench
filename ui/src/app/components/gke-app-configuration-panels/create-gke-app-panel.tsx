@@ -44,10 +44,10 @@ export type CreateGKEAppPanelPropsWithAppType = {
 } & CreateGKEAppPanelProps;
 
 type Props = {
-  IntroText?: () => JSX.Element;
-  PostCost?: () => JSX.Element;
-  PostCompute?: () => JSX.Element;
-  CreateAppText?: () => JSX.Element;
+  IntroText?: React.FunctionComponent;
+  PostCost?: React.FunctionComponent;
+  PostCompute?: React.FunctionComponent;
+  CreateAppText?: React.FunctionComponent;
 } & CreateGKEAppPanelPropsWithAppType;
 
 export const CreateGKEAppPanel = ({
