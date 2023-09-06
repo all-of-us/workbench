@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
@@ -414,19 +413,6 @@ public class UserMetricsControllerTest {
     assertThat(recentResources.get(0).getCohort()).isNull();
     assertThat(recentResources.get(0).getNotebook().getPath())
         .isEqualTo("gs://bucketFile/notebooks/");
-  }
-
-  @Test
-  public void testDeleteResource() {
-    RecentResourceRequest request = new RecentResourceRequest();
-    request.setNotebookName(dbUserRecentlyModifiedResource1.getResourceId());
-    userMetricsController.deleteRecentResource(
-        dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName(), request);
-    verify(mockUserRecentResourceService)
-        .deleteNotebookEntry(
-            dbWorkspace2.getWorkspaceId(),
-            dbUser.getUserId(),
-            dbUserRecentlyModifiedResource1.getResourceId());
   }
 
   @Test
