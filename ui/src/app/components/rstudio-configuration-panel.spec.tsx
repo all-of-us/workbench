@@ -1,16 +1,16 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  mountWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
+import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsRStudioResponse,
@@ -49,15 +49,13 @@ export const DEFAULT_PROPS: CreateGKEAppPanelProps = {
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
-describe('RStudioConfigurationPanel', () => {
+describe(RStudioConfigurationPanel.name, () => {
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) => {
-    const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    const c = mountWithRouter(<RStudioConfigurationPanel {...allProps} />);
-    await waitOneTickAndUpdate(c);
-    return c;
-  };
+  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) =>
+    render(
+      <RStudioConfigurationPanel {...{ ...DEFAULT_PROPS, ...propOverrides }} />
+    );
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
@@ -82,97 +80,103 @@ describe('RStudioConfigurationPanel', () => {
   });
 
   it('start button should create rstudio and close panel', async () => {
-    const wrapper = await component({
+    await component({
       app: undefined,
       disk: undefined,
     });
-    await waitOneTickAndUpdate(wrapper);
 
     const spyCreateApp = jest
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
-    const startButton = wrapper
-      .find('#RStudio-cloud-environment-create-button')
-      .first();
 
-    startButton.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(spyCreateApp).toHaveBeenCalledTimes(1);
-    expect(spyCreateApp).toHaveBeenCalledWith(
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      defaultRStudioConfig
+    const startButton = screen.getByLabelText(
+      'RStudio cloud environment create button'
     );
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expectButtonElementEnabled(startButton);
+    startButton.click();
+
+    await waitFor(() => {
+      expect(spyCreateApp).toHaveBeenCalledTimes(1);
+      expect(spyCreateApp).toHaveBeenCalledWith(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+        defaultRStudioConfig
+      );
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should use the existing PD when creating', async () => {
     const disk = stubDisk();
-    const wrapper = await component({
+    await component({
       app: undefined,
       disk,
     });
-    await waitOneTickAndUpdate(wrapper);
 
     const spyCreateApp = jest
       .spyOn(appsApi(), 'createApp')
       .mockImplementation((): Promise<any> => Promise.resolve());
-    const startButton = wrapper
-      .find('#RStudio-cloud-environment-create-button')
-      .first();
 
-    startButton.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(spyCreateApp).toHaveBeenCalledTimes(1);
-    expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
-    expect(onClose).toHaveBeenCalledTimes(1);
+    const startButton = screen.getByLabelText(
+      'RStudio cloud environment create button'
+    );
+    expectButtonElementEnabled(startButton);
+    startButton.click();
+
+    await waitFor(() => {
+      expect(spyCreateApp).toHaveBeenCalledTimes(1);
+      expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
-    const wrapper = await component();
-
-    const costEstimator = (w) => w.find('[data-test-id="cost-estimator"]');
-    const runningCost = (w) =>
-      costEstimator(w).find('[data-test-id="running-cost"]');
-    const pausedCost = (w) =>
-      costEstimator(w).find('[data-test-id="paused-cost"]');
-
-    expect(costEstimator(wrapper).exists()).toBeTruthy();
-    expect(runningCost(wrapper).text()).toEqual('$0.40 per hour');
-    expect(pausedCost(wrapper).text()).toEqual('$0.21 per hour');
+    await component();
+    expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
+      '$0.40 per hour'
+    );
+    expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
+      '$0.21 per hour'
+    );
   });
 
   it('should render a DeletePersistentDiskButton when a disk is present but no app', async () => {
     const disk = stubDisk();
     const onClickDeleteUnattachedPersistentDisk = jest.fn();
-    const wrapper = await component({
+
+    await component({
       app: undefined,
       disk,
       onClickDeleteUnattachedPersistentDisk,
     });
-    const deleteButton = wrapper.find('DeletePersistentDiskButton');
-    expect(deleteButton.exists()).toBeTruthy();
 
-    // validate that onClickDeleteUnattachedPersistentDisk is passed correctly
-    deleteButton.simulate('click');
-    expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(1);
+    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
+
+    await waitFor(() => {
+      expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should not render a DeletePersistentDiskButton when an app is present', async () => {
     const disk = stubDisk();
-    const wrapper = await component({
+
+    await component({
       app: createListAppsRStudioResponse(),
       disk,
     });
-    const deleteButton = wrapper.find('DeletePersistentDiskButton');
-    expect(deleteButton.exists()).toBeFalsy();
+
+    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+    expect(deleteButton).toBeNull();
   });
 
   it('should not render a DeletePersistentDiskButton no disk is present', async () => {
-    const wrapper = await component({
+    await component({
       app: undefined,
       disk: undefined,
     });
-    const deleteButton = wrapper.find('DeletePersistentDiskButton');
-    expect(deleteButton.exists()).toBeFalsy();
+
+    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
+    expect(deleteButton).toBeNull();
   });
 });

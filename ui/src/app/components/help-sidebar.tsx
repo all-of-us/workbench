@@ -527,7 +527,7 @@ export const HelpSidebar = fp.flow(
               <ConfigurationPanel
                 {...{ runtimeConfPanelInitialState }}
                 onClose={() => this.setActiveIcon(null)}
-                type={UIAppType.JUPYTER}
+                appType={UIAppType.JUPYTER}
               />
             ),
             showFooter: false,
@@ -581,7 +581,7 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
-                type={UIAppType.CROMWELL}
+                appType={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
                 gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
@@ -613,7 +613,7 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
-                type={UIAppType.RSTUDIO}
+                appType={UIAppType.RSTUDIO}
                 onClose={() => this.setActiveIcon(null)}
                 gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />

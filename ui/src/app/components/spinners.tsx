@@ -31,6 +31,7 @@ const styles = reactStyles({
 export const Spinner = ({ dark = false, size = 72, style = {}, ...props }) => {
   return (
     <svg
+      aria-label='Please Wait'
       xmlns='http://www.w3.org/2000/svg'
       viewBox='0 0 72 72'
       width={size}

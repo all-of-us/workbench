@@ -53,8 +53,11 @@ export const ConfirmDeleteUnattachedPD = ({
               style={{ marginRight: '0.375rem' }}
               onChange={() => setDeleting(true)}
               checked={deleting === true}
+              aria-labelledby='delete-unattached-pd-radio'
             />
-            <label>Delete persistent disk</label>
+            <label id='delete-unattached-pd-radio'>
+              Delete persistent disk
+            </label>
           </div>
         </h3>
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}>
@@ -71,14 +74,14 @@ export const ConfirmDeleteUnattachedPD = ({
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button
           type='secondaryLight'
-          aria-label={'Cancel'}
+          aria-label='Cancel'
           style={{ marginRight: '.9rem' }}
           onClick={() => onCancel()}
         >
           Cancel
         </Button>
         <Button
-          aria-label={'Delete'}
+          aria-label='Delete'
           disabled={!deleting}
           onClick={async () => {
             setDeleting(true);

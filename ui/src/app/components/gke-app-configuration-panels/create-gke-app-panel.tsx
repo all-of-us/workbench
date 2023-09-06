@@ -81,8 +81,8 @@ export const CreateGKEAppPanel = ({
     [AppType.RSTUDIO, () => defaultRStudioConfig]
   );
 
-  const persistentDiskRequest: Disk | PersistentDiskRequest =
-    disk !== undefined ? disk : defaultConfig.persistentDiskRequest;
+  const persistentDiskRequest: PersistentDiskRequest =
+    disk ?? defaultConfig.persistentDiskRequest;
   const createAppRequest: CreateAppRequest = {
     ...defaultConfig,
     persistentDiskRequest,
@@ -121,13 +121,13 @@ export const CreateGKEAppPanel = ({
         style={{
           alignItems: 'center',
           justifyContent: 'flex-end',
-          gap: '2rem', // cromwell-only?
+          gap: '2rem',
         }}
       >
         {unattachedDiskExists(app, disk) && (
           <DeletePersistentDiskButton
             onClick={onClickDeleteUnattachedPersistentDisk}
-            style={{ flexShrink: 0 }} // rstudio wants this instead {{ flexGrow: 1 }}?
+            style={{ flexShrink: 0 }}
           />
         )}
         <CreateAppText />

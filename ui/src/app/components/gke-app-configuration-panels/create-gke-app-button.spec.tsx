@@ -1,16 +1,18 @@
 import * as React from 'react';
-import { shallow } from 'enzyme';
 
 import { AppStatus } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
-import { Button } from 'app/components/buttons';
 import {
   CreateGKEAppButton,
   CreateGKEAppButtonProps,
 } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
-import { TooltipTrigger } from 'app/components/popups';
 
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+} from 'testing/react-test-helpers';
 import { createListAppsCromwellResponse } from 'testing/stubs/apps-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
@@ -26,7 +28,7 @@ describe(CreateGKEAppButton.name, () => {
     propOverrides?: Partial<CreateGKEAppButtonProps>
   ) => {
     const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    return shallow(<CreateGKEAppButton {...allProps} />);
+    return render(<CreateGKEAppButton {...allProps} />);
   };
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
@@ -37,23 +39,31 @@ describe(CreateGKEAppButton.name, () => {
 
   describe('should allow creating a GKE app for certain app statuses', () => {
     test.each(createEnabledStatuses)('Status %s', async (appStatus) => {
-      const wrapper = await component({
+      await component({
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
-      expect(wrapper.find(TooltipTrigger).prop('disabled')).toBeTruthy();
-      expect(wrapper.find(Button).prop('disabled')).toBeFalsy();
+      await waitFor(() => {
+        const createButton = screen.getByRole('button', {
+          name: 'Cromwell cloud environment create button',
+        });
+        expectButtonElementEnabled(createButton);
+      });
     });
   });
 
-  describe('should not allow creating an RStudio app for certain app statuses', () => {
+  describe('should not allow creating a GKE app for certain app statuses', () => {
     test.each(createDisabledStatuses)('Status %s', async (appStatus) => {
-      const wrapper = await component({
+      await component({
         createAppRequest: defaultCromwellConfig,
         existingApp: createListAppsCromwellResponse({ status: appStatus }),
       });
-      expect(wrapper.find(TooltipTrigger).prop('disabled')).toBeFalsy();
-      expect(wrapper.find(Button).prop('disabled')).toBeTruthy();
+      await waitFor(() => {
+        const createButton = screen.getByRole('button', {
+          name: 'Cromwell cloud environment create button',
+        });
+        expectButtonElementDisabled(createButton);
+      });
     });
   });
 });
