@@ -77,7 +77,6 @@ bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
    (person_id, start_datetime, survey, question, answer)
 SELECT  DISTINCT a.person_id,
-        o.observation_id as data_id,
         case when a.entry_datetime is null then CAST(a.entry_date AS TIMESTAMP) else a.entry_datetime end as survey_datetime,
         'Personal and Family Health History' as survey,
         d.concept_name as question,
