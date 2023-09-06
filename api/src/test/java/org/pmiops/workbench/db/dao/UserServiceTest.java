@@ -143,7 +143,6 @@ public class UserServiceTest {
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
-    providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
 
