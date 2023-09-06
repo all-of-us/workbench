@@ -41,7 +41,7 @@ const IntroText = () => (
 
 const PostCost = () => (
   <WarningMessage>
-    This cost is only for running the Cromwell Engine, there will be additional
+    This cost is only for running the Cromwell Engine. There will be additional
     cost for interactions with the workflow.
     <a
       style={{ marginLeft: '0.25rem' }}

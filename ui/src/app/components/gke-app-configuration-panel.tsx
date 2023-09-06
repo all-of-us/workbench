@@ -3,19 +3,18 @@ import { useEffect, useState } from 'react';
 
 import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
-import { findApp, toUIAppType } from 'app/components/apps-panel/utils';
-import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
-import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
 import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 
+import { findApp, toUIAppType } from './apps-panel/utils';
+import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
 import { CreateGKEAppPanelPropsWithAppType } from './gke-app-configuration-panels/create-gke-app-panel';
+import { RStudioConfigurationPanel } from './rstudio-configuration-panel';
 import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
 
 type InjectedProps = 'app' | 'disk' | 'onClickDeleteUnattachedPersistentDisk';
 

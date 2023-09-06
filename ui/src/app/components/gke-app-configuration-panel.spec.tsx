@@ -9,16 +9,6 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
-import {
-  GKEAppConfigurationPanel,
-  GkeAppConfigurationPanelProps,
-  GKEAppPanelContent,
-} from 'app/components/gke-app-configuration-panel';
-import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
-import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from 'app/components/rstudio-configuration-panel.spec';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { Spinner } from 'app/components/spinners';
 import {
   appsApi,
@@ -36,7 +26,17 @@ import {
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
+import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
+import {
+  GKEAppConfigurationPanel,
+  GkeAppConfigurationPanelProps,
+  GKEAppPanelContent,
+} from './gke-app-configuration-panel';
+import { RStudioConfigurationPanel } from './rstudio-configuration-panel';
+import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from './rstudio-configuration-panel.spec';
 import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
+import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
+import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
 
 async function validateInitialLoadingSpinner(wrapper: ReactWrapper) {
   expect(wrapper.childAt(0).is(Spinner)).toBeTruthy();
