@@ -40,7 +40,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -102,6 +101,7 @@ import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeStatus;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
@@ -212,7 +212,7 @@ public class RuntimeControllerTest {
   @Captor private ArgumentCaptor<LeonardoUpdateRuntimeRequest> updateRuntimeRequestCaptor;
 
   @MockBean LeonardoRuntimeAuditor mockLeonardoRuntimeAuditor;
-  @MockBean ComplianceService mockComplianceService;
+  @MockBean MoodleService mockMoodleService;
   @MockBean DirectoryService mockDirectoryService;
   @MockBean FireCloudService mockFireCloudService;
   @MockBean UserRecentResourceService mockUserRecentResourceService;

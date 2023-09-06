@@ -33,8 +33,6 @@ import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -62,6 +60,8 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.moodle.MoodleService;
+import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.profile.DiscoverySourceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final AccessTierService accessTierService;
   private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessModuleService accessModuleService;
-  private final ComplianceService complianceService;
+  private final MoodleService moodleService;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
   private final MailService mailService;
@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       AccessModuleNameMapper accessModuleNameMapper,
       AccessModuleService accessModuleService,
       FireCloudService fireCloudService,
-      ComplianceService complianceService,
+      MoodleService moodleService,
       DirectoryService directoryService,
       AccessTierService accessTierService,
       MailService mailService,
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessModuleService = accessModuleService;
     this.fireCloudService = fireCloudService;
-    this.complianceService = complianceService;
+    this.moodleService = moodleService;
     this.directoryService = directoryService;
     this.accessTierService = accessTierService;
     this.mailService = mailService;
@@ -571,7 +571,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     try {
       Map<BadgeName, BadgeDetailsV2> userBadgesByName =
-          complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
+          moodleService.getUserBadgesByBadgeName(dbUser.getUsername());
 
       /**
        * Determine the logical completion time for this user for the given compliance access module.

@@ -36,8 +36,6 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
@@ -58,6 +56,8 @@ import org.pmiops.workbench.model.GeneralDiscoverySource;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.PartnerDiscoverySource;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.moodle.MoodleService;
+import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -90,7 +90,7 @@ public class UserServiceTest {
   private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
 
-  @MockBean private ComplianceService mockComplianceService;
+  @MockBean private MoodleService mockMoodleService;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InstitutionService mockInstitutionService;
@@ -180,7 +180,7 @@ public class UserServiceTest {
     userBadgesByName.put(
         BadgeName.REGISTERED_TIER_TRAINING, new BadgeDetailsV2().lastissued(issued).valid(true));
 
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
@@ -205,7 +205,7 @@ public class UserServiceTest {
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
 
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
@@ -251,7 +251,7 @@ public class UserServiceTest {
             .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
             .build();
 
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
 
@@ -273,10 +273,6 @@ public class UserServiceTest {
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
 
-  private void tick() {
-    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
-  }
-
   @Test
   public void testSyncComplianceTrainingStatusNullBadgeV2() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
@@ -288,7 +284,7 @@ public class UserServiceTest {
     // An empty map should be returned when we have no badge information.
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
 
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
     userService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
@@ -298,7 +294,7 @@ public class UserServiceTest {
   @Test
   public void testSyncComplianceTrainingStatusBadgeNotFoundV2() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
-    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
@@ -309,7 +305,7 @@ public class UserServiceTest {
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     userService.syncComplianceTrainingStatusV2();
-    verifyNoInteractions(mockComplianceService);
+    verifyNoInteractions(mockMoodleService);
   }
 
   @Test
@@ -738,6 +734,10 @@ public class UserServiceTest {
     String username = "test@@appspot.gserviceaccount.com";
     userService.createServiceAccountUser(username);
     assertThat(userDao.findUserByUsername(username)).isNotNull();
+  }
+
+  private void tick() {
+    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
 
   private void assertModuleCompletionEqual(

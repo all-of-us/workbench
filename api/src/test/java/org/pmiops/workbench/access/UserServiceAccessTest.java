@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -56,6 +55,7 @@ import org.pmiops.workbench.model.InstitutionTierConfig;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -126,7 +126,7 @@ public class UserServiceAccessTest {
     UserAccessModuleMapperImpl.class,
   })
   @MockBean({
-    ComplianceService.class,
+    MoodleService.class,
     DirectoryService.class,
     FireCloudService.class,
     MailService.class,

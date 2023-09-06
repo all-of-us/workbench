@@ -1,10 +1,9 @@
-package org.pmiops.workbench.compliance;
+package org.pmiops.workbench.moodle;
 
 import java.util.Map;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 
-public interface ComplianceService {
+public interface MoodleService {
 
   enum BadgeName {
     REGISTERED_TIER_TRAINING,

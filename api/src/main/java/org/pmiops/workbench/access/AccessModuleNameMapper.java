@@ -4,9 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
-import org.pmiops.workbench.compliance.ComplianceService.BadgeName;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.model.AccessModule;
+import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(config = MapStructConfig.class)
