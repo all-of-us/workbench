@@ -1,5 +1,7 @@
 import { execSync} from "child_process";
 import {ServiceAccountContext} from "../libproject/serviceaccounts.mjs"
+import { env } from 'node:process';
+
 
 const YARN_DEPS = 'yarn deps';
 const CREDENTIALS_COPY = 'gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
@@ -33,7 +35,7 @@ async function build(env) {
 
   // await runCommand(YARN_DEPS);
   await runCommand("env");
-  await runCommand("process.env");
+  // await runCommand("process.env");
   await runCommand(CREDENTIALS_COPY);
   await runCommand(YARN_INSTALL);
   await runCommand(YARN_RUN_DEPS);
