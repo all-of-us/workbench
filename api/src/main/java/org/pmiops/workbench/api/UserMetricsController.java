@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.model.DbUserRecentlyModifiedResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -119,17 +118,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebookPath);
 
     return ResponseEntity.ok(toWorkspaceResource(recentResource, fcWorkspace, dbWorkspace));
-  }
-
-  @Override
-  public ResponseEntity<EmptyResponse> deleteRecentResource(
-      String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    userRecentResourceService.deleteNotebookEntry(
-        wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   /** Gets the list of all resources recently access by user in order of access date time */
@@ -287,12 +275,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         dataSetService,
         cloudStorageClient,
         workspaceUsers);
-  }
-
-  // Retrieves Database workspace ID
-  private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    return dbWorkspace.getWorkspaceId();
   }
 
   private Optional<BlobId> uriToBlobId(String uri) {

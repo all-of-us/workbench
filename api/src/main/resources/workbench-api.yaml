@@ -2482,27 +2482,6 @@ paths:
           description: Successfully added/updated
           schema:
             "$ref": "#/definitions/WorkspaceResource"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    delete:
-      tags:
-      - userMetrics
-      description: Deletes entry from recent resource
-      operationId: deleteRecentResource
-      parameters:
-      - in: body
-        name: RecentResourceRequest
-        description: request object for updating recent resource
-        required: true
-        schema:
-          "$ref": "#/definitions/RecentResourceRequest"
-      responses:
-        200:
-          description: Successfully deleted
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/workspaces/user-recent-workspaces":
     get:
       tags:
