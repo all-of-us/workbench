@@ -49,6 +49,7 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.billing.WorkspaceFreeTierUsageService;
 import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
+import org.pmiops.workbench.compliancetraining.ComplianceTrainingServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
@@ -193,6 +194,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     CommonConfig.class,
     CommonMappers.class,
     MoodleServiceImpl.class,
+    ComplianceTrainingServiceImpl.class,
     DemographicSurveyMapperImpl.class,
     FreeTierBillingService.class,
     InstitutionMapperImpl.class,

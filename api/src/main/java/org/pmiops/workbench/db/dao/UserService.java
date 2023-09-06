@@ -12,7 +12,6 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbDemographicSurveyV2;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.GeneralDiscoverySource;
@@ -100,9 +99,6 @@ public interface UserService {
    */
   Set<DbUser> findActiveUsersByUsernames(List<String> usernames);
 
-  DbUser syncComplianceTrainingStatusV2()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
   DbUser syncEraCommonsStatus();
 
   /**
@@ -161,4 +157,6 @@ public interface UserService {
 
   /** Signs a user out of all web and device sessions and reset their sign-in cookies. */
   void signOut(DbUser user);
+
+  boolean isServiceAccount(DbUser user);
 }
