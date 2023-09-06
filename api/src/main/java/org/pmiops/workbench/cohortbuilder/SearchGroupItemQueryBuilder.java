@@ -28,7 +28,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Modifier;
@@ -95,7 +94,6 @@ public final class SearchGroupItemQueryBuilder {
   private static final String STANDARD_SQL = "is_standard = %s";
   private static final String CONCEPT_ID_UNNEST_SQL = "concept_id IN unnest(%s)";
   private static final String CONCEPT_ID_IN_SQL = "concept_id IN";
-  private static final String VALUE_SOURCE_CONCEPT_ID_IN_SQL = " value_source_concept_id IN";
   private static final String STANDARD_OR_SOURCE_SQL =
       CONCEPT_ID_UNNEST_SQL + AND + STANDARD_SQL + "\n";
   public static final String CHILD_LOOKUP_SQL =
@@ -120,17 +118,6 @@ public final class SearchGroupItemQueryBuilder {
           + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
-  public static final String ANSWER_LOOKUP_SQL =
-      " (SELECT DISTINCT CAST(c.value AS INT64) as value\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "JOIN (select cast(cr.id as string) as id\n"
-          + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
-          + "WHERE concept_id IN unnest(%s)\n"
-          + "AND domain_id = 'SURVEY') a\n"
-          + "ON (c.path LIKE CONCAT('%%.', a.id, '.%%') OR c.path LIKE CONCAT('%%.', a.id) OR c.path LIKE CONCAT(a.id, '.%%') OR c.path = a.id)\n"
-          + "WHERE domain_id = 'SURVEY'\n"
-          + "AND type = 'PPI'\n"
-          + "AND subtype = 'ANSWER')";
   public static final String QUESTION_LOOKUP_SQL =
       "(SELECT DISTINCT concept_id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
@@ -146,8 +133,6 @@ public final class SearchGroupItemQueryBuilder {
       CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL + AND + STANDARD_SQL + "\n";
   private static final String DRUG_SQL =
       CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL + AND + STANDARD_SQL;
-  private static final String PFHH_QUESTION_SQL =
-      VALUE_SOURCE_CONCEPT_ID_IN_SQL + ANSWER_LOOKUP_SQL;
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
   private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " AND value_as_number IS NOT NULL";
   private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
@@ -216,9 +201,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String HAS_DATA_SQL =
       "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
-      "SELECT concept_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
-  private static final String CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE =
-      "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
+          "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
   private static final String VARIANT_SQL =
       "SELECT person_id\n"
@@ -256,8 +239,6 @@ public final class SearchGroupItemQueryBuilder {
       TemporalMention mention) {
     Set<SearchParameter> standardSearchParameters = new HashSet<>();
     Set<SearchParameter> sourceSearchParameters = new HashSet<>();
-    Set<SearchParameter> pfhhQuestionSearchParameters = new HashSet<>();
-    Set<SearchParameter> pfhhAnswerSearchParameters = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
 
     if (CollectionUtils.isEmpty(searchGroupItem.getSearchParameters())) {
@@ -289,19 +270,7 @@ public final class SearchGroupItemQueryBuilder {
           sourceSearchParameters.add(param);
         }
       } else {
-        // All PFHH survey search parameters will have a PFHH attribute
-        // PFHH parameters only search with answer concept ids
-        // If we get questions or survey we have to generate SQL that will look up all the answers
-        if (param.getAttributes().contains(getPFHHAttribute())) {
-          if (param.getSubtype().equals(CriteriaSubType.ANSWER.toString())) {
-            pfhhAnswerSearchParameters.add(param);
-          } else {
-            pfhhQuestionSearchParameters.add(param);
-          }
-        } else {
-          // handle non PFHH parameters that have attributes
-          queryParts.add(processAttributeSql(queryParams, param));
-        }
+        queryParts.add(processAttributeSql(queryParams, param));
       }
     }
     assert domain != null;
@@ -309,40 +278,17 @@ public final class SearchGroupItemQueryBuilder {
         domain.toString(), queryParams, standardSearchParameters, queryParts, STANDARD);
     addParamValueAndFormat(
         domain.toString(), queryParams, sourceSearchParameters, queryParts, SOURCE);
-    addParamValuePFHHAndFormat(queryParams, pfhhQuestionSearchParameters, queryParts);
-    addParamValuePFHHAndFormat(queryParams, pfhhAnswerSearchParameters, queryParts);
 
     String queryPartsSql;
-    if ((SOURCE_STANDARD_DOMAINS.contains(domain)
-        && !sourceSearchParameters.isEmpty()
-        && !standardSearchParameters.isEmpty())) {
-      // Using an OR is inefficient when dealing with source and standard concepts together
-      // To combat this we do a UNION ALL between source and standard concepts
+    if (SOURCE_STANDARD_DOMAINS.contains(domain)
+            && !sourceSearchParameters.isEmpty()
+            && !standardSearchParameters.isEmpty()) {
       queryPartsSql =
-          CONCEPT_ID_IN_SQL
-              + " ("
-              + CB_SEARCH_ALL_EVENTS_WHERE
-              + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
-              + ")";
-    } else if (Domain.SURVEY.equals(domain)) {
-      // Using an OR between survey/question/answer query parts is really inefficient(10-12secs
-      // slower)
-      // To combat this we do a UNION ALL between survey/question/answer query parts but this means
-      // we have to adapt when adding the potential modifiers(age at event or cati) and return early
-      // in this method.
-      String ageCatiModifierSql =
-          getAgeDateAndEncounterSql(queryParams, searchGroupItem.getModifiers());
-      queryPartsSql =
-          PERSON_ID_IN
-              + CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE
-              + String.join(
-                  ageCatiModifierSql + UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE,
-                  queryParts)
-              + ageCatiModifierSql
-              + ")";
-      return CB_SEARCH_ALL_EVENTS_PERSON_ID_WHERE + queryPartsSql;
+              PERSON_ID_IN
+                      + CB_SEARCH_ALL_EVENTS_WHERE
+                      + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
+                      + ")";
     } else {
-      // besides the special cases above, it's ok to OR query parts together
       queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
     }
     // format the base sql with all query parts
@@ -761,6 +707,8 @@ public final class SearchGroupItemQueryBuilder {
       String standardOrSourceParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
+      List<Long> conceptIds =
+              searchParameters.stream().map(SearchParameter::getConceptId).collect(Collectors.toList());
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
           searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
@@ -770,11 +718,9 @@ public final class SearchGroupItemQueryBuilder {
               .collect(Collectors.toList());
 
       String conceptIdsParam =
-          QueryParameterUtil.addQueryParameterValue(
-              queryParams,
-              QueryParameterValue.array(
-                  searchParameters.stream().map(SearchParameter::getConceptId).toArray(Long[]::new),
-                  Long.class));
+              QueryParameterUtil.addQueryParameterValue(
+                      queryParams,
+                      QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
       if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
         // Lookup child nodes
         queryParts.add(
@@ -786,37 +732,7 @@ public final class SearchGroupItemQueryBuilder {
       } else {
         // Children only
         queryParts.add(
-            String.format(STANDARD_OR_SOURCE_SQL, conceptIdsParam, standardOrSourceParam));
-      }
-    }
-  }
-
-  /** Add source or standard concept ids and set params * */
-  private static void addParamValuePFHHAndFormat(
-      Map<String, QueryParameterValue> queryParams,
-      Set<SearchParameter> searchParameters,
-      List<String> queryParts) {
-    if (!searchParameters.isEmpty()) {
-      String subtype = searchParameters.stream().findFirst().get().getSubtype();
-      if (subtype.equals(CriteriaSubType.ANSWER.toString())) {
-        Long[] conceptIds =
-            searchParameters.stream()
-                .flatMap(param -> param.getAttributes().stream())
-                .flatMap(attribute -> attribute.getOperands().stream())
-                .filter(conceptId -> !conceptId.equals("1740639"))
-                .map(Long::valueOf)
-                .toArray(Long[]::new);
-        String conceptIdsParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.array(conceptIds, Long.class));
-        queryParts.add(String.format(VALUE_SOURCE_CONCEPT_ID, "IN", conceptIdsParam));
-      } else {
-        Long[] conceptIds =
-            searchParameters.stream().map(SearchParameter::getConceptId).toArray(Long[]::new);
-        String conceptIdsParam =
-            QueryParameterUtil.addQueryParameterValue(
-                queryParams, QueryParameterValue.array(conceptIds, Long.class));
-        queryParts.add(String.format(PFHH_QUESTION_SQL, conceptIdsParam));
+                String.format(STANDARD_OR_SOURCE_SQL, conceptIdsParam, standardOrSourceParam));
       }
     }
   }
@@ -915,12 +831,5 @@ public final class SearchGroupItemQueryBuilder {
                         Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
                             && sp.getConceptId() == null
                             && sp.getAttributes().isEmpty()));
-  }
-
-  private static Attribute getPFHHAttribute() {
-    return new Attribute()
-        .name(AttrName.PERSONAL_FAMILY_HEALTH_HISTORY)
-        .operator(Operator.IN)
-        .operands(ImmutableList.of("1740639"));
   }
 }
