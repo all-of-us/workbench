@@ -563,5 +563,6 @@ bq --quiet --project_id="$BQ_PROJECT" query --batch --nouse_legacy_sql \
    SELECT id, LEFT(code, STRPOS(code, 'KidneyCondition_KidneyDisease') - 1) AS name
      FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     WHERE concept_id = 836838
-      AND subtype = 'ANSWER') cr2
+      AND subtype = 'ANSWER'
+      AND code NOT LIKE 'PMI_%') cr2
  WHERE cr1.id = cr2.id"

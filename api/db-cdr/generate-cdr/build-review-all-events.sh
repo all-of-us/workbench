@@ -75,8 +75,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on a.value_source_concept_id = e
 echo "Inserting PFHH survey data into cb_review_survey"
 bq --quiet --project_id="$BQ_PROJECT" query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_review_survey\`
-   (person_id, data_id, start_datetime, survey, question, answer)
+   (person_id, start_datetime, survey, question, answer)
 SELECT  DISTINCT a.person_id,
+        o.observation_id as data_id,
         case when a.entry_datetime is null then CAST(a.entry_date AS TIMESTAMP) else a.entry_datetime end as survey_datetime,
         'Personal and Family Health History' as survey,
         d.concept_name as question,
