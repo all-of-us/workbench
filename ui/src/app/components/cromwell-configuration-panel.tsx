@@ -30,16 +30,12 @@ const cromwellSupportArticles = [
   },
 ];
 
-const IntroText = () => (
-  <div>
-    A cloud environment consists of an application configuration, cloud compute
-    and persistent disk(s). Cromwell is a workflow execution engine. You will
-    need to create a Jupyter terminal environment in order to interact with
-    Cromwell.
-  </div>
-);
+const introTextOverride =
+  'A cloud environment consists of an application configuration, cloud compute, and persistent disk(s). ' +
+  'Cromwell is a workflow execution engine. ' +
+  'You will need to create a Jupyter terminal environment in order to interact with Cromwell.';
 
-const PostCost = () => (
+const CostNote = () => (
   <WarningMessage>
     This cost is only for running the Cromwell Engine. There will be additional
     cost for interactions with the workflow.
@@ -62,7 +58,7 @@ const PostCost = () => (
   </WarningMessage>
 );
 
-const PostCompute = () => (
+const SupportNote = () => (
   <div style={{ ...styles.controlSection }}>
     <div style={{ fontWeight: 'bold' }}>Cromwell support articles</div>
     {cromwellSupportArticles.map((article, index) => (
@@ -89,9 +85,9 @@ export const CromwellConfigurationPanel = (props: CreateGKEAppPanelProps) => (
   <CreateGKEAppPanel
     {...{
       ...props,
-      IntroText,
-      PostCost,
-      PostCompute,
+      introTextOverride,
+      CostNote,
+      SupportNote,
       CreateAppText,
     }}
     appType={AppType.CROMWELL}

@@ -9,15 +9,7 @@ import {
   CreateGKEAppPanelProps,
 } from './gke-app-configuration-panels/create-gke-app-panel';
 
-const IntroText = () => (
-  <div>
-    Your analysis environment consists of an application and compute resources.
-    Your cloud environment is unique to this workspace and not shared with other
-    users.
-  </div>
-);
-
-const PostCompute = () => (
+const SupportNote = () => (
   <InfoMessage>
     <h4 style={{ marginTop: 0, fontSize: '1rem' }}>
       How to create RStudio artifacts:
@@ -34,8 +26,7 @@ export const RStudioConfigurationPanel = (props: CreateGKEAppPanelProps) => (
   <CreateGKEAppPanel
     {...{
       ...props,
-      IntroText,
-      PostCompute,
+      SupportNote,
     }}
     appType={AppType.RSTUDIO}
   />

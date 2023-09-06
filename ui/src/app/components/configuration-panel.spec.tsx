@@ -44,7 +44,7 @@ describe('ConfigurationPanel', () => {
     onClose = jest.fn();
     defaultProps = {
       onClose,
-      type: UIAppType.JUPYTER,
+      appType: UIAppType.JUPYTER,
     };
 
     jest.useFakeTimers();

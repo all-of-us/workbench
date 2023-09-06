@@ -44,9 +44,9 @@ export type CreateGKEAppPanelPropsWithAppType = {
 } & CreateGKEAppPanelProps;
 
 type Props = {
-  IntroText?: React.FunctionComponent;
-  PostCost?: React.FunctionComponent;
-  PostCompute?: React.FunctionComponent;
+  introTextOverride?: string;
+  CostNote?: React.FunctionComponent;
+  SupportNote?: React.FunctionComponent;
   CreateAppText?: React.FunctionComponent;
 } & CreateGKEAppPanelPropsWithAppType;
 
@@ -59,9 +59,9 @@ export const CreateGKEAppPanel = ({
   app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
-  IntroText = () => null,
-  PostCost = () => null,
-  PostCompute = () => null,
+  introTextOverride,
+  CostNote = () => null,
+  SupportNote = () => null,
   CreateAppText = () => null,
 }: Props) => {
   const { profile } = profileState;
@@ -70,6 +70,10 @@ export const CreateGKEAppPanel = ({
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
   };
+
+  const defaultIntroText =
+    'Your analysis environment consists of an application and compute resources. ' +
+    'Your cloud environment is unique to this workspace and not shared with other users.';
 
   const defaultConfig = switchCase(
     appType,
@@ -91,7 +95,7 @@ export const CreateGKEAppPanel = ({
       id={`${appTypeToString[appType]}-configuration-panel`}
       style={{ height: '100%', rowGap: '1rem' }}
     >
-      <IntroText />
+      <div>{introTextOverride ?? defaultIntroText}</div>
       <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
@@ -105,14 +109,14 @@ export const CreateGKEAppPanel = ({
           onPause={Promise.resolve()}
           onResume={Promise.resolve()}
         />
-        <PostCost />
+        <CostNote />
       </div>
       <div style={{ ...styles.controlSection }}>
         <DisabledCloudComputeProfile
           {...{ appType, machine, persistentDiskRequest }}
         />
       </div>
-      <PostCompute />
+      <SupportNote />
       <FlexRow
         style={{
           alignItems: 'center',
