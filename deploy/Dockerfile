@@ -23,7 +23,7 @@ RUN n 14
 
 ENV CLOUD_SDK_VERSION 392.0.0
 
-WORKDIR /root
+WORKDIR /root/workbench/ui
 RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/
 RUN npm config set "//npm.fontawesome.com/:_authToken" "my token"
 
@@ -34,13 +34,6 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
   rm -rf gcloud.tgz
 
 ENV PATH=~/node/bin:~/google-cloud-sdk/bin:$PATH
-
-WORKDIR /root/workbench/ui
-RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
-  tar -xf gcloud.tgz && \
-  ./google-cloud-sdk/install.sh  --quiet && \
-  ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
-  rm -rf gcloud.tgz \
 
 RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /tmp/cloud_sql_proxy \
   && mv /tmp/cloud_sql_proxy /usr/local/bin && chmod +x /usr/local/bin/cloud_sql_proxy
