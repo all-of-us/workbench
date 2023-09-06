@@ -7104,6 +7104,9 @@ definitions:
       - lastModifiedEpochMillis
       - adminLocked
     properties:
+      recentlyModifiedId:
+        type: integer
+        format: int64
       workspaceId:
         type: integer
         format: int64

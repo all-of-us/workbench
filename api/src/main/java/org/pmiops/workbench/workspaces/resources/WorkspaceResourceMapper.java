@@ -57,6 +57,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
+  @Mapping(target = "recentlyModifiedId", ignore = true)
   ResourceFields fromDbCohort(DbCohort dbCohort);
 
   @Mapping(target = "cohort", ignore = true)
@@ -65,6 +66,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
+  @Mapping(target = "recentlyModifiedId", ignore = true)
   ResourceFields fromCohortReview(CohortReview cohortReview);
 
   @Mapping(target = "cohort", ignore = true)
@@ -73,6 +75,7 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "dataSet", ignore = true)
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
+  @Mapping(target = "recentlyModifiedId", ignore = true)
   ResourceFields fromDbConceptSet(DbConceptSet dbConceptSet);
 
   @Mapping(target = "cohort", ignore = true)
@@ -81,12 +84,14 @@ public interface WorkspaceResourceMapper {
   @Mapping(target = "dataSet", source = "dbDataset", qualifiedByName = "dbModelToClientLight")
   @Mapping(target = "notebook", ignore = true)
   @Mapping(target = "lastModifiedEpochMillis", source = "lastModifiedTime")
+  @Mapping(target = "recentlyModifiedId", ignore = true)
   ResourceFields fromDbDataset(DbDataset dbDataset);
 
   @Mapping(target = "cohort", ignore = true)
   @Mapping(target = "cohortReview", ignore = true)
   @Mapping(target = "conceptSet", ignore = true)
   @Mapping(target = "dataSet", ignore = true)
+  @Mapping(target = "recentlyModifiedId", ignore = true)
   ResourceFields fromNotebookNameAndLastModified(
       String notebook, Timestamp lastModifiedEpochMillis, String lastModifiedBy);
 
@@ -161,31 +166,40 @@ public interface WorkspaceResourceMapper {
       CloudStorageClient cloudStorageClient,
       Set<String> workspaceUsers) {
 
+    ResourceFields resourceFields;
+
     // null if Notebook, Long id otherwise
     final Long resourceId = Longs.tryParse(dbUserRecentlyModifiedResource.getResourceId());
     final long workspaceId = dbUserRecentlyModifiedResource.getWorkspaceId();
 
     switch (dbUserRecentlyModifiedResource.getResourceType()) {
       case COHORT:
-        return fromDbCohort(cohortService.findByCohortIdOrThrow(resourceId));
+        resourceFields = fromDbCohort(cohortService.findByCohortIdOrThrow(resourceId));
+        break;
       case COHORT_REVIEW:
-        return fromCohortReview(
+        resourceFields = fromCohortReview(
             cohortReviewService.findCohortReviewForWorkspace(workspaceId, resourceId));
+        break;
       case CONCEPT_SET:
-        return fromDbConceptSet(conceptSetService.getDbConceptSet(workspaceId, resourceId));
+        resourceFields = fromDbConceptSet(conceptSetService.getDbConceptSet(workspaceId, resourceId));
+        break;
       case DATA_SET:
-        return fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
+        resourceFields = fromDbDataset(dataSetService.mustGetDbDataset(workspaceId, resourceId));
+        break;
       case NOTEBOOK:
         String lastModifiedBy =
             cloudStorageClient.getNotebookLastModifiedBy(
                 dbUserRecentlyModifiedResource.getResourceId(), workspaceUsers);
-        return fromNotebookNameAndLastModified(
+        resourceFields = fromNotebookNameAndLastModified(
             dbUserRecentlyModifiedResource.getResourceId(),
             dbUserRecentlyModifiedResource.getLastAccessDate(),
             lastModifiedBy);
+        break;
       default:
         throw new ServerErrorException("Recent resource: bad resource type ");
     }
+    resourceFields.setRecentlyModifiedId(dbUserRecentlyModifiedResource.getId());
+    return resourceFields;
   }
 
   default FileDetail convertStringToFileDetail(String str) {
