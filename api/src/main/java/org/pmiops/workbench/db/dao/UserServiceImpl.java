@@ -561,8 +561,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * valid, we store their completion dates in the database. If they are marked invalid, we clear
    * the completion dates from the database as the user will need to complete a new training.
    */
-  @Override
-  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
+  private DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.
     if (isServiceAccount(dbUser)) {

@@ -103,9 +103,6 @@ public interface UserService {
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
-  DbUser syncComplianceTrainingStatusV2(DbUser user, Agent agent)
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
-
   DbUser syncEraCommonsStatus();
 
   /**
