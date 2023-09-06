@@ -4,7 +4,7 @@ import { env } from 'node:process';
 
 
 const YARN_DEPS = 'yarn deps';
-const CREDENTIALS_COPY = '~/gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
+const CREDENTIALS_COPY = 'gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..';
 const YARN_INSTALL = 'yarn install --frozen-lockfile';
 const YARN_RUN_DEPS = 'yarn run deps';
 
@@ -36,7 +36,7 @@ async function build(env) {
   // await runCommand(YARN_DEPS);
   console.log("Current directory:", process.cwd());
 
-  await runCommand("env");
+  await runCommand("cd ..\..\\");
   // await runCommand("process.env");
   await runCommand(CREDENTIALS_COPY);
   await runCommand(YARN_INSTALL);
