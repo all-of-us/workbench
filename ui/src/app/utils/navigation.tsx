@@ -31,6 +31,7 @@ export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(
 );
 export interface GroupCount {
   groupId: string;
+  groupName: string;
   groupCount: number;
   role: string;
 }

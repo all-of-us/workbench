@@ -281,6 +281,7 @@ export const SearchGroup = withCurrentWorkspace()(
       this.setState({ error: false, loading: true });
       const {
         group,
+        groupIndex,
         role,
         workspace: { id, namespace },
       } = this.props;
@@ -296,13 +297,20 @@ export const SearchGroup = withCurrentWorkspace()(
           signal: this.aborter.signal,
         })
         .then((count) => {
-          this.setState({count, initializing: false, loading: false});
+          this.setState({ count, initializing: false, loading: false });
           const currentGroupCounts = currentGroupCountsStore.getValue();
-          const groupCountIndex = currentGroupCounts.findIndex(({groupId}) => groupId === group.id);
+          const groupCountIndex = currentGroupCounts.findIndex(
+            ({ groupId }) => groupId === group.id
+          );
           if (groupCountIndex > -1) {
             currentGroupCounts[groupCountIndex].groupCount = count;
           } else {
-            currentGroupCounts.push({groupId: group.id, groupCount: count, role: group.role});
+            currentGroupCounts.push({
+              groupId: group.id,
+              groupName: group.name ?? `Group ${groupIndex + 1}`,
+              groupCount: count,
+              role: group.role,
+            });
           }
           currentGroupCountsStore.next(currentGroupCounts);
         })

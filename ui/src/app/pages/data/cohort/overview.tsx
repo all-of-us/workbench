@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Menu } from 'primereact/menu';
+import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
   AgeType,
@@ -25,7 +26,7 @@ import {
   CreateNewCohortModal,
   DiscardCohortChangesModal,
 } from 'app/pages/data/cohort/clear-cohort-modals';
-import { FunnelPlotTest } from 'app/pages/data/cohort/funnel-plot-test';
+import { CustomFunnel } from 'app/pages/data/cohort/custom-funnel';
 import { GenderChart } from 'app/pages/data/cohort/gender-chart';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import {
@@ -172,7 +173,6 @@ interface State {
   showDiscardCohortChangesModal: boolean;
   stackChart: boolean;
   total: number;
-  showFunnelPlot: boolean;
 }
 
 export const ListOverview = fp.flow(
@@ -186,6 +186,7 @@ export const ListOverview = fp.flow(
     private ageMenu: any;
     private genderOrSexMenu: any;
     private saveMenu: any;
+    private funnelOverlay: any;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -209,7 +210,6 @@ export const ListOverview = fp.flow(
         showDiscardCohortChangesModal: false,
         stackChart: true,
         total: undefined,
-        showFunnelPlot: false,
       };
     }
 
@@ -587,7 +587,6 @@ export const ListOverview = fp.flow(
         saveModalOpen,
         showCreateNewCohortModal,
         showDiscardCohortChangesModal,
-        showFunnelPlot,
         stackChart,
         total,
       } = this.state;
@@ -642,9 +641,12 @@ export const ListOverview = fp.flow(
                 )}
                 <TooltipTrigger content={<div>View Funnel Plot</div>}>
                   <Clickable
-                    style={styles.actionIcon}
-                    disabled={showFunnelPlot}
-                    onClick={() => this.setState({ showFunnelPlot: true })}
+                    style={
+                      this.disableActionIcons
+                        ? { ...styles.actionIcon, ...styles.disabled }
+                        : styles.actionIcon
+                    }
+                    onClick={(e) => this.funnelOverlay.toggle(e)}
                   >
                     <ClrIcon
                       shape='filter-grid-circle'
@@ -758,111 +760,110 @@ export const ListOverview = fp.flow(
                 contact Support in the left hand navigation.
               </div>
             )}
-            {!!total &&
-              !this.definitionErrors &&
-              !loading &&
-              !!chartData &&
-              (showFunnelPlot ? (
-                <FunnelPlotTest
-                  onExit={() => this.setState({ showFunnelPlot: false })}
-                  searchRequest={searchRequest}
-                  totalCount={total}
-                />
-              ) : (
-                <div style={styles.cardContainer}>
-                  <div style={styles.card}>
-                    <div style={styles.cardHeader}>Results by</div>
-                    <div style={refreshing ? styles.disabled : {}}>
-                      <Menu
-                        appendTo={document.body}
-                        model={this.chartTypeItems}
-                        popup={true}
-                        ref={(el) => (this.genderOrSexMenu = el)}
+            {!!total && !this.definitionErrors && !loading && !!chartData && (
+              <div style={styles.cardContainer}>
+                <div style={styles.card}>
+                  <div style={styles.cardHeader}>Results by</div>
+                  <div style={refreshing ? styles.disabled : {}}>
+                    <Menu
+                      appendTo={document.body}
+                      model={this.chartTypeItems}
+                      popup={true}
+                      ref={(el) => (this.genderOrSexMenu = el)}
+                    />
+                    <button
+                      style={styles.menuButton}
+                      onClick={(event) => this.genderOrSexMenu.toggle(event)}
+                    >
+                      {genderSexRaceOrEthTypeToText(chartType)}{' '}
+                      <ClrIcon
+                        style={{ float: 'right' }}
+                        shape='caret down'
+                        size={12}
                       />
-                      <button
-                        style={styles.menuButton}
-                        onClick={(event) => this.genderOrSexMenu.toggle(event)}
-                      >
-                        {genderSexRaceOrEthTypeToText(chartType)}{' '}
-                        <ClrIcon
-                          style={{ float: 'right' }}
-                          shape='caret down'
-                          size={12}
-                        />
-                      </button>
-                      <Menu
-                        appendTo={document.body}
-                        model={this.ageItems}
-                        popup={true}
-                        ref={(el) => (this.ageMenu = el)}
+                    </button>
+                    <Menu
+                      appendTo={document.body}
+                      model={this.ageItems}
+                      popup={true}
+                      ref={(el) => (this.ageMenu = el)}
+                    />
+                    <button
+                      style={styles.menuButton}
+                      onClick={(event) => this.ageMenu.toggle(event)}
+                    >
+                      {ageTypeToText(ageType)}{' '}
+                      <ClrIcon
+                        style={{ float: 'right' }}
+                        shape='caret down'
+                        size={12}
                       />
-                      <button
-                        style={styles.menuButton}
-                        onClick={(event) => this.ageMenu.toggle(event)}
-                      >
-                        {ageTypeToText(ageType)}{' '}
-                        <ClrIcon
-                          style={{ float: 'right' }}
-                          shape='caret down'
-                          size={12}
-                        />
-                      </button>
-                      <button
-                        style={
-                          this.disableRefreshButton
-                            ? { ...styles.refreshButton, ...styles.disabled }
-                            : styles.refreshButton
-                        }
-                        onClick={() => this.refreshGraphs()}
-                      >
-                        REFRESH
-                      </button>
-                    </div>
-                    {refreshing ? (
-                      <div style={{ height: '22.5rem' }}>
-                        <Spinner style={styles.chartSpinner} size={75} />
-                      </div>
-                    ) : (
-                      <React.Fragment>
-                        <div style={styles.cardHeader}>
-                          {genderSexRaceOrEthTypeToText(
-                            currentGraphOptions.chartType
-                          )}
-                        </div>
-                        <div style={{ padding: '0.75rem 1.125rem' }}>
-                          {!!chartData.length && (
-                            <GenderChart data={chartData} />
-                          )}
-                        </div>
-                        <div style={styles.cardHeader}>
-                          {genderSexRaceOrEthTypeToText(
-                            currentGraphOptions.chartType
-                          )}{' '}
-                          and {ageTypeToText(currentGraphOptions.ageType)}
-                          <ClrIcon
-                            shape='sort-by'
-                            className={stackChart ? 'is-info' : ''}
-                            onClick={() => this.toggleChartMode()}
-                          />
-                        </div>
-                        <div style={{ padding: '0.75rem 1.125rem' }}>
-                          {!!chartData.length && (
-                            <ComboChart
-                              data={chartData}
-                              legendTitle={ageTypeToText(
-                                currentGraphOptions.ageType
-                              )}
-                              mode={stackChart ? 'stacked' : 'normalized'}
-                            />
-                          )}
-                        </div>
-                      </React.Fragment>
-                    )}
+                    </button>
+                    <button
+                      style={
+                        this.disableRefreshButton
+                          ? { ...styles.refreshButton, ...styles.disabled }
+                          : styles.refreshButton
+                      }
+                      onClick={() => this.refreshGraphs()}
+                    >
+                      REFRESH
+                    </button>
                   </div>
+                  {refreshing ? (
+                    <div style={{ height: '22.5rem' }}>
+                      <Spinner style={styles.chartSpinner} size={75} />
+                    </div>
+                  ) : (
+                    <React.Fragment>
+                      <div style={styles.cardHeader}>
+                        {genderSexRaceOrEthTypeToText(
+                          currentGraphOptions.chartType
+                        )}
+                      </div>
+                      <div style={{ padding: '0.75rem 1.125rem' }}>
+                        {!!chartData.length && <GenderChart data={chartData} />}
+                      </div>
+                      <div style={styles.cardHeader}>
+                        {genderSexRaceOrEthTypeToText(
+                          currentGraphOptions.chartType
+                        )}{' '}
+                        and {ageTypeToText(currentGraphOptions.ageType)}
+                        <ClrIcon
+                          shape='sort-by'
+                          className={stackChart ? 'is-info' : ''}
+                          onClick={() => this.toggleChartMode()}
+                        />
+                      </div>
+                      <div style={{ padding: '0.75rem 1.125rem' }}>
+                        {!!chartData.length && (
+                          <ComboChart
+                            data={chartData}
+                            legendTitle={ageTypeToText(
+                              currentGraphOptions.ageType
+                            )}
+                            mode={stackChart ? 'stacked' : 'normalized'}
+                          />
+                        )}
+                      </div>
+                    </React.Fragment>
+                  )}
                 </div>
-              ))}
+              </div>
+            )}
           </div>
-
+          <OverlayPanel
+            ref={(el) => (this.funnelOverlay = el)}
+            appendTo={document.body}
+            style={{ width: '90vw' }}
+            dismissable
+          >
+            <CustomFunnel
+              onExit={(e) => this.funnelOverlay.toggle(e)}
+              searchRequest={searchRequest}
+              totalCount={total}
+            />
+          </OverlayPanel>
           {saveModalOpen && (
             <CreateModal
               entityName='Cohort'
