@@ -30,7 +30,7 @@ RUN npm config set "//npm.fontawesome.com/:_authToken" "my token"
 
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
-  ./google-cloud-sdk/install.sh  --quiet && \
+  ./google-cloud-sdk/install.sh && \
   ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
   ./google-cloud-sdk/bin/gcloud init && \
   rm -rf gcloud.tgz
