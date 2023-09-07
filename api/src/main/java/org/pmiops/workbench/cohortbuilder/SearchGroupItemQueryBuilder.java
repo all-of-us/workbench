@@ -119,7 +119,7 @@ public final class SearchGroupItemQueryBuilder {
           + "WHERE is_standard = %s\n"
           + "AND is_selectable = 1) b ON (ca.ancestor_id = b.concept_id))";
   public static final String QUESTION_LOOKUP_SQL =
-      "(SELECT DISTINCT concept_id\n"
+      "question_concept_id IN (SELECT DISTINCT concept_id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "JOIN (select cast(cr.id as string) as id\n"
           + "FROM `${projectId}.${dataSetId}.cb_criteria` cr\n"
