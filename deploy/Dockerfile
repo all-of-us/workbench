@@ -21,6 +21,8 @@ RUN npm install --global yarn n
 # Upgrade to Node 14, above installs 10.
 RUN n 14
 
+RUN npm install @openapitools/openapi-generator-cli -g
+
 ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root
