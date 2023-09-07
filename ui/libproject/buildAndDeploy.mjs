@@ -32,14 +32,7 @@ async function build_and_deploy(arg) {
 }
 async function build(env) {
 
-  await runCommand(BUILD_CMDS[0]);
-  console.log("Current directory:", process.cwd());
-  process.chdir('/root');
-  console.log("Current directory:", process.cwd());
-
-  await runCommand(BUILD_CMDS[1]);
-  process.chdir('/root/workbench/ui');
-  for (let index = 2; index < BUILD_CMDS.length; index++) {
+  for (let index = 0; index < BUILD_CMDS.length; index++) {
     await runCommand(BUILD_CMDS[index]);
   }
 
