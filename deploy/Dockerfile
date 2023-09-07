@@ -21,6 +21,7 @@ RUN npm install --global yarn n
 # Upgrade to Node 14, above installs 10.
 RUN n 14
 
+RUN npm i -D @types/node
 ENV CLOUD_SDK_VERSION 392.0.0
 
 WORKDIR /root
@@ -29,7 +30,7 @@ RUN npm config set "//npm.fontawesome.com/:_authToken" "my token"
 
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
-  ./google-cloud-sdk/install.sh  --quiet --global && \
+  ./google-cloud-sdk/install.sh  --quiet && \
   ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
   rm -rf gcloud.tgz
 
