@@ -32,7 +32,7 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
   tar -xf gcloud.tgz && \
   ./google-cloud-sdk/install.sh && \
   ./google-cloud-sdk/bin/gcloud components install app-engine-java && \
-  ./google-cloud-sdk/bin/gcloud init && \
+  ./google-cloud-sdk/bin/gcloud init --console-only && \
   rm -rf gcloud.tgz
 
 ENV PATH=~/node/bin:~/google-cloud-sdk/bin:$PATH
