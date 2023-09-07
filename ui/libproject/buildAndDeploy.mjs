@@ -1,6 +1,5 @@
 import { execSync} from "child_process";
 import {ServiceAccountContext} from "../libproject/serviceaccounts.mjs"
-import { env } from 'node:process';
 
 
 const YARN_DEPS = 'yarn deps';
@@ -33,17 +32,14 @@ async function build_and_deploy(arg) {
 }
 async function build(env) {
 
-  // await runCommand(YARN_DEPS);
+  console.log("Current directory:", process.cwd());
+  process.chdir('/root');
   console.log("Current directory:", process.cwd());
 
-  // await runCommand("process.env");
-  await runCommand(CREDENTIALS_COPY);
-  await runCommand(YARN_INSTALL);
-  await runCommand(YARN_RUN_DEPS);
 
-  // for (let index = 0; index < BUILD_CMDS.length; index++) {
-  //   await runCommand(BUILD_CMDS[index]);
-  // }
+  for (let index = 0; index < BUILD_CMDS.length; index++) {
+    await runCommand(BUILD_CMDS[index]);
+  }
 
   let optimize = "--aot";
   if (env === 'staging' || env ==='stable' || env === 'preprod' || env === 'prod') {
