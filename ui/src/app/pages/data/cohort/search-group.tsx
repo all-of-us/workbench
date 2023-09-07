@@ -310,6 +310,7 @@ export const SearchGroup = withCurrentWorkspace()(
               groupName: group.name ?? `Group ${groupIndex + 1}`,
               groupCount: count,
               role: group.role,
+              status: 'active',
             });
           }
           currentGroupCountsStore.next(currentGroupCounts);
@@ -388,12 +389,28 @@ export const SearchGroup = withCurrentWorkspace()(
       AnalyticsTracker.CohortBuilder.SearchGroupMenu('Suppress group');
       this.setGroupProperty('status', status);
       setTimeout(() => this.setOverlayPosition());
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].status = status;
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     enable() {
       AnalyticsTracker.CohortBuilder.SearchGroupMenu('Enable suppressed group');
       this.setGroupProperty('status', 'active');
       this.setState({ overlayStyle: undefined });
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].status = 'active';
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     undo() {
@@ -409,6 +426,14 @@ export const SearchGroup = withCurrentWorkspace()(
         (grp) => grp.id !== group.id
       );
       searchRequestStore.next(searchRequest);
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts.splice(groupCountIndex, 1);
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     rename(newName: string) {
@@ -417,6 +442,14 @@ export const SearchGroup = withCurrentWorkspace()(
       searchRequest[role][roleIndex] = { ...group, name: newName };
       searchRequestStore.next(searchRequest);
       this.setState({ renaming: false });
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].groupName = newName;
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     setOverlayPosition() {

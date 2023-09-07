@@ -34,6 +34,7 @@ export interface GroupCount {
   groupName: string;
   groupCount: number;
   role: string;
+  status: string;
 }
 export const currentGroupCountsStore = new BehaviorSubject<GroupCount[]>([]);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
