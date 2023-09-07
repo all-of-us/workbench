@@ -199,6 +199,7 @@ swaggerSources {
             rawOptions = SWAGGER_2_RAW_OPTS
             additionalProperties = [
                     'sourceFolder'   : '',
+                    'library'          : 'spring-boot',
                     'modelPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.model",
                     'apiPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.api",
                     'useTags'        : 'true',
