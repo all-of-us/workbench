@@ -305,11 +305,20 @@ export const SearchGroup = withCurrentWorkspace()(
           if (groupCountIndex > -1) {
             currentGroupCounts[groupCountIndex].groupCount = count;
           } else {
+            const groupName =
+              group.name ??
+              `Group ${
+                groupIndex +
+                1 +
+                (role === 'excludes'
+                  ? searchRequestStore.getValue().includes.length + 1
+                  : 0)
+              }`;
             currentGroupCounts.push({
               groupId: group.id,
-              groupName: group.name ?? `Group ${groupIndex + 1}`,
+              groupName,
               groupCount: count,
-              role: group.role,
+              role,
               status: 'active',
             });
           }

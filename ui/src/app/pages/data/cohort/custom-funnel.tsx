@@ -42,13 +42,17 @@ export const CustomFunnel = withCurrentWorkspace()(
             count: index === 0 ? groupCount.groupCount : null,
             name: index === 0 ? groupCount.groupName : null,
             groupId: index === 0 ? groupCount.groupId : null,
+            role: index === 0 ? groupCount.role : null,
           }))
         );
-        setSearchGroups(
-          searchRequestStore
+        setSearchGroups([
+          ...searchRequestStore
             .getValue()
-            .includes.filter((group) => group.status === 'active')
-        );
+            .includes.filter((group) => group.status === 'active'),
+          ...searchRequestStore
+            .getValue()
+            .excludes.filter((group) => group.status === 'active'),
+        ]);
       }
     }, []);
 
@@ -62,23 +66,35 @@ export const CustomFunnel = withCurrentWorkspace()(
       const [addedGroups, remainingGroups] = searchGroups.reduce(
         (acc, group) => {
           if (funnelGroups.some((fg) => fg.groupId === group.id)) {
-            acc[0].push(group);
+            const role = currentGroupCountsStore
+              .getValue()
+              .find((fg) => fg.groupId === group.id).role;
+            acc[0][role].push(group);
           } else {
             acc[1].push(group);
           }
           return acc;
         },
-        [[], []]
+        [{ includes: [], excludes: [] }, []]
       );
       if (remainingGroups.length > 1) {
         // If more than one group remaining, call for the intersection of each group with the previously added groups
         const intersectCounts = await Promise.all(
           remainingGroups.map((group) => {
             const searchRequest: CohortDefinition = {
-              includes: [...addedGroups.map(mapGroup), mapGroup(group)],
-              excludes: [],
+              includes: addedGroups.includes.map(mapGroup),
+              excludes: addedGroups.excludes.map(mapGroup),
               dataFilters: [],
             };
+            if (
+              currentGroupCountsStore
+                .getValue()
+                .find((fg) => fg.groupId === group.id).role === 'includes'
+            ) {
+              searchRequest.includes.push(mapGroup(group));
+            } else {
+              searchRequest.excludes.push(mapGroup(group));
+            }
             return cohortBuilderApi().countParticipants(
               namespace,
               id,
@@ -92,14 +108,15 @@ export const CustomFunnel = withCurrentWorkspace()(
         );
         // Update funnelGroups with the group with the highest intersection count
         setFunnelGroups((prevState) => {
-          prevState[addedGroups.length] = {
-            loading: false,
-            count: intersectCounts[highestCountIndex],
-            name:
-              remainingGroups[highestCountIndex].name ??
-              getGroupNameFromStore(remainingGroups[highestCountIndex].id),
-            groupId: remainingGroups[highestCountIndex].id,
-          };
+          prevState[addedGroups.includes.length + addedGroups.excludes.length] =
+            {
+              loading: false,
+              count: intersectCounts[highestCountIndex],
+              name:
+                remainingGroups[highestCountIndex].name ??
+                getGroupNameFromStore(remainingGroups[highestCountIndex].id),
+              groupId: remainingGroups[highestCountIndex].id,
+            };
           return [...prevState];
         });
       } else if (remainingGroups[0]) {
