@@ -587,6 +587,20 @@ public class UserServiceTest {
     assertThat(userDao.findUserByUsername(username)).isNotNull();
   }
 
+  @Test
+  public void testIsServiceAccount() {
+    var serviceAccountUser =
+        PresetData.createDbUser().setUsername("serviceaccount@researchallofus.org");
+    var nonServiceAccountUser =
+        PresetData.createDbUser().setUsername("nonserviceaccount@researchallofus.org");
+
+    providedWorkbenchConfig.auth.serviceAccountApiUsers =
+        ImmutableList.of(serviceAccountUser.getUsername());
+
+    assertThat(userService.isServiceAccount(serviceAccountUser)).isTrue();
+    assertThat(userService.isServiceAccount(nonServiceAccountUser)).isFalse();
+  }
+
   private void tick() {
     fakeClock.increment(CLOCK_INCREMENT_MILLIS);
   }
