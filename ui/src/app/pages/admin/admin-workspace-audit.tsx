@@ -12,7 +12,7 @@ import { MatchParams } from 'app/utils/stores';
 const getAuditLog = (subject: string) => {
   // Workspace actions take up many rows because of the Research Purpose fields
   const BQ_ROW_LIMIT = 1000;
-  return workspaceAdminApi().getAuditLogEntries(subject, BQ_ROW_LIMIT);
+  return workspaceAdminApi().getWorkspaceAuditLogEntries(subject, BQ_ROW_LIMIT);
 };
 
 const queryAuditLog = (subject: string) => {

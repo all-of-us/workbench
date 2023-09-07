@@ -1433,7 +1433,7 @@ paths:
       description: >
         Fetch audit logs involving this workspace as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
-      operationId: getAuditLogEntries
+      operationId: getWorkspaceAuditLogEntries
       parameters:
         - name: workspaceNamespace
           in: path
@@ -1532,7 +1532,7 @@ paths:
       description: >
         Fetch audit logs involving this user as either a subject or object. Requires the
         RESEARCHER_DATA_VIEW authority.
-      operationId: getAuditLogEntries
+      operationId: getUserAuditLogEntries
       parameters:
         - name: usernameWithoutGsuiteDomain
           in: path
@@ -1983,16 +1983,15 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/synchronizeUserAccess":
+  "/v1/cron/groupAndPushSynchronizeAccessTasks":
     get:
       security: []
       tags:
       - offlineUser
       - cron
       description: >
-        Check each user to ensure they still meet compliance guidelines. 
-        If they do not, remove them from access tiers.
-      operationId: synchronizeUserAccess
+        This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
+      operationId: groupAndPushSynchronizeAccessTasks
       responses:
         204:
           description: No Error
@@ -2282,36 +2281,27 @@ paths:
           description: A list of cohort definitions.
           schema:
             "$ref": "#/definitions/CohortReviewListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortId}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{id}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - in: path
-        name: cohortId
-        type: integer
-        format: int64
-        required: true
-        description: cohort primary key
     get:
       tags:
         - cohortReview
       description: Returns all cohort reviews per cohortId
       operationId: getCohortReviewsByCohortId
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        format: int64
+        required: true
+        description: cohort primary key
       responses:
         200:
           description: A list of cohort reviews.
           schema:
             "$ref": "#/definitions/CohortReviewListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortReviewId}":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    - in: path
-      name: cohortReviewId
-      type: integer
-      format: int64
-      required: true
-      description: specifies which cohort review
     patch:
       tags:
       - cohortReview
@@ -2321,6 +2311,12 @@ paths:
         are omitted will not be modified'
       operationId: updateCohortReview
       parameters:
+      - in: path
+        name: id
+        type: integer
+        format: int64
+        required: true
+        description: specifies which cohort review
       - in: body
         name: cohortReview
         description: cohort review
@@ -2336,6 +2332,13 @@ paths:
       - cohortReview
       description: Deletes the cohort review with the specified ID
       operationId: deleteCohortReview
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        format: int64
+        required: true
+        description: specifies which cohort review
       responses:
         202:
           description: ACCEPTED
@@ -2479,27 +2482,6 @@ paths:
           description: Successfully added/updated
           schema:
             "$ref": "#/definitions/WorkspaceResource"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete":
-    parameters:
-    - "$ref": "#/parameters/workspaceNamespace"
-    - "$ref": "#/parameters/workspaceId"
-    delete:
-      tags:
-      - userMetrics
-      description: Deletes entry from recent resource
-      operationId: deleteRecentResource
-      parameters:
-      - in: body
-        name: RecentResourceRequest
-        description: request object for updating recent resource
-        required: true
-        schema:
-          "$ref": "#/definitions/RecentResourceRequest"
-      responses:
-        200:
-          description: Successfully deleted
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/workspaces/user-recent-workspaces":
     get:
       tags:
@@ -3831,7 +3813,7 @@ paths:
           description: information about counts for EHR domains, physical Measurement CSS, and Surveys for all survey names
           schema:
             "$ref": "#/definitions/CardCountResponse"
-  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/{domain}/{standard}/search/term":
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/criteria/search/term":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -4377,7 +4359,7 @@ paths:
       - diskAdmin
       description:  Deletes a disk as an admin. Requires the
         RESEARCHER_DATA_VIEW authority.
-      operationId: deleteDisk
+      operationId: adminDeleteDisk
       responses:
         200:
           description: success

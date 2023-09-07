@@ -96,7 +96,7 @@ public class DiskAdminControllerTest {
             user,
             AppType.CROMWELL);
     ResponseEntity<EmptyResponse> response =
-        diskAdminController.deleteDisk(WORKSPACE_NS, diskToDelete.getName());
+        diskAdminController.adminDeleteDisk(WORKSPACE_NS, diskToDelete.getName());
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
   }
 
@@ -106,6 +106,7 @@ public class DiskAdminControllerTest {
         .when(mockDiskService)
         .deleteDiskAsService(WORKSPACE_NS, "disk name");
     assertThrows(
-        NotFoundException.class, () -> diskAdminController.deleteDisk(WORKSPACE_NS, "disk name"));
+        NotFoundException.class,
+        () -> diskAdminController.adminDeleteDisk(WORKSPACE_NS, "disk name"));
   }
 }

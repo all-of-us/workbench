@@ -54,13 +54,13 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
    */
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
-  public ResponseEntity<WorkspaceAuditLogQueryResponse> getAuditLogEntries(
+  public ResponseEntity<WorkspaceAuditLogQueryResponse> getWorkspaceAuditLogEntries(
       String workspaceNamespace,
       Integer limit,
       Long afterMillis,
       @Nullable Long beforeMillisNullable) {
     return ResponseEntity.ok(
-        workspaceAdminService.getAuditLogEntries(
+        workspaceAdminService.getWorkspaceAuditLogEntries(
             workspaceNamespace, limit, afterMillis, beforeMillisNullable));
   }
 

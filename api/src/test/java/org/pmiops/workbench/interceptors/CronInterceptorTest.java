@@ -44,14 +44,16 @@ public class CronInterceptorTest {
   @Test
   public void prehandleForCronNoHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod("synchronizeUserAccess"));
+    when(handler.getMethod())
+        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
   @Test
   public void prehandleForCronWithBadHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod("synchronizeUserAccess"));
+    when(handler.getMethod())
+        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("asdf");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
@@ -59,7 +61,8 @@ public class CronInterceptorTest {
   @Test
   public void prehandleForCronWithHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.GET);
-    when(handler.getMethod()).thenReturn(OfflineUserApi.class.getMethod("synchronizeUserAccess"));
+    when(handler.getMethod())
+        .thenReturn(OfflineUserApi.class.getMethod("groupAndPushSynchronizeAccessTasks"));
     when(request.getHeader(CronInterceptor.GAE_CRON_HEADER)).thenReturn("true");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }

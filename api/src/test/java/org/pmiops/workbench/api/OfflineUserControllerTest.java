@@ -107,8 +107,8 @@ public class OfflineUserControllerTest {
   }
 
   @Test
-  public void testSynchronizeUserAccess() {
-    offlineUserController.synchronizeUserAccess();
+  public void testGroupAndPushSynchronizeAccessTasks() {
+    offlineUserController.groupAndPushSynchronizeAccessTasks();
 
     // We set a batch size of 3, so we expect two cloud tasks.
     List<SynchronizeUserAccessRequest> expectedRequests =
