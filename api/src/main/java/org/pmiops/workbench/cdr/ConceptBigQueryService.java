@@ -26,31 +26,30 @@ public class ConceptBigQueryService {
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
 
   @Autowired
-  public ConceptBigQueryService(
-      BigQueryService bigQueryService) {
+  public ConceptBigQueryService(BigQueryService bigQueryService) {
     this.bigQueryService = bigQueryService;
   }
 
   public int getParticipantCountForConcepts(
       Domain domain, Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
     Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
-            dbConceptSetConceptIds.stream()
-                    .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+        dbConceptSetConceptIds.stream()
+            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
     List<Long> standardList =
-            partitionSourceAndStandard.get(true).stream()
-                    .map(DbConceptSetConceptId::getConceptId)
-                    .collect(Collectors.toList());
+        partitionSourceAndStandard.get(true).stream()
+            .map(DbConceptSetConceptId::getConceptId)
+            .collect(Collectors.toList());
     List<Long> sourceList =
-            partitionSourceAndStandard.get(false).stream()
-                    .map(DbConceptSetConceptId::getConceptId)
-                    .collect(Collectors.toList());
+        partitionSourceAndStandard.get(false).stream()
+            .map(DbConceptSetConceptId::getConceptId)
+            .collect(Collectors.toList());
     StringBuilder innerSql = new StringBuilder();
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
     if (!standardList.isEmpty()) {
       innerSql.append("SELECT person_id\n");
       innerSql.append("FROM `${projectId}.${dataSetId}.cb_search_all_events`\n");
       generateParentChildLookupSql(
-              innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
+          innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
       innerSql.append("\n");
       if (!sourceList.isEmpty()) {
         innerSql.append(" UNION ALL\n");
@@ -63,12 +62,12 @@ public class ConceptBigQueryService {
     }
     String finalSql = "SELECT COUNT(DISTINCT person_id) person_count FROM (\n" + innerSql + ")";
     QueryJobConfiguration jobConfiguration =
-            QueryJobConfiguration.newBuilder(finalSql)
-                    .setNamedParameters(paramMap.build())
-                    .setUseLegacySql(false)
-                    .build();
+        QueryJobConfiguration.newBuilder(finalSql)
+            .setNamedParameters(paramMap.build())
+            .setUseLegacySql(false)
+            .build();
     TableResult result =
-            bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
+        bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
     return (int) result.iterateAll().iterator().next().get(0).getLongValue();
   }
 

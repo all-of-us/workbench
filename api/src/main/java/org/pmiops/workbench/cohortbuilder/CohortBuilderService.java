@@ -77,10 +77,6 @@ public interface CohortBuilderService {
 
   List<Criteria> findVersionedSurveys();
 
-  List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds);
-
-  List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds);
-
   List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys);
 
   List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);

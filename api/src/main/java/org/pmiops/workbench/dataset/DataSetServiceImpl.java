@@ -384,23 +384,23 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       if (domain == Domain.SURVEY) {
         if (!isPrepackagedAllSurveys(request)) {
           dbConceptSetConceptIds.addAll(
-                  findDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
+              findDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
           List<Long> prePackagedSurveyConceptIds =
-                  request.getPrePackagedConceptSet().stream()
-                          .map(PRE_PACKAGED_SURVEY_CONCEPT_IDS::get)
-                          .collect(Collectors.toList());
+              request.getPrePackagedConceptSet().stream()
+                  .map(PRE_PACKAGED_SURVEY_CONCEPT_IDS::get)
+                  .collect(Collectors.toList());
 
           // add selected prePackaged survey question concept ids
           if (!prePackagedSurveyConceptIds.isEmpty()) {
             dbConceptSetConceptIds.addAll(
-                    findSurveyQuestionConceptIds(prePackagedSurveyConceptIds));
+                findSurveyQuestionConceptIds(prePackagedSurveyConceptIds));
           }
         }
       } else {
         // Get all source concepts and check to see if they cross this domain. Please see:
         // https://precisionmedicineinitiative.atlassian.net/browse/RW-7657
         dbConceptSetConceptIds.addAll(
-                findMultipleDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
+            findMultipleDomainConceptIds(request.getDomain(), request.getConceptSetIds()));
       }
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetConceptIds.stream()
@@ -772,8 +772,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       dbConceptSetConceptIds.addAll(findMultipleDomainConceptIds(domain, dbConceptSetIds));
     }
 
-    if (dbConceptSetConceptIds.isEmpty()
-        && surveyConceptIds.isEmpty()) {
+    if (dbConceptSetConceptIds.isEmpty() && surveyConceptIds.isEmpty()) {
       return Optional.empty();
     } else {
       StringBuilder queryBuilder = new StringBuilder();

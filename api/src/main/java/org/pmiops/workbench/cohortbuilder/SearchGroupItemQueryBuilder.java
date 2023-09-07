@@ -201,7 +201,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String HAS_DATA_SQL =
       "SELECT person_id\n" + "FROM `${projectId}.${dataSetId}.cb_search_person` p\nWHERE %s = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
-          "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
+      "SELECT person_id FROM `${projectId}.${dataSetId}.cb_search_all_events`\nWHERE ";
   private static final String PERSON_ID_IN = "person_id IN (";
   private static final String VARIANT_SQL =
       "SELECT person_id\n"
@@ -281,13 +281,13 @@ public final class SearchGroupItemQueryBuilder {
 
     String queryPartsSql;
     if (SOURCE_STANDARD_DOMAINS.contains(domain)
-            && !sourceSearchParameters.isEmpty()
-            && !standardSearchParameters.isEmpty()) {
+        && !sourceSearchParameters.isEmpty()
+        && !standardSearchParameters.isEmpty()) {
       queryPartsSql =
-              PERSON_ID_IN
-                      + CB_SEARCH_ALL_EVENTS_WHERE
-                      + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
-                      + ")";
+          PERSON_ID_IN
+              + CB_SEARCH_ALL_EVENTS_WHERE
+              + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
+              + ")";
     } else {
       queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
     }
@@ -708,7 +708,7 @@ public final class SearchGroupItemQueryBuilder {
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
       List<Long> conceptIds =
-              searchParameters.stream().map(SearchParameter::getConceptId).collect(Collectors.toList());
+          searchParameters.stream().map(SearchParameter::getConceptId).collect(Collectors.toList());
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
           searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
@@ -718,9 +718,8 @@ public final class SearchGroupItemQueryBuilder {
               .collect(Collectors.toList());
 
       String conceptIdsParam =
-              QueryParameterUtil.addQueryParameterValue(
-                      queryParams,
-                      QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
       if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
         // Lookup child nodes
         queryParts.add(
@@ -732,7 +731,7 @@ public final class SearchGroupItemQueryBuilder {
       } else {
         // Children only
         queryParts.add(
-                String.format(STANDARD_OR_SOURCE_SQL, conceptIdsParam, standardOrSourceParam));
+            String.format(STANDARD_OR_SOURCE_SQL, conceptIdsParam, standardOrSourceParam));
       }
     }
   }
