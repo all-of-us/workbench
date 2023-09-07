@@ -24,9 +24,15 @@ RUN n 14
 RUN npm i -D @types/node
 ENV CLOUD_SDK_VERSION 392.0.0
 
-WORKDIR /root
+WORKDIR /root/workbench/ui
 RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/
 RUN npm config set "//npm.fontawesome.com/:_authToken" "my token"
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /tmp/cloud_sql_proxy \
+  && mv /tmp/cloud_sql_proxy /usr/local/bin && chmod +x /usr/local/bin/cloud_sql_proxy
+COPY package*.json ./
+COPY yarn.lock ./
+
+WORKDIR /root
 
 RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
@@ -52,3 +58,4 @@ ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 RUN gem install activesupport -v 6.1.4.6
 RUN gem install jira-ruby
 RUN gem install execjs
+
