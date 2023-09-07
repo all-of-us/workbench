@@ -15,7 +15,6 @@ import { Spinner } from 'app/components/spinners';
 import { PREDEFINED_ATTRIBUTES } from 'app/pages/data/cohort/constant';
 import {
   ppiQuestions,
-  ppiSurveys,
 } from 'app/pages/data/cohort/search-state.service';
 import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
@@ -33,7 +32,6 @@ import {
 export const COPE_SURVEY_GROUP_NAME =
   'COVID-19 Participant Experience (COPE) Survey';
 export const MINUTE_SURVEY_GROUP_NAME = 'COVID-19 Vaccine Survey';
-const PFHH_SURVEY_CONCEPT_ID = 1740639;
 const styles = reactStyles({
   code: {
     color: colors.dark,
@@ -316,16 +314,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       .includes(this.props.node.subtype);
   }
 
-  get isPFHHSurvey() {
-    return (
-      ppiSurveys
-        .getValue()
-        [currentWorkspaceStore.getValue().cdrVersionId]?.find(
-          (survey) => survey.conceptId === PFHH_SURVEY_CONCEPT_ID
-        )?.id === +this.props.node.path.split('.')[0]
-    );
-  }
-
   get showCount() {
     const {
       node: { code, count, group, selectable, subtype, type },
@@ -367,13 +355,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           operands: [value],
         });
       } else if (domainId === Domain.SURVEY.toString()) {
-        if (this.isPFHHSurvey) {
-          attributes.push({
-            name: AttrName.PERSONALFAMILYHEALTHHISTORY,
-            operator: Operator.IN,
-            operands: [PFHH_SURVEY_CONCEPT_ID.toString()],
-          });
-        }
         if (!group) {
           const question = ppiQuestions.getValue()[parentId];
           if (question) {
