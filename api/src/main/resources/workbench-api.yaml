@@ -7043,7 +7043,7 @@ components:
         cdrVersionId: "2"
         creationTime: 1588097211621
         creator: user@aou-domain.org
-        etag: '"1"'
+        etag: "1"
         googleBucketName: gcs-bucket-AAAAAAAA-BBBBB
         id: mynewestworkspace
         lastModifiedBy: user@aou-domain.org
