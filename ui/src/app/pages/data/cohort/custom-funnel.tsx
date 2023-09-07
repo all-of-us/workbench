@@ -92,7 +92,7 @@ export const CustomFunnel = withCurrentWorkspace()(
           };
           return [...prevState];
         });
-      } else {
+      } else if (remainingGroups[0]) {
         // Only one group remains to be added, update funnelGroups using the totalCount instead of calling api
         setFunnelGroups((prevState) => {
           prevState[prevState.length - 1] = {
