@@ -191,10 +191,10 @@ swaggerSources {
     workbench {
         inputFile = file('src/main/resources/workbench-api.yaml')
         code {
-            configuration = configurations.__swaggerCodegenV2__
+            configuration = configurations.__swaggerCodegenV3__
             language = 'spring'
-            outputDir = file(SWAGGER_2_CODEGEN_DIR)
-            templateDir = file(SWAGGER_2_TEMPLATE_DIR)
+            outputDir = file(SWAGGER_3_CODEGEN_DIR)
+            templateDir = file("$projectDir/src/main/resources/swagger3codegen")
             wipeOutputDir = false
             rawOptions = SWAGGER_2_RAW_OPTS
             additionalProperties = [

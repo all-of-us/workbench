@@ -4818,6 +4818,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to show the Event Date modifier in cohort builder
+      enableResearchReviewPrompt:
+        type: boolean
+        default: false
+        description: Whether user should see a prompt if Workspace Research Purpose needs Review
       enableRasIdMeLinking:
         type: boolean
         default: false
@@ -5415,6 +5419,9 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ResearchOutcomeEnum"
+      needsReviewPrompt:
+        type: boolean
+        default: false
   SpecificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
