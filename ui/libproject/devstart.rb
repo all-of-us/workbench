@@ -34,7 +34,7 @@ def build(cmd_name, args)
   common = Common.new
 
   fontawesomeCredsLineFilePath = "gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt"
-  common.run_inline "gsutil cat #{fontawesomeCredsLinePath} >> ~/.npmrc"
+  common.run_inline "gsutil cat #{fontawesomeCredsLineFilePath} >> ~/.npmrc"
   common.run_inline %W{yarn install --frozen-lockfile}
   common.run_inline %W{yarn run deps}
 
