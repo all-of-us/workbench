@@ -18,6 +18,14 @@ export const stubDisk = (): Disk => ({
   blockSize: 1,
 });
 
+export const stubDiskWithDefaultSize = (): Disk => ({
+  size: 120,
+  diskType: DiskType.Standard,
+  isGceRuntime: true,
+  name: 'stub-disk',
+  blockSize: 1,
+});
+
 export const mockJupyterDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.Standard,
