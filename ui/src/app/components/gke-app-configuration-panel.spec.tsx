@@ -272,11 +272,12 @@ describe(GKEAppConfigurationPanel.name, () => {
     expectButtonElementEnabled(deleteButton);
     deleteButton.click();
 
+    const deletePDSelected = true;
     await waitFor(() => {
       expect(deleteAppStub).toHaveBeenCalledWith(
         workspaceNamespace,
         app.appName,
-        true /* deletePDSelected */
+        deletePDSelected
       );
       expect(onCloseStub).toHaveBeenCalled();
     });
@@ -318,11 +319,12 @@ describe(GKEAppConfigurationPanel.name, () => {
     expectButtonElementEnabled(deleteButton);
     deleteButton.click();
 
+    const deletePDSelected = false;
     await waitFor(() => {
       expect(deleteAppStub).toHaveBeenCalledWith(
         workspaceNamespace,
         app.appName,
-        false /* deletePDSelected */
+        deletePDSelected
       );
 
       expect(onCloseStub).toHaveBeenCalled();
