@@ -32,13 +32,6 @@ export enum GKEAppPanelContent {
   DELETE_GKE_APP,
 }
 
-const CreateGKEAppPanel = ({ appType, ...props }: CreateGkeAppProps) =>
-  switchCase(
-    appType,
-    [AppType.CROMWELL, () => <CreateCromwell {...props} />],
-    [AppType.RSTUDIO, () => <CreateRStudio {...props} />]
-  );
-
 export const GKEAppConfigurationPanel = ({
   appType,
   workspaceNamespace,
@@ -133,18 +126,38 @@ export const GKEAppConfigurationPanel = ({
     panelContent,
     [
       GKEAppPanelContent.CREATE,
-      () => (
-        <CreateGKEAppPanel
-          {...{
-            ...props,
-            appType,
-            app,
-            disk,
-            onClickDeleteUnattachedPersistentDisk,
-            onClose,
-          }}
-        />
-      ),
+      () =>
+        switchCase(
+          appType,
+          [
+            AppType.CROMWELL,
+            () => (
+              <CreateCromwell
+                {...{
+                  ...props,
+                  app,
+                  disk,
+                  onClickDeleteUnattachedPersistentDisk,
+                  onClose,
+                }}
+              />
+            ),
+          ],
+          [
+            AppType.RSTUDIO,
+            () => (
+              <CreateRStudio
+                {...{
+                  ...props,
+                  app,
+                  disk,
+                  onClickDeleteUnattachedPersistentDisk,
+                  onClose,
+                }}
+              />
+            ),
+          ]
+        ),
     ],
     [
       GKEAppPanelContent.DELETE_UNATTACHED_PD,
