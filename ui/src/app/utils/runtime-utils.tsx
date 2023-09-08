@@ -584,7 +584,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       masterMachineType: machineType,
       masterDiskSize: diskConfig.size,
     };
-  } else if (diskConfig.detachable) {
+  } else {
     runtime.gceWithPdConfig = {
       machineType,
       persistentDisk: {
@@ -594,12 +594,6 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
         name: diskConfig.existingDiskName,
       },
       gpuConfig,
-    };
-  } else {
-    runtime.gceConfig = {
-      machineType,
-      gpuConfig,
-      diskSize: diskConfig.size,
     };
   }
 
@@ -662,9 +656,8 @@ export const maybeWithExistingDisk = (
 
   return {
     ...runtime,
-    gceConfig: null,
     gceWithPdConfig: {
-      ...runtime.gceConfig,
+      ...runtime.gceWithPdConfig,
       persistentDisk: {
         name: existingDisk.name,
         size: existingDisk.size,
@@ -743,23 +736,7 @@ export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
 ): AnalysisConfig => {
-  if (runtime.gceConfig) {
-    const { machineType, diskSize, gpuConfig } = runtime.gceConfig;
-    return {
-      computeType: ComputeType.Standard,
-      machine: findMachineByName(machineType),
-      diskConfig: {
-        size: diskSize,
-        detachable: false,
-        detachableType: null,
-        existingDiskName: null,
-      },
-      detachedDisk: existingDisk,
-      autopauseThreshold: runtime.autopauseThreshold,
-      dataprocConfig: null,
-      gpuConfig,
-    };
-  } else if (runtime.gceWithPdConfig) {
+  if (runtime.gceWithPdConfig) {
     const {
       machineType,
       persistentDisk: { size: diskSize, diskType: detachableType },
