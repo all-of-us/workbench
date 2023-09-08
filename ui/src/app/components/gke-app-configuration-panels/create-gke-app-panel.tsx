@@ -8,6 +8,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import {
   createAppRequestToAnalysisConfig,
   defaultCromwellConfig,
@@ -17,7 +18,6 @@ import { DeletePersistentDiskButton } from 'app/components/delete-persistent-dis
 import { EnvironmentInformedActionPanel } from 'app/components/environment-informed-action-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
-import { switchCase } from 'app/utils';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import {

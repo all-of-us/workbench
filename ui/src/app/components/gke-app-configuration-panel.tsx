@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
 import { notificationStore } from 'app/utils/stores';
