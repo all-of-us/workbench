@@ -6,6 +6,7 @@ import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -23,13 +24,12 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 
-import { defaultRStudioConfig } from './apps-panel/utils';
-import { CreateGKEAppPanelProps } from './gke-app-configuration-panels/create-gke-app-panel';
-import { RStudioConfigurationPanel } from './rstudio-configuration-panel';
+import { CommonCreateGkeAppProps } from './create-gke-app';
+import { CreateRStudio } from './create-rstudio';
 
 const onClose = jest.fn();
 const freeTierBillingAccountId = 'freetier';
-export const DEFAULT_PROPS: CreateGKEAppPanelProps = {
+export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
   creatorFreeCreditsRemaining: null,
   workspace: {
@@ -49,13 +49,11 @@ export const DEFAULT_PROPS: CreateGKEAppPanelProps = {
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
-describe(RStudioConfigurationPanel.name, () => {
+describe(CreateRStudio.name, () => {
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) =>
-    render(
-      <RStudioConfigurationPanel {...{ ...DEFAULT_PROPS, ...propOverrides }} />
-    );
+  const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
+    render(<CreateRStudio {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();

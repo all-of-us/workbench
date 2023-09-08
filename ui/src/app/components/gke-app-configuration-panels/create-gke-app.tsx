@@ -26,14 +26,15 @@ import {
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { CreateGKEAppButton } from './create-gke-app-button';
+import { CreateGkeAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
 
 const defaultIntroText =
   'Your analysis environment consists of an application and compute resources. ' +
   'Your cloud environment is unique to this workspace and not shared with other users.';
 
-export interface CreateGKEAppPanelProps {
+export interface CreateGkeAppProps {
+  appType: AppType;
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
   workspace: WorkspaceData;
@@ -41,20 +42,23 @@ export interface CreateGKEAppPanelProps {
   app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
   onClickDeleteUnattachedPersistentDisk: () => void;
-}
-
-export type CreateGKEAppPanelPropsWithAppType = {
-  appType: AppType;
-} & CreateGKEAppPanelProps;
-
-type Props = {
   introText?: string;
   CostNote?: React.FunctionComponent;
   SupportNote?: React.FunctionComponent;
   CreateAppText?: React.FunctionComponent;
-} & CreateGKEAppPanelPropsWithAppType;
+}
 
-export const CreateGKEAppPanel = ({
+type ToOmit =
+  | 'appType'
+  | 'introText'
+  | 'CostNote'
+  | 'SupportNote'
+  | 'CreateAppText';
+
+// for use by the individual gke app creation components, e.g. CreateCromwell
+export type CommonCreateGkeAppProps = Omit<CreateGkeAppProps, ToOmit>;
+
+export const CreateGkeApp = ({
   appType,
   onClose,
   creatorFreeCreditsRemaining,
@@ -67,7 +71,7 @@ export const CreateGKEAppPanel = ({
   CostNote = () => null,
   SupportNote = () => null,
   CreateAppText = () => null,
-}: Props) => {
+}: CreateGkeAppProps) => {
   const { profile } = profileState;
 
   const onDismiss = () => {
@@ -131,7 +135,7 @@ export const CreateGKEAppPanel = ({
           />
         )}
         <CreateAppText />
-        <CreateGKEAppButton
+        <CreateGkeAppButton
           {...{ createAppRequest, onDismiss }}
           existingApp={app}
           workspaceNamespace={workspace.namespace}

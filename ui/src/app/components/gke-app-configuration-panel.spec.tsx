@@ -28,7 +28,7 @@ import {
   GkeAppConfigurationPanelProps,
   GKEAppPanelContent,
 } from './gke-app-configuration-panel';
-import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from './rstudio-configuration-panel.spec';
+import { defaultProps as rstudioDefaultProps } from './gke-app-configuration-panels/create-rstudio.spec';
 
 // component text for selectors
 
@@ -71,7 +71,7 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([]));
   });
 
-  const DEFAULT_PROPS: GkeAppConfigurationPanelProps = {
+  const defaultProps: GkeAppConfigurationPanelProps = {
     appType: AppType.RSTUDIO,
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
@@ -79,15 +79,15 @@ describe(GKEAppConfigurationPanel.name, () => {
     creatorFreeCreditsRemaining: 300,
 
     // Use RSTUDIO_DEFAULT_PROPS for the rest of the props since they shouldn't affect this test
-    workspace: RSTUDIO_DEFAULT_PROPS.workspace,
-    profileState: RSTUDIO_DEFAULT_PROPS.profileState,
+    workspace: rstudioDefaultProps.workspace,
+    profileState: rstudioDefaultProps.profileState,
   };
 
   const createWrapper = (
     propOverrides: Partial<GkeAppConfigurationPanelProps> = {}
   ) => {
     const props = {
-      ...DEFAULT_PROPS,
+      ...defaultProps,
       ...propOverrides,
     };
     return render(<GKEAppConfigurationPanel {...props} />);

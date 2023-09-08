@@ -5,7 +5,7 @@ import { AppStatus } from 'generated/fetch';
 import { render, screen, waitFor } from '@testing-library/react';
 import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import {
-  CreateGKEAppButton,
+  CreateGkeAppButton,
   CreateGKEAppButtonProps,
 } from 'app/components/gke-app-configuration-panels/create-gke-app-button';
 
@@ -16,8 +16,8 @@ import {
 import { createListAppsCromwellResponse } from 'testing/stubs/apps-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
-describe(CreateGKEAppButton.name, () => {
-  const DEFAULT_PROPS: CreateGKEAppButtonProps = {
+describe(CreateGkeAppButton.name, () => {
+  const defaultProps: CreateGKEAppButtonProps = {
     createAppRequest: defaultCromwellConfig,
     existingApp: null,
     workspaceNamespace: 'aou-rw-test-1',
@@ -27,8 +27,8 @@ describe(CreateGKEAppButton.name, () => {
   const component = async (
     propOverrides?: Partial<CreateGKEAppButtonProps>
   ) => {
-    const allProps = { ...DEFAULT_PROPS, ...propOverrides };
-    return render(<CreateGKEAppButton {...allProps} />);
+    const allProps = { ...defaultProps, ...propOverrides };
+    return render(<CreateGkeAppButton {...allProps} />);
   };
 
   const createEnabledStatuses = [AppStatus.DELETED, null, undefined];
