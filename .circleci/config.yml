@@ -284,7 +284,7 @@ commands:
       - run:
           name: "Download .npmrc file with Fontawesome Pro license key so FA icon SVG packages can be installed"
           working_directory: ~/workbench
-          command: gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+          command: gsutil cat gs://all-of-us-workbench-test-credentials/dot-npmrc-fontawesome-creds-line.txt >> .npmrc 
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
