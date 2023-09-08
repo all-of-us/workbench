@@ -32,16 +32,21 @@ async function build_and_deploy(arg) {
 }
 async function build(env) {
 
-  for (let index = 0; index < BUILD_CMDS.length; index++) {
-    await runCommand(BUILD_CMDS[index]);
-  }
+  try {
+    for (let index = 0; index < BUILD_CMDS.length; index++) {
+      await runCommand(BUILD_CMDS[index]);
+    }
 
-  let optimize = "--aot";
-  if (env === 'staging' || env ==='stable' || env === 'preprod' || env === 'prod') {
-    optimize = "--prod"
+    let optimize = "--aot";
+    if (env === 'staging' || env === 'stable' || env === 'preprod' || env === 'prod') {
+      optimize = "--prod"
+    }
+    const react_opts = "REACT_APP_ENVIRONMENT=" + env;
+    await runCommand(`${react_opts} yarn run build ${optimize} --no-watch --no-progress`);
+  } catch (e) {
+    console.error("Error while building: ", e);
+    process.exit(1);
   }
-  const react_opts = "REACT_APP_ENVIRONMENT=" + env;
-  await runCommand(`${react_opts} yarn run build ${optimize} --no-watch --no-progress`);
 }
 
 function  isEmpty(value) {
