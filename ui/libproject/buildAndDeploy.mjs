@@ -7,7 +7,7 @@ const CREDENTIALS_COPY = 'gsutil cp gs://all-of-us-workbench-test-credentials/.n
 const YARN_INSTALL = 'yarn install --frozen-lockfile';
 const YARN_RUN_DEPS = 'yarn run deps';
 
-const BUILD_CMDS = [YARN_DEPS, CREDENTIALS_COPY, YARN_INSTALL, YARN_RUN_DEPS];
+const BUILD_CMDS = [CREDENTIALS_COPY, YARN_INSTALL, YARN_RUN_DEPS];
 
 async function build_and_deploy(arg) {
   const project = arg[2];
