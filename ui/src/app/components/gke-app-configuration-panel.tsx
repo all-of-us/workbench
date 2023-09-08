@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { AppType, Disk, UserAppEnvironment } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { findApp, toUIAppType } from 'app/components/apps-panel/utils';
 import {
   CromwellConfigurationPanel,
@@ -16,7 +17,6 @@ import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configura
 import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
 import { Spinner } from 'app/components/spinners';
 import { appsApi, disksApi } from 'app/services/swagger-fetch-clients';
-import { switchCase } from 'app/utils';
 import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 

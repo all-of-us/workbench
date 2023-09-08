@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -35,7 +36,6 @@ import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   summarizeErrors,
-  switchCase,
   withCdrVersions,
   withCurrentWorkspace,
 } from 'app/utils';

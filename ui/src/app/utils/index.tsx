@@ -48,16 +48,6 @@ export function randomString(len): string {
   return str;
 }
 
-export const DEFAULT = Symbol();
-
-export const switchCase = (value, ...pairs) => {
-  const match = fp.find(
-    ([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT),
-    pairs
-  );
-  return match?.[1]();
-};
-
 const throttleAnimation = (fn) => {
   let running = false;
   return (...args) => {

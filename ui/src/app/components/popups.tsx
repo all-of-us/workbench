@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import onClickOutside from 'react-onclickoutside';
 import * as fp from 'lodash/fp';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { switchCase } from 'app/utils';
 
 const styles = {
   tooltip: {
@@ -277,7 +277,7 @@ export const Tooltip = withDynamicPosition()(
           element.height - 12,
           (target.top + target.bottom) / 2 - position.top
         );
-        return switchCase(
+        return switchCase<string, { [key: string]: number | string }>(
           finalSide,
           ['top', () => ({ bottom: 0, left, transform: 'rotate(180deg)' })],
           ['bottom', () => ({ top: 0, left })],
@@ -299,7 +299,12 @@ export const Tooltip = withDynamicPosition()(
             {children}
             <svg
               viewBox='0 0 2 1'
-              style={{ ...getNotchPosition(), ...styles.notch }}
+              style={
+                {
+                  ...getNotchPosition(),
+                  ...styles.notch,
+                } as React.CSSProperties
+              }
             >
               <path d='M0,1l1,-1l1,1Z' />
             </svg>

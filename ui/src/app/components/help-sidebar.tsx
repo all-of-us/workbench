@@ -14,6 +14,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AppsPanel } from 'app/components/apps-panel';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { CloseButton, StyledExternalLink } from 'app/components/buttons';
@@ -46,7 +47,6 @@ import { runtimeApi, workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   reactStyles,
-  switchCase,
   withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentCohortSearchContext,

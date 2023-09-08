@@ -1,7 +1,7 @@
 import * as React from 'react';
 
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
-import { DEFAULT, switchCase } from 'app/utils';
 import { supportUrls } from 'app/utils/zendesk';
 
 interface BackupFilesHelpSectionProps {
@@ -11,13 +11,13 @@ interface BackupFilesHelpSectionProps {
 export const BackupFilesHelpSection = ({
   appType,
 }: BackupFilesHelpSectionProps) => {
-  const savedFiles = switchCase(
+  const savedFiles = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => 'Jupyter notebooks'],
     [UIAppType.RSTUDIO, () => '.Rmd and .R files'],
     [DEFAULT, () => null]
   );
-  const savedFilesReferenceText = switchCase(
+  const savedFilesReferenceText = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => 'your notebooks'],
     [UIAppType.RSTUDIO, () => 'those files'],

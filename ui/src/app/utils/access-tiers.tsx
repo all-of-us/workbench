@@ -1,6 +1,6 @@
 import { Profile } from 'generated/fetch';
 
-import { switchCase } from './index';
+import { switchCase } from '@terra-ui-packages/core-utils';
 
 export enum AccessTierShortNames {
   Registered = 'registered',

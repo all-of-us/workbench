@@ -6,12 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { MenuItem } from 'app/components/buttons';
 import { CopySnippetModal } from 'app/components/copy-snippet-modal';
 import { PopupTrigger } from 'app/components/popups';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
-import { switchCase } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
-import { switchCase } from 'app/utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
 import { ControlledTierBadge, RegisteredTierBadge } from './icons';

@@ -5,6 +5,7 @@ import {
   DataprocConfig,
   Disk,
   DiskType,
+  EmptyResponse,
   ErrorCode,
   GpuConfig,
   ListRuntimeResponse,
@@ -16,9 +17,10 @@ import {
   SecuritySuspendedErrorParameters,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { disksApi, runtimeApi } from 'app/services/swagger-fetch-clients';
-import { switchCase, withAsyncErrorHandling } from 'app/utils';
+import { withAsyncErrorHandling } from 'app/utils';
 import {
   ExceededActionCountError,
   ExceededErrorCountError,
@@ -1036,7 +1038,7 @@ export const useRuntimeStatus = (
   }, [runtimeStatus]);
 
   const setStatusRequest = async (req) => {
-    await switchCase(
+    await switchCase<RuntimeStatusRequest, Promise<Response | EmptyResponse>>(
       req,
       [
         RuntimeStatusRequest.DeleteRuntime,
