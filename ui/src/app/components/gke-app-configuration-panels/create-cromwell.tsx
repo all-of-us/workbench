@@ -3,17 +3,14 @@ import * as React from 'react';
 import { AppType } from 'generated/fetch';
 
 import { WarningMessage } from 'app/components/messages';
+import { styles } from 'app/components/runtime-configuration-panel/styles';
 import {
   CROMWELL_INFORMATION_LINK,
   CROMWELL_INTRO_LINK,
   WORKFLOW_AND_WDL_LINK,
 } from 'app/utils/aou_external_links';
 
-import {
-  CreateGKEAppPanel,
-  CreateGKEAppPanelProps,
-} from './gke-app-configuration-panels/create-gke-app-panel';
-import { styles } from './runtime-configuration-panel/styles';
+import { CommonCreateGkeAppProps, CreateGkeApp } from './create-gke-app';
 
 const cromwellSupportArticles = [
   {
@@ -81,8 +78,8 @@ const CreateAppText = () => (
   </div>
 );
 
-export const CromwellConfigurationPanel = (props: CreateGKEAppPanelProps) => (
-  <CreateGKEAppPanel
+export const CreateCromwell = (props: CommonCreateGkeAppProps) => (
+  <CreateGkeApp
     {...{
       ...props,
       introText,

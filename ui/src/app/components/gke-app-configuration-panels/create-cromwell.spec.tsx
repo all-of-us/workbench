@@ -6,6 +6,7 @@ import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -23,15 +24,14 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 
-import { defaultCromwellConfig } from './apps-panel/utils';
-import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
-import { CreateGKEAppPanelProps } from './gke-app-configuration-panels/create-gke-app-panel';
+import { CreateCromwell } from './create-cromwell';
+import { CommonCreateGkeAppProps } from './create-gke-app';
 
-describe(CromwellConfigurationPanel.name, () => {
+describe(CreateCromwell.name, () => {
   const onClose = jest.fn();
   const freeTierBillingAccountId = 'freetier';
 
-  const DEFAULT_PROPS: CreateGKEAppPanelProps = {
+  const defaultProps: CommonCreateGkeAppProps = {
     onClose,
     creatorFreeCreditsRemaining: null,
     workspace: {
@@ -53,10 +53,8 @@ describe(CromwellConfigurationPanel.name, () => {
 
   let disksApiStub: DisksApiStub;
 
-  const component = async (propOverrides?: Partial<CreateGKEAppPanelProps>) =>
-    render(
-      <CromwellConfigurationPanel {...{ ...DEFAULT_PROPS, ...propOverrides }} />
-    );
+  const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
+    render(<CreateCromwell {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();

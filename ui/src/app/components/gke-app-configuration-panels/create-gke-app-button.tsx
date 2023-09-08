@@ -16,7 +16,7 @@ export interface CreateGKEAppButtonProps {
   onDismiss: () => void;
 }
 
-export function CreateGKEAppButton({
+export function CreateGkeAppButton({
   createAppRequest,
   existingApp,
   workspaceNamespace,

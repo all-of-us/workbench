@@ -10,9 +10,9 @@ import { notificationStore } from 'app/utils/stores';
 import { deleteUserApp, findDisk } from 'app/utils/user-apps-utils';
 
 import { findApp, toUIAppType } from './apps-panel/utils';
-import { CromwellConfigurationPanel } from './cromwell-configuration-panel';
-import { CreateGKEAppPanelPropsWithAppType } from './gke-app-configuration-panels/create-gke-app-panel';
-import { RStudioConfigurationPanel } from './rstudio-configuration-panel';
+import { CreateCromwell } from './gke-app-configuration-panels/create-cromwell';
+import { CreateGkeAppProps } from './gke-app-configuration-panels/create-gke-app';
+import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
 import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
@@ -24,23 +24,13 @@ export type GkeAppConfigurationPanelProps = {
   workspaceNamespace: string;
   onClose: () => void;
   initialPanelContent: GKEAppPanelContent | null;
-} & Omit<CreateGKEAppPanelPropsWithAppType, InjectedProps>;
+} & Omit<CreateGkeAppProps, InjectedProps>;
 
 export enum GKEAppPanelContent {
   CREATE,
   DELETE_UNATTACHED_PD,
   DELETE_GKE_APP,
 }
-
-const CreateGKEAppPanel = ({
-  appType,
-  ...props
-}: CreateGKEAppPanelPropsWithAppType) =>
-  switchCase(
-    appType,
-    [AppType.CROMWELL, () => <CromwellConfigurationPanel {...props} />],
-    [AppType.RSTUDIO, () => <RStudioConfigurationPanel {...props} />]
-  );
 
 export const GKEAppConfigurationPanel = ({
   appType,
@@ -136,18 +126,38 @@ export const GKEAppConfigurationPanel = ({
     panelContent,
     [
       GKEAppPanelContent.CREATE,
-      () => (
-        <CreateGKEAppPanel
-          {...{
-            ...props,
-            appType,
-            app,
-            disk,
-            onClickDeleteUnattachedPersistentDisk,
-            onClose,
-          }}
-        />
-      ),
+      () =>
+        switchCase(
+          appType,
+          [
+            AppType.CROMWELL,
+            () => (
+              <CreateCromwell
+                {...{
+                  ...props,
+                  app,
+                  disk,
+                  onClickDeleteUnattachedPersistentDisk,
+                  onClose,
+                }}
+              />
+            ),
+          ],
+          [
+            AppType.RSTUDIO,
+            () => (
+              <CreateRStudio
+                {...{
+                  ...props,
+                  app,
+                  disk,
+                  onClickDeleteUnattachedPersistentDisk,
+                  onClose,
+                }}
+              />
+            ),
+          ]
+        ),
     ],
     [
       GKEAppPanelContent.DELETE_UNATTACHED_PD,
