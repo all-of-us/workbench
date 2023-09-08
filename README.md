@@ -103,7 +103,7 @@ The `status` column enum values can be found in `org.pmiops.workbench.db.model.S
 
 ### UI
 
-See [ui/README.md].
+See [ui/README.md]().
 
 ## Deploying
 
