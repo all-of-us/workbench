@@ -3,9 +3,9 @@ package org.pmiops.workbench.disks;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
@@ -17,36 +17,36 @@ import org.springframework.stereotype.Service;
 public class DiskService {
   private static final Logger log = Logger.getLogger(DiskService.class.getName());
   private final LeonardoMapper leonardoMapper;
-  private final LeonardoApiClient leonardoNotebooksClient;
+  private final LeonardoApiClient leonardoApiClient;
   private final WorkspaceService workspaceService;
 
   @Autowired
   public DiskService(
       LeonardoMapper leonardoMapper,
-      LeonardoApiClient leonardoNotebooksClient,
+      LeonardoApiClient leonardoApiClient,
       WorkspaceService workspaceService) {
     this.leonardoMapper = leonardoMapper;
-    this.leonardoNotebooksClient = leonardoNotebooksClient;
+    this.leonardoApiClient = leonardoApiClient;
     this.workspaceService = workspaceService;
   }
 
   public void deleteDisk(String workspaceNamespace, String diskName) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.deletePersistentDisk(googleProject, diskName);
+    leonardoApiClient.deletePersistentDisk(googleProject, diskName);
   }
 
   public void deleteDiskAsService(String workspaceNamespace, String diskName) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.deletePersistentDiskAsService(googleProject, diskName);
+    leonardoApiClient.deletePersistentDiskAsService(googleProject, diskName);
   }
 
   public List<Disk> getAllDisksInWorkspaceNamespace(String workspaceNamespace) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listDisksByProjectAsService(googleProject);
+    List<ListPersistentDiskResponse> responseList =
+        leonardoApiClient.listDisksByProjectAsService(googleProject);
     return responseList.stream()
         .map(leonardoMapper::toApiListDisksResponse)
         .collect(Collectors.toList());
@@ -57,7 +57,7 @@ public class DiskService {
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
     Disk disk =
         leonardoMapper.toApiGetDiskResponse(
-            leonardoNotebooksClient.getPersistentDisk(googleProject, diskName));
+            leonardoApiClient.getPersistentDisk(googleProject, diskName));
 
     if (DiskStatus.FAILED.equals(disk.getStatus())) {
       log.warning(
@@ -70,8 +70,8 @@ public class DiskService {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
 
-    List<LeonardoListPersistentDiskResponse> responseList =
-        leonardoNotebooksClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
+    List<ListPersistentDiskResponse> responseList =
+        leonardoApiClient.listPersistentDiskByProjectCreatedByCreator(googleProject);
 
     return PersistentDiskUtils.findTheMostRecentActiveDisks(
         responseList.stream()
@@ -82,6 +82,6 @@ public class DiskService {
   public void updateDisk(String workspaceNamespace, String diskName, Integer diskSize) {
     String googleProject =
         workspaceService.lookupWorkspaceByNamespace(workspaceNamespace).getGoogleProject();
-    leonardoNotebooksClient.updatePersistentDisk(googleProject, diskName, diskSize);
+    leonardoApiClient.updatePersistentDisk(googleProject, diskName, diskSize);
   }
 }

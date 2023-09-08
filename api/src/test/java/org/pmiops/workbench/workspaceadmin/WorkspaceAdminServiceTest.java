@@ -27,6 +27,11 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.AuditInfo;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudContext;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.CloudProvider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -54,12 +59,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
-import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudContext;
-import org.pmiops.workbench.leonardo.model.LeonardoCloudProvider;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AdminLockingRequest;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
@@ -106,10 +105,12 @@ public class WorkspaceAdminServiceTest {
   private static final String EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
 
   private DbWorkspace dbWorkspace;
-  private LeonardoGetRuntimeResponse testLeoRuntime;
-  private LeonardoGetRuntimeResponse testLeoRuntimeDifferentProject;
-  private LeonardoListRuntimeResponse testLeoListRuntimeResponse;
-  private LeonardoListRuntimeResponse testLeoListRuntimeResponse2;
+  private GetRuntimeResponse testLeoRuntime;
+  private GetRuntimeResponse testLeoRuntimeDifferentProject;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+      testLeoListRuntimeResponse;
+  private org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+      testLeoListRuntimeResponse2;
 
   @MockBean private AdminAuditor mockAdminAuditor;
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
@@ -191,41 +192,41 @@ public class WorkspaceAdminServiceTest {
         .thenReturn(new FirecloudManagedGroupWithMembers().groupEmail("test@firecloud.org"));
 
     testLeoRuntime =
-        new LeonardoGetRuntimeResponse()
+        new GetRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.DELETING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
+            .status(ClusterStatus.DELETING)
+            .auditInfo(new AuditInfo().createdDate(CREATED_DATE));
     testLeoListRuntimeResponse =
-        new LeonardoListRuntimeResponse()
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse()
             .runtimeName(RUNTIME_NAME)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.RUNNING);
+            .status(ClusterStatus.RUNNING);
 
     testLeoListRuntimeResponse2 =
-        new LeonardoListRuntimeResponse()
+        new org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse()
             .runtimeName(RUNTIME_NAME_2)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID))
-            .status(LeonardoRuntimeStatus.RUNNING);
+            .status(ClusterStatus.RUNNING);
 
     testLeoRuntimeDifferentProject =
-        new LeonardoGetRuntimeResponse()
+        new GetRuntimeResponse()
             .runtimeName(EXTRA_RUNTIME_NAME_DIFFERENT_PROJECT)
             .cloudContext(
-                new LeonardoCloudContext()
-                    .cloudProvider(LeonardoCloudProvider.GCP)
+                new CloudContext()
+                    .cloudProvider(CloudProvider.GCP)
                     .cloudResource(GOOGLE_PROJECT_ID_2))
-            .status(LeonardoRuntimeStatus.RUNNING)
-            .auditInfo(new LeonardoAuditInfo().createdDate(CREATED_DATE));
+            .status(ClusterStatus.RUNNING)
+            .auditInfo(new AuditInfo().createdDate(CREATED_DATE));
   }
 
   @Test
@@ -398,8 +399,8 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -413,14 +414,17 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_DeleteSome() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList =
+            ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete = ImmutableList.of(testLeoRuntime.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
@@ -435,8 +439,9 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject_DeleteDoesNotAffectOtherProjects() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList =
+            ImmutableList.of(testLeoListRuntimeResponse, testLeoListRuntimeResponse2);
     List<String> runtimesToDelete =
         ImmutableList.of(testLeoRuntimeDifferentProject.getRuntimeName());
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
@@ -452,8 +457,8 @@ public class WorkspaceAdminServiceTest {
 
   @Test
   public void testDeleteRuntimesInProject_NoRuntimes() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -465,14 +470,16 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 
   @Test
   public void testDeleteRuntimesInProject_NullRuntimesList() {
-    List<LeonardoListRuntimeResponse> listRuntimeResponseList =
-        ImmutableList.of(testLeoListRuntimeResponse);
+    List<org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse>
+        listRuntimeResponseList = ImmutableList.of(testLeoListRuntimeResponse);
     when(mockLeonardoNotebooksClient.listRuntimesByProjectAsService(GOOGLE_PROJECT_ID))
         .thenReturn(listRuntimeResponseList);
 
@@ -484,7 +491,9 @@ public class WorkspaceAdminServiceTest {
         .fireDeleteRuntimesInProject(
             GOOGLE_PROJECT_ID,
             listRuntimeResponseList.stream()
-                .map(LeonardoListRuntimeResponse::getRuntimeName)
+                .map(
+                    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse
+                        ::getRuntimeName)
                 .collect(Collectors.toList()));
   }
 

@@ -1,6 +1,8 @@
 import {
   DataprocConfig,
-  GceConfig,
+  GceWithPdConfig,
+  GetRuntimeResponse,
+  PersistentDiskRequest,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -19,10 +21,17 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 import { stubDisk } from './disks-api-stub';
 
-export const defaultGceConfig = (): GceConfig => ({
+const defaultPersistentDiskRequest = (): PersistentDiskRequest => ({
   // Set the default disk size a bit over the minimum for ease of testing
   // decreases in the disk size.
-  diskSize: MIN_DISK_SIZE_GB + 30,
+  name: 'test_disk',
+  size: MIN_DISK_SIZE_GB + 30,
+});
+
+export const defaultGceWithPdConfig = (): GceWithPdConfig => ({
+  // Set the default disk size a bit over the minimum for ease of testing
+  // decreases in the disk size.
+  persistentDisk: defaultPersistentDiskRequest(),
   machineType: 'n1-standard-4',
 });
 
@@ -43,7 +52,7 @@ export const defaultRuntime = () => ({
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
-  gceConfig: defaultGceConfig(),
+  gceWithPdConfig: defaultGceWithPdConfig(),
   errors: [],
 });
 
@@ -57,8 +66,8 @@ export class RuntimeApiStub extends RuntimeApi {
     this.runtime = defaultRuntime();
   }
 
-  getRuntime(): Promise<Runtime> {
-    return new Promise<Runtime>((resolve) => {
+  getRuntime(): Promise<GetRuntimeResponse> {
+    return new Promise<GetRuntimeResponse>((resolve) => {
       resolve(this.runtime);
     });
   }

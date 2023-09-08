@@ -13,8 +13,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.leonardo.model.LeonardoDiskType;
-import org.pmiops.workbench.leonardo.model.LeonardoListPersistentDiskResponse;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.DiskType;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListPersistentDiskResponse;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.DiskStatus;
@@ -23,10 +23,10 @@ public final class PersistentDiskUtils {
   private static final Logger log = Logger.getLogger(PersistentDiskUtils.class.getName());
 
   // See https://cloud.google.com/compute/pricing
-  private static final Map<LeonardoDiskType, Double> DISK_PRICE_PER_GB_MONTH =
-      ImmutableMap.<LeonardoDiskType, Double>builder()
-          .put(LeonardoDiskType.STANDARD, .04)
-          .put(LeonardoDiskType.SSD, .17)
+  private static final Map<DiskType, Double> DISK_PRICE_PER_GB_MONTH =
+      ImmutableMap.<DiskType, Double>builder()
+          .put(DiskType.STANDARD, .04)
+          .put(DiskType.SSD, .17)
           .build();
 
   // https://github.com/DataBiosphere/leonardo/blob/3774547f2018e056e9af42142a10ac004cfe1ee8/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/diskModels.scala#L60
@@ -36,10 +36,10 @@ public final class PersistentDiskUtils {
   private PersistentDiskUtils() {}
 
   // Keep in sync with ui/src/app/utils/machines.ts
-  public static double costPerMonth(LeonardoListPersistentDiskResponse disk, String googleProject) {
+  public static double costPerMonth(ListPersistentDiskResponse disk, String googleProject) {
     Double pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(disk.getDiskType());
     if (pricePerGbMonth == null) {
-      pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(LeonardoDiskType.STANDARD);
+      pricePerGbMonth = DISK_PRICE_PER_GB_MONTH.get(DiskType.STANDARD);
       log.warning(
           String.format(
               "unknown disk type %s for disk %s/%s, defaulting to standard",

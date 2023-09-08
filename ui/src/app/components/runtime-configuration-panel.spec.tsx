@@ -5,6 +5,8 @@ import { ReactWrapper } from 'enzyme';
 
 import {
   DisksApi,
+  GceWithPdConfig,
+  PersistentDiskRequest,
   RuntimeConfigurationType,
   RuntimeStatus,
   WorkspaceAccessLevel,
@@ -53,11 +55,15 @@ import {
   CdrVersionsStubVariables,
   cdrVersionTiersResponse,
 } from 'testing/stubs/cdr-versions-api-stub';
-import { DisksApiStub } from 'testing/stubs/disks-api-stub';
+import {
+  DisksApiStub,
+  stubDisk,
+  stubDiskWithDefaultSize,
+} from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import {
   defaultDataprocConfig,
-  defaultGceConfig,
+  defaultGceWithPdConfig,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
@@ -121,7 +127,6 @@ describe('RuntimeConfigurationPanel', () => {
         },
         gpuConfig: null,
       },
-      gceConfig: null,
       dataprocConfig: null,
     };
   };
@@ -356,7 +361,6 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toEqual(
       'n1-standard-4'
     );
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
   });
 
   it('should show customize after create', async () => {
@@ -378,10 +382,9 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: {
-        ...defaultGceConfig(),
+      gceWithPdConfig: {
+        ...defaultGceWithPdConfig(),
         machineType: 'n1-standard-16',
-        diskSize: 1000,
       },
     });
 
@@ -389,7 +392,6 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
     expect(runtimeApiStub.runtime.gceWithPdConfig.machineType).toBe(
       runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig.machineType
     );
@@ -408,7 +410,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
         ...defaultDataprocConfig(),
@@ -441,10 +442,9 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: {
-        ...defaultGceConfig(),
+      gceWithPdConfig: {
+        ...defaultGceWithPdConfig(),
         machineType: 'n1-standard-16',
-        diskSize: MIN_DISK_SIZE_GB,
       },
       dataprocConfig: null,
     });
@@ -463,10 +463,9 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: {
-        ...defaultGceConfig(),
+      gceWithPdConfig: {
+        ...defaultGceWithPdConfig(),
         machineType: 'n1-standard-16',
-        diskSize: MIN_DISK_SIZE_GB,
       },
       dataprocConfig: null,
     });
@@ -566,7 +565,7 @@ describe('RuntimeConfigurationPanel', () => {
       numberOfWorkers: 10,
       numberOfPreemptibleWorkers: 20,
     });
-    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+    expect(runtimeApiStub.runtime.gceWithPdConfig).toBeFalsy();
   });
 
   it('should allow configuration via GCE preset', async () => {
@@ -618,7 +617,6 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
     );
-    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it(
@@ -627,15 +625,24 @@ describe('RuntimeConfigurationPanel', () => {
     async () => {
       const customMachineType = 'n1-standard-16';
       const customDiskSize = 1000;
+      const diskRequest = (): PersistentDiskRequest => ({
+        // Set the default disk size a bit over the minimum for ease of testing
+        // decreases in the disk size.
+        name: 'test_disk',
+        size: customDiskSize,
+      });
+
+      const gceWithPdConfig = (): GceWithPdConfig => ({
+        // Set the default disk size a bit over the minimum for ease of testing
+        // decreases in the disk size.
+        persistentDisk: diskRequest(),
+        machineType: customMachineType,
+      });
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.GeneralAnalysis,
-        gceConfig: {
-          ...defaultGceConfig(),
-          machineType: customMachineType,
-          diskSize: customDiskSize,
-        },
+        ...gceWithPdConfig(),
         dataprocConfig: null,
       });
 
@@ -669,7 +676,6 @@ describe('RuntimeConfigurationPanel', () => {
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-        gceConfig: null,
         gceWithPdConfig: null,
         dataprocConfig: {
           ...defaultDataprocConfig(),
@@ -715,8 +721,8 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.UserOverride,
-      gceConfig: {
-        ...defaultGceConfig(),
+      gceWithPdConfig: {
+        ...defaultGceWithPdConfig(),
         machineType: 'n1-standard-16',
       },
       dataprocConfig: null,
@@ -760,7 +766,6 @@ describe('RuntimeConfigurationPanel', () => {
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
     );
-    expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
   });
 
   it('should tag as user override after preset modification', async () => {
@@ -880,7 +885,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn user about re-boot if there are updates that require one - increase disk size', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
@@ -889,6 +893,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
     await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Update');
 
     expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
@@ -896,7 +901,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should not warn user for updates where not needed - number of workers', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       configurationType: RuntimeConfigurationType.UserOverride,
@@ -913,7 +917,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should not warn user for updates where not needed - number of preemptibles', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -932,7 +935,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn user about reboot if there are updates that require one - CPU', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -948,7 +950,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn user about reboot if there are updates that require one - Memory', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -986,8 +987,14 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async () => {
+    runtimeDiskStoreStub = {
+      workspaceNamespace: workspaceStubs[0].namespace,
+      gcePersistentDisk: stubDiskWithDefaultSize(),
+    };
+    runtimeDiskStore.set(runtimeDiskStoreStub);
     const wrapper = await component();
     await pickComputeType(wrapper, ComputeType.Dataproc);
+    await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Next');
     expect(
       wrapper.find(WarningMessage).text().includes('deletion')
@@ -1009,7 +1016,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn the user about deletion if there are updates that require one - Worker CPU', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1028,7 +1034,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn the user about deletion if there are updates that require one - Worker RAM', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1047,7 +1052,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should warn the user about deletion if there are updates that require one - Worker Disk', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1064,7 +1068,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should retain original inputs when hitting cancel from the Confirm panel', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1096,7 +1099,6 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable Next button if Runtime is in between states', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
       status: RuntimeStatus.Creating,
@@ -1119,7 +1121,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
@@ -1162,10 +1163,16 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should send a delete call if an update requires delete', async () => {
+    runtimeDiskStoreStub = {
+      workspaceNamespace: workspaceStubs[0].namespace,
+      gcePersistentDisk: stubDiskWithDefaultSize(),
+    };
+    runtimeDiskStore.set(runtimeDiskStoreStub);
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
 
+    await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
@@ -1236,7 +1243,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.UserOverride,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
@@ -1574,7 +1580,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1752,7 +1757,6 @@ describe('RuntimeConfigurationPanel', () => {
 
     await mustClickButton(wrapper, 'Create');
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig).toBeUndefined();
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk.name).toEqual(
       'stub-disk'
     );
@@ -1778,7 +1782,6 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
-      gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
     });
@@ -1799,7 +1802,7 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: defaultGceConfig(),
+      gceWithPdConfig: defaultGceWithPdConfig(),
       dataprocConfig: null,
     });
 
@@ -1821,7 +1824,6 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Stopped,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
-      gceConfig: null,
       gceWithPdConfig: null,
     });
 
@@ -1837,7 +1839,6 @@ describe('RuntimeConfigurationPanel', () => {
       status: RuntimeStatus.Running,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
-      gceConfig: null,
       gceWithPdConfig: null,
     });
 

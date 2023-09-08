@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterError;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ClusterStatus;
+import org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -22,13 +25,10 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.leonardo.LeonardoLabelHelper;
 import org.pmiops.workbench.leonardo.PersistentDiskUtils;
-import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
-import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
-import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
+import org.pmiops.workbench.model.GetRuntimeResponse;
 import org.pmiops.workbench.model.PersistentDiskRequest;
 import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
@@ -76,16 +76,17 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
+  public ResponseEntity<GetRuntimeResponse> getRuntime(String workspaceNamespace) {
     DbUser user = userProvider.get();
     leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     String googleProject = dbWorkspace.getGoogleProject();
     try {
-      LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
-      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+      org.broadinstitute.dsde.workbench.client.leonardo.model.GetRuntimeResponse
+          leoRuntimeResponse =
+              leonardoNotebooksClient.getRuntime(googleProject, user.getRuntimeName());
+      if (ClusterStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
                 "Observed Leonardo runtime with unexpected error status:\n%s",
@@ -97,7 +98,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
   }
 
-  private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
+  private String formatRuntimeErrors(@Nullable List<ClusterError> errors) {
     if (errors == null || errors.isEmpty()) {
       return "no error messages";
     }
@@ -106,8 +107,8 @@ public class RuntimeController implements RuntimeApiDelegate {
         .collect(Collectors.joining("\n"));
   }
 
-  private Runtime getOverrideFromListRuntimes(String googleProject) {
-    Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
+  private GetRuntimeResponse getOverrideFromListRuntimes(String googleProject) {
+    Optional<ListRuntimeResponse> mostRecentRuntimeMaybe =
         leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
             .min(
                 (a, b) -> {
@@ -127,7 +128,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                   return bCreatedDate.compareTo(aCreatedDate);
                 });
 
-    LeonardoListRuntimeResponse mostRecentRuntime =
+    org.broadinstitute.dsde.workbench.client.leonardo.model.ListRuntimeResponse mostRecentRuntime =
         mostRecentRuntimeMaybe.orElseThrow(NotFoundException::new);
 
     @SuppressWarnings("unchecked")
@@ -138,7 +139,7 @@ public class RuntimeController implements RuntimeApiDelegate {
             .values()
             .contains(runtimeLabels.get(LeonardoLabelHelper.LEONARDO_LABEL_AOU_CONFIG))) {
       try {
-        Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
+        GetRuntimeResponse runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
           log.warning(
               "Runtimes returned from ListRuntimes should be DELETED but found "
@@ -147,8 +148,7 @@ public class RuntimeController implements RuntimeApiDelegate {
         return runtime.status(RuntimeStatus.DELETED);
       } catch (RuntimeException e) {
         log.warning(
-            "RuntimeException during LeonardoListRuntimeResponse -> Runtime mapping "
-                + e.toString());
+            "RuntimeException during ListRuntimeResponse -> Runtime mapping " + e.toString());
       }
     }
 
@@ -194,7 +194,7 @@ public class RuntimeController implements RuntimeApiDelegate {
               LEONARDO_LABEL_IS_RUNTIME_TRUE));
     }
     long configCount =
-        Stream.of(runtime.getGceConfig(), runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
+        Stream.of(runtime.getDataprocConfig(), runtime.getGceWithPdConfig())
             .filter(c -> c != null)
             .count();
     if (configCount != 1) {
@@ -224,11 +224,10 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Runtime cannot be empty for an update request");
     }
 
-    if (!(runtimeRequest.getRuntime().getGceConfig() != null
-        ^ runtimeRequest.getRuntime().getGceWithPdConfig() != null
-        ^ runtimeRequest.getRuntime().getDataprocConfig() != null)) {
+    if ((runtimeRequest.getRuntime().getGceWithPdConfig() != null)
+        && (runtimeRequest.getRuntime().getDataprocConfig() != null)) {
       throw new BadRequestException(
-          "Exactly one of GceConfig, GceWithPdConfig, or DataprocConfig must be provided");
+          "Exactly one of GceWithPdConfig, or DataprocConfig must be provided");
     }
 
     DbUser user = userProvider.get();
