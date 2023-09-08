@@ -17,6 +17,7 @@ import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
+import org.pmiops.workbench.compliancetraining.ComplianceTrainingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -87,6 +88,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
   private final RasLinkService rasLinkService;
+  private final ComplianceTrainingService complianceTrainingService;
 
   @Autowired
   ProfileController(
@@ -108,7 +110,8 @@ public class ProfileController implements ProfileApiDelegate {
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      RasLinkService rasLinkService) {
+      RasLinkService rasLinkService,
+      ComplianceTrainingService complianceTrainingService) {
     this.addressMapper = addressMapper;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -128,6 +131,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.rasLinkService = rasLinkService;
+    this.complianceTrainingService = complianceTrainingService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -354,7 +358,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncComplianceTrainingStatusV2();
+      complianceTrainingService.syncComplianceTrainingStatusV2();
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {

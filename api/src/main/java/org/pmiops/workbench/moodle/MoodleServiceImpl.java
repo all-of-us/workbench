@@ -1,11 +1,10 @@
-package org.pmiops.workbench.compliance;
+package org.pmiops.workbench.moodle;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.moodle.model.UserBadgeResponseV2;
@@ -14,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ComplianceServiceImpl implements ComplianceService {
+public class MoodleServiceImpl implements MoodleService {
   private static final String RESPONSE_FORMAT = "json";
   private static final String MOODLE_EXCEPTION = "moodle_exception";
   private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
@@ -22,10 +21,10 @@ public class ComplianceServiceImpl implements ComplianceService {
   private final CloudStorageClient cloudStorageClient;
   private final Provider<MoodleApi> moodleApiProvider;
 
-  private static final Logger logger = Logger.getLogger(ComplianceServiceImpl.class.getName());
+  private static final Logger logger = Logger.getLogger(MoodleServiceImpl.class.getName());
 
   @Autowired
-  public ComplianceServiceImpl(
+  public MoodleServiceImpl(
       CloudStorageClient cloudStorageClient, Provider<MoodleApi> moodleApiProvider) {
     this.cloudStorageClient = cloudStorageClient;
     this.moodleApiProvider = moodleApiProvider;

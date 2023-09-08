@@ -11,7 +11,12 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.utils.TestMockFactory.createDefaultCdrVersion;
 
 import com.google.cloud.PageImpl;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.Schema;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -20,7 +25,16 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +69,6 @@ import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMappe
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapperImpl;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -113,6 +126,7 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -197,7 +211,7 @@ public class CohortReviewControllerTest {
   @Autowired FireCloudService fireCloudService;
   @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CloudBillingClient cloudBillingClient;
-  @Autowired ComplianceService complianceService;
+  @Autowired MoodleService moodleService;
   @Autowired DataSetService dataSetService;
   @Autowired BigQueryService bigQueryService;
   @Autowired UserService userService;
@@ -284,7 +298,7 @@ public class CohortReviewControllerTest {
     CdrVersionService.class,
     CloudBillingClient.class,
     CloudStorageClient.class,
-    ComplianceService.class,
+    MoodleService.class,
     DataSetService.class,
     DirectoryService.class,
     FireCloudService.class,

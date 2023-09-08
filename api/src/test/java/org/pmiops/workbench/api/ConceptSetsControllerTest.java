@@ -38,7 +38,6 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -72,6 +71,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -242,7 +242,7 @@ public class ConceptSetsControllerTest {
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortService.class,
-    ComplianceService.class,
+    MoodleService.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
     DataSetService.class,
