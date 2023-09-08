@@ -185,6 +185,6 @@
     "latestAouVersion": 1
   },
   "tanagra": {
-    "baseUrl": "https:\/\/aou-tanagra-dev.fake-research-aou.org"
+    "baseUrl": "https:\/\/aou-tanagra.dev.pmi-ops.org"
   }
 }
