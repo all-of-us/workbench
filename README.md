@@ -103,48 +103,7 @@ The `status` column enum values can be found in `org.pmiops.workbench.db.model.S
 
 ### UI
 
-In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
-```
-workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
-```
-
-Before launching or testing the UI, yarn must first install the neccessary packages. From the `ui/` directory:
-```Shell
-yarn install
-```
-
-To launch the local UI:
-```Shell
-yarn dev-up-local
-```
-
-You can view your local UI server at http://localhost:4200/.  
-
-This connects the UI server to your local API server, If you wish to connect
-your UI server to the test API server, you need to start your UI server using:
-
-```
-yarn dev-up-test
-```
-
-Alternatively, you can specify which environment to connect to by setting `REACT_APP_ENVIRONMENT` variable. For example to connect to the test API server you can use
-```
-REACT_APP_ENVIRONMENT=localtest yarn dev-up
-```
-
-To run react UI tests:
-```Shell
-yarn test
-```
-
-Other useful yarn commands:
-```Shell
-# To upgrade yarn packages:
-yarn
-
-# To lint the UI and automatically fix issues:
-yarn lint --fix
-```
+See [ui/README.md].
 
 ## Deploying
 
