@@ -33,6 +33,7 @@ async function build_and_deploy(arg) {
 async function build(env) {
 
   try {
+    console.log(process.env);
     for (let index = 0; index < BUILD_CMDS.length; index++) {
       await runCommand(BUILD_CMDS[index]);
     }
