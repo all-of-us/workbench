@@ -30,7 +30,7 @@ const cromwellSupportArticles = [
   },
 ];
 
-const introTextOverride =
+const introText =
   'A cloud environment consists of an application configuration, cloud compute, and persistent disk(s). ' +
   'Cromwell is a workflow execution engine. ' +
   'You will need to create a Jupyter terminal environment in order to interact with Cromwell.';
@@ -85,7 +85,7 @@ export const CromwellConfigurationPanel = (props: CreateGKEAppPanelProps) => (
   <CreateGKEAppPanel
     {...{
       ...props,
-      introTextOverride,
+      introText,
       CostNote,
       SupportNote,
       CreateAppText,

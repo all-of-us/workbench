@@ -29,6 +29,10 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import { CreateGKEAppButton } from './create-gke-app-button';
 import { DisabledCloudComputeProfile } from './disabled-cloud-compute-profile';
 
+const defaultIntroText =
+  'Your analysis environment consists of an application and compute resources. ' +
+  'Your cloud environment is unique to this workspace and not shared with other users.';
+
 export interface CreateGKEAppPanelProps {
   onClose: () => void;
   creatorFreeCreditsRemaining: number | null;
@@ -44,7 +48,7 @@ export type CreateGKEAppPanelPropsWithAppType = {
 } & CreateGKEAppPanelProps;
 
 type Props = {
-  introTextOverride?: string;
+  introText?: string;
   CostNote?: React.FunctionComponent;
   SupportNote?: React.FunctionComponent;
   CreateAppText?: React.FunctionComponent;
@@ -59,7 +63,7 @@ export const CreateGKEAppPanel = ({
   app,
   disk,
   onClickDeleteUnattachedPersistentDisk,
-  introTextOverride,
+  introText = defaultIntroText,
   CostNote = () => null,
   SupportNote = () => null,
   CreateAppText = () => null,
@@ -70,10 +74,6 @@ export const CreateGKEAppPanel = ({
     onClose();
     setTimeout(() => setSidebarActiveIconStore.next('apps'), 3000);
   };
-
-  const defaultIntroText =
-    'Your analysis environment consists of an application and compute resources. ' +
-    'Your cloud environment is unique to this workspace and not shared with other users.';
 
   const defaultConfig = switchCase(
     appType,
@@ -95,7 +95,7 @@ export const CreateGKEAppPanel = ({
       id={`${appTypeToString[appType]}-configuration-panel`}
       style={{ height: '100%', rowGap: '1rem' }}
     >
-      <div>{introTextOverride ?? defaultIntroText}</div>
+      <div>{introText}</div>
       <div style={{ ...styles.controlSection }}>
         <EnvironmentInformedActionPanel
           {...{
