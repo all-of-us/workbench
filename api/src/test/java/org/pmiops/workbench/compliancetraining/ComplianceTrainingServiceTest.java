@@ -36,6 +36,7 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -190,8 +191,9 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationIfComplete()
-      throws Exception {
+  public void
+      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
+          throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 100;
     Map<BadgeName, BadgeDetailsV2> userBadgesByName =
         ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
@@ -217,6 +219,8 @@ public class ComplianceTrainingServiceTest {
     var rtVerification =
         complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
     assertThat(rtVerification.isPresent()).isTrue();
+    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is incomplete, so there should not be a verification record.
     var ctAccessModule =
