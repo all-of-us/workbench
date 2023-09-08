@@ -96,7 +96,11 @@ export const EnvironmentCostEstimator = ({
             </div>
           }
         >
-          <div style={costStyle} data-test-id='running-cost'>
+          <div
+            style={costStyle}
+            data-test-id='running-cost'
+            aria-label='cost while running'
+          >
             <div style={styles.costValue}>{formatUsd(runningCost)}</div>
             <div style={styles.costPeriod}>{` per hour`}</div>
           </div>
@@ -116,7 +120,11 @@ export const EnvironmentCostEstimator = ({
             </div>
           }
         >
-          <div style={costStyle} data-test-id='paused-cost'>
+          <div
+            style={costStyle}
+            data-test-id='paused-cost'
+            aria-label='cost while paused'
+          >
             <div style={styles.costValue}>{formatUsd(pausedCost)}</div>
             <div style={styles.costPeriod}>{` per hour`}</div>
           </div>

@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AppsApi,
@@ -9,17 +7,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { CromwellConfigurationPanel } from 'app/components/cromwell-configuration-panel';
-import {
-  GKEAppConfigurationPanel,
-  GkeAppConfigurationPanelProps,
-  GKEAppPanelContent,
-} from 'app/components/gke-app-configuration-panel';
-import { RStudioConfigurationPanel } from 'app/components/rstudio-configuration-panel';
-import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from 'app/components/rstudio-configuration-panel.spec';
-import { ConfirmDeleteEnvironmentWithPD } from 'app/components/runtime-configuration-panel/confirm-delete-environment-with-pd';
-import { ConfirmDeleteUnattachedPD } from 'app/components/runtime-configuration-panel/confirm-delete-unattached-pd';
-import { Spinner } from 'app/components/spinners';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   appsApi,
   disksApi,
@@ -28,23 +16,39 @@ import {
 import { notificationStore, serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
-  createListAppsRStudioResponse,
 } from 'testing/stubs/apps-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
 
-import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
+import {
+  GKEAppConfigurationPanel,
+  GkeAppConfigurationPanelProps,
+  GKEAppPanelContent,
+} from './gke-app-configuration-panel';
+import { DEFAULT_PROPS as RSTUDIO_DEFAULT_PROPS } from './rstudio-configuration-panel.spec';
 
-async function validateInitialLoadingSpinner(wrapper: ReactWrapper) {
-  expect(wrapper.childAt(0).is(Spinner)).toBeTruthy();
+// component text for selectors
 
-  await waitOneTickAndUpdate(wrapper);
+const cromwellIntroTextRegex = /Cromwell is a workflow execution engine/;
+const defaultIntroTextRegex =
+  /Your cloud environment is unique to this workspace and not shared with other users/;
+const rstudioIntroTextRegex = defaultIntroTextRegex;
+const deleteUnattachedPdRegex =
+  /Deletes your persistent disk, which will also delete all files/;
+const confirmDeleteGkeAppText =
+  'You’re about to delete your cloud analysis environment.';
+const confirmDeleteGkeAppWithPdText =
+  'Keep persistent disk, delete environment';
 
-  expect(wrapper.childAt(0).is(Spinner)).toBeFalsy();
-}
+const validateInitialLoadingSpinner = async () => {
+  expect(screen.queryByLabelText('Please Wait')).not.toBeNull();
+  return waitFor(() => {
+    expect(screen.queryByLabelText('Please Wait')).toBeNull();
+  });
+};
 
 describe(GKEAppConfigurationPanel.name, () => {
   beforeEach(() => {
@@ -68,14 +72,13 @@ describe(GKEAppConfigurationPanel.name, () => {
   });
 
   const DEFAULT_PROPS: GkeAppConfigurationPanelProps = {
-    type: AppType.RSTUDIO,
+    appType: AppType.RSTUDIO,
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
     initialPanelContent: null,
+    creatorFreeCreditsRemaining: 300,
 
     // Use RSTUDIO_DEFAULT_PROPS for the rest of the props since they shouldn't affect this test
-    creatorFreeCreditsRemaining:
-      RSTUDIO_DEFAULT_PROPS.creatorFreeCreditsRemaining,
     workspace: RSTUDIO_DEFAULT_PROPS.workspace,
     profileState: RSTUDIO_DEFAULT_PROPS.profileState,
   };
@@ -87,21 +90,23 @@ describe(GKEAppConfigurationPanel.name, () => {
       ...DEFAULT_PROPS,
       ...propOverrides,
     };
-    return mount(<GKEAppConfigurationPanel {...props} />);
+    return render(<GKEAppConfigurationPanel {...props} />);
   };
 
   it('should show a loading spinner while waiting for the list apps API call to return', async () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([]));
-    await validateInitialLoadingSpinner(createWrapper());
+    createWrapper();
+    await validateInitialLoadingSpinner();
   });
 
   it('should show a loading spinner while waiting for the list disks API call to return', async () => {
     jest
       .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([]));
-    await validateInitialLoadingSpinner(createWrapper());
+    createWrapper();
+    await validateInitialLoadingSpinner();
   });
 
   it('should show an error if the list apps API call fails', async () => {
@@ -111,11 +116,11 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     expect(notificationStore.get()).toBeNull();
 
-    const wrapper = createWrapper();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get().title).toBeTruthy();
-    expect(notificationStore.get().message).toBeTruthy();
+    createWrapper();
+    await waitFor(() => {
+      expect(notificationStore.get().title).toBeTruthy();
+      expect(notificationStore.get().message).toBeTruthy();
+    });
   });
 
   it('should show an error if the list disks API call fails', async () => {
@@ -125,11 +130,11 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     expect(notificationStore.get()).toBeNull();
 
-    const wrapper = createWrapper();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get().title).toBeTruthy();
-    expect(notificationStore.get().message).toBeTruthy();
+    createWrapper();
+    await waitFor(() => {
+      expect(notificationStore.get().title).toBeTruthy();
+      expect(notificationStore.get().message).toBeTruthy();
+    });
   });
 
   it('should not show an error if both fetch API calls succeed', async () => {
@@ -142,84 +147,21 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     expect(notificationStore.get()).toBeNull();
 
-    const wrapper = createWrapper();
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(notificationStore.get()).toBeNull();
-  });
-
-  it('should pass the relevant user app to the specific app component when the API call succeeds', async () => {
-    const workspaceNamespace = 'aou-rw-1234';
-    const cromwellApp = createListAppsCromwellResponse();
-    const apps = [cromwellApp, createListAppsRStudioResponse()];
-    const listAppsStub = jest
-      .spyOn(appsApi(), 'listAppsInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.resolve(apps));
-
-    const wrapper = createWrapper({
-      workspaceNamespace,
-      type: AppType.CROMWELL,
+    createWrapper();
+    await waitFor(() => {
+      expect(notificationStore.get()).toBeNull();
     });
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(listAppsStub).toHaveBeenCalledWith(workspaceNamespace);
-    const cromwellPanel = wrapper.find(CromwellConfigurationPanel);
-    expect(cromwellPanel.exists()).toBeTruthy();
-    expect(cromwellPanel.prop('app')).toEqual(cromwellApp);
   });
 
-  it('should pass the relevant disk to the specific app if available', async () => {
-    const workspaceNamespace = 'aou-rw-1234';
-    const cromwellDisk = stubDisk();
-    cromwellDisk.appType = AppType.CROMWELL;
-    const rstudioDisk = stubDisk();
-    rstudioDisk.appType = AppType.RSTUDIO;
-    const listDisksStub = jest
-      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
-      .mockImplementation(
-        (): Promise<any> => Promise.resolve([cromwellDisk, rstudioDisk])
-      );
-
-    const wrapper = createWrapper({
-      workspaceNamespace,
-      type: AppType.CROMWELL,
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(listDisksStub).toHaveBeenCalledWith(workspaceNamespace);
-    const cromwellPanel = wrapper.find(CromwellConfigurationPanel);
-    expect(cromwellPanel.exists()).toBeTruthy();
-    expect(cromwellPanel.prop('disk')).toEqual(cromwellDisk);
-  });
-
-  it('should pass no disk to the specific app component if no relevant disk is available', async () => {
-    const workspaceNamespace = 'aou-rw-1234';
-    const rstudioDisk = stubDisk();
-    rstudioDisk.appType = AppType.RSTUDIO;
-    const listDisksStub = jest
-      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
-      .mockImplementation((): Promise<any> => Promise.resolve([rstudioDisk]));
-
-    const wrapper = createWrapper({
-      workspaceNamespace,
-      type: AppType.CROMWELL,
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(listDisksStub).toHaveBeenCalledWith(workspaceNamespace);
-    const cromwellPanel = wrapper.find(CromwellConfigurationPanel);
-    expect(cromwellPanel.exists()).toBeTruthy();
-    expect(cromwellPanel.prop('disk')).toEqual(undefined);
-  });
-
-  it('should display the CREATE panel if no initial panel is passed', async () => {
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+  it('should display the Cromwell creation panel if no initial panel is passed', async () => {
+    createWrapper({
+      appType: AppType.CROMWELL,
       initialPanelContent: null,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
+    });
   });
 
   it('should display the initial panel if an initial panel is passed', async () => {
@@ -233,56 +175,63 @@ describe(GKEAppConfigurationPanel.name, () => {
     jest
       .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([cromwellDisk]));
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+    createWrapper({
+      appType: AppType.CROMWELL,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(ConfirmDeleteEnvironmentWithPD).exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.queryByText(confirmDeleteGkeAppWithPdText)).not.toBeNull();
+    });
   });
 
   it('should display the Cromwell panel when the type is Cromwell', async () => {
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+    createWrapper({
+      appType: AppType.CROMWELL,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    const cromwellPanel = wrapper.find(CromwellConfigurationPanel);
-    expect(cromwellPanel.exists()).toBeTruthy();
-    // check that an arbitrary CromwellConfigurationPanelProps prop is passed through
-    expect(cromwellPanel.prop('onClose')).toEqual(DEFAULT_PROPS.onClose);
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
+      expect(screen.queryByText(rstudioIntroTextRegex)).toBeNull();
+    });
   });
 
   it('should display the RStudio panel when the type is RStudio', async () => {
-    const wrapper = createWrapper({
-      type: AppType.RSTUDIO,
+    createWrapper({
+      appType: AppType.RSTUDIO,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    const rstudioPanel = wrapper.find(RStudioConfigurationPanel);
-    expect(rstudioPanel.exists()).toBeTruthy();
-    // check that an arbitrary RStudioConfigurationPanelProps prop is passed through
-    expect(rstudioPanel.prop('onClose')).toEqual(DEFAULT_PROPS.onClose);
+    await waitFor(() => {
+      expect(screen.queryByText(rstudioIntroTextRegex)).not.toBeNull();
+      expect(screen.queryByText(cromwellIntroTextRegex)).toBeNull();
+    });
   });
 
   it('should change panels from CREATE to DELETE_UNATTACHED_PD after clicking the delete PD button', async () => {
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+    // add an unattached PD
+    const disk = stubDisk();
+    disk.appType = AppType.CROMWELL;
+    jest
+      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
+      .mockImplementation((): Promise<any> => Promise.resolve([disk]));
+
+    createWrapper({
+      appType: AppType.CROMWELL,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    const cromwellPanel = wrapper.find(CromwellConfigurationPanel);
-    expect(cromwellPanel.exists()).toBeTruthy();
-    expect(wrapper.find(ConfirmDeleteUnattachedPD).exists()).toBeFalsy();
-
-    act(() => {
-      cromwellPanel.prop('onClickDeleteUnattachedPersistentDisk')();
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
+      expect(screen.queryByText(deleteUnattachedPdRegex)).toBeNull();
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
-    expect(wrapper.find(ConfirmDeleteUnattachedPD).exists()).toBeTruthy();
+    const deleteButton = screen.getByLabelText('Delete Persistent Disk');
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText(deleteUnattachedPdRegex)).not.toBeNull();
+      expect(screen.queryByText(cromwellIntroTextRegex)).toBeNull();
+    });
   });
 
   it('should call the delete GKE app api after confirming deleting a GKE app', async () => {
@@ -302,28 +251,36 @@ describe(GKEAppConfigurationPanel.name, () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([app]));
-    const wrapper = createWrapper({
+    createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
-    await waitOneTickAndUpdate(wrapper);
+
+    // confirm that the correct panel is visible
+    await waitFor(() => {
+      expect(screen.queryByText(confirmDeleteGkeAppWithPdText)).not.toBeNull();
+    });
+
+    const deletePDRadioButton = screen.getByRole('radio', {
+      name: 'Delete persistent disk and environment',
+    });
+    deletePDRadioButton.click();
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
 
     const deletePDSelected = true;
-    act(() => {
-      wrapper.find(ConfirmDeleteEnvironmentWithPD).prop('onConfirm')(
+    await waitFor(() => {
+      expect(deleteAppStub).toHaveBeenCalledWith(
+        workspaceNamespace,
+        app.appName,
         deletePDSelected
       );
+      expect(onCloseStub).toHaveBeenCalled();
     });
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(deleteAppStub).toHaveBeenCalledWith(
-      workspaceNamespace,
-      app.appName,
-      deletePDSelected
-    );
-    expect(onCloseStub).toHaveBeenCalled();
   });
 
   it('should open the ConfirmDelete (without PD) panel when deleting a GKE app with no PD', async () => {
@@ -346,30 +303,32 @@ describe(GKEAppConfigurationPanel.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve([app]));
 
     const workspaceNamespace = 'aou-rw-1234';
-    const wrapper = createWrapper({
+    createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    const confirmDeletePanel = wrapper.find(ConfirmDelete);
-    expect(confirmDeletePanel.exists()).toBeTruthy();
-
-    act(() => {
-      confirmDeletePanel.prop('onConfirm')();
+    // confirm that the correct panel is visible
+    await waitFor(() => {
+      expect(screen.queryByText(confirmDeleteGkeAppText)).not.toBeNull();
     });
-    await waitOneTickAndUpdate(wrapper);
+
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
 
     const deletePDSelected = false;
-    expect(deleteAppStub).toHaveBeenCalledWith(
-      workspaceNamespace,
-      app.appName,
-      deletePDSelected
-    );
+    await waitFor(() => {
+      expect(deleteAppStub).toHaveBeenCalledWith(
+        workspaceNamespace,
+        app.appName,
+        deletePDSelected
+      );
 
-    expect(onCloseStub).toHaveBeenCalled();
+      expect(onCloseStub).toHaveBeenCalled();
+    });
   });
 
   it('should close the panel after cancelling deleting a GKE app', async () => {
@@ -386,18 +345,24 @@ describe(GKEAppConfigurationPanel.name, () => {
     jest
       .spyOn(appsApi(), 'listAppsInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([app]));
-    const wrapper = createWrapper({
+    createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
       initialPanelContent: GKEAppPanelContent.DELETE_GKE_APP,
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find(ConfirmDeleteEnvironmentWithPD).prop('onCancel')();
-    await waitOneTickAndUpdate(wrapper);
+    await waitFor(() => {
+      expect(screen.queryByText(confirmDeleteGkeAppWithPdText)).not.toBeNull();
+    });
 
-    expect(onCloseStub).toHaveBeenCalled();
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    expectButtonElementEnabled(cancelButton);
+    cancelButton.click();
+
+    await waitFor(() => {
+      expect(onCloseStub).toHaveBeenCalled();
+    });
   });
 
   it('should call the delete PD api after confirming deleting PD', async () => {
@@ -413,31 +378,45 @@ describe(GKEAppConfigurationPanel.name, () => {
     jest
       .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
       .mockImplementation((): Promise<any> => Promise.resolve([disk]));
-    const wrapper = createWrapper({
+    createWrapper({
       onClose: onCloseStub,
-      type: AppType.CROMWELL,
+      appType: AppType.CROMWELL,
       workspaceNamespace,
     });
-    await waitOneTickAndUpdate(wrapper);
-    // Start with the DELETE_UNATTACHED_PD panel
-    act(() => {
-      wrapper
-        .find(CromwellConfigurationPanel)
-        .prop('onClickDeleteUnattachedPersistentDisk')();
+
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find(ConfirmDeleteUnattachedPD).prop('onConfirm')();
-    await waitOneTickAndUpdate(wrapper);
+    const deleteButton = screen.getByRole('button', {
+      name: 'Delete Persistent Disk',
+    });
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
 
-    expect(deleteUnattachedPDStub).toHaveBeenCalledWith(
-      workspaceNamespace,
-      disk.name
-    );
-    expect(onCloseStub).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByText(deleteUnattachedPdRegex)).not.toBeNull();
+    });
 
-    // Validate there is no error modal if the call succeeds
-    expect(notificationStore.get()).toBeNull();
+    const deletePDRadioButton = screen.getByRole('radio', {
+      name: 'Delete persistent disk',
+    });
+    deletePDRadioButton.click();
+
+    const confirmDeleteButton = screen.getByRole('button', { name: 'Delete' });
+    expectButtonElementEnabled(confirmDeleteButton);
+    confirmDeleteButton.click();
+
+    await waitFor(() => {
+      expect(deleteUnattachedPDStub).toHaveBeenCalledWith(
+        workspaceNamespace,
+        disk.name
+      );
+      expect(onCloseStub).toHaveBeenCalled();
+
+      // Validate there is no error modal if the call succeeds
+      expect(notificationStore.get()).toBeNull();
+    });
   });
 
   it('should show an error modal if the delete PD API call fails', async () => {
@@ -445,52 +424,85 @@ describe(GKEAppConfigurationPanel.name, () => {
       .spyOn(disksApi(), 'deleteDisk')
       .mockImplementation((): Promise<any> => Promise.reject());
 
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+    const disk = stubDisk();
+    disk.appType = AppType.CROMWELL;
+    jest
+      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
+      .mockImplementation((): Promise<any> => Promise.resolve([disk]));
+
+    createWrapper({
+      appType: AppType.CROMWELL,
     });
-    await waitOneTickAndUpdate(wrapper);
-    // Start with the DELETE_UNATTACHED_PD panel
-    act(() => {
-      wrapper
-        .find(CromwellConfigurationPanel)
-        .prop('onClickDeleteUnattachedPersistentDisk')();
+
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
+      expect(notificationStore.get()).toBeNull(); // no errors
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(notificationStore.get()).toBeNull();
+    const deleteButton = screen.getByRole('button', {
+      name: 'Delete Persistent Disk',
+    });
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
 
-    wrapper.find(ConfirmDeleteUnattachedPD).prop('onConfirm')();
-    await waitOneTickAndUpdate(wrapper);
+    await waitFor(() => {
+      expect(screen.queryByText(deleteUnattachedPdRegex)).not.toBeNull();
+    });
 
-    expect(notificationStore.get().title).toBeTruthy();
-    expect(notificationStore.get().message).toBeTruthy();
+    const deletePDRadioButton = screen.getByRole('radio', {
+      name: 'Delete persistent disk',
+    });
+    deletePDRadioButton.click();
+
+    const confirmDeleteButton = screen.getByRole('button', { name: 'Delete' });
+    expectButtonElementEnabled(confirmDeleteButton);
+    confirmDeleteButton.click();
+
+    await waitFor(() => {
+      expect(notificationStore.get().title).toBeTruthy();
+      expect(notificationStore.get().message).toBeTruthy();
+    });
   });
 
   it('should change panels from DELETE_UNATTACHED_PD to CREATE after cancelling delete PD', async () => {
-    const wrapper = createWrapper({
-      type: AppType.CROMWELL,
+    // Setup: A Cromwell disk exists and the current app is Cromwell
+    const workspaceNamespace = 'aou-rw-1234';
+    const disk = stubDisk();
+    disk.appType = AppType.CROMWELL;
+    jest
+      .spyOn(disksApi(), 'listOwnedDisksInWorkspace')
+      .mockImplementation((): Promise<any> => Promise.resolve([disk]));
+    createWrapper({
+      appType: AppType.CROMWELL,
+      workspaceNamespace,
     });
-    await waitOneTickAndUpdate(wrapper);
-    // Start with the DELETE_UNATTACHED_PD panel
-    act(() => {
-      wrapper
-        .find(CromwellConfigurationPanel)
-        .prop('onClickDeleteUnattachedPersistentDisk')();
+
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
     });
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeFalsy();
-    const confirmDeleteUnattachedPDPanel = wrapper.find(
-      ConfirmDeleteUnattachedPD
-    );
-    expect(confirmDeleteUnattachedPDPanel.exists()).toBeTruthy();
-
-    act(() => {
-      confirmDeleteUnattachedPDPanel.prop('onCancel')();
+    const deleteButton = screen.getByRole('button', {
+      name: 'Delete Persistent Disk',
     });
-    await waitOneTickAndUpdate(wrapper);
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
 
-    expect(wrapper.find(CromwellConfigurationPanel).exists()).toBeTruthy();
-    expect(wrapper.find(ConfirmDeleteUnattachedPD).exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(screen.queryByText(deleteUnattachedPdRegex)).not.toBeNull();
+    });
+
+    const deletePDRadioButton = screen.getByRole('radio', {
+      name: 'Delete persistent disk',
+    });
+    deletePDRadioButton.click();
+
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    expectButtonElementEnabled(cancelButton);
+    cancelButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
+      expect(screen.queryByText(deleteUnattachedPdRegex)).toBeNull();
+    });
   });
 });

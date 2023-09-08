@@ -45,7 +45,7 @@ export function CreateGKEAppButton({
   return (
     <TooltipTrigger
       disabled={createEnabled}
-      content={`An ${appTypeString} app exists or is being created`}
+      content={`A ${appTypeString} app exists or is being created`}
     >
       {/* tooltip trigger needs a div for some reason */}
       <div>

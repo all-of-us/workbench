@@ -54,7 +54,7 @@ export const ConfirmDelete = ({ onCancel, onConfirm }) => {
           Cancel
         </Button>
         <Button
-          aria-label={'Delete'}
+          aria-label='Delete'
           disabled={deleting}
           onClick={async () => {
             setDeleting(true);

@@ -7,15 +7,12 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { clearCompoundRuntimeOperations } from 'app/utils/stores';
 
-import {
-  mountWithRouter,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 import { WorkspacesApiStub } from 'testing/stubs/workspaces-api-stub';
@@ -30,12 +27,8 @@ describe('ConfigurationPanel', () => {
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
 
-  const component = async (propOverrides?: object) => {
-    const allProps = { ...defaultProps, ...propOverrides };
-    const c = mountWithRouter(<ConfigurationPanel {...allProps} />);
-    await waitOneTickAndUpdate(c);
-    return c;
-  };
+  const component = async (propOverrides?: object) =>
+    render(<ConfigurationPanel {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     workspacesApiStub = new WorkspacesApiStub();
@@ -44,7 +37,7 @@ describe('ConfigurationPanel', () => {
     onClose = jest.fn();
     defaultProps = {
       onClose,
-      type: UIAppType.JUPYTER,
+      appType: UIAppType.JUPYTER,
     };
 
     jest.useFakeTimers();
@@ -63,12 +56,12 @@ describe('ConfigurationPanel', () => {
       billingStatus: BillingStatus.INACTIVE,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     });
-    const wrapper = await component();
+    await component();
 
-    const disabledPanel = wrapper.find({
-      'data-test-id': 'environment-disabled-panel',
-    });
-    expect(disabledPanel.exists()).toBeTruthy();
+    const disabledPanel = screen.queryByText(
+      'Cloud services are disabled for this workspace.'
+    );
+    expect(disabledPanel).not.toBeNull();
   });
 
   it('should not render disabled panel when creator billing is enabled', async () => {
@@ -78,11 +71,10 @@ describe('ConfigurationPanel', () => {
       billingStatus: BillingStatus.ACTIVE,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     });
-    const wrapper = await component();
-
-    const disabledPanel = wrapper.find({
-      'data-test-id': 'environment-disabled-panel',
-    });
-    expect(disabledPanel.exists()).toBeFalsy();
+    await component();
+    const disabledPanel = screen.queryByText(
+      'Cloud services are disabled for this workspace.'
+    );
+    expect(disabledPanel).toBeNull();
   });
 });
