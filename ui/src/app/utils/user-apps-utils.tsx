@@ -9,7 +9,10 @@ import {
 
 import { environment } from 'environments/environment';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
-import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
+import {
+  rstudioConfigIconId,
+  sasConfigIconId,
+} from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
@@ -20,6 +23,7 @@ import { userAppsStore } from './stores';
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
+  [AppType.SAS]: 'SAS',
 };
 
 const appStatusesRequiringUpdates = [
@@ -110,7 +114,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (
+export const openGkeApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -130,9 +134,21 @@ export const openRStudioOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, userApp);
+    openGkeApp(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
+  }
+};
+
+export const openSASOrConfigPanel = (
+  workspaceNamespace: string,
+  userApps: ListAppsResponse
+) => {
+  const userApp = findApp(userApps, UIAppType.SAS);
+  if (userApp?.status === AppStatus.RUNNING) {
+    openGkeApp(workspaceNamespace, userApp);
+  } else {
+    setSidebarActiveIconStore.next(sasConfigIconId);
   }
 };
 

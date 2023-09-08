@@ -18,6 +18,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -32,7 +33,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  openRStudio,
+  openGkeApp,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -158,7 +159,7 @@ const RStudioButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openRStudio(workspaceNamespace, userApp);
+    openGkeApp(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -223,7 +224,8 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     appType,
     [UIAppType.JUPYTER, () => onClickDeleteRuntime],
     [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
-    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)]
+    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
+    [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
   );
 
   return (

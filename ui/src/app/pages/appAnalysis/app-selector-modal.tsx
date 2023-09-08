@@ -12,7 +12,7 @@ import {
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 
-export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS];
 
 const styles = reactStyles({
   appsLabel: {

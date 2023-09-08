@@ -8,6 +8,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
@@ -82,6 +83,7 @@ export const AppsPanel = (props: {
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
     UIAppType.CROMWELL,
+    UIAppType.SAS,
   ];
 
   useEffect(() => {
@@ -152,6 +154,8 @@ export const AppsPanel = (props: {
                     setSidebarActiveIconStore.next(cromwellConfigIconId);
                   } else if (availableApp.appType === UIAppType.RSTUDIO) {
                     setSidebarActiveIconStore.next(rstudioConfigIconId);
+                  } else if (availableApp.appType === UIAppType.SAS) {
+                    setSidebarActiveIconStore.next(sasConfigIconId);
                   } else {
                     addToExpandedApps(availableApp.appType);
                   }

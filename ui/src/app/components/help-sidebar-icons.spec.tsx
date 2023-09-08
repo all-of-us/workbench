@@ -8,15 +8,18 @@ import {
   IconConfig,
   rstudioConfigIconId,
   RuntimeIcon,
+  sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
 import rstudioIcon from 'assets/user-apps/RStudio-icon.png';
+import sasIcon from 'assets/user-apps/SAS-icon.png';
 
 import {
   createListAppsCromwellResponse,
   createListAppsRStudioResponse,
+  createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 
 import { UIAppType } from './apps-panel/utils';
@@ -98,6 +101,36 @@ describe('CompoundIcons', () => {
     verifySidebarIcon(
       wrapper,
       `help-sidebar-icon-${rstudioConfigIconId}`,
+      icon,
+      label
+    );
+
+    const statusIndicator = wrapper.find(
+      `[data-test-id="app-status-icon-container"]`
+    );
+    expect(statusIndicator.exists()).toBeTruthy();
+  });
+
+  it('UserAppIcon renders for SAS', () => {
+    const icon = sasIcon;
+    const label = 'SAS Icon';
+    const iconConfig = getIconConfig(sasConfigIconId, label);
+
+    userAppsStore.set({
+      userApps: [createListAppsSASResponse({ status: AppStatus.RUNNING })],
+    });
+
+    const wrapper = mount(
+      <UserAppIcon
+        iconConfig={iconConfig}
+        userSuspended={false}
+        appType={UIAppType.SAS}
+      />
+    );
+
+    verifySidebarIcon(
+      wrapper,
+      `help-sidebar-icon-${sasConfigIconId}`,
       icon,
       label
     );

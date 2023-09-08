@@ -13,6 +13,7 @@ import {
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import {
   leoRuntimesApi,
@@ -21,6 +22,7 @@ import {
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
+import { appTypeToString } from 'app/utils/user-apps-utils';
 import {
   AppsApi as LeoAppsApi,
   ProxyApi,
@@ -229,7 +231,7 @@ describe('ExpandedApp', () => {
     }
   );
 
-  const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO];
+  const gkeAppTypes = [UIAppType.CROMWELL, UIAppType.RSTUDIO, UIAppType.SAS];
   describe.each(gkeAppTypes)('GKE App %s', (appType) => {
     test.each([
       [AppStatus.RUNNING, 'Pause'],
@@ -313,8 +315,12 @@ describe('ExpandedApp', () => {
         expect(cromwell_delete_modal.length).toBe(0);
 
         expect(onClickDeleteGkeApp).toHaveBeenCalledWith(cromwellConfigIconId);
-      } else {
+      } else if (appType === UIAppType.RSTUDIO) {
         expect(onClickDeleteGkeApp).toHaveBeenCalledWith(rstudioConfigIconId);
+      } else if (appType === UIAppType.SAS) {
+        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(sasConfigIconId);
+      } else {
+        fail('Unexpected appType: ' + appTypeToString[appType]);
       }
     });
 
@@ -396,6 +402,61 @@ describe('ExpandedApp', () => {
 
         const launchButton = wrapper.find({
           'data-test-id': 'open-RStudio-button',
+        });
+        expect(launchButton.prop('disabled')).toBeTruthy();
+      }
+    );
+  });
+
+  it('should allow launching SAS when the SAS app status is RUNNING', async () => {
+    const appName = 'my-app';
+    const proxyUrl = 'https://example.com';
+    const wrapper = await component(UIAppType.SAS, {
+      appName,
+      googleProject,
+      appType: AppType.SAS,
+      status: AppStatus.RUNNING,
+      proxyUrls: {
+        [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
+      },
+    });
+    const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
+
+    const focusStub = jest.fn();
+    const windowOpenSpy = jest
+      .spyOn(window, 'open')
+      .mockReturnValue({ focus: focusStub } as any as Window);
+
+    const launchButton = wrapper.find({
+      'data-test-id': 'open-SAS-button',
+    });
+    expect(launchButton.exists()).toBeTruthy();
+    expect(launchButton.prop('disabled')).toBeFalsy();
+
+    await launchButton.simulate('click');
+
+    expect(localizeSpy).toHaveBeenCalledWith(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      appName,
+      { appType: 'SAS', fileNames: [], playgroundMode: false }
+    );
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+    expect(focusStub).toHaveBeenCalled();
+  });
+
+  describe('should disable the launch button when the SAS app status is not RUNNING', () => {
+    test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
+      'Status %s',
+      async (appStatus) => {
+        const wrapper = await component(UIAppType.SAS, {
+          appName: 'my-app',
+          googleProject,
+          status: appStatus,
+        });
+
+        const launchButton = wrapper.find({
+          'data-test-id': 'open-SAS-button',
         });
         expect(launchButton.prop('disabled')).toBeTruthy();
       }

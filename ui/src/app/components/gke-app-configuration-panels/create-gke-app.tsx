@@ -13,6 +13,7 @@ import {
   createAppRequestToAnalysisConfig,
   defaultCromwellConfig,
   defaultRStudioConfig,
+  defaultSASConfig,
 } from 'app/components/apps-panel/utils';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/environment-informed-action-panel';
@@ -82,7 +83,8 @@ export const CreateGkeApp = ({
   const defaultConfig = switchCase(
     appType,
     [AppType.CROMWELL, () => defaultCromwellConfig],
-    [AppType.RSTUDIO, () => defaultRStudioConfig]
+    [AppType.RSTUDIO, () => defaultRStudioConfig],
+    [AppType.SAS, () => defaultSASConfig]
   );
 
   const persistentDiskRequest: PersistentDiskRequest =

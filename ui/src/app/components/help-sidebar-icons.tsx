@@ -103,6 +103,7 @@ const iconStyles = reactStyles({
 
 export const rstudioConfigIconId = 'rstudioConfig';
 export const cromwellConfigIconId = 'cromwellConfig';
+export const sasConfigIconId = 'sasConfig';
 
 export type SidebarIconId =
   | 'criteria'
@@ -115,6 +116,7 @@ export type SidebarIconId =
   | 'runtimeConfig'
   | typeof cromwellConfigIconId
   | typeof rstudioConfigIconId
+  | typeof sasConfigIconId
   | 'terminal'
   | 'genomicExtractions';
 
@@ -432,6 +434,16 @@ const DisplayIcon = (props: DisplayIconProps) => {
       ),
     ],
     [
+      sasConfigIconId,
+      () => (
+        <UserAppIcon
+          iconConfig={icon}
+          appType={UIAppType.SAS}
+          {...{ userSuspended }}
+        />
+      ),
+    ],
+    [
       'terminal',
       () => (
         <RouteLink
@@ -612,6 +624,11 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       rstudioConfigIconId,
       'RStudio Icon',
       'RStudio Cloud Environment'
+    ),
+    [sasConfigIconId]: gkeAppIconConfig(
+      sasConfigIconId,
+      'SAS Icon',
+      'SAS Cloud Environment'
     ),
     terminal: {
       id: 'terminal',

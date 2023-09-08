@@ -13,6 +13,7 @@ import { findApp, toUIAppType } from './apps-panel/utils';
 import { CreateCromwell } from './gke-app-configuration-panels/create-cromwell';
 import { CreateGkeAppProps } from './gke-app-configuration-panels/create-gke-app';
 import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
+import { CreateSAS } from './gke-app-configuration-panels/create-sas';
 import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
@@ -147,6 +148,20 @@ export const GKEAppConfigurationPanel = ({
             AppType.RSTUDIO,
             () => (
               <CreateRStudio
+                {...{
+                  ...props,
+                  app,
+                  disk,
+                  onClickDeleteUnattachedPersistentDisk,
+                  onClose,
+                }}
+              />
+            ),
+          ],
+          [
+            AppType.SAS,
+            () => (
+              <CreateSAS
                 {...{
                   ...props,
                   app,

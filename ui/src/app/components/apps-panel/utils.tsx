@@ -86,6 +86,19 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
 };
 
+export const defaultSASConfig: CreateAppRequest = {
+  appType: AppType.SAS,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.Standard,
+  },
+};
+
 export const createAppRequestToAnalysisConfig = (
   createAppRequest: CreateAppRequest
 ): Partial<AnalysisConfig> => {
