@@ -153,6 +153,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
             var updatedUserAccessModule =
                 accessModuleService.updateCompletionTime(
                     dbUser, accessModuleName, timestamp.orElse(null));
+            // This is null, for example:
+            // - If the user has not completed any trainings yet
+            // - For CT if the user has just completed RT
             if (updatedUserAccessModule.getCompletionTime() != null) {
               var verification = retrieveVerificationOrCreate(updatedUserAccessModule);
               verification.setComplianceTrainingVerificationSystem(
