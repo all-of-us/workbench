@@ -592,31 +592,14 @@ const PanelMain = fp.flow(
                           () => RuntimeStatusRequest.DeleteRuntime,
                         ],
                         [
-                          deletePDSelected && usingDataproc,
-                          () => RuntimeStatusRequest.DeletePD,
-                        ],
-                        [
                           deletePDSelected && !usingDataproc,
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
+                        ],
+                        [
+                          deletePDSelected && usingDataproc,
+                          () => RuntimeStatusRequest.DeletePD,
                         ]
                       );
-                      //
-                      // switchCase(
-                      //   [usingDataproc, deletePDSelected],
-                      //   [[true, true], () => RuntimeStatusRequest.DeletePD],
-                      //   [
-                      //     [true, false],
-                      //     () => RuntimeStatusRequest.DeleteRuntime,
-                      //   ],
-                      //   [
-                      //     [false, true],
-                      //     () => RuntimeStatusRequest.DeleteRuntimeAndPD,
-                      //   ],
-                      //   [
-                      //     [false, false],
-                      //     () => RuntimeStatusRequest.DeleteRuntime,
-                      //   ]
-                      // );
                       await setRuntimeStatus(runtimeStatusReq);
                       onClose();
                     }}
