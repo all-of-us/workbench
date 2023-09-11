@@ -244,32 +244,32 @@ public class CdrVersionServiceTest {
 
   @Test
   public void testGetCdrVersionsHasFitBit() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasFitbitData);
+    testGetCdrVersionsHasDataType(CdrVersion::isHasFitbitData);
   }
 
   @Test
   public void testGetCdrVersionsHasFitbitSleepData() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasFitbitSleepData);
+    testGetCdrVersionsHasDataType(CdrVersion::isHasFitbitSleepData);
   }
 
   @Test
   public void testGetCdrVersionsHasSurveyConductData() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasSurveyConductData);
+    testGetCdrVersionsHasDataType(CdrVersion::isHasSurveyConductData);
   }
 
   @Test
   public void testGetCdrVersionsTanagraEnabled() {
-    testGetCdrVersionsHasDataType(CdrVersion::getTanagraEnabled);
+    testGetCdrVersionsHasDataType(CdrVersion::isTanagraEnabled);
   }
 
   @Test
   public void testGetCdrVersionsHasCopeSurveyData() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasCopeSurveyData);
+    testGetCdrVersionsHasDataType(CdrVersion::isHasCopeSurveyData);
   }
 
   @Test
   public void testGetCdrVersionsHasWgsData() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasWgsData);
+    testGetCdrVersionsHasDataType(CdrVersion::isHasWgsData);
   }
 
   private void assertExpectedResponse(CdrVersionTiersResponse response) {
