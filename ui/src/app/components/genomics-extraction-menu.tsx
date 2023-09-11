@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
 
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond } from '@terra-ui-packages/core-utils';
 import { MenuItem } from 'app/components/buttons';
 import { CopySnippetModal } from 'app/components/copy-snippet-modal';
 import { PopupTrigger } from 'app/components/popups';
@@ -39,15 +39,13 @@ interface Props {
 export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
-  const tooltip = switchCase(
-    { r: isRunning, w: canWrite },
-    [{ r: true, w: true }, () => ''],
+  const tooltip = cond(
+    [isRunning && canWrite, () => ''],
     [
-      { r: true, w: false },
+      isRunning && !canWrite,
       () => 'You do not have permission to modify this workspace',
     ],
-    [{ r: false, w: true }, () => 'Extraction job is not currently running'],
-    [{ r: false, w: false }, () => 'Extraction job is not currently running']
+    [!isRunning, () => 'Extraction job is not currently running']
   );
 
   const [modalState, setModalState] = useState(false);
