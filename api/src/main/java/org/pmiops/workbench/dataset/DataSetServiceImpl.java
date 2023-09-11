@@ -464,7 +464,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       queryBuilder.append(")");
     }
 
-    if (!request.getIncludesAllParticipants()) {
+    if (!request.isIncludesAllParticipants()) {
       final ImmutableList<QueryAndParameters> queryMapEntries =
           cohortService.findAllByCohortIdIn(request.getCohortIds()).stream()
               .map(this::getCohortQueryStringAndCollectNamedParameters)
@@ -1005,7 +1005,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private List<String> generateWgsCode(
       DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
-    if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
+    if (!dataSetExportRequest.isGenerateGenomicsAnalysisCode()) {
       return new ArrayList<>();
     }
 

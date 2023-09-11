@@ -121,7 +121,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
     boolean includesAllParticipants =
-        Boolean.TRUE.equals(dataSetRequest.getIncludesAllParticipants());
+        Boolean.TRUE.equals(dataSetRequest.isIncludesAllParticipants());
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (CollectionUtils.isEmpty(dataSetRequest.getConceptSetIds())
@@ -280,7 +280,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     JSONObject notebookFile;
 
-    if (!dataSetExportRequest.getNewNotebook()) {
+    if (!dataSetExportRequest.isNewNotebook()) {
       notebookFile =
           notebooksService.getNotebookContents(bucketName, dataSetExportRequest.getNotebookName());
       dataSetExportRequest.setKernelType(notebooksService.getNotebookKernel(notebookFile));

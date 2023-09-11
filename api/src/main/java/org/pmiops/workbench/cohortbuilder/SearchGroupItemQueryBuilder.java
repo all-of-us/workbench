@@ -231,7 +231,7 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams,
       List<String> queryParts,
       SearchGroup searchGroup) {
-    if (searchGroup.getTemporal()) {
+    if (searchGroup.isTemporal()) {
       // build the outer temporal sql statement
       String query = buildOuterTemporalQuery(queryParams, searchGroup);
       queryParts.add(query);
@@ -763,7 +763,7 @@ public final class SearchGroupItemQueryBuilder {
               queryParams, QueryParameterValue.int64(standardOrSource));
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
-          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
+          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::isGroup));
       List<Long> parents =
           parentsAndChildren.get(true).stream()
               .map(SearchParameter::getConceptId)

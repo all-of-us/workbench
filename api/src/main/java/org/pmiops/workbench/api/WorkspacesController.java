@@ -357,7 +357,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   request.getFromWorkspaceFirecloudName(),
                   new CloneWorkspaceRequest()
                       .workspace(request.getWorkspace())
-                      .includeUserRoles(request.getShouldDuplicateRoles()))
+                      .includeUserRoles(request.isShouldDuplicateRoles()))
               .getBody()
               .getWorkspace();
         });
@@ -393,11 +393,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
-    if (workspace.getResearchPurpose().getReviewRequested()) {
+    if (workspace.getResearchPurpose().isReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().isReviewRequested());
 
     // A little unintuitive but setting this here reflects the current state of the workspace
     // while it was in the billing buffer. Setting this value will inform the update billing

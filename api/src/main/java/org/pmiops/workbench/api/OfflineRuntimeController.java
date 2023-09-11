@@ -361,7 +361,7 @@ public class OfflineRuntimeController implements OfflineRuntimeApiDelegate {
       LeonardoListPersistentDiskResponse diskResponse, String googleProject) throws ApiException {
     final String diskName = diskResponse.getName();
 
-    if (leonardoMapper.toApiListDisksResponse(diskResponse).getIsGceRuntime()) {
+    if (leonardoMapper.toApiListDisksResponse(diskResponse).isIsGceRuntime()) {
       return runtimesApiProvider.get().listRuntimesByProject(googleProject, null, false).stream()
           .flatMap(runtime -> Stream.ofNullable(runtime.getDiskConfig()))
           .anyMatch(diskConfig -> diskName.equals(diskConfig.getName()));
