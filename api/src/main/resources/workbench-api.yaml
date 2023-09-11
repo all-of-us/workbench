@@ -6712,11 +6712,6 @@ components:
           type: boolean
           description: Whether to show the Event Date modifier in cohort builder
           default: false
-        enableResearchReviewPrompt:
-          type: boolean
-          description: Whether user should see a prompt if Workspace Research Purpose
-            needs Review
-          default: false
         enableRasIdMeLinking:
           type: boolean
           description: Whether users are given the option to link their RAS/ID.me
@@ -7311,9 +7306,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ResearchOutcomeEnum'
-        needsReviewPrompt:
-          type: boolean
-          default: false
     SpecificPopulationEnum:
       type: string
       description: Short parsable descriptions of specific population categories
@@ -12457,8 +12449,8 @@ components:
     YesNoPreferNot:
       type: string
       enum:
-      - YES
-      - NO
+      - 'YES' # quotes needed so Swagger/YAML doesn't autoconvert this to "true"
+      - 'NO'  # quotes needed so Swagger/YAML doesn't autoconvert this to "false"
       - PREFER_NOT_TO_ANSWER
     CreateNewUserSatisfactionSurveyWithOneTimeCode:
       type: object
