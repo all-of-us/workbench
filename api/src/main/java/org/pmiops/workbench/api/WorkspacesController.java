@@ -263,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         operation.getId(),
         fromWorkspaceNamespace,
         fromWorkspaceId,
-        request.getIncludeUserRoles(),
+        request.isIncludeUserRoles(),
         request.getWorkspace());
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
   }

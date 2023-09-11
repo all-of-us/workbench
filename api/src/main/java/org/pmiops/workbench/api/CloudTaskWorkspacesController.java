@@ -1,11 +1,10 @@
 package org.pmiops.workbench.api;
 
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.impersonation.ImpersonatedWorkspaceService;
-import org.pmiops.workbench.model.DeleteTestUserRawlsWorkspacesRequest;
-import org.pmiops.workbench.model.DeleteTestUserWorkspacesRequest;
 import org.pmiops.workbench.model.TestUserRawlsWorkspace;
 import org.pmiops.workbench.model.TestUserWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
   }
 
   @Override
-  public ResponseEntity<Void> deleteTestUserWorkspaces(DeleteTestUserWorkspacesRequest request) {
+  public ResponseEntity<Void> deleteTestUserWorkspaces(List<TestUserWorkspace> request) {
     LOGGER.info(String.format("Deleting a batch of %d workspaces...", request.size()));
     request.stream()
         .collect(Collectors.groupingBy(TestUserWorkspace::getUsername, Collectors.counting()))
@@ -55,7 +54,7 @@ public class CloudTaskWorkspacesController implements CloudTaskWorkspacesApiDele
 
   @Override
   public ResponseEntity<Void> deleteTestUserWorkspacesInRawls(
-      DeleteTestUserRawlsWorkspacesRequest request) {
+      List<TestUserRawlsWorkspace> request) {
     LOGGER.info(String.format("Deleting a batch of %d workspaces in Rawls...", request.size()));
     request.stream()
         .collect(Collectors.groupingBy(TestUserRawlsWorkspace::getUsername, Collectors.counting()))
