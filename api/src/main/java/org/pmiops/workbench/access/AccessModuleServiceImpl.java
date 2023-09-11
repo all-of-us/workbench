@@ -108,17 +108,19 @@ public class AccessModuleServiceImpl implements AccessModuleService {
   }
 
   @Override
-  public void updateCompletionTime(
+  public DbUserAccessModule updateCompletionTime(
       DbUser dbUser, DbAccessModuleName accessModuleName, @Nullable Timestamp timestamp) {
     DbAccessModule dbAccessModule =
         getDbAccessModuleOrThrow(dbAccessModulesProvider.get(), accessModuleName);
     DbUserAccessModule userAccessModuleToUpdate =
         retrieveUserAccessModuleOrCreate(dbUser, dbAccessModule);
-    userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
+    userAccessModuleToUpdate =
+        userAccessModuleDao.save(userAccessModuleToUpdate.setCompletionTime(timestamp));
     if (accessModuleName.equals(DbAccessModuleName.RAS_ID_ME)
         || accessModuleName.equals(DbAccessModuleName.RAS_LOGIN_GOV)) {
       updateCompletionTime(dbUser, DbAccessModuleName.IDENTITY, timestamp);
     }
+    return userAccessModuleToUpdate;
   }
 
   @Override

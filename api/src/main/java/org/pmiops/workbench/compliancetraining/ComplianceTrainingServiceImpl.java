@@ -14,9 +14,12 @@ import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
+import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.moodle.MoodleService;
@@ -24,6 +27,7 @@ import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
@@ -35,6 +39,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   private final Clock clock;
   private final Provider<DbUser> userProvider;
   private final UserService userService;
+  private final ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
 
   @Autowired
   public ComplianceTrainingServiceImpl(
@@ -44,7 +49,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       AccessSyncService accessSyncService,
       Clock clock,
       Provider<DbUser> userProvider,
-      UserService userService) {
+      UserService userService,
+      ComplianceTrainingVerificationDao complianceTrainingVerificationDao) {
     this.moodleService = moodleService;
     this.accessModuleService = accessModuleService;
     this.accessModuleNameMapper = accessModuleNameMapper;
@@ -52,6 +58,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
     this.clock = clock;
     this.userProvider = userProvider;
     this.userService = userService;
+    this.complianceTrainingVerificationDao = complianceTrainingVerificationDao;
   }
 
   /** Syncs the current user's training status from Moodle. */
@@ -74,6 +81,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
    * @param dbUser
    * @param agent
    */
+  @Transactional
   public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.
@@ -141,9 +149,20 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                       accessModuleNameMapper::moduleFromBadge, determineCompletionTime));
 
       completionTimes.forEach(
-          (accessModuleName, timestamp) ->
-              accessModuleService.updateCompletionTime(
-                  dbUser, accessModuleName, timestamp.orElse(null)));
+          (accessModuleName, timestamp) -> {
+            var updatedUserAccessModule =
+                accessModuleService.updateCompletionTime(
+                    dbUser, accessModuleName, timestamp.orElse(null));
+            // This is null, for example:
+            // - If the user has not completed any trainings yet
+            // - For CT if the user has just completed RT
+            if (updatedUserAccessModule.getCompletionTime() != null) {
+              var verification = retrieveVerificationOrCreate(updatedUserAccessModule);
+              verification.setComplianceTrainingVerificationSystem(
+                  DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+              complianceTrainingVerificationDao.save(verification);
+            }
+          });
 
       return accessSyncService.updateUserAccessTiers(dbUser, agent);
     } catch (NumberFormatException e) {
@@ -165,5 +184,12 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   private Timestamp clockNow() {
     return new Timestamp(clock.instant().toEpochMilli());
+  }
+
+  private DbComplianceTrainingVerification retrieveVerificationOrCreate(
+      DbUserAccessModule userAccessModule) {
+    return complianceTrainingVerificationDao
+        .getByUserAccessModule(userAccessModule)
+        .orElse(new DbComplianceTrainingVerification().setUserAccessModule(userAccessModule));
   }
 }

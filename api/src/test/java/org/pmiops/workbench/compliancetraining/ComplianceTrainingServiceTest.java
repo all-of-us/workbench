@@ -27,6 +27,7 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -35,6 +36,7 @@ import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
+import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -95,6 +97,7 @@ public class ComplianceTrainingServiceTest {
   @SpyBean private AccessModuleService accessModuleService;
   @Autowired private InstitutionDao institutionDao;
   @Autowired private ComplianceTrainingService complianceTrainingService;
+  @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
 
   @Import({
     FakeClockConfiguration.class,
@@ -185,6 +188,106 @@ public class ComplianceTrainingServiceTest {
 
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void
+      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
+          throws Exception {
+    long issued = fakeClock.instant().getEpochSecond() - 100;
+    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .build();
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+
+    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
+
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+
+    // RT is complete, so there should be a verification record.
+    var rtAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    var rtUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
+    var rtVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    assertThat(rtVerification.isPresent()).isTrue();
+    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+
+    // CT is incomplete, so there should not be a verification record.
+    var ctAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
+    var ctUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
+    var ctVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    assertThat(ctVerification.isPresent()).isFalse();
+  }
+
+  @Test
+  public void
+      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
+          throws Exception {
+    long issued = fakeClock.instant().getEpochSecond() - 100;
+    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTOnly =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .build();
+    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTAndCT =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .put(
+                BadgeName.CONTROLLED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .build();
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
+        .thenReturn(userBadgesByNameRTOnly)
+        .thenReturn(userBadgesByNameRTAndCT);
+
+    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
+
+    // Complete RT training
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
+
+    // Complete CT training
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByNameRTAndCT);
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+
+    // RT is complete, so there should be a verification record.
+    var rtAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    var rtUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
+    var rtVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    assertThat(rtVerification.isPresent()).isTrue();
+    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+
+    // CT is complete, so there should be a verification record.
+    var ctAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
+    var ctUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
+    var ctVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    assertThat(ctVerification.isPresent()).isTrue();
   }
 
   @Test
