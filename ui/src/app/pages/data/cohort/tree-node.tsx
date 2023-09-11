@@ -13,9 +13,7 @@ import { ClrIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { PREDEFINED_ATTRIBUTES } from 'app/pages/data/cohort/constant';
-import {
-  ppiQuestions,
-} from 'app/pages/data/cohort/search-state.service';
+import { ppiQuestions } from 'app/pages/data/cohort/search-state.service';
 import { domainToTitle } from 'app/pages/data/cohort/utils';
 import { cohortBuilderApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
