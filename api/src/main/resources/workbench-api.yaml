@@ -2614,12 +2614,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                newName:
-                  type: string
+              $ref: '#/components/schemas/NotebookRename'
         required: true
       responses:
         200:
@@ -2628,7 +2623,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FileDetail'
-      x-codegen-request-body-name: NotebookRename
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate:
     post:
       tags:
@@ -11523,6 +11517,13 @@ components:
           type: string
           description: The email address associated with the Terra Group created to
             serve as this Auth Domain
+    NotebookRename:
+      type: object
+      properties:
+        name:
+          type: string
+        newName:
+          type: string
     ReportingSnapshot:
       type: object
       properties:
