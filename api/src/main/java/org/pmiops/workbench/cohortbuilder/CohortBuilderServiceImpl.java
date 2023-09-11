@@ -297,7 +297,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request) {
-    boolean removeDrugBrand = request.getRemoveDrugBrand();
+    boolean removeDrugBrand = request.isRemoveDrugBrand();
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
     // if search term is empty find the top counts for the domain

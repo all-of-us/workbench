@@ -117,7 +117,7 @@ public class AppsController implements AppsApiDelegate {
                     workspaceNamespace,
                     appName,
                     body.getFileNames(),
-                    body.getPlaygroundMode(),
+                    body.isPlaygroundMode(),
                     false)));
   }
 
