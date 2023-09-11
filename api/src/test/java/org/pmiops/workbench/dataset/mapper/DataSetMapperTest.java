@@ -222,7 +222,7 @@ public class DataSetMapperTest {
     assertThat(dbDataset.getVersion()).isEqualTo(Etags.toVersion(dataSet.getEtag()));
     assertThat(dbDataset.getName()).isEqualTo(dataSet.getName());
     assertThat(dbDataset.getIncludesAllParticipants())
-        .isEqualTo(dataSet.getIncludesAllParticipants());
+        .isEqualTo(dataSet.isIncludesAllParticipants());
     assertThat(dbDataset.getDescription()).isEqualTo(dataSet.getDescription());
     assertThat(dbDataset.getWorkspaceId()).isEqualTo(dataSet.getWorkspaceId());
     assertThat(dbDataset.getLastModifiedTime().toInstant().toEpochMilli())

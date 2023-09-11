@@ -255,16 +255,16 @@ public class TestMockFactory {
     // a.k.a. RawlsWorkspaceDetails.name
     dbWorkspace.setFirecloudName(workspace.getId()); // DB_WORKSPACE_FIRECLOUD_NAME
     ResearchPurpose researchPurpose = workspace.getResearchPurpose();
-    dbWorkspace.setDiseaseFocusedResearch(researchPurpose.getDiseaseFocusedResearch());
+    dbWorkspace.setDiseaseFocusedResearch(researchPurpose.isDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(researchPurpose.getDiseaseOfFocus());
-    dbWorkspace.setMethodsDevelopment(researchPurpose.getMethodsDevelopment());
-    dbWorkspace.setControlSet(researchPurpose.getControlSet());
-    dbWorkspace.setAncestry(researchPurpose.getAncestry());
-    dbWorkspace.setCommercialPurpose(researchPurpose.getCommercialPurpose());
-    dbWorkspace.setSocialBehavioral(researchPurpose.getSocialBehavioral());
-    dbWorkspace.setPopulationHealth(researchPurpose.getPopulationHealth());
-    dbWorkspace.setEducational(researchPurpose.getEducational());
-    dbWorkspace.setDrugDevelopment(researchPurpose.getDrugDevelopment());
+    dbWorkspace.setMethodsDevelopment(researchPurpose.isMethodsDevelopment());
+    dbWorkspace.setControlSet(researchPurpose.isControlSet());
+    dbWorkspace.setAncestry(researchPurpose.isAncestry());
+    dbWorkspace.setCommercialPurpose(researchPurpose.isCommercialPurpose());
+    dbWorkspace.setSocialBehavioral(researchPurpose.isSocialBehavioral());
+    dbWorkspace.setPopulationHealth(researchPurpose.isPopulationHealth());
+    dbWorkspace.setEducational(researchPurpose.isEducational());
+    dbWorkspace.setDrugDevelopment(researchPurpose.isDrugDevelopment());
 
     dbWorkspace.setSpecificPopulationsEnum(new HashSet<>(researchPurpose.getPopulationDetails()));
     dbWorkspace.setAdditionalNotes(researchPurpose.getAdditionalNotes());
