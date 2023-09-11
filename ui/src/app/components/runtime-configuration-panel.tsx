@@ -586,22 +586,37 @@ const PanelMain = fp.flow(
                 return (
                   <ConfirmDeleteEnvironmentWithPD
                     onConfirm={async (deletePDSelected) => {
-                      const runtimeStatusReq = switchCase(
-                        [usingDataproc, deletePDSelected],
-                        [[true, true], () => RuntimeStatusRequest.DeletePD],
+                      const runtimeStatusReq = cond(
                         [
-                          [true, false],
+                          !deletePDSelected,
                           () => RuntimeStatusRequest.DeleteRuntime,
                         ],
                         [
-                          [false, true],
+                          deletePDSelected && usingDataproc,
+                          () => RuntimeStatusRequest.DeletePD,
+                        ],
+                        [
+                          deletePDSelected && !usingDataproc,
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
-                        ],
-                        [
-                          [false, false],
-                          () => RuntimeStatusRequest.DeleteRuntime,
                         ]
                       );
+                      //
+                      // switchCase(
+                      //   [usingDataproc, deletePDSelected],
+                      //   [[true, true], () => RuntimeStatusRequest.DeletePD],
+                      //   [
+                      //     [true, false],
+                      //     () => RuntimeStatusRequest.DeleteRuntime,
+                      //   ],
+                      //   [
+                      //     [false, true],
+                      //     () => RuntimeStatusRequest.DeleteRuntimeAndPD,
+                      //   ],
+                      //   [
+                      //     [false, false],
+                      //     () => RuntimeStatusRequest.DeleteRuntime,
+                      //   ]
+                      // );
                       await setRuntimeStatus(runtimeStatusReq);
                       onClose();
                     }}
