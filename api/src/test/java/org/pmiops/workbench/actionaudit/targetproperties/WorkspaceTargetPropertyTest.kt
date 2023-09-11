@@ -19,7 +19,6 @@ class WorkspaceTargetPropertyTest {
     @BeforeEach
     fun setUp() {
         val researchPurposeAllFieldsPopulated = ResearchPurpose()
-                .apply { approved = true }
                 .apply { diseaseOfFocus = "Chicken Pox" }
                 .apply { otherPopulationDetails = "cool people" }
                 .apply { populationDetails = listOf(SpecificPopulationEnum.ACCESS_TO_CARE) }
@@ -29,6 +28,7 @@ class WorkspaceTargetPropertyTest {
                 .apply { timeRequested = 101L }
                 .apply { timeReviewed = 111L }
                 .apply { anticipatedFindings = "cool stuff" }
+                .approved(true)
 
         val researchPurpose2 = ResearchPurpose()
                 .apply { intendedStudy = "broken dreams" }
@@ -48,7 +48,7 @@ class WorkspaceTargetPropertyTest {
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
             .apply { accessTierShortName = AccessTierService.REGISTERED_TIER_SHORT_NAME }
-            .apply { published = false }
+            .published(false)
 
         workspace2 = Workspace()
             .apply { name = "Workspace 2" }
@@ -61,7 +61,7 @@ class WorkspaceTargetPropertyTest {
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
             .apply { accessTierShortName = AccessTierService.REGISTERED_TIER_SHORT_NAME }
-            .apply { published = false }
+            .published(false)
     }
 
     @Test

@@ -286,7 +286,7 @@ public class ReportingTestUtils {
     assertThat(dataset.getCreatorId()).isEqualTo(DATASET__CREATOR_ID);
     assertThat(dataset.getDatasetId()).isEqualTo(DATASET__DATASET_ID);
     assertThat(dataset.getDescription()).isEqualTo(DATASET__DESCRIPTION);
-    assertThat(dataset.getIncludesAllParticipants()).isEqualTo(DATASET__INCLUDES_ALL_PARTICIPANTS);
+    assertThat(dataset.isIncludesAllParticipants()).isEqualTo(DATASET__INCLUDES_ALL_PARTICIPANTS);
     assertTimeApprox(dataset.getLastModifiedTime(), DATASET__LAST_MODIFIED_TIME);
     assertThat(dataset.getName()).isEqualTo(DATASET__NAME);
     assertThat(dataset.getWorkspaceId()).isEqualTo(DATASET__WORKSPACE_ID);
