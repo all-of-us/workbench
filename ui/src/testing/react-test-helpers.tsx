@@ -118,24 +118,19 @@ export const simulateTextInputChange = async (
   return await waitOneTickAndUpdate(wrapper);
 };
 
-export const expectButtonElementState = (
-  element: HTMLElement,
-  enabled: boolean
-) => {
-  expect(element?.style?.cursor).toEqual(enabled ? 'pointer' : 'not-allowed');
-};
-
 export const expectButtonElementEnabled = (buttonElement: HTMLElement) =>
-  expectButtonElementState(buttonElement, true);
+  expect(buttonElement).not.toHaveStyle('cursor: not-allowed');
 export const expectButtonElementDisabled = (buttonElement: HTMLElement) =>
-  expectButtonElementState(buttonElement, false);
+  expect(buttonElement).toHaveStyle('cursor: not-allowed');
 
+// TODO: is there a common way to describe "elements where we disable by setting the cursor to not-allowed" ?
 export const expectMenuItemElementEnabled = expectButtonElementEnabled;
 export const expectMenuItemElementDisabled = expectButtonElementDisabled;
 
 // When simulate is used with an input element of type checkbox, it will negate its current state.
 export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
   checkBoxWrapper.simulate('change');
+
 // TODO: this is a nasty hack. Can we do better?
 
 // it appears that we need to have a 'popup-root' ID defined when a Modal is rendered, or it will throw an error
