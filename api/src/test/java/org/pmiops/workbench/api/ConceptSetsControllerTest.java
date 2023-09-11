@@ -1063,13 +1063,13 @@ public class ConceptSetsControllerTest {
     ConceptSetConceptId addedConcept3 =
         new ConceptSetConceptId()
             .conceptId(CRITERIA_CONDITION_3.getConceptId())
-            .standard(CRITERIA_CONDITION_3.getIsStandard());
+            .standard(CRITERIA_CONDITION_3.isIsStandard());
     updateConceptSetRequest.addAddedConceptSetConceptIdsItem(addedConcept3);
     // remove
     ConceptSetConceptId removedConcept1 =
         new ConceptSetConceptId()
             .conceptId(CRITERIA_CONDITION_1.getConceptId())
-            .standard(CRITERIA_CONDITION_1.getIsStandard());
+            .standard(CRITERIA_CONDITION_1.isIsStandard());
     updateConceptSetRequest.addRemovedConceptSetConceptIdsItem(removedConcept1);
     fakeClock.increment(1000L);
 
@@ -1635,7 +1635,7 @@ public class ConceptSetsControllerTest {
         .addType(criteria.getType())
         .addDomainId(criteria.getDomainId())
         .addCode(criteria.getCode())
-        .addStandard(criteria.getIsStandard())
+        .addStandard(criteria.isIsStandard())
         .addName(criteria.getName())
         .addFullText("+[" + criteria.getDomainId() + "_rank1]")
         .build();

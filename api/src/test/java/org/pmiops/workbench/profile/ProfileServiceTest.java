@@ -521,7 +521,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    assertThat(profileService.getProfile(targetUser).getDisabled()).isTrue();
+    assertThat(profileService.getProfile(targetUser).isDisabled()).isTrue();
   }
 
   @Test
@@ -543,7 +543,7 @@ public class ProfileServiceTest {
     profileService.updateProfile(
         targetUser, Agent.asAdmin(loggedInUser), updatedProfile, previousProfile);
 
-    assertThat(profileService.getProfile(targetUser).getDisabled()).isFalse();
+    assertThat(profileService.getProfile(targetUser).isDisabled()).isFalse();
   }
 
   @Test
@@ -899,7 +899,7 @@ public class ProfileServiceTest {
 
     assertThat(adminTableUsers.get(0).getInstitutionName()).isEqualTo("University 1");
     assertThat(adminTableUsers.get(0).getContactEmail()).isEqualTo("jay@aou.biz");
-    assertThat(adminTableUsers.get(0).getDisabled()).isEqualTo(false);
+    assertThat(adminTableUsers.get(0).isDisabled()).isEqualTo(false);
     assertThat(adminTableUsers.get(1).getUserId()).isEqualTo(user2.getUserId());
     assertThat(adminTableUsers.get(2).getUserId()).isEqualTo(user3.getUserId());
   }

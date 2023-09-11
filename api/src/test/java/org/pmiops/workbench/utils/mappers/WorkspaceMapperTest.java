@@ -166,7 +166,7 @@ public class WorkspaceMapperTest {
     assertResearchPurposeMatches(rp);
 
     assertThat(ws.getCreationTime()).isEqualTo(DB_CREATION_TIMESTAMP.toInstant().toEpochMilli());
-    assertThat(ws.getPublished()).isEqualTo(sourceDbWorkspace.getPublished());
+    assertThat(ws.isPublished()).isEqualTo(sourceDbWorkspace.getPublished());
   }
 
   @Test
@@ -189,28 +189,28 @@ public class WorkspaceMapperTest {
 
   private void assertResearchPurposeMatches(ResearchPurpose rp) {
     assertThat(rp.getAdditionalNotes()).isEqualTo(sourceDbWorkspace.getAdditionalNotes());
-    assertThat(rp.getApproved()).isEqualTo(sourceDbWorkspace.getApproved());
-    assertThat(rp.getAncestry()).isEqualTo(sourceDbWorkspace.getAncestry());
+    assertThat(rp.isApproved()).isEqualTo(sourceDbWorkspace.getApproved());
+    assertThat(rp.isAncestry()).isEqualTo(sourceDbWorkspace.getAncestry());
     assertThat(rp.getAnticipatedFindings()).isEqualTo(sourceDbWorkspace.getAnticipatedFindings());
-    assertThat(rp.getCommercialPurpose()).isEqualTo(sourceDbWorkspace.getCommercialPurpose());
-    assertThat(rp.getControlSet()).isEqualTo(sourceDbWorkspace.getControlSet());
-    assertThat(rp.getDiseaseFocusedResearch())
+    assertThat(rp.isCommercialPurpose()).isEqualTo(sourceDbWorkspace.getCommercialPurpose());
+    assertThat(rp.isControlSet()).isEqualTo(sourceDbWorkspace.getControlSet());
+    assertThat(rp.isDiseaseFocusedResearch())
         .isEqualTo(sourceDbWorkspace.getDiseaseFocusedResearch());
     assertThat(rp.getDiseaseOfFocus()).isEqualTo(sourceDbWorkspace.getDiseaseOfFocus());
-    assertThat(rp.getDrugDevelopment()).isEqualTo(sourceDbWorkspace.getDrugDevelopment());
-    assertThat(rp.getEducational()).isEqualTo(sourceDbWorkspace.getEducational());
+    assertThat(rp.isDrugDevelopment()).isEqualTo(sourceDbWorkspace.getDrugDevelopment());
+    assertThat(rp.isEducational()).isEqualTo(sourceDbWorkspace.getEducational());
     assertThat(rp.getIntendedStudy()).isEqualTo(sourceDbWorkspace.getIntendedStudy());
-    assertThat(rp.getMethodsDevelopment()).isEqualTo(sourceDbWorkspace.getMethodsDevelopment());
+    assertThat(rp.isMethodsDevelopment()).isEqualTo(sourceDbWorkspace.getMethodsDevelopment());
     assertThat(rp.getOtherPopulationDetails())
         .isEqualTo(sourceDbWorkspace.getOtherPopulationDetails());
-    assertThat(rp.getOtherPurpose()).isEqualTo(sourceDbWorkspace.getOtherPurpose());
+    assertThat(rp.isOtherPurpose()).isEqualTo(sourceDbWorkspace.getOtherPurpose());
     assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
     assertThat(rp.getPopulationDetails())
         .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
-    assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());
+    assertThat(rp.isPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());
     assertThat(rp.getReasonForAllOfUs()).isEqualTo(sourceDbWorkspace.getReasonForAllOfUs());
-    assertThat(rp.getReviewRequested()).isEqualTo(sourceDbWorkspace.getReviewRequested());
-    assertThat(rp.getSocialBehavioral()).isEqualTo(sourceDbWorkspace.getSocialBehavioral());
+    assertThat(rp.isReviewRequested()).isEqualTo(sourceDbWorkspace.getReviewRequested());
+    assertThat(rp.isSocialBehavioral()).isEqualTo(sourceDbWorkspace.getSocialBehavioral());
     assertThat(rp.getTimeRequested())
         .isEqualTo(sourceDbWorkspace.getTimeRequested().toInstant().toEpochMilli());
     assertThat(rp.getTimeReviewed()).isNull();
