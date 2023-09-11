@@ -1,4 +1,3 @@
-import * as fp from 'lodash/fp';
 import validate from 'validate.js';
 
 import {
@@ -11,6 +10,8 @@ import {
   WorkspaceAccessLevel,
   WorkspaceResource,
 } from 'generated/fetch';
+
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 
 import { appendJupyterNotebookFileSuffix } from 'app/pages/analysis/util';
 import { analysisTabPath, dataTabPath } from 'app/routing/utils';
@@ -30,47 +31,52 @@ export const isNotebook = (resource: WorkspaceResource): boolean =>
   !!resource.notebook;
 
 export function toDisplay(resourceType: ResourceType): string {
-  return fp.cond([
-    [(rt) => rt === ResourceType.COHORT, () => 'Cohort'],
-    [(rt) => rt === ResourceType.COHORT_REVIEW, () => 'Cohort Review'],
-    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Concept Set'],
-    [(rt) => rt === ResourceType.DATASET, () => 'Dataset'],
-    [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
+  return switchCase(
+    resourceType,
+    [ResourceType.COHORT, () => 'Cohort'],
+    [ResourceType.COHORTREVIEW, () => 'Cohort Review'],
+    [ResourceType.CONCEPTSET, () => 'Concept Set'],
+    [ResourceType.DATASET, () => 'Dataset'],
+    [ResourceType.NOTEBOOK, () => 'Notebook'],
 
-    [(rt) => rt === ResourceType.COHORT_SEARCH_GROUP, () => 'Group'],
-    [(rt) => rt === ResourceType.COHORT_SEARCH_ITEM, () => 'Item'],
-    [(rt) => rt === ResourceType.WORKSPACE, () => 'Workspace'],
-  ])(resourceType);
+    [ResourceType.COHORTSEARCHGROUP, () => 'Group'],
+    [ResourceType.COHORTSEARCHITEM, () => 'Item'],
+    [ResourceType.WORKSPACE, () => 'Workspace']
+  );
 }
 
 export function getDescription(resource: WorkspaceResource): string {
-  return fp.cond([
-    [isCohort, (r) => r.cohort.description],
-    [isCohortReview, (r) => r.cohortReview.description],
-    [isConceptSet, (r) => r.conceptSet.description],
-    [isDataSet, (r) => r.dataSet.description],
-    [isNotebook, fp.stubString /* notebooks don't have descriptions */],
-  ])(resource);
+  return cond(
+    [isCohort(resource), () => resource.cohort.description],
+    [isCohortReview(resource), () => resource.cohortReview.description],
+    [isConceptSet(resource), () => resource.conceptSet.description],
+    [isDataSet(resource), () => resource.dataSet.description],
+    [
+      // notebooks don't have descriptions
+      isNotebook(resource),
+      () => '',
+    ]
+  );
 }
 
 export function getDisplayName(resource: WorkspaceResource): string {
-  return fp.cond([
-    [isCohort, (r) => r.cohort.name],
-    [isCohortReview, (r) => r.cohortReview.cohortName],
-    [isConceptSet, (r) => r.conceptSet.name],
-    [isDataSet, (r) => r.dataSet.name],
-    [isNotebook, (r) => r.notebook.name],
-  ])(resource);
+  return cond(
+    [isCohort(resource), () => resource.cohort.name],
+    [isCohortReview(resource), () => resource.cohortReview.cohortName],
+    [isConceptSet(resource), () => resource.conceptSet.name],
+    [isDataSet(resource), () => resource.dataSet.name],
+    [isNotebook(resource), () => resource.notebook.name]
+  );
 }
 
 export function getId(resource: WorkspaceResource): number {
   // Notebooks do not have IDs
-  return fp.cond([
-    [isCohort, (r) => r.cohort.id],
-    [isCohortReview, (r) => r.cohortReview.cohortReviewId],
-    [isConceptSet, (r) => r.conceptSet.id],
-    [isDataSet, (r) => r.dataSet.id],
-  ])(resource);
+  return cond(
+    [isCohort(resource), () => resource.cohort.id],
+    [isCohortReview(resource), () => resource.cohortReview.cohortReviewId],
+    [isConceptSet(resource), () => resource.conceptSet.id],
+    [isDataSet(resource), () => resource.dataSet.id]
+  );
 }
 
 export function getResourceUrl(resource: WorkspaceResource): UrlObj {
@@ -81,46 +87,51 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
     workspaceFirecloudName
   );
 
-  return fp.cond([
+  return cond(
     [
-      isCohort,
-      (r) => ({
-        url: `${dataTabPrefix}/cohorts/build`,
-        queryParams: { cohortId: r.cohort.id },
+      isCohort(resource),
+      () => ({
+        url: `${workspacePrefix}/data/cohorts/build`,
+        queryParams: { cohortId: resource.cohort.id },
       }),
     ],
     [
-      isCohortReview,
-      (r) => ({
-        url: `${dataTabPrefix}/cohorts/${r.cohortReview.cohortId}/reviews/${r.cohortReview.cohortReviewId}`,
+      isCohortReview(resource),
+      () => ({
+        url: `${workspacePrefix}/data/cohorts/${resource.cohortReview.cohortId}/reviews/${resource.cohortReview.cohortReviewId}`,
       }),
     ],
     [
-      isConceptSet,
-      (r) => ({
-        url: `${dataTabPrefix}/concepts/sets/${r.conceptSet.id}`,
+      isConceptSet(resource),
+      () => ({
+        url: `${workspacePrefix}/data/concepts/sets/${resource.conceptSet.id}`,
       }),
     ],
-    [isDataSet, (r) => ({ url: `${dataTabPrefix}/data-sets/${r.dataSet.id}` })],
     [
-      isNotebook,
-      (r) => ({
-        url: `${analysisTabPrefix}/preview/${encodeURIComponentStrict(
-          r.notebook.name
+      isDataSet(resource),
+      () => ({
+        url: `${workspacePrefix}/data/data-sets/${resource.dataSet.id}`,
+      }),
+    ],
+    [
+      isNotebook(resource),
+      () => ({
+        url: `${workspacePrefix}/${analysisTabName}/preview/${encodeURIComponentStrict(
+          resource.notebook.name
         )}`,
       }),
-    ],
-  ])(resource);
+    ]
+  );
 }
 
 export function getType(resource: WorkspaceResource): ResourceType {
-  return fp.cond([
-    [isCohort, () => ResourceType.COHORT],
-    [isCohortReview, () => ResourceType.COHORT_REVIEW],
-    [isConceptSet, () => ResourceType.CONCEPT_SET],
-    [isDataSet, () => ResourceType.DATASET],
-    [isNotebook, () => ResourceType.NOTEBOOK],
-  ])(resource);
+  return cond(
+    [isCohort(resource), () => ResourceType.COHORT],
+    [isCohortReview(resource), () => ResourceType.COHORTREVIEW],
+    [isConceptSet(resource), () => ResourceType.CONCEPTSET],
+    [isDataSet(resource), () => ResourceType.DATASET],
+    [isNotebook(resource), () => ResourceType.NOTEBOOK]
+  );
 }
 
 export const getTypeString = (resource: WorkspaceResource): string =>

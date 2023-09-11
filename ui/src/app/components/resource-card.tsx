@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 
 import { WorkspaceResource } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Clickable } from 'app/components/buttons';
 import { ResourceCardBase } from 'app/components/card';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -88,13 +89,16 @@ const StyledResourceType = (props: { resource: WorkspaceResource }) => {
   const { resource } = props;
 
   function getColor(): string {
-    return fp.cond([
-      [isCohort, () => colors.resourceCardHighlights.cohort],
-      [isCohortReview, () => colors.resourceCardHighlights.cohortReview],
-      [isConceptSet, () => colors.resourceCardHighlights.conceptSet],
-      [isDataSet, () => colors.resourceCardHighlights.dataSet],
-      [isNotebook, () => colors.resourceCardHighlights.notebook],
-    ])(resource);
+    return cond(
+      [isCohort(resource), () => colors.resourceCardHighlights.cohort],
+      [
+        isCohortReview(resource),
+        () => colors.resourceCardHighlights.cohortReview,
+      ],
+      [isConceptSet(resource), () => colors.resourceCardHighlights.conceptSet],
+      [isDataSet(resource), () => colors.resourceCardHighlights.dataSet],
+      [isNotebook(resource), () => colors.resourceCardHighlights.notebook]
+    );
   }
   return (
     <div

@@ -471,13 +471,11 @@ const OuterHeader = (props: { pageMode: DARPageMode }) => (
       Researcher Workbench
     </Header>
     <Header style={styles.initialRegistrationHeaderDAR}>
-      {fp.cond([
-        [
-          (pm) => pm === DARPageMode.INITIAL_REGISTRATION,
-          () => 'Data Access Requirements',
-        ],
-        [(pm) => pm === DARPageMode.ANNUAL_RENEWAL, () => 'Annual Renewal'],
-      ])(props.pageMode)}
+      {switchCase(
+        props.pageMode,
+        [DARPageMode.INITIAL_REGISTRATION, () => 'Data Access Requirements'],
+        [DARPageMode.ANNUAL_RENEWAL, () => 'Annual Renewal']
+      )}
     </Header>
   </FlexColumn>
 );
