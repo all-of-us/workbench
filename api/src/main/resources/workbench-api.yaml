@@ -4000,7 +4000,7 @@ paths:
           type: string
       requestBody:
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/DataSetPreviewRequest'
         required: true
