@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router';
 import * as fp from 'lodash/fp';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 
+import { render, RenderResult } from '@testing-library/react';
 import { setImmediate } from 'timers';
 
 export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
@@ -117,11 +118,6 @@ export const simulateTextInputChange = async (
   return await waitOneTickAndUpdate(wrapper);
 };
 
-export const expectButtonState = (wrapper: ReactWrapper, enabled: boolean) => {
-  const buttonStyle: React.CSSProperties = wrapper.prop('style');
-  expect(buttonStyle.cursor).toEqual(enabled ? 'pointer' : 'not-allowed');
-};
-
 export const expectButtonElementState = (
   element: HTMLElement,
   enabled: boolean
@@ -134,11 +130,16 @@ export const expectButtonElementEnabled = (buttonElement: HTMLElement) =>
 export const expectButtonElementDisabled = (buttonElement: HTMLElement) =>
   expectButtonElementState(buttonElement, false);
 
-export const expectButtonEnabled = (buttonWrapper: ReactWrapper) =>
-  expectButtonState(buttonWrapper, true);
-export const expectButtonDisabled = (buttonWrapper: ReactWrapper) =>
-  expectButtonState(buttonWrapper, false);
+export const expectMenuItemElementEnabled = expectButtonElementEnabled;
+export const expectMenuItemElementDisabled = expectButtonElementDisabled;
 
 // When simulate is used with an input element of type checkbox, it will negate its current state.
 export const toggleCheckbox = (checkBoxWrapper: ReactWrapper) =>
   checkBoxWrapper.simulate('change');
+// TODO: this is a nasty hack. Can we do better?
+
+// it appears that we need to have a 'popup-root' ID defined when a Modal is rendered, or it will throw an error
+
+export const renderModal = <C,>(
+  component: React.ReactElement<C, string | React.JSXElementConstructor<C>>
+): RenderResult => render(<div id='popup-root'>{component}</div>);
