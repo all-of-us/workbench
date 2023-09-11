@@ -22,7 +22,7 @@ public class DbConceptSetConceptId {
   }
 
   @Column(name = "is_standard")
-  public Boolean getStandard() {
+  public Boolean isStandard() {
     return standard;
   }
 

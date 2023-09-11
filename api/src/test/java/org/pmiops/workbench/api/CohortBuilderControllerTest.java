@@ -225,7 +225,7 @@ public class CohortBuilderControllerTest {
     assertThat(domainCard.getDescription()).isEqualTo(dbDomainCard.getDescription());
     assertThat(domainCard.getParticipantCount()).isEqualTo(dbDomainCard.getParticipantCount());
     assertThat(domainCard.getConceptCount()).isEqualTo(10);
-    assertThat(domainCard.getStandard()).isFalse();
+    assertThat(domainCard.isStandard()).isFalse();
     assertThat(domainCard.getSortOrder()).isEqualTo(3);
   }
 
@@ -1701,7 +1701,7 @@ public class CohortBuilderControllerTest {
         .path(dbCriteria.getPath())
         .hasAncestorData(dbCriteria.getAncestorData())
         .hasHierarchy(dbCriteria.getHierarchy())
-        .isStandard(dbCriteria.getStandard())
+        .isStandard(dbCriteria.isStandard())
         .value(dbCriteria.getValue());
   }
 

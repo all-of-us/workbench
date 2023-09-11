@@ -11,7 +11,7 @@ public enum DatasetColumnValueExtractor implements ColumnValueExtractor<Reportin
   DATASET_ID("dataset_id", ReportingDataset::getDatasetId),
   DESCRIPTION("description", ReportingDataset::getDescription),
   INCLUDES_ALL_PARTICIPANTS(
-      "includes_all_participants", ReportingDataset::getIncludesAllParticipants),
+      "includes_all_participants", ReportingDataset::isIncludesAllParticipants),
   LAST_MODIFIED_TIME("last_modified_time", d -> toInsertRowString(d.getLastModifiedTime())),
   NAME("name", ReportingDataset::getName),
   WORKSPACE_ID("workspace_id", ReportingDataset::getWorkspaceId);

@@ -108,7 +108,7 @@ public interface ConceptSetMapper {
                     c ->
                         DbConceptSetConceptId.builder()
                             .addConceptId(c.getConceptId())
-                            .addStandard(c.getStandard())
+                            .addStandard(c.isStandard())
                             .build())
                 .collect(Collectors.toList()));
   }

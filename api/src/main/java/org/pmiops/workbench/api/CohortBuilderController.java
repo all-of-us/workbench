@@ -149,7 +149,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         new CriteriaListResponse()
             .items(
                 cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
-                    domain, request.getSourceConceptIds(), request.getStandardConceptIds())));
+                    domain, request.getSourceConceptIds(), request.isStandardConceptIds())));
   }
 
   @Override

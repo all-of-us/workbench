@@ -22,7 +22,7 @@ public class CdrBigQuerySchemaConfigService {
       this.sourceConceptColumn = sourceConceptColumn;
     }
 
-    public ColumnConfig getStandardConceptColumn() {
+    public ColumnConfig isStandardConceptColumn() {
       return standardConceptColumn;
     }
 

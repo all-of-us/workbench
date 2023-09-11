@@ -29,7 +29,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   DEMOGRAPHIC_SURVEY_COMPLETION_TIME(
       "demographic_survey_completion_time",
       u -> toInsertRowString(u.getDemographicSurveyCompletionTime())),
-  DISABLED("disabled", ReportingUser::getDisabled),
+  DISABLED("disabled", ReportingUser::isDisabled),
   ERA_COMMONS_BYPASS_TIME(
       "era_commons_bypass_time", u -> toInsertRowString(u.getEraCommonsBypassTime())),
   ERA_COMMONS_COMPLETION_TIME(
@@ -76,7 +76,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
   IDENTIFIES_AS_LGBTQ(
       "identifies_as_lgbtq",
-      u -> u.getIdentifiesAsLgbtq() == null ? null : u.getIdentifiesAsLgbtq().toString()),
+      u -> u.isIdentifiesAsLgbtq() == null ? null : u.isIdentifiesAsLgbtq().toString()),
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
   SEXES_AT_BIRTH("sexes_at_birth", ReportingUser::getSexesAtBirth),
   RACES("races", ReportingUser::getRaces),
