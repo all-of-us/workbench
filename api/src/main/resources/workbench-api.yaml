@@ -29,6 +29,7 @@ paths:
       - status
       description: Returns the status of the various services and integrations
       operationId: getStatus
+      security: []
       responses:
         200:
           description: A map of system name to status.
@@ -42,6 +43,7 @@ paths:
       - config
       description: Returns some server configuration data.
       operationId: getConfig
+      security: []
       responses:
         200:
           description: Configuration data
@@ -55,6 +57,7 @@ paths:
       - featured-workspaces-config
       description: Returns the featured workspaces config
       operationId: getFeaturedWorkspacesConfig
+      security: []
       responses:
         200:
           description: List of featured workspaces
@@ -222,11 +225,12 @@ paths:
           content: {}
   /v1/is-username-taken:
     get:
-      security: []
+
       tags:
       - profile
       description: Checks to see if the given username is not available.
       operationId: isUsernameTaken
+      security: []
       parameters:
       - name: username
         in: query
@@ -246,6 +250,7 @@ paths:
       - profile
       description: Only for accounts that have not logged in yet, update contact email.
       operationId: updateContactEmail
+      security: []
       requestBody:
         content:
           application/json:
@@ -272,6 +277,7 @@ paths:
       - profile
       description: Resend welcome email
       operationId: resendWelcomeEmail
+      security: []
       requestBody:
         content:
           application/json:
@@ -315,6 +321,7 @@ paths:
       - profile
       description: Creates an account in the researchallofus.org domain.
       operationId: createAccount
+      security: []
       requestBody:
         content:
           application/json:
@@ -2278,6 +2285,7 @@ paths:
       description: Registers an egress event detected by SumoLogic with the Workbench.
         Forwards the event to Stackdriver for recording and potential alerting.
       operationId: logEgressEvent
+      security: []
       parameters:
       - name: X-API-KEY
         in: header
@@ -2352,6 +2360,7 @@ paths:
         cleanup. Enforces upgrade by deletion and re-creation for older runtime deployments.
         May be slow to execute. Only executable via App Engine cronjob.
       operationId: deleteOldRuntimes
+      security: []
       responses:
         204:
           description: Runtimes were checked and handled successfully.
@@ -2366,6 +2375,7 @@ paths:
         old disks. Only executable via App Engine cronjob. Note: rerunning this out
         of band may result in the sending of duplicate emails.'
       operationId: checkPersistentDisks
+      security: []
       responses:
         204:
           description: Disks were checked and handled successfully.
@@ -2377,6 +2387,7 @@ paths:
       - cron
       description: Audits project access for all users
       operationId: bulkAuditProjectAccess
+      security: []
       responses:
         204:
           description: All users' project access were audited.
@@ -2394,6 +2405,7 @@ paths:
       - cron
       description: Send workbench data to RDR
       operationId: exportData
+      security: []
       responses:
         204:
           description: All modified/created workspaces and users were exported
@@ -2412,6 +2424,7 @@ paths:
       description: Find and alert users that have exceeded their free tier billing
         usage
       operationId: checkFreeTierBillingUsage
+      security: []
       responses:
         204:
           description: No Error
@@ -2430,6 +2443,7 @@ paths:
       description: |
         This cron job ensures that cloud tasks are created to support /v1/cloudTask/synchronizeUserAccess.
       operationId: groupAndPushSynchronizeAccessTasks
+      security: []
       responses:
         204:
           description: No Error
@@ -2448,6 +2462,7 @@ paths:
       description: Check each user daily for access expiration (or approaching expiration)
         and send expiration or warning emails as appropriate.
       operationId: sendAccessExpirationEmails
+      security: []
       responses:
         204:
           description: No Error
@@ -2465,6 +2480,7 @@ paths:
       - cron
       description: Trigger recording of all gauge metrics
       operationId: updateGaugeMetrics
+      security: []
       responses:
         204:
           description: No content
@@ -2483,6 +2499,7 @@ paths:
       description: |
         Capture a reporting snapshot and begin the upload task to BigQuery reporting dataset.
       operationId: uploadReportingSnapshot
+      security: []
       responses:
         204:
           description: No content
@@ -2501,6 +2518,7 @@ paths:
       description: Endpoint meant to be called offline to trigger re-enqueueing of
         any pending egress events. Only executable via App Engine cronjob.
       operationId: checkPendingEgressEvents
+      security: []
       responses:
         204:
           description: No content.
@@ -2511,6 +2529,7 @@ paths:
       - offlineObjectNameSize
       - cron
       operationId: checkObjectNameSize
+      security: []
       responses:
         204:
           description: No content.
@@ -2522,6 +2541,7 @@ paths:
       - cron
       description: Keep test users' TOS compliance statuses in the appropriate states
       operationId: ensureTestUserTosCompliance
+      security: []
       responses:
         204:
           description: No content.
@@ -2534,6 +2554,7 @@ paths:
       description: Email newly eligible users a link to take the new user satisfaction
         survey.
       operationId: emailNewUserSatisfactionSurveyLinks
+      security: []
       responses:
         204:
           description: No content.
@@ -2545,6 +2566,7 @@ paths:
       - cron
       description: Delete all test users' workspaces
       operationId: deleteAllTestUserWorkspaces
+      security: []
       responses:
         204:
           description: No content.
@@ -2556,6 +2578,7 @@ paths:
       - cron
       description: Delete all test users' workspaces from Rawls
       operationId: deleteAllTestUserWorkspacesOrphanedInRawls
+      security: []
       responses:
         204:
           description: No content.
@@ -4057,6 +4080,7 @@ paths:
       description: Task handler which handle request from cloud task queue rdrQueueTest
         to send Researcher data
       operationId: exportResearcherData
+      security: []
       parameters:
       - name: backfill
         in: query
@@ -4092,6 +4116,7 @@ paths:
       description: Task handler which handle request from cloud task queue rdrQueueTest
         to send Workspace data
       operationId: exportWorkspaceData
+      security: []
       parameters:
       - name: backfill
         in: query
@@ -4116,6 +4141,7 @@ paths:
       - cloudTask
       description: Audits the provided user's access to GCP resources
       operationId: auditProjectAccess
+      security: []
       requestBody:
         description: Audit configuration to run.
         content:
@@ -4136,6 +4162,7 @@ paths:
       description: |
         Check each user to ensure they still meet compliance guidelines.  If they do not, remove them from access tiers.
       operationId: synchronizeUserAccess
+      security: []
       requestBody:
         description: Users to synchronize.
         content:
@@ -4155,6 +4182,7 @@ paths:
       - cloudTask
       description: Processes and remediates the given PENDING egress event
       operationId: processEgressEvent
+      security: []
       requestBody:
         description: Event to be processed.
         content:
@@ -4214,6 +4242,7 @@ paths:
       - cloudTask
       description: Deletes the requested test user workspaces.
       operationId: deleteTestUserWorkspaces
+      security: []
       requestBody:
         description: Batch of workspace deletions to process.
         content:
@@ -4234,6 +4263,7 @@ paths:
       description: |
         Deletes the requested test user workspaces in Rawls (Terra Workspace service). This may be necessary in case of a mismatch between the RW and Terra views of workspaces
       operationId: deleteTestUserWorkspacesInRawls
+      security: []
       requestBody:
         description: Batch of Rawls workspace deletions to process.
         content:
@@ -4299,6 +4329,7 @@ paths:
       - institution
       description: Gets the public details for the list of all Institutions.
       operationId: getPublicInstitutionDetails
+      security: []
       responses:
         200:
           description: A list of all Institutions
@@ -4385,6 +4416,7 @@ paths:
       description: Checks whether the given email address is a verified member of
         an institution.
       operationId: checkEmail
+      security: []
       parameters:
       - name: shortName
         in: path
@@ -6174,6 +6206,7 @@ paths:
       description: Checks if a given one-time can be used to create a new user satisfaction
         survey response.
       operationId: validateOneTimeCodeForNewUserSatisfactionSurvey
+      security: []
       parameters:
       - name: oneTimeCode
         in: path
@@ -6196,6 +6229,7 @@ paths:
       description: Stores user responses for the new user satisfaction survey if they
         have a valid one-time code.
       operationId: createNewUserSatisfactionSurveyWithOneTimeCode
+      security: []
       requestBody:
         description: Survey response data and the one-time code
         content:
