@@ -320,11 +320,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            request.getDomain(),
-            searchTerm.getCodeTerm(),
-            request.isStandard(),
-            type,
-            pageRequest);
+            request.getDomain(), searchTerm.getCodeTerm(), request.isStandard(), type, pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
