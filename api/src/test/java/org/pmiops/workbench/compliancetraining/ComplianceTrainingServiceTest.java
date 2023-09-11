@@ -233,6 +233,64 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
+  public void
+      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
+          throws Exception {
+    long issued = fakeClock.instant().getEpochSecond() - 100;
+    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTOnly =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .build();
+    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTAndCT =
+        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
+            .put(
+                BadgeName.REGISTERED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .put(
+                BadgeName.CONTROLLED_TIER_TRAINING,
+                new BadgeDetailsV2().lastissued(issued).valid(true))
+            .build();
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
+        .thenReturn(userBadgesByNameRTOnly)
+        .thenReturn(userBadgesByNameRTAndCT);
+
+    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
+
+    // Complete RT training
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
+
+    // Complete CT training
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByNameRTAndCT);
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
+
+    DbUser user = userDao.findUserByUsername(USERNAME);
+
+    // RT is complete, so there should be a verification record.
+    var rtAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
+    var rtUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
+    var rtVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    assertThat(rtVerification.isPresent()).isTrue();
+    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
+        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
+
+    // CT is complete, so there should be a verification record.
+    var ctAccessModule =
+        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
+    var ctUserAccessModule =
+        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
+    var ctVerification =
+        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    assertThat(ctVerification.isPresent()).isTrue();
+  }
+
+  @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);

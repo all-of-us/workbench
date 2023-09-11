@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AccessModuleStatus;
 import org.pmiops.workbench.moodle.MoodleService;
@@ -153,12 +154,9 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                 accessModuleService.updateCompletionTime(
                     dbUser, accessModuleName, timestamp.orElse(null));
             if (updatedUserAccessModule.getCompletionTime() != null) {
-              var verification =
-                  new DbComplianceTrainingVerification()
-                      .setComplianceTrainingVerificationSystem(
-                          DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem
-                              .MOODLE)
-                      .setUserAccessModule(updatedUserAccessModule);
+              var verification = retrieveVerificationOrCreate(updatedUserAccessModule);
+              verification.setComplianceTrainingVerificationSystem(
+                  DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
               complianceTrainingVerificationDao.save(verification);
             }
           });
@@ -183,5 +181,12 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   private Timestamp clockNow() {
     return new Timestamp(clock.instant().toEpochMilli());
+  }
+
+  private DbComplianceTrainingVerification retrieveVerificationOrCreate(
+      DbUserAccessModule userAccessModule) {
+    return complianceTrainingVerificationDao
+        .getByUserAccessModule(userAccessModule)
+        .orElse(new DbComplianceTrainingVerification().setUserAccessModule(userAccessModule));
   }
 }
