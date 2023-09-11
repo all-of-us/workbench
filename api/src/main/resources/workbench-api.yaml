@@ -2048,16 +2048,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-              - requestDateInMillis
-              - requestReason
-              type: object
-              properties:
-                requestReason:
-                  type: string
-                requestDateInMillis:
-                  type: integer
-                  format: int64
+              $ref: '#/components/schemas/AdminLockingRequest'
         required: true
       responses:
         200:
@@ -2072,7 +2063,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: AdminLockingRequest
   /v1/admin/workspaces/{workspaceNamespace}/unlocked:
     post:
       tags:
@@ -11509,6 +11499,17 @@ components:
         reason:
           type: string
           description: The administrative purpose for accessing this notebook
+    AdminLockingRequest:
+      required:
+        - requestDateInMillis
+        - requestReason
+      type: object
+      properties:
+        requestReason:
+          type: string
+        requestDateInMillis:
+          type: integer
+          format: int64
     AuthDomainCreatedResponse:
       required:
       - authDomainName
