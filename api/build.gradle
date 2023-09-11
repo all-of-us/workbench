@@ -504,11 +504,15 @@ dependencies {
     // TODO(calbach): The duplicated deps here are highly suspect. Investigate
     // removing the generated sourceSet, or else fixing the runtime deps.
     implementation 'io.swagger.core.v3:swagger-annotations:2.2.3'
+    implementation 'io.swagger.core.v3:swagger-models:2.2.3'
     implementation 'io.gsonfire:gson-fire:1.8.5'
     implementation 'org.threeten:threetenbp:1.6.2'
+    implementation 'io.springfox:springfox-oas:3.0.0'
     generatedCompile 'io.swagger.core.v3:swagger-annotations:2.2.3'
+    generatedCompile 'io.swagger.core.v3:swagger-models:2.2.3'
     generatedCompile 'io.gsonfire:gson-fire:1.8.5'
     generatedCompile 'org.threeten:threetenbp:1.6.2'
+    generatedCompile 'io.springfox:springfox-oas:3.0.0'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$project.ext.KOTLIN_VERSION"
 
