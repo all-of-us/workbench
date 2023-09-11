@@ -177,7 +177,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                     .map(leonardoMapper::toApiListDisksResponse)
                     .collect(Collectors.toList()));
         List<Disk> runtimeDisks =
-            diskList.stream().filter(Disk::getIsGceRuntime).collect(Collectors.toList());
+            diskList.stream().filter(Disk::isIsGceRuntime).collect(Collectors.toList());
         if (!runtimeDisks.isEmpty()) {
           // Find active disks for runtime VM. Block user from creating new disk.
           throw new BadRequestException(
@@ -282,7 +282,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                     workspaceNamespace,
                     userProvider.get().getRuntimeName(),
                     body.getNotebookNames(),
-                    body.getPlaygroundMode(),
+                    body.isPlaygroundMode(),
                     true)));
   }
 }

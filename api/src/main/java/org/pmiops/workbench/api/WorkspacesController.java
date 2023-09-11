@@ -512,8 +512,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
       workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
-      if (researchPurpose.getReviewRequested()) {
+      dbWorkspace.setReviewRequested(researchPurpose.isReviewRequested());
+      if (researchPurpose.isReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
       }
@@ -613,7 +613,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
-    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
+    if (Boolean.TRUE.equals(body.isIncludeUserRoles())) {
       var fromAcl =
           workspaceAuthService.getFirecloudWorkspaceAcl(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());

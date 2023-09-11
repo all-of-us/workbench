@@ -135,7 +135,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList = new ArrayList<>();
     Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
         dbConceptSetConceptIds.stream()
-            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+            .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
     List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
     List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
     if (!standard.isEmpty()) {
@@ -236,7 +236,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         cbCriteriaDao.findCriteriaAutoComplete(
             criteriaSearchRequest.getDomain(),
             ImmutableList.of(criteriaSearchRequest.getType()),
-            criteriaSearchRequest.getStandard(),
+            criteriaSearchRequest.isStandard(),
             ImmutableList.of(true),
             searchTerm,
             pageRequest);
@@ -247,7 +247,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
               criteriaSearchRequest.getDomain(),
               ImmutableList.of(criteriaSearchRequest.getType()),
-              criteriaSearchRequest.getStandard(),
+              criteriaSearchRequest.isStandard(),
               ImmutableList.of(true),
               searchTerm.getCodeTerm(),
               pageRequest);
@@ -322,7 +322,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
             request.getDomain(),
             searchTerm.getCodeTerm(),
-            request.getStandard(),
+            request.isStandard(),
             type,
             pageRequest);
 
@@ -337,7 +337,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (dbCriteriaPage.getContent().isEmpty() && !request.getTerm().contains(".")) {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaByDomain(
-              request.getDomain(), searchTerm, request.getStandard(), type, pageRequest);
+              request.getDomain(), searchTerm, request.isStandard(), type, pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -679,7 +679,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     } else {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaTopCountsByStandard(
-              request.getDomain(), request.getStandard(), pageRequest);
+              request.getDomain(), request.isStandard(), pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(

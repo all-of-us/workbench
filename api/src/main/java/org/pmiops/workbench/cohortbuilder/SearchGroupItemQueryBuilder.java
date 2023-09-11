@@ -283,7 +283,7 @@ public final class SearchGroupItemQueryBuilder {
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
       if (param.getAttributes().isEmpty()) {
-        if (param.getStandard()) {
+        if (param.isStandard()) {
           standardSearchParameters.add(param);
         } else {
           sourceSearchParameters.add(param);
@@ -574,7 +574,7 @@ public final class SearchGroupItemQueryBuilder {
             .collect(Collectors.toList());
     String standardParam =
         QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
+            queryParams, QueryParameterValue.int64(parameter.isStandard() ? 1 : 0));
     String conceptIdParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams,

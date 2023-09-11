@@ -151,7 +151,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private static boolean filterToNonPublished(WorkspaceResponse response) {
     return response.getAccessLevel() == WorkspaceAccessLevel.OWNER
         || response.getAccessLevel() == WorkspaceAccessLevel.WRITER
-        || !response.getWorkspace().getPublished();
+        || !response.getWorkspace().isPublished();
   }
 
   @Override
@@ -159,7 +159,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceMapper
         .toApiWorkspaceResponses(workspaceDao, fireCloudService.getWorkspaces())
         .stream()
-        .filter(workspaceResponse -> workspaceResponse.getWorkspace().getPublished())
+        .filter(workspaceResponse -> workspaceResponse.getWorkspace().isPublished())
         .collect(Collectors.toList());
   }
 

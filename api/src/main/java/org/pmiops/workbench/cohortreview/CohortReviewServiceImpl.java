@@ -329,7 +329,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         .annotationValueString(modifyRequest.getAnnotationValueString())
         .annotationValueEnum(modifyRequest.getAnnotationValueEnum())
         .annotationValueDateString(modifyRequest.getAnnotationValueDate())
-        .annotationValueBoolean(modifyRequest.getAnnotationValueBoolean())
+        .annotationValueBoolean(modifyRequest.isAnnotationValueBoolean())
         .annotationValueInteger(modifyRequest.getAnnotationValueInteger());
     DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findDbCohortAnnotationDefinition(
