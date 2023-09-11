@@ -222,6 +222,7 @@ paths:
           content: {}
   /v1/is-username-taken:
     get:
+      security: []
       tags:
       - profile
       description: Checks to see if the given username is not available.

@@ -2,7 +2,7 @@ package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.common.base.Strings;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -28,7 +28,7 @@ public class CloudTaskInterceptor implements AsyncHandlerInterceptor {
     }
 
     HandlerMethod method = (HandlerMethod) handler;
-    ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
+    Operation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), Operation.class);
     if (apiOp == null) {
       return true;
     }
