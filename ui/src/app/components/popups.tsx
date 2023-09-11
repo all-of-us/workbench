@@ -181,9 +181,9 @@ export const computePopupPosition = ({
   const overflowsLeft = position.left < 0;
   const overflowsRight = position.left + element.width >= viewport.width;
 
+  const newTop = overflowsTop ? 'bottom' : 'top';
   const newBottom = overflowsBottom ? 'top' : 'bottom';
   const newLeft = overflowsLeft ? 'right' : 'left';
-  const newTop = overflowsTop ? 'bottom' : 'top';
   const newRight = overflowsRight ? 'left' : 'right';
   const maybeFlip = (d) => {
     return switchCase(

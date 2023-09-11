@@ -45,8 +45,7 @@ export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
       isRunning && !canWrite,
       () => 'You do not have permission to modify this workspace',
     ],
-    [!isRunning && canWrite, () => 'Extraction job is not currently running'],
-    [!isRunning && !canWrite, () => 'Extraction job is not currently running']
+    [!isRunning, () => 'Extraction job is not currently running']
   );
 
   const [modalState, setModalState] = useState(false);

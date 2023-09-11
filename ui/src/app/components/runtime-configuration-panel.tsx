@@ -596,6 +596,7 @@ const PanelMain = fp.flow(
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
                         ],
                         [
+                          // TODO: this configuration is not supported.  Remove?
                           deletePDSelected && usingDataproc,
                           () => RuntimeStatusRequest.DeletePD,
                         ]
