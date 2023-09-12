@@ -14,11 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
 import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
@@ -30,11 +28,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
-import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -42,9 +38,7 @@ import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.MoodleService;
@@ -81,7 +75,6 @@ public class ComplianceTrainingServiceTest {
   private static List<DbAccessModule> accessModules;
 
   @MockBean private MoodleService mockMoodleService;
-  @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
@@ -92,17 +85,14 @@ public class ComplianceTrainingServiceTest {
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
   @MockBean private UserService userService;
-  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
-  @Autowired private InstitutionDao institutionDao;
   @Autowired private ComplianceTrainingService complianceTrainingService;
   @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
 
   @Import({
     FakeClockConfiguration.class,
-    FakeJpaDateTimeConfiguration.class,
     AccessModuleNameMapperImpl.class,
     AccessSyncServiceImpl.class,
     AccessTierServiceImpl.class,
@@ -112,20 +102,12 @@ public class ComplianceTrainingServiceTest {
     MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class
   })
-  @MockBean({
-    MailService.class,
-  })
   @TestConfiguration
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig getWorkbenchConfig() {
       return providedWorkbenchConfig;
-    }
-
-    @Bean
-    Random getRandom() {
-      return new Random();
     }
 
     @Bean
