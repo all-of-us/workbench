@@ -43,6 +43,7 @@ import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.moodle.MoodleServiceImpl;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +121,7 @@ public class ComplianceTrainingServiceTest {
 
   @BeforeEach
   public void setUp() {
-    DbUser user = new DbUser();
+    DbUser user = PresetData.createDbUser();
     user.setUsername(USERNAME);
     when(userService.isServiceAccount(user)).thenReturn(false);
     user = userDao.save(user);
