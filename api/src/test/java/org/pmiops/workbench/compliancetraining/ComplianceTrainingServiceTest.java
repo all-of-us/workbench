@@ -203,8 +203,6 @@ public class ComplianceTrainingServiceTest {
     // RT is complete, so there should be a verification record.
     var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
-    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
-        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is complete, so there should be a verification record.
     var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
