@@ -129,8 +129,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
