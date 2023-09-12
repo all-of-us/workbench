@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,9 +89,13 @@ public class AdminAuthorityTest {
    */
   @Test
   public void testAdminEndpointsHaveAuthority() throws Exception {
-    List<Class<?>> controllers = findClassesInApiPackageWithAnnotation(RestController.class);
+    List<Class<?>> controllers = findClassesInApiPackageWithAnnotation(RestController.class)
+        .stream()
+        .filter(c -> Arrays.stream(c.getInterfaces())
+            .map(i -> i.getName()).anyMatch( n -> n.endsWith("ApiDelegate")))
+        .collect(Collectors.toList());
     Map<String, Class<?>> generatedApis =
-        findClassesInApiPackageWithAnnotation(Api.class).stream()
+        findClassesInApiPackageWithAnnotation(Validated.class).stream()
             .collect(Collectors.toMap(Class::getName, Functions.identity()));
 
     assertThat(controllers).isNotEmpty();
