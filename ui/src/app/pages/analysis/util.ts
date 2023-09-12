@@ -7,6 +7,7 @@ import {
   JUPYTER_FILE_EXT,
   R_SCRIPT_EXT,
   RMD_FILE_EXT,
+  SAS_FILE_EXT,
 } from 'app/utils/constants';
 
 export function dropJupyterNotebookFileSuffix(filename: string) {
@@ -41,6 +42,14 @@ export function appendRScriptSuffix(filename: string) {
   return filename;
 }
 
+export function appendSasSuffix(filename: string) {
+  if (filename && !filename.endsWith(SAS_FILE_EXT)) {
+    return filename + SAS_FILE_EXT;
+  }
+
+  return filename;
+}
+
 export function appendAnalysisFileSuffixByOldName(
   filename: string,
   oldFileName: string
@@ -55,6 +64,7 @@ export function appendAnalysisFileSuffixByOldName(
       () => appendRStudioNotebookFileSuffix(filename),
     ],
     [oldFileName.endsWith(R_SCRIPT_EXT), () => appendRScriptSuffix(filename)],
+    [oldFileName.endsWith(SAS_FILE_EXT), () => appendSasSuffix(filename)],
     () => filename
   );
 }
@@ -85,6 +95,11 @@ const appsExtensionMap = [
   {
     extension: R_SCRIPT_EXT,
     appType: UIAppType.RSTUDIO,
+    canPlayground: false,
+  },
+  {
+    extension: SAS_FILE_EXT,
+    appType: UIAppType.SAS,
     canPlayground: false,
   },
 ];

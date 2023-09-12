@@ -104,7 +104,12 @@ export const AppFilesList = withCurrentWorkspace()(
       // Find App Type on the basis of file name extension
       const { name } = row;
       const appType = getAppInfoFromFileName(name).appType;
-      return <AppLogo appType={appType} style={{ marginRight: '1em' }} />;
+      return (
+        <AppLogo
+          appType={appType}
+          style={{ marginRight: '1em', maxHeight: '4.5rem' }}
+        />
+      );
     };
 
     const displayName = (row) => {
