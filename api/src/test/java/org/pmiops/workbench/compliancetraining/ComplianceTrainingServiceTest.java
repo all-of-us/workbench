@@ -91,11 +91,7 @@ public class ComplianceTrainingServiceTest {
     MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class
   })
-  @MockBean({
-    FireCloudService.class,
-    InstitutionService.class,
-    UserServiceAuditor.class
-  })
+  @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class})
   @TestConfiguration
   static class Configuration {
     @Bean
@@ -134,7 +130,8 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
@@ -155,7 +152,8 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
           throws Exception {
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
@@ -190,14 +188,14 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
           throws Exception {
-    var userBadgesByNameRTOnly = ImmutableMap.of(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails());
-    var userBadgesByNameRTAndCT = ImmutableMap.of(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails(),
-                BadgeName.CONTROLLED_TIER_TRAINING,
-                defaultBadgeDetails());
+    var userBadgesByNameRTOnly =
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
+    var userBadgesByNameRTAndCT =
+        ImmutableMap.of(
+            BadgeName.REGISTERED_TIER_TRAINING,
+            defaultBadgeDetails(),
+            BadgeName.CONTROLLED_TIER_TRAINING,
+            defaultBadgeDetails());
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
@@ -277,7 +275,12 @@ public class ComplianceTrainingServiceTest {
   public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
-    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails().lastissued(issued), BadgeName.CONTROLLED_TIER_TRAINING, ctBadge));
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(
+            BadgeName.REGISTERED_TIER_TRAINING,
+            defaultBadgeDetails().lastissued(issued),
+            BadgeName.CONTROLLED_TIER_TRAINING,
+            ctBadge));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
@@ -353,7 +356,8 @@ public class ComplianceTrainingServiceTest {
     return new BadgeDetailsV2().valid(true).lastissued(START_INSTANT.getEpochSecond() - 100);
   }
 
-  private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName) throws ApiException {
+  private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
+      throws ApiException {
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
   }
 }
