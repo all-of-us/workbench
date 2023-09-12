@@ -12,6 +12,7 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
@@ -34,7 +35,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudUserInfo;
-import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.user.DevUserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,12 +301,10 @@ public class AuthInterceptorTest {
 
   @Test
   public void preHandle_apiBaseUrlNotMatch_cloudTask_allowed() throws Exception {
-    when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockHandler.getMethod())
-        .thenReturn(
-            CloudTaskRdrExportApi.class.getMethod(
-                "exportResearcherData", ArrayOfLong.class, Boolean.class));
+        .thenReturn(CloudTaskRdrExportApi.class.getMethod(
+            "exportResearcherData", List.class, Boolean.class));
 
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
