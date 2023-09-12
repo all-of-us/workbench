@@ -225,7 +225,7 @@ const PanelMain = fp.flow(
     );
 
     // TODO: simplify the state logic here!  At least, try to understand why this is happening.
-    // Somehow, setting the analysisConfig in the above useState() step means that
+    // Somehow, only setting the analysisConfig in the above useState() step means that
     // a gcePersistentDisk update from the diskStore does not always cause analysisConfig to be updated.
     // So we must set this explicit dependency trigger instead.
     useEffect(
