@@ -36,7 +36,21 @@ To automatically fix lint errors:
 
 Other useful helper scripts are available. To get a list of all available scripts:
 
-`yarn run`
+```
+$ yarn run
+...
+   - deps
+      yarn run codegen && yarn run build-terra-deps
+   - dev-up
+      yarn && yarn run deps && yarn start
+   - dev-up-local
+      yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start
+   - dev-up-tanagra-local
+      yarn && concurrently "yarn run start-tanagra" "yarn run dev-up-local"
+   - dev-up-test
+      yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start
+...
+```
 
 ## Fontawesome
 
