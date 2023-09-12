@@ -221,7 +221,7 @@ const PanelMain = fp.flow(
     );
 
     const [analysisConfig, setAnalysisConfig] = useState(
-      existingAnalysisConfig
+      withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
     );
 
     // TODO: simplify the state logic here!  At least, try to understand why this is happening.
