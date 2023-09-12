@@ -232,7 +232,7 @@ const PanelMain = fp.flow(
     useEffect(
       () =>
         setAnalysisConfig(
-          withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
+          withAnalysisConfigDefaults(analysisConfig, gcePersistentDisk)
         ),
       [gcePersistentDisk]
     );
