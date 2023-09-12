@@ -19,8 +19,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
+import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessSyncServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -50,7 +52,6 @@ import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.moodle.MoodleServiceImpl;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +91,7 @@ public class ComplianceTrainingServiceTest {
   @Autowired private FakeClock fakeClock;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
-  @Autowired private UserService userService;
+  @MockBean private UserService userService;
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
@@ -102,7 +103,8 @@ public class ComplianceTrainingServiceTest {
   @Import({
     FakeClockConfiguration.class,
     FakeJpaDateTimeConfiguration.class,
-    UserServiceTestConfiguration.class,
+    AccessModuleNameMapperImpl.class,
+    AccessSyncServiceImpl.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,
     CommonMappers.class,
@@ -143,6 +145,7 @@ public class ComplianceTrainingServiceTest {
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
+    when(userService.isServiceAccount(user)).thenReturn(false);
     user = userDao.save(user);
     providedDbUser = user;
 
@@ -395,6 +398,8 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     verifyNoInteractions(mockMoodleService);
