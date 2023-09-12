@@ -69,18 +69,15 @@ public class ComplianceTrainingServiceTest {
   private static List<DbAccessModule> accessModules;
 
   @MockBean private MoodleService mockMoodleService;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
+  @MockBean private UserService userService;
+
+  // use a SpyBean when we need the full service for some tests and mocks for others
+  @SpyBean private AccessModuleService accessModuleService;
 
   @Autowired private AccessModuleDao accessModuleDao;
   @Autowired private FakeClock fakeClock;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
-  @MockBean private UserService userService;
-
-  // use a SpyBean when we need the full service for some tests and mocks for others
-  @SpyBean private AccessModuleService accessModuleService;
   @Autowired private ComplianceTrainingService complianceTrainingService;
   @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
 
@@ -94,6 +91,11 @@ public class ComplianceTrainingServiceTest {
     UserAccessModuleMapperImpl.class,
     MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class
+  })
+  @MockBean({
+    FireCloudService.class,
+    InstitutionService.class,
+    UserServiceAuditor.class
   })
   @TestConfiguration
   static class Configuration {
