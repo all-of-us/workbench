@@ -30,6 +30,14 @@ To run the UI locally against the test API:
 
 By default, this runs the server at: http://localhost:4200/.
 
+To automatically fix lint errors:
+
+`yarn lint --fix`
+
+Other useful helper scripts are available. To get a list of all available scripts:
+
+`yarn run`
+
 ## Fontawesome
 
 We use some [Fontawesome](https://fontawesome.com/) Pro icons. Fontawesome requires a license during a fresh `yarn install`. Delete `node_modules` and `yarn.lock` before running `yarn install` to test. If a license isn't found, `yarn install` will fail with the error message:
