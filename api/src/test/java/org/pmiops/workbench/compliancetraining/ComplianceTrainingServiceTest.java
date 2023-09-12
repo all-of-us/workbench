@@ -62,7 +62,6 @@ public class ComplianceTrainingServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
-  private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
@@ -337,7 +336,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void tick() {
-    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
+    fakeClock.increment(1000); // arbitrary value
   }
 
   private void assertModuleCompletionEqual(
