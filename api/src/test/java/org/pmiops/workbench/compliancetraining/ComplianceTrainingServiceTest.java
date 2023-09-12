@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -12,7 +11,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -36,7 +34,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.moodle.MoodleService.BadgeName;
@@ -132,13 +129,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
-    Institution institution = new Institution();
-    when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
-    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(false);
-    when(mockInstitutionService.validateInstitutionalEmail(
-            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(true);
   }
 
   @Test
