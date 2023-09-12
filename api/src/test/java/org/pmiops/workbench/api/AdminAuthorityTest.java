@@ -8,7 +8,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
-import io.swagger.annotations.Api;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -89,11 +88,14 @@ public class AdminAuthorityTest {
    */
   @Test
   public void testAdminEndpointsHaveAuthority() throws Exception {
-    List<Class<?>> controllers = findClassesInApiPackageWithAnnotation(RestController.class)
-        .stream()
-        .filter(c -> Arrays.stream(c.getInterfaces())
-            .map(i -> i.getName()).anyMatch( n -> n.endsWith("ApiDelegate")))
-        .collect(Collectors.toList());
+    List<Class<?>> controllers =
+        findClassesInApiPackageWithAnnotation(RestController.class).stream()
+            .filter(
+                c ->
+                    Arrays.stream(c.getInterfaces())
+                        .map(i -> i.getName())
+                        .anyMatch(n -> n.endsWith("ApiDelegate")))
+            .collect(Collectors.toList());
     Map<String, Class<?>> generatedApis =
         findClassesInApiPackageWithAnnotation(Validated.class).stream()
             .collect(Collectors.toMap(Class::getName, Functions.identity()));
