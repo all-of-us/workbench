@@ -4,7 +4,9 @@ import { Dropdown } from 'primereact/dropdown';
 import { validate } from 'validate.js';
 
 import {
+  CdrVersionTiersResponse,
   DataprocConfig,
+  Disk,
   GpuConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -172,6 +174,78 @@ export const PresetSelector = ({
   );
 };
 
+const allowDataproc = (
+  cdrVersionId: string,
+  cdrVersionTiersResponse: CdrVersionTiersResponse
+) => !!findCdrVersion(cdrVersionId, cdrVersionTiersResponse)?.hasWgsData;
+
+const useCustomRuntimeWithPresetOverride = (
+  namespace: string,
+  gcePersistentDisk: Disk
+): [
+  { currentRuntime: Runtime; pendingRuntime: Runtime },
+  (request: { runtime: Runtime; detachedDisk: Disk | null }) => void
+] => {
+  const [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
+    useCustomRuntime(namespace, gcePersistentDisk);
+
+  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
+  const maybeModifiedCurrentRuntime =
+    currentRuntime && currentRuntime.status === RuntimeStatus.Deleted
+      ? applyPresetOverride(
+          // The attached disk information is lost for deleted runtimes. In any case,
+          // by default we want to offer that the user reattach their existing disk,
+          // if any and if the configuration allows it.
+          maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
+        )
+      : currentRuntime;
+
+  return [
+    { currentRuntime: maybeModifiedCurrentRuntime, pendingRuntime },
+    setRuntimeRequest,
+  ];
+};
+
+interface InitializePanelContentProps {
+  initialPanelContent?: PanelContent;
+  pendingRuntime?: Runtime;
+  currentRuntime?: Runtime;
+  status: RuntimeStatus;
+}
+
+const initializePanelContent = ({
+  initialPanelContent,
+  pendingRuntime,
+  currentRuntime,
+  status,
+}: InitializePanelContentProps): PanelContent =>
+  cond<PanelContent>(
+    [!!initialPanelContent, () => initialPanelContent],
+    // If there's a pendingRuntime, this means there's already a create/update
+    // in progress, even if the runtime store doesn't actively reflect this yet.
+    // Show the customize panel in this event.
+    [!!pendingRuntime, () => PanelContent.Customize],
+    [
+      currentRuntime === null ||
+        currentRuntime === undefined ||
+        status === RuntimeStatus.Unknown,
+      () => PanelContent.Create,
+    ],
+    [
+      // General Analysis consist of GCE + PD. Display create page only if
+      // 1) currentRuntime + pd both are deleted and
+      // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
+      currentRuntime?.status === RuntimeStatus.Deleted &&
+        !currentRuntime?.gceWithPdConfig &&
+        [
+          RuntimeConfigurationType.GeneralAnalysis,
+          RuntimeConfigurationType.HailGenomicAnalysis,
+        ].includes(currentRuntime?.configurationType),
+      () => PanelContent.Create,
+    ],
+    () => PanelContent.Customize
+  );
+
 const PanelMain = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace()
@@ -179,44 +253,29 @@ const PanelMain = fp.flow(
   ({
     cdrVersionTiersResponse,
     workspace,
-    profileState,
+    profileState: { profile },
     onClose = () => {},
     initialPanelContent,
     creatorFreeCreditsRemaining,
   }) => {
-    const { profile } = profileState;
     const { namespace, cdrVersionId, googleProject } = workspace;
-
-    const { hasWgsData: allowDataproc } = findCdrVersion(
-      cdrVersionId,
-      cdrVersionTiersResponse
-    ) || { hasWgsData: false };
-
     const { gcePersistentDisk } = useStore(runtimeDiskStore);
-    let [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
-      useCustomRuntime(namespace, gcePersistentDisk);
-
-    // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
-      currentRuntime = applyPresetOverride(
-        // The attached disk information is lost for deleted runtimes. In any case,
-        // by default we want to offer that the user reattach their existing disk,
-        // if any and if the configuration allows it.
-        maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
-      );
-    }
 
     const [status, setRuntimeStatus] = useRuntimeStatus(
       namespace,
       googleProject
     );
 
-    // Prioritize the "pendingRuntime", if any. When an update is pending, we want
-    // to render the target runtime details, which  may not match the current runtime.
-    const existingRuntime =
-      pendingRuntime || currentRuntime || ({} as Partial<Runtime>);
+    const [{ currentRuntime, pendingRuntime }, setRuntimeRequest] =
+      useCustomRuntimeWithPresetOverride(namespace, gcePersistentDisk);
+
+    // arbitrary default before loading
+    const [panelContent, setPanelContent] = useState(PanelContent.Create);
+
     const existingAnalysisConfig = toAnalysisConfig(
-      existingRuntime,
+      // Prioritize the "pendingRuntime", if any. When an update is pending, we want
+      // to render the target runtime details, which  may not match the current runtime.
+      pendingRuntime || currentRuntime || ({} as Partial<Runtime>),
       gcePersistentDisk
     );
 
@@ -236,43 +295,22 @@ const PanelMain = fp.flow(
       [gcePersistentDisk]
     );
 
+    useEffect(() => {
+      setPanelContent(
+        initializePanelContent({
+          initialPanelContent,
+          pendingRuntime,
+          currentRuntime,
+          status,
+        })
+      );
+    }, [initialPanelContent, pendingRuntime, currentRuntime, status]);
+
     const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
         runtime: fromAnalysisConfig(config),
         detachedDisk: config.detachedDisk,
       });
-
-    const initializePanelContent = (): PanelContent =>
-      cond<PanelContent>(
-        [!!initialPanelContent, () => initialPanelContent],
-        // If there's a pendingRuntime, this means there's already a create/update
-        // in progress, even if the runtime store doesn't actively reflect this yet.
-        // Show the customize panel in this event.
-        [!!pendingRuntime, () => PanelContent.Customize],
-        [
-          currentRuntime === null ||
-            currentRuntime === undefined ||
-            status === RuntimeStatus.Unknown,
-          () => PanelContent.Create,
-        ],
-        [
-          // General Analysis consist of GCE + PD. Display create page only if
-          // 1) currentRuntime + pd both are deleted and
-          // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
-          currentRuntime?.status === RuntimeStatus.Deleted &&
-            !currentRuntime?.gceWithPdConfig &&
-            [
-              RuntimeConfigurationType.GeneralAnalysis,
-              RuntimeConfigurationType.HailGenomicAnalysis,
-            ].includes(currentRuntime?.configurationType),
-          () => PanelContent.Create,
-        ],
-        () => PanelContent.Customize
-      );
-
-    const [panelContent, setPanelContent] = useState<PanelContent>(
-      initializePanelContent()
-    );
 
     const validMainMachineTypes =
       analysisConfig.computeType === ComputeType.Standard
@@ -711,7 +749,10 @@ const PanelMain = fp.flow(
                     )}
                   <PresetSelector
                     {...{
-                      allowDataproc,
+                      allowDataproc: allowDataproc(
+                        cdrVersionId,
+                        cdrVersionTiersResponse
+                      ),
                       setAnalysisConfig,
                       gcePersistentDisk,
                       disabled: disableControls,
@@ -757,7 +798,13 @@ const PanelMain = fp.flow(
                         <Dropdown
                           id='runtime-compute'
                           appendTo='self'
-                          disabled={!allowDataproc || disableControls}
+                          disabled={
+                            disableControls ||
+                            !allowDataproc(
+                              cdrVersionId,
+                              cdrVersionTiersResponse
+                            )
+                          }
                           style={{ width: '15rem' }}
                           options={[ComputeType.Standard, ComputeType.Dataproc]}
                           value={
