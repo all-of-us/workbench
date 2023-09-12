@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="Peter-Lavigne" id="db.changelog-226-compliance-training-verification">
+    <createTable tableName="compliance_training_verification">
+      <column name="compliance_training_verification_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_access_module_id" type="bigint">
+        <constraints nullable="false"
+                     foreignKeyName="fk_compliance_training_verification_access_module"
+                     references="user_access_module(user_access_module_id)"
+                     deleteCascade="true"/>
+      </column>
+      <column name="compliance_training_verification_system" type="ENUM('MOODLE','ABSORB')">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <sql>
+      INSERT INTO compliance_training_verification (user_access_module_id, compliance_training_verification_system)
+        SELECT uam.user_access_module_id, 'MOODLE'
+        FROM user_access_module AS uam
+        INNER JOIN access_module AS am
+            ON am.access_module_id = uam.access_module_id
+        WHERE am.name = 'RT_COMPLIANCE_TRAINING'
+            AND uam.completion_time IS NOT NULL;
+
+      INSERT INTO compliance_training_verification (user_access_module_id, compliance_training_verification_system)
+      SELECT uam.user_access_module_id, 'MOODLE'
+      FROM user_access_module AS uam
+             INNER JOIN access_module AS am
+                        ON am.access_module_id = uam.access_module_id
+      WHERE am.name = 'CT_COMPLIANCE_TRAINING'
+        AND uam.completion_time IS NOT NULL;
+    </sql>
+
+    <rollback>
+      <dropTable tableName="compliance_training_verification"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

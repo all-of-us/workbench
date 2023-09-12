@@ -23,7 +23,7 @@ import { DisabledPanel } from './runtime-configuration-panel/disabled-panel';
 
 export interface ConfigurationPanelProps {
   onClose: () => void;
-  type: UIAppType;
+  appType: UIAppType;
   runtimeConfPanelInitialState?: RuntimeConfigurationPanelProps['initialPanelContent'];
   gkeAppConfPanelInitialState?: GkeAppConfigurationPanelProps['initialPanelContent'];
 }
@@ -35,7 +35,7 @@ export const ConfigurationPanel = fp.flow(
   ({
     onClose,
     workspace,
-    type,
+    appType,
     runtimeConfPanelInitialState = null,
     gkeAppConfPanelInitialState = null,
     profileState,
@@ -74,7 +74,7 @@ export const ConfigurationPanel = fp.flow(
             () => <DisabledPanel />,
           ],
           [
-            type === UIAppType.JUPYTER,
+            appType === UIAppType.JUPYTER,
             () => (
               <div>
                 <RuntimeConfigurationPanel
@@ -88,7 +88,7 @@ export const ConfigurationPanel = fp.flow(
           () => (
             <GKEAppConfigurationPanel
               {...{
-                type: toAppType[type],
+                appType: toAppType[appType],
                 onClose,
                 creatorFreeCreditsRemaining,
                 workspace,

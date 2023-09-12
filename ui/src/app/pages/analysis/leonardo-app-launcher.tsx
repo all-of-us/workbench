@@ -6,6 +6,7 @@ import * as fp from 'lodash/fp';
 import { Profile, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { environment } from 'environments/environment';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button, StyledRouterLink } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -21,12 +22,7 @@ import {
 } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import {
-  reactStyles,
-  switchCase,
-  withCurrentWorkspace,
-  withUserProfile,
-} from 'app/utils';
+import { reactStyles, withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { InitialRuntimeNotFoundError } from 'app/utils/leo-runtime-initializer';
 import { NavigationProps } from 'app/utils/navigation';
 import { Kernels } from 'app/utils/notebook-kernels';

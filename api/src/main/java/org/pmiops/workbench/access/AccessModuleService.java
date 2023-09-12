@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModuleStatus;
 
@@ -18,8 +19,12 @@ public interface AccessModuleService {
   /** Updates bypass times for all modules in the environment. */
   void updateAllBypassTimes(long userId);
 
-  /** Update module status to complete for a user. */
-  void updateCompletionTime(
+  /**
+   * Update module status to complete for a user.
+   *
+   * @return the updated {@link DbUserAccessModule}
+   */
+  DbUserAccessModule updateCompletionTime(
       DbUser dbUser, DbAccessModuleName accessModuleName, Timestamp timestamp);
 
   /** Retrieves all {@link AccessModuleStatus} for a user. */

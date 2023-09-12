@@ -12,6 +12,7 @@ import {
   OrganizationType,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { CommonToggle } from 'app/components/admin/common-toggle';
 import { Button } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
@@ -35,7 +36,7 @@ import {
 } from 'app/pages/admin/admin-institution-options';
 import { institutionApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import { reactStyles, switchCase } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import {
   AccessTierShortNames,
   displayNameForTier,

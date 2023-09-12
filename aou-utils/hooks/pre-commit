@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+./hooks/apply-git-secrets.sh
+
+git secrets --pre_commit_hook -- "$@"
+
+CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+if [ "$CURRENT_BRANCH" = "master" ]
+then
+  echo Current branch is master, aborting commit.
+  echo Please commit to a working branch and push it to GitHub for review/merge.
+  exit 1
+fi

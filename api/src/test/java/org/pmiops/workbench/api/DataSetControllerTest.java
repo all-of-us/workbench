@@ -73,7 +73,6 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -127,6 +126,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceACL;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceAccessEntry;
@@ -266,7 +266,7 @@ public class DataSetControllerTest {
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
-    ComplianceService.class,
+    MoodleService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,

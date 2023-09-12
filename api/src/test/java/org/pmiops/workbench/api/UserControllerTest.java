@@ -25,7 +25,6 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserAccessTierDao;
@@ -42,6 +41,7 @@ import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
+import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
@@ -80,7 +80,7 @@ public class UserControllerTest {
     CommonMappers.class,
   })
   @MockBean({
-    ComplianceService.class,
+    MoodleService.class,
     DirectoryService.class,
     FireCloudService.class,
     FreeTierBillingService.class,

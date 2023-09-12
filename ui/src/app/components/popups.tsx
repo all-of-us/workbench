@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import onClickOutside from 'react-onclickoutside';
 import * as fp from 'lodash/fp';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
-import { switchCase } from 'app/utils';
 
 const styles = {
   tooltip: {
@@ -180,58 +180,22 @@ export const computePopupPosition = ({
   const overflowsBottom = position.top + element.height >= viewport.height;
   const overflowsLeft = position.left < 0;
   const overflowsRight = position.left + element.width >= viewport.width;
+
+  const newTop = overflowsTop ? 'bottom' : 'top';
+  const newBottom = overflowsBottom ? 'top' : 'bottom';
+  const newLeft = overflowsLeft ? 'right' : 'left';
+  const newRight = overflowsRight ? 'left' : 'right';
   const maybeFlip = (d) => {
     return switchCase(
       d,
-      ['top', () => (overflowsTop ? 'bottom' : 'top')],
-      ['bottom', () => (overflowsBottom ? 'top' : 'bottom')],
-      ['left', () => (overflowsLeft ? 'right' : 'left')],
-      ['right', () => (overflowsRight ? 'left' : 'right')],
-      // Unfortunately, nested switchCase is probably the clearest way to express this.
-      [
-        'bottom-left',
-        () =>
-          switchCase(
-            { ob: overflowsBottom, ol: overflowsLeft },
-            [{ ob: false, ol: false }, () => 'bottom-left'],
-            [{ ob: false, ol: true }, () => 'bottom-right'],
-            [{ ob: true, ol: false }, () => 'top-left'],
-            [{ ob: true, ol: true }, () => 'top-right']
-          ),
-      ],
-      [
-        'bottom-right',
-        () =>
-          switchCase(
-            { ob: overflowsBottom, or: overflowsRight },
-            [{ ob: false, or: false }, () => 'bottom-right'],
-            [{ ob: false, or: true }, () => 'bottom-left'],
-            [{ ob: true, or: false }, () => 'top-right'],
-            [{ ob: true, or: true }, () => 'top-left']
-          ),
-      ],
-      [
-        'top-left',
-        () =>
-          switchCase(
-            { ot: overflowsTop, ol: overflowsLeft },
-            [{ ot: false, ol: false }, () => 'top-left'],
-            [{ ot: false, ol: true }, () => 'top-right'],
-            [{ ot: true, ol: false }, () => 'bottom-left'],
-            [{ ot: true, ol: true }, () => 'bottom-right']
-          ),
-      ],
-      [
-        'top-right',
-        () =>
-          switchCase(
-            { ot: overflowsTop, or: overflowsRight },
-            [{ ot: false, or: false }, () => 'top-right'],
-            [{ ot: false, or: true }, () => 'top-left'],
-            [{ ot: true, or: false }, () => 'bottom-right'],
-            [{ ot: true, or: true }, () => 'bottom-left']
-          ),
-      ]
+      ['top', () => newTop],
+      ['bottom', () => newBottom],
+      ['left', () => newLeft],
+      ['right', () => newRight],
+      ['bottom-left', () => [newBottom, newLeft].join('-')],
+      ['bottom-right', () => [newBottom, newRight].join('-')],
+      ['top-left', () => [newTop, newLeft].join('-')],
+      ['top-right', () => [newTop, newRight].join('-')]
     );
   };
   const finalSide = maybeFlip(side);
@@ -277,7 +241,7 @@ export const Tooltip = withDynamicPosition()(
           element.height - 12,
           (target.top + target.bottom) / 2 - position.top
         );
-        return switchCase(
+        return switchCase<string, { [key: string]: number | string }>(
           finalSide,
           ['top', () => ({ bottom: 0, left, transform: 'rotate(180deg)' })],
           ['bottom', () => ({ top: 0, left })],
@@ -299,7 +263,12 @@ export const Tooltip = withDynamicPosition()(
             {children}
             <svg
               viewBox='0 0 2 1'
-              style={{ ...getNotchPosition(), ...styles.notch }}
+              style={
+                {
+                  ...getNotchPosition(),
+                  ...styles.notch,
+                } as React.CSSProperties
+              }
             >
               <path d='M0,1l1,-1l1,1Z' />
             </svg>

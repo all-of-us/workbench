@@ -57,13 +57,6 @@ cd workbench
 git submodule update -f --init --recursive
 ```
 
-## .npmrc
-
-In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
-```
-workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
-```
-
 ## git-secrets
 
 ### Setup

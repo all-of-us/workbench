@@ -275,6 +275,12 @@
       "namespace": "aou-rw-01b56aa0",
       "id": "demosocialdeterminantsofhealth",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Best Practices for AoU Data Science",
+      "namespace": "aou-rw-d56fb435",
+      "id": "bestpracticesforaoudatascience",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

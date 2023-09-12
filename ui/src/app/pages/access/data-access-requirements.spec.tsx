@@ -10,12 +10,12 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { render, RenderResult, screen } from '@testing-library/react';
 import {
   profileApi,
   registerApiClient,
 } from 'app/services/swagger-fetch-clients';
-import { switchCase } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import {
   DARPageMode,

@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -35,7 +36,6 @@ import { disksApi } from 'app/services/swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import {
   summarizeErrors,
-  switchCase,
   withCdrVersions,
   withCurrentWorkspace,
 } from 'app/utils';
@@ -586,20 +586,19 @@ const PanelMain = fp.flow(
                 return (
                   <ConfirmDeleteEnvironmentWithPD
                     onConfirm={async (deletePDSelected) => {
-                      const runtimeStatusReq = switchCase(
-                        [usingDataproc, deletePDSelected],
-                        [[true, true], () => RuntimeStatusRequest.DeletePD],
+                      const runtimeStatusReq = cond(
                         [
-                          [true, false],
+                          !deletePDSelected,
                           () => RuntimeStatusRequest.DeleteRuntime,
                         ],
                         [
-                          [false, true],
+                          deletePDSelected && !usingDataproc,
                           () => RuntimeStatusRequest.DeleteRuntimeAndPD,
                         ],
                         [
-                          [false, false],
-                          () => RuntimeStatusRequest.DeleteRuntime,
+                          // TODO: this configuration is not supported.  Remove?
+                          deletePDSelected && usingDataproc,
+                          () => RuntimeStatusRequest.DeletePD,
                         ]
                       );
                       await setRuntimeStatus(runtimeStatusReq);

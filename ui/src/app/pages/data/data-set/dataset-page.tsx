@@ -23,6 +23,7 @@ import {
   ResourceType,
 } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { AlertInfo } from 'app/components/alert';
 import {
   Button,
@@ -57,7 +58,6 @@ import {
   formatDomain,
   formatDomainString,
   reactStyles,
-  switchCase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,

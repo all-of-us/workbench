@@ -6,12 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { GenomicExtractionJob, TerraJobStatus } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { MenuItem } from 'app/components/buttons';
 import { CopySnippetModal } from 'app/components/copy-snippet-modal';
 import { PopupTrigger } from 'app/components/popups';
 import { dataSetApi } from 'app/services/swagger-fetch-clients';
 import colors, { addOpacity } from 'app/styles/colors';
-import { switchCase } from 'app/utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -30,27 +30,29 @@ const styles = {
   },
 };
 
-interface Props {
+export interface GenomicsExtractionMenuProps {
   job: GenomicExtractionJob;
   workspace: WorkspaceData;
   onMutate: () => void;
 }
 
-export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
+export const GenomicsExtractionMenu = ({
+  job,
+  workspace,
+  onMutate,
+}: GenomicsExtractionMenuProps) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
-  const tooltip = switchCase(
-    { r: isRunning, w: canWrite },
-    [{ r: true, w: true }, () => ''],
+  const tooltip = cond(
+    [isRunning && canWrite, () => ''],
     [
-      { r: true, w: false },
+      isRunning && !canWrite,
       () => 'You do not have permission to modify this workspace',
     ],
-    [{ r: false, w: true }, () => 'Extraction job is not currently running'],
-    [{ r: false, w: false }, () => 'Extraction job is not currently running']
+    [!isRunning, () => 'Extraction job is not currently running']
   );
 
-  const [modalState, setModalState] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <React.Fragment>
@@ -65,7 +67,7 @@ export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
               disabled={
                 !(job.status === TerraJobStatus.SUCCEEDED && job.outputDir)
               }
-              onClick={() => setModalState(true)}
+              onClick={() => setShowModal(true)}
             >
               View Path
             </MenuItem>
@@ -100,6 +102,7 @@ export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
       >
         <FontAwesomeIcon
           icon={faEllipsisV}
+          title='Genomic Extractions Action Menu'
           style={{
             color: colors.accent,
             fontSize: '1.05rem',
@@ -110,11 +113,11 @@ export const GenomicsExtractionMenu = ({ job, workspace, onMutate }: Props) => {
           }}
         />
       </PopupTrigger>
-      {modalState && (
+      {showModal && (
         <CopySnippetModal
           title={`GCS Path for ${job.datasetName} VCFs`}
           copyText={job.outputDir}
-          closeFunction={() => setModalState(false)}
+          closeFunction={() => setShowModal(false)}
         />
       )}
     </React.Fragment>

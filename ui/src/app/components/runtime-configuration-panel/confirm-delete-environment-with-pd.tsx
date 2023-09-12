@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { Disk } from 'generated/fetch';
 
+import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import { RadioButton } from 'app/components/inputs';
 import colors from 'app/styles/colors';
-import { DEFAULT, switchCase } from 'app/utils';
 import { detachableDiskPricePerMonth } from 'app/utils/machines';
 import { formatUsd } from 'app/utils/numbers';
 
@@ -36,7 +36,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
   const [deleting, setDeleting] = useState(false);
   const [deletePDSelected, setDeletePDSelected] = useState(false);
 
-  const volumeHome = switchCase(
+  const volumeHome = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => '/home/jupyter'],
     [UIAppType.RSTUDIO, () => '/home/rstudio'],
@@ -98,8 +98,11 @@ export const ConfirmDeleteEnvironmentWithPD = ({
               style={{ marginRight: '0.375rem' }}
               onChange={() => setDeletePDSelected(true)}
               checked={deletePDSelected}
+              aria-labelledby='delete-environment-and-pd'
             />
-            <label>Delete persistent disk and environment</label>
+            <label id='delete-environment-and-pd'>
+              Delete persistent disk and environment
+            </label>
           </div>
         </h3>
         <p style={{ ...styles.confirmWarningText, gridColumn: 1, gridRow: 2 }}>
@@ -204,7 +207,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
           Cancel
         </Button>
         <Button
-          aria-label={'Delete'}
+          aria-label='Delete'
           disabled={deleting}
           onClick={async () => {
             setDeleting(true);
