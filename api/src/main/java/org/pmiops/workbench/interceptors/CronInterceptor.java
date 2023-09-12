@@ -16,7 +16,8 @@ public class CronInterceptor implements AsyncHandlerInterceptor {
   private static final String CRON_TAG = "cron";
 
   @Override
-  public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
+  public boolean preHandle(
+      HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
       throws Exception {
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
