@@ -303,8 +303,9 @@ public class AuthInterceptorTest {
   public void preHandle_apiBaseUrlNotMatch_cloudTask_allowed() throws Exception {
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockHandler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(
-            "exportResearcherData", List.class, Boolean.class));
+        .thenReturn(
+            CloudTaskRdrExportApi.class.getMethod(
+                "exportResearcherData", List.class, Boolean.class));
 
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
