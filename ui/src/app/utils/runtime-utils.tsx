@@ -736,6 +736,23 @@ export const toAnalysisConfig = (
   runtime: Runtime,
   existingDisk: Disk | null
 ): AnalysisConfig => {
+  if (runtime.gceConfig) {
+    const { machineType, diskSize, gpuConfig } = runtime.gceConfig;
+    return {
+      computeType: ComputeType.Standard,
+      machine: findMachineByName(machineType),
+      diskConfig: {
+        size: diskSize,
+        detachable: false,
+        detachableType: null,
+        existingDiskName: null,
+      },
+      detachedDisk: existingDisk,
+      autopauseThreshold: runtime.autopauseThreshold,
+      dataprocConfig: null,
+      gpuConfig,
+    };
+  }
   if (runtime.gceWithPdConfig) {
     const {
       machineType,
