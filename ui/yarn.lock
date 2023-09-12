@@ -1812,10 +1812,10 @@
   dependencies:
     lodash "^4.17.21"
 
-"@terra-ui-packages/core-utils@0.0.5":
-  version "0.0.5"
-  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/core-utils/-/@terra-ui-packages/core-utils-0.0.5.tgz#27ec336f8cb766bad1e23c3bc26c74db5be893de"
-  integrity sha512-VugXZvgFyYvj8gtNby5RRMBANJdghUs6brUNB1zoZmaea1GlxoqU/dhmIQQ//9lxnBpASdOAY5D2aVB4tlOdqg==
+"@terra-ui-packages/core-utils@0.0.6":
+  version "0.0.6"
+  resolved "https://us-central1-npm.pkg.dev/dsp-artifact-registry/terra-ui-packages/@terra-ui-packages/core-utils/-/@terra-ui-packages/core-utils-0.0.6.tgz#b3749ab1def680d72625f6b1b43cb584e3fe9533"
+  integrity sha512-S686y7E6Sxh9W9vA4eCZYF5GtjuSGURvny/tP/e+fLSJgsXz8GazDg8AemtXn7dCWp7XQWyxm8ahf1OhUthvfg==
   dependencies:
     lodash "^4.17.21"
 
