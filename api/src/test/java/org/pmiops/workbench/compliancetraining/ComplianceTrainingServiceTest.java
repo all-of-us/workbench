@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
@@ -162,23 +163,13 @@ public class ComplianceTrainingServiceTest {
     reloadUser();
 
     // RT is complete, so there should be a verification record.
-    var rtAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
-    var rtUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
-    var rtVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
     assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is incomplete, so there should not be a verification record.
-    var ctAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
-    var ctUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
-    var ctVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
     assertThat(ctVerification.isPresent()).isFalse();
   }
 
@@ -210,23 +201,13 @@ public class ComplianceTrainingServiceTest {
     reloadUser();
 
     // RT is complete, so there should be a verification record.
-    var rtAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
-    var rtUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
-    var rtVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
     assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is complete, so there should be a verification record.
-    var ctAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
-    var ctUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
-    var ctVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
     assertThat(ctVerification.isPresent()).isTrue();
   }
 
@@ -358,5 +339,11 @@ public class ComplianceTrainingServiceTest {
 
   private void reloadUser() {
     user = userDao.findUserByUsername(USERNAME);
+  }
+
+  private Optional<DbComplianceTrainingVerification> getVerification(DbAccessModuleName moduleName) {
+    return accessModuleDao.findOneByName(moduleName)
+            .flatMap(am -> userAccessModuleDao.getByUserAndAccessModule(user, am))
+            .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 }
