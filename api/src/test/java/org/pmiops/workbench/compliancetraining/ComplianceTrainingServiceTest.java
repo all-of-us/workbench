@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
@@ -26,14 +25,12 @@ import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
-import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -71,7 +68,6 @@ public class ComplianceTrainingServiceTest {
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
-  private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
 
   @MockBean private MoodleService mockMoodleService;
@@ -80,7 +76,6 @@ public class ComplianceTrainingServiceTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
 
   @Autowired private AccessModuleDao accessModuleDao;
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private FakeClock fakeClock;
   @Autowired private UserAccessModuleDao userAccessModuleDao;
   @Autowired private UserDao userDao;
@@ -136,9 +131,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.access.enableComplianceTraining = true;
     providedWorkbenchConfig.access.enableEraCommons = true;
     providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
-
-    // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = accessTierDao.save(createRegisteredTier());
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
     Institution institution = new Institution();
