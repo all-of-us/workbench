@@ -224,6 +224,19 @@ const PanelMain = fp.flow(
     const [analysisConfig, setAnalysisConfig] = useState(
       withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
     );
+
+    // TODO: simplify the state logic here!  At least, try to understand why this is happening.
+    // Somehow, only setting the analysisConfig in the above useState() step means that
+    // a gcePersistentDisk update from the diskStore does not always cause analysisConfig to be updated.
+    // So we must set this explicit dependency trigger instead.
+    useEffect(
+      () =>
+        setAnalysisConfig(
+          withAnalysisConfigDefaults(analysisConfig, gcePersistentDisk)
+        ),
+      [gcePersistentDisk]
+    );
+
     const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
         runtime: fromAnalysisConfig(config),
