@@ -135,11 +135,9 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
-
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(
-        BadgeName.REGISTERED_TIER_TRAINING, new BadgeDetailsV2().lastissued(issued).valid(true));
+        BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
 
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -162,12 +160,11 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
           throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
     Map<BadgeName, BadgeDetailsV2> userBadgesByName =
         ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
             .put(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
+                defaultBadgeDetails())
             .build();
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -204,21 +201,20 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
           throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
     Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTOnly =
         ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
             .put(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
+                defaultBadgeDetails())
             .build();
     Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTAndCT =
         ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
             .put(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
+                defaultBadgeDetails())
             .put(
                 BadgeName.CONTROLLED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
+                defaultBadgeDetails())
             .build();
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
         .thenReturn(userBadgesByNameRTOnly)
@@ -261,7 +257,7 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
+    BadgeDetailsV2 retBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
     Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
@@ -303,12 +299,12 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
-    BadgeDetailsV2 ctBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
+    BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
     Map<BadgeName, BadgeDetailsV2> userBadgesByName =
         ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
             .put(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
+                defaultBadgeDetails().lastissued(issued))
             .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
             .build();
 
@@ -384,5 +380,9 @@ public class ComplianceTrainingServiceTest {
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
         .get()
         .getCompletionTime();
+  }
+
+  private BadgeDetailsV2 defaultBadgeDetails() {
+    return new BadgeDetailsV2().valid(true).lastissued(START_INSTANT.getEpochSecond() - 100);
   }
 }
