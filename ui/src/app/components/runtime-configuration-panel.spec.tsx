@@ -481,8 +481,10 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should disable controls when runtime has a non-actionable status', async () => {
-    runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
-    runtimeStoreStub.runtime = runtimeApiStub.runtime;
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.Stopping,
+    });
 
     // sanity check
     expect(isActionable(runtimeApiStub.runtime.status)).toBeFalsy();
