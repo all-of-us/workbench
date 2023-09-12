@@ -306,7 +306,11 @@ public class AuthInterceptorTest {
     when(mockHandler.getMethod())
         .thenReturn(
             CloudTaskRdrExportApi.class.getMethod(
+<<<<<<< HEAD
                 "exportResearcherData", ArrayOfLong.class, Boolean.class));
+=======
+                "exportResearcherData", List.class, Boolean.class));
+>>>>>>> af6dd41ed (support rename copy delete create sas)
 
     when(mockRequest.getRequestURL()).thenReturn(new StringBuffer("domain"));
 
