@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -135,11 +134,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(
-        BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
@@ -160,13 +155,7 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
           throws Exception {
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails())
-            .build();
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
@@ -201,33 +190,24 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
           throws Exception {
-    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTOnly =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
+    var userBadgesByNameRTOnly = ImmutableMap.of(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails())
-            .build();
-    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTAndCT =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
+                defaultBadgeDetails());
+    var userBadgesByNameRTAndCT = ImmutableMap.of(
                 BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails())
-            .put(
+                defaultBadgeDetails(),
                 BadgeName.CONTROLLED_TIER_TRAINING,
-                defaultBadgeDetails())
-            .build();
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
-        .thenReturn(userBadgesByNameRTOnly)
-        .thenReturn(userBadgesByNameRTAndCT);
+                defaultBadgeDetails());
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
     // Complete RT training
+    mockGetUserBadgesByBadgeName(userBadgesByNameRTOnly);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
     // Complete CT training
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByNameRTAndCT);
+    mockGetUserBadgesByBadgeName(userBadgesByNameRTAndCT);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
@@ -259,10 +239,7 @@ public class ComplianceTrainingServiceTest {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 retBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, retBadge));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
@@ -300,15 +277,7 @@ public class ComplianceTrainingServiceTest {
   public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                defaultBadgeDetails().lastissued(issued))
-            .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
-            .build();
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails().lastissued(issued), BadgeName.CONTROLLED_TIER_TRAINING, ctBadge));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
@@ -339,9 +308,7 @@ public class ComplianceTrainingServiceTest {
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of());
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
@@ -384,5 +351,9 @@ public class ComplianceTrainingServiceTest {
 
   private BadgeDetailsV2 defaultBadgeDetails() {
     return new BadgeDetailsV2().valid(true).lastissued(START_INSTANT.getEpochSecond() - 100);
+  }
+
+  private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName) throws ApiException {
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
   }
 }
