@@ -24,9 +24,37 @@ To regenerate TypeScript APIs after you've changed them in Swagger:
 
 `yarn codegen`
 
+To run the UI locally against the test API:
+
+`REACT_APP_ENVIRONMENT=test yarn dev-up`
+
+By default, this runs the server at: http://localhost:4200/.
+
+To automatically fix lint errors:
+
+`yarn lint --fix`
+
+Other useful helper scripts are available. To get a list of all available scripts:
+
+```
+$ yarn run
+...
+   - deps
+      yarn run codegen && yarn run build-terra-deps
+   - dev-up
+      yarn && yarn run deps && yarn start
+   - dev-up-local
+      yarn && yarn run deps && REACT_APP_ENVIRONMENT=local yarn start
+   - dev-up-tanagra-local
+      yarn && concurrently "yarn run start-tanagra" "yarn run dev-up-local"
+   - dev-up-test
+      yarn && yarn run deps && REACT_APP_ENVIRONMENT=localtest yarn start
+...
+```
+
 ## Fontawesome
 
-Fontawesome requires a license during a fresh `yarn install`. Delete `node_modules` and `yarn.lock` before running `yarn install` to test. If a license isn't found, `yarn install` will fail with the error message:
+We use some [Fontawesome](https://fontawesome.com/) Pro icons. Fontawesome requires a license during a fresh `yarn install`. Delete `node_modules` and `yarn.lock` before running `yarn install` to test. If a license isn't found, `yarn install` will fail with the error message:
 ```
 error An unexpected error occurred: "https://npm.fontawesome.com/@fortawesome%2ffontawesome-free: authentication required".
 ```
