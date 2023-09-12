@@ -62,7 +62,7 @@ public class ComplianceTrainingServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
-  private static DbUser providedDbUser;
+  private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
 
@@ -102,7 +102,7 @@ public class ComplianceTrainingServiceTest {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser getDbUser() {
-      return providedDbUser;
+      return user;
     }
 
     @Bean
@@ -114,11 +114,10 @@ public class ComplianceTrainingServiceTest {
 
   @BeforeEach
   public void setUp() {
-    DbUser user = PresetData.createDbUser();
+    user = PresetData.createDbUser();
     user.setUsername(USERNAME);
     when(userService.isServiceAccount(user)).thenReturn(false);
     user = userDao.save(user);
-    providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
@@ -135,7 +134,7 @@ public class ComplianceTrainingServiceTest {
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
@@ -160,7 +159,7 @@ public class ComplianceTrainingServiceTest {
 
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
 
     // RT is complete, so there should be a verification record.
     var rtAccessModule =
@@ -208,7 +207,7 @@ public class ComplianceTrainingServiceTest {
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
 
     // RT is complete, so there should be a verification record.
     var rtAccessModule =
@@ -241,7 +240,7 @@ public class ComplianceTrainingServiceTest {
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion time.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
@@ -284,7 +283,7 @@ public class ComplianceTrainingServiceTest {
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion time.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
     assertModuleCompletionEqual(
@@ -304,16 +303,14 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testSyncComplianceTrainingStatusNullBadgeV2() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
-
-    DbUser user = userDao.findUserByUsername(USERNAME);
     accessModuleService.updateCompletionTime(
-        user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
+            user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
     mockGetUserBadgesByBadgeName(ImmutableMap.of());
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
-    user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
   }
 
@@ -328,7 +325,6 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
-    DbUser user = userDao.findUserByUsername(USERNAME);
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatusV2();
@@ -358,5 +354,9 @@ public class ComplianceTrainingServiceTest {
   private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
       throws ApiException {
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+  }
+
+  private void reloadUser() {
+    user = userDao.findUserByUsername(USERNAME);
   }
 }
