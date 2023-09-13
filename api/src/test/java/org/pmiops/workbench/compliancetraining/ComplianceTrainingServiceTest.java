@@ -136,7 +136,7 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
   }
 
   @Test
@@ -148,7 +148,7 @@ public class ComplianceTrainingServiceTest {
     reloadUser();
     var completionTime = START_TIMESTAMP;
     assertModuleCompletionEqual(
-            DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, completionTime);
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
 
     // Time passes and the user re-syncs
     fakeClock.increment(1000); // The time increment is arbitrary
@@ -157,7 +157,7 @@ public class ComplianceTrainingServiceTest {
 
     // Completion timestamp should not change when the method is called again.
     assertModuleCompletionEqual(
-            DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, completionTime);
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
   }
 
   @Test
@@ -234,14 +234,14 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
 
     // Deprecate the old training.
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
     complianceTrainingService.syncComplianceTrainingStatusV2();
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
 
     // The user does a new training.
     retBadge.lastissued(issued + 5).valid(true);
@@ -249,7 +249,7 @@ public class ComplianceTrainingServiceTest {
     // Completion and expiry timestamp should be updated.
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
 
     // Time passes, user renews training
     retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
@@ -258,7 +258,7 @@ public class ComplianceTrainingServiceTest {
     // Completion should be updated to the current time.
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(fakeClock.instant()));
   }
 
   @Test
@@ -277,9 +277,9 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, START_TIMESTAMP);
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
     fakeClock.increment(5000);
@@ -287,9 +287,9 @@ public class ComplianceTrainingServiceTest {
     // Renewing training updates completion.
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(fakeClock.instant()));
   }
 
   @Test
@@ -303,7 +303,7 @@ public class ComplianceTrainingServiceTest {
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
     reloadUser();
-    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
   }
 
   @Test
@@ -324,11 +324,11 @@ public class ComplianceTrainingServiceTest {
   }
 
   private void assertModuleCompletionEqual(
-      DbAccessModuleName moduleName, DbUser user, Timestamp timestamp) {
-    assertThat(getModuleCompletionTime(moduleName, user)).isEqualTo(timestamp);
+      DbAccessModuleName moduleName, Timestamp timestamp) {
+    assertThat(getModuleCompletionTime(moduleName)).isEqualTo(timestamp);
   }
 
-  private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName, DbUser user) {
+  private Timestamp getModuleCompletionTime(DbAccessModuleName moduleName) {
     return userAccessModuleDao
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
         .get()
