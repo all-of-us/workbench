@@ -162,7 +162,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void
-      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
+      testSyncComplianceTrainingStatusV2_UpdatesVerificationToMoodleIfComplete()
           throws Exception {
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
@@ -188,7 +188,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void
-      testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
+      testSyncComplianceTrainingStatusV2_UpdatesVerification_OnePerAccessModule()
           throws Exception {
     var userBadgesByNameRTOnly =
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
@@ -223,7 +223,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testUpdateComplianceTrainingStatusV2() throws Exception {
+  public void testSyncComplianceTrainingStatusV2_RenewsExpiredTraining() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 retBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
@@ -262,7 +262,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
+  public void testSyncComplianceTrainingStatusV2_Controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
     mockGetUserBadgesByBadgeName(
@@ -293,7 +293,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusNullBadgeV2() throws ApiException {
+  public void testSyncComplianceTrainingStatusV2_NullBadge() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
@@ -307,7 +307,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusBadgeNotFoundV2() throws ApiException {
+  public void testSyncComplianceTrainingStatusV2_BadgeNotFound() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(new ApiException(HttpStatus.NOT_FOUND.value(), "user not found"));
@@ -316,7 +316,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
+  public void testSyncComplianceTrainingStatusV2_SkippedForServiceAccount() throws ApiException {
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatusV2();
