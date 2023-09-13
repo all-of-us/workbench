@@ -138,13 +138,27 @@ public class ComplianceTrainingServiceTest {
     reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatusV2_ResyncCausesNoChanges() throws Exception {
+    // Set up: The user completes ands syncs RT training
+    mockGetUserBadgesByBadgeName(
+            ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    reloadUser();
+    var completionTime = Timestamp.from(START_INSTANT);
+    assertModuleCompletionEqual(
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, completionTime);
+
+    // Time passes and the user re-syncs
+    fakeClock.increment(1000); // The time increment is arbitrary
+    complianceTrainingService.syncComplianceTrainingStatusV2();
+    reloadUser();
 
     // Completion timestamp should not change when the method is called again.
-    tick();
-    complianceTrainingService.syncComplianceTrainingStatusV2();
-
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, completionTime);
   }
 
   @Test
@@ -308,10 +322,6 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     verifyNoInteractions(mockMoodleService);
-  }
-
-  private void tick() {
-    fakeClock.increment(1000); // arbitrary value
   }
 
   private void assertModuleCompletionEqual(
