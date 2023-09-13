@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,7 +61,7 @@ public class ComplianceTrainingServiceTest {
   private static final String USERNAME = "abc@fake-research-aou.org";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
+  private static final Timestamp START_TIMESTAMP = FakeClockConfiguration.NOW;
   private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
@@ -137,7 +136,7 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
   }
 
   @Test
@@ -147,7 +146,7 @@ public class ComplianceTrainingServiceTest {
             ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
     complianceTrainingService.syncComplianceTrainingStatusV2();
     reloadUser();
-    var completionTime = Timestamp.from(START_INSTANT);
+    var completionTime = START_TIMESTAMP;
     assertModuleCompletionEqual(
             DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, completionTime);
 
@@ -235,7 +234,7 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
 
     // Deprecate the old training.
     retBadge.setValid(false);
@@ -250,7 +249,7 @@ public class ComplianceTrainingServiceTest {
     // Completion and expiry timestamp should be updated.
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
 
     // Time passes, user renews training
     retBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
@@ -278,9 +277,9 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
 
     ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
     fakeClock.increment(5000);
@@ -288,7 +287,7 @@ public class ComplianceTrainingServiceTest {
     // Renewing training updates completion.
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, START_TIMESTAMP);
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, user, Timestamp.from(fakeClock.instant()));
   }
@@ -337,7 +336,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   private BadgeDetailsV2 defaultBadgeDetails() {
-    return new BadgeDetailsV2().valid(true).lastissued(START_INSTANT.getEpochSecond() - 100);
+    return new BadgeDetailsV2().valid(true).lastissued(START_TIMESTAMP.toInstant().getEpochSecond() - 100);
   }
 
   private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
