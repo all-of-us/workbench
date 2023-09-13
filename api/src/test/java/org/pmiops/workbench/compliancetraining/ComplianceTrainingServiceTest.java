@@ -283,7 +283,7 @@ public class ComplianceTrainingServiceTest {
   public void testSyncComplianceTrainingStatusNullBadgeV2() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
     accessModuleService.updateCompletionTime(
-            user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
+        user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
     mockGetUserBadgesByBadgeName(ImmutableMap.of());
@@ -339,9 +339,11 @@ public class ComplianceTrainingServiceTest {
     user = userDao.findUserByUsername(USERNAME);
   }
 
-  private Optional<DbComplianceTrainingVerification> getVerification(DbAccessModuleName moduleName) {
-    return accessModuleDao.findOneByName(moduleName)
-            .flatMap(am -> userAccessModuleDao.getByUserAndAccessModule(user, am))
-            .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
+  private Optional<DbComplianceTrainingVerification> getVerification(
+      DbAccessModuleName moduleName) {
+    return accessModuleDao
+        .findOneByName(moduleName)
+        .flatMap(am -> userAccessModuleDao.getByUserAndAccessModule(user, am))
+        .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 }
