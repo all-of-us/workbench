@@ -752,8 +752,7 @@ export const toAnalysisConfig = (
       dataprocConfig: null,
       gpuConfig,
     };
-  }
-  if (runtime.gceWithPdConfig) {
+  } else if (runtime.gceWithPdConfig) {
     const {
       machineType,
       persistentDisk: { size: diskSize, diskType: detachableType },
