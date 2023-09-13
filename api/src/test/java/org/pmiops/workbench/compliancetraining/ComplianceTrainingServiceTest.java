@@ -4,53 +4,43 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.access.AccessTierService.REGISTERED_TIER_SHORT_NAME;
-import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTier;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
-import org.pmiops.workbench.FakeJpaDateTimeConfiguration;
+import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
+import org.pmiops.workbench.access.AccessSyncServiceImpl;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.access.UserAccessModuleMapperImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
-import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
-import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
-import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.MoodleService;
 import org.pmiops.workbench.moodle.MoodleService.BadgeName;
 import org.pmiops.workbench.moodle.MoodleServiceImpl;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.PresetData;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,36 +63,27 @@ public class ComplianceTrainingServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = FakeClockConfiguration.NOW.toInstant();
-  private static final int CLOCK_INCREMENT_MILLIS = 1000;
-  private static DbUser providedDbUser;
+  private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
-  private static DbAccessTier registeredTier;
   private static List<DbAccessModule> accessModules;
 
   @MockBean private MoodleService mockMoodleService;
-  @MockBean private DirectoryService mockDirectoryService;
-  @MockBean private FireCloudService mockFireCloudService;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserServiceAuditor mockUserServiceAuditAdapter;
-
-  @Autowired private AccessModuleDao accessModuleDao;
-  @Autowired private AccessTierDao accessTierDao;
-  @Autowired private FakeClock fakeClock;
-  @Autowired private UserAccessModuleDao userAccessModuleDao;
-  @Autowired private UserDao userDao;
-  @Autowired private UserService userService;
-  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
+  @MockBean private UserService userService;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
   @SpyBean private AccessModuleService accessModuleService;
-  @Autowired private InstitutionDao institutionDao;
+
+  @Autowired private AccessModuleDao accessModuleDao;
+  @Autowired private FakeClock fakeClock;
+  @Autowired private UserAccessModuleDao userAccessModuleDao;
+  @Autowired private UserDao userDao;
   @Autowired private ComplianceTrainingService complianceTrainingService;
   @Autowired private ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
 
   @Import({
     FakeClockConfiguration.class,
-    FakeJpaDateTimeConfiguration.class,
-    UserServiceTestConfiguration.class,
+    AccessModuleNameMapperImpl.class,
+    AccessSyncServiceImpl.class,
     AccessTierServiceImpl.class,
     AccessModuleServiceImpl.class,
     CommonMappers.class,
@@ -110,9 +91,7 @@ public class ComplianceTrainingServiceTest {
     MoodleServiceImpl.class,
     ComplianceTrainingServiceImpl.class
   })
-  @MockBean({
-    MailService.class,
-  })
+  @MockBean({FireCloudService.class, InstitutionService.class, UserServiceAuditor.class})
   @TestConfiguration
   static class Configuration {
     @Bean
@@ -122,14 +101,9 @@ public class ComplianceTrainingServiceTest {
     }
 
     @Bean
-    Random getRandom() {
-      return new Random();
-    }
-
-    @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser getDbUser() {
-      return providedDbUser;
+      return user;
     }
 
     @Bean
@@ -141,44 +115,27 @@ public class ComplianceTrainingServiceTest {
 
   @BeforeEach
   public void setUp() {
-    DbUser user = new DbUser();
+    user = PresetData.createDbUser();
     user.setUsername(USERNAME);
+    when(userService.isServiceAccount(user)).thenReturn(false);
     user = userDao.save(user);
-    providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
-    providedWorkbenchConfig.access.enableEraCommons = true;
-    providedWorkbenchConfig.termsOfService.latestAouVersion = 5; // arbitrary
-
-    // key UserService logic depends on the existence of the Registered Tier
-    registeredTier = accessTierDao.save(createRegisteredTier());
 
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
-    Institution institution = new Institution();
-    when(mockInstitutionService.getByUser(user)).thenReturn(Optional.of(institution));
-    when(mockInstitutionService.eRaRequiredForTier(institution, REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(false);
-    when(mockInstitutionService.validateInstitutionalEmail(
-            institution, user.getContactEmail(), REGISTERED_TIER_SHORT_NAME))
-        .thenReturn(true);
   }
 
   @Test
   public void testSyncComplianceTrainingStatusV2() throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
-
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(
-        BadgeName.REGISTERED_TIER_TRAINING, new BadgeDetailsV2().lastissued(issued).valid(true));
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
@@ -194,14 +151,8 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerificationToMoodleIfComplete()
           throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
-            .build();
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
@@ -209,26 +160,16 @@ public class ComplianceTrainingServiceTest {
 
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
 
     // RT is complete, so there should be a verification record.
-    var rtAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
-    var rtUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
-    var rtVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
     assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
         .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is incomplete, so there should not be a verification record.
-    var ctAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
-    var ctUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
-    var ctVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
     assertThat(ctVerification.isPresent()).isFalse();
   }
 
@@ -236,74 +177,49 @@ public class ComplianceTrainingServiceTest {
   public void
       testSyncComplianceTrainingStatusV2_UpdatesComplianceTrainingVerification_OneVerificationPerAccessModule()
           throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 100;
-    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTOnly =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
-            .build();
-    Map<BadgeName, BadgeDetailsV2> userBadgesByNameRTAndCT =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
-            .put(
-                BadgeName.CONTROLLED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
-            .build();
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
-        .thenReturn(userBadgesByNameRTOnly)
-        .thenReturn(userBadgesByNameRTAndCT);
+    var userBadgesByNameRTOnly =
+        ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
+    var userBadgesByNameRTAndCT =
+        ImmutableMap.of(
+            BadgeName.REGISTERED_TIER_TRAINING,
+            defaultBadgeDetails(),
+            BadgeName.CONTROLLED_TIER_TRAINING,
+            defaultBadgeDetails());
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
     // Complete RT training
+    mockGetUserBadgesByBadgeName(userBadgesByNameRTOnly);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
     // Complete CT training
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByNameRTAndCT);
+    mockGetUserBadgesByBadgeName(userBadgesByNameRTAndCT);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
 
     // RT is complete, so there should be a verification record.
-    var rtAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get();
-    var rtUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, rtAccessModule).get();
-    var rtVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(rtUserAccessModule);
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
     assertThat(rtVerification.isPresent()).isTrue();
-    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
-        .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
 
     // CT is complete, so there should be a verification record.
-    var ctAccessModule =
-        accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get();
-    var ctUserAccessModule =
-        userAccessModuleDao.getByUserAndAccessModule(user, ctAccessModule).get();
-    var ctVerification =
-        complianceTrainingVerificationDao.getByUserAccessModule(ctUserAccessModule);
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
     assertThat(ctVerification.isPresent()).isTrue();
   }
 
   @Test
   public void testUpdateComplianceTrainingStatusV2() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
-    BadgeDetailsV2 retBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
+    BadgeDetailsV2 retBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(BadgeName.REGISTERED_TIER_TRAINING, retBadge);
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, retBadge));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion time.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
 
@@ -335,21 +251,18 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testUpdateComplianceTrainingStatusV2_controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
-    BadgeDetailsV2 ctBadge = new BadgeDetailsV2().lastissued(issued).valid(true);
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName =
-        ImmutableMap.<BadgeName, BadgeDetailsV2>builder()
-            .put(
-                BadgeName.REGISTERED_TIER_TRAINING,
-                new BadgeDetailsV2().lastissued(issued).valid(true))
-            .put(BadgeName.CONTROLLED_TIER_TRAINING, ctBadge)
-            .build();
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
+    mockGetUserBadgesByBadgeName(
+        ImmutableMap.of(
+            BadgeName.REGISTERED_TIER_TRAINING,
+            defaultBadgeDetails().lastissued(issued),
+            BadgeName.CONTROLLED_TIER_TRAINING,
+            ctBadge));
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion time.
-    DbUser user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, Timestamp.from(START_INSTANT));
     assertModuleCompletionEqual(
@@ -369,18 +282,14 @@ public class ComplianceTrainingServiceTest {
   @Test
   public void testSyncComplianceTrainingStatusNullBadgeV2() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
-
-    DbUser user = userDao.findUserByUsername(USERNAME);
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
 
     // An empty map should be returned when we have no badge information.
-    Map<BadgeName, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-
-    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+    mockGetUserBadgesByBadgeName(ImmutableMap.of());
 
     complianceTrainingService.syncComplianceTrainingStatusV2();
-    user = userDao.findUserByUsername(USERNAME);
+    reloadUser();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, user, null);
   }
 
@@ -395,13 +304,14 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTraining_SkippedForServiceAccountV2() throws ApiException {
+    when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatusV2();
     verifyNoInteractions(mockMoodleService);
   }
 
   private void tick() {
-    fakeClock.increment(CLOCK_INCREMENT_MILLIS);
+    fakeClock.increment(1000); // arbitrary value
   }
 
   private void assertModuleCompletionEqual(
@@ -414,5 +324,26 @@ public class ComplianceTrainingServiceTest {
         .getByUserAndAccessModule(user, accessModuleDao.findOneByName(moduleName).get())
         .get()
         .getCompletionTime();
+  }
+
+  private BadgeDetailsV2 defaultBadgeDetails() {
+    return new BadgeDetailsV2().valid(true).lastissued(START_INSTANT.getEpochSecond() - 100);
+  }
+
+  private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
+      throws ApiException {
+    when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
+  }
+
+  private void reloadUser() {
+    user = userDao.findUserByUsername(USERNAME);
+  }
+
+  private Optional<DbComplianceTrainingVerification> getVerification(
+      DbAccessModuleName moduleName) {
+    return accessModuleDao
+        .findOneByName(moduleName)
+        .flatMap(am -> userAccessModuleDao.getByUserAndAccessModule(user, am))
+        .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 }
