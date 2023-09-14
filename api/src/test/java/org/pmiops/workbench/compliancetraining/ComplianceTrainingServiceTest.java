@@ -251,52 +251,90 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_RenewsExpiredTraining() throws Exception {
-    long issued = currentSecond() - 10;
-    BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(issued);
-    BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(issued);
-
+    // User completes trainings
+    BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
+    BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
     mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge, BadgeName.CONTROLLED_TIER_TRAINING, ctBadge));
 
+    // Time passes
+    tick();
+
+    // User syncs training
     complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion time.
-    reloadUser();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
         DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
 
+    // Time passes
+    tick();
+
     // Deprecate the old training.
     rtBadge.setValid(false);
     ctBadge.setValid(false);
+
+    // Time passes
+    tick();
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
     complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, null);
 
-    // The user does a new training.
-    rtBadge.lastissued(issued + 5).valid(true);
-    ctBadge.lastissued(issued + 5).valid(true);
+    // Time passes
     tick();
 
-    // Completion and expiry timestamp should be updated.
+    // The user does a new training.
+    rtBadge.lastissued(currentSecond()).valid(true);
+    ctBadge.lastissued(currentSecond()).valid(true);
+
+    // Time passes, user syncs training
+    tick();
     complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Completion and expiry timestamp should be updated.
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
             DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+  }
 
+  @Test
+  public void testSyncComplianceTrainingStatus_RenewsExpiringTraining() throws Exception {
+    // User completes trainings
+    BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
+    BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(currentSecond());
+    mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge, BadgeName.CONTROLLED_TIER_TRAINING, ctBadge));
 
-    // Time passes, user renews training
-    rtBadge.lastissued(currentSecond() + 1);
-    ctBadge.lastissued(currentSecond() + 1);
+    // Time passes
     tick();
 
-    // Completion should be updated to the current time.
+    // User syncs training
     complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion time.
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
+    assertModuleCompletionEqual(
+            DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+
+    // Time passes
+    tick();
+
+    // Time passes, user renews training
+    tick();
+    rtBadge.lastissued(currentSecond());
+    ctBadge.lastissued(currentSecond());
+
+    // Time passes, user syncs training
+    tick();
+    complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Completion should be updated to the current time.
+    assertModuleCompletionEqual(
+            DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
             DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
   }
