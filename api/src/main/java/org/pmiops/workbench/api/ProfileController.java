@@ -358,7 +358,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      complianceTrainingService.syncComplianceTrainingStatusV2();
+      complianceTrainingService.syncComplianceTrainingStatus();
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {

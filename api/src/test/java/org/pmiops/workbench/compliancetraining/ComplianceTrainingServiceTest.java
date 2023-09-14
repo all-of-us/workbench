@@ -127,11 +127,11 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2() throws Exception {
+  public void testSyncComplianceTrainingStatus() throws Exception {
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion.
     reloadUser();
@@ -140,11 +140,11 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_ResyncCausesNoChanges() throws Exception {
+  public void testSyncComplianceTrainingStatus_ResyncCausesNoChanges() throws Exception {
     // Set up: The user completes ands syncs RT training
     mockGetUserBadgesByBadgeName(
             ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     reloadUser();
     var completionTime = START_TIMESTAMP;
     assertModuleCompletionEqual(
@@ -152,7 +152,7 @@ public class ComplianceTrainingServiceTest {
 
     // Time passes and the user re-syncs
     fakeClock.increment(1000); // The time increment is arbitrary
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     reloadUser();
 
     // Completion timestamp should not change when the method is called again.
@@ -162,14 +162,14 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void
-      testSyncComplianceTrainingStatusV2_UpdatesVerificationToMoodleIfComplete()
+      testSyncComplianceTrainingStatus_UpdatesVerificationToMoodleIfComplete()
           throws Exception {
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
 
     assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
 
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
 
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
@@ -188,7 +188,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void
-      testSyncComplianceTrainingStatusV2_UpdatesVerification_OnePerAccessModule()
+      testSyncComplianceTrainingStatus_UpdatesVerification_OnePerAccessModule()
           throws Exception {
     var userBadgesByNameRTOnly =
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails());
@@ -203,12 +203,12 @@ public class ComplianceTrainingServiceTest {
 
     // Complete RT training
     mockGetUserBadgesByBadgeName(userBadgesByNameRTOnly);
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
 
     // Complete CT training
     mockGetUserBadgesByBadgeName(userBadgesByNameRTAndCT);
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
     reloadUser();
@@ -223,13 +223,13 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_RenewsExpiredTraining() throws Exception {
+  public void testSyncComplianceTrainingStatus_RenewsExpiredTraining() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 retBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
     mockGetUserBadgesByBadgeName(ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, retBadge));
 
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
@@ -240,14 +240,14 @@ public class ComplianceTrainingServiceTest {
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
 
     // The user does a new training.
     retBadge.lastissued(issued + 5).valid(true);
 
     // Completion and expiry timestamp should be updated.
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
 
@@ -256,13 +256,13 @@ public class ComplianceTrainingServiceTest {
     fakeClock.increment(5000);
 
     // Completion should be updated to the current time.
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(fakeClock.instant()));
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_Controlled() throws Exception {
+  public void testSyncComplianceTrainingStatus_Controlled() throws Exception {
     long issued = fakeClock.instant().getEpochSecond() - 10;
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().lastissued(issued);
     mockGetUserBadgesByBadgeName(
@@ -272,7 +272,7 @@ public class ComplianceTrainingServiceTest {
             BadgeName.CONTROLLED_TIER_TRAINING,
             ctBadge));
 
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
@@ -285,7 +285,7 @@ public class ComplianceTrainingServiceTest {
     fakeClock.increment(5000);
 
     // Renewing training updates completion.
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
         DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
     assertModuleCompletionEqual(
@@ -293,7 +293,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_NullBadge() throws ApiException {
+  public void testSyncComplianceTrainingStatus_NullBadge() throws ApiException {
     // When Moodle returns an empty RET badge response, we should clear the completion time.
     accessModuleService.updateCompletionTime(
         user, DbAccessModuleName.RT_COMPLIANCE_TRAINING, new Timestamp(12345));
@@ -301,25 +301,25 @@ public class ComplianceTrainingServiceTest {
     // An empty map should be returned when we have no badge information.
     mockGetUserBadgesByBadgeName(ImmutableMap.of());
 
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     reloadUser();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, null);
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_BadgeNotFound() throws ApiException {
+  public void testSyncComplianceTrainingStatus_BadgeNotFound() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(new ApiException(HttpStatus.NOT_FOUND.value(), "user not found"));
     assertThrows(
-        NotFoundException.class, () -> complianceTrainingService.syncComplianceTrainingStatusV2());
+        NotFoundException.class, () -> complianceTrainingService.syncComplianceTrainingStatus());
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusV2_SkippedForServiceAccount() throws ApiException {
+  public void testSyncComplianceTrainingStatus_SkippedForServiceAccount() throws ApiException {
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
-    complianceTrainingService.syncComplianceTrainingStatusV2();
+    complianceTrainingService.syncComplianceTrainingStatus();
     verifyNoInteractions(mockMoodleService);
   }
 
