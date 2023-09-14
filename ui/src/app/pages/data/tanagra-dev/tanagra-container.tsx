@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
+import { getAccessToken } from 'app/utils/authentication';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { useExitActionListener, useNavigation } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
@@ -42,7 +43,7 @@ export const TanagraContainer = fp.flow(
             height: '100%',
             width: '100%',
           }}
-          src={`${tanagraUrl}/ui#/tanagra/underlays/${bigqueryDataset}/studies/${namespace}/${splat}`}
+          src={`${tanagraUrl}/ui#/tanagra/underlays/${bigqueryDataset}/studies/${namespace}/${splat}/?token=${getAccessToken()}`}
         />
       </div>
     );
