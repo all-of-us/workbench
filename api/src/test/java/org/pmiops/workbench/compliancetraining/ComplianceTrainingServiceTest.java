@@ -132,7 +132,7 @@ public class ComplianceTrainingServiceTest {
             ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge));
 
     // Time passes
-    fakeClock.increment(1000);
+    tick();
 
     // User syncs training
     complianceTrainingService.syncComplianceTrainingStatus();
@@ -145,7 +145,7 @@ public class ComplianceTrainingServiceTest {
     assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
 
     // Time passes
-    fakeClock.increment(1000);
+    tick();
 
     // User completes CT training in Moodle
     var ctBadge = defaultBadgeDetails().lastissued(currentSecond());
@@ -153,7 +153,7 @@ public class ComplianceTrainingServiceTest {
             ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, rtBadge, BadgeName.CONTROLLED_TIER_TRAINING, ctBadge));
 
     // Time passes
-    fakeClock.increment(1000);
+    tick();
 
     // User syncs training
     complianceTrainingService.syncComplianceTrainingStatus();
@@ -178,7 +178,7 @@ public class ComplianceTrainingServiceTest {
             DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
 
     // Time passes and the user re-syncs
-    fakeClock.increment(1000); // The time increment is arbitrary
+    tick();
     complianceTrainingService.syncComplianceTrainingStatus();
     reloadUser();
 
@@ -278,7 +278,7 @@ public class ComplianceTrainingServiceTest {
     // The user does a new training.
     rtBadge.lastissued(issued + 5).valid(true);
     ctBadge.lastissued(issued + 5).valid(true);
-    fakeClock.increment(1000);
+    tick();
 
     // Completion and expiry timestamp should be updated.
     complianceTrainingService.syncComplianceTrainingStatus();
@@ -291,7 +291,7 @@ public class ComplianceTrainingServiceTest {
     // Time passes, user renews training
     rtBadge.lastissued(currentSecond() + 1);
     ctBadge.lastissued(currentSecond() + 1);
-    fakeClock.increment(5000);
+    tick();
 
     // Completion should be updated to the current time.
     complianceTrainingService.syncComplianceTrainingStatus();
@@ -376,5 +376,9 @@ public class ComplianceTrainingServiceTest {
 
   private Timestamp currentTimestamp() {
     return Timestamp.from(fakeClock.instant());
+  }
+
+  private void tick() {
+    fakeClock.increment(1000); // The time increment is arbitrary
   }
 }
