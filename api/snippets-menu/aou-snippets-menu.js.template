@@ -33,6 +33,17 @@ define([
       // Avoid mutating the original default_menus to reduce side-effects.
       snippets_menu.options['menus'] = [...snippets_menu.default_menus];
       const menus = snippets_menu.options['menus'];
+
+      // Remove pandas because it is broken by https://github.com/ipython-contrib/jupyter_contrib_nbextensions/pull/1636
+      // How to remove snippets: https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/snippets_menu#deleting-menu-items
+      // TODO(RW-10914): Bring pandas back.
+      menus[0]['sub-menu'].splice(4, 1);
+
+      menus[0] = {
+         ...menus[0],
+         'sub-menu': [...customMenus, ...menus[0]['sub-menu']]
+      };
+
       menus[0] = {
          ...menus[0],
          'sub-menu': [...customMenus, ...menus[0]['sub-menu']]
