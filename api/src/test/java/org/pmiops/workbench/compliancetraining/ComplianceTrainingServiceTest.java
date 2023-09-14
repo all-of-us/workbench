@@ -251,7 +251,7 @@ public class ComplianceTrainingServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatus_RenewsExpiredTraining() throws Exception {
-    long issued = fakeClock.instant().getEpochSecond() - 10;
+    long issued = currentSecond() - 10;
     BadgeDetailsV2 rtBadge = defaultBadgeDetails().valid(true).lastissued(issued);
     BadgeDetailsV2 ctBadge = defaultBadgeDetails().valid(true).lastissued(issued);
 
