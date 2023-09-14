@@ -60,8 +60,6 @@ public class ComplianceTrainingServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
-  // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final Timestamp START_TIMESTAMP = FakeClockConfiguration.NOW;
   private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
@@ -175,7 +173,7 @@ public class ComplianceTrainingServiceTest {
             ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
     complianceTrainingService.syncComplianceTrainingStatus();
     reloadUser();
-    var completionTime = START_TIMESTAMP;
+    var completionTime = currentTimestamp();
     assertModuleCompletionEqual(
             DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
 
@@ -264,9 +262,9 @@ public class ComplianceTrainingServiceTest {
     // The user should be updated in the database with a non-empty completion time.
     reloadUser();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
-        DbAccessModuleName.CT_COMPLIANCE_TRAINING, START_TIMESTAMP);
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
 
     // Deprecate the old training.
     rtBadge.setValid(false);
@@ -280,26 +278,27 @@ public class ComplianceTrainingServiceTest {
     // The user does a new training.
     rtBadge.lastissued(issued + 5).valid(true);
     ctBadge.lastissued(issued + 5).valid(true);
+    fakeClock.increment(1000);
 
     // Completion and expiry timestamp should be updated.
     complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, START_TIMESTAMP);
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
-            DbAccessModuleName.CT_COMPLIANCE_TRAINING, START_TIMESTAMP);
+            DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
 
 
     // Time passes, user renews training
-    rtBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
-    ctBadge.lastissued(fakeClock.instant().getEpochSecond() + 1);
+    rtBadge.lastissued(currentSecond() + 1);
+    ctBadge.lastissued(currentSecond() + 1);
     fakeClock.increment(5000);
 
     // Completion should be updated to the current time.
     complianceTrainingService.syncComplianceTrainingStatus();
     assertModuleCompletionEqual(
-        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(fakeClock.instant()));
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, currentTimestamp());
     assertModuleCompletionEqual(
-            DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(fakeClock.instant()));
+            DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
   }
 
   @Test
@@ -350,7 +349,8 @@ public class ComplianceTrainingServiceTest {
   }
 
   private BadgeDetailsV2 defaultBadgeDetails() {
-    return new BadgeDetailsV2().valid(true).lastissued(START_TIMESTAMP.toInstant().getEpochSecond() - 100);
+    Timestamp start_timestamp = FakeClockConfiguration.NOW;
+    return new BadgeDetailsV2().valid(true).lastissued(start_timestamp.toInstant().getEpochSecond() - 100);
   }
 
   private void mockGetUserBadgesByBadgeName(Map<BadgeName, BadgeDetailsV2> userBadgesByName)
