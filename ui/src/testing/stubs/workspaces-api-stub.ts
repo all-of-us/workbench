@@ -225,7 +225,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         workspace: ws,
         accessLevel:
           this.workspaceAccess.get(workspaceId) ||
-          WorkspaceAccessLevel.NOACCESS,
+          WorkspaceAccessLevel.NO_ACCESS,
       });
     });
   }

@@ -295,7 +295,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         .filter(({ email }) => user.email !== email)
         .concat({
           ...user,
-          role: WorkspaceAccessLevel.NOACCESS,
+          role: WorkspaceAccessLevel.NO_ACCESS,
         });
 
       this.setState({

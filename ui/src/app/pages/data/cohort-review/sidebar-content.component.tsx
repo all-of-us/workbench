@@ -239,7 +239,7 @@ const AnnotationItem = fp.flow(
         readValue(annotationType, annotation),
       ])[0];
       const disabled =
-        accessLevel === WorkspaceAccessLevel.NOACCESS ||
+        accessLevel === WorkspaceAccessLevel.NO_ACCESS ||
         accessLevel === WorkspaceAccessLevel.READER;
       switch (annotationType) {
         case AnnotationType.INTEGER:
@@ -499,7 +499,7 @@ export const SidebarContent = fp.flow(
         editingDefinitions,
       } = this.state;
       const disabled =
-        accessLevel === WorkspaceAccessLevel.NOACCESS ||
+        accessLevel === WorkspaceAccessLevel.NO_ACCESS ||
         accessLevel === WorkspaceAccessLevel.READER;
       const annotationsExist =
         annotationDefinitions && annotationDefinitions.length > 0;

@@ -706,7 +706,7 @@ describe('WorkspaceEdit', () => {
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({
         workspace,
-        accessLevel: WorkspaceAccessLevel.NOACCESS,
+        accessLevel: WorkspaceAccessLevel.NO_ACCESS,
       });
     };
 
@@ -753,7 +753,7 @@ describe('WorkspaceEdit', () => {
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({
         workspace,
-        accessLevel: WorkspaceAccessLevel.NOACCESS,
+        accessLevel: WorkspaceAccessLevel.NO_ACCESS,
       });
     };
 

@@ -175,7 +175,7 @@ describe('CopyModal', () => {
     );
     wsApiStub.workspaceAccess.set(
       workspaces[3].id,
-      WorkspaceAccessLevel.NOACCESS
+      WorkspaceAccessLevel.NO_ACCESS
     );
     wsApiStub.workspaceAccess.set(
       workspaces[4].id,
