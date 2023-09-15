@@ -62,10 +62,10 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   }
 
   /** Syncs the current user's training status from Moodle. */
-  public DbUser syncComplianceTrainingStatusV2()
+  public DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     DbUser user = userProvider.get();
-    return syncComplianceTrainingStatusV2(user, Agent.asUser(user));
+    return syncComplianceTrainingStatus(user, Agent.asUser(user));
   }
 
   /**
@@ -82,7 +82,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
    * @param agent
    */
   @Transactional
-  public DbUser syncComplianceTrainingStatusV2(DbUser dbUser, Agent agent)
+  public DbUser syncComplianceTrainingStatus(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Skip sync for service account user rows.
     if (userService.isServiceAccount(dbUser)) {
