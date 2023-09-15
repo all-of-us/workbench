@@ -150,7 +150,7 @@ public class EgressEventServiceTest {
   @Test
   public void testAppCreateEgressEventAlert() {
 
-    SumologicEgressEvent event = recentAppEgressEvent();
+    SumologicEgressEvent event = recentAppEgressEvent(dbUser1);
 
     doReturn(Collections.singletonList(userRStudioAppEnvironmentForUser(dbUser1)))
         .when(leonardoApiClient)
@@ -282,11 +282,11 @@ public class EgressEventServiceTest {
         .timeWindowDuration(600L);
   }
 
-  private static SumologicEgressEvent recentAppEgressEvent() {
+  private static SumologicEgressEvent recentAppEgressEvent(DbUser user) {
     return new SumologicEgressEvent()
         .projectName(DEFAULT_GOOGLE_PROJECT)
         .vmName("some-vm")
-        .srcGkeCluster("a-gke-cluster")
+        .srcGkeServiceName("all-of-us-" + user.getUserId() + "sas-123")
         .egressMib(120.7)
         .egressMibThreshold(100.0)
         .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())

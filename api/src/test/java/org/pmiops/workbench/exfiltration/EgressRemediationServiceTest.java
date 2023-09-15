@@ -616,7 +616,7 @@ public class EgressRemediationServiceTest {
                         .timeWindowDuration(Duration.ofHours(1L).toMillis())
                         .vmPrefix("some-vm-name")
                         .vmName("some-vm-name")
-                        .srcGkeCluster("some-gke-cluster")));
+                        .srcGkeServiceName("all-of-us-sas-random")));
   }
 
   private Escalation suspendComputeAfter(int afterIncidentCount, Duration duration) {

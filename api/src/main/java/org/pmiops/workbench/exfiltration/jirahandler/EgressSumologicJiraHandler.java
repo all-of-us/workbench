@@ -63,11 +63,11 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     WorkbenchConfig config = workbenchConfigProvider.get();
     SumologicEgressEvent originalEvent = egressEventMapper.toSumoLogicEvent(event);
     String jiraDescription = "";
-    if (StringUtils.isNotEmpty(originalEvent.getSrcGkeCluster())) {
+    if (StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())) {
       jiraDescription =
           String.format(
               "User App Cluster name: %s, VM Name: %s\n",
-              originalEvent.getSrcGkeCluster(), originalEvent.getVmName());
+              originalEvent.getSrcGkeServiceName(), originalEvent.getVmName());
     } else {
       jiraDescription =
           String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix());

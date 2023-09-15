@@ -7286,8 +7286,8 @@ definitions:
       vm_name:
         description: The VM name that caused the egress.
         type: string
-      src_gke_cluster:
-        description: The GKE cluster that caused the egress.
+      src_gke_service_name:
+        description: The GKE service that caused the egress.
         type: string
       gke_egress_mib:
         description: The amount of egress by the GKE cluster during the
