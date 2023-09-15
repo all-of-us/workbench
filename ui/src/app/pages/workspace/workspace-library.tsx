@@ -132,7 +132,7 @@ const libraryTabs = {
               workspace.workspace.id === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
-                FeaturedWorkspaceCategory.TUTORIALWORKSPACES
+                FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES
           )
       );
     },

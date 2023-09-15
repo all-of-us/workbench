@@ -21,7 +21,7 @@ const tutorialWorkspace = {
   namespace:
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Tutorial Workspace',
   id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Tutorial Workspace',
-  category: FeaturedWorkspaceCategory.TUTORIALWORKSPACES,
+  category: FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
 };
 
 export class FeaturedWorkspacesConfigApiStub extends FeaturedWorkspacesConfigApi {
