@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.notebooks.NotebookUtils.appendFileExtensionIfNotExist;
+import static org.pmiops.workbench.notebooks.NotebookUtils.appendFileExtensionIfMissing;
 
 import java.time.Clock;
 import java.util.List;
@@ -76,7 +76,7 @@ public class NotebooksController implements NotebooksApiDelegate {
       // needed.
       // TODO(yonghao): Remove withNotebookExtension after UI start setting extension.
       String newNameWithExtension =
-          appendFileExtensionIfNotExist(fromNotebookNameWithExtension, copyRequest.getNewName());
+          appendFileExtensionIfMissing(fromNotebookNameWithExtension, copyRequest.getNewName());
 
       fileDetail =
           notebooksService.copyNotebook(

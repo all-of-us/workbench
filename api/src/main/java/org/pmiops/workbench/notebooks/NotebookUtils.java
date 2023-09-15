@@ -69,7 +69,7 @@ public class NotebookUtils {
   }
 
   /** Appends file type extension e.g. ipynb if the file does not have one. */
-  public static String appendFileExtensionIfNotExist(
+  public static String appendFileExtensionIfMissing(
       String fromNotebookNameWithExtension, String newName) {
     if (isRmdNotebook(fromNotebookNameWithExtension)) {
       return NotebookUtils.withRMarkdownExtension(newName);
@@ -77,6 +77,8 @@ public class NotebookUtils {
       return NotebookUtils.withJupyterNotebookExtension(newName);
     } else if (isSasFile(fromNotebookNameWithExtension)) {
       return NotebookUtils.withSasExtension(newName);
+    } else if (isRScriptFile(fromNotebookNameWithExtension)) {
+      return NotebookUtils.withRFileExtension(newName);
     } else {
       throw new NotImplementedException(
           String.format(
@@ -95,6 +97,12 @@ public class NotebookUtils {
     return notebookName.endsWith(R_MARKDOWN_NOTEBOOK_EXTENSION)
         ? notebookName
         : notebookName.concat(R_MARKDOWN_NOTEBOOK_EXTENSION);
+  }
+
+  private static String withRFileExtension(String notebookName) {
+    return notebookName.endsWith(R_SCRIPT_EXTENSION)
+        ? notebookName
+        : notebookName.concat(R_SCRIPT_EXTENSION);
   }
 
   private static String withSasExtension(String notebookName) {
