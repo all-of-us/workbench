@@ -77,7 +77,7 @@ export const AccountCreationOptions = {
   ],
   institutionalRolesByOrganizationType: [
     {
-      type: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+      type: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
       roles: [
         InstitutionalRole.UNDERGRADUATE,
         InstitutionalRole.TRAINEE,

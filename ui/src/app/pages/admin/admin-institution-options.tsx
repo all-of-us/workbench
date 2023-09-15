@@ -17,7 +17,7 @@ export const OrganizationTypeOptions = [
   { label: 'Industry', value: OrganizationType.INDUSTRY },
   {
     label: 'Academic Research Institution',
-    value: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+    value: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
   },
   {
     label: 'Educational Institution',

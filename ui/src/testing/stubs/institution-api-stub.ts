@@ -34,7 +34,7 @@ export const BROAD_ADDR_2 = 'broad_institution@broadinstitute.org';
 export const BROAD: Institution = {
   shortName: 'Broad',
   displayName: 'Broad Institute',
-  organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+  organizationTypeEnum: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
   tierConfigs: [
     {
       accessTierShortName: 'registered',
