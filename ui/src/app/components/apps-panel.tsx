@@ -81,6 +81,7 @@ export const AppsPanel = (props: {
   const appsToDisplay = [
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
     UIAppType.CROMWELL,
   ];
 
