@@ -349,7 +349,7 @@ describe('NotebookLauncher', () => {
   it('should show error on mid-load compute suspension', async () => {
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Starting,
+      status: RuntimeStatus.STARTING,
     }));
 
     runtimeStub.getRuntime = () =>

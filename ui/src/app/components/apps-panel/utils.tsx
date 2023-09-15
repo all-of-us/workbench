@@ -159,7 +159,7 @@ export const fromRuntimeStatus = (
     [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
     [status === RuntimeStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
     [status === RuntimeStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
-    [status === RuntimeStatus.Starting, () => UserEnvironmentStatus.RESUMING],
+    [status === RuntimeStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
     [status === RuntimeStatus.Updating, () => UserEnvironmentStatus.UPDATING],
     () => UserEnvironmentStatus.UNKNOWN
   );

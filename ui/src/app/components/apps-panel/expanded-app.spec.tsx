@@ -149,7 +149,7 @@ describe('ExpandedApp', () => {
 
   test.each([
     [RuntimeStatus.STOPPING, 'Pausing'],
-    [RuntimeStatus.Starting, 'Resuming'],
+    [RuntimeStatus.STARTING, 'Resuming'],
 
     [RuntimeStatus.Deleted, 'Pause'],
     [RuntimeStatus.DELETING, 'Pause'],
@@ -205,7 +205,7 @@ describe('ExpandedApp', () => {
 
   test.each([
     RuntimeStatus.STOPPING,
-    RuntimeStatus.Starting,
+    RuntimeStatus.STARTING,
     RuntimeStatus.Error,
     RuntimeStatus.Unknown,
     undefined,

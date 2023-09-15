@@ -373,7 +373,7 @@ export const LeonardoAppLauncher = fp.flow(
 
     private isRuntimeInProgress(status: RuntimeStatus): boolean {
       return (
-        status === RuntimeStatus.Starting ||
+        status === RuntimeStatus.STARTING ||
         status === RuntimeStatus.STOPPING ||
         status === RuntimeStatus.STOPPED
       );

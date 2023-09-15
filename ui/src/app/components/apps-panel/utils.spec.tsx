@@ -12,7 +12,7 @@ describe('AppsPanel utils', () => {
     [RuntimeStatus.RUNNING, UserEnvironmentStatus.RUNNING],
     [RuntimeStatus.STOPPING, UserEnvironmentStatus.PAUSING],
     [RuntimeStatus.STOPPED, UserEnvironmentStatus.PAUSED],
-    [RuntimeStatus.Starting, UserEnvironmentStatus.RESUMING],
+    [RuntimeStatus.STARTING, UserEnvironmentStatus.RESUMING],
     [RuntimeStatus.CREATING, UserEnvironmentStatus.CREATING],
     [RuntimeStatus.Deleted, UserEnvironmentStatus.DELETED],
     [RuntimeStatus.DELETING, UserEnvironmentStatus.DELETING],

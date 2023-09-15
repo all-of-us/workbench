@@ -134,9 +134,9 @@ describe('RuntimeInitializer', () => {
       { status: RuntimeStatus.STOPPED },
       // Here is where we expect, chronologically, a call to startRuntime. The next two
       // runtime statuses mock out what we might expect to see after that call.
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
       { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers();
@@ -147,8 +147,8 @@ describe('RuntimeInitializer', () => {
   it('should call callback with runtime status', async () => {
     mockGetRuntimeCalls([{ status: RuntimeStatus.STOPPED }]);
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
       { status: RuntimeStatus.RUNNING },
     ]);
     const statuses = [];
@@ -160,8 +160,8 @@ describe('RuntimeInitializer', () => {
       RuntimeStatus.STOPPED,
       // Note: onStatusUpdate will be called for every status received, not just when the status
       // value is changed.
-      RuntimeStatus.Starting,
-      RuntimeStatus.Starting,
+      RuntimeStatus.STARTING,
+      RuntimeStatus.STARTING,
       RuntimeStatus.RUNNING,
     ]);
   });
@@ -172,7 +172,7 @@ describe('RuntimeInitializer', () => {
       return { status: RuntimeStatus.CREATING };
     });
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Starting },
+      { status: RuntimeStatus.STARTING },
       { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers({
@@ -291,7 +291,7 @@ describe('RuntimeInitializer', () => {
 
   it('should timeout after max delay', async () => {
     mockGetRuntime.mockImplementation(async () => {
-      return { status: RuntimeStatus.Starting };
+      return { status: RuntimeStatus.STARTING };
     });
 
     // There's some nuance / awkwardness to this test: the LeoRuntimeInitializer uses Date.now() to get
@@ -311,7 +311,7 @@ describe('RuntimeInitializer', () => {
 
   it('should reject promise after abort signal', async () => {
     mockGetRuntime.mockImplementation(async () => {
-      return { status: RuntimeStatus.Starting };
+      return { status: RuntimeStatus.STARTING };
     });
     const aborter = new AbortController();
 
