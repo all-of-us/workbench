@@ -105,6 +105,7 @@ export const AppFilesList = withCurrentWorkspace()(
       const { name } = row;
       const appType = getAppInfoFromFileName(name).appType;
       return <AppLogo appType={appType} style={{ marginRight: '1em' }} />;
+    };
 
     const displayName = (row) => {
       const {
