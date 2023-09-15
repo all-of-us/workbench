@@ -17,7 +17,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 export const VUMC: Institution = {
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
-  organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
+  organizationTypeEnum: OrganizationType.HEALTH_CENTER_NON_PROFIT,
   tierConfigs: [
     {
       accessTierShortName: 'registered',

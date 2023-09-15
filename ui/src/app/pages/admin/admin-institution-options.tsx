@@ -25,7 +25,7 @@ export const OrganizationTypeOptions = [
   },
   {
     label: 'Health Center / Non-Profit',
-    value: OrganizationType.HEALTHCENTERNONPROFIT,
+    value: OrganizationType.HEALTH_CENTER_NON_PROFIT,
   },
   { label: 'Other', value: OrganizationType.OTHER },
 ];

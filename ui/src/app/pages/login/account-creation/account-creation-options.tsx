@@ -101,7 +101,7 @@ export const AccountCreationOptions = {
       ],
     },
     {
-      type: OrganizationType.HEALTHCENTERNONPROFIT,
+      type: OrganizationType.HEALTH_CENTER_NON_PROFIT,
       // identical to the INDUSTRY roles
       roles: [
         InstitutionalRole.PREDOCTORAL,
