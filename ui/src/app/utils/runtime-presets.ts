@@ -18,7 +18,7 @@ export const runtimePresets: {
   generalAnalysis: {
     displayName: 'General Analysis',
     runtimeTemplate: {
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceWithPdConfig: {

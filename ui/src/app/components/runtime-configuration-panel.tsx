@@ -263,7 +263,7 @@ const PanelMain = fp.flow(
           currentRuntime?.status === RuntimeStatus.Deleted &&
             !currentRuntime?.gceWithPdConfig &&
             [
-              RuntimeConfigurationType.GeneralAnalysis,
+              RuntimeConfigurationType.GENERAL_ANALYSIS,
               RuntimeConfigurationType.HailGenomicAnalysis,
             ].includes(currentRuntime?.configurationType),
           () => PanelContent.Create,

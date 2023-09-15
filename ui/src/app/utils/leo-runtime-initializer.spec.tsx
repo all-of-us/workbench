@@ -41,7 +41,7 @@ const baseRuntime: Runtime = {
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
-  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
 };
 
 const workspaceNamespace = 'aou-rw-12345';
@@ -219,7 +219,7 @@ describe('RuntimeInitializer', () => {
     mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
-        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceWithPdConfig: {
           machineType: DEFAULT_MACHINE_NAME,
           persistentDisk: {

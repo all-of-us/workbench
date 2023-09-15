@@ -377,7 +377,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -440,7 +440,7 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -462,7 +462,7 @@ describe('RuntimeConfigurationPanel', () => {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Error,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -591,7 +591,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.GeneralAnalysis
+      RuntimeConfigurationType.GENERAL_ANALYSIS
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
       diskType: 'pd-standard',
@@ -632,7 +632,7 @@ describe('RuntimeConfigurationPanel', () => {
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.Deleted,
-        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceConfig: {
           ...defaultGceConfig(),
           machineType: customMachineType,
@@ -800,7 +800,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.GeneralAnalysis
+      RuntimeConfigurationType.GENERAL_ANALYSIS
     );
   });
 
@@ -1800,7 +1800,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.Stopped,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
     });

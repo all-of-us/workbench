@@ -42,7 +42,7 @@ export const defaultRuntime = () => ({
   status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
   gceConfig: defaultGceConfig(),
   errors: [],
 });
