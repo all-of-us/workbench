@@ -33,7 +33,8 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  openGkeApp,
+  openRStudioApp,
+  openSASApp,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -159,7 +160,7 @@ const RStudioButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openGkeApp(workspaceNamespace, userApp);
+    openRStudioApp(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -198,7 +199,7 @@ const SASButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openGkeApp(workspaceNamespace, userApp);
+    openSASApp(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;

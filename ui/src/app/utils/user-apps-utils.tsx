@@ -114,7 +114,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openGkeApp = (
+export const openRStudioApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -128,13 +128,28 @@ export const openGkeApp = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
+export const openSASApp = (
+  workspaceNamespace: string,
+  userApp: UserAppEnvironment
+) => {
+  // TODO: same action as RStudio?
+  // localizeUserApp(
+  //   workspaceNamespace,
+  //   userApp.appName,
+  //   userApp.appType,
+  //   [],
+  //   false
+  // );
+  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+};
+
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   userApps: ListAppsResponse
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openGkeApp(workspaceNamespace, userApp);
+    openRStudioApp(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }
@@ -146,7 +161,7 @@ export const openSASOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.SAS);
   if (userApp?.status === AppStatus.RUNNING) {
-    openGkeApp(workspaceNamespace, userApp);
+    openSASApp(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(sasConfigIconId);
   }
