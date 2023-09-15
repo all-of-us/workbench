@@ -420,7 +420,8 @@ describe('ExpandedApp', () => {
         [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
       },
     });
-    //    const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
+    // TODO not sure which action to take for SAS
+    // const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
 
     const focusStub = jest.fn();
     const windowOpenSpy = jest
