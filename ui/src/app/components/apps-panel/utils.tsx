@@ -12,7 +12,7 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
-import * as runtimeUitils from 'app/utils/runtime-utils';
+import * as runtimeUtils from 'app/utils/runtime-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
@@ -215,7 +215,7 @@ const getAppDisplayState = (
     appType,
     active:
       appType === UIAppType.JUPYTER
-        ? runtimeUitils.isVisible(runtime?.status)
+        ? runtimeUtils.isVisible(runtime?.status)
         : isAppActive(findApp(userApps, appType)),
   };
 };
