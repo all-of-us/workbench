@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { BillingStatus, Workspace } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
@@ -149,17 +150,25 @@ export const AppsPanel = (props: {
               <UnexpandedApp
                 appType={availableApp.appType}
                 key={availableApp.appType}
-                onClick={() => {
-                  if (availableApp.appType === UIAppType.CROMWELL) {
-                    setSidebarActiveIconStore.next(cromwellConfigIconId);
-                  } else if (availableApp.appType === UIAppType.RSTUDIO) {
-                    setSidebarActiveIconStore.next(rstudioConfigIconId);
-                  } else if (availableApp.appType === UIAppType.SAS) {
-                    setSidebarActiveIconStore.next(sasConfigIconId);
-                  } else {
-                    addToExpandedApps(availableApp.appType);
-                  }
-                }}
+                onClick={() =>
+                  switchCase(
+                    availableApp.appType,
+                    [
+                      UIAppType.CROMWELL,
+                      () =>
+                        setSidebarActiveIconStore.next(cromwellConfigIconId),
+                    ],
+                    [
+                      UIAppType.RSTUDIO,
+                      () => setSidebarActiveIconStore.next(rstudioConfigIconId),
+                    ],
+                    [
+                      UIAppType.SAS,
+                      () => setSidebarActiveIconStore.next(sasConfigIconId),
+                    ],
+                    () => addToExpandedApps(availableApp.appType)
+                  )
+                }
               />
             )
           )}
