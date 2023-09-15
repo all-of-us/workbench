@@ -191,6 +191,45 @@ const RStudioButtonRow = (props: {
   );
 };
 
+const SASButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  const { userApp, workspaceNamespace } = props;
+
+  const onClickLaunch = async () => {
+    openGkeApp(workspaceNamespace, userApp);
+  };
+
+  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
+
+  return (
+    <FlexRow>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(sasConfigIconId);
+        }}
+      />
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <TooltipTrigger
+        disabled={!launchButtonDisabled}
+        content='Environment must be running to launch SAS'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            onClick={onClickLaunch}
+            disabled={launchButtonDisabled}
+            icon={faRocket}
+            buttonText='Open SAS'
+            data-test-id='open-SAS-button'
+          />
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+  );
+};
+
 interface ExpandedAppProps {
   appType: UIAppType;
   initialUserAppInfo: UserAppEnvironment;
@@ -300,6 +339,16 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                 />
               ),
             ],
+            [
+              appType === UIAppType.SAS,
+              () => (
+                <SASButtonRow
+                  userApp={initialUserAppInfo}
+                  workspaceNamespace={workspace.namespace}
+                />
+              ),
+            ],
+
             () => null
           )}
         </FlexColumn>
