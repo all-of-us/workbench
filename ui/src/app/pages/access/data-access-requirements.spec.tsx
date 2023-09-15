@@ -1572,7 +1572,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1624,7 +1624,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1664,7 +1664,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1712,7 +1712,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
 
@@ -1736,7 +1736,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1780,7 +1780,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1833,7 +1833,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1884,7 +1884,7 @@ describe('DataAccessRequirements', () => {
 
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
     removeOneModule(AccessModule.PROFILECONFIRMATION);
-    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+    removeOneModule(AccessModule.PUBLICATION_CONFIRMATION);
 
     const { container } = component(DARPageMode.ANNUAL_RENEWAL);
 

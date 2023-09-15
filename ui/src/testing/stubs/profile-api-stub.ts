@@ -65,7 +65,7 @@ export class ProfileStubVariables {
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+          moduleName: AccessModule.PUBLICATION_CONFIRMATION,
           expirationEpochMillis: undefined,
         },
       ],

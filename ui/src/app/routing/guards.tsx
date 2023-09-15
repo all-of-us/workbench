@@ -64,7 +64,7 @@ export const shouldRedirectToMaybe = (profile: Profile): string | undefined => {
     [
       !allCompleteOrBypassed(profile, [
         AccessModule.PROFILECONFIRMATION,
-        AccessModule.PUBLICATIONCONFIRMATION,
+        AccessModule.PUBLICATION_CONFIRMATION,
       ]),
       () => ACCESS_RENEWAL_PATH,
     ],

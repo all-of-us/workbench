@@ -303,7 +303,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -325,7 +325,7 @@ export const getAccessModuleConfig = (
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const rtAccessRenewalModules = [
   AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
 ];

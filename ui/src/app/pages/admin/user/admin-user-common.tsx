@@ -665,5 +665,5 @@ export const orderedAccessModules = [
   AccessModule.DATAUSERCODEOFCONDUCT,
   AccessModule.IDENTITY,
   AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
 ];

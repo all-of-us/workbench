@@ -309,7 +309,7 @@ export const initialRtModules = [
 ];
 export const renewalRtModules = [
   AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
   AccessModule.COMPLIANCETRAINING,
 ];
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;

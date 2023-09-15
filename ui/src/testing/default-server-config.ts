@@ -48,7 +48,7 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PUBLICATIONCONFIRMATION,
+    name: AccessModule.PUBLICATION_CONFIRMATION,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,

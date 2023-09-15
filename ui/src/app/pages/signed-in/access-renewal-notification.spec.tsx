@@ -26,7 +26,7 @@ const allModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
 ];
 
 const EMPTY_STRING = '';

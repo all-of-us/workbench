@@ -42,7 +42,7 @@ import {
 import { AccessTierShortNames } from './access-tiers';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
-const arbitraryModuleName = AccessModule.PUBLICATIONCONFIRMATION;
+const arbitraryModuleName = AccessModule.PUBLICATION_CONFIRMATION;
 
 describe('maybeDaysRemaining', () => {
   beforeEach(() => {
@@ -605,7 +605,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(Date.now());
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(true);
   });
 
@@ -622,7 +622,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(true);
   });
 
@@ -639,7 +639,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 
@@ -677,13 +677,13 @@ describe('isExpiringOrExpired', () => {
 
   it('should return isExpiringOrExpired=false if a module has a null expiration', () => {
     expect(
-      isExpiringOrExpired(null, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(null, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 
   it('should return isExpiringOrExpired=false if a module has an undefined expiration', () => {
     expect(
-      isExpiringOrExpired(undefined, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(undefined, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 });

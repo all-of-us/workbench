@@ -50,7 +50,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
       ? [AccessModule.PROFILECONFIRMATION]
       : []),
     ...(user.publicationConfirmationBypassTime
-      ? [AccessModule.PUBLICATIONCONFIRMATION]
+      ? [AccessModule.PUBLICATION_CONFIRMATION]
       : []),
   ];
 };
@@ -91,7 +91,7 @@ const moduleToToggleProps: Record<
     name: 'Profile Confirmation',
     'data-test-id': 'profile-confirmation-toggle',
   },
-  [AccessModule.PUBLICATIONCONFIRMATION]: {
+  [AccessModule.PUBLICATION_CONFIRMATION]: {
     name: 'Publication Confirmation',
     'data-test-id': 'publication-confirmation-toggle',
   },

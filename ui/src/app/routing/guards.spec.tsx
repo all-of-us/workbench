@@ -21,7 +21,7 @@ const newUserModuleState: AccessModuleStatus[] = [
     expirationEpochMillis: nowPlusDays(365),
   },
   {
-    moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+    moduleName: AccessModule.PUBLICATION_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(365),
   },
@@ -62,7 +62,7 @@ const allCompleteMissingOneInitial: AccessModuleStatus[] =
 // artificial state for test users - Publications is missing (renewable, not initial registration)
 const allCompleteMissingOneRenewable: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
-    ({ moduleName }) => moduleName !== AccessModule.PUBLICATIONCONFIRMATION
+    ({ moduleName }) => moduleName !== AccessModule.PUBLICATION_CONFIRMATION
   );
 
 const allCompleteMissingOneEach: AccessModuleStatus[] =
@@ -70,14 +70,14 @@ const allCompleteMissingOneEach: AccessModuleStatus[] =
     ({ moduleName }) =>
       ![
         AccessModule.TWOFACTORAUTH,
-        AccessModule.PUBLICATIONCONFIRMATION,
+        AccessModule.PUBLICATION_CONFIRMATION,
       ].includes(moduleName)
   );
 
 // PUBLICATIONCONFIRMATION is expired
 const allCompleteOneExpired: AccessModuleStatus[] =
   allCompleteMissingOneRenewable.concat({
-    moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+    moduleName: AccessModule.PUBLICATION_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(-1),
   });

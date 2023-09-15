@@ -288,7 +288,7 @@ export const RenewalCardBody = (props: {
       ),
     ],
     [
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       () => {
         return (
           <React.Fragment>
