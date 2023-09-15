@@ -2473,7 +2473,7 @@ def deploy_tanagra(cmd_name, args)
 
   env_project = ENVIRONMENTS[op.opts.project]
   ENV.update(read_db_vars(gcc))
-  ENV.update({"TANAGRA_AUTH_GCP_PROJECT_ID" => op.opts.project})
+  ENV.update({"TANAGRA_SERVICE_ACCOUNT" => op.opts.project})
   ENV.update({"TANAGRA_ACCESS_CONTROL_BASE_PATH" => env_project.fetch(:api_endpoint_host)})
   ENV.update({"TANAGRA_ACCESS_CONTROL_MODEL" => env_project.fetch(:tanagra_access_control_model)})
   ENV.update({"TANAGRA_AUTH_DISABLE_CHECKS" => env_project.fetch(:tanagra_auth_disable_checks)})
