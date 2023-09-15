@@ -446,7 +446,7 @@ export const ConceptSearch = fp.flow(
         {
           editName: nameValidationFormat(
             existingNames,
-            ResourceType.CONCEPTSET
+            ResourceType.CONCEPT_SET
           ),
           editDescription: { length: { maximum: 1000 } },
         }
@@ -638,7 +638,7 @@ export const ConceptSearch = fp.flow(
               closeFunction={() => this.setState({ deleting: false })}
               receiveDelete={() => this.onDeleteConceptSet()}
               resourceName={conceptSet.name}
-              resourceType={ResourceType.CONCEPTSET}
+              resourceType={ResourceType.CONCEPT_SET}
             />
           )}
           {error && (
@@ -661,7 +661,7 @@ export const ConceptSearch = fp.flow(
               fromResourceName={conceptSet.name}
               fromCdrVersionId={cdrVersionId}
               fromAccessTierShortName={accessTierShortName}
-              resourceType={ResourceType.CONCEPTSET}
+              resourceType={ResourceType.CONCEPT_SET}
               onClose={() => this.setState({ copying: false })}
               onCopy={() => this.setState({ copySaving: false })}
               saveFunction={(copyRequest: CopyRequest) =>

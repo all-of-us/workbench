@@ -354,7 +354,7 @@ describe('CopyModal', () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 
-    props.resourceType = ResourceType.CONCEPTSET;
+    props.resourceType = ResourceType.CONCEPT_SET;
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
@@ -395,7 +395,7 @@ describe('CopyModal', () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 
-    props.resourceType = ResourceType.CONCEPTSET;
+    props.resourceType = ResourceType.CONCEPT_SET;
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(
@@ -437,7 +437,7 @@ describe('CopyModal', () => {
     const csApiStub = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, csApiStub);
 
-    props.resourceType = ResourceType.CONCEPTSET;
+    props.resourceType = ResourceType.CONCEPT_SET;
     props.fromResourceName = csApiStub.conceptSets[0].name;
     props.saveFunction = (copyRequest) => {
       return conceptSetsApi().copyConceptSet(

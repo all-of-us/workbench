@@ -344,7 +344,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         .concat(
           convertToResources(
             ConceptSetsApiStub.stubConceptSets(),
-            ResourceType.CONCEPTSET,
+            ResourceType.CONCEPT_SET,
             workspace
           )
         );

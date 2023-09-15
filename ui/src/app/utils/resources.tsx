@@ -30,7 +30,7 @@ export function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
     [(rt) => rt === ResourceType.COHORT, () => 'Cohort'],
     [(rt) => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
-    [(rt) => rt === ResourceType.CONCEPTSET, () => 'Concept Set'],
+    [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Concept Set'],
     [(rt) => rt === ResourceType.DATASET, () => 'Dataset'],
     [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
 
@@ -113,7 +113,7 @@ export function getType(resource: WorkspaceResource): ResourceType {
   return fp.cond([
     [isCohort, () => ResourceType.COHORT],
     [isCohortReview, () => ResourceType.COHORTREVIEW],
-    [isConceptSet, () => ResourceType.CONCEPTSET],
+    [isConceptSet, () => ResourceType.CONCEPT_SET],
     [isDataSet, () => ResourceType.DATASET],
     [isNotebook, () => ResourceType.NOTEBOOK],
   ])(resource);
@@ -150,7 +150,7 @@ export function convertToResource(
         ? (inputResource as CohortReview)
         : null,
     conceptSet:
-      resourceType === ResourceType.CONCEPTSET
+      resourceType === ResourceType.CONCEPT_SET
         ? (inputResource as ConceptSet)
         : null,
     dataSet:
