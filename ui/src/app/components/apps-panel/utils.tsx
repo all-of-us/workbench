@@ -20,12 +20,16 @@ import jupyterLogo from 'assets/images/Jupyter.png';
 import jupyterIcon from 'assets/images/Jupyter-icon.png';
 import rStudioLogo from 'assets/images/RStudio.png';
 import rStudioIcon from 'assets/images/RStudio-icon.png';
+import sasLogo from 'assets/images/SAS.png';
+import sasIcon from 'assets/images/SAS-icon.png';
 
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
   JUPYTER = 'Jupyter',
   RSTUDIO = 'RStudio',
   CROMWELL = 'Cromwell',
+
+  SAS = 'SAS',
 }
 
 interface AppAssets {
@@ -48,6 +52,11 @@ export const appAssets: AppAssets[] = [
     appType: UIAppType.CROMWELL,
     logo: cromwellLogo,
     icon: cromwellIcon,
+  },
+  {
+    appType: UIAppType.SAS,
+    logo: sasLogo,
+    icon: sasIcon,
   },
 ];
 
@@ -120,12 +129,14 @@ export const canDeleteApp = (app: UserAppEnvironment): boolean =>
 export const toAppType: Record<UIAppType, AppType | null> = {
   [UIAppType.CROMWELL]: AppType.CROMWELL,
   [UIAppType.RSTUDIO]: AppType.RSTUDIO,
+  [UIAppType.SAS]: AppType.SAS,
   [UIAppType.JUPYTER]: null,
 };
 
 export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.CROMWELL]: UIAppType.CROMWELL,
   [AppType.RSTUDIO]: UIAppType.RSTUDIO,
+  [AppType.SAS]: UIAppType.SAS,
 };
 
 export const findApp = (
