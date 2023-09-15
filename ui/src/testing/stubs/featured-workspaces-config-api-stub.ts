@@ -13,7 +13,7 @@ const phenotypeWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Phenotype Library',
   namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Phenotype Library',
   id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Phenotype Library',
-  category: FeaturedWorkspaceCategory.PHENOTYPELIBRARY,
+  category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
 };
 
 const tutorialWorkspace = {

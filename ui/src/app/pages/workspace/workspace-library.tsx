@@ -105,7 +105,7 @@ const libraryTabs = {
               workspace.workspace.id === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
-                FeaturedWorkspaceCategory.PHENOTYPELIBRARY
+                FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY
           )
       );
     },
