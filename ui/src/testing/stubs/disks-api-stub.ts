@@ -12,7 +12,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export const stubDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
@@ -20,7 +20,7 @@ export const stubDisk = (): Disk => ({
 
 export const mockJupyterDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: true,
   name: 'mock-disk1',
   blockSize: 1,
@@ -32,7 +32,7 @@ export const mockJupyterDisk = (): Disk => ({
 
 export const mockCromwellDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: false,
   name: 'mock-disk2',
   blockSize: 1,
@@ -44,7 +44,7 @@ export const mockCromwellDisk = (): Disk => ({
 
 export const mockRStudioDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: false,
   name: 'mock-disk3',
   blockSize: 1,

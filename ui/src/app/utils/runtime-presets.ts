@@ -23,7 +23,7 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceWithPdConfig: {
         persistentDisk: {
-          diskType: DiskType.Standard,
+          diskType: DiskType.STANDARD,
           size: MIN_DISK_SIZE_GB,
           labels: {},
           name: null,
