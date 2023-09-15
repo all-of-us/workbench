@@ -156,7 +156,7 @@ export const fromRuntimeStatus = (
     [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
     [status === RuntimeStatus.Deleting, () => UserEnvironmentStatus.DELETING],
     [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
-    [status === RuntimeStatus.Running, () => UserEnvironmentStatus.RUNNING],
+    [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
     [status === RuntimeStatus.Stopping, () => UserEnvironmentStatus.PAUSING],
     [status === RuntimeStatus.Stopped, () => UserEnvironmentStatus.PAUSED],
     [status === RuntimeStatus.Starting, () => UserEnvironmentStatus.RESUMING],

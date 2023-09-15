@@ -374,7 +374,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display dynamic runtime status icon', async () => {
-    setRuntimeStatus(RuntimeStatus.Running);
+    setRuntimeStatus(RuntimeStatus.RUNNING);
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 

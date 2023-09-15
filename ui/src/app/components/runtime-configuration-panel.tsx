@@ -463,7 +463,7 @@ const PanelMain = fp.flow(
     // where we get 'status' from
     const runtimeCanBeUpdated =
       environmentChanged &&
-      [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
+      [RuntimeStatus.RUNNING, RuntimeStatus.Stopped].includes(
         status as RuntimeStatus
       ) &&
       runtimeCanBeCreated;
@@ -776,7 +776,7 @@ const PanelMain = fp.flow(
                           ComputeType.Dataproc && (
                           <TooltipTrigger
                             content={
-                              status !== RuntimeStatus.Running
+                              status !== RuntimeStatus.RUNNING
                                 ? 'Start your Dataproc cluster to access the Spark console'
                                 : null
                             }
@@ -784,7 +784,7 @@ const PanelMain = fp.flow(
                             <LinkButton
                               data-test-id='manage-spark-console'
                               disabled={
-                                status !== RuntimeStatus.Running ||
+                                status !== RuntimeStatus.RUNNING ||
                                 existingAnalysisConfig.computeType !==
                                   ComputeType.Dataproc
                               }

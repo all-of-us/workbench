@@ -39,7 +39,7 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
 export const defaultRuntime = () => ({
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
-  status: RuntimeStatus.Running,
+  status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
@@ -101,7 +101,7 @@ export class RuntimeApiStub extends RuntimeApi {
     return new Promise<{}>((resolve) => {
       // Setting it to Running doesn't really make sense but it reflects
       // what is currently happening in the product.
-      this.runtime.status = RuntimeStatus.Running;
+      this.runtime.status = RuntimeStatus.RUNNING;
       resolve({});
     });
   }

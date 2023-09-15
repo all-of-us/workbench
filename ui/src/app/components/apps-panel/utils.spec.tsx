@@ -9,7 +9,7 @@ import {
 
 describe('AppsPanel utils', () => {
   test.each([
-    [RuntimeStatus.Running, UserEnvironmentStatus.RUNNING],
+    [RuntimeStatus.RUNNING, UserEnvironmentStatus.RUNNING],
     [RuntimeStatus.Stopping, UserEnvironmentStatus.PAUSING],
     [RuntimeStatus.Stopped, UserEnvironmentStatus.PAUSED],
     [RuntimeStatus.Starting, UserEnvironmentStatus.RESUMING],

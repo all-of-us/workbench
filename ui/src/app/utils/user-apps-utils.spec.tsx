@@ -74,7 +74,7 @@ describe('User Apps Helper functions', () => {
       .mockImplementation(
         () =>
           new Promise<ListAppsResponse>(() => [
-            { status: RuntimeStatus.Running, appType: AppType.CROMWELL },
+            { status: RuntimeStatus.RUNNING, appType: AppType.CROMWELL },
           ])
       );
     await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');

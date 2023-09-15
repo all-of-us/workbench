@@ -102,7 +102,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running,
+  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.RUNNING,
 };
 
 /**
@@ -302,7 +302,7 @@ export class LeoRuntimeInitializer {
    * Runs the runtime intiailizer flow.
    *
    * The strategy here is to poll the getRuntime endpoint for runtime status, waiting for the
-   * runtime to reach the ready state (RuntimeStatus.Running) or an error state which can be
+   * runtime to reach the ready state (RuntimeStatus.RUNNING) or an error state which can be
    * recovered from. Action will be taken where possible: a stopped runtime will trigger a call to
    * startRuntime, a nonexistent runtime will trigger a call to createRuntime, and an errored
    * runtime will trigger a call to deleteRuntime in an attempt to retry runtime creation.

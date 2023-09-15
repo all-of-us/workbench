@@ -96,7 +96,7 @@ describe('ExpandedApp', () => {
   });
 
   it('should allow pausing when the Jupyter app is Running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await component(UIAppType.JUPYTER, undefined);
     expect(wrapper.exists()).toBeTruthy();
@@ -179,7 +179,7 @@ describe('ExpandedApp', () => {
     }
   );
 
-  test.each([RuntimeStatus.Running, RuntimeStatus.Stopped])(
+  test.each([RuntimeStatus.RUNNING, RuntimeStatus.Stopped])(
     'should allow deletion when the Jupyter app status is %s',
     async (status) => {
       runtimeStub.runtime.status = status;

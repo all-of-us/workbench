@@ -109,7 +109,7 @@ describe('RuntimeConfigurationPanel', () => {
     const { size, diskType, name } = existingDisk();
     return {
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
+      status: RuntimeStatus.RUNNING,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceWithPdConfig: {
         machineType: 'n1-standard-16',
@@ -1119,7 +1119,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
+      status: RuntimeStatus.RUNNING,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1236,7 +1236,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should update the cost estimator when master machine changes', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
+      status: RuntimeStatus.RUNNING,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1305,7 +1305,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Cancel');
 
     // Runtime should still be active, and confirm page should no longer be visible.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.RUNNING);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -1574,7 +1574,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow Dataproc -> PD transition', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
+      status: RuntimeStatus.RUNNING,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1836,7 +1836,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should render Spark console links for running cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
+      status: RuntimeStatus.RUNNING,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,

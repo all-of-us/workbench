@@ -1001,12 +1001,12 @@ export const useRuntimeStatus = (
       [
         RuntimeStatusRequest.DeletePD,
         () => (r) =>
-          r.status === RuntimeStatus.Running ||
+          r.status === RuntimeStatus.RUNNING ||
           r.status === RuntimeStatus.Stopped,
       ],
       [
         RuntimeStatusRequest.Start,
-        () => (r) => r.status === RuntimeStatus.Running,
+        () => (r) => r.status === RuntimeStatus.RUNNING,
       ],
       [
         RuntimeStatusRequest.Stop,
@@ -1160,7 +1160,7 @@ export const useCustomRuntime = (
           ].includes(mostSevereDiff)
         ) {
           if (
-            runtime.status === RuntimeStatus.Running ||
+            runtime.status === RuntimeStatus.RUNNING ||
             runtime.status === RuntimeStatus.Stopped
           ) {
             await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
@@ -1172,7 +1172,7 @@ export const useCustomRuntime = (
             await LeoRuntimeInitializer.initialize({
               workspaceNamespace,
               targetRuntime: request.runtime,
-              resolutionCondition: (r) => r.status !== RuntimeStatus.Running,
+              resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
               pollAbortSignal: aborter.signal,
               overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
             });
@@ -1281,7 +1281,7 @@ export const isVisible = (status: RuntimeStatus) =>
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
-  [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);
+  [RuntimeStatus.RUNNING, RuntimeStatus.Stopped].includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
   runtime?.labels?.creator;

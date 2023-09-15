@@ -38,7 +38,7 @@ let mockStartRuntime: SpyInstance;
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
   googleProject: 'aou-rw-12345',
-  status: RuntimeStatus.Running,
+  status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
@@ -121,7 +121,7 @@ describe('RuntimeInitializer', () => {
     // This tests the simplest case of the initializer. No polling necessary.
     mockGetRuntimeCalls([baseRuntime]);
     const runtime = await runInitializerAndTimers();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should resume runtime if it is initially stopping / stopped', async () => {
@@ -137,11 +137,11 @@ describe('RuntimeInitializer', () => {
       { status: RuntimeStatus.Starting },
       { status: RuntimeStatus.Starting },
       { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers();
     expect(mockStartRuntime).toHaveBeenCalled();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should call callback with runtime status', async () => {
@@ -149,7 +149,7 @@ describe('RuntimeInitializer', () => {
     mockGetRuntimeCalls([
       { status: RuntimeStatus.Starting },
       { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const statuses = [];
     await runInitializerAndTimers({
@@ -162,7 +162,7 @@ describe('RuntimeInitializer', () => {
       // value is changed.
       RuntimeStatus.Starting,
       RuntimeStatus.Starting,
-      RuntimeStatus.Running,
+      RuntimeStatus.RUNNING,
     ]);
   });
 
@@ -173,14 +173,14 @@ describe('RuntimeInitializer', () => {
     });
     mockGetRuntimeCalls([
       { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers({
       targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate,
     });
 
     expect(mockCreateRuntime).toHaveBeenCalled();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it("should error and suggest user's most runtime if a valid one exists", async () => {
@@ -266,11 +266,11 @@ describe('RuntimeInitializer', () => {
     ]);
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Running }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.RUNNING }]);
 
     const runtime = await runInitializerAndTimers();
 
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should give up after too many server errors', async () => {

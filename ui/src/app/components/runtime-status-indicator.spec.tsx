@@ -23,7 +23,7 @@ describe('Runtime Status Indicator', () => {
   test.each([
     [RuntimeStatus.Creating, UpdatingIcon],
     [RuntimeStatus.Stopped, StoppedIcon],
-    [RuntimeStatus.Running, RunningIcon],
+    [RuntimeStatus.RUNNING, RunningIcon],
     [RuntimeStatus.Stopping, StoppingIcon],
     [RuntimeStatus.Error, ErrorIcon],
   ])(

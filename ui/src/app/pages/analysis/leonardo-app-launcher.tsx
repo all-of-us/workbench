@@ -102,7 +102,7 @@ const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
 // an iframe. When the runtime is in other states, requests to the runtime host
 // are likely to fail.
 const interactiveRuntimeStatuses = new Set<RuntimeStatus>([
-  RuntimeStatus.Running,
+  RuntimeStatus.RUNNING,
   RuntimeStatus.Updating,
 ]);
 
