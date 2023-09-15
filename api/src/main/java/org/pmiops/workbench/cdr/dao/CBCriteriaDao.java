@@ -447,23 +447,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "join ( "
               + "      select cast(id as char) as id "
               + "      from cb_criteria "
-              + "      where concept_id in (1740639) "
-              + "      and domain_id = 'SURVEY' "
-              + "      ) a on (c.path like CONCAT('%', a.id, '.%')) "
-              + "where domain_id = 'SURVEY' "
-              + "and type = 'PPI' "
-              + "and subtype = 'QUESTION' "
-              + "and concept_id in (:conceptIds)",
-      nativeQuery = true)
-  List<Long> findPFHHSurveyQuestionIds(@Param("conceptIds") List<Long> conceptIds);
-
-  @Query(
-      value =
-          "select distinct concept_id "
-              + "from cb_criteria c "
-              + "join ( "
-              + "      select cast(id as char) as id "
-              + "      from cb_criteria "
               + "      where concept_id in (:surveyConceptIds) "
               + "      and domain_id = 'SURVEY' "
               + "      ) a on (c.path like CONCAT('%', a.id, '.%')) "
@@ -472,23 +455,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long>, CustomC
               + "and subtype = 'QUESTION' ",
       nativeQuery = true)
   List<Long> findSurveyQuestionIds(@Param("surveyConceptIds") List<Long> surveyConceptIds);
-
-  @Query(
-      value =
-          "select distinct cast(value as signed) "
-              + "from cb_criteria c "
-              + "join ( "
-              + "      select cast(id as char) as id "
-              + "      from cb_criteria "
-              + "      where concept_id in (1740639) "
-              + "      and domain_id = 'SURVEY' "
-              + "      ) a on (c.path like CONCAT('%', a.id, '.%')) "
-              + "where domain_id = 'SURVEY' "
-              + "and type = 'PPI' "
-              + "and subtype = 'ANSWER' "
-              + "and concept_id in (:conceptIds)",
-      nativeQuery = true)
-  List<Long> findPFHHSurveyAnswerIds(@Param("conceptIds") List<Long> conceptIds);
 
   @Query(value = "SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD", nativeQuery = true)
   List<String> findMySQLStopWords();

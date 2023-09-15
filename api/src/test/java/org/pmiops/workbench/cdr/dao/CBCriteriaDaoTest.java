@@ -34,9 +34,6 @@ public class CBCriteriaDaoTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   private DbCriteria surveyCriteria;
-  private DbCriteria pfhhSurveyQuestion;
-
-  private DbCriteria pfhhSurveyAnswer;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -81,60 +78,6 @@ public class CBCriteriaDaoTest {
             .addPath(String.valueOf(surveyCriteria.getId()))
             .addFullText("term[survey_rank1]")
             .build());
-    // adding pfhh survey module
-    DbCriteria pfhhSurveyModule =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.SURVEY.toString())
-                .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.SURVEY.toString())
-                .addGroup(true)
-                .addConceptId("1740639")
-                .addStandard(false)
-                .addSelectable(true)
-                .addName("Personal and Family Health History")
-                .build());
-    // adding pfhh survey module path
-    pfhhSurveyModule.setPath(String.valueOf(pfhhSurveyModule.getId()));
-    cbCriteriaDao.save(pfhhSurveyModule);
-    // adding pfhh survey question
-    pfhhSurveyQuestion =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.SURVEY.toString())
-                .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.QUESTION.toString())
-                .addGroup(true)
-                .addConceptId("43530446")
-                .addStandard(false)
-                .addSelectable(true)
-                .addName("Question")
-                .build());
-    // setting the correct path on pfhh question
-    pfhhSurveyQuestion.setPath(pfhhSurveyModule.getId() + "." + pfhhSurveyQuestion.getId());
-    pfhhSurveyQuestion = cbCriteriaDao.save(pfhhSurveyQuestion);
-    // adding a pfhh survey answer
-    pfhhSurveyAnswer =
-        cbCriteriaDao.save(
-            DbCriteria.builder()
-                .addDomainId(Domain.SURVEY.toString())
-                .addType(CriteriaType.PPI.toString())
-                .addSubtype(CriteriaSubType.ANSWER.toString())
-                .addGroup(false)
-                .addConceptId("43530446")
-                .addStandard(false)
-                .addSelectable(true)
-                .addName("Answer")
-                .addValue("1385558")
-                .build());
-    // setting the correct path on pfhh answer
-    pfhhSurveyAnswer.setPath(
-        pfhhSurveyModule.getId()
-            + "."
-            + pfhhSurveyQuestion.getId()
-            + "."
-            + pfhhSurveyAnswer.getId());
-    cbCriteriaDao.save(pfhhSurveyAnswer);
 
     sourceCriteria =
         cbCriteriaDao.save(
@@ -551,21 +494,6 @@ public class CBCriteriaDaoTest {
     assertThat(dbCriteria).hasSize(1);
     assertThat(dbCriteria).containsExactly(versionedSurvey);
     jdbcTemplate.execute("drop table cb_survey_version");
-  }
-
-  @Test
-  public void findPFHHSurveyQuestionIds() {
-    List<Long> pfhhSurveyQuestionIds =
-        cbCriteriaDao.findPFHHSurveyQuestionIds(ImmutableList.of(43530446L));
-    assertThat(Long.parseLong(pfhhSurveyQuestion.getConceptId()))
-        .isEqualTo(pfhhSurveyQuestionIds.get(0));
-  }
-
-  @Test
-  public void findPFHHSurveyAnswerIds() {
-    List<Long> pfhhSurveyAnswerIds =
-        cbCriteriaDao.findPFHHSurveyAnswerIds(ImmutableList.of(43530446L));
-    assertThat(Long.parseLong(pfhhSurveyAnswer.getValue())).isEqualTo(pfhhSurveyAnswerIds.get(0));
   }
 
   @Test
