@@ -10,7 +10,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
+import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';

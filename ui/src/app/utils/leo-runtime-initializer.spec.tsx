@@ -3,7 +3,7 @@ import {
   RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
-import { RuntimeApi } from 'generated/fetch/api';
+import { RuntimeApi } from 'generated/fetch';
 
 import { expect } from '@jest/globals';
 import {

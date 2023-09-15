@@ -7,7 +7,7 @@ import {
   UserRole,
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
