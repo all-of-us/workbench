@@ -114,7 +114,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudioApp = (
+export const openRStudio = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -149,7 +149,7 @@ export const openRStudioOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudioApp(workspaceNamespace, userApp);
+    openRStudio(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }

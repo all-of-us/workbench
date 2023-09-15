@@ -33,7 +33,7 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  openRStudioApp,
+  openRStudio,
   openSASApp,
   pauseUserApp,
   resumeUserApp,
@@ -160,7 +160,7 @@ const RStudioButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openRStudioApp(workspaceNamespace, userApp);
+    openRStudio(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
