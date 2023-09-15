@@ -53,7 +53,7 @@ export class ProfileStubVariables {
     accessModules: {
       modules: [
         {
-          moduleName: AccessModule.COMPLIANCETRAINING,
+          moduleName: AccessModule.COMPLIANCE_TRAINING,
           expirationEpochMillis: undefined,
         },
         {

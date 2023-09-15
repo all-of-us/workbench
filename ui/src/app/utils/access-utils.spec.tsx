@@ -81,7 +81,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: undefined,
           },
         ],
@@ -97,7 +97,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1) +
               ONE_MINUTE_IN_MILLIS,
@@ -118,7 +118,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: nowPlusDays(soonDays) + ONE_MINUTE_IN_MILLIS,
           },
           {
@@ -140,7 +140,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
           },
           {
@@ -164,7 +164,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -191,7 +191,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -220,7 +220,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -249,7 +249,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpires) + ONE_MINUTE_IN_MILLIS,
           },

@@ -527,9 +527,9 @@ describe('AdminUserProfile', () => {
   test.each([
     [
       AccessRenewalStatus.EXPIRED,
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       {
-        moduleName: AccessModule.COMPLIANCETRAINING,
+        moduleName: AccessModule.COMPLIANCE_TRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(-1),
       },
@@ -629,7 +629,7 @@ describe('AdminUserProfile', () => {
     const excludedModules = [
       AccessModule.IDENTITY,
       AccessModule.ERACOMMONS,
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       AccessModule.CTCOMPLIANCETRAINING,
     ];
     const expectedModules = orderedAccessModules.filter(

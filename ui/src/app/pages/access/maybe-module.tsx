@@ -48,7 +48,7 @@ export const MaybeModule = ({
     [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
     [AccessModule.ERACOMMONS, () => redirectToNiH],
-    [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
+    [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
     [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
     [
       AccessModule.DATAUSERCODEOFCONDUCT,

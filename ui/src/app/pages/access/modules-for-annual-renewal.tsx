@@ -364,7 +364,7 @@ export const RenewalCardBody = (props: {
       },
     ],
     [
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>

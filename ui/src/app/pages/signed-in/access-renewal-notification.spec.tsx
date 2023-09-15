@@ -20,7 +20,7 @@ import {
 
 const allModules = [
   AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
   AccessModule.ERACOMMONS,
   AccessModule.TWOFACTORAUTH,
@@ -76,12 +76,12 @@ const rtExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
       ![
-        AccessModule.COMPLIANCETRAINING,
+        AccessModule.COMPLIANCE_TRAINING,
         AccessModule.CTCOMPLIANCETRAINING,
       ].includes(status.moduleName)
   ),
   {
-    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(5),
   },
@@ -96,12 +96,12 @@ const ctExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
       ![
-        AccessModule.COMPLIANCETRAINING,
+        AccessModule.COMPLIANCE_TRAINING,
         AccessModule.CTCOMPLIANCETRAINING,
       ].includes(status.moduleName)
   ),
   {
-    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(10),
   },

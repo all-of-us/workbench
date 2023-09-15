@@ -37,7 +37,7 @@ interface State {
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
     ...(user.complianceTrainingBypassTime
-      ? [AccessModule.COMPLIANCETRAINING]
+      ? [AccessModule.COMPLIANCE_TRAINING]
       : []),
     ...(user.ctComplianceTrainingBypassTime
       ? [AccessModule.CTCOMPLIANCETRAINING]
@@ -59,7 +59,7 @@ const moduleToToggleProps: Record<
   AccessModule,
   { name: string; 'data-test-id': string }
 > = {
-  [AccessModule.COMPLIANCETRAINING]: {
+  [AccessModule.COMPLIANCE_TRAINING]: {
     name: 'RT Compliance Training',
     'data-test-id': 'rt-compliance-training-toggle',
   },

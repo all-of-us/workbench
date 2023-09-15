@@ -660,7 +660,7 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 export const orderedAccessModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
   AccessModule.IDENTITY,

@@ -232,7 +232,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -326,7 +326,7 @@ export const getAccessModuleConfig = (
 export const rtAccessRenewalModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.COMPLIANCE_TRAINING,
   AccessModule.DATAUSERCODEOFCONDUCT,
 ];
 
@@ -498,7 +498,7 @@ export const isExpiringOrExpired = (
   module: AccessModule
 ): boolean => {
   const trainingModules = [
-    AccessModule.COMPLIANCETRAINING,
+    AccessModule.COMPLIANCE_TRAINING,
     AccessModule.CTCOMPLIANCETRAINING,
   ];
   const lookback = trainingModules.includes(module)
@@ -618,7 +618,7 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
   // Calling both can cause conflicts, so we need to remove one.
   // We choose to remove CT arbitrarily.
   const filteredModuleNames = moduleNames.includes(
-    AccessModule.COMPLIANCETRAINING
+    AccessModule.COMPLIANCE_TRAINING
   )
     ? moduleNames.filter((m) => m !== AccessModule.CTCOMPLIANCETRAINING)
     : moduleNames;

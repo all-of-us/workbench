@@ -305,12 +305,12 @@ export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.IDENTITY,
   AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [
   AccessModule.PROFILECONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.COMPLIANCE_TRAINING,
 ];
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;
 const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;

@@ -332,7 +332,7 @@ describe('DataAccessRequirements', () => {
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(
-      enabledModules.includes(AccessModule.COMPLIANCETRAINING)
+      enabledModules.includes(AccessModule.COMPLIANCE_TRAINING)
     ).toBeFalsy();
   });
 
@@ -481,7 +481,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[3]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.COMPLIANCETRAINING);
+    expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
   });
 
   it('should return undefined from getFocusedModule when all modules have been completed', () => {
@@ -517,7 +517,7 @@ describe('DataAccessRequirements', () => {
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
           { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             completionEpochMillis: 1,
           },
           {
@@ -586,7 +586,7 @@ describe('DataAccessRequirements', () => {
     });
     const { container } = component();
     expect(
-      findModule(container, AccessModule.COMPLIANCETRAINING)?.parentElement
+      findModule(container, AccessModule.COMPLIANCE_TRAINING)?.parentElement
     ).toBeFalsy();
   });
 
@@ -1576,7 +1576,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1628,7 +1628,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1668,7 +1668,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1740,7 +1740,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
 
@@ -1784,7 +1784,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1842,7 +1842,7 @@ describe('DataAccessRequirements', () => {
     );
 
     // this module will not be returned in AccessModules because it is disabled
-    removeOneModule(AccessModule.COMPLIANCETRAINING);
+    removeOneModule(AccessModule.COMPLIANCE_TRAINING);
 
     component(DARPageMode.ANNUAL_RENEWAL);
 
@@ -1872,7 +1872,7 @@ describe('DataAccessRequirements', () => {
       const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
 
       updateOneModuleExpirationTime(
-        AccessModule.COMPLIANCETRAINING,
+        AccessModule.COMPLIANCE_TRAINING,
         expirationTime
       );
 
