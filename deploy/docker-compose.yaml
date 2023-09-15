@@ -13,7 +13,7 @@ services:
       - workbench:/home/circleci/workbench
       - yarn-cache:/home/circleci/.cache/yarn
       - ./bootstrap-docker.sh:/bootstrap-docker.sh
-
+      - ..:/mnt/local-source
 volumes:
   workbench:
   gradle-cache:
