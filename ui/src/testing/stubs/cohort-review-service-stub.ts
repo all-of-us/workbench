@@ -58,7 +58,7 @@ export const cohortReviewStubs = [
     queryResultSize: 1,
     reviewStatus: ReviewStatus.CREATED,
     participantCohortStatuses: [
-      { participantId: 1, status: CohortStatus.NOTREVIEWED },
+      { participantId: 1, status: CohortStatus.NOT_REVIEWED },
     ],
     page: 1,
     pageSize: 1,
@@ -129,7 +129,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   getParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
     return new Promise<ParticipantCohortStatus>((resolve) =>
-      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+      resolve({ participantId: 1, status: CohortStatus.NOT_REVIEWED })
     );
   }
   getParticipantCohortAnnotations(): Promise<ParticipantCohortAnnotationListResponse> {
@@ -156,7 +156,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   updateParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
     return new Promise<ParticipantCohortStatus>((resolve) =>
-      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+      resolve({ participantId: 1, status: CohortStatus.NOT_REVIEWED })
     );
   }
   createCohortReview() {
