@@ -63,7 +63,7 @@ export const shouldRedirectToMaybe = (profile: Profile): string | undefined => {
     // not a common scenario (mainly test users) but AAR is the only way to recover if these modules are missing
     [
       !allCompleteOrBypassed(profile, [
-        AccessModule.PROFILECONFIRMATION,
+        AccessModule.PROFILE_CONFIRMATION,
         AccessModule.PUBLICATION_CONFIRMATION,
       ]),
       () => ACCESS_RENEWAL_PATH,

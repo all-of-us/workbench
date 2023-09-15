@@ -122,7 +122,7 @@ describe('maybeDaysRemaining', () => {
             expirationEpochMillis: nowPlusDays(soonDays) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             expirationEpochMillis:
               nowPlusDays(aBitLater) + ONE_MINUTE_IN_MILLIS,
           },
@@ -144,7 +144,7 @@ describe('maybeDaysRemaining', () => {
             expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             expirationEpochMillis: nowPlusDays(31) + ONE_MINUTE_IN_MILLIS,
           },
         ],

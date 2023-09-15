@@ -521,7 +521,7 @@ describe('DataAccessRequirements', () => {
             completionEpochMillis: 1,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             completionEpochMillis: 1,
           },
         ],
@@ -1496,7 +1496,7 @@ describe('DataAccessRequirements', () => {
             if (
               [
                 AccessModule.CTCOMPLIANCETRAINING,
-                AccessModule.DATAUSERCODEOFCONDUCT,
+                AccessModule.DATA_USER_CODE_OF_CONDUCT,
               ].includes(moduleName)
             ) {
               return { moduleName };
@@ -1528,7 +1528,7 @@ describe('DataAccessRequirements', () => {
       findClickableModuleText(container, AccessModule.CTCOMPLIANCETRAINING)
     ).toBeTruthy();
     expect(
-      findClickableModuleText(container, AccessModule.DATAUSERCODEOFCONDUCT)
+      findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
     ).toBeTruthy();
 
     // Only the first module is active.
@@ -1540,7 +1540,7 @@ describe('DataAccessRequirements', () => {
       findNextCtaForModule(container, AccessModule.CTCOMPLIANCETRAINING)
     ).toBeTruthy();
     expect(
-      findNextCtaForModule(container, AccessModule.DATAUSERCODEOFCONDUCT)
+      findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
     ).toBeFalsy();
   });
 
@@ -1568,7 +1568,7 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1580,7 +1580,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1620,7 +1620,7 @@ describe('DataAccessRequirements', () => {
     addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1632,7 +1632,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1660,7 +1660,7 @@ describe('DataAccessRequirements', () => {
     addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1672,7 +1672,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1688,7 +1688,7 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     component(DARPageMode.ANNUAL_RENEWAL);
@@ -1708,7 +1708,7 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1732,7 +1732,7 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1776,7 +1776,7 @@ describe('DataAccessRequirements', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1788,7 +1788,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1829,7 +1829,7 @@ describe('DataAccessRequirements', () => {
     setCompletionTimes(() => Date.now());
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
@@ -1837,7 +1837,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1883,7 +1883,7 @@ describe('DataAccessRequirements', () => {
   );
 
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
-    removeOneModule(AccessModule.PROFILECONFIRMATION);
+    removeOneModule(AccessModule.PROFILE_CONFIRMATION);
     removeOneModule(AccessModule.PUBLICATION_CONFIRMATION);
 
     const { container } = component(DARPageMode.ANNUAL_RENEWAL);

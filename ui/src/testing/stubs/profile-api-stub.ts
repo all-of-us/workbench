@@ -57,11 +57,11 @@ export class ProfileStubVariables {
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PROFILECONFIRMATION,
+          moduleName: AccessModule.PROFILE_CONFIRMATION,
           expirationEpochMillis: undefined,
         },
         {

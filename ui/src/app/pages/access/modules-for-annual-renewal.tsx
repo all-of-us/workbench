@@ -251,7 +251,7 @@ export const RenewalCardBody = (props: {
   const module = switchCase(
     moduleStatus.moduleName,
     [
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
@@ -486,7 +486,7 @@ export const RenewalCardBody = (props: {
       ),
     ],
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => (
         <React.Fragment>
           <div style={{ gridArea: 'content' }}>

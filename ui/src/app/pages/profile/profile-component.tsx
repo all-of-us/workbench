@@ -256,7 +256,7 @@ export const ProfileComponent = fp.flow(
       } = currentProfile;
 
       const profileConfirmationAccessModule = fp.find(
-        { moduleName: AccessModule.PROFILECONFIRMATION },
+        { moduleName: AccessModule.PROFILE_CONFIRMATION },
         profile.accessModules.modules
       );
       const hasExpired =

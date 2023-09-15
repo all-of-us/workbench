@@ -19,13 +19,13 @@ import {
 } from './access-renewal-notification';
 
 const allModules = [
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.DATA_USER_CODE_OF_CONDUCT,
   AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
   AccessModule.ERACOMMONS,
   AccessModule.TWOFACTORAUTH,
   AccessModule.RASLINKLOGINGOV,
-  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
 ];
 
@@ -184,7 +184,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for RT when there is one expiring module',
       AccessTierShortNames.Registered,
-      allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpiring(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],
@@ -193,7 +193,7 @@ describe('Access Renewal Notification', () => {
       'for RT when there is one module expiring in two weeks',
       AccessTierShortNames.Registered,
       allCompleteOneExpiringInMoreThanTwoWeeks(
-        AccessModule.DATAUSERCODEOFCONDUCT
+        AccessModule.DATA_USER_CODE_OF_CONDUCT
       ),
       colors.notificationBanner.expiring_after_two_weeks,
       colors.primary,
@@ -203,7 +203,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for CT when there is one expiring module',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpiring(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       EMPTY_STRING,
       EMPTY_STRING,
     ],
@@ -211,7 +211,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for RT when there is one expired module',
       AccessTierShortNames.Registered,
-      allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpired(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],
@@ -220,7 +220,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for CT when there is one expired module',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpired(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       EMPTY_STRING,
       EMPTY_STRING,
     ],

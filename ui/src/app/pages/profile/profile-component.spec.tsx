@@ -184,7 +184,7 @@ describe('ProfilePageComponent', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.PROFILECONFIRMATION,
+            moduleName: AccessModule.PROFILE_CONFIRMATION,
             expirationEpochMillis: Date.now() - tenMinutesMs,
           },
         ],
@@ -202,7 +202,7 @@ describe('ProfilePageComponent', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.PROFILECONFIRMATION,
+            moduleName: AccessModule.PROFILE_CONFIRMATION,
             expirationEpochMillis: Date.now() - tenMinutesMs,
             bypassEpochMillis: 1,
           },

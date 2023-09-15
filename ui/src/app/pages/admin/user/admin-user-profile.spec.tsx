@@ -568,9 +568,9 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.EXPIRING_SOON,
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       {
-        moduleName: AccessModule.PROFILECONFIRMATION,
+        moduleName: AccessModule.PROFILE_CONFIRMATION,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(5),
       },

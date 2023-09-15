@@ -308,12 +308,12 @@ export const initialRtModules = [
   AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [
-  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
   AccessModule.COMPLIANCE_TRAINING,
 ];
 const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+const duccModule = AccessModule.DATA_USER_CODE_OF_CONDUCT;
 
 // in display order
 // exported for test

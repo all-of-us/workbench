@@ -51,7 +51,7 @@ export const MaybeModule = ({
     [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
     [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => () => {
         AnalyticsTracker.Registration.EnterDUCC();
         navigate(['data-code-of-conduct']);

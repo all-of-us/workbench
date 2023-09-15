@@ -42,12 +42,12 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.ctComplianceTrainingBypassTime
       ? [AccessModule.CTCOMPLIANCETRAINING]
       : []),
-    ...(user.duccBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
+    ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
     ...(user.profileConfirmationBypassTime
-      ? [AccessModule.PROFILECONFIRMATION]
+      ? [AccessModule.PROFILE_CONFIRMATION]
       : []),
     ...(user.publicationConfirmationBypassTime
       ? [AccessModule.PUBLICATION_CONFIRMATION]
@@ -67,7 +67,7 @@ const moduleToToggleProps: Record<
     name: 'CT Compliance Training',
     'data-test-id': 'ct-compliance-training-toggle',
   },
-  [AccessModule.DATAUSERCODEOFCONDUCT]: {
+  [AccessModule.DATA_USER_CODE_OF_CONDUCT]: {
     name: 'Data User Code of Conduct',
     'data-test-id': 'ducc-toggle',
   },
@@ -87,7 +87,7 @@ const moduleToToggleProps: Record<
     name: 'Identity Verification',
     'data-test-id': 'identity-toggle',
   },
-  [AccessModule.PROFILECONFIRMATION]: {
+  [AccessModule.PROFILE_CONFIRMATION]: {
     name: 'Profile Confirmation',
     'data-test-id': 'profile-confirmation-toggle',
   },

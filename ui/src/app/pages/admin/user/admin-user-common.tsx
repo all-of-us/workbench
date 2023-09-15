@@ -662,8 +662,8 @@ export const orderedAccessModules = [
   AccessModule.ERACOMMONS,
   AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.DATA_USER_CODE_OF_CONDUCT,
   AccessModule.IDENTITY,
-  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
 ];

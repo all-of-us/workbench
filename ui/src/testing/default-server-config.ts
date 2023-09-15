@@ -36,13 +36,13 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.DATAUSERCODEOFCONDUCT,
+    name: AccessModule.DATA_USER_CODE_OF_CONDUCT,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PROFILECONFIRMATION,
+    name: AccessModule.PROFILE_CONFIRMATION,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,

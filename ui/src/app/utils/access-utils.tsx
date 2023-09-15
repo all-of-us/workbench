@@ -280,7 +280,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -292,7 +292,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -324,10 +324,10 @@ export const getAccessModuleConfig = (
 
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const rtAccessRenewalModules = [
-  AccessModule.PROFILECONFIRMATION,
+  AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
   AccessModule.COMPLIANCE_TRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.DATA_USER_CODE_OF_CONDUCT,
 ];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {

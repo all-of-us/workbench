@@ -16,7 +16,7 @@ import { shouldRedirectToMaybe } from './guards';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {
-    moduleName: AccessModule.PROFILECONFIRMATION,
+    moduleName: AccessModule.PROFILE_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(365),
   },
