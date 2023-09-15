@@ -1101,7 +1101,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      status: RuntimeStatus.Creating,
+      status: RuntimeStatus.CREATING,
     });
 
     const wrapper = await component();
@@ -1591,7 +1591,7 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk).toBeTruthy();
   });
 
@@ -1620,7 +1620,7 @@ describe('RuntimeConfigurationPanel', () => {
     runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk).toBeNull();
   });
 
@@ -1645,7 +1645,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk?.name).toEqual(disk.name);
   });
 

@@ -79,7 +79,7 @@ export class RuntimeApiStub extends RuntimeApi {
         reqDisk.name = dapi.disk.name;
       }
     }
-    this.runtime = { ...runtime, status: RuntimeStatus.Creating };
+    this.runtime = { ...runtime, status: RuntimeStatus.CREATING };
     return {};
   }
 

@@ -21,7 +21,7 @@ import {
 
 describe('Runtime Status Indicator', () => {
   test.each([
-    [RuntimeStatus.Creating, UpdatingIcon],
+    [RuntimeStatus.CREATING, UpdatingIcon],
     [RuntimeStatus.Stopped, StoppedIcon],
     [RuntimeStatus.RUNNING, RunningIcon],
     [RuntimeStatus.Stopping, StoppingIcon],

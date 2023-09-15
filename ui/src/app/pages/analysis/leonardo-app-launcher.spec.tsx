@@ -105,7 +105,7 @@ describe('NotebookLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(DisksApi, new DisksApiStub());
@@ -142,7 +142,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -168,7 +168,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Initializing" until a Creating runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -473,7 +473,7 @@ describe('TerminalLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
@@ -498,7 +498,7 @@ describe('TerminalLauncher', () => {
   });
 
   it('should display terminal state header correctly when RuntimeStatus changes', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await terminalComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -589,7 +589,7 @@ describe('SparkConsoleLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
@@ -614,7 +614,7 @@ describe('SparkConsoleLauncher', () => {
   });
 
   it('should display progress correctly when RuntimeStatus changes', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await terminalComponent();
     await waitForFakeTimersAndUpdate(wrapper);

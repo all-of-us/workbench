@@ -393,7 +393,7 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
     runtimeStatusIcon(wrapper, /* exists */ false);
 
-    act(() => setRuntimeStatus(RuntimeStatus.Creating));
+    act(() => setRuntimeStatus(RuntimeStatus.CREATING));
     await waitForFakeTimersAndUpdate(wrapper);
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
       colors.asyncOperationStatus.starting

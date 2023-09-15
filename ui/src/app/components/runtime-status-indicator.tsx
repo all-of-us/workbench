@@ -48,7 +48,7 @@ export const RuntimeStatusIndicator = fp.flow(
       // There also be some lag during the runtime creation flow between when
       // the compound operation starts, and the runtime is set in the store; for
       // this reason use Creating rather than Deleting here.
-      status = RuntimeStatus.Creating;
+      status = RuntimeStatus.CREATING;
     }
 
     return (
@@ -64,7 +64,7 @@ export const RuntimeStatusIndicator = fp.flow(
             return <ErrorIcon />;
           }
           switch (status) {
-            case RuntimeStatus.Creating:
+            case RuntimeStatus.CREATING:
             case RuntimeStatus.Starting:
             case RuntimeStatus.Updating:
               return <UpdatingIcon />;

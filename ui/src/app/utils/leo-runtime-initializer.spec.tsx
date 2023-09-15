@@ -169,7 +169,7 @@ describe('RuntimeInitializer', () => {
   it('should create runtime if it is initially nonexistent', async () => {
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 404 }));
     mockCreateRuntime.mockImplementationOnce(async () => {
-      return { status: RuntimeStatus.Creating };
+      return { status: RuntimeStatus.CREATING };
     });
     mockGetRuntimeCalls([
       { status: RuntimeStatus.Starting },
@@ -261,8 +261,8 @@ describe('RuntimeInitializer', () => {
 
   it('should recover from intermittent 500s', async () => {
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Creating },
-      { status: RuntimeStatus.Creating },
+      { status: RuntimeStatus.CREATING },
+      { status: RuntimeStatus.CREATING },
     ]);
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
@@ -274,7 +274,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should give up after too many server errors', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Creating }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.CREATING }]);
     for (let i = 0; i < 20; i++) {
       mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
     }
