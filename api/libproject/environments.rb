@@ -117,7 +117,7 @@ ENVIRONMENTS = {
         :auth_domain_group_email => "all-of-us-registered-preprod@firecloud.org",
         :ingest_other_datasets_project => "fc-aou-vpc-ingest-preprod-prev",
         :dest_other_datasets_project => "fc-aou-cdr-preprod-preview",
-        :auth_domain_other_datasets_email => "aou-preview-data@firecloud.org",
+        :auth_domain_other_datasets_email => "aou-prev-data@firecloud.org",
       },
       "controlled" => {
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod-ct",
