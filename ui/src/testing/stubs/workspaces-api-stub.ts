@@ -68,7 +68,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
     return new Promise<WorkspaceResponseListResponse>((resolve) => {
       resolve({
         items: this.workspaces.map((workspace) => {
-          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          let accessLevel: WorkspaceAccessLevel =
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
           if (this.workspaceAccess.has(workspace.id)) {
             accessLevel = this.workspaceAccess.get(workspace.id);
           }
@@ -269,7 +270,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
       );
       resolve({
         items: publishedWorkspaces.map((workspace) => {
-          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          let accessLevel: WorkspaceAccessLevel =
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
           if (this.workspaceAccess.has(workspace.id)) {
             accessLevel = this.workspaceAccess.get(workspace.id);
           }
