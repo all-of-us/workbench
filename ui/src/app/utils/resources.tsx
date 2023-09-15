@@ -29,7 +29,7 @@ export const isNotebook = (resource: WorkspaceResource): boolean =>
 export function toDisplay(resourceType: ResourceType): string {
   return fp.cond([
     [(rt) => rt === ResourceType.COHORT, () => 'Cohort'],
-    [(rt) => rt === ResourceType.COHORTREVIEW, () => 'Cohort Review'],
+    [(rt) => rt === ResourceType.COHORT_REVIEW, () => 'Cohort Review'],
     [(rt) => rt === ResourceType.CONCEPT_SET, () => 'Concept Set'],
     [(rt) => rt === ResourceType.DATASET, () => 'Dataset'],
     [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
@@ -112,7 +112,7 @@ export function getResourceUrl(resource: WorkspaceResource): UrlObj {
 export function getType(resource: WorkspaceResource): ResourceType {
   return fp.cond([
     [isCohort, () => ResourceType.COHORT],
-    [isCohortReview, () => ResourceType.COHORTREVIEW],
+    [isCohortReview, () => ResourceType.COHORT_REVIEW],
     [isConceptSet, () => ResourceType.CONCEPT_SET],
     [isDataSet, () => ResourceType.DATASET],
     [isNotebook, () => ResourceType.NOTEBOOK],
@@ -146,7 +146,7 @@ export function convertToResource(
     cohort:
       resourceType === ResourceType.COHORT ? (inputResource as Cohort) : null,
     cohortReview:
-      resourceType === ResourceType.COHORTREVIEW
+      resourceType === ResourceType.COHORT_REVIEW
         ? (inputResource as CohortReview)
         : null,
     conceptSet:

@@ -103,7 +103,7 @@ describe('resources.tsx', () => {
     expect(isNotebook(testCohort)).toBeFalsy();
 
     expect(isCohortReview(testCohortReview)).toBeTruthy();
-    expect(getType(testCohortReview)).toEqual(ResourceType.COHORTREVIEW);
+    expect(getType(testCohortReview)).toEqual(ResourceType.COHORT_REVIEW);
 
     expect(isCohort(testCohortReview)).toBeFalsy();
     expect(isConceptSet(testCohortReview)).toBeFalsy();
@@ -137,7 +137,7 @@ describe('resources.tsx', () => {
 
   it('should return resource type strings', () => {
     expect(toDisplay(ResourceType.COHORT)).toBe('Cohort');
-    expect(toDisplay(ResourceType.COHORTREVIEW)).toBe('Cohort Review');
+    expect(toDisplay(ResourceType.COHORT_REVIEW)).toBe('Cohort Review');
     expect(toDisplay(ResourceType.CONCEPT_SET)).toBe('Concept Set');
     expect(toDisplay(ResourceType.DATASET)).toBe('Dataset');
     expect(toDisplay(ResourceType.NOTEBOOK)).toBe('Notebook');

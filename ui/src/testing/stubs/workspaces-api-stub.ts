@@ -328,7 +328,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
       };
       const workspaceResources = convertToResources(
         cohortReviewStubs,
-        ResourceType.COHORTREVIEW,
+        ResourceType.COHORT_REVIEW,
         workspace
       )
         .concat(

@@ -78,7 +78,7 @@ const descriptions = {
 
 const resourceTypesToFetch = [
   ResourceType.COHORT.toString(),
-  ResourceType.COHORTREVIEW.toString(),
+  ResourceType.COHORT_REVIEW.toString(),
   ResourceType.CONCEPT_SET.toString(),
   ResourceType.DATASET.toString(),
 ];
