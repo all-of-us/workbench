@@ -31,7 +31,7 @@ export const RuntimeCost = () => {
     [RuntimeStatus.Creating, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.RUNNING, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.Updating, () => `${runtime.status} ${runningCost} / hr`],
-    [RuntimeStatus.Deleting, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.DELETING, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.Stopping, () => `Pausing ${runningCost} / hr`],
     [RuntimeStatus.Starting, () => `Resuming ${runningCost} / hr`],
     [RuntimeStatus.Stopped, () => `Paused ${storageCost} / hr`],

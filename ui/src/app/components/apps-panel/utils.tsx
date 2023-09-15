@@ -154,7 +154,7 @@ export const fromRuntimeStatus = (
   cond(
     [status === RuntimeStatus.Creating, () => UserEnvironmentStatus.CREATING],
     [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
-    [status === RuntimeStatus.Deleting, () => UserEnvironmentStatus.DELETING],
+    [status === RuntimeStatus.DELETING, () => UserEnvironmentStatus.DELETING],
     [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
     [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
     [status === RuntimeStatus.Stopping, () => UserEnvironmentStatus.PAUSING],

@@ -341,7 +341,7 @@ export const InteractiveNotebook = fp.flow(
         case RuntimeStatus.Stopping:
         case RuntimeStatus.Stopped:
           return 'Resuming your Jupyter environment. This may take up to 1 minute.';
-        case RuntimeStatus.Deleting:
+        case RuntimeStatus.DELETING:
         case RuntimeStatus.Creating:
         case RuntimeStatus.Deleted:
           return 'Preparing your Jupyter environment. This may take up to 5 minutes.';

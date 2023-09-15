@@ -382,7 +382,7 @@ describe('HelpSidebar', () => {
       colors.asyncOperationStatus.running
     );
 
-    act(() => setRuntimeStatus(RuntimeStatus.Deleting));
+    act(() => setRuntimeStatus(RuntimeStatus.DELETING));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -401,7 +401,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "starting" UX during compound runtime op with no runtime', async () => {
-    setRuntimeStatus(RuntimeStatus.Deleting);
+    setRuntimeStatus(RuntimeStatus.DELETING);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
       aborter: new AbortController(),
     });

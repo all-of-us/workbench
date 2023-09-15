@@ -1286,7 +1286,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Delete');
 
     // Runtime should be deleting, and panel should have closed.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
     expect(onClose).toHaveBeenCalled();
   });
 

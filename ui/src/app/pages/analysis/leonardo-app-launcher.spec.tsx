@@ -295,7 +295,7 @@ describe('NotebookLauncher', () => {
     // Simulate transition to deleting - should navigate away.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Deleting,
+      status: RuntimeStatus.DELETING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -543,7 +543,7 @@ describe('TerminalLauncher', () => {
     // Simulate transition to deleting - should navigate away.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Deleting,
+      status: RuntimeStatus.DELETING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 

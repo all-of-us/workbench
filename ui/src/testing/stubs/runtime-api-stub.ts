@@ -93,7 +93,7 @@ export class RuntimeApiStub extends RuntimeApi {
         this.runtime.gceWithPdConfig?.persistentDisk?.name
       );
     }
-    this.runtime.status = RuntimeStatus.Deleting;
+    this.runtime.status = RuntimeStatus.DELETING;
     return {};
   }
 
