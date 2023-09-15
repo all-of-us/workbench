@@ -269,7 +269,7 @@ export class LeoRuntimeInitializer {
   private isRuntimeStopped(): boolean {
     return (
       this.currentRuntime &&
-      this.currentRuntime.status === RuntimeStatus.Stopped
+      this.currentRuntime.status === RuntimeStatus.STOPPED
     );
   }
 

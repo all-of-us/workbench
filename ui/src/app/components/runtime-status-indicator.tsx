@@ -68,11 +68,11 @@ export const RuntimeStatusIndicator = fp.flow(
             case RuntimeStatus.Starting:
             case RuntimeStatus.Updating:
               return <UpdatingIcon />;
-            case RuntimeStatus.Stopped:
+            case RuntimeStatus.STOPPED:
               return <StoppedIcon />;
             case RuntimeStatus.RUNNING:
               return <RunningIcon />;
-            case RuntimeStatus.Stopping:
+            case RuntimeStatus.STOPPING:
             case RuntimeStatus.DELETING:
               return <StoppingIcon />;
             case RuntimeStatus.Error:

@@ -483,7 +483,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable controls when runtime has a non-actionable status', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopping,
+      status: RuntimeStatus.STOPPING,
     });
 
     // sanity check
@@ -1778,7 +1778,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable worker count updates for stopped dataproc cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
+      status: RuntimeStatus.STOPPED,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1799,7 +1799,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow worker configuration for stopped GCE runtime', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
+      status: RuntimeStatus.STOPPED,
       configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
@@ -1820,7 +1820,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable Spark console for non-running cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
+      status: RuntimeStatus.STOPPED,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,

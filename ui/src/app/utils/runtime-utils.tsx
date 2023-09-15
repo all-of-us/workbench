@@ -1002,7 +1002,7 @@ export const useRuntimeStatus = (
         RuntimeStatusRequest.DeletePD,
         () => (r) =>
           r.status === RuntimeStatus.RUNNING ||
-          r.status === RuntimeStatus.Stopped,
+          r.status === RuntimeStatus.STOPPED,
       ],
       [
         RuntimeStatusRequest.Start,
@@ -1010,7 +1010,7 @@ export const useRuntimeStatus = (
       ],
       [
         RuntimeStatusRequest.Stop,
-        () => (r) => r.status === RuntimeStatus.Stopped,
+        () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
     const initializePolling = async () => {
@@ -1161,7 +1161,7 @@ export const useCustomRuntime = (
         ) {
           if (
             runtime.status === RuntimeStatus.RUNNING ||
-            runtime.status === RuntimeStatus.Stopped
+            runtime.status === RuntimeStatus.STOPPED
           ) {
             await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
               runtime: request.runtime,
@@ -1281,7 +1281,7 @@ export const isVisible = (status: RuntimeStatus) =>
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
-  [RuntimeStatus.RUNNING, RuntimeStatus.Stopped].includes(status);
+  [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED].includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
   runtime?.labels?.creator;

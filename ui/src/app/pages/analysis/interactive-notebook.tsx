@@ -338,8 +338,8 @@ export const InteractiveNotebook = fp.flow(
         this.props.runtimeStore.runtime || {};
       switch (status) {
         case RuntimeStatus.Starting:
-        case RuntimeStatus.Stopping:
-        case RuntimeStatus.Stopped:
+        case RuntimeStatus.STOPPING:
+        case RuntimeStatus.STOPPED:
           return 'Resuming your Jupyter environment. This may take up to 1 minute.';
         case RuntimeStatus.DELETING:
         case RuntimeStatus.CREATING:

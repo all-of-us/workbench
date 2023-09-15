@@ -195,7 +195,7 @@ describe('NotebookLauncher', () => {
 
   it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -221,7 +221,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Resuming" until a Stopped runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);

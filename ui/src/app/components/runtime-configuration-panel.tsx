@@ -463,7 +463,7 @@ const PanelMain = fp.flow(
     // where we get 'status' from
     const runtimeCanBeUpdated =
       environmentChanged &&
-      [RuntimeStatus.RUNNING, RuntimeStatus.Stopped].includes(
+      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED].includes(
         status as RuntimeStatus
       ) &&
       runtimeCanBeCreated;
