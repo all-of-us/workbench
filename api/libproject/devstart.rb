@@ -2472,9 +2472,12 @@ def deploy_tanagra(cmd_name, args)
   gcc.validate
 
   ENV.update(read_db_vars(gcc))
-  tanagra_db_username = ENV["WORKBENCH_DB_USER"]
-  tanagra_db_password = ENV["WORKBENCH_DB_PASSWORD"]
-  tanagra_db_cloudSqlInstance = ENV["CLOUD_SQL_INSTANCE_NAME"]
+  env_project = ENVIRONMENTS[op.opts.project]
+  base_path = "https://" + env_project.fetch(:api_endpoint_host)
+  underlay_files = env_project.fetch(:tanagra_underlay_files)
+  ENV.update({"TANAGRA_AUTH_GCP_PROJECT_ID" => op.opts.project})
+  ENV.update({"TANAGRA_ACCESS_CONTROL_BASE_PATH" => base_path})
+  ENV.update({"TANAGRA_UNDERLAY_FILES" => underlay_files})
 
   if (op.opts.key_file)
     ENV["GOOGLE_APPLICATION_CREDENTIALS"] = op.opts.key_file
@@ -2501,16 +2504,10 @@ def deploy_tanagra(cmd_name, args)
 
   Dir.chdir('../tanagra-aou-utils') do
     common.status "Building appengine config file..."
-    common.run_inline("sed 's/${SERVICE_ACCOUNT}/#{op.opts.project}@appspot.gserviceaccount.com/g' tanagra-api.yaml > ./appengine/tanagra-api.yaml")
+    common.run_inline("envsubst < tanagra-api.yaml > appengine/tanagra-api.yaml")
 
     common.status "Building env variables file..."
-    common.run_inline("touch ./appengine/tanagra_env_variables.yaml > ./appengine/tanagra_env_variables.yaml")
-    common.run_inline("echo \"env_variables:\" >> ./appengine/tanagra_env_variables.yaml")
-    ENV.each_pair do |k,v|
-      if (k.start_with?("TANAGRA_"))
-        common.run_inline("echo \"  #{k}: #{v}\" >> ./appengine/tanagra_env_variables.yaml")
-      end
-    end
+    common.run_inline("envsubst < tanagra_env_variables_template.yaml > appengine/tanagra_env_variables.yaml")
   end
 
   Dir.chdir('../tanagra-aou-utils/appengine') do

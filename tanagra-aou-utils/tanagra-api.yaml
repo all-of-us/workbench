@@ -1,7 +1,7 @@
 runtime: java11
 env: standard
 service: 'tanagra-api'
-service_account: ${SERVICE_ACCOUNT}
+service_account: $TANAGRA_AUTH_GCP_PROJECT_ID@appspot.gserviceaccount.com
 instance_class: F4
 automatic_scaling:
   min_idle_instances: 0
