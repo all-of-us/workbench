@@ -294,7 +294,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           content='Your application must be running in order to be deleted.'
         >
           <Clickable
-            aria-label='Delete Environment'
+            aria-label={`Delete ${appType} Environment`}
             disabled={!trashEnabled}
             style={
               trashEnabled

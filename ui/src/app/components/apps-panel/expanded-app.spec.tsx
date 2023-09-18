@@ -9,8 +9,7 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, waitFor } from '@testing-library/react';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
@@ -175,7 +174,7 @@ describe('ExpandedApp', () => {
       expect(container).toBeInTheDocument();
 
       const deleteButton = screen.getByRole('button', {
-        name: 'Delete Environment',
+        name: 'Delete Jupyter Environment',
       });
       expectButtonElementEnabled(deleteButton);
       deleteButton.click();
@@ -200,7 +199,7 @@ describe('ExpandedApp', () => {
       expect(container).toBeInTheDocument();
 
       const deleteButton = screen.getByRole('button', {
-        name: 'Delete Environment',
+        name: 'Delete Jupyter Environment',
       });
       expectButtonElementDisabled(deleteButton);
     }
@@ -254,7 +253,7 @@ describe('ExpandedApp', () => {
       expect(container).toBeInTheDocument();
 
       const deleteButton = screen.getByRole('button', {
-        name: 'Delete Environment',
+        name: `Delete ${appType} Environment`,
       });
       expectButtonElementEnabled(deleteButton);
       deleteButton.click();
@@ -312,7 +311,7 @@ describe('ExpandedApp', () => {
         expect(container).toBeInTheDocument();
 
         const deleteButton = screen.getByRole('button', {
-          name: 'Delete Environment',
+          name: `Delete ${appType} Environment`,
         });
         expectButtonElementDisabled(deleteButton);
       }
