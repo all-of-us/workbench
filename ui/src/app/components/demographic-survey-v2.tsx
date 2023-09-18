@@ -279,7 +279,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         onUpdate(
           'sexualOrientations',
           survey.sexualOrientations.filter(
-            (so) => so !== SexualOrientationV2.TWOSPIRIT
+            (so) => so !== SexualOrientationV2.TWO_SPIRIT
           )
         );
         onUpdate(
@@ -886,7 +886,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label: 'Two Spirit',
-                value: SexualOrientationV2.TWOSPIRIT,
+                value: SexualOrientationV2.TWO_SPIRIT,
                 disabled: !isAian,
                 disabledText: TWO_SPIRIT_SEXUAL_ORIENTATION_DISABLED_TEXT,
               },
