@@ -97,7 +97,7 @@ export const ExportDatasetModal = ({
 
   function hasWgs() {
     return fp.includes(
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
       dataset.prePackagedConceptSet
     );
   }

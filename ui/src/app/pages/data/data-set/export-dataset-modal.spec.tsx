@@ -283,7 +283,7 @@ describe('ExportDatasetModal', () => {
 
   it('Show genomics analysis tools if WGS is in the dataset', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
 
@@ -298,7 +298,7 @@ describe('ExportDatasetModal', () => {
 
   it('Remove genomics analysis tools if R is selected', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
 
@@ -329,7 +329,7 @@ describe('ExportDatasetModal', () => {
 
   it('Should export code with genomics analysis tool', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -366,7 +366,7 @@ describe('ExportDatasetModal', () => {
       html: '<div id="notebook">print("hello world!")</div>',
     };
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');

@@ -660,7 +660,7 @@ describe('DataSetPage', () => {
       ],
       cohorts: [{ id: 1 }],
       domainValuePairs: [{ domain: Domain.WHOLE_GENOME_VARIANT, value: 'wgs' }],
-      prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
+      prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLE_GENOME],
     };
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
