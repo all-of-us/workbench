@@ -61,7 +61,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 50,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 
@@ -74,7 +74,7 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 100,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 

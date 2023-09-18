@@ -99,7 +99,7 @@ export enum AnalysisDiffState {
 }
 
 export const diskTypeLabels = {
-  [DiskType.Standard]: 'Standard Disk',
+  [DiskType.STANDARD]: 'Standard Disk',
   [DiskType.Ssd]: 'Solid State Disk',
 };
 
@@ -693,13 +693,13 @@ export const withAnalysisConfigDefaults = (
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
-        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.Standard;
+        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.STANDARD;
       if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
         existingDiskName = existingPersistentDisk.name;
       }
     } else {
       // No existing disk.
-      detachableType = DiskType.Standard;
+      detachableType = DiskType.STANDARD;
       detachable = true;
     }
   } else if (computeType === ComputeType.Dataproc) {

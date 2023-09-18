@@ -90,7 +90,7 @@ describe('RuntimeConfigurationPanel', () => {
   const existingDisk = (): Disk => {
     return {
       size: 1000,
-      diskType: DiskType.Standard,
+      diskType: DiskType.STANDARD,
       name: 'my-existing-disk',
       blockSize: 1,
       isGceRuntime: true,
@@ -1380,7 +1380,7 @@ describe('RuntimeConfigurationPanel', () => {
     const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
 
     await enableDetachable(wrapper);
-    await pickDetachableType(wrapper, DiskType.Standard);
+    await pickDetachableType(wrapper, DiskType.STANDARD);
 
     await pickDetachableDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
@@ -1391,7 +1391,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickDetachableDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickDetachableType(wrapper, DiskType.Standard);
+    await pickDetachableType(wrapper, DiskType.STANDARD);
     expect(getNextButton().prop('disabled')).toBeTruthy();
   });
 

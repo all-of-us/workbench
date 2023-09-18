@@ -138,7 +138,7 @@ export const DiskSelector = ({
                     ...diskConfig,
                     size: existingDisk?.size || diskConfig.size,
                     detachable: true,
-                    detachableType: existingDisk?.diskType || DiskType.Standard,
+                    detachableType: existingDisk?.diskType || DiskType.STANDARD,
                   },
                   existingDisk
                 )
@@ -164,7 +164,7 @@ export const DiskSelector = ({
                   </label>
                   <Dropdown
                     id={'disk-type'}
-                    options={[DiskType.Standard, DiskType.Ssd].map((value) => ({
+                    options={[DiskType.STANDARD, DiskType.Ssd].map((value) => ({
                       label: diskTypeLabels[value],
                       value,
                     }))}
