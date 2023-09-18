@@ -710,7 +710,7 @@ const PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS = {
 };
 
 const PREPACKAGED_WITH_WHOLE_GENOME = {
-  [PrePackagedConceptSetEnum.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
+  [PrePackagedConceptSetEnum.WHOLEGENOME]: Domain.WHOLE_GENOME_VARIANT,
 };
 
 const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
@@ -743,7 +743,7 @@ const reverseDomainEnum = {
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBITSLEEPDAILYSUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBITSLEEPLEVEL,
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
-  WHOLE_GENOME_VARIANT: Domain.WHOLEGENOMEVARIANT,
+  WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
   ARRAY_DATA: Domain.ARRAYDATA,
 };
@@ -1438,7 +1438,7 @@ export const DatasetPage = fp.flow(
     };
 
     const getPreviewByDomain = async (domain: Domain) => {
-      if (domain === Domain.WHOLEGENOMEVARIANT) {
+      if (domain === Domain.WHOLE_GENOME_VARIANT) {
         setPreviewList(
           (prevPreviewList) =>
             new Map(
@@ -1662,7 +1662,7 @@ export const DatasetPage = fp.flow(
 
     const onClickExport = () => {
       setModalState(
-        selectedDomains.has(Domain.WHOLEGENOMEVARIANT)
+        selectedDomains.has(Domain.WHOLE_GENOME_VARIANT)
           ? ModalState.Extract
           : ModalState.Export
       );

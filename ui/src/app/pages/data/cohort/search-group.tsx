@@ -351,7 +351,7 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.PERSON,
           Domain.SURVEY,
           Domain.FITBIT,
-          Domain.WHOLEGENOMEVARIANT,
+          Domain.WHOLE_GENOME_VARIANT,
           Domain.LRWHOLEGENOMEVARIANT,
           Domain.ARRAYDATA,
           Domain.STRUCTURALVARIANTDATA,

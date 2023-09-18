@@ -150,7 +150,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         id: 351,
         name: 'Mock WGS',
         description: 'Mocked for tests',
-        domain: Domain.WHOLEGENOMEVARIANT,
+        domain: Domain.WHOLE_GENOME_VARIANT,
         lastModifiedTime: new Date().getTime() - 2000,
         criteriums: [],
       },

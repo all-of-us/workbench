@@ -174,7 +174,7 @@ const SKIP_DOMAIN_SEARCH = [
   Domain.FITBITHEARTRATESUMMARY.toString(),
   Domain.FITBITACTIVITY.toString(),
   Domain.FITBITINTRADAYSTEPS.toString(),
-  Domain.WHOLEGENOMEVARIANT.toString(),
+  Domain.WHOLE_GENOME_VARIANT.toString(),
   Domain.LRWHOLEGENOMEVARIANT.toString(),
   Domain.ARRAYDATA.toString(),
   Domain.STRUCTURALVARIANTDATA.toString(),

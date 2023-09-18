@@ -208,7 +208,7 @@ export const CohortSearch = fp.flow(
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
-      } else if (domain === Domain.WHOLEGENOMEVARIANT) {
+      } else if (domain === Domain.WHOLE_GENOME_VARIANT) {
         this.selectGenome();
       } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
         this.selectLongReadGenome();
@@ -396,7 +396,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Short Read WGS',
         group: false,
-        domainId: Domain.WHOLEGENOMEVARIANT.toString(),
+        domainId: Domain.WHOLE_GENOME_VARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],

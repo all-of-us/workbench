@@ -653,13 +653,13 @@ describe('DataSetPage', () => {
       conceptSets: [
         {
           id: ConceptSetsApiStub.stubConceptSets().find(
-            (cs) => cs.domain === Domain.WHOLEGENOMEVARIANT
+            (cs) => cs.domain === Domain.WHOLE_GENOME_VARIANT
           ).id,
-          domain: Domain.WHOLEGENOMEVARIANT,
+          domain: Domain.WHOLE_GENOME_VARIANT,
         },
       ],
       cohorts: [{ id: 1 }],
-      domainValuePairs: [{ domain: Domain.WHOLEGENOMEVARIANT, value: 'wgs' }],
+      domainValuePairs: [{ domain: Domain.WHOLE_GENOME_VARIANT, value: 'wgs' }],
       prePackagedConceptSet: [PrePackagedConceptSetEnum.WHOLEGENOME],
     };
     const wrapper = component();
