@@ -111,7 +111,7 @@ export const AdminInstitution = fp.flow(withNavigation)(
         fp.filter<string>(
           (tier) =>
             getTierConfig(institution, tier)?.membershipRequirement !==
-            InstitutionMembershipRequirement.NOACCESS
+            InstitutionMembershipRequirement.NO_ACCESS
         ),
         fp.map(fp.capitalize),
         fp.join(', ')
