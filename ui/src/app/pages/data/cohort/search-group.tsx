@@ -151,7 +151,7 @@ const css = `
 `;
 
 const temporalMentions = [
-  TemporalMention.ANYMENTION,
+  TemporalMention.ANY_MENTION,
   TemporalMention.FIRSTMENTION,
   TemporalMention.LASTMENTION,
 ];
@@ -165,7 +165,7 @@ const temporalTimes = [
 
 function temporalEnumToText(option) {
   switch (option) {
-    case TemporalMention.ANYMENTION:
+    case TemporalMention.ANY_MENTION:
       return 'Any mention of';
     case TemporalMention.FIRSTMENTION:
       return 'First mention of';

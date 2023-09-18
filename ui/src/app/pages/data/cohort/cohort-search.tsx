@@ -107,7 +107,7 @@ export function initGroup(role: string, items: any) {
     items,
     count: null,
     temporal: false,
-    mention: TemporalMention.ANYMENTION,
+    mention: TemporalMention.ANY_MENTION,
     time: TemporalTime.DURINGSAMEENCOUNTERAS,
     timeValue: '',
     timeFrame: '',

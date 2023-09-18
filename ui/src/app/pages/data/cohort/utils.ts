@@ -323,7 +323,7 @@ export function parseCohortDefinition(json: string) {
         item.status = 'active';
         return item;
       });
-      grp.mention = grp.mention ? grp.mention : TemporalMention.ANYMENTION;
+      grp.mention = grp.mention ? grp.mention : TemporalMention.ANY_MENTION;
       grp.time = grp.time ? grp.time : TemporalTime.DURINGSAMEENCOUNTERAS;
       grp.timeValue = grp.timeValue ? grp.timeValue : '';
       grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
