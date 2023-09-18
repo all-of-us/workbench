@@ -114,7 +114,7 @@ export function domainToTitle(domain: any): string {
     case Domain.SURVEY:
       domain = 'Surveys';
       break;
-    case Domain.ALLEVENTS:
+    case Domain.ALL_EVENTS:
       domain = 'All Events';
       break;
     case Domain.FITBIT:
@@ -132,7 +132,7 @@ export function domainToTitle(domain: any): string {
     case Domain.STRUCTURAL_VARIANT_DATA:
       domain = 'Structural Variant Data';
       break;
-    case Domain.SNPINDELVARIANT:
+    case Domain.SNP_INDEL_VARIANT:
       domain = 'SNP/Indel Variants';
       break;
   }
@@ -194,9 +194,9 @@ export function ageTypeToText(ageType: AgeType) {
   switch (ageType) {
     case AgeType.AGE:
       return 'Current Age';
-    case AgeType.AGEATCDR:
+    case AgeType.AGE_AT_CDR:
       return 'Age at CDR';
-    case AgeType.AGEATCONSENT:
+    case AgeType.AGE_AT_CONSENT:
       return 'Age  at Consent';
   }
 }
@@ -207,7 +207,7 @@ export function genderSexRaceOrEthTypeToText(
   switch (genderSexRaceOrEthType) {
     case GenderSexRaceOrEthType.GENDER:
       return 'Gender Identity';
-    case GenderSexRaceOrEthType.SEXATBIRTH:
+    case GenderSexRaceOrEthType.SEX_AT_BIRTH:
       return 'Sex at Birth';
     case GenderSexRaceOrEthType.RACE:
       return 'Race';
