@@ -12,13 +12,19 @@ import { styles } from './styles';
 
 const { useState, Fragment } = React;
 
+interface ConfirmDeleteUnattachedPDProps {
+  appType: UIAppType;
+  onConfirm: () => void;
+  onCancel: () => void;
+  showCreateMessaging?: boolean;
+}
 export const ConfirmDeleteUnattachedPD = ({
+  appType,
   onConfirm,
   onCancel,
   showCreateMessaging = false,
-}) => {
+}: ConfirmDeleteUnattachedPDProps) => {
   const [deleting, setDeleting] = useState(false);
-
   return (
     <Fragment>
       <div style={{ display: 'flex', marginRight: '0.75rem' }}>
@@ -70,7 +76,7 @@ export const ConfirmDeleteUnattachedPD = ({
           it.{' '}
         </p>
       </div>
-      <BackupFilesHelpSection appType={UIAppType.JUPYTER} />
+      <BackupFilesHelpSection {...{ appType }} />
       <FlexRow style={{ justifyContent: 'flex-end' }}>
         <Button
           type='secondaryLight'
