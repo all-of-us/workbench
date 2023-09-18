@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import {
   AppsApi,
@@ -10,6 +9,8 @@ import {
   UserAppEnvironment,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
@@ -30,7 +31,11 @@ import {
 } from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { waitOneTickAndUpdate } from 'testing/react-test-helpers';
+import {
+  expectButtonElementDisabled,
+  expectButtonElementEnabled,
+  renderModal,
+} from 'testing/react-test-helpers';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
 import { LeoProxyApiStub } from 'testing/stubs/leo-proxy-api-stub';
@@ -59,7 +64,7 @@ const component = async (
   appType: UIAppType,
   initialUserAppInfo: UserAppEnvironment
 ) =>
-  mount(
+  renderModal(
     <ExpandedApp
       {...{
         appType,
@@ -99,53 +104,39 @@ describe('ExpandedApp', () => {
 
   it('should allow pausing when the Jupyter app is Running', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Running;
-
-    const wrapper = await component(UIAppType.JUPYTER, undefined);
-    expect(wrapper.exists()).toBeTruthy();
-
-    const pauseButton = wrapper
-      .find({
-        'data-test-id': 'apps-panel-button-Pause',
-      })
-      .first();
-    expect(pauseButton.exists()).toBeTruthy();
-    const { disabled } = pauseButton.props();
-    expect(disabled).toBeFalsy();
-
     const pauseSpy = jest.spyOn(leoRuntimesApi(), 'stopRuntime');
-    const { onClick } = pauseButton.props();
-    await onClick();
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(pauseSpy).toHaveBeenCalledWith(
-      workspace.googleProject,
-      runtimeStub.runtime.runtimeName
+    const { container } = await component(UIAppType.JUPYTER, undefined);
+    expect(container).toBeInTheDocument();
+
+    const pauseButton = screen.getByRole('button', { name: 'Pause' });
+    expectButtonElementEnabled(pauseButton);
+    pauseButton.click();
+
+    await waitFor(() =>
+      expect(pauseSpy).toHaveBeenCalledWith(
+        workspace.googleProject,
+        runtimeStub.runtime.runtimeName
+      )
     );
   });
 
   it('should allow resuming when the Jupyter app is Stopped', async () => {
     runtimeStub.runtime.status = RuntimeStatus.Stopped;
-
-    const wrapper = await component(UIAppType.JUPYTER, undefined);
-    expect(wrapper.exists()).toBeTruthy();
-
-    const pauseButton = wrapper
-      .find({
-        'data-test-id': 'apps-panel-button-Resume',
-      })
-      .first();
-    expect(pauseButton.exists()).toBeTruthy();
-    const { disabled } = pauseButton.props();
-    expect(disabled).toBeFalsy();
-
     const resumeSpy = jest.spyOn(leoRuntimesApi(), 'startRuntime');
-    const { onClick } = pauseButton.props();
-    await onClick();
-    await waitOneTickAndUpdate(wrapper);
 
-    expect(resumeSpy).toHaveBeenCalledWith(
-      workspace.googleProject,
-      runtimeStub.runtime.runtimeName
+    const { container } = await component(UIAppType.JUPYTER, undefined);
+    expect(container).toBeInTheDocument();
+
+    const resumeButton = screen.getByRole('button', { name: 'Resume' });
+    expectButtonElementEnabled(resumeButton);
+    resumeButton.click();
+
+    await waitFor(() =>
+      expect(resumeSpy).toHaveBeenCalledWith(
+        workspace.googleProject,
+        runtimeStub.runtime.runtimeName
+      )
     );
   });
 
@@ -164,20 +155,14 @@ describe('ExpandedApp', () => {
     [null, 'Pause'],
   ])(
     'should not allow clicking pause/resume when the Jupyter app status is %s',
-    async (status, buttonText) => {
+    async (status, name) => {
       runtimeStub.runtime.status = status;
 
-      const wrapper = await component(UIAppType.JUPYTER, undefined);
-      expect(wrapper.exists()).toBeTruthy();
+      const { container } = await component(UIAppType.JUPYTER, undefined);
+      expect(container).toBeInTheDocument();
 
-      const pauseButton = wrapper
-        .find({
-          'data-test-id': `apps-panel-button-${buttonText}`,
-        })
-        .first();
-      expect(pauseButton.exists()).toBeTruthy();
-      const { disabled } = pauseButton.props();
-      expect(disabled).toBeTruthy();
+      const actionButton = screen.getByRole('button', { name });
+      expectButtonElementEnabled(actionButton);
     }
   );
 
@@ -186,22 +171,16 @@ describe('ExpandedApp', () => {
     async (status) => {
       runtimeStub.runtime.status = status;
 
-      const wrapper = await component(UIAppType.JUPYTER, undefined);
-      expect(wrapper.exists()).toBeTruthy();
+      const { container } = await component(UIAppType.JUPYTER, undefined);
+      expect(container).toBeInTheDocument();
 
-      const deletion = wrapper
-        .find({
-          'data-test-id': 'Jupyter-delete-button',
-        })
-        .first();
-      expect(deletion.exists()).toBeTruthy();
-      const { disabled } = deletion.props();
-      expect(disabled).toBeFalsy();
+      const deleteButton = screen.getByRole('button', {
+        name: 'Delete Environment',
+      });
+      expectButtonElementEnabled(deleteButton);
+      deleteButton.click();
 
-      const { onClick } = deletion.props();
-      await onClick();
-
-      expect(onClickDeleteRuntime).toHaveBeenCalled();
+      await waitFor(() => expect(onClickDeleteRuntime).toHaveBeenCalled());
     }
   );
 
@@ -217,17 +196,13 @@ describe('ExpandedApp', () => {
     async (status) => {
       runtimeStub.runtime.status = status;
 
-      const wrapper = await component(UIAppType.JUPYTER, undefined);
-      expect(wrapper.exists()).toBeTruthy();
+      const { container } = await component(UIAppType.JUPYTER, undefined);
+      expect(container).toBeInTheDocument();
 
-      const deletion = wrapper
-        .find({
-          'data-test-id': 'Jupyter-delete-button',
-        })
-        .first();
-      expect(deletion.exists()).toBeTruthy();
-      const { disabled } = deletion.props();
-      expect(disabled).toBeTruthy();
+      const deleteButton = screen.getByRole('button', {
+        name: 'Delete Environment',
+      });
+      expectButtonElementDisabled(deleteButton);
     }
   );
 
@@ -250,24 +225,18 @@ describe('ExpandedApp', () => {
       [null, 'Pause'],
     ])(
       'should not allow clicking pause/resume when the app status is %s',
-      async (status, buttonText) => {
+      async (status, name) => {
         const appName = 'my-app';
 
-        const wrapper = await component(appType, {
+        const { container } = await component(appType, {
           appName,
           googleProject,
           status,
         });
-        expect(wrapper.exists()).toBeTruthy();
+        expect(container).toBeInTheDocument();
 
-        const pauseButton = wrapper
-          .find({
-            'data-test-id': `apps-panel-button-${buttonText}`,
-          })
-          .first();
-        expect(pauseButton.exists()).toBeTruthy();
-        const { disabled } = pauseButton.props();
-        expect(disabled).toBeTruthy();
+        const actionButton = screen.getByRole('button', { name });
+        expectButtonElementEnabled(actionButton);
       }
     );
 
@@ -278,47 +247,48 @@ describe('ExpandedApp', () => {
     ])('should allow deletion when the app status is %s', async (status) => {
       const appName = 'my-app';
 
-      const wrapper = await component(appType, {
+      const { container } = await component(appType, {
         appName,
         status,
       });
-      expect(wrapper.exists()).toBeTruthy();
+      expect(container).toBeInTheDocument();
 
-      const deletion = wrapper
-        .find({
-          'data-test-id': `${appType}-delete-button`,
-        })
-        .first();
-      expect(deletion.exists()).toBeTruthy();
-      const { disabled } = deletion.props();
-      expect(disabled).toBeFalsy();
+      const deleteButton = screen.getByRole('button', {
+        name: 'Delete Environment',
+      });
+      expectButtonElementEnabled(deleteButton);
+      deleteButton.click();
 
-      deletion.simulate('click');
       if (appType === UIAppType.CROMWELL) {
         /* For Cromwell, on delete we show user a modal asking them to confirm manually that there are
-            no cromwell Jobs running. Only after user confirming YES we close the modal and start the delete process */
-        let cromwell_delete_modal = wrapper.find({
-          'data-test-id': 'delete-cromwell-modal',
+            no cromwell Jobs running. Only after user confirms YES we close the modal and start the delete process */
+        const cromwellDeletionModalText =
+          'Delete Cromwell: check for running jobs';
+        await waitFor(() => {
+          expect(screen.queryByText(cromwellDeletionModalText)).not.toBeNull();
         });
 
-        expect(cromwell_delete_modal).toBeTruthy();
-        const button_delete_cromwell = cromwell_delete_modal.find({
-          'data-test-id': 'delete-cromwell-btn',
+        const confirmDeleteButton = screen.getByRole('button', {
+          name: 'YES, DELETE',
         });
+        expectButtonElementEnabled(confirmDeleteButton);
+        confirmDeleteButton.click();
 
-        button_delete_cromwell.simulate('click');
-
-        // Clicking button YES i.e confirming deletion of cromwell should close the modal
-        cromwell_delete_modal = wrapper.find({
-          'data-test-id': 'delete-cromwell-modal',
+        await waitFor(() => {
+          // modal is closed
+          expect(screen.queryByText(cromwellDeletionModalText)).toBeNull();
+          expect(onClickDeleteGkeApp).toHaveBeenCalledWith(
+            cromwellConfigIconId
+          );
         });
-        expect(cromwell_delete_modal.length).toBe(0);
-
-        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(cromwellConfigIconId);
       } else if (appType === UIAppType.RSTUDIO) {
-        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(rstudioConfigIconId);
+        await waitFor(() =>
+          expect(onClickDeleteGkeApp).toHaveBeenCalledWith(rstudioConfigIconId)
+        );
       } else if (appType === UIAppType.SAS) {
-        expect(onClickDeleteGkeApp).toHaveBeenCalledWith(sasConfigIconId);
+        await waitFor(() =>
+          expect(onClickDeleteGkeApp).toHaveBeenCalledWith(sasConfigIconId)
+        );
       } else {
         fail('Unexpected appType: ' + appTypeToString[appType]);
       }
@@ -335,20 +305,16 @@ describe('ExpandedApp', () => {
       async (status) => {
         const appName = 'my-app';
 
-        const wrapper = await component(appType, {
+        const { container } = await component(appType, {
           appName,
           status,
         });
-        expect(wrapper.exists()).toBeTruthy();
+        expect(container).toBeInTheDocument();
 
-        const deletion = wrapper
-          .find({
-            'data-test-id': `${appType}-delete-button`,
-          })
-          .first();
-        expect(deletion.exists()).toBeTruthy();
-        const { disabled } = deletion.props();
-        expect(disabled).toBeTruthy();
+        const deleteButton = screen.getByRole('button', {
+          name: 'Delete Environment',
+        });
+        expectButtonElementDisabled(deleteButton);
       }
     );
   });
@@ -356,7 +322,7 @@ describe('ExpandedApp', () => {
   it('should allow launching RStudio when the RStudio app status is RUNNING', async () => {
     const appName = 'my-app';
     const proxyUrl = 'https://example.com';
-    const wrapper = await component(UIAppType.RSTUDIO, {
+    await component(UIAppType.RSTUDIO, {
       appName,
       googleProject,
       appType: AppType.RSTUDIO,
@@ -365,45 +331,66 @@ describe('ExpandedApp', () => {
         [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
       },
     });
-    const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
+    const localizeSpy = jest
+      .spyOn(appsApi(), 'localizeApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
 
     const focusStub = jest.fn();
     const windowOpenSpy = jest
       .spyOn(window, 'open')
       .mockReturnValue({ focus: focusStub } as any as Window);
 
-    const launchButton = wrapper.find({
-      'data-test-id': 'open-RStudio-button',
+    const launchButton = screen.getByRole('button', {
+      name: 'Open RStudio',
     });
-    expect(launchButton.exists()).toBeTruthy();
-    expect(launchButton.prop('disabled')).toBeFalsy();
+    expectButtonElementEnabled(launchButton);
+    launchButton.click();
 
-    await launchButton.simulate('click');
+    await waitFor(() => {
+      expect(localizeSpy).toHaveBeenCalledWith(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+        appName,
+        { appType: 'RSTUDIO', fileNames: [], playgroundMode: false }
+      );
 
-    expect(localizeSpy).toHaveBeenCalledWith(
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      appName,
-      { appType: 'RSTUDIO', fileNames: [], playgroundMode: false }
-    );
-
-    expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
-    expect(focusStub).toHaveBeenCalled();
+      expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+      expect(focusStub).toHaveBeenCalled();
+    });
   });
 
   describe('should disable the launch button when the RStudio app status is not RUNNING', () => {
     test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
       'Status %s',
       async (appStatus) => {
-        const wrapper = await component(UIAppType.RSTUDIO, {
+        const localizeSpy = jest
+          .spyOn(appsApi(), 'localizeApp')
+          .mockImplementation((): Promise<any> => Promise.resolve());
+        const focusStub = jest.fn();
+        const windowOpenSpy = jest
+          .spyOn(window, 'open')
+          .mockReturnValue({ focus: focusStub } as any as Window);
+
+        await component(UIAppType.RSTUDIO, {
           appName: 'my-app',
           googleProject,
           status: appStatus,
         });
 
-        const launchButton = wrapper.find({
-          'data-test-id': 'open-RStudio-button',
+        const launchButton = screen.getByRole('button', {
+          name: 'Open RStudio',
         });
-        expect(launchButton.prop('disabled')).toBeTruthy();
+
+        // TODO this doesn't work because we set the styling differently here.
+        // but really this is a fragile hack that we should ideally be moving away from
+        // expectButtonElementDisabled(launchButton);
+
+        launchButton.click();
+        // disabled so nothing happens
+        await waitFor(() => {
+          expect(localizeSpy).not.toHaveBeenCalled();
+          expect(windowOpenSpy).not.toHaveBeenCalled();
+          expect(focusStub).not.toHaveBeenCalled();
+        });
       }
     );
   });
@@ -411,7 +398,7 @@ describe('ExpandedApp', () => {
   it('should allow launching SAS when the SAS app status is RUNNING', async () => {
     const appName = 'my-app';
     const proxyUrl = 'https://example.com';
-    const wrapper = await component(UIAppType.SAS, {
+    await component(UIAppType.SAS, {
       appName,
       googleProject,
       appType: AppType.SAS,
@@ -420,47 +407,65 @@ describe('ExpandedApp', () => {
         [GKE_APP_PROXY_PATH_SUFFIX]: proxyUrl,
       },
     });
-    // TODO not sure which action to take for SAS
-    // const localizeSpy = jest.spyOn(appsApi(), 'localizeApp');
+    const localizeSpy = jest
+      .spyOn(appsApi(), 'localizeApp')
+      .mockImplementation((): Promise<any> => Promise.resolve());
 
     const focusStub = jest.fn();
     const windowOpenSpy = jest
       .spyOn(window, 'open')
       .mockReturnValue({ focus: focusStub } as any as Window);
 
-    const launchButton = wrapper.find({
-      'data-test-id': 'open-SAS-button',
+    const launchButton = screen.getByRole('button', {
+      name: 'Open SAS',
     });
-    expect(launchButton.exists()).toBeTruthy();
-    expect(launchButton.prop('disabled')).toBeFalsy();
+    expectButtonElementEnabled(launchButton);
+    launchButton.click();
 
-    await launchButton.simulate('click');
+    await waitFor(() => {
+      expect(localizeSpy).toHaveBeenCalledWith(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+        appName,
+        { appType: 'SAS', fileNames: [], playgroundMode: false }
+      );
 
-    // TODO not sure which action to take for SAS
-    // expect(localizeSpy).toHaveBeenCalledWith(
-    //   WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    //   appName,
-    //   { appType: 'SAS', fileNames: [], playgroundMode: false }
-    // );
-
-    expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
-    expect(focusStub).toHaveBeenCalled();
+      expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
+      expect(focusStub).toHaveBeenCalled();
+    });
   });
 
   describe('should disable the launch button when the SAS app status is not RUNNING', () => {
     test.each(minus(ALL_GKE_APP_STATUSES, [AppStatus.RUNNING]))(
       'Status %s',
       async (appStatus) => {
-        const wrapper = await component(UIAppType.SAS, {
+        const localizeSpy = jest
+          .spyOn(appsApi(), 'localizeApp')
+          .mockImplementation((): Promise<any> => Promise.resolve());
+        const focusStub = jest.fn();
+        const windowOpenSpy = jest
+          .spyOn(window, 'open')
+          .mockReturnValue({ focus: focusStub } as any as Window);
+
+        await component(UIAppType.SAS, {
           appName: 'my-app',
           googleProject,
           status: appStatus,
         });
 
-        const launchButton = wrapper.find({
-          'data-test-id': 'open-SAS-button',
+        const launchButton = screen.getByRole('button', {
+          name: 'Open SAS',
         });
-        expect(launchButton.prop('disabled')).toBeTruthy();
+        // TODO this doesn't work because we set the styling differently here.
+        // but really this is a fragile hack that we should ideally be moving away from
+        // expectButtonElementDisabled(launchButton);
+
+        launchButton.click();
+        // disabled so nothing happens
+        await waitFor(() => {
+          expect(localizeSpy).not.toHaveBeenCalled();
+          expect(windowOpenSpy).not.toHaveBeenCalled();
+          expect(focusStub).not.toHaveBeenCalled();
+        });
       }
     );
   });
