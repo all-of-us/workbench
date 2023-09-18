@@ -252,11 +252,11 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should not automatically delete errored runtimes', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Error }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.ERROR }]);
 
     const runtime = await runInitializerAndTimers();
 
-    expect(runtime.status).toEqual(RuntimeStatus.Error);
+    expect(runtime.status).toEqual(RuntimeStatus.ERROR);
   });
 
   it('should recover from intermittent 500s', async () => {

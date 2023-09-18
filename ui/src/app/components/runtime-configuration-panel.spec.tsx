@@ -438,7 +438,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow creation when runtime has error status', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Error,
+      status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
       configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
@@ -460,7 +460,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow creation with update from error', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Error,
+      status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
       configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {

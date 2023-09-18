@@ -345,7 +345,7 @@ export const InteractiveNotebook = fp.flow(
         case RuntimeStatus.CREATING:
         case RuntimeStatus.DELETED:
           return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
-        case RuntimeStatus.Error:
+        case RuntimeStatus.ERROR:
           return (
             'Error creating your analysis environment. Please delete or ' +
             'recreate via the compute configuration panel in the sidebar.'

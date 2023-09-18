@@ -16,7 +16,7 @@ describe('AppsPanel utils', () => {
     [RuntimeStatus.CREATING, UserEnvironmentStatus.CREATING],
     [RuntimeStatus.DELETED, UserEnvironmentStatus.DELETED],
     [RuntimeStatus.DELETING, UserEnvironmentStatus.DELETING],
-    [RuntimeStatus.Error, UserEnvironmentStatus.ERROR],
+    [RuntimeStatus.ERROR, UserEnvironmentStatus.ERROR],
     [RuntimeStatus.Updating, UserEnvironmentStatus.UPDATING],
     [RuntimeStatus.UNKNOWN, UserEnvironmentStatus.UNKNOWN],
 

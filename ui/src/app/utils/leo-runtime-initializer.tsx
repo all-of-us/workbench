@@ -275,7 +275,7 @@ export class LeoRuntimeInitializer {
 
   private isRuntimeErrored(): boolean {
     return (
-      this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Error
+      this.currentRuntime && this.currentRuntime.status === RuntimeStatus.ERROR
     );
   }
 

@@ -25,7 +25,7 @@ describe('Runtime Status Indicator', () => {
     [RuntimeStatus.STOPPED, StoppedIcon],
     [RuntimeStatus.RUNNING, RunningIcon],
     [RuntimeStatus.STOPPING, StoppingIcon],
-    [RuntimeStatus.Error, ErrorIcon],
+    [RuntimeStatus.ERROR, ErrorIcon],
   ])(
     'Runtime Status indicator renders correct indicator when runtime is in %s state',
     (status, icon) => {

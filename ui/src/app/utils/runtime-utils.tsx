@@ -920,7 +920,7 @@ export const maybeInitializeRuntime = async (
       pollAbortSignal: signal,
       targetRuntime,
     });
-    if (runtime.status === RuntimeStatus.Error) {
+    if (runtime.status === RuntimeStatus.ERROR) {
       throw new RuntimeStatusError(runtime.errors);
     }
     return runtime;
@@ -1182,7 +1182,7 @@ export const useCustomRuntime = (
 
       const runtimeExists =
         !!runtime &&
-        ![RuntimeStatus.Error, RuntimeStatus.DELETED].includes(runtime.status);
+        ![RuntimeStatus.ERROR, RuntimeStatus.DELETED].includes(runtime.status);
       try {
         if (runtimeExists) {
           await applyRuntimeUpdate();
@@ -1194,7 +1194,7 @@ export const useCustomRuntime = (
           );
         }
 
-        if (runtime?.status === RuntimeStatus.Error) {
+        if (runtime?.status === RuntimeStatus.ERROR) {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
             signal: aborter.signal,
           });
@@ -1277,7 +1277,7 @@ export enum PanelContent {
 
 // should we show the runtime in the UI?
 export const isVisible = (status: RuntimeStatus) =>
-  status && ![RuntimeStatus.DELETED, RuntimeStatus.Error].includes(status);
+  status && ![RuntimeStatus.DELETED, RuntimeStatus.ERROR].includes(status);
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>

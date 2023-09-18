@@ -375,9 +375,9 @@ export const HelpSidebar = fp.flow(
           if (
             newRuntime.runtimeLoaded &&
             newRuntime.workspaceNamespace === this.props.workspace.namespace &&
-            newRuntime.runtime.status === RuntimeStatus.Error &&
+            newRuntime.runtime.status === RuntimeStatus.ERROR &&
             (!oldRuntime.runtime ||
-              oldRuntime.runtime.status !== RuntimeStatus.Error) &&
+              oldRuntime.runtime.status !== RuntimeStatus.ERROR) &&
             newRuntime.runtime.errors
           ) {
             this.setState({
