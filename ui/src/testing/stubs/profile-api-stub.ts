@@ -105,7 +105,7 @@ export class ProfileApiStub extends ProfileApi {
 
   public updateProfile(updatedProfile?: Profile) {
     this.profile = updatedProfile;
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public getMe() {
@@ -113,11 +113,11 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public confirmProfile() {
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public confirmPublications() {
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public updatePageVisits() {
