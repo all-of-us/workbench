@@ -15,13 +15,13 @@ export const PREDEFINED_ATTRIBUTES = {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['90'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['60'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
   ],
   Normal: [
@@ -29,13 +29,13 @@ export const PREDEFINED_ATTRIBUTES = {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['120'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['80'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
   ],
   'Pre-Hypertensive': [
@@ -92,7 +92,7 @@ export const MODIFIERS_MAP = {
     operators: {
       [Operator.BETWEEN]: 'Between',
       [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
-      [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
+      [Operator.LESS_THAN_OR_EQUAL_TO]: 'Less Than or Equal To',
     },
   },
   [ModifierType.CATI]: {
@@ -113,7 +113,7 @@ export const MODIFIERS_MAP = {
     operators: {
       [Operator.BETWEEN]: 'Between',
       [Operator.GREATERTHANOREQUALTO]: 'On or After',
-      [Operator.LESSTHANOREQUALTO]: 'On or Before',
+      [Operator.LESS_THAN_OR_EQUAL_TO]: 'On or Before',
     },
   },
   [ModifierType.NUMOFOCCURRENCES]: {

@@ -271,7 +271,7 @@ const defaultOptions = [
   },
   {
     label: 'Less Than or Equal To',
-    value: Operator.LESSTHANOREQUALTO.toString(),
+    value: Operator.LESS_THAN_OR_EQUAL_TO.toString(),
   },
   { label: 'Between', value: Operator.BETWEEN.toString() },
 ];

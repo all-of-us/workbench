@@ -192,7 +192,7 @@ const getDefaultFormState = () => {
       },
       {
         label: 'Less Than or Equal To',
-        value: Operator.LESSTHANOREQUALTO,
+        value: Operator.LESS_THAN_OR_EQUAL_TO,
       },
       {
         label: 'Between',
@@ -335,7 +335,7 @@ export const ModifierPage = fp.flow(
             },
             {
               label: 'Is On or Before',
-              value: Operator.LESSTHANOREQUALTO,
+              value: Operator.LESS_THAN_OR_EQUAL_TO,
             },
             {
               label: 'Is On or After',

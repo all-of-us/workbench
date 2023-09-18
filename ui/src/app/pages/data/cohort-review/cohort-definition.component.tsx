@@ -94,7 +94,7 @@ const modifierOperatorDisplay = (operator: Operator) => {
       return '>=';
     case Operator.IN:
       return '';
-    case Operator.LESSTHANOREQUALTO:
+    case Operator.LESS_THAN_OR_EQUAL_TO:
       return '<=';
   }
 };
