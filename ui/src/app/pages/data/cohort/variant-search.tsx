@@ -215,7 +215,7 @@ export const VariantSearch = withCurrentWorkspace()(
         type: CriteriaType.NONE,
         name: `Variant ${row.vid}`,
         group: false,
-        domainId: Domain.SNPINDELVARIANT,
+        domainId: Domain.SNP_INDEL_VARIANT,
         hasAttributes: false,
         selectable: true,
         variantId: row.vid,
