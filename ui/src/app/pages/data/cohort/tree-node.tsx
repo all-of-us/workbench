@@ -369,7 +369,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       } else if (domainId === Domain.SURVEY.toString()) {
         if (this.isPFHHSurvey) {
           attributes.push({
-            name: AttrName.PERSONALFAMILYHEALTHHISTORY,
+            name: AttrName.PERSONAL_FAMILY_HEALTH_HISTORY,
             operator: Operator.IN,
             operands: [PFHH_SURVEY_CONCEPT_ID.toString()],
           });
