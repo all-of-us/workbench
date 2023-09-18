@@ -49,6 +49,7 @@ import {
   stackdriverErrorReporterStore,
   useStore,
 } from 'app/utils/stores';
+import { Configuration as NotebookConfiguration } from 'notebooks-generated/fetch';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 import { Configuration as TanagraConfiguration } from 'tanagra-generated';
 
@@ -81,7 +82,7 @@ const bindClients = () => {
     })
   );
   notebooksBindApiClients(
-    new Configuration({
+    new NotebookConfiguration({
       basePath: environment.leoApiUrl,
       accessToken: () => getAccessToken(),
     })
