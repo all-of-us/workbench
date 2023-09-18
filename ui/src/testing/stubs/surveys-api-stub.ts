@@ -11,8 +11,6 @@ export class SurveysApiStub extends SurveysApi {
     _newUserSatisfactionSurvey: CreateNewUserSatisfactionSurvey,
     _options?: any
   ) {
-    return new Promise<Response>((resolve, _) => {
-      resolve(new Response());
-    });
+    return Promise.resolve(undefined);
   }
 }
