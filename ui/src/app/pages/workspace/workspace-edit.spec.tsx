@@ -120,7 +120,7 @@ describe('WorkspaceEdit', () => {
         scientificApproach: 'scientificApproach ',
         drugDevelopment: true,
         disseminateResearchFindingList: [
-          DisseminateResearchEnum.PUBLICATIONPERSONALBLOG,
+          DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG,
         ],
         researchOutcomeList: [ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN],
       },
