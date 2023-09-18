@@ -214,7 +214,7 @@ export const CohortSearch = fp.flow(
         this.selectLongReadGenome();
       } else if (domain === Domain.ARRAY_DATA) {
         this.selectArrayData();
-      } else if (domain === Domain.STRUCTURALVARIANTDATA) {
+      } else if (domain === Domain.STRUCTURAL_VARIANT_DATA) {
         this.selectStructuralVariantData();
       } else if (domain === Domain.CONCEPT_SET) {
         this.setState({ showAddConceptSetModal: true });
@@ -449,7 +449,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Structural Variant Data',
         group: false,
-        domainId: Domain.STRUCTURALVARIANTDATA.toString(),
+        domainId: Domain.STRUCTURAL_VARIANT_DATA.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],

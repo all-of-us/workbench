@@ -354,7 +354,7 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.WHOLE_GENOME_VARIANT,
           Domain.LR_WHOLE_GENOME_VARIANT,
           Domain.ARRAY_DATA,
-          Domain.STRUCTURALVARIANTDATA,
+          Domain.STRUCTURAL_VARIANT_DATA,
         ].includes(it.type)
       );
     }

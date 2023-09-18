@@ -129,7 +129,7 @@ export function domainToTitle(domain: any): string {
     case Domain.ARRAY_DATA:
       domain = 'Global Diversity Array';
       break;
-    case Domain.STRUCTURALVARIANTDATA:
+    case Domain.STRUCTURAL_VARIANT_DATA:
       domain = 'Structural Variant Data';
       break;
     case Domain.SNPINDELVARIANT:

@@ -177,7 +177,7 @@ const SKIP_DOMAIN_SEARCH = [
   Domain.WHOLE_GENOME_VARIANT.toString(),
   Domain.LR_WHOLE_GENOME_VARIANT.toString(),
   Domain.ARRAY_DATA.toString(),
-  Domain.STRUCTURALVARIANTDATA.toString(),
+  Domain.STRUCTURAL_VARIANT_DATA.toString(),
 ];
 
 interface ItemProp extends Item {
