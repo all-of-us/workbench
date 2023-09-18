@@ -358,7 +358,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                   {
                     label: 'Alaska Native',
-                    value: EthnicCategory.AI_ANALASKANATIVE,
+                    value: EthnicCategory.AI_AN_ALASKA_NATIVE,
                   },
                   {
                     label: 'Central or South American Indian',
