@@ -24,7 +24,7 @@ import {
 
 const orderedSatisfactionOptions = [
   {
-    value: NewUserSatisfactionSurveySatisfaction.VERYUNSATISFIED,
+    value: NewUserSatisfactionSurveySatisfaction.VERY_UNSATISFIED,
     label: 'Very unsatisfied',
   },
   {
