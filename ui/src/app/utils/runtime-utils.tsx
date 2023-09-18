@@ -1291,4 +1291,4 @@ export const isActionable = (status: RuntimeStatus) =>
   ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
-  runtime?.labels?.creator;
+  (runtime?.labels as Map<string, string>).get('creator');
