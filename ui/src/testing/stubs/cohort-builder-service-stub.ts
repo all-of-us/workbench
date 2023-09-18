@@ -108,7 +108,7 @@ export const CriteriaStubVariables: Criteria[] = [
   {
     id: 1,
     parentId: 0,
-    type: CriteriaType.ICD9CM.toString(),
+    type: CriteriaType.ICD9_CM.toString(),
     subtype: '',
     code: '123',
     name: 'Test',
