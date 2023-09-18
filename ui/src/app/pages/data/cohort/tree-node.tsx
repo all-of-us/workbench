@@ -309,8 +309,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     return [
       CriteriaSubType.WHEEL,
       CriteriaSubType.PREG,
-      CriteriaSubType.HRIRR,
-      CriteriaSubType.HRNOIRR,
+      CriteriaSubType.HR_IRR,
+      CriteriaSubType.HR_NOIRR,
     ]
       .map((st) => st.toString())
       .includes(this.props.node.subtype);
