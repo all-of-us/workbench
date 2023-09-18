@@ -156,10 +156,10 @@ const styles = reactStyles({
     lineHeight: '1rem',
   },
   cromwellBetaBadge: {
-    borderColor: `#F0B1D0`,
+    borderColor: '#F0B1D0',
   },
   rstudioBetaBadge: {
-    borderColor: `#72abdc`,
+    borderColor: '#72abdc',
   },
   sasBetaBadge: {
     borderColor: '#008ACD',
