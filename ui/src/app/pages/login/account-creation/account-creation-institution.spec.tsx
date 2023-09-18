@@ -80,7 +80,7 @@ const academicSpecificRoleOption =
 
 const industrySpecificRoleOption =
   AccountCreationOptions.institutionalRoleOptions.find(
-    (x) => x.value === InstitutionalRole.SENIORRESEARCHER
+    (x) => x.value === InstitutionalRole.SENIOR_RESEARCHER
   );
 
 const eventDefaults = {
@@ -325,8 +325,8 @@ it('should clear email validation when institution is changed', async () => {
   getRoleDropdown(wrapper).props.onChange({
     ...eventDefaults,
     originalEvent: undefined,
-    value: InstitutionalRole.EARLYCAREER,
-    target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
+    value: InstitutionalRole.EARLY_CAREER,
+    target: { name: '', id: '', value: InstitutionalRole.EARLY_CAREER },
   });
 
   // At this point, the form should be ready to submit.
@@ -342,8 +342,8 @@ it('should clear email validation when institution is changed', async () => {
   getRoleDropdown(wrapper).props.onChange({
     ...eventDefaults,
     originalEvent: undefined,
-    value: InstitutionalRole.PREDOCTORAL,
-    target: { name: '', id: '', value: InstitutionalRole.PREDOCTORAL },
+    value: InstitutionalRole.PRE_DOCTORAL,
+    target: { name: '', id: '', value: InstitutionalRole.PRE_DOCTORAL },
   });
 
   // The form should be blocked now due to lack of email verification.
@@ -374,8 +374,8 @@ it('should trigger email check when email is filled in before choosing instituti
   getRoleDropdown(wrapper).props.onChange({
     ...eventDefaults,
     originalEvent: undefined,
-    value: InstitutionalRole.EARLYCAREER,
-    target: { name: '', id: '', value: InstitutionalRole.EARLYCAREER },
+    value: InstitutionalRole.EARLY_CAREER,
+    target: { name: '', id: '', value: InstitutionalRole.EARLY_CAREER },
   });
   await waitOneTickAndUpdate(wrapper);
 
