@@ -222,7 +222,7 @@ export const CriteriaSearch = fp.flow(
       } = this.props;
       return (
         (domain === Domain.VISIT ||
-          (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT) ||
+          (source === 'cohort' && domain === Domain.PHYSICAL_MEASUREMENT) ||
           (source === 'cohort' && domain === Domain.SURVEY)) &&
         !conceptSearchTerms
       );

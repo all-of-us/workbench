@@ -188,7 +188,7 @@ const domains = [
   Domain.PROCEDURE,
   Domain.DRUG,
   Domain.OBSERVATION,
-  Domain.PHYSICALMEASUREMENT,
+  Domain.PHYSICAL_MEASUREMENT,
   Domain.LAB,
   Domain.VITAL,
 ];
@@ -796,7 +796,7 @@ export const DetailTabTable = fp.flow(
       }
       if (
         domain !== Domain.SURVEY &&
-        domain !== Domain.PHYSICALMEASUREMENT &&
+        domain !== Domain.PHYSICAL_MEASUREMENT &&
         visits
       ) {
         data = data.filter((item) => visits === item.visitType);

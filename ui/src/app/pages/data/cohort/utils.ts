@@ -81,10 +81,10 @@ export function domainToTitle(domain: any): string {
     case Domain.MEASUREMENT:
       domain = 'Labs and Measurements';
       break;
-    case Domain.PHYSICALMEASUREMENT:
+    case Domain.PHYSICAL_MEASUREMENT:
       domain = 'Physical Measurements';
       break;
-    case Domain.PHYSICALMEASUREMENTCSS:
+    case Domain.PHYSICAL_MEASUREMENTCSS:
       domain = 'Physical Measurements';
       break;
     case Domain.VISIT:
@@ -438,7 +438,7 @@ export function getTypeAndStandard(searchParameters: Array<any>, type: Domain) {
           ? CriteriaType.AGE
           : searchParameters[0].type;
       return { type: _type, standard: false };
-    case Domain.PHYSICALMEASUREMENT:
+    case Domain.PHYSICAL_MEASUREMENT:
       return { type: searchParameters[0].type, standard: false };
     case Domain.SURVEY:
       return { type: searchParameters[0].type, standard: false };

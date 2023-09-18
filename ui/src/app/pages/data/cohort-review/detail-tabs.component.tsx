@@ -305,7 +305,7 @@ const tabs = [
   },
   {
     name: 'Physical Measurements',
-    domain: Domain.PHYSICALMEASUREMENT,
+    domain: Domain.PHYSICAL_MEASUREMENT,
     columns: {
       standard: [
         itemDate,

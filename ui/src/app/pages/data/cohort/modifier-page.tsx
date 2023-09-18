@@ -241,7 +241,7 @@ export const ModifierPage = fp.flow(
 
     const addEncounters = () => {
       return ![
-        Domain.PHYSICALMEASUREMENT,
+        Domain.PHYSICAL_MEASUREMENT,
         Domain.SURVEY,
         Domain.VISIT,
       ].includes(cohortContext.domain);

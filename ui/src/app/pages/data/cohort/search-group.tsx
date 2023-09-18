@@ -347,7 +347,7 @@ export const SearchGroup = withCurrentWorkspace()(
     get disableTemporal() {
       return this.items.some((it) =>
         [
-          Domain.PHYSICALMEASUREMENT,
+          Domain.PHYSICAL_MEASUREMENT,
           Domain.PERSON,
           Domain.SURVEY,
           Domain.FITBIT,

@@ -464,7 +464,7 @@ export const AttributesPage = fp.flow(
   };
 
   const isPhysicalMeasurement = () => {
-    return node.domainId === Domain.PHYSICALMEASUREMENT;
+    return node.domainId === Domain.PHYSICAL_MEASUREMENT;
   };
 
   const hasUnits = () => {

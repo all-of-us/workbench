@@ -257,7 +257,7 @@ export class SearchBar extends React.Component<Props, State> {
     } = this.props;
     if (searchTerms !== prevProps.searchTerms) {
       if (
-        domainId === Domain.PHYSICALMEASUREMENT.toString() ||
+        domainId === Domain.PHYSICAL_MEASUREMENT.toString() ||
         domainId === Domain.VISIT.toString()
       ) {
         AnalyticsTracker.CohortBuilder.SearchTerms(
@@ -409,7 +409,7 @@ export class SearchBar extends React.Component<Props, State> {
   doesDomainIncludeToolTip() {
     return (
       this.props.node.domainId !== Domain.VISIT.toString() &&
-      this.props.node.domainId !== Domain.PHYSICALMEASUREMENT.toString()
+      this.props.node.domainId !== Domain.PHYSICAL_MEASUREMENT.toString()
     );
   }
 

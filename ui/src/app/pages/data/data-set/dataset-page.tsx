@@ -465,7 +465,7 @@ export class ValueListItem extends React.Component<
     dataSetApi()
       .getDataDictionaryEntry(
         parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
-        domain === Domain.PHYSICALMEASUREMENTCSS
+        domain === Domain.PHYSICAL_MEASUREMENTCSS
           ? Domain.MEASUREMENT.toString()
           : domain.toString(),
         domainValue.value
@@ -731,7 +731,7 @@ const reverseDomainEnum = {
   VISIT: Domain.VISIT,
   SURVEY: Domain.SURVEY,
   PERSON: Domain.PERSON,
-  PHYSICAL_MEASUREMENT: Domain.PHYSICALMEASUREMENT,
+  PHYSICAL_MEASUREMENT: Domain.PHYSICAL_MEASUREMENT,
   ALL_EVENTS: Domain.ALLEVENTS,
   LAB: Domain.LAB,
   VITAL: Domain.VITAL,
@@ -742,7 +742,7 @@ const reverseDomainEnum = {
   FITBIT_INTRADAY_STEPS: Domain.FITBITINTRADAYSTEPS,
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBITSLEEPDAILYSUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBITSLEEPLEVEL,
-  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
+  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENTCSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
   ARRAY_DATA: Domain.ARRAY_DATA,
@@ -897,7 +897,7 @@ export const DatasetPage = fp.flow(
         .map((cs) => ({
           conceptSetId: cs.id,
           domain:
-            cs.domain === Domain.PHYSICALMEASUREMENT
+            cs.domain === Domain.PHYSICAL_MEASUREMENT
               ? Domain.MEASUREMENT
               : cs.domain,
         }))
@@ -941,7 +941,7 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+          ![domain, Domain.PHYSICAL_MEASUREMENTCSS].includes(
             domainWithConceptSetId.domain
           )
         ) {
@@ -1028,7 +1028,7 @@ export const DatasetPage = fp.flow(
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
           if (
-            ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+            ![domain, Domain.PHYSICAL_MEASUREMENTCSS].includes(
               domainWithConceptSetId.domain
             )
           ) {
