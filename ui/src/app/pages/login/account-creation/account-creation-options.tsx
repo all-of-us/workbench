@@ -158,7 +158,7 @@ export const AccountCreationOptions = {
     { label: 'Male', value: SexAtBirth.MALE },
     {
       label: 'None of these describe me',
-      value: SexAtBirth.NONEOFTHESEDESCRIBEME,
+      value: SexAtBirth.NONE_OF_THESE_DESCRIBE_ME,
     },
     { label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER },
   ],
