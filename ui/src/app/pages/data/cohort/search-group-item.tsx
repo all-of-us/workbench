@@ -629,7 +629,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
               hideDescription={true}
               onCancel={() => this.setState({ renaming: false })}
               onRename={(v) => this.rename(v)}
-              resourceType={ResourceType.COHORTSEARCHITEM}
+              resourceType={ResourceType.COHORT_SEARCH_ITEM}
             />
           )}
           {showConceptSetModal && (

@@ -35,7 +35,7 @@ export function toDisplay(resourceType: ResourceType): string {
     [(rt) => rt === ResourceType.NOTEBOOK, () => 'Notebook'],
 
     [(rt) => rt === ResourceType.COHORT_SEARCH_GROUP, () => 'Group'],
-    [(rt) => rt === ResourceType.COHORTSEARCHITEM, () => 'Item'],
+    [(rt) => rt === ResourceType.COHORT_SEARCH_ITEM, () => 'Item'],
     [(rt) => rt === ResourceType.WORKSPACE, () => 'Workspace'],
   ])(resourceType);
 }

@@ -143,7 +143,7 @@ describe('resources.tsx', () => {
     expect(toDisplay(ResourceType.NOTEBOOK)).toBe('Notebook');
 
     expect(toDisplay(ResourceType.COHORT_SEARCH_GROUP)).toBe('Group');
-    expect(toDisplay(ResourceType.COHORTSEARCHITEM)).toBe('Item');
+    expect(toDisplay(ResourceType.COHORT_SEARCH_ITEM)).toBe('Item');
     expect(toDisplay(ResourceType.WORKSPACE)).toBe('Workspace');
 
     expect(getTypeString(testCohort)).toBe('Cohort');
