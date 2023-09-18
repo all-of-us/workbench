@@ -103,7 +103,7 @@ const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
 // are likely to fail.
 const interactiveRuntimeStatuses = new Set<RuntimeStatus>([
   RuntimeStatus.RUNNING,
-  RuntimeStatus.Updating,
+  RuntimeStatus.UPDATING,
 ]);
 
 const styles = reactStyles({

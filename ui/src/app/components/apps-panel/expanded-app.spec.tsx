@@ -156,7 +156,7 @@ describe('ExpandedApp', () => {
     [RuntimeStatus.UNKNOWN, 'Pause'],
     [RuntimeStatus.ERROR, 'Pause'],
     [RuntimeStatus.CREATING, 'Pause'],
-    [RuntimeStatus.Updating, 'Pause'],
+    [RuntimeStatus.UPDATING, 'Pause'],
 
     [undefined, 'Pause'],
     [null, 'Pause'],

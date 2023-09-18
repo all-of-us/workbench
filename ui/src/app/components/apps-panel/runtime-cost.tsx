@@ -30,7 +30,7 @@ export const RuntimeCost = () => {
     // TODO: is it appropriate to assume full running cost in all these cases?
     [RuntimeStatus.CREATING, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.RUNNING, () => `${runtime.status} ${runningCost} / hr`],
-    [RuntimeStatus.Updating, () => `${runtime.status} ${runningCost} / hr`],
+    [RuntimeStatus.UPDATING, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.DELETING, () => `${runtime.status} ${runningCost} / hr`],
     [RuntimeStatus.STOPPING, () => `Pausing ${runningCost} / hr`],
     [RuntimeStatus.STARTING, () => `Resuming ${runningCost} / hr`],

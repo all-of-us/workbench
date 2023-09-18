@@ -322,7 +322,7 @@ describe('NotebookLauncher', () => {
     // Simulate transition to updating.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Updating,
+      status: RuntimeStatus.UPDATING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 

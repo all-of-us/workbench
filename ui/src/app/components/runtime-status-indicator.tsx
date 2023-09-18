@@ -66,7 +66,7 @@ export const RuntimeStatusIndicator = fp.flow(
           switch (status) {
             case RuntimeStatus.CREATING:
             case RuntimeStatus.STARTING:
-            case RuntimeStatus.Updating:
+            case RuntimeStatus.UPDATING:
               return <UpdatingIcon />;
             case RuntimeStatus.STOPPED:
               return <StoppedIcon />;
