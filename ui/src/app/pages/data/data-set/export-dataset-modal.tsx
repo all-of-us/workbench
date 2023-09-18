@@ -65,10 +65,13 @@ export const ExportDatasetModal = ({
   closeFunction,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] = useState(undefined);
-  const [kernelType, setKernelType] = useState(KernelTypeEnum.PYTHON);
-  const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
-    DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
+  const [kernelType, setKernelType] = useState<KernelTypeEnum>(
+    KernelTypeEnum.PYTHON
   );
+  const [genomicsAnalysisTool, setGenomicsAnalysisTool] =
+    useState<DataSetExportRequestGenomicsAnalysisToolEnum>(
+      DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
+    );
   const [isExporting, setIsExporting] = useState(false);
   const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
   const [notebookNameWithoutSuffix, setNotebookNameWithoutSuffix] =
