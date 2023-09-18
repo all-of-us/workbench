@@ -784,7 +784,11 @@ export const AttributesPage = fp.flow(
       numAttributes
         .filter((at) => at.operator)
         .forEach(({ operator, operands, conceptId }) => {
-          const attr = { name: AttrName.NUM, operator, operands };
+          const attr: { name: AttrName; operator: any; operands: any } = {
+            name: AttrName.NUM,
+            operator,
+            operands,
+          };
           if (subtype === CriteriaSubType.BP) {
             // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
             // TODO RW-5572 confirm proper behavior and fix
