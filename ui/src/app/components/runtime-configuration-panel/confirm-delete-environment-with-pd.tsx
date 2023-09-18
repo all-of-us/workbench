@@ -40,7 +40,7 @@ export const ConfirmDeleteEnvironmentWithPD = ({
     appType,
     [UIAppType.JUPYTER, () => '/home/jupyter'],
     [UIAppType.RSTUDIO, () => '/home/rstudio'],
-    [UIAppType.SAS, () => 'SAS TODO SAS'],
+    [UIAppType.SAS, () => 'sas-analytics-pro/Home'],
     [DEFAULT, () => null]
   );
 
