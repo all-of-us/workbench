@@ -259,7 +259,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         page: pageState.page,
         pageSize: pageState.pageSize,
         sortColumn: reverseColumnEnum[sortState.sortField],
-        sortOrder: sortState.sortOrder === 1 ? SortOrder.ASC : SortOrder.Desc,
+        sortOrder: sortState.sortOrder === 1 ? SortOrder.ASC : SortOrder.DESC,
         filters: { items: queryFilters },
       } as Request;
       return cohortReviewApi().getParticipantCohortStatuses(
