@@ -446,10 +446,10 @@ export const ConceptHomepage = fp.flow(
         conceptCountInfoError,
       } = this.state;
       const domainCards = conceptDomainCards.filter(
-        (domain) => domain.domain !== Domain.PHYSICAL_MEASUREMENTCSS
+        (domain) => domain.domain !== Domain.PHYSICAL_MEASUREMENT_CSS
       );
       const physicalMeasurementsCard = conceptDomainCards.find(
-        (domain) => domain.domain === Domain.PHYSICAL_MEASUREMENTCSS
+        (domain) => domain.domain === Domain.PHYSICAL_MEASUREMENT_CSS
       );
       return (
         <React.Fragment>
@@ -583,7 +583,7 @@ export const ConceptHomepage = fp.flow(
                         <PhysicalMeasurementsCard
                           physicalMeasurementCard={physicalMeasurementsCard}
                           browsePhysicalMeasurements={() =>
-                            this.browseDomain(Domain.PHYSICAL_MEASUREMENTCSS)
+                            this.browseDomain(Domain.PHYSICAL_MEASUREMENT_CSS)
                           }
                         />
                       )}

@@ -465,7 +465,7 @@ export class ValueListItem extends React.Component<
     dataSetApi()
       .getDataDictionaryEntry(
         parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
-        domain === Domain.PHYSICAL_MEASUREMENTCSS
+        domain === Domain.PHYSICAL_MEASUREMENT_CSS
           ? Domain.MEASUREMENT.toString()
           : domain.toString(),
         domainValue.value
@@ -742,7 +742,7 @@ const reverseDomainEnum = {
   FITBIT_INTRADAY_STEPS: Domain.FITBITINTRADAYSTEPS,
   FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBITSLEEPDAILYSUMMARY,
   FITBIT_SLEEP_LEVEL: Domain.FITBITSLEEPLEVEL,
-  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENTCSS,
+  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENT_CSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
   ARRAY_DATA: Domain.ARRAY_DATA,
@@ -941,7 +941,7 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![domain, Domain.PHYSICAL_MEASUREMENTCSS].includes(
+          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
             domainWithConceptSetId.domain
           )
         ) {
@@ -1028,7 +1028,7 @@ export const DatasetPage = fp.flow(
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
           if (
-            ![domain, Domain.PHYSICAL_MEASUREMENTCSS].includes(
+            ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
               domainWithConceptSetId.domain
             )
           ) {

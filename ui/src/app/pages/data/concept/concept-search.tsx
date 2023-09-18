@@ -352,7 +352,7 @@ export const ConceptSearch = fp.flow(
     get displayDomainName() {
       const { conceptSet } = this.state;
       return conceptSet.domain === Domain.PHYSICAL_MEASUREMENT ||
-        conceptSet.domain === Domain.PHYSICAL_MEASUREMENTCSS
+        conceptSet.domain === Domain.PHYSICAL_MEASUREMENT_CSS
         ? 'Physical Measurements'
         : fp.capitalize(conceptSet.domain.toString());
     }

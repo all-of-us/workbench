@@ -322,7 +322,7 @@ export const withCdrVersions = () => {
 };
 
 export function formatDomainString(domainString: string): string {
-  return domainString === Domain.PHYSICAL_MEASUREMENTCSS.toString()
+  return domainString === Domain.PHYSICAL_MEASUREMENT_CSS.toString()
     ? fp.capitalize(Domain.PHYSICAL_MEASUREMENT.toString())
     : domainString === Domain.WHOLE_GENOME_VARIANT.toString()
     ? 'VCF Files'
