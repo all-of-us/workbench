@@ -220,7 +220,7 @@ describe('WorkspaceEdit', () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.AGE_CHILDREN,
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
@@ -237,7 +237,9 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+        .find(
+          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
+        )
         .first()
         .prop('checked')
     ).toEqual(true);
@@ -266,7 +268,7 @@ describe('WorkspaceEdit', () => {
 
   it('should initialize the specific populations checkbox as unchecked when creating workspaces', async () => {
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.AGE_CHILDREN,
     ];
     workspaceEditMode = WorkspaceEditMode.Create;
     const wrapper = component();
@@ -284,7 +286,7 @@ describe('WorkspaceEdit', () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.AGE_CHILDREN,
       SpecificPopulationEnum.RACE_MENA,
       SpecificPopulationEnum.DISABILITYSTATUS,
     ];
@@ -301,7 +303,9 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+        .find(
+          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
+        )
         .first()
         .prop('checked')
     ).toEqual(true);
