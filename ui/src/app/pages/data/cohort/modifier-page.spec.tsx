@@ -84,7 +84,7 @@ describe('ModifierPage', () => {
       wrapper.find('[data-test-id="' + ModifierType.ENCOUNTERS + '"]').length
     ).toBe(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.EVENTDATE + '"]').length
+      wrapper.find('[data-test-id="' + ModifierType.EVENT_DATE + '"]').length
     ).toBe(0);
   });
 });

@@ -262,7 +262,7 @@ export const ModifierPage = fp.flow(
               ? +existing.operands[0]
               : existing.operator,
             values:
-              mod.name === ModifierType.EVENTDATE
+              mod.name === ModifierType.EVENT_DATE
                 ? values.map((val) => new Date(val + 'T08:00:00'))
                 : values,
           };
@@ -323,7 +323,7 @@ export const ModifierPage = fp.flow(
       }
       if (serverConfigStore.get().config.enableEventDateModifier) {
         formState.push({
-          name: ModifierType.EVENTDATE,
+          name: ModifierType.EVENT_DATE,
           label: 'Event Date',
           type: 'date',
           operator: undefined,
@@ -466,7 +466,7 @@ export const ModifierPage = fp.flow(
                 operands: [operator.toString()],
               });
               break;
-            case ModifierType.EVENTDATE:
+            case ModifierType.EVENT_DATE:
               const formatted = values.map((val) =>
                 moment(val, 'YYYY-MM-DD', true).isValid()
                   ? moment(val).format('YYYY-MM-DD')
@@ -626,7 +626,7 @@ export const ModifierPage = fp.flow(
                   style={{ marginTop: '1.125rem' }}
                 >
                   <label style={styles.label}>{label}</label>
-                  {name === ModifierType.EVENTDATE && (
+                  {name === ModifierType.EVENT_DATE && (
                     <TooltipTrigger content={<div>{dateTooltip}</div>}>
                       <ClrIcon
                         style={styles.info}

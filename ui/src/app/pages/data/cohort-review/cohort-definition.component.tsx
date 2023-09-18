@@ -77,7 +77,7 @@ const modifierTypeDisplay = (modifierType: ModifierType) => {
       return 'Age at Event';
     case ModifierType.ENCOUNTERS:
       return 'During Visit Type - ';
-    case ModifierType.EVENTDATE:
+    case ModifierType.EVENT_DATE:
       return 'Event Date';
     case ModifierType.NUMOFOCCURRENCES:
       return 'Num of Occurrences';

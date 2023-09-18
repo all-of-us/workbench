@@ -108,7 +108,7 @@ export const MODIFIERS_MAP = {
       [Operator.IN]: '',
     },
   },
-  [ModifierType.EVENTDATE]: {
+  [ModifierType.EVENT_DATE]: {
     name: 'Event Date',
     operators: {
       [Operator.BETWEEN]: 'Between',
