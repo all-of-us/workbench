@@ -86,7 +86,7 @@ const participantDataListResponseStub = {
   pageRequest: {
     page: 1,
     pageSize: 25,
-    sortOrder: SortOrder.Asc,
+    sortOrder: SortOrder.ASC,
     sortColumn: 'test',
   },
 };

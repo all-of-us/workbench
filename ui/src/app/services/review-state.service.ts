@@ -105,7 +105,7 @@ const initialPaginationState = {
   page: 0,
   pageSize: 25,
   sortColumn: FilterColumns.PARTICIPANTID,
-  sortOrder: SortOrder.Asc,
+  sortOrder: SortOrder.ASC,
 };
 
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);

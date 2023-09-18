@@ -397,7 +397,7 @@ export const DetailTabTable = fp.flow(
           const pageFilterRequest = {
             page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
             pageSize: lazyLoadSize,
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortOrder: sortOrder === 1 ? SortOrder.ASC : SortOrder.Desc,
             sortColumn: columns.find((col) => col.name === sortField).filter,
             domain,
             filters: lazyLoad ? filters : { items: [] },
@@ -486,7 +486,7 @@ export const DetailTabTable = fp.flow(
           const pageFilterRequest = {
             page: requestPage,
             pageSize: lazyLoadSize,
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortOrder: sortOrder === 1 ? SortOrder.ASC : SortOrder.Desc,
             sortColumn: columns.find((col) => col.name === sortField).filter,
             domain: domain,
             filters,

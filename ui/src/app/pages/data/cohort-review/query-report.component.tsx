@@ -342,7 +342,7 @@ export const QueryReport = fp.flow(
           params: { ns, wsid, crid },
         },
       } = this.props;
-      const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.Asc };
+      const filterRequest = { page: 0, pageSize: 0, sortOrder: SortOrder.ASC };
       let request: CohortDefinition;
       await cohortReviewApi()
         .getParticipantCohortStatuses(ns, wsid, +crid, filterRequest)
