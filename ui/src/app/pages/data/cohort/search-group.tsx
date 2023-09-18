@@ -152,32 +152,32 @@ const css = `
 
 const temporalMentions = [
   TemporalMention.ANY_MENTION,
-  TemporalMention.FIRSTMENTION,
-  TemporalMention.LASTMENTION,
+  TemporalMention.FIRST_MENTION,
+  TemporalMention.LAST_MENTION,
 ];
 
 const temporalTimes = [
   TemporalTime.DURING_SAME_ENCOUNTER_AS,
-  TemporalTime.XDAYSAFTER,
-  TemporalTime.XDAYSBEFORE,
-  TemporalTime.WITHINXDAYSOF,
+  TemporalTime.X_DAYS_AFTER,
+  TemporalTime.X_DAYS_BEFORE,
+  TemporalTime.WITHIN_X_DAYS_OF,
 ];
 
 function temporalEnumToText(option) {
   switch (option) {
     case TemporalMention.ANY_MENTION:
       return 'Any mention of';
-    case TemporalMention.FIRSTMENTION:
+    case TemporalMention.FIRST_MENTION:
       return 'First mention of';
-    case TemporalMention.LASTMENTION:
+    case TemporalMention.LAST_MENTION:
       return 'Last mention of';
     case TemporalTime.DURING_SAME_ENCOUNTER_AS:
       return 'During same encounter as';
-    case TemporalTime.XDAYSBEFORE:
+    case TemporalTime.X_DAYS_BEFORE:
       return 'X or more days before';
-    case TemporalTime.XDAYSAFTER:
+    case TemporalTime.X_DAYS_AFTER:
       return 'X or more days after';
-    case TemporalTime.WITHINXDAYSOF:
+    case TemporalTime.WITHIN_X_DAYS_OF:
       return 'On or within X days of';
   }
 }
