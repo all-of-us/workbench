@@ -126,7 +126,7 @@ export function domainToTitle(domain: any): string {
     case Domain.LR_WHOLE_GENOME_VARIANT:
       domain = 'Long Read WGS';
       break;
-    case Domain.ARRAYDATA:
+    case Domain.ARRAY_DATA:
       domain = 'Global Diversity Array';
       break;
     case Domain.STRUCTURALVARIANTDATA:

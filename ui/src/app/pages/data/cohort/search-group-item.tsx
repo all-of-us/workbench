@@ -176,7 +176,7 @@ const SKIP_DOMAIN_SEARCH = [
   Domain.FITBITINTRADAYSTEPS.toString(),
   Domain.WHOLE_GENOME_VARIANT.toString(),
   Domain.LR_WHOLE_GENOME_VARIANT.toString(),
-  Domain.ARRAYDATA.toString(),
+  Domain.ARRAY_DATA.toString(),
   Domain.STRUCTURALVARIANTDATA.toString(),
 ];
 

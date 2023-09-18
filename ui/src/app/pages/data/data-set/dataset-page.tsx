@@ -745,7 +745,7 @@ const reverseDomainEnum = {
   PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
-  ARRAY_DATA: Domain.ARRAYDATA,
+  ARRAY_DATA: Domain.ARRAY_DATA,
 };
 
 // Temp workaround to prevent errors from mismatched upper and lower case values

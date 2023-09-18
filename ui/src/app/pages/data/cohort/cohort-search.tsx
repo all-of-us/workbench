@@ -212,7 +212,7 @@ export const CohortSearch = fp.flow(
         this.selectGenome();
       } else if (domain === Domain.LR_WHOLE_GENOME_VARIANT) {
         this.selectLongReadGenome();
-      } else if (domain === Domain.ARRAYDATA) {
+      } else if (domain === Domain.ARRAY_DATA) {
         this.selectArrayData();
       } else if (domain === Domain.STRUCTURALVARIANTDATA) {
         this.selectStructuralVariantData();
@@ -430,7 +430,7 @@ export const CohortSearch = fp.flow(
         type: '',
         name: 'Global Diversity Array',
         group: false,
-        domainId: Domain.ARRAYDATA.toString(),
+        domainId: Domain.ARRAY_DATA.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],

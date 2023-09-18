@@ -353,7 +353,7 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.FITBIT,
           Domain.WHOLE_GENOME_VARIANT,
           Domain.LR_WHOLE_GENOME_VARIANT,
-          Domain.ARRAYDATA,
+          Domain.ARRAY_DATA,
           Domain.STRUCTURALVARIANTDATA,
         ].includes(it.type)
       );
