@@ -657,7 +657,7 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 };
 
 // list the access modules in the desired order
-export const orderedAccessModules = [
+export const orderedAccessModules: Array<AccessModule> = [
   AccessModule.TWO_FACTOR_AUTH,
   AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
