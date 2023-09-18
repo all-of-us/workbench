@@ -231,13 +231,13 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
     const { demographicSurveyV2: survey } = profile;
 
     const [isAian, setIsAian] = useState(
-      survey.ethnicCategories.includes(EthnicCategory.AIAN)
+      survey.ethnicCategories.includes(EthnicCategory.AI_AN)
     );
     const [showAsianOptions, setShowAsianOptions] = useState(
       survey.ethnicCategories.includes(EthnicCategory.ASIAN)
     );
     const [showAiAnOptions, setShowAiAnOptions] = useState(
-      survey.ethnicCategories.includes(EthnicCategory.AIAN)
+      survey.ethnicCategories.includes(EthnicCategory.AI_AN)
     );
     const [showBlackOptions, setShowBlackOptions] = useState(
       survey.ethnicCategories.includes(EthnicCategory.BLACK)
@@ -271,7 +271,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
 
     useEffect(() => {
       const includesAiAN = survey.ethnicCategories.includes(
-        EthnicCategory.AIAN
+        EthnicCategory.AI_AN
       );
       const isAiAnChanged = includesAiAN !== isAian;
 
@@ -350,23 +350,23 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             options={[
               {
                 label: 'American Indian or Alaska Native (AIAN)',
-                value: EthnicCategory.AIAN,
+                value: EthnicCategory.AI_AN,
                 subOptions: [
                   {
                     label: 'American Indian',
-                    value: EthnicCategory.AIANAMERICANINDIAN,
+                    value: EthnicCategory.AI_ANAMERICANINDIAN,
                   },
                   {
                     label: 'Alaska Native',
-                    value: EthnicCategory.AIANALASKANATIVE,
+                    value: EthnicCategory.AI_ANALASKANATIVE,
                   },
                   {
                     label: 'Central or South American Indian',
-                    value: EthnicCategory.AIANCENTRALSOUTH,
+                    value: EthnicCategory.AI_ANCENTRALSOUTH,
                   },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.AIANOTHER,
+                    value: EthnicCategory.AI_ANOTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
