@@ -462,8 +462,7 @@ export const DetailTabs = fp.flow(
           wsid,
           +crid,
           +pid,
-          domainName,
-          10
+          domainName
         );
         this.setState((prevState) => ({
           chartData: {
