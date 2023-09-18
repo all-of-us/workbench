@@ -497,7 +497,7 @@ export const isExpiringOrExpired = (
   expiration: number,
   module: AccessModule
 ): boolean => {
-  const trainingModules = [
+  const trainingModules: Array<AccessModule> = [
     AccessModule.COMPLIANCE_TRAINING,
     AccessModule.CT_COMPLIANCE_TRAINING,
   ];
