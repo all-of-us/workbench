@@ -403,9 +403,7 @@ export const SurveyQuestionStubVariables = {
 
 export class CohortBuilderServiceStub extends CohortBuilderApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   findDemoChartInfo(): Promise<DemoChartInfoListResponse> {

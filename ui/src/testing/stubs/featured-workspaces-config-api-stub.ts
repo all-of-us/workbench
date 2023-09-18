@@ -28,9 +28,7 @@ export class FeaturedWorkspacesConfigApiStub extends FeaturedWorkspacesConfigApi
   featuredWorkspacesList: FeaturedWorkspace[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.featuredWorkspacesList = [phenotypeWorkspace, tutorialWorkspace];
   }
 

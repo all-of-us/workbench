@@ -4,9 +4,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class LeoRuntimesApiStub extends RuntimesApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public startRuntime(): Promise<Response> {

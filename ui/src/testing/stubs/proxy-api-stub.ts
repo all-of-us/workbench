@@ -4,9 +4,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class ProxyApiStub extends ProxyApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public setCookie(): Promise<Response> {

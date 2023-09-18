@@ -7,9 +7,7 @@ export class ConfigApiStub extends ConfigApi {
   public config: ConfigResponse;
 
   constructor(configOverrides: Partial<ConfigResponse> = {}) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.config = { ...defaultServerConfig, ...configOverrides };
   }
 

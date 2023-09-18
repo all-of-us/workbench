@@ -56,9 +56,7 @@ export const mockRStudioDisk = (): Disk => ({
 
 export class DisksApiStub extends DisksApi {
   constructor(public disk?: Disk) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   deleteDisk(

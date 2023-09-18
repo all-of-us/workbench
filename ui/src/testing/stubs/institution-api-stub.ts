@@ -92,9 +92,7 @@ export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;
 
   constructor(institutions: Array<Institution> = defaultInstitutions) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     this.institutions = institutions;
   }

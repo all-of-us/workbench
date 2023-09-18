@@ -86,9 +86,7 @@ export const controlledCdrVersion = controlledCdrVersionTier.versions[0];
 
 export class CdrVersionsApiStub extends CdrVersionsApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   getCdrVersionsByTier(): Promise<CdrVersionTiersResponse> {

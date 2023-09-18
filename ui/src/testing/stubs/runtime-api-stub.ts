@@ -51,9 +51,7 @@ export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.runtime = defaultRuntime();
   }
 

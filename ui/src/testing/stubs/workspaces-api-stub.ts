@@ -50,9 +50,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceOperationCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceOperations = [];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();

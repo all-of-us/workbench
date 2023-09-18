@@ -4,9 +4,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class SurveysApiStub extends SurveysApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   createNewUserSatisfactionSurvey(

@@ -4,9 +4,7 @@ import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 export class StatusAlertApiStub extends StatusAlertApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public getStatusAlert(): Promise<StatusAlert> {

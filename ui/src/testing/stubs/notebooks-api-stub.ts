@@ -17,9 +17,7 @@ export class NotebooksApiStub extends NotebooksApi {
   public notebookKernel: KernelTypeEnum;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.notebookList = NotebooksApiStub.stubNotebookList();
   }
 

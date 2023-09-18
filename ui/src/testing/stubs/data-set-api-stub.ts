@@ -36,9 +36,7 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.extractionJobs = [];
   }
 

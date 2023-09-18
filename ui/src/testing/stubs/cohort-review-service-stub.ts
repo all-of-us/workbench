@@ -107,9 +107,7 @@ const cohortChartDataStub = {
 
 export class CohortReviewServiceStub extends CohortReviewApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {

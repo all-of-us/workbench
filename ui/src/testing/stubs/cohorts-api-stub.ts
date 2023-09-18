@@ -81,9 +81,7 @@ export class CohortsApiStub extends CohortsApi {
   public resourceList: WorkspaceResource[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,

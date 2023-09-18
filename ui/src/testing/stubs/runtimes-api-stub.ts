@@ -4,9 +4,7 @@ import { stubNotImplementedError } from './stub-utils';
 
 export class RuntimesApiStub extends RuntimesApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public startRuntime(): Promise<Response> {

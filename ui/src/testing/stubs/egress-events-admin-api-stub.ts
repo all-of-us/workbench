@@ -14,9 +14,7 @@ export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
   private nextEventId = 1;
 
   constructor(public events: EgressEvent[] = []) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public listEgressEvents(

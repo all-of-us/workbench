@@ -6,9 +6,7 @@ import { stubNotImplementedError } from './stub-utils';
 
 export class UserAdminApiStub extends UserAdminApi {
   constructor(public profile = ProfileStubVariables.PROFILE_STUB) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public getAllUsers(): Promise<AdminUserListResponse> {

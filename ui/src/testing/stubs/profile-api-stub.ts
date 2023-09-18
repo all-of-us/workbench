@@ -91,9 +91,7 @@ export class ProfileApiStub extends ProfileApi {
   profile: Profile;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 

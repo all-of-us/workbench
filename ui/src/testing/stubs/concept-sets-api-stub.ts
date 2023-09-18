@@ -80,9 +80,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   // TODO when this piece is converted
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
     this.surveyConceptSets = ConceptSetsApiStub.stubConceptSets().filter(

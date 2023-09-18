@@ -74,9 +74,7 @@ export class AppsApiStub extends AppsApi {
   public listAppsResponse: ListAppsResponse;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public createApp(): Promise<EmptyResponse> {
