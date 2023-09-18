@@ -22,7 +22,7 @@ const allModules = [
   AccessModule.DATA_USER_CODE_OF_CONDUCT,
   AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.ERACOMMONS,
+  AccessModule.ERA_COMMONS,
   AccessModule.TWOFACTORAUTH,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.PROFILE_CONFIRMATION,

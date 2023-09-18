@@ -43,7 +43,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
       ? [AccessModule.CTCOMPLIANCETRAINING]
       : []),
     ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
-    ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
+    ...(user.eraCommonsBypassTime ? [AccessModule.ERA_COMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
     ...(user.profileConfirmationBypassTime
@@ -71,7 +71,7 @@ const moduleToToggleProps: Record<
     name: 'Data User Code of Conduct',
     'data-test-id': 'ducc-toggle',
   },
-  [AccessModule.ERACOMMONS]: {
+  [AccessModule.ERA_COMMONS]: {
     name: 'eRA Commons Linking',
     'data-test-id': 'era-commons-toggle',
   },

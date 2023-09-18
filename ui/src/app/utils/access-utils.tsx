@@ -219,7 +219,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.ERACOMMONS,
+      AccessModule.ERA_COMMONS,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,

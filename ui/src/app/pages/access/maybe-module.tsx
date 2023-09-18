@@ -47,7 +47,7 @@ export const MaybeModule = ({
     [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
     [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
-    [AccessModule.ERACOMMONS, () => redirectToNiH],
+    [AccessModule.ERA_COMMONS, () => redirectToNiH],
     [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
     [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
     [

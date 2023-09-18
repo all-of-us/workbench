@@ -560,9 +560,9 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.BYPASSED,
-      AccessModule.ERACOMMONS,
+      AccessModule.ERA_COMMONS,
       {
-        moduleName: AccessModule.ERACOMMONS,
+        moduleName: AccessModule.ERA_COMMONS,
         bypassEpochMillis: 1,
       },
     ],
@@ -628,7 +628,7 @@ describe('AdminUserProfile', () => {
 
     const excludedModules = [
       AccessModule.IDENTITY,
-      AccessModule.ERACOMMONS,
+      AccessModule.ERA_COMMONS,
       AccessModule.COMPLIANCE_TRAINING,
       AccessModule.CTCOMPLIANCETRAINING,
     ];
@@ -725,7 +725,7 @@ describe('AdminUserProfile', () => {
       // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const eraRow = tableRows.at(
-        orderedAccessModules.indexOf(AccessModule.ERACOMMONS)
+        orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)
       );
       const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
 

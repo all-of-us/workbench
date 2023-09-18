@@ -272,7 +272,7 @@ const isEraRequiredForTier = (
     (tier) => tier.accessTierShortName === accessTierShortName
   );
   return (
-    getAccessModuleConfig(AccessModule.ERACOMMONS).isEnabledInEnvironment &&
+    getAccessModuleConfig(AccessModule.ERA_COMMONS).isEnabledInEnvironment &&
     tierEligibility?.eraRequired
   );
 };
@@ -284,12 +284,12 @@ export const TierBadgesMaybe = (props: {
   const { profile, moduleName } = props;
 
   const rtRequired =
-    moduleName === AccessModule.ERACOMMONS
+    moduleName === AccessModule.ERA_COMMONS
       ? isEraRequiredForTier(profile, AccessTierShortNames.Registered)
       : getAccessModuleConfig(moduleName)?.requiredForRTAccess;
 
   const ctRequired =
-    moduleName === AccessModule.ERACOMMONS
+    moduleName === AccessModule.ERA_COMMONS
       ? isEraRequiredForTier(profile, AccessTierShortNames.Controlled)
       : getAccessModuleConfig(moduleName)?.requiredForCTAccess;
 
@@ -659,7 +659,7 @@ export const ErrorsTooltip = ({ errors, children }: ErrorsTooltipProps) => {
 // list the access modules in the desired order
 export const orderedAccessModules = [
   AccessModule.TWOFACTORAUTH,
-  AccessModule.ERACOMMONS,
+  AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CTCOMPLIANCETRAINING,
   AccessModule.DATA_USER_CODE_OF_CONDUCT,

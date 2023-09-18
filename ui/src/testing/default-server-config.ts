@@ -18,7 +18,7 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.ERACOMMONS,
+    name: AccessModule.ERA_COMMONS,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: false,

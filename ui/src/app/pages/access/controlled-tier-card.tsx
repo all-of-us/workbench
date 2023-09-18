@@ -44,7 +44,7 @@ const ControlledTierEraModule = (props: {
 }): JSX.Element => {
   const { profile, eligible, spinnerProps } = props;
 
-  const moduleName = AccessModule.ERACOMMONS;
+  const moduleName = AccessModule.ERA_COMMONS;
 
   const status = getAccessModuleStatusByName(profile, moduleName);
 

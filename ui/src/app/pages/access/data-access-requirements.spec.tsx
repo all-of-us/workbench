@@ -323,7 +323,7 @@ describe('DataAccessRequirements', () => {
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
+    expect(enabledModules.includes(AccessModule.ERA_COMMONS)).toBeFalsy();
   });
 
   it('should not return the Compliance module from getEligibleModules when its feature flag is disabled', () => {
@@ -442,7 +442,7 @@ describe('DataAccessRequirements', () => {
       );
 
       // update this if the order changes
-      expect(activeModule).toEqual(AccessModule.ERACOMMONS);
+      expect(activeModule).toEqual(AccessModule.ERA_COMMONS);
 
       // 2FA (module 0) is complete, so enabled #1 is active
       expect(activeModule).toEqual(enabledModules[1]);
@@ -458,7 +458,7 @@ describe('DataAccessRequirements', () => {
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
+          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
@@ -515,7 +515,7 @@ describe('DataAccessRequirements', () => {
       accessModules: {
         modules: [
           { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
+          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.COMPLIANCE_TRAINING,
             completionEpochMillis: 1,
@@ -576,7 +576,7 @@ describe('DataAccessRequirements', () => {
     });
     const { container } = component();
     expect(
-      findModule(container, AccessModule.ERACOMMONS)?.parentElement
+      findModule(container, AccessModule.ERA_COMMONS)?.parentElement
     ).toBeFalsy();
   });
 
@@ -930,7 +930,7 @@ describe('DataAccessRequirements', () => {
   it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
     let { container } = component();
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeTruthy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
 
     profileStore.set({
       profile: {
@@ -948,7 +948,7 @@ describe('DataAccessRequirements', () => {
     });
     ({ container } = component());
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeFalsy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
 
     // Ignore eraRequired if the accessTier is Controlled
     profileStore.set({
@@ -971,7 +971,7 @@ describe('DataAccessRequirements', () => {
     });
     ({ container } = component());
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeTruthy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
   });
 
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
@@ -1145,7 +1145,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeTruthy();
     }
   );
@@ -1179,7 +1179,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );
@@ -1209,7 +1209,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );
@@ -1319,7 +1319,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );

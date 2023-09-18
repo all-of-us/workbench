@@ -304,7 +304,7 @@ const RenewalRequirementsText = () => (
 export const initialRtModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.IDENTITY,
-  AccessModule.ERACOMMONS,
+  AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [
@@ -400,7 +400,7 @@ const isEraCommonsModuleRequiredByInstitution = (
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
-  if (moduleNames !== AccessModule.ERACOMMONS) {
+  if (moduleNames !== AccessModule.ERA_COMMONS) {
     return true;
   }
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;
