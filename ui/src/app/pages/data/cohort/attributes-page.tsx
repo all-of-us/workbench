@@ -809,7 +809,7 @@ export const AttributesPage = fp.flow(
         }, []);
         if (isCOPEOrMinuteSurvey && !anyVersion) {
           attrs.push({
-            name: AttrName.SURVEYVERSIONCONCEPTID,
+            name: AttrName.SURVEY_VERSION_CONCEPT_ID,
             operator: Operator.IN,
             operands: catOperands,
           });
