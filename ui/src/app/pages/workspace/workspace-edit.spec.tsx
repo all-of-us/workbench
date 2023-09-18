@@ -122,7 +122,10 @@ describe('WorkspaceEdit', () => {
         disseminateResearchFindingList: [
           DisseminateResearchEnum.PUBLICATIONPERSONALBLOG,
         ],
-        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN],
+        researchOutcomeList: [
+          SpecificPopulationEnum.DISABILITY_STATUSResearchOutcomeEnum
+            .DECREASE_ILLNESS_BURDEN,
+        ],
       },
     };
 
