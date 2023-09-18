@@ -37,7 +37,7 @@ describe('EgressEventsTable', () => {
     wrapper.find('.p-dropdown').simulate('click');
     wrapper
       .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
+      .find({ 'aria-label': EgressEventStatus.VERIFIED_FALSE_POSITIVE })
       .simulate('click');
     wrapper.find('[type="button"]').find('[name="row-save"]').simulate('click');
     await waitForFakeTimersAndUpdate(wrapper);
@@ -94,7 +94,7 @@ describe('EgressEventsTable', () => {
 
     await editRowToFalsePositive(wrapper, 2);
     expect(eventsStub.events[2].status).toBe(
-      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+      EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
   });
 
@@ -108,10 +108,10 @@ describe('EgressEventsTable', () => {
     await editRowToFalsePositive(wrapper, 3);
 
     expect(eventsStub.events[2].status).toBe(
-      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+      EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
     expect(eventsStub.events[3].status).toBe(
-      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+      EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
   });
 });

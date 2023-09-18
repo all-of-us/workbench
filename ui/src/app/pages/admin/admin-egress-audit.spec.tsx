@@ -59,13 +59,13 @@ describe('AdminEgressAudit', () => {
 
     wrapper
       .find('.p-dropdown-item')
-      .find({ 'aria-label': EgressEventStatus.VERIFIEDFALSEPOSITIVE })
+      .find({ 'aria-label': EgressEventStatus.VERIFIED_FALSE_POSITIVE })
       .simulate('click');
     wrapper.find({ 'data-test-id': 'save-egress-event' }).simulate('click');
 
     await waitForFakeTimersAndUpdate(wrapper);
     expect(eventsStub.events[0].status).toBe(
-      EgressEventStatus.VERIFIEDFALSEPOSITIVE
+      EgressEventStatus.VERIFIED_FALSE_POSITIVE
     );
   });
 });
