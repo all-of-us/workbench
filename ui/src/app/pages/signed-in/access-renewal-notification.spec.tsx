@@ -75,10 +75,12 @@ const allCompleteOneExpired = (moduleName: AccessModule) => [
 const rtExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
-      ![
-        AccessModule.COMPLIANCE_TRAINING,
-        AccessModule.CT_COMPLIANCE_TRAINING,
-      ].includes(status.moduleName)
+      !(
+        [
+          AccessModule.COMPLIANCE_TRAINING,
+          AccessModule.CT_COMPLIANCE_TRAINING,
+        ] as Array<AccessModule>
+      ).includes(status.moduleName)
   ),
   {
     moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
@@ -95,10 +97,12 @@ const rtExpiresFirst = [
 const ctExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
-      ![
-        AccessModule.COMPLIANCE_TRAINING,
-        AccessModule.CT_COMPLIANCE_TRAINING,
-      ].includes(status.moduleName)
+      !(
+        [
+          AccessModule.COMPLIANCE_TRAINING,
+          AccessModule.CT_COMPLIANCE_TRAINING,
+        ] as Array<AccessModule>
+      ).includes(status.moduleName)
   ),
   {
     moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
