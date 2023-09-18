@@ -20,6 +20,7 @@ import { userAppsStore } from './stores';
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
+  [AppType.SAS]: 'SAS',
 };
 
 const appStatusesRequiringUpdates = [
