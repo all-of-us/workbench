@@ -141,6 +141,7 @@ export const CreateGkeApp = ({
           {...{ createAppRequest, onDismiss }}
           existingApp={app}
           workspaceNamespace={workspace.namespace}
+          username={profile.username}
         />
       </FlexRow>
     </FlexColumn>

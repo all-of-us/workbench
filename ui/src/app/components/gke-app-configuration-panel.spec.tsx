@@ -55,7 +55,6 @@ describe(GKEAppConfigurationPanel.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
     notificationStore.set(null);
-
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,

@@ -202,7 +202,7 @@ interface FetchOptions {
  *  });
  *
  * @param apiCall The API function to call and handle
- * @param options:
+ * @param options
  *  expectedResponseMatcher An optional handler for errors which should NOT pop up error modals
  *  customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.

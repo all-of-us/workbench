@@ -14,6 +14,7 @@ import {
   expectButtonElementEnabled,
 } from 'testing/react-test-helpers';
 import { createListAppsCromwellResponse } from 'testing/stubs/apps-api-stub';
+import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 describe(CreateGkeAppButton.name, () => {
@@ -22,6 +23,7 @@ describe(CreateGkeAppButton.name, () => {
     existingApp: null,
     workspaceNamespace: 'aou-rw-test-1',
     onDismiss: () => {},
+    username: ProfileStubVariables.PROFILE_STUB.username,
   };
 
   const component = async (
