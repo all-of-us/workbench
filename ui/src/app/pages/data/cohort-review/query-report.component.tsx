@@ -211,7 +211,7 @@ const chartTypes = [
   GenderSexRaceOrEthType.ETHNICITY,
   GenderSexRaceOrEthType.GENDER,
   GenderSexRaceOrEthType.RACE,
-  GenderSexRaceOrEthType.SEXATBIRTH,
+  GenderSexRaceOrEthType.SEX_AT_BIRTH,
 ];
 
 export interface QueryReportProps
