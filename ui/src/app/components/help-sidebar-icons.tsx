@@ -693,9 +693,6 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     if (config.enableRStudioGKEApp) {
       keys.push(rstudioConfigIconId);
     }
-    if (config.enableSasGKEApp) {
-      keys.push(sasConfigIconId);
-    }
     keys.push('runtimeConfig', 'terminal');
   }
 

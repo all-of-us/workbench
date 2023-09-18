@@ -28,7 +28,6 @@ export enum UIAppType {
   JUPYTER = 'Jupyter',
   RSTUDIO = 'RStudio',
   CROMWELL = 'Cromwell',
-
   SAS = 'SAS',
 }
 
