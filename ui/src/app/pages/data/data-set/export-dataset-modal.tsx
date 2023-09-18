@@ -64,7 +64,7 @@ export const ExportDatasetModal = ({
   closeFunction,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] = useState(undefined);
-  const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
+  const [kernelType, setKernelType] = useState(KernelTypeEnum.PYTHON);
   const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
     DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
   );
@@ -327,7 +327,7 @@ export const ExportDatasetModal = ({
                 </label>
               ))}
 
-            {hasWgs() && kernelType === KernelTypeEnum.Python && (
+            {hasWgs() && kernelType === KernelTypeEnum.PYTHON && (
               <React.Fragment>
                 <div style={headerStyles.formLabel}>
                   Select analysis tool for genetic variant data
