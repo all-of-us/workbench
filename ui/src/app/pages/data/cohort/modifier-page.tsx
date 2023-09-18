@@ -176,7 +176,7 @@ const dateTooltip = `Dates are consistently shifted within a participant’s rec
 
 const getDefaultFormState = () => {
   const defaultFormState = {
-    name: ModifierType.AGE_AT_EVENT,
+    name: ModifierType.AGE_AT_EVENT as ModifierType,
     label: 'Age At Event',
     type: 'number',
     operator: undefined,
@@ -256,13 +256,16 @@ export const ModifierPage = fp.flow(
           const values = existing.operands.filter((val) => !!val);
           formState[index] = {
             ...mod,
-            operator: [ModifierType.CATI, ModifierType.ENCOUNTERS].includes(
-              mod.name
-            )
+            operator: (
+              [
+                ModifierType.CATI,
+                ModifierType.ENCOUNTERS,
+              ] as Array<ModifierType>
+            ).includes(mod.name)
               ? +existing.operands[0]
               : existing.operator,
             values:
-              mod.name === ModifierType.EVENT_DATE
+              (mod.name as ModifierType) === ModifierType.EVENT_DATE
                 ? values.map((val) => new Date(val + 'T08:00:00'))
                 : values,
           };
@@ -399,7 +402,11 @@ export const ModifierPage = fp.flow(
       let initialState = true;
       let untouched = false;
       const errors = formState.reduce((acc, item) => {
-        if (![ModifierType.CATI, ModifierType.ENCOUNTERS].includes(item.name)) {
+        if (
+          !(
+            [ModifierType.CATI, ModifierType.ENCOUNTERS] as Array<ModifierType>
+          ).includes(item.name)
+        ) {
           item.values.forEach((val, v) => {
             if (val !== undefined) {
               initialState = false;
@@ -427,7 +434,11 @@ export const ModifierPage = fp.flow(
     const selectChange = (sel: any, index: number) => {
       AnalyticsTracker.CohortBuilder.ModifierDropdown(formState[index].label);
       const { name } = formState[index];
-      if ([ModifierType.CATI, ModifierType.ENCOUNTERS].includes(name)) {
+      if (
+        (
+          [ModifierType.CATI, ModifierType.ENCOUNTERS] as Array<ModifierType>
+        ).includes(name)
+      ) {
         formState[index].values = [sel];
       } else if (!sel) {
         formState[index].values = [undefined, undefined];
@@ -646,9 +657,12 @@ export const ModifierPage = fp.flow(
                       itemTemplate={(e) => optionTemplate(e, name)}
                     />
                     {operator &&
-                      ![ModifierType.CATI, ModifierType.ENCOUNTERS].includes(
-                        name
-                      ) && (
+                      !(
+                        [
+                          ModifierType.CATI,
+                          ModifierType.ENCOUNTERS,
+                        ] as Array<ModifierType>
+                      ).includes(name) && (
                         <div style={{ paddingTop: '1.5rem' }}>
                           {renderInput(i, '0', mod.type)}
                           {operator === Operator.BETWEEN && (
