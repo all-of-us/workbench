@@ -40,7 +40,7 @@ const orderedSatisfactionOptions = [
     label: 'Satisfied',
   },
   {
-    value: NewUserSatisfactionSurveySatisfaction.VERYSATISFIED,
+    value: NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED,
     label: 'Very satisfied',
   },
 ];

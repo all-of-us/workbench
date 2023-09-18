@@ -37,7 +37,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
   const setValidNewUserSatisfactionSurveyData = () => {
     setNewUserSatisfactionSurveyData(
       'satisfaction',
-      NewUserSatisfactionSurveySatisfaction.VERYSATISFIED
+      NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
     setNewUserSatisfactionSurveyData('additionalInfo', '');
   };
@@ -73,7 +73,7 @@ describe(NewUserSatisfactionSurveyModal.name, () => {
 
     setNewUserSatisfactionSurveyData(
       'satisfaction',
-      NewUserSatisfactionSurveySatisfaction.VERYSATISFIED
+      NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED
     );
     expect(
       findSubmitButton(createShallowWrapper()).prop('disabled')
