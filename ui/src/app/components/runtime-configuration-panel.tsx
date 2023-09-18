@@ -253,7 +253,7 @@ const PanelMain = fp.flow(
         [
           currentRuntime === null ||
             currentRuntime === undefined ||
-            status === RuntimeStatus.Unknown,
+            status === RuntimeStatus.UNKNOWN,
           () => PanelContent.Create,
         ],
         [

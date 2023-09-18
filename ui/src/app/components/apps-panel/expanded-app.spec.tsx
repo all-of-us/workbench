@@ -153,7 +153,7 @@ describe('ExpandedApp', () => {
 
     [RuntimeStatus.DELETED, 'Pause'],
     [RuntimeStatus.DELETING, 'Pause'],
-    [RuntimeStatus.Unknown, 'Pause'],
+    [RuntimeStatus.UNKNOWN, 'Pause'],
     [RuntimeStatus.Error, 'Pause'],
     [RuntimeStatus.CREATING, 'Pause'],
     [RuntimeStatus.Updating, 'Pause'],
@@ -207,7 +207,7 @@ describe('ExpandedApp', () => {
     RuntimeStatus.STOPPING,
     RuntimeStatus.STARTING,
     RuntimeStatus.Error,
-    RuntimeStatus.Unknown,
+    RuntimeStatus.UNKNOWN,
     undefined,
     null,
   ])(

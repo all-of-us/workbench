@@ -334,7 +334,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private renderNotebookText() {
-      const { status = RuntimeStatus.Unknown } =
+      const { status = RuntimeStatus.UNKNOWN } =
         this.props.runtimeStore.runtime || {};
       switch (status) {
         case RuntimeStatus.STARTING:

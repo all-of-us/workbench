@@ -35,7 +35,7 @@ export const RuntimeCost = () => {
     [RuntimeStatus.STOPPING, () => `Pausing ${runningCost} / hr`],
     [RuntimeStatus.STARTING, () => `Resuming ${runningCost} / hr`],
     [RuntimeStatus.STOPPED, () => `Paused ${storageCost} / hr`],
-    [RuntimeStatus.Unknown, () => runtime.status]
+    [RuntimeStatus.UNKNOWN, () => runtime.status]
   );
 
   return (
