@@ -55,7 +55,7 @@ const allBypassed: AccessModuleStatus[] = Object.keys(AccessModule).map(
 // 2FA is missing (initial, not renewable)
 const allCompleteMissingOneInitial: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
-    ({ moduleName }) => moduleName !== AccessModule.TWOFACTORAUTH
+    ({ moduleName }) => moduleName !== AccessModule.TWO_FACTOR_AUTH
   );
 
 // RW-8203
@@ -69,7 +69,7 @@ const allCompleteMissingOneEach: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
     ({ moduleName }) =>
       ![
-        AccessModule.TWOFACTORAUTH,
+        AccessModule.TWO_FACTOR_AUTH,
         AccessModule.PUBLICATION_CONFIRMATION,
       ].includes(moduleName)
   );

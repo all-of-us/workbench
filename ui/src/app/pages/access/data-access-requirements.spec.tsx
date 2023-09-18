@@ -351,7 +351,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[0]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH);
+    expect(activeModule).toEqual(AccessModule.TWO_FACTOR_AUTH);
   });
 
   it('should return the second module (RAS) from getFocusedModule when the first module (2FA) has been completed', () => {
@@ -359,7 +359,10 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
         ],
       },
     };
@@ -386,7 +389,7 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1 },
+          { moduleName: AccessModule.TWO_FACTOR_AUTH, bypassEpochMillis: 1 },
         ],
       },
     };
@@ -424,7 +427,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModule.TWOFACTORAUTH,
+              moduleName: AccessModule.TWO_FACTOR_AUTH,
               completionEpochMillis: 1,
             },
           ],
@@ -457,7 +460,10 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
           { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.IDENTITY,
@@ -514,7 +520,10 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
           { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.COMPLIANCE_TRAINING,
@@ -1761,7 +1770,7 @@ describe('DataAccessRequirements', () => {
     const newModules = [
       ...profileStore.get().profile.accessModules.modules,
       {
-        moduleName: AccessModule.TWOFACTORAUTH, // not expirable
+        moduleName: AccessModule.TWO_FACTOR_AUTH, // not expirable
         completionEpochMillis: null,
         bypassEpochMillis: null,
         expirationEpochMillis: oneYearAgo(),

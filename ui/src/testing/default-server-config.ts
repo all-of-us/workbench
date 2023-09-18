@@ -6,7 +6,7 @@ import {
 
 const defaultAccessModuleConfig: AccessModuleConfig[] = [
   {
-    name: AccessModule.TWOFACTORAUTH,
+    name: AccessModule.TWO_FACTOR_AUTH,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,

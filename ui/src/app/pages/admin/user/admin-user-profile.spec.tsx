@@ -536,9 +536,9 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.NEVER_EXPIRES,
-      AccessModule.TWOFACTORAUTH,
+      AccessModule.TWO_FACTOR_AUTH,
       {
-        moduleName: AccessModule.TWOFACTORAUTH,
+        moduleName: AccessModule.TWO_FACTOR_AUTH,
         completionEpochMillis: nowPlusDays(-1000),
       },
     ],

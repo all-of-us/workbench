@@ -302,7 +302,7 @@ const RenewalRequirementsText = () => (
 
 // in display order
 export const initialRtModules = [
-  AccessModule.TWOFACTORAUTH,
+  AccessModule.TWO_FACTOR_AUTH,
   AccessModule.IDENTITY,
   AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,

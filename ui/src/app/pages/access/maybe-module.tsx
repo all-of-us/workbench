@@ -44,7 +44,7 @@ export const MaybeModule = ({
   // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
   const moduleAction: Function = switchCase(
     moduleName,
-    [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
+    [AccessModule.TWO_FACTOR_AUTH, () => () => setShowTwoFactorAuthModal(true)],
     [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
     [AccessModule.ERA_COMMONS, () => redirectToNiH],

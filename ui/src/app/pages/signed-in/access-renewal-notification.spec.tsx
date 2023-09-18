@@ -23,7 +23,7 @@ const allModules = [
   AccessModule.COMPLIANCE_TRAINING,
   AccessModule.CT_COMPLIANCE_TRAINING,
   AccessModule.ERA_COMMONS,
-  AccessModule.TWOFACTORAUTH,
+  AccessModule.TWO_FACTOR_AUTH,
   AccessModule.RASLINKLOGINGOV,
   AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,

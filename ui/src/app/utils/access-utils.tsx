@@ -175,7 +175,7 @@ export const getAccessModuleConfig = (
     moduleName,
 
     [
-      AccessModule.TWOFACTORAUTH,
+      AccessModule.TWO_FACTOR_AUTH,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,

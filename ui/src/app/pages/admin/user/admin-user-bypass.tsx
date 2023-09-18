@@ -44,7 +44,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
       : []),
     ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERA_COMMONS] : []),
-    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWO_FACTOR_AUTH] : []),
     ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
     ...(user.profileConfirmationBypassTime
       ? [AccessModule.PROFILE_CONFIRMATION]
@@ -75,7 +75,7 @@ const moduleToToggleProps: Record<
     name: 'eRA Commons Linking',
     'data-test-id': 'era-commons-toggle',
   },
-  [AccessModule.TWOFACTORAUTH]: {
+  [AccessModule.TWO_FACTOR_AUTH]: {
     name: 'Two Factor Auth',
     'data-test-id': 'two-factor-auth-toggle',
   },
