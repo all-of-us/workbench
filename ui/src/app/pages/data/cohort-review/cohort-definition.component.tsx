@@ -90,7 +90,7 @@ const modifierOperatorDisplay = (operator: Operator) => {
       return 'Between';
     case Operator.EQUAL:
       return '=';
-    case Operator.GREATERTHANOREQUALTO:
+    case Operator.GREATER_THAN_OR_EQUAL_TO:
       return '>=';
     case Operator.IN:
       return '';

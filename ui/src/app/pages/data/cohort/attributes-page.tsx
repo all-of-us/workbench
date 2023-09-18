@@ -267,7 +267,7 @@ const defaultOptions = [
   { label: 'Equals', value: Operator.EQUAL.toString() },
   {
     label: 'Greater Than or Equal To',
-    value: Operator.GREATERTHANOREQUALTO.toString(),
+    value: Operator.GREATER_THAN_OR_EQUAL_TO.toString(),
   },
   {
     label: 'Less Than or Equal To',

@@ -188,7 +188,7 @@ const getDefaultFormState = () => {
       },
       {
         label: 'Greater Than or Equal To',
-        value: Operator.GREATERTHANOREQUALTO,
+        value: Operator.GREATER_THAN_OR_EQUAL_TO,
       },
       {
         label: 'Less Than or Equal To',
@@ -287,7 +287,7 @@ export const ModifierPage = fp.flow(
             },
             {
               label: 'N or More',
-              value: Operator.GREATERTHANOREQUALTO,
+              value: Operator.GREATER_THAN_OR_EQUAL_TO,
             },
           ],
         });
@@ -339,7 +339,7 @@ export const ModifierPage = fp.flow(
             },
             {
               label: 'Is On or After',
-              value: Operator.GREATERTHANOREQUALTO,
+              value: Operator.GREATER_THAN_OR_EQUAL_TO,
             },
             {
               label: 'Is Between',
