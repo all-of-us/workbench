@@ -210,7 +210,7 @@ export const CohortSearch = fp.flow(
         this.selectFitbit(domain, name);
       } else if (domain === Domain.WHOLE_GENOME_VARIANT) {
         this.selectGenome();
-      } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
+      } else if (domain === Domain.LR_WHOLE_GENOME_VARIANT) {
         this.selectLongReadGenome();
       } else if (domain === Domain.ARRAYDATA) {
         this.selectArrayData();
@@ -413,7 +413,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Long Read WGS',
         group: false,
-        domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
+        domainId: Domain.LR_WHOLE_GENOME_VARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],

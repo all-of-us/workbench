@@ -123,7 +123,7 @@ export function domainToTitle(domain: any): string {
     case Domain.WHOLE_GENOME_VARIANT:
       domain = 'Short Read WGS';
       break;
-    case Domain.LRWHOLEGENOMEVARIANT:
+    case Domain.LR_WHOLE_GENOME_VARIANT:
       domain = 'Long Read WGS';
       break;
     case Domain.ARRAYDATA:

@@ -352,7 +352,7 @@ export const SearchGroup = withCurrentWorkspace()(
           Domain.SURVEY,
           Domain.FITBIT,
           Domain.WHOLE_GENOME_VARIANT,
-          Domain.LRWHOLEGENOMEVARIANT,
+          Domain.LR_WHOLE_GENOME_VARIANT,
           Domain.ARRAYDATA,
           Domain.STRUCTURALVARIANTDATA,
         ].includes(it.type)
