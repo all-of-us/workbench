@@ -124,7 +124,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         name: 'Mock Concept Set for survey overAll health',
         description: 'Mocked for tests',
         domain: Domain.OBSERVATION,
-        survey: Surveys.OVERALLHEALTH,
+        survey: Surveys.OVERALL_HEALTH,
         lastModifiedTime: new Date().getTime() - 2000,
         criteriums: [],
       },
