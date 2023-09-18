@@ -21,7 +21,7 @@ export const OrganizationTypeOptions = [
   },
   {
     label: 'Educational Institution',
-    value: OrganizationType.EDUCATIONALINSTITUTION,
+    value: OrganizationType.EDUCATIONAL_INSTITUTION,
   },
   {
     label: 'Health Center / Non-Profit',

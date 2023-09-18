@@ -112,7 +112,7 @@ export const AccountCreationOptions = {
       ],
     },
     {
-      type: OrganizationType.EDUCATIONALINSTITUTION,
+      type: OrganizationType.EDUCATIONAL_INSTITUTION,
       roles: [
         InstitutionalRole.TEACHER,
         InstitutionalRole.STUDENT,
