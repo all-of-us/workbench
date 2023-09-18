@@ -65,7 +65,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModule.RAS_LINK_LOGIN_GOV,
             expirationEpochMillis: undefined,
           },
         ],

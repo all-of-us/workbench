@@ -24,7 +24,7 @@ const allModules = [
   AccessModule.CT_COMPLIANCE_TRAINING,
   AccessModule.ERA_COMMONS,
   AccessModule.TWO_FACTOR_AUTH,
-  AccessModule.RASLINKLOGINGOV,
+  AccessModule.RAS_LINK_LOGIN_GOV,
   AccessModule.PROFILE_CONFIRMATION,
   AccessModule.PUBLICATION_CONFIRMATION,
 ];

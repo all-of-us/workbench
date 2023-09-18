@@ -315,7 +315,9 @@ describe('DataAccessRequirements', () => {
       },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    expect(
+      enabledModules.includes(AccessModule.RAS_LINK_LOGIN_GOV)
+    ).toBeFalsy();
   });
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {

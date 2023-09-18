@@ -45,7 +45,7 @@ export const MaybeModule = ({
   const moduleAction: Function = switchCase(
     moduleName,
     [AccessModule.TWO_FACTOR_AUTH, () => () => setShowTwoFactorAuthModal(true)],
-    [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
+    [AccessModule.RAS_LINK_LOGIN_GOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
     [AccessModule.ERA_COMMONS, () => redirectToNiH],
     [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
