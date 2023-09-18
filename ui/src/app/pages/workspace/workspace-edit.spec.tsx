@@ -285,7 +285,7 @@ describe('WorkspaceEdit', () => {
     // specific population group.
     workspace.researchPurpose.populationDetails = [
       SpecificPopulationEnum.AGECHILDREN,
-      SpecificPopulationEnum.RACEMENA,
+      SpecificPopulationEnum.RACE_MENA,
       SpecificPopulationEnum.DISABILITYSTATUS,
     ];
 
@@ -307,7 +307,7 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+        .find(`[data-test-id="${SpecificPopulationEnum.RACE_MENA}-checkbox"]`)
         .first()
         .prop('checked')
     ).toEqual(true);
