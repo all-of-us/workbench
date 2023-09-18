@@ -285,7 +285,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
         onUpdate(
           'genderIdentities',
           survey.genderIdentities.filter(
-            (so) => so !== GenderIdentityV2.TWOSPIRIT
+            (so) => so !== GenderIdentityV2.TWO_SPIRIT
           )
         );
       }
@@ -354,7 +354,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'American Indian',
-                    value: EthnicCategory.AI_ANAMERICANINDIAN,
+                    value: EthnicCategory.AI_ANAMERICAN_INDIAN,
                   },
                   {
                     label: 'Alaska Native',
@@ -769,7 +769,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label: 'Two Spirit',
-                value: GenderIdentityV2.TWOSPIRIT,
+                value: GenderIdentityV2.TWO_SPIRIT,
                 disabled: !isAian,
                 disabledText: TWO_SPIRIT_IDENTITY_DISABLED_TEXT,
               },
