@@ -852,27 +852,28 @@ export class AccountCreation extends React.Component<
                 options={[
                   {
                     label: 'Research All of Us Website',
-                    value: GeneralDiscoverySource.RESEARCHALLOFUSWEBSITE,
+                    value: GeneralDiscoverySource.RESEARCH_ALL_OF_US_WEBSITE,
                   },
                   {
                     label: 'Social Media',
-                    value: GeneralDiscoverySource.SOCIALMEDIA,
+                    value: GeneralDiscoverySource.SOCIAL_MEDIA,
                   },
                   {
                     label: 'Journal or News Article',
-                    value: GeneralDiscoverySource.JOURNALORNEWSARTICLE,
+                    value: GeneralDiscoverySource.JOURNAL_OR_NEWS_ARTICLE,
                   },
                   {
                     label: 'Activity, Presentation, or Event',
-                    value: GeneralDiscoverySource.ACTIVITYPRESENTATIONOREVENT,
+                    value:
+                      GeneralDiscoverySource.ACTIVITY_PRESENTATION_OR_EVENT,
                   },
                   {
                     label: 'Friends or Colleagues',
-                    value: GeneralDiscoverySource.FRIENDSORCOLLEAGUES,
+                    value: GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
                   },
                   {
                     label: 'Other Website',
-                    value: GeneralDiscoverySource.OTHERWEBSITE,
+                    value: GeneralDiscoverySource.OTHER_WEBSITE,
                   },
                   {
                     label: 'Other',
@@ -913,76 +914,79 @@ export class AccountCreation extends React.Component<
                       'All of Us Evenings with Genetics Research Program, Baylor College \n' +
                       'of Medicine, Department of Molecular and Human Genetics',
                     value:
-                      PartnerDiscoverySource.ALLOFUSEVENINGSWITHGENETICSRESEARCHPROGRAM,
+                      PartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM,
                   },
                   {
                     label: 'All of Us Research Program Staff',
-                    value: PartnerDiscoverySource.ALLOFUSRESEARCHPROGRAMSTAFF,
+                    value:
+                      PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
                   },
                   {
                     label: 'All of Us Researcher Academy/RTI International',
                     value:
-                      PartnerDiscoverySource.ALLOFUSRESEARCHERACADEMYRTIINTERNATIONAL,
+                      PartnerDiscoverySource.ALL_OF_US_RESEARCHER_ACADEMY_RTI_INTERNATIONAL,
                   },
                   {
                     label:
                       'American Association on Health and Disability (AAHD)',
                     value:
-                      PartnerDiscoverySource.AMERICANASSOCIATIONONHEALTHANDDISABILITYAAHD,
+                      PartnerDiscoverySource.AMERICAN_ASSOCIATION_ON_HEALTH_AND_DISABILITY_AAHD,
                   },
                   {
                     label: 'Asian Health Coalition',
-                    value: PartnerDiscoverySource.ASIANHEALTHCOALITION,
+                    value: PartnerDiscoverySource.ASIAN_HEALTH_COALITION,
                   },
                   {
                     label: 'CTSA/PACER Community Network (CPCN)',
-                    value: PartnerDiscoverySource.CTSAPACERCOMMUNITYNETWORKCPCN,
+                    value:
+                      PartnerDiscoverySource.CTSA_PACER_COMMUNITY_NETWORK_CPCN,
                   },
                   {
                     label: 'Data and Research Center (DRC)',
-                    value: PartnerDiscoverySource.DATAANDRESEARCHCENTERDRC,
+                    value: PartnerDiscoverySource.DATA_AND_RESEARCH_CENTER_DRC,
                   },
                   {
                     label: 'Delta Research and Educational Foundation (DREF)',
                     value:
-                      PartnerDiscoverySource.DELTARESEARCHANDEDUCATIONALFOUNDATIONDREF,
+                      PartnerDiscoverySource.DELTA_RESEARCH_AND_EDUCATIONAL_FOUNDATION_DREF,
                   },
                   {
                     label: 'FiftyForward (Senior Citizens, Inc.)',
-                    value: PartnerDiscoverySource.FIFTYFORWARDSENIORCITIZENSINC,
+                    value:
+                      PartnerDiscoverySource.FIFTYFORWARD_SENIOR_CITIZENS_INC,
                   },
                   {
                     label:
                       'IGNITE Northwell Health, Feinstein Institute for Medical Research',
                     value:
-                      PartnerDiscoverySource.IGNITENORTHWELLHEALTHFEINSTEININSTITUTEFORMEDICALRESEARCH,
+                      PartnerDiscoverySource.IGNITE_NORTHWELL_HEALTH_FEINSTEIN_INSTITUTE_FOR_MEDICAL_RESEARCH,
                   },
                   {
                     label: 'National Alliance for Hispanic Health (NAHH)',
                     value:
-                      PartnerDiscoverySource.NATIONALALLIANCEFORHISPANICHEALTHNAHH,
+                      PartnerDiscoverySource.NATIONAL_ALLIANCE_FOR_HISPANIC_HEALTH_NAHH,
                   },
                   {
                     label: 'National Baptist Convention, USA, Inc.',
                     value:
-                      PartnerDiscoverySource.NATIONALBAPTISTCONVENTIONUSAINC,
+                      PartnerDiscoverySource.NATIONAL_BAPTIST_CONVENTION_USA_INC,
                   },
                   {
                     label: 'Network of the National Library of Medicine (NNLM)',
                     value:
-                      PartnerDiscoverySource.NETWORKOFTHENATIONALLIBRARYOFMEDICINENNLM,
+                      PartnerDiscoverySource.NETWORK_OF_THE_NATIONAL_LIBRARY_OF_MEDICINE_NNLM,
                   },
                   {
                     label: 'PRIDEnet/Stanford University',
-                    value: PartnerDiscoverySource.PRIDENETSTANFORDUNIVERSITY,
+                    value: PartnerDiscoverySource.PRIDENET_STANFORD_UNIVERSITY,
                   },
                   {
                     label: 'Pyxis Partners',
-                    value: PartnerDiscoverySource.PYXISPARTNERS,
+                    value: PartnerDiscoverySource.PYXIS_PARTNERS,
                   },
                   {
                     label: 'Scripps Research Institute',
-                    value: PartnerDiscoverySource.SCRIPPSRESEARCHINSTITUTE,
+                    value: PartnerDiscoverySource.SCRIPPS_RESEARCH_INSTITUTE,
                   },
                   {
                     label: 'Other',
@@ -1006,7 +1010,7 @@ export class AccountCreation extends React.Component<
                   },
                   {
                     label: 'None of the Above',
-                    value: PartnerDiscoverySource.NONEOFTHEABOVE,
+                    value: PartnerDiscoverySource.NONE_OF_THE_ABOVE,
                   },
                 ]}
                 multiple
