@@ -370,9 +370,12 @@ export const ConceptSearch = fp.flow(
       return (
         !concept ||
         !unsavedChanges ||
-        ![WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER].includes(
-          accessLevel
-        )
+        !(
+          [
+            WorkspaceAccessLevel.OWNER,
+            WorkspaceAccessLevel.WRITER,
+          ] as Array<WorkspaceAccessLevel>
+        ).includes(accessLevel)
       );
     }
 
