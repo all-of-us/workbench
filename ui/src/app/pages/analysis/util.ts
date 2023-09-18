@@ -102,11 +102,6 @@ const appsExtensionMap = [
     appType: UIAppType.SAS,
     canPlayground: false,
   },
-  {
-    extension: 'SAS TODO SAS',
-    appType: UIAppType.SAS,
-    canPlayground: false,
-  },
 ];
 
 export const getAppInfoFromFileName = (name: string) => {
