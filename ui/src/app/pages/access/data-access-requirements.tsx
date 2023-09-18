@@ -312,7 +312,7 @@ export const renewalRtModules = [
   AccessModule.PUBLICATION_CONFIRMATION,
   AccessModule.COMPLIANCE_TRAINING,
 ];
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
+const ctModule = AccessModule.CT_COMPLIANCE_TRAINING;
 const duccModule = AccessModule.DATA_USER_CODE_OF_CONDUCT;
 
 // in display order

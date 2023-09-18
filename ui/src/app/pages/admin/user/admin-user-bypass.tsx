@@ -40,7 +40,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
       ? [AccessModule.COMPLIANCE_TRAINING]
       : []),
     ...(user.ctComplianceTrainingBypassTime
-      ? [AccessModule.CTCOMPLIANCETRAINING]
+      ? [AccessModule.CT_COMPLIANCE_TRAINING]
       : []),
     ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERA_COMMONS] : []),
@@ -63,7 +63,7 @@ const moduleToToggleProps: Record<
     name: 'RT Compliance Training',
     'data-test-id': 'rt-compliance-training-toggle',
   },
-  [AccessModule.CTCOMPLIANCETRAINING]: {
+  [AccessModule.CT_COMPLIANCE_TRAINING]: {
     name: 'CT Compliance Training',
     'data-test-id': 'ct-compliance-training-toggle',
   },

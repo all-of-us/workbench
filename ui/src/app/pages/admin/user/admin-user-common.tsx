@@ -661,7 +661,7 @@ export const orderedAccessModules = [
   AccessModule.TWOFACTORAUTH,
   AccessModule.ERA_COMMONS,
   AccessModule.COMPLIANCE_TRAINING,
-  AccessModule.CTCOMPLIANCETRAINING,
+  AccessModule.CT_COMPLIANCE_TRAINING,
   AccessModule.DATA_USER_CODE_OF_CONDUCT,
   AccessModule.IDENTITY,
   AccessModule.PROFILE_CONFIRMATION,

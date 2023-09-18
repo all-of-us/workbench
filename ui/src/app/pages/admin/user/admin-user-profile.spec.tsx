@@ -551,9 +551,9 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.CURRENT,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       {
-        moduleName: AccessModule.CTCOMPLIANCETRAINING,
+        moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(400),
       },
@@ -630,7 +630,7 @@ describe('AdminUserProfile', () => {
       AccessModule.IDENTITY,
       AccessModule.ERA_COMMONS,
       AccessModule.COMPLIANCE_TRAINING,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
     ];
     const expectedModules = orderedAccessModules.filter(
       (moduleName) => !excludedModules.includes(moduleName)

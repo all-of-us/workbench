@@ -1241,7 +1241,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
     }
@@ -1280,7 +1280,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
     }
@@ -1394,7 +1394,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeFalsy();
     }
@@ -1426,7 +1426,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIneligibleModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1451,7 +1451,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIneligibleModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1481,7 +1481,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIncompleteModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIncompleteModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1495,7 +1495,7 @@ describe('DataAccessRequirements', () => {
           modules: allInitialModules.map((moduleName) => {
             if (
               [
-                AccessModule.CTCOMPLIANCETRAINING,
+                AccessModule.CT_COMPLIANCE_TRAINING,
                 AccessModule.DATA_USER_CODE_OF_CONDUCT,
               ].includes(moduleName)
             ) {
@@ -1525,7 +1525,7 @@ describe('DataAccessRequirements', () => {
 
     // Both are clickable.
     expect(
-      findClickableModuleText(container, AccessModule.CTCOMPLIANCETRAINING)
+      findClickableModuleText(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
     expect(
       findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
@@ -1534,10 +1534,10 @@ describe('DataAccessRequirements', () => {
     // Only the first module is active.
     console.error(
       "Bob's burgers: ",
-      findNextCtaForModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     );
     expect(
-      findNextCtaForModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
     expect(
       findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
@@ -1617,7 +1617,7 @@ describe('DataAccessRequirements', () => {
 
   it('should show the correct state when RT and CT modules are complete', async () => {
     expireAllRTModules();
-    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+    addOneModule(oneExpiredModule(AccessModule.CT_COMPLIANCE_TRAINING));
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILE_CONFIRMATION,
@@ -1636,7 +1636,7 @@ describe('DataAccessRequirements', () => {
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
 
@@ -1657,7 +1657,7 @@ describe('DataAccessRequirements', () => {
     });
 
     expireAllRTModules();
-    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+    addOneModule(oneExpiredModule(AccessModule.CT_COMPLIANCE_TRAINING));
 
     updateOneModuleExpirationTime(
       AccessModule.PROFILE_CONFIRMATION,

@@ -256,7 +256,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -499,7 +499,7 @@ export const isExpiringOrExpired = (
 ): boolean => {
   const trainingModules = [
     AccessModule.COMPLIANCE_TRAINING,
-    AccessModule.CTCOMPLIANCETRAINING,
+    AccessModule.CT_COMPLIANCE_TRAINING,
   ];
   const lookback = trainingModules.includes(module)
     ? serverConfigStore.get().config.complianceTrainingRenewalLookback
@@ -620,7 +620,7 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
   const filteredModuleNames = moduleNames.includes(
     AccessModule.COMPLIANCE_TRAINING
   )
-    ? moduleNames.filter((m) => m !== AccessModule.CTCOMPLIANCETRAINING)
+    ? moduleNames.filter((m) => m !== AccessModule.CT_COMPLIANCE_TRAINING)
     : moduleNames;
 
   return Promise.all(
@@ -641,7 +641,7 @@ export const isCompliant = (status: AccessModuleStatus) =>
   isCompleted(status) || isBypassed(status);
 
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
-  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+  if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
     // Currently a user can only be ineligible for CT modules.
     // Note: eRA Commons is an edge case which is handled elsewhere. It is
     // technically also possible for CT eRA commons to be ineligible.

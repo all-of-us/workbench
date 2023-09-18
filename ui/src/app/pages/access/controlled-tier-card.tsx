@@ -35,7 +35,7 @@ const handleRequestAccessButton = (url) => () => {
   window.open(adjustedUrl);
 };
 
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
+const ctModule = AccessModule.CT_COMPLIANCE_TRAINING;
 
 const ControlledTierEraModule = (props: {
   profile: Profile;

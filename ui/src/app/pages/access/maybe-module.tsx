@@ -49,7 +49,7 @@ export const MaybeModule = ({
     [AccessModule.IDENTITY, () => redirectToRas],
     [AccessModule.ERA_COMMONS, () => redirectToNiH],
     [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
-    [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
+    [AccessModule.CT_COMPLIANCE_TRAINING, () => redirectToControlledTraining],
     [
       AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => () => {

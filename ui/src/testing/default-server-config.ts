@@ -30,7 +30,7 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.CTCOMPLIANCETRAINING,
+    name: AccessModule.CT_COMPLIANCE_TRAINING,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: true,

@@ -425,7 +425,7 @@ export const RenewalCardBody = (props: {
       ),
     ],
     [
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       () => (
         <React.Fragment>
           <div style={{ paddingRight: '1.4em', gridArea: 'content' }}>
@@ -560,7 +560,8 @@ export const ModulesForAnnualRenewal = (props: RenewalCardProps) => {
               ...(showModule ? showingStyle : hiddenStyle),
               ...{
                 marginTop:
-                  index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING
+                  index > 0 ||
+                  moduleName === AccessModule.CT_COMPLIANCE_TRAINING
                     ? '1.9em'
                     : '0em',
               },

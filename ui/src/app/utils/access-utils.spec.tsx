@@ -169,7 +169,7 @@ describe('maybeDaysRemaining', () => {
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -196,7 +196,7 @@ describe('maybeDaysRemaining', () => {
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -225,7 +225,7 @@ describe('maybeDaysRemaining', () => {
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -254,7 +254,7 @@ describe('maybeDaysRemaining', () => {
               nowPlusDays(rtExpires) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpires) + ONE_MINUTE_IN_MILLIS,
           },
@@ -656,7 +656,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+      isExpiringOrExpired(expirationDate, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toEqual(true);
   });
 
@@ -671,7 +671,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+      isExpiringOrExpired(expirationDate, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toEqual(false);
   });
 

@@ -85,10 +85,10 @@ const allCompleteOneExpired: AccessModuleStatus[] =
 const allCompleteCtTrainingExpired: AccessModuleStatus[] =
   allCompleteNotExpiring
     .filter(
-      ({ moduleName }) => moduleName !== AccessModule.CTCOMPLIANCETRAINING
+      ({ moduleName }) => moduleName !== AccessModule.CT_COMPLIANCE_TRAINING
     )
     .concat({
-      moduleName: AccessModule.CTCOMPLIANCETRAINING,
+      moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
       completionEpochMillis: Date.now(),
       expirationEpochMillis: nowPlusDays(-1),
     });
