@@ -611,7 +611,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
         ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
         runtimePresets
       )
-    ) || RuntimeConfigurationType.UserOverride;
+    ) || RuntimeConfigurationType.USER_OVERRIDE;
 
   return runtime;
 };

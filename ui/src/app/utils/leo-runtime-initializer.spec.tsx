@@ -188,7 +188,7 @@ describe('RuntimeInitializer', () => {
     mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
-        configurationType: RuntimeConfigurationType.UserOverride,
+        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
         gceConfig: {
           diskSize: 777,
           machineType: 'n1-standard-16',

@@ -110,7 +110,7 @@ describe('RuntimeConfigurationPanel', () => {
     return {
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceWithPdConfig: {
         machineType: 'n1-standard-16',
         persistentDisk: {
@@ -519,7 +519,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
       machineType: 'n1-highmem-8',
@@ -558,7 +558,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
       masterMachineType: 'n1-standard-2',
@@ -716,7 +716,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -780,7 +780,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
   });
 
@@ -885,7 +885,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
     const wrapper = await component();
 
@@ -901,7 +901,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
 
     const wrapper = await component();
@@ -1120,7 +1120,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -1237,7 +1237,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
