@@ -97,6 +97,10 @@ const moduleToToggleProps: Record<
     name: 'Publication Confirmation',
     'data-test-id': 'publication-confirmation-toggle',
   },
+  [AccessModule.RAS_LINK_ID_ME]: {
+    name: 'RAS ID.ME Link',
+    'data-test-id': 'ras-link-id-me-toggle',
+  },
 };
 
 export class AdminUserBypass extends React.Component<Props, State> {
