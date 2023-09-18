@@ -150,7 +150,7 @@ const defaultDemoFilters: any = {
   STATUS: [
     { name: 'Included', value: CohortStatus.INCLUDED },
     { name: 'Excluded', value: CohortStatus.EXCLUDED },
-    { name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW },
+    { name: 'Needs Further Review', value: CohortStatus.NEEDS_FURTHER_REVIEW },
     { name: 'Unreviewed', value: CohortStatus.NOTREVIEWED },
     { name: 'Select All', value: 'Select All' },
   ],
@@ -170,7 +170,7 @@ const formatStatusForText = (status: CohortStatus) => {
   return {
     [CohortStatus.EXCLUDED]: 'Excluded',
     [CohortStatus.INCLUDED]: 'Included',
-    [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
+    [CohortStatus.NEEDS_FURTHER_REVIEW]: 'Needs Further Review',
     [CohortStatus.NOTREVIEWED]: '',
   }[status];
 };

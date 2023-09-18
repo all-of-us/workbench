@@ -542,7 +542,7 @@ export const SidebarContent = fp.flow(
                 { label: 'Included', value: CohortStatus.INCLUDED },
                 {
                   label: 'Needs Further Review',
-                  value: CohortStatus.NEEDSFURTHERREVIEW,
+                  value: CohortStatus.NEEDS_FURTHER_REVIEW,
                 },
               ]}
               value={savingStatus || status}

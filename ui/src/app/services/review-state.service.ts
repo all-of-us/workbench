@@ -27,7 +27,7 @@ export const initialFilterState = {
     STATUS: [
       CohortStatus.INCLUDED,
       CohortStatus.EXCLUDED,
-      CohortStatus.NEEDSFURTHERREVIEW,
+      CohortStatus.NEEDS_FURTHER_REVIEW,
       CohortStatus.NOT_REVIEWED,
       'Select All',
     ],
