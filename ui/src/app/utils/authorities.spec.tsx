@@ -12,7 +12,7 @@ const instAuth = {
 };
 const accessAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.ACCESSCONTROLADMIN],
+  authorities: [Authority.ACCESS_CONTROL_ADMIN],
 };
 const devAuth = {
   ...ProfileStubVariables.PROFILE_STUB,

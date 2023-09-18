@@ -55,7 +55,7 @@ const updateCache = jest.fn();
 
 const ADMIN_PROFILE: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.ACCESSCONTROLADMIN],
+  authorities: [Authority.ACCESS_CONTROL_ADMIN],
 };
 const TARGET_USER_PROFILE = ProfileStubVariables.PROFILE_STUB;
 
