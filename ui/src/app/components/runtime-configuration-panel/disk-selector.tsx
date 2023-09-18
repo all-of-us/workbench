@@ -164,7 +164,7 @@ export const DiskSelector = ({
                   </label>
                   <Dropdown
                     id={'disk-type'}
-                    options={[DiskType.STANDARD, DiskType.Ssd].map((value) => ({
+                    options={[DiskType.STANDARD, DiskType.SSD].map((value) => ({
                       label: diskTypeLabels[value],
                       value,
                     }))}

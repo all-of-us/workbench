@@ -24,7 +24,7 @@ const fakeCromwellConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 50000,
-    diskType: DiskType.Ssd,
+    diskType: DiskType.SSD,
   },
 };
 

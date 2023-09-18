@@ -100,7 +100,7 @@ export enum AnalysisDiffState {
 
 export const diskTypeLabels = {
   [DiskType.STANDARD]: 'Standard Disk',
-  [DiskType.Ssd]: 'Solid State Disk',
+  [DiskType.SSD]: 'Solid State Disk',
 };
 
 export interface DiskConfig {

@@ -1385,7 +1385,7 @@ describe('RuntimeConfigurationPanel', () => {
     await pickDetachableDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickDetachableType(wrapper, DiskType.Ssd);
+    await pickDetachableType(wrapper, DiskType.SSD);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
     await pickDetachableDiskSize(wrapper, 4900);
@@ -1410,7 +1410,7 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   const pickSsdType = async (wrapper) =>
-    pickDetachableType(wrapper, DiskType.Ssd);
+    pickDetachableType(wrapper, DiskType.SSD);
   const decrementDetachableDiskSize = async (wrapper) => {
     const prevSize = await getDetachableDiskSize(wrapper);
     await pickDetachableDiskSize(wrapper, prevSize - 1);
