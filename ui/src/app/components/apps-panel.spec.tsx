@@ -124,13 +124,19 @@ describe('AppsPanel', () => {
     expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
   });
 
-  test.each([true, false])(
-    'should / should not show apps when the RStudio feature flag is %s',
-    async (enableRStudioGKEApp) => {
+  test.each([
+    [true, true],
+    [true, false],
+    [false, true],
+    [false, false],
+  ])(
+    'should / should not show apps based on feature flags enableRStudioGKEApp %s, enableSasGKEApp %s',
+    async (enableRStudioGKEApp, enableSasGKEApp) => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
           enableRStudioGKEApp,
+          enableSasGKEApp,
         },
       });
       appsStub.listAppsResponse = [];
@@ -143,6 +149,10 @@ describe('AppsPanel', () => {
 
       expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
         enableRStudioGKEApp
+      );
+
+      expect(findUnexpandedApp(wrapper, 'SAS').exists()).toEqual(
+        enableSasGKEApp
       );
     }
   );
