@@ -20,7 +20,7 @@ const devAuth = {
 };
 const featuredWsAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.FEATUREDWORKSPACEADMIN],
+  authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
 };
 
 describe('authorities', () => {

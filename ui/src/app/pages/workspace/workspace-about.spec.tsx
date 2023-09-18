@@ -185,7 +185,7 @@ describe('WorkspaceAbout', () => {
   it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
     const profileWithAuth = {
       ...ProfileStubVariables.PROFILE_STUB,
-      authorities: [Authority.FEATUREDWORKSPACEADMIN],
+      authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
     };
     profileStore.set({ profile: profileWithAuth, load, reload, updateCache });
 
