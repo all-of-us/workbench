@@ -288,7 +288,7 @@ describe('WorkspaceEdit', () => {
     workspace.researchPurpose.populationDetails = [
       SpecificPopulationEnum.AGE_CHILDREN,
       SpecificPopulationEnum.RACE_MENA,
-      SpecificPopulationEnum.DISABILITYSTATUS,
+      SpecificPopulationEnum.DISABILITY_STATUS,
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
@@ -318,7 +318,7 @@ describe('WorkspaceEdit', () => {
     expect(
       wrapper
         .find(
-          `[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`
+          `[data-test-id="${SpecificPopulationEnum.DISABILITY_STATUS}-checkbox"]`
         )
         .first()
         .prop('checked')
