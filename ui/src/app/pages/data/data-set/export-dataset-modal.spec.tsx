@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import {
   DataSetApi,
   DataSetExportRequest,
+  DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
   KernelTypeEnum,
   NotebooksApi,
@@ -286,7 +287,7 @@ describe('ExportDatasetModal', () => {
     ];
     const wrapper = mount(component(testProps));
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -304,7 +305,7 @@ describe('ExportDatasetModal', () => {
     wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -317,7 +318,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [];
     const wrapper = mount(component(testProps));
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -351,7 +352,7 @@ describe('ExportDatasetModal', () => {
       notebookName: expectedNotebookName,
       kernelType: KernelTypeEnum.PYTHON,
       generateGenomicsAnalysisCode: true,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL,
+      genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
     });
   });
 
@@ -378,8 +379,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
-        genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
       })
     );
 
@@ -395,7 +395,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
         genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK,
+          DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
       })
     );
 
@@ -410,8 +410,7 @@ describe('ExportDatasetModal', () => {
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
         kernelType: KernelTypeEnum.PYTHON,
-        genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.NONE,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );
   });

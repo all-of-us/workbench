@@ -7,6 +7,7 @@ import {
   BillingStatus,
   DataSet,
   DataSetExportRequest,
+  DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
@@ -66,7 +67,7 @@ export const ExportDatasetModal = ({
   const [existingNotebooks, setExistingNotebooks] = useState(undefined);
   const [kernelType, setKernelType] = useState(KernelTypeEnum.PYTHON);
   const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
-    DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+    DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
   );
   const [isExporting, setIsExporting] = useState(false);
   const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
@@ -209,7 +210,7 @@ export const ExportDatasetModal = ({
 
   function genomicsToolRadioButton(
     displayName: string,
-    genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
   ) {
     return (
       <label
@@ -334,15 +335,15 @@ export const ExportDatasetModal = ({
                 </div>
                 {genomicsToolRadioButton(
                   'Hail',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+                  DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
                 )}
                 {genomicsToolRadioButton(
                   'PLINK',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK
+                  DataSetExportRequestGenomicsAnalysisToolEnum.PLINK
                 )}
                 {genomicsToolRadioButton(
                   'Other VCF-compatible tool',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.NONE
+                  DataSetExportRequestGenomicsAnalysisToolEnum.NONE
                 )}
               </React.Fragment>
             )}
