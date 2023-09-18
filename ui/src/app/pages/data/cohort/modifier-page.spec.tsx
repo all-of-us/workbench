@@ -77,7 +77,7 @@ describe('ModifierPage', () => {
       wrapper.find('[data-test-id="' + ModifierType.AGE_AT_EVENT + '"]').length
     ).toBeGreaterThan(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.NUMOFOCCURRENCES + '"]')
+      wrapper.find('[data-test-id="' + ModifierType.NUM_OF_OCCURRENCES + '"]')
         .length
     ).toBe(0);
     expect(

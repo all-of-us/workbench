@@ -116,7 +116,7 @@ export const MODIFIERS_MAP = {
       [Operator.LESS_THAN_OR_EQUAL_TO]: 'On or Before',
     },
   },
-  [ModifierType.NUMOFOCCURRENCES]: {
+  [ModifierType.NUM_OF_OCCURRENCES]: {
     name: 'Number Of Occurrence Dates',
     operators: {
       [Operator.GREATER_THAN_OR_EQUAL_TO]: 'N or More',

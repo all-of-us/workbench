@@ -275,7 +275,7 @@ export const ModifierPage = fp.flow(
     const initModifiersForm = async () => {
       if (cohortContext.domain !== Domain.SURVEY) {
         formState.push({
-          name: ModifierType.NUMOFOCCURRENCES,
+          name: ModifierType.NUM_OF_OCCURRENCES,
           label: 'Number Of Occurrence Dates',
           type: 'number',
           operator: undefined,

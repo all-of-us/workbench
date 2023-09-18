@@ -79,7 +79,7 @@ const modifierTypeDisplay = (modifierType: ModifierType) => {
       return 'During Visit Type - ';
     case ModifierType.EVENT_DATE:
       return 'Event Date';
-    case ModifierType.NUMOFOCCURRENCES:
+    case ModifierType.NUM_OF_OCCURRENCES:
       return 'Num of Occurrences';
   }
 };
