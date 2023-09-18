@@ -119,7 +119,7 @@ const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
   Promise.reject(
     new Response(
       JSON.stringify({
-        errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+        errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
         parameters: {
           suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
         },

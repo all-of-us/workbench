@@ -142,7 +142,7 @@ const errorToSecuritySuspendedParams = async (
     return null;
   }
   const body = await error?.json();
-  if (body?.errorCode !== ErrorCode.COMPUTESECURITYSUSPENDED) {
+  if (body?.errorCode !== ErrorCode.COMPUTE_SECURITY_SUSPENDED) {
     return null;
   }
 
