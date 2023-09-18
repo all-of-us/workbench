@@ -407,7 +407,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.DELETED,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -615,7 +615,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.HailGenomicAnalysis
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
@@ -670,7 +670,7 @@ describe('RuntimeConfigurationPanel', () => {
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
         status: RuntimeStatus.DELETED,
-        configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
         gceConfig: null,
         gceWithPdConfig: null,
         dataprocConfig: {
@@ -757,7 +757,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.HailGenomicAnalysis
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
@@ -1575,7 +1575,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
@@ -1779,7 +1779,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
@@ -1821,7 +1821,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.STOPPED,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1837,7 +1837,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
       status: RuntimeStatus.RUNNING,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,

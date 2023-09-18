@@ -264,7 +264,7 @@ const PanelMain = fp.flow(
             !currentRuntime?.gceWithPdConfig &&
             [
               RuntimeConfigurationType.GENERAL_ANALYSIS,
-              RuntimeConfigurationType.HailGenomicAnalysis,
+              RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
             ].includes(currentRuntime?.configurationType),
           () => PanelContent.Create,
         ],

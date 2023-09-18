@@ -36,7 +36,7 @@ export const runtimePresets: {
   hailAnalysis: {
     displayName: 'Hail Genomics Analysis',
     runtimeTemplate: {
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: DEFAULT_MACHINE_NAME,
