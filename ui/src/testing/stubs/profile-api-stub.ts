@@ -6,7 +6,7 @@ import {
   ProfileApi,
   UsernameTakenResponse,
 } from 'generated/fetch';
-import { AdminUserListResponse } from 'generated/fetch/api';
+import { AdminUserListResponse } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 

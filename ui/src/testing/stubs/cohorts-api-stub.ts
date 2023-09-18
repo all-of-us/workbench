@@ -7,7 +7,7 @@ import {
   WorkspaceAccessLevel,
   WorkspaceResource,
 } from 'generated/fetch';
-import { CohortListResponse } from 'generated/fetch/api';
+import { CohortListResponse } from 'generated/fetch';
 
 import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 

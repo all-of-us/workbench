@@ -2,7 +2,7 @@ import {
   AccessModule,
   AccessModuleConfig,
   ConfigResponse,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
 
 const defaultAccessModuleConfig: AccessModuleConfig[] = [
   {
