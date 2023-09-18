@@ -243,7 +243,7 @@ const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 const WORKSPACE_OPERATION_POLL_TIMEOUT_MS = 6 * 60 * 1000;
 const WORKSPACE_OPERATION_POLL_INTERVAL_MS = 5 * 1000;
 
-const OPERATION_PENDING_STATES = [
+const OPERATION_PENDING_STATES: Array<WorkspaceOperationStatus> = [
   WorkspaceOperationStatus.PENDING,
   WorkspaceOperationStatus.QUEUED,
   WorkspaceOperationStatus.PROCESSING,
