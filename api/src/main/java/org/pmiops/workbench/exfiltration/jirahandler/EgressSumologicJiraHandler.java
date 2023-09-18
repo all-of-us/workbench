@@ -11,7 +11,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
-import org.pmiops.workbench.exfiltration.ExfiltrationConstants;
+import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.jira.JiraContent;
 import org.pmiops.workbench.jira.JiraService;
@@ -23,7 +23,7 @@ import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service(ExfiltrationConstants.SUMOLOGIC_JIRA_HANDLER_QUALIFIER)
+@Service(ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER)
 public class EgressSumologicJiraHandler extends EgressJiraHandler {
 
   private static final Logger log = Logger.getLogger(EgressSumologicJiraHandler.class.getName());
@@ -66,7 +66,7 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
     if (StringUtils.isNotEmpty(originalEvent.getSrcGkeServiceName())) {
       jiraDescription =
           String.format(
-              "User App Cluster name: %s, VM Name: %s\n",
+              "User App name: %s, App type: %s\n",
               originalEvent.getSrcGkeServiceName(), originalEvent.getVmName());
     } else {
       jiraDescription =

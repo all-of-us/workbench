@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration.impl;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ExfiltrationConstants;
+import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -37,7 +37,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
-      @Qualifier(ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
+      @Qualifier(ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
           EgressJiraHandler egressJiraHandler,
       MailService mailService,
       UserAdminService userAdminService) {

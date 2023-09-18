@@ -1,5 +1,8 @@
 package org.pmiops.workbench.exfiltration;
 
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gceVmNameToUserDatabaseId;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gkeServiceNameToUserDatabaseId;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
@@ -32,8 +35,6 @@ import org.springframework.stereotype.Service;
 public class EgressEventServiceImpl implements EgressEventService {
 
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
-  private static final Pattern VM_PREFIX_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)");
-  private static final String USER_ID_GROUP_NAME = "userid";
   private static final Duration MAXIMUM_EXPECTED_EVENT_AGE = Duration.ofMinutes(5);
   private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
@@ -97,14 +98,13 @@ public class EgressEventServiceImpl implements EgressEventService {
 
       logger.warning(
           String.format(
-              "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM name %s)",
-              workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmName()));
+              "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, username %s)",
+              workspaceNamespace, event.getProjectName(), event.getEgressMib(), egressUser.get().getUsername()));
       this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
 
       Optional<DbEgressEvent> maybeEvent =
           this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
       maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
-
   }
 
   @NotNull
@@ -116,13 +116,11 @@ public class EgressEventServiceImpl implements EgressEventService {
         && event.getVmPrefix().startsWith("all-of-us")) {
           return gceVmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
     }
-
     // This is the GKE case
     if (StringUtils.isNotEmpty(event.getSrcGkeServiceName())) {
       return
           gkeServiceNameToUserDatabaseId(event.getSrcGkeServiceName()).flatMap(userService::getByDatabaseId);
     }
-
     return Optional.empty();
   }
 
@@ -189,13 +187,5 @@ public class EgressEventServiceImpl implements EgressEventService {
             userMaybe.get(), workspaceMaybe.get(), event.getTimeWindowDuration(), lookbackLimit);
 
     return !matchingEvents.isEmpty();
-  }
-
-  private Optional<Long> gceVmNameToUserDatabaseId(String vmPrefix) {
-    return Matchers.getGroup(VM_PREFIX_PATTERN, vmPrefix, USER_ID_GROUP_NAME).map(Long::parseLong);
-  }
-
-  private Optional<Long> gkeServiceNameToUserDatabaseId(String gkeServiceName) {
-    return Matchers.getGroup(VM_PREFIX_PATTERN, gkeServiceName, USER_ID_GROUP_NAME).map(Long::parseLong);
   }
 }

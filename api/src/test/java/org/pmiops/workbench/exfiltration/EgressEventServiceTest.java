@@ -156,7 +156,7 @@ public class EgressEventServiceTest {
         .when(leonardoApiClient)
         .listAppsInProjectAsService(dbWorkspace.getGoogleProject());
 
-    doReturn(Collections.singletonList(dbUser1)).when(mockUserService).findUsersByUsernames(any());
+    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
 
     egressEventService.handleEvent(event);
     verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
@@ -286,7 +286,7 @@ public class EgressEventServiceTest {
     return new SumologicEgressEvent()
         .projectName(DEFAULT_GOOGLE_PROJECT)
         .vmName("some-vm")
-        .srcGkeServiceName("all-of-us-" + user.getUserId() + "sas-123")
+        .srcGkeServiceName("all-of-us-" + user.getUserId() + "rstudio-123")
         .egressMib(120.7)
         .egressMibThreshold(100.0)
         .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())

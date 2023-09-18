@@ -1,6 +1,6 @@
 package org.pmiops.workbench.actionaudit.bucket;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.THRESHOLD_MB;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.THRESHOLD_MB;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;

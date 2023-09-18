@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration.impl;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.SUMOLOGIC_JIRA_HANDLER_QUALIFIER;
 
 import jakarta.mail.MessagingException;
 import java.time.Clock;
@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.model.DbEgressEvent;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exfiltration.EgressRemediationAction;
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
-import org.pmiops.workbench.exfiltration.ExfiltrationConstants;
+import org.pmiops.workbench.exfiltration.ExfiltrationUtils;
 import org.pmiops.workbench.exfiltration.jirahandler.EgressJiraHandler;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service(ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
+@Service(ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER)
 public class EgressSumologicRemediationService extends EgressRemediationService {
 
   private final EgressJiraHandler egressJiraHandler;

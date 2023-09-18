@@ -10,7 +10,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
