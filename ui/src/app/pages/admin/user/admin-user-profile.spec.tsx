@@ -314,10 +314,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     saveButton = wrapper.find('[data-test-id="update-profile"]');
@@ -360,10 +360,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
@@ -403,10 +403,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     await simulateTextInputChange(

@@ -64,7 +64,7 @@ export const AccountCreationOptions = {
     },
     {
       label: 'Research associate (post-doctoral; early/mid career)',
-      value: InstitutionalRole.POSTDOCTORAL,
+      value: InstitutionalRole.POST_DOCTORAL,
     },
     {
       label: 'Senior Researcher (PI/Team Lead, senior scientist)',
@@ -94,7 +94,7 @@ export const AccountCreationOptions = {
       // identical to the HEALTHCENTERNONPROFIT roles
       roles: [
         InstitutionalRole.PREDOCTORAL,
-        InstitutionalRole.POSTDOCTORAL,
+        InstitutionalRole.POST_DOCTORAL,
         InstitutionalRole.SENIORRESEARCHER,
         InstitutionalRole.PROJECTPERSONNEL,
         InstitutionalRole.OTHER,
@@ -105,7 +105,7 @@ export const AccountCreationOptions = {
       // identical to the INDUSTRY roles
       roles: [
         InstitutionalRole.PREDOCTORAL,
-        InstitutionalRole.POSTDOCTORAL,
+        InstitutionalRole.POST_DOCTORAL,
         InstitutionalRole.SENIORRESEARCHER,
         InstitutionalRole.PROJECTPERSONNEL,
         InstitutionalRole.OTHER,
