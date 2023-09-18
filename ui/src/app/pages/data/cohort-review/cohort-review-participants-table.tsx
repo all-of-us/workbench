@@ -151,7 +151,7 @@ const defaultDemoFilters: any = {
     { name: 'Included', value: CohortStatus.INCLUDED },
     { name: 'Excluded', value: CohortStatus.EXCLUDED },
     { name: 'Needs Further Review', value: CohortStatus.NEEDS_FURTHER_REVIEW },
-    { name: 'Unreviewed', value: CohortStatus.NOTREVIEWED },
+    { name: 'Unreviewed', value: CohortStatus.NOT_REVIEWED },
     { name: 'Select All', value: 'Select All' },
   ],
 };
@@ -171,7 +171,7 @@ const formatStatusForText = (status: CohortStatus) => {
     [CohortStatus.EXCLUDED]: 'Excluded',
     [CohortStatus.INCLUDED]: 'Included',
     [CohortStatus.NEEDS_FURTHER_REVIEW]: 'Needs Further Review',
-    [CohortStatus.NOTREVIEWED]: '',
+    [CohortStatus.NOT_REVIEWED]: '',
   }[status];
 };
 const mapData = (participant: ParticipantCohortStatus) => {

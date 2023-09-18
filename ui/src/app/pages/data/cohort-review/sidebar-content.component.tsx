@@ -537,7 +537,7 @@ export const SidebarContent = fp.flow(
           >
             <Select
               options={[
-                { label: '--', value: CohortStatus.NOTREVIEWED },
+                { label: '--', value: CohortStatus.NOT_REVIEWED },
                 { label: 'Excluded', value: CohortStatus.EXCLUDED },
                 { label: 'Included', value: CohortStatus.INCLUDED },
                 {
