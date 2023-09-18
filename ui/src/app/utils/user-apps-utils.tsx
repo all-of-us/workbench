@@ -17,6 +17,7 @@ import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
+import { fetchWithErrorModal } from './errors';
 import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
 
@@ -90,13 +91,14 @@ const localizeUserApp = (
   appType: AppType,
   fileNames: Array<string>,
   playgroundMode: boolean
-) => {
-  appsApi().localizeApp(namespace, appName, {
-    fileNames,
-    playgroundMode,
-    appType,
-  });
-};
+) =>
+  fetchWithErrorModal(() =>
+    appsApi().localizeApp(namespace, appName, {
+      fileNames,
+      playgroundMode,
+      appType,
+    })
+  );
 
 export const resumeUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
@@ -114,7 +116,7 @@ export function unattachedDiskExists(
   return !app && disk !== undefined;
 }
 
-export const openRStudio = (
+export const openGkeApp = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
@@ -128,28 +130,13 @@ export const openRStudio = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
-export const openSASApp = (
-  workspaceNamespace: string,
-  userApp: UserAppEnvironment
-) => {
-  // TODO: same action as RStudio?
-  // localizeUserApp(
-  //   workspaceNamespace,
-  //   userApp.appName,
-  //   userApp.appType,
-  //   [],
-  //   false
-  // );
-  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
-};
-
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   userApps: ListAppsResponse
 ) => {
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
-    openRStudio(workspaceNamespace, userApp);
+    openGkeApp(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }
@@ -161,7 +148,7 @@ export const openSASOrConfigPanel = (
 ) => {
   const userApp = findApp(userApps, UIAppType.SAS);
   if (userApp?.status === AppStatus.RUNNING) {
-    openSASApp(workspaceNamespace, userApp);
+    openGkeApp(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(sasConfigIconId);
   }
