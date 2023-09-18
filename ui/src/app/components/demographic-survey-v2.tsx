@@ -394,22 +394,22 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 label: 'Asian',
                 value: EthnicCategory.ASIAN,
                 subOptions: [
-                  { label: 'Asian Indian', value: EthnicCategory.ASIANINDIAN },
-                  { label: 'Cambodian', value: EthnicCategory.ASIANCAMBODIAN },
-                  { label: 'Chinese', value: EthnicCategory.ASIANCHINESE },
-                  { label: 'Filipino', value: EthnicCategory.ASIANFILIPINO },
-                  { label: 'Hmong', value: EthnicCategory.ASIANHMONG },
-                  { label: 'Japanese', value: EthnicCategory.ASIANJAPANESE },
-                  { label: 'Korean', value: EthnicCategory.ASIANKOREAN },
-                  { label: 'Lao', value: EthnicCategory.ASIANLAO },
-                  { label: 'Pakistani', value: EthnicCategory.ASIANPAKISTANI },
+                  { label: 'Asian Indian', value: EthnicCategory.ASIAN_INDIAN },
+                  { label: 'Cambodian', value: EthnicCategory.ASIAN_CAMBODIAN },
+                  { label: 'Chinese', value: EthnicCategory.ASIAN_CHINESE },
+                  { label: 'Filipino', value: EthnicCategory.ASIAN_FILIPINO },
+                  { label: 'Hmong', value: EthnicCategory.ASIAN_HMONG },
+                  { label: 'Japanese', value: EthnicCategory.ASIAN_JAPANESE },
+                  { label: 'Korean', value: EthnicCategory.ASIAN_KOREAN },
+                  { label: 'Lao', value: EthnicCategory.ASIAN_LAO },
+                  { label: 'Pakistani', value: EthnicCategory.ASIAN_PAKISTANI },
                   {
                     label: 'Vietnamese',
-                    value: EthnicCategory.ASIANVIETNAMESE,
+                    value: EthnicCategory.ASIAN_VIETNAMESE,
                   },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.ASIANOTHER,
+                    value: EthnicCategory.ASIAN_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityAsianOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -438,24 +438,24 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'African American',
-                    value: EthnicCategory.BLACKAA,
+                    value: EthnicCategory.BLACK_AA,
                   },
-                  { label: 'Barbadian', value: EthnicCategory.BLACKBARBADIAN },
-                  { label: 'Caribbean', value: EthnicCategory.BLACKCARIBBEAN },
-                  { label: 'Ethiopian', value: EthnicCategory.BLACKETHIOPIAN },
-                  { label: 'Ghanaian', value: EthnicCategory.BLACKGHANAIAN },
-                  { label: 'Haitian', value: EthnicCategory.BLACKHAITIAN },
-                  { label: 'Jamaican', value: EthnicCategory.BLACKJAMAICAN },
-                  { label: 'Liberian', value: EthnicCategory.BLACKLIBERIAN },
-                  { label: 'Nigerian', value: EthnicCategory.BLACKNIGERIAN },
-                  { label: 'Somali', value: EthnicCategory.BLACKSOMALI },
+                  { label: 'Barbadian', value: EthnicCategory.BLACK_BARBADIAN },
+                  { label: 'Caribbean', value: EthnicCategory.BLACK_CARIBBEAN },
+                  { label: 'Ethiopian', value: EthnicCategory.BLACK_ETHIOPIAN },
+                  { label: 'Ghanaian', value: EthnicCategory.BLACK_GHANAIAN },
+                  { label: 'Haitian', value: EthnicCategory.BLACK_HAITIAN },
+                  { label: 'Jamaican', value: EthnicCategory.BLACK_JAMAICAN },
+                  { label: 'Liberian', value: EthnicCategory.BLACK_LIBERIAN },
+                  { label: 'Nigerian', value: EthnicCategory.BLACK_NIGERIAN },
+                  { label: 'Somali', value: EthnicCategory.BLACK_SOMALI },
                   {
                     label: 'South African',
-                    value: EthnicCategory.BLACKSOUTHAFRICAN,
+                    value: EthnicCategory.BLACK_SOUTH_AFRICAN,
                   },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.BLACKOTHER,
+                    value: EthnicCategory.BLACK_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityBlackOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -484,34 +484,37 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'Colombian',
-                    value: EthnicCategory.HISPANICCOLOMBIAN,
+                    value: EthnicCategory.HISPANIC_COLOMBIAN,
                   },
-                  { label: 'Cuban', value: EthnicCategory.HISPANICCUBAN },
+                  { label: 'Cuban', value: EthnicCategory.HISPANIC_CUBAN },
                   {
                     label: 'Dominican',
-                    value: EthnicCategory.HISPANICDOMINICAN,
+                    value: EthnicCategory.HISPANIC_DOMINICAN,
                   },
                   {
                     label: 'Ecuadorian',
-                    value: EthnicCategory.HISPANICECUADORIAN,
+                    value: EthnicCategory.HISPANIC_ECUADORIAN,
                   },
-                  { label: 'Honduran', value: EthnicCategory.HISPANICHONDURAN },
+                  {
+                    label: 'Honduran',
+                    value: EthnicCategory.HISPANIC_HONDURAN,
+                  },
                   {
                     label: 'Mexican or Mexican American',
-                    value: EthnicCategory.HISPANICMEXICAN,
+                    value: EthnicCategory.HISPANIC_MEXICAN,
                   },
                   {
                     label: 'Puerto Rican',
-                    value: EthnicCategory.HISPANICPUERTORICAN,
+                    value: EthnicCategory.HISPANIC_PUERTO_RICAN,
                   },
                   {
                     label: 'Salvadoran',
-                    value: EthnicCategory.HISPANICSALVADORAN,
+                    value: EthnicCategory.HISPANIC_SALVADORAN,
                   },
-                  { label: 'Spanish', value: EthnicCategory.HISPANICSPANISH },
+                  { label: 'Spanish', value: EthnicCategory.HISPANIC_SPANISH },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.HISPANICOTHER,
+                    value: EthnicCategory.HISPANIC_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityHispanicOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -540,29 +543,29 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'Afghan',
-                    value: EthnicCategory.MENAAFGHAN,
+                    value: EthnicCategory.MENA_AFGHAN,
                   },
-                  { label: 'Algerian', value: EthnicCategory.MENAALGERIAN },
-                  { label: 'Egyptian', value: EthnicCategory.MENAEGYPTIAN },
+                  { label: 'Algerian', value: EthnicCategory.MENA_ALGERIAN },
+                  { label: 'Egyptian', value: EthnicCategory.MENA_EGYPTIAN },
                   {
                     label: 'Iranian',
-                    value: EthnicCategory.MENAIRANIAN,
+                    value: EthnicCategory.MENA_IRANIAN,
                   },
-                  { label: 'Iraqi', value: EthnicCategory.MENAIRAQI },
-                  { label: 'Israeli', value: EthnicCategory.MENAISRAELI },
+                  { label: 'Iraqi', value: EthnicCategory.MENA_IRAQI },
+                  { label: 'Israeli', value: EthnicCategory.MENA_ISRAELI },
                   {
                     label: 'Lebanese',
-                    value: EthnicCategory.MENALEBANESE,
+                    value: EthnicCategory.MENA_LEBANESE,
                   },
                   {
                     label: 'Moroccan',
-                    value: EthnicCategory.MENAMOROCCAN,
+                    value: EthnicCategory.MENA_MOROCCAN,
                   },
-                  { label: 'Syrian', value: EthnicCategory.MENASYRIAN },
-                  { label: 'Tunisian', value: EthnicCategory.MENATUNISIAN },
+                  { label: 'Syrian', value: EthnicCategory.MENA_SYRIAN },
+                  { label: 'Tunisian', value: EthnicCategory.MENA_TUNISIAN },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.MENAOTHER,
+                    value: EthnicCategory.MENA_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityMeNaOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -591,31 +594,31 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'Chamorro',
-                    value: EthnicCategory.NHPICHAMORRO,
+                    value: EthnicCategory.NHPI_CHAMORRO,
                   },
-                  { label: 'Chuukese', value: EthnicCategory.NHPICHUUKESE },
-                  { label: 'Fijian', value: EthnicCategory.NHPIFIJIAN },
+                  { label: 'Chuukese', value: EthnicCategory.NHPI_CHUUKESE },
+                  { label: 'Fijian', value: EthnicCategory.NHPI_FIJIAN },
                   {
                     label: 'Marshallese',
-                    value: EthnicCategory.NHPIMARSHALLESE,
+                    value: EthnicCategory.NHPI_MARSHALLESE,
                   },
                   {
                     label: 'Native Hawaiian',
-                    value: EthnicCategory.NHPIHAWAIIAN,
+                    value: EthnicCategory.NHPI_HAWAIIAN,
                   },
-                  { label: 'Palauan', value: EthnicCategory.NHPIPALAUAN },
+                  { label: 'Palauan', value: EthnicCategory.NHPI_PALAUAN },
                   {
                     label: 'Samoan',
-                    value: EthnicCategory.NHPISAMOAN,
+                    value: EthnicCategory.NHPI_SAMOAN,
                   },
                   {
                     label: 'Tahitian',
-                    value: EthnicCategory.NHPITAHITIAN,
+                    value: EthnicCategory.NHPI_TAHITIAN,
                   },
-                  { label: 'Tongan', value: EthnicCategory.NHPITONGAN },
+                  { label: 'Tongan', value: EthnicCategory.NHPI_TONGAN },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.NHPIOTHER,
+                    value: EthnicCategory.NHPI_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityNhPiOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -644,33 +647,33 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                 subOptions: [
                   {
                     label: 'Dutch',
-                    value: EthnicCategory.WHITEDUTCH,
+                    value: EthnicCategory.WHITE_DUTCH,
                   },
-                  { label: 'English', value: EthnicCategory.WHITEENGLISH },
-                  { label: 'European', value: EthnicCategory.WHITEEUROPEAN },
+                  { label: 'English', value: EthnicCategory.WHITE_ENGLISH },
+                  { label: 'European', value: EthnicCategory.WHITE_EUROPEAN },
                   {
                     label: 'French',
-                    value: EthnicCategory.WHITEFRENCH,
+                    value: EthnicCategory.WHITE_FRENCH,
                   },
                   {
                     label: 'German',
-                    value: EthnicCategory.WHITEGERMAN,
+                    value: EthnicCategory.WHITE_GERMAN,
                   },
-                  { label: 'Irish', value: EthnicCategory.WHITEIRISH },
+                  { label: 'Irish', value: EthnicCategory.WHITE_IRISH },
                   {
                     label: 'Italian',
-                    value: EthnicCategory.WHITEITALIAN,
+                    value: EthnicCategory.WHITE_ITALIAN,
                   },
                   {
                     label: 'Norwegian',
-                    value: EthnicCategory.WHITENORWEGIAN,
+                    value: EthnicCategory.WHITE_NORWEGIAN,
                   },
-                  { label: 'Polish', value: EthnicCategory.WHITEPOLISH },
-                  { label: 'Scottish', value: EthnicCategory.WHITESCOTTISH },
-                  { label: 'Spanish', value: EthnicCategory.WHITESPANISH },
+                  { label: 'Polish', value: EthnicCategory.WHITE_POLISH },
+                  { label: 'Scottish', value: EthnicCategory.WHITE_SCOTTISH },
+                  { label: 'Spanish', value: EthnicCategory.WHITE_SPANISH },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.WHITEOTHER,
+                    value: EthnicCategory.WHITE_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityWhiteOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
@@ -697,11 +700,11 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label: 'Prefer not to answer',
-                value: EthnicCategory.PREFERNOTTOANSWER,
+                value: EthnicCategory.PREFER_NOT_TO_ANSWER,
                 onChange: (checked) => {
                   onUpdate(
                     'ethnicCategories',
-                    checked ? [EthnicCategory.PREFERNOTTOANSWER] : []
+                    checked ? [EthnicCategory.PREFER_NOT_TO_ANSWER] : []
                   );
                   if (checked) {
                     [
@@ -738,7 +741,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 'ethnicCategories',
-                value.filter((v) => v !== EthnicCategory.PREFERNOTTOANSWER)
+                value.filter((v) => v !== EthnicCategory.PREFER_NOT_TO_ANSWER)
               )
             }
             enableExpansionControls
@@ -758,14 +761,14 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             options={[
               { label: 'Genderqueer', value: GenderIdentityV2.GENDERQUEER },
               { label: 'Man', value: GenderIdentityV2.MAN },
-              { label: 'Non-binary', value: GenderIdentityV2.NONBINARY },
+              { label: 'Non-binary', value: GenderIdentityV2.NON_BINARY },
               {
                 label: 'Trans man/Transgender man',
-                value: GenderIdentityV2.TRANSMAN,
+                value: GenderIdentityV2.TRANS_MAN,
               },
               {
                 label: 'Trans woman/Transgender woman',
-                value: GenderIdentityV2.TRANSWOMAN,
+                value: GenderIdentityV2.TRANS_WOMAN,
               },
               {
                 label: 'Two Spirit',
@@ -783,11 +786,11 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label: 'Prefer not to answer',
-                value: GenderIdentityV2.PREFERNOTTOANSWER,
+                value: GenderIdentityV2.PREFER_NOT_TO_ANSWER,
                 onChange: (checked) => {
                   onUpdate(
                     'genderIdentities',
-                    checked ? [GenderIdentityV2.PREFERNOTTOANSWER] : []
+                    checked ? [GenderIdentityV2.PREFER_NOT_TO_ANSWER] : []
                   );
                   if (checked) {
                     onUpdate('genderOtherText', null);
@@ -815,7 +818,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 GENDER_IDENTITIES,
-                value.filter((v) => v !== GenderIdentityV2.PREFERNOTTOANSWER)
+                value.filter((v) => v !== GenderIdentityV2.PREFER_NOT_TO_ANSWER)
               )
             }
           />
@@ -831,7 +834,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { label: 'Male', value: SexAtBirthV2.MALE },
               {
                 label: 'Prefer not to answer',
-                value: SexAtBirthV2.PREFERNOTTOANSWER,
+                value: SexAtBirthV2.PREFER_NOT_TO_ANSWER,
               },
               {
                 label: NONE_FULLY_DESCRIBE,
@@ -878,7 +881,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               { label: 'Queer', value: SexualOrientationV2.QUEER },
               {
                 label: 'Same-gender loving',
-                value: SexualOrientationV2.SAMEGENDER,
+                value: SexualOrientationV2.SAME_GENDER,
               },
               {
                 label: 'Straight or heterosexual',
@@ -896,11 +899,11 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               },
               {
                 label: 'Prefer not to answer',
-                value: SexualOrientationV2.PREFERNOTTOANSWER,
+                value: SexualOrientationV2.PREFER_NOT_TO_ANSWER,
                 onChange: (checked) => {
                   onUpdate(
                     'sexualOrientations',
-                    checked ? [SexualOrientationV2.PREFERNOTTOANSWER] : []
+                    checked ? [SexualOrientationV2.PREFER_NOT_TO_ANSWER] : []
                   );
                   if (checked) {
                     onUpdate('orientationOtherText', null);
@@ -928,7 +931,9 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             onChange={(value) =>
               onUpdate(
                 SEXUAL_ORIENTATIONS,
-                value.filter((v) => v !== SexualOrientationV2.PREFERNOTTOANSWER)
+                value.filter(
+                  (v) => v !== SexualOrientationV2.PREFER_NOT_TO_ANSWER
+                )
               )
             }
           />
@@ -1040,12 +1045,12 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
             options={[
               {
                 label: 'Never attended school/no formal education',
-                value: EducationV2.NOEDUCATION,
+                value: EducationV2.NO_EDUCATION,
               },
               {
                 label:
                   'Primary/Middle School/High School (Grades 1 through 12/GED)',
-                value: EducationV2.GRADES112,
+                value: EducationV2.GRADES_1_12,
               },
               {
                 label:
@@ -1055,14 +1060,14 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
               {
                 label:
                   'College graduate (4 years or more) or current post-graduate trainee',
-                value: EducationV2.COLLEGEGRADUATE,
+                value: EducationV2.COLLEGE_GRADUATE,
               },
 
               { label: 'Masters Degree', value: EducationV2.MASTER },
               { label: 'Doctorate', value: EducationV2.DOCTORATE },
               {
                 label: 'Prefer not to answer',
-                value: EducationV2.PREFERNOTTOANSWER,
+                value: EducationV2.PREFER_NOT_TO_ANSWER,
               },
             ]}
             selected={survey.education}
