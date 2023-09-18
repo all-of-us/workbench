@@ -1505,10 +1505,12 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: allInitialModules.map((moduleName) => {
             if (
-              [
-                AccessModule.CT_COMPLIANCE_TRAINING,
-                AccessModule.DATA_USER_CODE_OF_CONDUCT,
-              ].includes(moduleName)
+              (
+                [
+                  AccessModule.CT_COMPLIANCE_TRAINING,
+                  AccessModule.DATA_USER_CODE_OF_CONDUCT,
+                ] as Array<AccessModule>
+              ).includes(moduleName)
             ) {
               return { moduleName };
             }
