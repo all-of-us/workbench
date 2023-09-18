@@ -1182,7 +1182,9 @@ export const useCustomRuntime = (
 
       const runtimeExists =
         !!runtime &&
-        ![RuntimeStatus.ERROR, RuntimeStatus.DELETED].includes(runtime.status);
+        !(
+          [RuntimeStatus.ERROR, RuntimeStatus.DELETED] as Array<RuntimeStatus>
+        ).includes(runtime.status);
       try {
         if (runtimeExists) {
           await applyRuntimeUpdate();
@@ -1277,11 +1279,16 @@ export enum PanelContent {
 
 // should we show the runtime in the UI?
 export const isVisible = (status: RuntimeStatus) =>
-  status && ![RuntimeStatus.DELETED, RuntimeStatus.ERROR].includes(status);
+  status &&
+  !(
+    [RuntimeStatus.DELETED, RuntimeStatus.ERROR] as Array<RuntimeStatus>
+  ).includes(status);
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
-  [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED].includes(status);
+  (
+    [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+  ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
   runtime?.labels?.creator;
