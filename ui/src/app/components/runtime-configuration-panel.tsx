@@ -463,9 +463,9 @@ const PanelMain = fp.flow(
     // where we get 'status' from
     const runtimeCanBeUpdated =
       environmentChanged &&
-      [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED].includes(
-        status as RuntimeStatus
-      ) &&
+      (
+        [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+      ).includes(status as RuntimeStatus) &&
       runtimeCanBeCreated;
 
     const renderUpdateButton = () => {
