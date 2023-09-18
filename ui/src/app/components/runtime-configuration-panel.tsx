@@ -262,10 +262,12 @@ const PanelMain = fp.flow(
           // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
           currentRuntime?.status === RuntimeStatus.DELETED &&
             !currentRuntime?.gceWithPdConfig &&
-            [
-              RuntimeConfigurationType.GENERAL_ANALYSIS,
-              RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
-            ].includes(currentRuntime?.configurationType),
+            (
+              [
+                RuntimeConfigurationType.GENERAL_ANALYSIS,
+                RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+              ] as Array<RuntimeConfigurationType>
+            ).includes(currentRuntime?.configurationType),
           () => PanelContent.Create,
         ],
         () => PanelContent.Customize
