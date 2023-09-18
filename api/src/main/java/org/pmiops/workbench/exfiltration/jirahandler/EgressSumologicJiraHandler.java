@@ -1,5 +1,7 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.gkeServiceNameToAppType;
+
 import java.time.Instant;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -67,7 +69,8 @@ public class EgressSumologicJiraHandler extends EgressJiraHandler {
       jiraDescription =
           String.format(
               "User App name: %s, App type: %s\n",
-              originalEvent.getSrcGkeServiceName(), originalEvent.getVmName());
+              originalEvent.getSrcGkeServiceName(),
+              gkeServiceNameToAppType(originalEvent.getSrcGkeServiceName()));
     } else {
       jiraDescription =
           String.format("Notebook server VM prefix: %s\n", originalEvent.getVmPrefix());

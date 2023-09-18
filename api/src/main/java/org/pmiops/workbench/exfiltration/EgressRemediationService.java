@@ -30,6 +30,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.user.UserAdminService;
+import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 
 /** Service for automated egress alert remediation. */
 public abstract class EgressRemediationService {
@@ -41,11 +42,6 @@ public abstract class EgressRemediationService {
   // case (still suspend, to be safe).
   private static final Duration EGRESS_NOTIFY_DEBOUNCE_TIME = Duration.ofHours(1L);
 
-  // The maximum egress user is allowed when bypassed for large file download. If more than this
-  // user will still trigger egress alert.
-  // Current value is 100GB
-  private static final int EGRESS_HARD_LIMIT_MB = 100 * 1024;
-
   private static final Logger log = Logger.getLogger(EgressRemediationService.class.getName());
 
   private final Clock clock;
@@ -56,6 +52,8 @@ public abstract class EgressRemediationService {
   private final EgressEventDao egressEventDao;
   private final UserAdminService userAdminService;
 
+  private final EgressEventMapper egressEventMapper;
+
   public EgressRemediationService(
       Clock clock,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -63,6 +61,7 @@ public abstract class EgressRemediationService {
       LeonardoApiClient leonardoNotebooksClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventDao egressEventDao,
+      EgressEventMapper egressEventMapper,
       UserAdminService userAdminService) {
     this.clock = clock;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -70,6 +69,7 @@ public abstract class EgressRemediationService {
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventDao = egressEventDao;
+    this.egressEventMapper = egressEventMapper;
     this.userAdminService = userAdminService;
   }
 
@@ -94,18 +94,11 @@ public abstract class EgressRemediationService {
               "egress event %d has no associated user, please investigate", egressEventId));
     }
 
-    if (userAdminService.getCurrentEgressBypassWindow(user.getUserId()) != null
-        && event.getEgressMegabytes() != null
-        && event.getEgressMegabytes() < EGRESS_HARD_LIMIT_MB) {
-      log.info(
-          String.format(
-              "Skip egress event %d because user is bypassed for large file download",
-              egressEventId));
+    if (shouldSkipEgressEvent(event)) {
       egressEventDao.save(event.setStatus(DbEgressEventStatus.BYPASSED));
       egressEventAuditor.fireRemediateEgressEvent(event, null);
       return;
     }
-
     // Gather/merge past alerts into an incident history
     int egressIncidentCount = getEgressIncidentCountForUser(user);
 
@@ -161,6 +154,8 @@ public abstract class EgressRemediationService {
 
   protected abstract void logEvent(DbEgressEvent event, EgressRemediationAction action)
       throws ApiException;
+
+  protected abstract boolean shouldSkipEgressEvent(DbEgressEvent event);
 
   /**
    * Returns a heuristic count of logical egress "incidents", which are created by merging proximal

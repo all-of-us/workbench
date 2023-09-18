@@ -19,6 +19,7 @@ import org.pmiops.workbench.jira.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.user.UserAdminService;
+import org.pmiops.workbench.utils.mappers.EgressEventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
       @Qualifier(ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER)
           EgressJiraHandler egressJiraHandler,
       MailService mailService,
+      EgressEventMapper egressEventMapper,
       UserAdminService userAdminService) {
     super(
         clock,
@@ -48,6 +50,7 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
         leonardoNotebooksClient,
         egressEventAuditor,
         egressEventDao,
+        egressEventMapper,
         userAdminService);
     this.egressJiraHandler = egressJiraHandler;
     this.mailService = mailService;
@@ -63,5 +66,10 @@ public class EgressObjectLengthsRemediationService extends EgressRemediationServ
   @Override
   protected void logEvent(DbEgressEvent event, EgressRemediationAction action) throws ApiException {
     egressJiraHandler.logEventToJira(event, action);
+  }
+
+  @Override
+  protected boolean shouldSkipEgressEvent(DbEgressEvent event) {
+    return false;
   }
 }

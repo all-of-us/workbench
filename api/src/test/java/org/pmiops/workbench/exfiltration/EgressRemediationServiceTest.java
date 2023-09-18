@@ -60,6 +60,7 @@ import org.pmiops.workbench.jira.model.IssueUpdateDetails;
 import org.pmiops.workbench.jira.model.SearchResults;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.EgressBypassWindow;
 import org.pmiops.workbench.model.SumologicEgressEvent;
 import org.pmiops.workbench.test.FakeClock;
@@ -389,7 +390,7 @@ public class EgressRemediationServiceTest {
     workbenchConfig.egressAlertRemediationPolicy.escalations =
         ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
 
-    long eventId = saveNewGKEEvent();
+    long eventId = saveNewGKEEvent(AppType.RSTUDIO);
     egressRemediationService.remediateEgressEvent(eventId);
 
     assertThat(getDbUser().getDisabled()).isFalse();
@@ -400,6 +401,19 @@ public class EgressRemediationServiceTest {
 
     verify(mockMailService)
         .sendEgressRemediationEmail(any(), eq(EgressRemediationAction.SUSPEND_COMPUTE));
+  }
+
+  @Test
+  public void testRemediateGKEEgressEvent_skipCromwellApp() throws Exception {
+    workbenchConfig.egressAlertRemediationPolicy.escalations =
+        ImmutableList.of(suspendComputeAfter(1, Duration.ofMinutes(1)));
+
+    long eventId = saveNewGKEEvent(AppType.CROMWELL);
+    egressRemediationService.remediateEgressEvent(eventId);
+
+    assertThat(getDbUser().getDisabled()).isFalse();
+    assertComputeNotSuspended();
+    verifyNoInteractions(mockLeonardoNotebooksClient);
   }
 
   @Test
@@ -546,8 +560,8 @@ public class EgressRemediationServiceTest {
     return saveNewEvent(newGCEEvent());
   }
 
-  private long saveNewGKEEvent() {
-    return saveNewEvent(newGKEEvent());
+  private long saveNewGKEEvent(AppType appType) {
+    return saveNewEvent(newGKEEvent(appType));
   }
 
   private long saveNewEvent(DbEgressEvent e) {
@@ -597,7 +611,7 @@ public class EgressRemediationServiceTest {
                         .vmPrefix(getDbUser().getRuntimeName())));
   }
 
-  private DbEgressEvent newGKEEvent() {
+  private DbEgressEvent newGKEEvent(AppType appType) {
     return new DbEgressEvent()
         .setUser(getDbUser())
         .setWorkspace(dbWorkspace)
@@ -616,7 +630,8 @@ public class EgressRemediationServiceTest {
                         .timeWindowDuration(Duration.ofHours(1L).toMillis())
                         .vmPrefix("some-vm-name")
                         .vmName("some-vm-name")
-                        .srcGkeServiceName("all-of-us-sas-random")));
+                        .srcGkeServiceName(
+                            "all-of-us-123-" + appType.toString().toLowerCase() + "-random")));
   }
 
   private Escalation suspendComputeAfter(int afterIncidentCount, Duration duration) {

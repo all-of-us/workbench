@@ -9,11 +9,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -27,7 +25,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.model.SumologicEgressEvent;
-import org.pmiops.workbench.utils.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +79,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     } else {
       workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
     }
+
     Optional<DbUser> egressUser = findEgressUsers(event);
 
     // This would happen if we receive a second GKE Egress for the same event when the app is being
@@ -96,30 +94,32 @@ public class EgressEventServiceImpl implements EgressEventService {
       this.egressEventAuditor.fireEgressEvent(event);
     }
 
-      logger.warning(
-          String.format(
-              "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, username %s)",
-              workspaceNamespace, event.getProjectName(), event.getEgressMib(), egressUser.get().getUsername()));
-      this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
+    logger.warning(
+        String.format(
+            "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, username %s)",
+            workspaceNamespace,
+            event.getProjectName(),
+            event.getEgressMib(),
+            egressUser.get().getUsername()));
+    this.egressEventAuditor.fireEgressEventForUser(event, egressUser.get());
 
-      Optional<DbEgressEvent> maybeEvent =
-          this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
-      maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
+    Optional<DbEgressEvent> maybeEvent =
+        this.maybePersistEgressEvent(event, Optional.of(egressUser.get()), dbWorkspaceMaybe);
+    maybeEvent.ifPresent(e -> taskQueueService.pushEgressEventTask(e.getEgressEventId()));
   }
 
   @NotNull
-  private Optional<DbUser> findEgressUsers(
-      SumologicEgressEvent event) {
+  private Optional<DbUser> findEgressUsers(SumologicEgressEvent event) {
 
     // This case is when the Egress is from a GCE cluster.
     if (StringUtils.isNotEmpty(event.getVmPrefix())
         && event.getVmPrefix().startsWith("all-of-us")) {
-          return gceVmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
+      return gceVmNameToUserDatabaseId(event.getVmPrefix()).flatMap(userService::getByDatabaseId);
     }
     // This is the GKE case
     if (StringUtils.isNotEmpty(event.getSrcGkeServiceName())) {
-      return
-          gkeServiceNameToUserDatabaseId(event.getSrcGkeServiceName()).flatMap(userService::getByDatabaseId);
+      return gkeServiceNameToUserDatabaseId(event.getSrcGkeServiceName())
+          .flatMap(userService::getByDatabaseId);
     }
     return Optional.empty();
   }
