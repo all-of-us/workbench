@@ -163,6 +163,7 @@ export const GKEAppConfigurationPanel = ({
       GKEAppPanelContent.DELETE_UNATTACHED_PD,
       () => (
         <ConfirmDeleteUnattachedPD
+          appType={toUIAppType[appType]}
           onConfirm={onConfirmDeleteUnattachedPersistentDisk}
           onCancel={onCancelDeleteUnattachedPersistentDisk}
         />

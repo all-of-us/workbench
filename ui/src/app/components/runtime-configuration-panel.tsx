@@ -11,8 +11,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -642,6 +641,7 @@ const PanelMain = fp.flow(
             PanelContent.DeleteUnattachedPd,
             () => (
               <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
                 onConfirm={async () => {
                   await disksApi().deleteDisk(
                     namespace,
@@ -657,6 +657,7 @@ const PanelMain = fp.flow(
             PanelContent.DeleteUnattachedPdAndCreate,
             () => (
               <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
                 showCreateMessaging
                 onConfirm={async () => {
                   await disksApi().deleteDisk(

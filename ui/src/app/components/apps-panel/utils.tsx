@@ -12,50 +12,49 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
-import * as runtimeUitils from 'app/utils/runtime-utils';
+import * as runtimeUtils from 'app/utils/runtime-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
-import cromwellLogo from 'assets/images/Cromwell.png';
-import cromwellIcon from 'assets/images/Cromwell-icon.png';
-import jupyterLogo from 'assets/images/Jupyter.png';
-import jupyterIcon from 'assets/images/Jupyter-icon.png';
-import rStudioLogo from 'assets/images/RStudio.png';
-import rStudioIcon from 'assets/images/RStudio-icon.png';
-import sasLogo from 'assets/images/SAS.png';
-import sasIcon from 'assets/images/SAS-icon.png';
+import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
+import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
+import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
+import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
+import rStudioBanner from 'assets/user-apps/RStudio-banner.png';
+import rStudioIcon from 'assets/user-apps/RStudio-icon.png';
+import sasBanner from 'assets/user-apps/SAS-banner.png';
+import sasIcon from 'assets/user-apps/SAS-icon.png';
 
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
   JUPYTER = 'Jupyter',
   RSTUDIO = 'RStudio',
   CROMWELL = 'Cromwell',
-
   SAS = 'SAS',
 }
 
 interface AppAssets {
   appType: UIAppType;
-  logo: string;
+  banner: string;
   icon: string;
 }
 export const appAssets: AppAssets[] = [
   {
     appType: UIAppType.JUPYTER,
-    logo: jupyterLogo,
+    banner: jupyterBanner,
     icon: jupyterIcon,
   },
   {
     appType: UIAppType.RSTUDIO,
-    logo: rStudioLogo,
+    banner: rStudioBanner,
     icon: rStudioIcon,
   },
   {
     appType: UIAppType.CROMWELL,
-    logo: cromwellLogo,
+    banner: cromwellBanner,
     icon: cromwellIcon,
   },
   {
     appType: UIAppType.SAS,
-    logo: sasLogo,
+    banner: sasBanner,
     icon: sasIcon,
   },
 ];
@@ -215,7 +214,7 @@ const getAppDisplayState = (
     appType,
     active:
       appType === UIAppType.JUPYTER
-        ? runtimeUitils.isVisible(runtime?.status)
+        ? runtimeUtils.isVisible(runtime?.status)
         : isAppActive(findApp(userApps, appType)),
   };
 };
