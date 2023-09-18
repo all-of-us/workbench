@@ -43,7 +43,7 @@ export async function convertAPIError(e): Promise<ErrorResponse> {
     } = await e.json();
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
   } catch {
-    return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+    return { statusCode: e.status, errorCode: ErrorCode.PARSE_ERROR };
   }
 }
 
