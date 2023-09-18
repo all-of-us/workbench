@@ -520,7 +520,7 @@ export const CriteriaSearch = fp.flow(
             )}
             {/* List View (using duplicated version of ListSearch) */}
             {!this.initTree &&
-            cohortContext.domain === Domain.SNPINDELVARIANT ? (
+            cohortContext.domain === Domain.SNP_INDEL_VARIANT ? (
               <VariantSearch
                 searchTerms={conceptSearchTerms}
                 select={this.addSelection}
