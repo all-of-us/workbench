@@ -68,10 +68,12 @@ const allCompleteMissingOneRenewable: AccessModuleStatus[] =
 const allCompleteMissingOneEach: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
     ({ moduleName }) =>
-      ![
-        AccessModule.TWO_FACTOR_AUTH,
-        AccessModule.PUBLICATION_CONFIRMATION,
-      ].includes(moduleName)
+      !(
+        [
+          AccessModule.TWO_FACTOR_AUTH,
+          AccessModule.PUBLICATION_CONFIRMATION,
+        ] as Array<AccessModule>
+      ).includes(moduleName)
   );
 
 // PUBLICATIONCONFIRMATION is expired
