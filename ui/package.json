@@ -17,7 +17,7 @@
     "lint": "yarn eslint src --ext .ts,.tsx",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run notebooks-codegen-swagger && yarn run tanagra-codegen-openapi",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated src/tanagra-generated",
-    "codegen-swagger": "openapi-generator-cli generate -i ../api/src/main/resources/workbench-api.yaml -g typescript-fetch -p generateAliasAsModel=true --additional-properties=typeScriptThreePlus=true,enumPropertyNaming=UPPERCASE,useSingleRequestParameter=false -o src/generated/fetch",
+    "codegen-swagger": "openapi-generator-cli generate -i ../api/src/main/resources/workbench-api.yaml -g typescript-fetch -p generateAliasAsModel=true --additional-properties=typeScriptThreePlus=true,enumPropertyNaming=UPPERCASE,useSingleRequestParameter=false,prefixParameterInterfaces=true -o src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",
     "tanagra-codegen-openapi": "openapi-generator-cli generate -i ../tanagra/service/src/main/resources/api/service_openapi.yaml -g typescript-fetch --additional-properties=typescriptThreePlus=true -o src/tanagra-generated"
   },
