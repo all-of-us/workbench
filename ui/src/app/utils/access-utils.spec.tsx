@@ -503,7 +503,7 @@ describe('useIsUserDisabled', () => {
       Promise.reject(
         new Response(
           JSON.stringify({
-            errorCode: ErrorCode.USERDISABLED,
+            errorCode: ErrorCode.USER_DISABLED,
           })
         )
       )

@@ -78,7 +78,7 @@ export async function fetchWithSystemErrorHandler<T>(
           systemErrorStore.next(errorResponse);
           throw e;
         case 403:
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
+          if (errorResponse.errorCode === ErrorCode.USER_DISABLED) {
             systemErrorStore.next(errorResponse);
           }
           throw e;

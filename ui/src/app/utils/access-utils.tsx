@@ -391,7 +391,7 @@ export const useIsUserDisabled = () => {
           }
         } catch (e) {
           const errorResponse = await convertAPIError(e);
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED && mounted) {
+          if (errorResponse.errorCode === ErrorCode.USER_DISABLED && mounted) {
             setDisabled(true);
           }
         }
