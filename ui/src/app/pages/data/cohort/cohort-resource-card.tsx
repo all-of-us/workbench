@@ -135,8 +135,8 @@ export const CohortResourceCard = fp.flow(
         .getDataSetByResourceId(
           resource.workspaceNamespace,
           resource.workspaceFirecloudName,
-          getType(resource),
-          getId(resource)
+          getId(resource),
+          getType(resource)
         )
         .then((dataSetList) => {
           if (dataSetList && dataSetList.items.length > 0) {
