@@ -133,7 +133,7 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
-  if (domain === Domain.CONCEPT_SET || domain === Domain.CONCEPTQUICKADD) {
+  if (domain === Domain.CONCEPT_SET || domain === Domain.CONCEPT_QUICK_ADD) {
     item.type = selections[0]?.domainId;
   }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
@@ -218,7 +218,7 @@ export const CohortSearch = fp.flow(
         this.selectStructuralVariantData();
       } else if (domain === Domain.CONCEPT_SET) {
         this.setState({ showAddConceptSetModal: true });
-      } else if (domain === Domain.CONCEPTQUICKADD) {
+      } else if (domain === Domain.CONCEPT_QUICK_ADD) {
         this.setState({ showConceptQuickAddModal: true });
       } else {
         this.setState({ initCriteriaSearch: true });
