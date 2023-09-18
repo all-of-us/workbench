@@ -142,7 +142,7 @@ describe('resources.tsx', () => {
     expect(toDisplay(ResourceType.DATASET)).toBe('Dataset');
     expect(toDisplay(ResourceType.NOTEBOOK)).toBe('Notebook');
 
-    expect(toDisplay(ResourceType.COHORTSEARCHGROUP)).toBe('Group');
+    expect(toDisplay(ResourceType.COHORT_SEARCH_GROUP)).toBe('Group');
     expect(toDisplay(ResourceType.COHORTSEARCHITEM)).toBe('Item');
     expect(toDisplay(ResourceType.WORKSPACE)).toBe('Workspace');
 

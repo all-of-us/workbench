@@ -823,7 +823,7 @@ export const SearchGroup = withCurrentWorkspace()(
               hideDescription={true}
               onCancel={() => this.setState({ renaming: false })}
               onRename={(v) => this.rename(v)}
-              resourceType={ResourceType.COHORTSEARCHGROUP}
+              resourceType={ResourceType.COHORT_SEARCH_GROUP}
             />
           )}
         </React.Fragment>
