@@ -22,7 +22,7 @@ import {
 } from 'app/utils/stores';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
-import { AppLogo } from './apps-panel/app-logo';
+import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
 import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
 
@@ -55,7 +55,7 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
       propagateDataTestId
     >
       <FlexRow style={styles.availableApp}>
-        <AppLogo
+        <AppBanner
           {...{ appType }}
           style={{ marginRight: '1em', padding: '1rem' }}
         />

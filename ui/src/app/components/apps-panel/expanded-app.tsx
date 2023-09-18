@@ -37,7 +37,7 @@ import {
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
 
-import { AppLogo } from './app-logo';
+import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
@@ -233,7 +233,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     >
       <FlexRow>
         <div>
-          <AppLogo
+          <AppBanner
             {...{ appType }}
             style={{ marginRight: '1em', padding: '1rem' }}
           />
