@@ -213,7 +213,7 @@ export class LeoRuntimeInitializer {
       };
       if (this.currentRuntime) {
         defaultRuntime =
-          this.currentRuntime.status === RuntimeStatus.Deleted
+          this.currentRuntime.status === RuntimeStatus.DELETED
             ? applyPresetOverride(
                 // The attached disk information is lost for deleted runtimes. In any case,
                 // by default we want to offer that the user reattach their existing disk,
@@ -262,7 +262,7 @@ export class LeoRuntimeInitializer {
   private isRuntimeDeleted(): boolean {
     return (
       this.currentRuntime &&
-      this.currentRuntime.status === RuntimeStatus.Deleted
+      this.currentRuntime.status === RuntimeStatus.DELETED
     );
   }
 

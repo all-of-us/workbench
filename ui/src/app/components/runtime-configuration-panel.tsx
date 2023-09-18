@@ -198,7 +198,7 @@ const PanelMain = fp.flow(
       useCustomRuntime(namespace, gcePersistentDisk);
 
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
+    if (currentRuntime && currentRuntime.status === RuntimeStatus.DELETED) {
       currentRuntime = applyPresetOverride(
         // The attached disk information is lost for deleted runtimes. In any case,
         // by default we want to offer that the user reattach their existing disk,
@@ -260,7 +260,7 @@ const PanelMain = fp.flow(
           // General Analysis consist of GCE + PD. Display create page only if
           // 1) currentRuntime + pd both are deleted and
           // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
-          currentRuntime?.status === RuntimeStatus.Deleted &&
+          currentRuntime?.status === RuntimeStatus.DELETED &&
             !currentRuntime?.gceWithPdConfig &&
             [
               RuntimeConfigurationType.GENERAL_ANALYSIS,

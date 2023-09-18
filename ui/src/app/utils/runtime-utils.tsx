@@ -992,11 +992,11 @@ export const useRuntimeStatus = (
       runtimeStatus,
       [
         RuntimeStatusRequest.DeleteRuntime,
-        () => (r) => r === null || r.status === RuntimeStatus.Deleted,
+        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
       ],
       [
         RuntimeStatusRequest.DeleteRuntimeAndPD,
-        () => (r) => r === null || r.status === RuntimeStatus.Deleted,
+        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
       ],
       [
         RuntimeStatusRequest.DeletePD,
@@ -1182,7 +1182,7 @@ export const useCustomRuntime = (
 
       const runtimeExists =
         !!runtime &&
-        ![RuntimeStatus.Error, RuntimeStatus.Deleted].includes(runtime.status);
+        ![RuntimeStatus.Error, RuntimeStatus.DELETED].includes(runtime.status);
       try {
         if (runtimeExists) {
           await applyRuntimeUpdate();
@@ -1277,7 +1277,7 @@ export enum PanelContent {
 
 // should we show the runtime in the UI?
 export const isVisible = (status: RuntimeStatus) =>
-  status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status);
+  status && ![RuntimeStatus.DELETED, RuntimeStatus.Error].includes(status);
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>

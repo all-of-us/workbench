@@ -153,7 +153,7 @@ export const fromRuntimeStatus = (
 ): UserEnvironmentStatus =>
   cond(
     [status === RuntimeStatus.CREATING, () => UserEnvironmentStatus.CREATING],
-    [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
+    [status === RuntimeStatus.DELETED, () => UserEnvironmentStatus.DELETED],
     [status === RuntimeStatus.DELETING, () => UserEnvironmentStatus.DELETING],
     [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
     [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],

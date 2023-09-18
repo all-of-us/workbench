@@ -376,7 +376,7 @@ describe('RuntimeConfigurationPanel', () => {
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
+      status: RuntimeStatus.DELETED,
       configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
@@ -406,7 +406,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
+      status: RuntimeStatus.DELETED,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
       gceWithPdConfig: null,
@@ -631,7 +631,7 @@ describe('RuntimeConfigurationPanel', () => {
       const customDiskSize = 1000;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
         configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceConfig: {
           ...defaultGceConfig(),
@@ -669,7 +669,7 @@ describe('RuntimeConfigurationPanel', () => {
       const customNumberOfWorkers = 5;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
         configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
         gceConfig: null,
         gceWithPdConfig: null,
@@ -715,7 +715,7 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentDisk(existingDisk());
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
+      status: RuntimeStatus.DELETED,
       configurationType: RuntimeConfigurationType.UserOverride,
       gceConfig: {
         ...defaultGceConfig(),
@@ -1177,7 +1177,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should show create button if runtime is deleted', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
+      status: RuntimeStatus.DELETED,
     });
 
     const wrapper = await component();
@@ -1474,7 +1474,7 @@ describe('RuntimeConfigurationPanel', () => {
     if (wantDeleteRuntime) {
       expect(runtimeApiStub.runtime.status).toEqual('Deleting');
 
-      runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+      runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
       // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
       await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
@@ -1588,7 +1588,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
@@ -1617,7 +1617,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
@@ -1641,7 +1641,7 @@ describe('RuntimeConfigurationPanel', () => {
     // Default option should be NOT to delete.
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 

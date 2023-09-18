@@ -193,7 +193,7 @@ describe('RuntimeInitializer', () => {
           diskSize: 777,
           machineType: 'n1-standard-16',
         },
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
       };
     });
 
@@ -226,7 +226,7 @@ describe('RuntimeInitializer', () => {
             size: 120,
           },
         },
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
       };
     });
 

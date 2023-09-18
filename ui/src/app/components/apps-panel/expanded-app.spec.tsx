@@ -151,7 +151,7 @@ describe('ExpandedApp', () => {
     [RuntimeStatus.STOPPING, 'Pausing'],
     [RuntimeStatus.STARTING, 'Resuming'],
 
-    [RuntimeStatus.Deleted, 'Pause'],
+    [RuntimeStatus.DELETED, 'Pause'],
     [RuntimeStatus.DELETING, 'Pause'],
     [RuntimeStatus.Unknown, 'Pause'],
     [RuntimeStatus.Error, 'Pause'],
