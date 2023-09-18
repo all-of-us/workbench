@@ -157,7 +157,7 @@ const temporalMentions = [
 ];
 
 const temporalTimes = [
-  TemporalTime.DURINGSAMEENCOUNTERAS,
+  TemporalTime.DURING_SAME_ENCOUNTER_AS,
   TemporalTime.XDAYSAFTER,
   TemporalTime.XDAYSBEFORE,
   TemporalTime.WITHINXDAYSOF,
@@ -171,7 +171,7 @@ function temporalEnumToText(option) {
       return 'First mention of';
     case TemporalMention.LASTMENTION:
       return 'Last mention of';
-    case TemporalTime.DURINGSAMEENCOUNTERAS:
+    case TemporalTime.DURING_SAME_ENCOUNTER_AS:
       return 'During same encounter as';
     case TemporalTime.XDAYSBEFORE:
       return 'X or more days before';
@@ -514,7 +514,7 @@ export const SearchGroup = withCurrentWorkspace()(
         [0, 0]
       );
       const inputError =
-        time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+        time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
         isNaN(parseInt(timeValue, 10));
       return counts.includes(0) || inputError;
     }
@@ -664,7 +664,7 @@ export const SearchGroup = withCurrentWorkspace()(
               <React.Fragment>
                 {/* Temporal time dropdown */}
                 <div style={styles.cardBlock}>
-                  {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+                  {time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
                     inputError &&
                     inputTouched && (
                       <div style={styles.inputError}>
@@ -685,7 +685,7 @@ export const SearchGroup = withCurrentWorkspace()(
                     {temporalEnumToText(time)}{' '}
                     <ClrIcon shape='caret down' size={12} />
                   </button>
-                  {time !== TemporalTime.DURINGSAMEENCOUNTERAS && (
+                  {time !== TemporalTime.DURING_SAME_ENCOUNTER_AS && (
                     <NumberInput
                       style={styles.timeInput}
                       value={timeValue}

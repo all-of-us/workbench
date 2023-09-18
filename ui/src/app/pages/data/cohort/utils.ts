@@ -324,7 +324,7 @@ export function parseCohortDefinition(json: string) {
         return item;
       });
       grp.mention = grp.mention ? grp.mention : TemporalMention.ANY_MENTION;
-      grp.time = grp.time ? grp.time : TemporalTime.DURINGSAMEENCOUNTERAS;
+      grp.time = grp.time ? grp.time : TemporalTime.DURING_SAME_ENCOUNTER_AS;
       grp.timeValue = grp.timeValue ? grp.timeValue : '';
       grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
       grp.status = 'active';

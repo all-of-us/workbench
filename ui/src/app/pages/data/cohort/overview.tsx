@@ -333,7 +333,7 @@ export const ListOverview = fp.flow(
           [0, 0]
         );
         const inputError =
-          grp.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+          grp.time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
           (isNaN(parseInt(grp.timeValue, 10)) || grp.timeValue < 0);
         return activeItems.includes(0) || inputError;
       });
