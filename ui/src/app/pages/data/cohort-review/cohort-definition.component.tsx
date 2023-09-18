@@ -73,7 +73,7 @@ const showParameterParent = (domain: string) =>
 
 const modifierTypeDisplay = (modifierType: ModifierType) => {
   switch (modifierType) {
-    case ModifierType.AGEATEVENT:
+    case ModifierType.AGE_AT_EVENT:
       return 'Age at Event';
     case ModifierType.ENCOUNTERS:
       return 'During Visit Type - ';

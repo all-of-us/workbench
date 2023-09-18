@@ -74,7 +74,7 @@ describe('ModifierPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.AGEATEVENT + '"]').length
+      wrapper.find('[data-test-id="' + ModifierType.AGE_AT_EVENT + '"]').length
     ).toBeGreaterThan(0);
     expect(
       wrapper.find('[data-test-id="' + ModifierType.NUMOFOCCURRENCES + '"]')

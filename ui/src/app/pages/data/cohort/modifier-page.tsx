@@ -176,7 +176,7 @@ const dateTooltip = `Dates are consistently shifted within a participant’s rec
 
 const getDefaultFormState = () => {
   const defaultFormState = {
-    name: ModifierType.AGEATEVENT,
+    name: ModifierType.AGE_AT_EVENT,
     label: 'Age At Event',
     type: 'number',
     operator: undefined,

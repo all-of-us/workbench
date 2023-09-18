@@ -87,7 +87,7 @@ export const PREDEFINED_ATTRIBUTES = {
 };
 
 export const MODIFIERS_MAP = {
-  [ModifierType.AGEATEVENT]: {
+  [ModifierType.AGE_AT_EVENT]: {
     name: 'Age At Event',
     operators: {
       [Operator.BETWEEN]: 'Between',
