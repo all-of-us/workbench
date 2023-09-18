@@ -626,7 +626,7 @@ describe('AdminUserProfile', () => {
       },
     });
 
-    const excludedModules = [
+    const excludedModules: Array<AccessModule> = [
       AccessModule.IDENTITY,
       AccessModule.ERA_COMMONS,
       AccessModule.COMPLIANCE_TRAINING,
