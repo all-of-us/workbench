@@ -108,7 +108,7 @@ export const canCreateApp = (app: UserAppEnvironment): boolean =>
 // matches Leonardo code
 // https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
 export const isDeletable = (status: AppStatus): boolean =>
-  [AppStatus.STATUSUNSPECIFIED, AppStatus.RUNNING, AppStatus.ERROR].includes(
+  [AppStatus.STATUS_UNSPECIFIED, AppStatus.RUNNING, AppStatus.ERROR].includes(
     status
   );
 

@@ -39,7 +39,7 @@ describe('AppsPanel utils', () => {
     [AppStatus.DELETING, UserEnvironmentStatus.UNKNOWN],
     [AppStatus.ERROR, UserEnvironmentStatus.UNKNOWN],
     [AppStatus.PROVISIONING, UserEnvironmentStatus.UNKNOWN],
-    [AppStatus.STATUSUNSPECIFIED, UserEnvironmentStatus.UNKNOWN],
+    [AppStatus.STATUS_UNSPECIFIED, UserEnvironmentStatus.UNKNOWN],
 
     [undefined, UserEnvironmentStatus.UNKNOWN],
     [null, UserEnvironmentStatus.UNKNOWN],
@@ -60,7 +60,7 @@ describe('AppsPanel utils', () => {
     [AppStatus.DELETING, AppStatus.DELETING.toString()],
     [AppStatus.ERROR, AppStatus.ERROR.toString()],
     [AppStatus.PROVISIONING, AppStatus.PROVISIONING.toString()],
-    [AppStatus.STATUSUNSPECIFIED, AppStatus.STATUSUNSPECIFIED.toString()],
+    [AppStatus.STATUS_UNSPECIFIED, AppStatus.STATUS_UNSPECIFIED.toString()],
 
     [undefined, undefined],
     [null, undefined],
