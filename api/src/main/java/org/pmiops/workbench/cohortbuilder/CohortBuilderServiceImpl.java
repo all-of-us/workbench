@@ -582,16 +582,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<Long> findPFHHSurveyQuestionIds(List<Long> conceptIds) {
-    return cbCriteriaDao.findPFHHSurveyQuestionIds(conceptIds);
-  }
-
-  @Override
-  public List<Long> findPFHHSurveyAnswerIds(List<Long> conceptIds) {
-    return cbCriteriaDao.findPFHHSurveyAnswerIds(conceptIds);
-  }
-
-  @Override
   public List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds) {
     return cbCriteriaDao.findSurveyQuestionIds(surveyConceptIds);
   }

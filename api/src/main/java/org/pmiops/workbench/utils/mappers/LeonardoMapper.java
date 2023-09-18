@@ -246,8 +246,9 @@ public interface LeonardoMapper {
   LeonardoKubernetesRuntimeConfig toLeonardoKubernetesRuntimeConfig(
       KubernetesRuntimeConfig kubernetesRuntimeConfig);
 
-  @ValueMapping(source = "RSTUDIO", target = "ALLOWED") // we don't support Galaxy
-  @ValueMapping(source = "SAS", target = "ALLOWED") // we don't support CUSTOM apps
+  // SAS and RStudio apps are implemented as ALLOWED Helm Charts
+  @ValueMapping(source = "RSTUDIO", target = "ALLOWED")
+  @ValueMapping(source = "SAS", target = "ALLOWED")
   LeonardoAppType toLeonardoAppType(AppType appType);
 
   @ValueMapping(source = "RSTUDIO", target = "RSTUDIO_CHART")
