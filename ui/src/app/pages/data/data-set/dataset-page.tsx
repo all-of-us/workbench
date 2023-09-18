@@ -1151,7 +1151,6 @@ export const DatasetPage = fp.flow(
             updatedPrepackaged.add(prepackagedSurvey)
           );
         } else if (
-          prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
           Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
             updatedPrepackaged.has(key.valueOf())
           )
