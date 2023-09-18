@@ -168,12 +168,12 @@ class SearchGroupItemParameter extends React.Component<
 
 const SKIP_DOMAIN_SEARCH = [
   Domain.FITBIT.toString(),
-  Domain.FITBITSLEEPLEVEL.toString(),
-  Domain.FITBITSLEEPDAILYSUMMARY.toString(),
-  Domain.FITBITHEARTRATELEVEL.toString(),
-  Domain.FITBITHEARTRATESUMMARY.toString(),
-  Domain.FITBITACTIVITY.toString(),
-  Domain.FITBITINTRADAYSTEPS.toString(),
+  Domain.FITBIT_SLEEP_LEVEL.toString(),
+  Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
+  Domain.FITBIT_HEART_RATE_LEVEL.toString(),
+  Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
+  Domain.FITBIT_ACTIVITY.toString(),
+  Domain.FITBIT_INTRADAY_STEPS.toString(),
   Domain.WHOLE_GENOME_VARIANT.toString(),
   Domain.LR_WHOLE_GENOME_VARIANT.toString(),
   Domain.ARRAY_DATA.toString(),
