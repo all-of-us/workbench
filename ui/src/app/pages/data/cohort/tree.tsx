@@ -341,9 +341,9 @@ export const CriteriaTree = fp.flow(
     get criteriaLookupNeeded() {
       return (
         this.props.source === 'cohort' &&
-        ![Domain.PHYSICAL_MEASUREMENT, Domain.VISIT].includes(
-          this.props.domain
-        ) &&
+        !(
+          [Domain.PHYSICAL_MEASUREMENT, Domain.VISIT] as Array<Domain>
+        ).includes(this.props.domain) &&
         currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
       );
     }
