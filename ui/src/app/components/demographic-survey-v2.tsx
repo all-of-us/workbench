@@ -362,11 +362,11 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal)(
                   },
                   {
                     label: 'Central or South American Indian',
-                    value: EthnicCategory.AI_ANCENTRALSOUTH,
+                    value: EthnicCategory.AI_AN_CENTRAL_SOUTH,
                   },
                   {
                     label: NONE_FULLY_DESCRIBE,
-                    value: EthnicCategory.AI_ANOTHER,
+                    value: EthnicCategory.AI_AN_OTHER,
                     showInput: true,
                     otherText: survey.ethnicityAiAnOtherText,
                     otherTextMaxLength: NONE_FULLY_DESCRIBE_MAX_LENGTH,
