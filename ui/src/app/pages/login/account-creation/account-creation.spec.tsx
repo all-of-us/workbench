@@ -300,12 +300,12 @@ it('should allow entering discovery sources', async () => {
   const profile: Profile = onComplete.mock.calls[0][0];
 
   expect(profile.generalDiscoverySources).toEqual([
-    GeneralDiscoverySource.SOCIALMEDIA,
-    GeneralDiscoverySource.FRIENDSORCOLLEAGUES,
+    GeneralDiscoverySource.SOCIAL_MEDIA,
+    GeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
   ]);
   expect(profile.partnerDiscoverySources).toEqual([
-    PartnerDiscoverySource.ALLOFUSRESEARCHPROGRAMSTAFF,
-    PartnerDiscoverySource.ASIANHEALTHCOALITION,
+    PartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+    PartnerDiscoverySource.ASIAN_HEALTH_COALITION,
   ]);
 });
 
