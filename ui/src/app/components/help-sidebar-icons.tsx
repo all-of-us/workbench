@@ -149,6 +149,7 @@ const CompoundIcon = ({
       <img
         src={iconPath}
         alt={iconConfig.label}
+        aria-label={iconConfig.label}
         style={styles.compoundStyle}
         data-test-id={'help-sidebar-icon-' + iconConfig.id}
       />
