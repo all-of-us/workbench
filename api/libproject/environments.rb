@@ -47,7 +47,9 @@ ENVIRONMENTS = {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_cdr_wgs_project => "all-of-us-workbench-test",
+    # turn on authZ model
     :tanagra_access_control_model => "AOU_WORKBENCH",
+    # turn on authN
     :tanagra_auth_disable_checks => "false",
     :tanagra_auth_bearer_token => "true",
     :tanagra_underlay_files => "aou/test/SC2023Q3R1/SC2023Q3R1.json,aou/test/SR2023Q3R1/SR2023Q3R1.json",
