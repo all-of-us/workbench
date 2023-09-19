@@ -48,7 +48,7 @@ import {
 import { ALL_GKE_APP_STATUSES, minus } from 'testing/utils';
 
 import { ExpandedApp } from './expanded-app';
-import { toAppType, toUIAppType, UIAppType } from './utils';
+import { toAppType, UIAppType } from './utils';
 
 const googleProject = 'project-for-test';
 const workspace = {

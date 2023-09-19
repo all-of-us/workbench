@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 
+import { serverConfigStore, useStore } from '../../utils/stores';
 import { UIAppType } from 'app/components/apps-panel/utils';
 import { Button } from 'app/components/buttons';
 import {
@@ -11,8 +12,6 @@ import {
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-
-export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO, UIAppType.SAS];
 
 const styles = reactStyles({
   appsLabel: {
@@ -32,6 +31,14 @@ interface AppSelectorModalProps {
 }
 export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose } = props;
+  const { config } = useStore(serverConfigStore);
+  // in display order
+  const appList = [
+    UIAppType.JUPYTER,
+    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
+  ];
+
   return (
     <Modal
       data-test-id='select-application-modal'
@@ -50,7 +57,7 @@ export const AppSelectorModal = (props: AppSelectorModalProps) => {
           aria-labelledby='select-an-app'
           value={selectedApp}
           appendTo='self'
-          options={APP_LIST}
+          options={appList}
           placeholder='Choose One'
           onChange={(e) => setSelectedApp(e.value)}
           style={{ width: '13.5rem' }}

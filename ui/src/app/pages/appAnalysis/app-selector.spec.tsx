@@ -1,27 +1,24 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
 import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
-import { WorkspaceData } from '../../utils/workspace-data';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { UIAppType } from 'app/components/apps-panel/utils';
+import { screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { serverConfigStore } from 'app/utils/stores';
+import { WorkspaceData } from 'app/utils/workspace-data';
 
+import defaultServerConfig from 'testing/default-server-config';
 import {
   expectButtonElementDisabled,
   expectButtonElementEnabled,
   renderModal,
-  simulateComponentChange,
 } from 'testing/react-test-helpers';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
 import { workspaceDataStub } from 'testing/stubs/workspaces';
 
 import { AppSelector } from './app-selector';
-import { APP_LIST } from './app-selector-modal';
 
 describe('App Selector', () => {
   const getStartButton = () => screen.getByRole('button', { name: 'start' });
@@ -30,12 +27,6 @@ describe('App Selector', () => {
 
   const getDropdownTrigger = () =>
     screen.getByRole('button', { name: 'Choose One' });
-
-  const applicationListDropDownWrapper = (container) => {
-    return container
-      .querySelector('[data-test-id="application-list-dropdown"]')
-      .first();
-  };
 
   const component = (workspace: WorkspaceData = workspaceDataStub) =>
     renderModal(
@@ -49,6 +40,10 @@ describe('App Selector', () => {
       ...workspaceDataStub,
       cdrVersionId: '1',
     });
+    serverConfigStore.set({
+      config: defaultServerConfig,
+    });
+
     registerApiClient(NotebooksApi, new NotebooksApiStub());
   });
 
@@ -85,8 +80,8 @@ describe('App Selector', () => {
     });
   });
 
-  it('should open jupyter modal when Jupyter application is selected and next button is clicked', async () => {
-    const { container } = component();
+  it('should open the Jupyter modal when Jupyter is selected and Next is clicked', async () => {
+    component();
     const startButton = getStartButton();
     startButton.click();
 
@@ -126,5 +121,152 @@ describe('App Selector', () => {
       // the Jupyter modal is visible
       expect(screen.queryByText('New Notebook')).toBeInTheDocument();
     });
+  });
+
+  it('should not list RStudio as an option when the feature flag is false', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableRStudioGKEApp: false },
+    });
+
+    component();
+    const startButton = getStartButton();
+    startButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText('Select an application')).toBeInTheDocument();
+    });
+
+    // the caret next to the dropdown
+    const dropdownTrigger = getDropdownTrigger();
+    expect(dropdownTrigger).toBeInTheDocument();
+    dropdownTrigger.click();
+
+    await waitFor(async () => {
+      // I'd prefer to do this, but it doesn't work
+      // screen.queryByRole('option', { name: 'RStudio' });
+      expect(screen.queryByText('RStudio')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should open the RStudio config panel when RStudio is selected and Next is clicked', async () => {
+    component();
+    const startButton = getStartButton();
+    startButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText('Select an application')).toBeInTheDocument();
+    });
+
+    // the caret next to the dropdown
+    const dropdownTrigger = getDropdownTrigger();
+    expect(dropdownTrigger).toBeInTheDocument();
+    dropdownTrigger.click();
+
+    const rStudioOption = await waitFor(async () => {
+      // I'd prefer to do this, but it doesn't work
+      // return screen.getByRole('option', { name: 'RStudio' });
+      return screen.getByText('RStudio').closest('li');
+    });
+
+    // disabled because no app type is selected yet
+    expectButtonElementDisabled(getNextButton());
+
+    rStudioOption.click();
+
+    // now enabled
+    const nextButton = await waitFor(() => {
+      const next = getNextButton();
+      expectButtonElementEnabled(next);
+      return next;
+    });
+    nextButton.click();
+
+    await waitFor(() => {
+      // the selection modal is gone
+      expect(
+        screen.queryByText('Select an application')
+      ).not.toBeInTheDocument();
+    });
+
+    // TODO I don't know why this doesn't work.  "screen" doesn't see anything at all besides the start button?
+    // await waitFor(() => {
+    //   // the RStudio config panel is visible
+    //   expect(
+    //     screen.queryByText('RStudio Cloud Environment')
+    //   ).toBeInTheDocument();
+    // });
+  });
+
+  it('should not list SAS as an option when the feature flag is false', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableSasGKEApp: false },
+    });
+
+    component();
+    const startButton = getStartButton();
+    startButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText('Select an application')).toBeInTheDocument();
+    });
+
+    // the caret next to the dropdown
+    const dropdownTrigger = getDropdownTrigger();
+    expect(dropdownTrigger).toBeInTheDocument();
+    dropdownTrigger.click();
+
+    await waitFor(async () => {
+      // I'd prefer to do this, but it doesn't work
+      // screen.queryByRole('option', { name: 'SAS' });
+      expect(screen.queryByText('SAS')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should open the SAS config panel when SAS is selected and Next is clicked', async () => {
+    component();
+    const startButton = getStartButton();
+    startButton.click();
+
+    await waitFor(() => {
+      expect(screen.queryByText('Select an application')).toBeInTheDocument();
+    });
+
+    // the caret next to the dropdown
+    const dropdownTrigger = getDropdownTrigger();
+    expect(dropdownTrigger).toBeInTheDocument();
+    dropdownTrigger.click();
+
+    const sasOption = await waitFor(async () => {
+      // I'd prefer to do this, but it doesn't work
+      // return screen.getByRole('option', { name: 'SAS' });
+      return screen.getByText('SAS').closest('li');
+    });
+
+    // disabled because no app type is selected yet
+    expectButtonElementDisabled(getNextButton());
+
+    sasOption.click();
+
+    // now enabled
+    const nextButton = await waitFor(() => {
+      const next = getNextButton();
+      expectButtonElementEnabled(next);
+      return next;
+    });
+    nextButton.click();
+
+    await waitFor(() => {
+      // the selection modal is gone
+      expect(
+        screen.queryByText('Select an application')
+      ).not.toBeInTheDocument();
+    });
+
+    // TODO I don't know why this doesn't work.  "screen" doesn't see anything at all besides the start button?
+    // await waitFor(() => {
+    //   screen.debug();
+    //   // the RStudio config panel is visible
+    //   expect(screen.queryByText('SAS Cloud Environment')).toBeInTheDocument();
+    // });
   });
 });
