@@ -78,7 +78,8 @@ const bindClients = () => {
   bindApiClients(
     new Configuration({
       basePath: getApiBaseUrl(),
-      accessToken: () => getAccessToken(),
+      // TODO: Look into removing 'Bearer' when updating to OpenAPI 3: https://stackoverflow.com/a/45471010/2166475
+      accessToken: () => 'Bearer ' + getAccessToken(),
     })
   );
   notebooksBindApiClients(
