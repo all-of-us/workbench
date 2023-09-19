@@ -408,9 +408,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       'runtimeConfig',
       () => (
         <RuntimeIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
-          {...{ userSuspended }}
         />
       ),
     ],
@@ -418,9 +418,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       cromwellConfigIconId,
       () => (
         <UserAppIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           appType={UIAppType.CROMWELL}
-          {...{ userSuspended }}
         />
       ),
     ],
@@ -428,9 +428,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       rstudioConfigIconId,
       () => (
         <UserAppIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           appType={UIAppType.RSTUDIO}
-          {...{ userSuspended }}
         />
       ),
     ],
@@ -438,9 +438,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       sasConfigIconId,
       () => (
         <UserAppIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           appType={UIAppType.SAS}
-          {...{ userSuspended }}
         />
       ),
     ],
