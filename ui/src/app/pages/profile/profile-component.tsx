@@ -3,6 +3,8 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   AccessModule,
@@ -60,7 +62,6 @@ const validators = {
   zipCode: { ...required, ...notTooLong(10) },
   city: { ...required, ...notTooLong(95) },
   state: { ...required, ...notTooLong(95) },
-  country: { ...required, ...notTooLong(95) },
 };
 
 interface ProfilePageProps
@@ -155,7 +156,6 @@ export const ProfileComponent = fp.flow(
           city: '',
           state: '',
           zipCode: '',
-          country: '',
         };
       }
       return this.props.profileState.profile;
@@ -245,14 +245,7 @@ export const ProfileComponent = fp.flow(
         familyName,
         areaOfResearch,
         professionalUrl,
-        address: {
-          streetAddress1,
-          streetAddress2,
-          zipCode,
-          city,
-          state,
-          country,
-        },
+        address: { streetAddress1, streetAddress2, zipCode, city, state },
       } = currentProfile;
 
       const profileConfirmationAccessModule = fp.find(
@@ -293,7 +286,6 @@ export const ProfileComponent = fp.flow(
             zipCode,
             city,
             state,
-            country,
           },
           validators,
           {
@@ -355,11 +347,21 @@ export const ProfileComponent = fp.flow(
                 content='This field cannot be edited'
                 disabled={!props.disabled}
               >
-                <TextInput
-                  data-test-id={props.id || valueKey}
-                  {...inputProps}
-                  style={{ ...styles.inputStyle, ...inputProps.style }}
-                />
+                <div>
+                  <TextInput
+                    data-test-id={props.id || valueKey}
+                    {...inputProps}
+                    style={
+                      props.disabled
+                        ? {
+                            ...styles.disabledInput,
+                            ...styles.inputStyle,
+                            ...inputProps.style,
+                          }
+                        : { ...styles.inputStyle, ...inputProps.style }
+                    }
+                  />
+                </div>
               </TooltipTrigger>
             )}
             <ValidationError>{errorText}</ValidationError>
@@ -543,9 +545,22 @@ export const ProfileComponent = fp.flow(
                       id: 'zipCode',
                     })}
                     {makeProfileInput({
-                      title: 'Country',
+                      title: (
+                        <FlexRow style={{ gap: '10px' }}>
+                          <label>Country</label>
+                          <TooltipTrigger
+                            side={'right'}
+                            content={
+                              'If you need to update your country, email drcsupport@researchallofus.org with your updated country.'
+                            }
+                          >
+                            <FontAwesomeIcon icon={faCircleInfo} />
+                          </TooltipTrigger>
+                        </FlexRow>
+                      ),
                       valueKey: ['address', 'country'],
                       id: 'country',
+                      disabled: true,
                     })}
                   </FlexRow>
                 </div>
