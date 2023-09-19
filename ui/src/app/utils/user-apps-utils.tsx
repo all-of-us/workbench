@@ -73,17 +73,15 @@ export const createUserApp = (namespace, config: CreateAppRequest) =>
       maybeStartPollingForUserApps(namespace);
     });
 
-export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) => {
-  return appsApi()
+export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) =>
+  appsApi()
     .deleteApp(namespace, appName, deleteDiskWithUserApp)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
-export const pauseUserApp = (googleProject, appName, namespace) => {
+export const pauseUserApp = (googleProject, appName, namespace) =>
   leoAppsApi()
     .stopApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
 const localizeUserApp = (
   namespace,
@@ -98,11 +96,10 @@ const localizeUserApp = (
     appType,
   });
 
-export const resumeUserApp = (googleProject, appName, namespace) => {
+export const resumeUserApp = (googleProject, appName, namespace) =>
   leoAppsApi()
     .startApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
 export const findDisk = (disks: Disk[], appType: AppType): Disk | undefined =>
   disks.find((disk) => disk.appType === appType);
