@@ -99,6 +99,9 @@
     "host": "aou.nnlm.gov",
     "credentialsKeyV2": "moodle-prod-key-v2.txt"
   },
+  "absorb": {
+    "externalDepartmentId": "Development"
+  },
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,

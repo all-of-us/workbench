@@ -58,6 +58,8 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
                 });
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
+    assertThat(aouMeta)
+        .containsEntry("Absorb_department_external_ID", config.absorb.externalDepartmentId);
     assertThat(service.getContactEmail(username)).hasValue("notasecret@gmail.com");
 
     retryTemplate()
