@@ -66,7 +66,7 @@ export const maybeStartPollingForUserApps = (namespace) => {
     });
 };
 
-export const createUserApp = async (namespace, config: CreateAppRequest) =>
+export const createUserApp = (namespace, config: CreateAppRequest) =>
   appsApi()
     .createApp(namespace, config)
     .then(() => {
@@ -92,13 +92,11 @@ const localizeUserApp = (
   fileNames: Array<string>,
   playgroundMode: boolean
 ) =>
-  fetchWithErrorModal(() =>
-    appsApi().localizeApp(namespace, appName, {
-      fileNames,
-      playgroundMode,
-      appType,
-    })
-  );
+  appsApi().localizeApp(namespace, appName, {
+    fileNames,
+    playgroundMode,
+    appType,
+  });
 
 export const resumeUserApp = (googleProject, appName, namespace) => {
   leoAppsApi()
@@ -120,12 +118,14 @@ export const openRStudio = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
-  localizeUserApp(
-    workspaceNamespace,
-    userApp.appName,
-    userApp.appType,
-    [],
-    false
+  fetchWithErrorModal(() =>
+    localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      [],
+      false
+    )
   );
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
@@ -135,13 +135,13 @@ export const openSAS = (
   userApp: UserAppEnvironment
 ) => {
   // RW-10934 SAS localization throws a 500 error
-  // localizeUserApp(
+  // fetchWithErrorModal(() => localizeUserApp(
   //   workspaceNamespace,
   //   userApp.appName,
   //   userApp.appType,
   //   [],
   //   false
-  // );
+  // ));
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 

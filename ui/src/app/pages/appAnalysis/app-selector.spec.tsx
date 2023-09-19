@@ -5,7 +5,6 @@ import { NotebooksApi, WorkspaceAccessLevel } from 'generated/fetch';
 
 import { screen, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
-import { currentWorkspaceStore } from 'app/utils/navigation';
 import { serverConfigStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
@@ -36,10 +35,6 @@ describe('App Selector', () => {
     );
 
   beforeEach(() => {
-    currentWorkspaceStore.next({
-      ...workspaceDataStub,
-      cdrVersionId: '1',
-    });
     serverConfigStore.set({
       config: defaultServerConfig,
     });
