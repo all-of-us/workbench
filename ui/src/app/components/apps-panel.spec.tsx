@@ -76,7 +76,7 @@ const expectExpandedApp = (appName: string): HTMLElement => {
   return deleteEnvButton;
 };
 
-describe('AppsPanel', () => {
+describe(AppsPanel.name, () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
   const leoAppsStub = new LeoAppsApiStub();

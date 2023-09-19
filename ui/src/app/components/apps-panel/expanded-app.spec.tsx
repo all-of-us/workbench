@@ -349,15 +349,18 @@ describe('ExpandedApp', () => {
         launchButton.click();
 
         await waitFor(() => {
-          expect(localizeSpy).toHaveBeenCalledWith(
-            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-            appName,
-            {
-              appType: toAppType[appType],
-              fileNames: [],
-              playgroundMode: false,
-            }
-          );
+          // RW-10934 SAS localization throws a 500 error
+          if (appType !== UIAppType.SAS) {
+            expect(localizeSpy).toHaveBeenCalledWith(
+              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+              appName,
+              {
+                appType: toAppType[appType],
+                fileNames: [],
+                playgroundMode: false,
+              }
+            );
+          }
 
           expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
           expect(focusStub).toHaveBeenCalled();
