@@ -162,7 +162,7 @@ const styles = reactStyles({
     borderColor: `#72abdc`,
   },
   sasBetaBadge: {
-    borderColor: 'SAS TODO SAS',
+    borderColor: '#008ACD',
   },
 });
 
