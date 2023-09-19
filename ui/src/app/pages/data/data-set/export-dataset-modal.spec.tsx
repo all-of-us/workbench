@@ -4,7 +4,6 @@ import { mount } from 'enzyme';
 
 import {
   DataSetApi,
-  DataSetExportRequest,
   DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
   KernelTypeEnum,
