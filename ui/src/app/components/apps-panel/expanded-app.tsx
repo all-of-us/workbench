@@ -33,8 +33,8 @@ import {
 } from 'app/utils/runtime-utils';
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
-  openRStudioApp,
-  openSASApp,
+  openRStudio,
+  openSAS,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -160,7 +160,7 @@ const RStudioButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openRStudioApp(workspaceNamespace, userApp);
+    openRStudio(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
@@ -199,7 +199,7 @@ const SASButtonRow = (props: {
   const { userApp, workspaceNamespace } = props;
 
   const onClickLaunch = async () => {
-    openSASApp(workspaceNamespace, userApp);
+    openSAS(workspaceNamespace, userApp);
   };
 
   const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
