@@ -585,9 +585,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -617,9 +617,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.RSTUDIO}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -649,9 +649,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.SAS}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };

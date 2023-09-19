@@ -29,10 +29,12 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 
 describe(CreateCromwell.name, () => {
   const onClose = jest.fn();
+  const onClickDeleteGkeApp = jest.fn();
   const freeTierBillingAccountId = 'freetier';
 
   const defaultProps: CommonCreateGkeAppProps = {
     onClose,
+    onClickDeleteGkeApp,
     creatorFreeCreditsRemaining: null,
     workspace: {
       ...workspaceStubs[0],

@@ -28,9 +28,11 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 import { CreateSAS } from './create-sas';
 
 const onClose = jest.fn();
+const onClickDeleteGkeApp = jest.fn();
 const freeTierBillingAccountId = 'freetier';
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
+  onClickDeleteGkeApp,
   creatorFreeCreditsRemaining: null,
   workspace: {
     ...workspaceStubs[0],

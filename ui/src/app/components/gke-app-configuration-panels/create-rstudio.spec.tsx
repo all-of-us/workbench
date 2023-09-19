@@ -28,9 +28,11 @@ import { CommonCreateGkeAppProps } from './create-gke-app';
 import { CreateRStudio } from './create-rstudio';
 
 const onClose = jest.fn();
+const onClickDeleteGkeApp = jest.fn();
 const freeTierBillingAccountId = 'freetier';
 export const defaultProps: CommonCreateGkeAppProps = {
   onClose,
+  onClickDeleteGkeApp,
   creatorFreeCreditsRemaining: null,
   workspace: {
     ...workspaceStubs[0],
