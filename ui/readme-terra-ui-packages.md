@@ -27,3 +27,22 @@ Once you have selected a function or component to use, there are only two steps:
 1. Add the package to our dependencies (e.g., `"@terra-ui-packages/core-utils": "0.0.5"`) if it hasn't already been done, then;
 2. Import and use it (e.g., `import { cond } from '@terra-ui-packages/core-utils';`)
 
+## Working on Packages
+
+You can use checked-out source code as a package to test unpublished versions. To do this, first clone the Terra UI GitHub repository:
+
+`$ git clone https://github.com/DataBiosphere/terra-ui.git`
+
+### Development Cycle
+
+After each change, build the package:
+
+`terra-ui-repo-dir $ yarn workspace @terra-ui-packages/core-utils build`
+
+Re-add the package from source as a dependency:
+
+`aou-repo-ui-dir $ yarn add /path/to/terra-ui-repo-dir/packages/core-utils`
+
+This should allow you to use the updated package code:
+
+`$ yarn run tsc`

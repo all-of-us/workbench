@@ -10,9 +10,9 @@ import {
   RuntimeIcon,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
-import cromwellIcon from 'assets/images/Cromwell-icon.png';
-import jupyterIcon from 'assets/images/Jupyter-icon.png';
-import rstudioIcon from 'assets/images/RStudio-icon.png';
+import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
+import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
+import rstudioIcon from 'assets/user-apps/RStudio-icon.png';
 
 import {
   createListAppsCromwellResponse,
