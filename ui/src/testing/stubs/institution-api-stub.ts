@@ -12,8 +12,6 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { getTierConfig } from 'app/utils/institutions';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const VUMC: Institution = {
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',

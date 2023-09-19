@@ -9,8 +9,6 @@ import {
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_CDR_VERSION_ID = 'fakeCdrVersion';

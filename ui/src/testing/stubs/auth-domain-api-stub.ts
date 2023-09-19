@@ -1,7 +1,5 @@
 import { AuthDomainApi } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class AuthDomainApiStub extends AuthDomainApi {
   constructor() {
     super(undefined);

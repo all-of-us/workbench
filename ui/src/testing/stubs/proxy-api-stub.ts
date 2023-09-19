@@ -1,7 +1,5 @@
 import { ProxyApi } from 'notebooks-generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class ProxyApiStub extends ProxyApi {
   constructor() {
     super(undefined);

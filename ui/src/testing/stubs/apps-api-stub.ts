@@ -11,8 +11,6 @@ import {
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 const listAppsAppResponseSharedDefaults = {
   googleProject: 'terra-vpc-sc-dev-42c21469',
   createdDate: '2023-03-13T18:16:49.481854Z',

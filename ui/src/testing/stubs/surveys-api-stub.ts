@@ -1,7 +1,5 @@
 import { CreateNewUserSatisfactionSurvey, SurveysApi } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class SurveysApiStub extends SurveysApi {
   constructor() {
     super(undefined);

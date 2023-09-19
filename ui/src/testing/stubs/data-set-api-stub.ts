@@ -11,8 +11,6 @@ import {
   ReadOnlyNotebookResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const stubDataSet = (): DataSet => ({
   id: 1,
   name: 'Stub Dataset',

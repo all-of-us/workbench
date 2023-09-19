@@ -8,8 +8,6 @@ import {
   WorkbenchListBillingAccountsResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class UserApiStub extends UserApi {
   existingUsers: UserRole[];
   constructor(existingUsers?: UserRole[]) {

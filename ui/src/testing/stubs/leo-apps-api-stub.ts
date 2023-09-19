@@ -1,7 +1,5 @@
 import { AppsApi } from 'notebooks-generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class LeoAppsApiStub extends AppsApi {
   constructor() {
     super(undefined);

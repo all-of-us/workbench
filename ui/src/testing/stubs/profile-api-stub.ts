@@ -10,8 +10,6 @@ import { AdminUserListResponse } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 import { BROAD } from './institution-api-stub';
 
 export class ProfileStubVariables {

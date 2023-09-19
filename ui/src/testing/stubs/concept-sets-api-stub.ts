@@ -11,8 +11,6 @@ import {
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class ConceptStubVariables {
   static STUB_CONCEPTS: Criteria[] = [
     {

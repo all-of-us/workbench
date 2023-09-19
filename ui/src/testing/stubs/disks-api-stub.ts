@@ -8,8 +8,6 @@ import {
   ListDisksResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const stubDisk = (): Disk => ({
   size: 1000,
   diskType: DiskType.STANDARD,

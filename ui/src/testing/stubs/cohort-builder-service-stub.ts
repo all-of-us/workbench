@@ -18,8 +18,6 @@ import {
   SurveyVersionListResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class SurveyStubVariables {
   static STUB_SURVEYS: SurveyModule[] = [
     {

@@ -8,8 +8,6 @@ import {
   UpdateEgressEventRequest,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class EgressEventsAdminApiStub extends EgressEventsAdminApi {
   private nextEventId = 1;
 

@@ -15,7 +15,6 @@ import {
 } from 'app/utils/machines';
 
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 import { stubDisk } from './disks-api-stub';
 

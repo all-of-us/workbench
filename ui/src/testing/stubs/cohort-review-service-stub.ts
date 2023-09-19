@@ -16,8 +16,6 @@ import {
   VocabularyListResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 const criteriaStub = {
   includes: [
     {
