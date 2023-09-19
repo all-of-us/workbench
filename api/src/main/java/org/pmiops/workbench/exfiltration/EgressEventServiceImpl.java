@@ -38,7 +38,6 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final UserService userService;
   private final TaskQueueService taskQueueService;
 
-  private final LeonardoApiClient leonardoApiClient;
   private final WorkspaceDao workspaceDao;
   private final EgressEventDao egressEventDao;
 
@@ -53,14 +52,12 @@ public class EgressEventServiceImpl implements EgressEventService {
       EgressEventAuditor egressEventAuditor,
       UserService userService,
       TaskQueueService taskQueueService,
-      LeonardoApiClient leonardoApiClient,
       WorkspaceDao workspaceDao,
       EgressEventDao egressEventDao) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.userService = userService;
     this.taskQueueService = taskQueueService;
-    this.leonardoApiClient = leonardoApiClient;
     this.workspaceDao = workspaceDao;
     this.egressEventDao = egressEventDao;
   }

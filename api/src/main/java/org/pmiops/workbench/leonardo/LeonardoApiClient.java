@@ -128,7 +128,7 @@ public interface LeonardoApiClient {
   /** @return true if Leonardo service is okay, false otherwise. */
   boolean getLeonardoStatus();
 
-  int stopAllUserAppsAsService(String userEmail);
+  int deleteUserAppsAsService(String userEmail);
 
   /** List all persistent disks in google project */
   List<LeonardoListPersistentDiskResponse> listDisksByProjectAsService(String googleProject);

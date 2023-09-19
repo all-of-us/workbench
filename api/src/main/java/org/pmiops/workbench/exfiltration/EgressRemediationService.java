@@ -282,7 +282,7 @@ public abstract class EgressRemediationService {
 
   private void stopUserRuntimesAndApps(String userEmail) {
     int stoppedRuntimeCount = leonardoNotebooksClient.stopAllUserRuntimesAsService(userEmail);
-    int stoppedAppCount = leonardoNotebooksClient.stopAllUserAppsAsService(userEmail);
+    int stoppedAppCount = leonardoNotebooksClient.deleteUserAppsAsService(userEmail);
     log.info(
         String.format(
             "stopped %d runtimes and %d apps for user %s",
