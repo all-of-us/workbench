@@ -66,7 +66,7 @@ export const maybeStartPollingForUserApps = (namespace) => {
     });
 };
 
-export const createUserApp = (namespace, config: CreateAppRequest) =>
+export const createUserApp = async (namespace, config: CreateAppRequest) =>
   appsApi()
     .createApp(namespace, config)
     .then(() => {
