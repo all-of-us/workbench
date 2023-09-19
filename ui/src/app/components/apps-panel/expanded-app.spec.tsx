@@ -3,7 +3,6 @@ import * as React from 'react';
 import {
   AppsApi,
   AppStatus,
-  AppType,
   NotebooksApi,
   RuntimeStatus,
   UserAppEnvironment,
