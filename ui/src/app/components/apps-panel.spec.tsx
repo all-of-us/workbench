@@ -49,13 +49,17 @@ const findAvailableApps = (activeAppsExist: boolean) =>
 const findAppBanner = (name: string) => screen.queryByRole('img', { name });
 
 const expectUnexpandedApp = (appName: string): HTMLElement => {
-  // arbitrary button choice for an expanded app
+  // an unexpanded app is just the banner
+  const appBanner = findAppBanner(appName);
+  expect(appBanner).toBeInTheDocument();
+
+  // now check if it's expanded - arbitrary button choice
   const deleteEnvButton = screen.queryByRole('button', {
     name: `Delete ${appName} Environment`,
   });
   expect(deleteEnvButton).not.toBeInTheDocument();
 
-  return findAppBanner(appName);
+  return appBanner;
 };
 
 const expectAppIsMissing = (appName: string) => {
@@ -63,6 +67,7 @@ const expectAppIsMissing = (appName: string) => {
 };
 
 const expectExpandedApp = (appName: string): HTMLElement => {
+  expect(findAppBanner(appName)).toBeInTheDocument();
   // arbitrary button choice
   const deleteEnvButton = screen.queryByRole('button', {
     name: `Delete ${appName} Environment`,
