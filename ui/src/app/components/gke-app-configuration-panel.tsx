@@ -18,7 +18,11 @@ import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
 
-type InjectedProps = 'app' | 'disk' | 'onClickDeleteUnattachedPersistentDisk';
+type InjectedProps =
+  | 'app'
+  | 'disk'
+  | 'onClickDeleteUnattachedPersistentDisk'
+  | 'onClickDeleteGkeApp';
 
 export type GkeAppConfigurationPanelProps = {
   appType: AppType;
@@ -114,6 +118,9 @@ export const GKEAppConfigurationPanel = ({
     }
   };
 
+  const onClickDeleteGkeApp = () =>
+    setPanelContent(GKEAppPanelContent.DELETE_GKE_APP);
+
   const onCancelDeleteUnattachedPersistentDisk = () => {
     setPanelContent(GKEAppPanelContent.CREATE);
   };
@@ -123,6 +130,14 @@ export const GKEAppConfigurationPanel = ({
     onClose();
   };
 
+  const createAppProps = {
+    ...props,
+    app,
+    disk,
+    onClose,
+    onClickDeleteGkeApp,
+    onClickDeleteUnattachedPersistentDisk,
+  };
   return switchCase(
     panelContent,
     [
@@ -130,48 +145,9 @@ export const GKEAppConfigurationPanel = ({
       () =>
         switchCase(
           appType,
-          [
-            AppType.CROMWELL,
-            () => (
-              <CreateCromwell
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ],
-          [
-            AppType.RSTUDIO,
-            () => (
-              <CreateRStudio
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ],
-          [
-            AppType.SAS,
-            () => (
-              <CreateSAS
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ]
+          [AppType.CROMWELL, () => <CreateCromwell {...createAppProps} />],
+          [AppType.RSTUDIO, () => <CreateRStudio {...createAppProps} />],
+          [AppType.SAS, () => <CreateSAS {...createAppProps} />]
         ),
     ],
     [

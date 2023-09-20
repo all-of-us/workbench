@@ -98,14 +98,6 @@ export const ConfigurationPanel = fp.flow(
               appType={toAppType[appType]}
               workspaceNamespace={workspace.namespace}
               initialPanelContent={gkeAppConfPanelInitialState}
-              onClickDeleteGkeApp={
-                (sidebarIcon: SidebarIconId) =>
-                  setSidebarActiveIconStore.next(sidebarIcon)
-                // openGkeAppConfigWithState(
-                //   sidebarIcon,
-                //   GKEAppPanelContent.DELETE_GKE_APP
-                // )
-              }
             />
           )
         )}

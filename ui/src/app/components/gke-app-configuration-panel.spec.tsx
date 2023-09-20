@@ -73,7 +73,6 @@ describe(GKEAppConfigurationPanel.name, () => {
     appType: AppType.RSTUDIO,
     workspaceNamespace: 'aou-rw-1234',
     onClose: jest.fn(),
-    onClickDeleteGkeApp: jest.fn(),
     initialPanelContent: null,
     creatorFreeCreditsRemaining: 300,
 

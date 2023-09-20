@@ -530,8 +530,8 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <ConfigurationPanel
                 {...{ runtimeConfPanelInitialState }}
-                onClose={() => this.setActiveIcon(null)}
                 appType={UIAppType.JUPYTER}
+                onClose={() => this.setActiveIcon(null)}
               />
             ),
             showFooter: false,
