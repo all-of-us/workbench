@@ -80,9 +80,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
 
-  private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
+  // Keep in sync with
+  // https://github.com/DataBiosphere/leonardo/blob/807c024d8e8be86b782e519319520ca3b3705a52/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L522C42-L522C42
+  private static Set<LeonardoAppStatus> DELETABLE_APP_STATUSES =
       ImmutableSet.of(
-          LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
+          LeonardoAppStatus.STATUS_UNSPECIFIED, LeonardoAppStatus.RUNNING, LeonardoAppStatus.ERROR);
 
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
@@ -653,9 +655,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return true;
   }
 
-  /**
-   * Deletes user apps (exclude Cromwell) and keep user disk.
-   */
+  /** Deletes user apps (exclude Cromwell) and keep user disk. */
   @Override
   public int deleteUserAppsAsService(String userEmail) {
     AppsApi appsApiAsService = serviceAppsApiProvider.get();
@@ -670,6 +670,7 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
 
     List<Boolean> results =
         apps.stream()
+            .filter(r -> DELETABLE_APP_STATUSES.contains(r.getStatus()))
             .filter(r -> r.getAppType() != LeonardoAppType.CROMWELL) // Don't delete Cromwell
             .filter(
                 r -> {
