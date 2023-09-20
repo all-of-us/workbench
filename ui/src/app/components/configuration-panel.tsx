@@ -78,9 +78,8 @@ export const ConfigurationPanel = fp.flow(
             () => (
               <div>
                 <RuntimeConfigurationPanel
-                  {...{ onClose, creatorFreeCreditsRemaining }}
+                  {...{ onClose, profileState, creatorFreeCreditsRemaining }}
                   initialPanelContent={runtimeConfPanelInitialState}
-                  profileState={profileState}
                 />
               </div>
             ),
