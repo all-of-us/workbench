@@ -59,7 +59,7 @@ export const appAssets: AppAssets[] = [
   },
 ];
 
-// TODO replace with better defaults
+// TODO replace with better defaults?
 export const defaultCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
@@ -73,6 +73,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
 };
 
+// TODO replace with better defaults?
 export const defaultRStudioConfig: CreateAppRequest = {
   appType: AppType.RSTUDIO,
   kubernetesRuntimeConfig: {
@@ -86,6 +87,7 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
 };
 
+// TODO replace with better defaults?
 export const defaultSASConfig: CreateAppRequest = {
   appType: AppType.SAS,
   kubernetesRuntimeConfig: {

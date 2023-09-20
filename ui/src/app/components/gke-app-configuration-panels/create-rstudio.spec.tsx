@@ -5,24 +5,16 @@ import * as React from 'react';
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
 import { AppsApi } from 'generated/fetch/api';
 
-import { render, screen, waitFor } from '@testing-library/react';
-import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
-import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
+import { render, screen } from '@testing-library/react';
+import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { expectButtonElementEnabled } from 'testing/react-test-helpers';
-import {
-  AppsApiStub,
-  createListAppsRStudioResponse,
-} from 'testing/stubs/apps-api-stub';
+import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
-import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
+import { DisksApiStub } from 'testing/stubs/disks-api-stub';
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';
-import {
-  workspaceStubs,
-  WorkspaceStubVariables,
-} from 'testing/stubs/workspaces';
+import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { CommonCreateGkeAppProps } from './create-gke-app';
 import { CreateRStudio } from './create-rstudio';
@@ -50,6 +42,7 @@ export const defaultProps: CommonCreateGkeAppProps = {
   onClickDeleteUnattachedPersistentDisk: jest.fn(),
 };
 
+// tests for behavior specific to RStudio.  For behavior common to all GKE Apps, see create-gke-app.spec
 describe(CreateRStudio.name, () => {
   let disksApiStub: DisksApiStub;
 
@@ -72,56 +65,6 @@ describe(CreateRStudio.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('start button should create rstudio and close panel', async () => {
-    await component({
-      app: undefined,
-      disk: undefined,
-    });
-
-    const spyCreateApp = jest
-      .spyOn(appsApi(), 'createApp')
-      .mockImplementation((): Promise<any> => Promise.resolve());
-
-    const startButton = screen.getByLabelText(
-      'RStudio cloud environment create button'
-    );
-    expectButtonElementEnabled(startButton);
-    startButton.click();
-
-    await waitFor(() => {
-      expect(spyCreateApp).toHaveBeenCalledTimes(1);
-      expect(spyCreateApp).toHaveBeenCalledWith(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        defaultRStudioConfig
-      );
-      expect(onClose).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('should use the existing PD when creating', async () => {
-    const disk = stubDisk();
-    await component({
-      app: undefined,
-      disk,
-    });
-
-    const spyCreateApp = jest
-      .spyOn(appsApi(), 'createApp')
-      .mockImplementation((): Promise<any> => Promise.resolve());
-
-    const startButton = screen.getByLabelText(
-      'RStudio cloud environment create button'
-    );
-    expectButtonElementEnabled(startButton);
-    startButton.click();
-
-    await waitFor(() => {
-      expect(spyCreateApp).toHaveBeenCalledTimes(1);
-      expect(spyCreateApp.mock.calls[0][1].persistentDiskRequest).toEqual(disk);
-      expect(onClose).toHaveBeenCalledTimes(1);
-    });
-  });
-
   it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
@@ -130,72 +73,5 @@ describe(CreateRStudio.name, () => {
     expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
       '$0.21 per hour'
     );
-  });
-
-  it('should allow deleting the environment when an app is running', async () => {
-    const disk = stubDisk();
-    const onClickDeleteGkeApp = jest.fn();
-
-    await component({
-      app: createListAppsRStudioResponse(),
-      disk,
-      onClickDeleteGkeApp,
-    });
-
-    const deleteButton = screen.queryByLabelText('Delete Environment');
-    expectButtonElementEnabled(deleteButton);
-    deleteButton.click();
-
-    await waitFor(() => {
-      expect(onClickDeleteGkeApp).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('should not render a Delete Environment link when no app is present', async () => {
-    await component();
-
-    const deleteButton = screen.queryByLabelText('Delete Environment');
-    expect(deleteButton).not.toBeInTheDocument();
-  });
-
-  it('should allow deleting a persistent disk when a disk is present but no app', async () => {
-    const disk = stubDisk();
-    const onClickDeleteUnattachedPersistentDisk = jest.fn();
-
-    await component({
-      app: undefined,
-      disk,
-      onClickDeleteUnattachedPersistentDisk,
-    });
-
-    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-    expectButtonElementEnabled(deleteButton);
-    deleteButton.click();
-
-    await waitFor(() => {
-      expect(onClickDeleteUnattachedPersistentDisk).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('should not render a Delete Persistent Disk link when an app is present', async () => {
-    const disk = stubDisk();
-
-    await component({
-      app: createListAppsRStudioResponse(),
-      disk,
-    });
-
-    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-    expect(deleteButton).not.toBeInTheDocument();
-  });
-
-  it('should not render a Delete Persistent Disk link when no disk is present', async () => {
-    await component({
-      app: undefined,
-      disk: undefined,
-    });
-
-    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
-    expect(deleteButton).not.toBeInTheDocument();
   });
 });
