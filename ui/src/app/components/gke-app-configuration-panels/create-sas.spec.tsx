@@ -14,7 +14,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
-  createListAppsRStudioResponse,
+  createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
@@ -160,7 +160,7 @@ describe(CreateSAS.name, () => {
     const disk = stubDisk();
 
     await component({
-      app: createListAppsRStudioResponse(),
+      app: createListAppsSASResponse(),
       disk,
     });
 
