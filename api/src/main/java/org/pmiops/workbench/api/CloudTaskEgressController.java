@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_SUMOLOGIC_SERVICE_QUALIFIER;
 
 import org.pmiops.workbench.exfiltration.EgressRemediationService;
 import org.pmiops.workbench.model.ProcessEgressEventRequest;

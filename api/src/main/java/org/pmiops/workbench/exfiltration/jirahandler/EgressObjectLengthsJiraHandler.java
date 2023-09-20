@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration.jirahandler;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.OBJECT_LENGTHS_JIRA_HANDLER_QUALIFIER;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

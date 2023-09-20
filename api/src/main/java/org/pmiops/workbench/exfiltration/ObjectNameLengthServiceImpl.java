@@ -1,6 +1,6 @@
 package org.pmiops.workbench.exfiltration;
 
-import static org.pmiops.workbench.exfiltration.ExfiltrationConstants.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
+import static org.pmiops.workbench.exfiltration.ExfiltrationUtils.EGRESS_OBJECT_LENGTHS_SERVICE_QUALIFIER;
 
 import com.google.gson.Gson;
 import java.io.IOException;
