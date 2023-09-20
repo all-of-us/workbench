@@ -15,12 +15,14 @@ export const BackupFilesHelpSection = ({
     appType,
     [UIAppType.JUPYTER, () => 'Jupyter notebooks'],
     [UIAppType.RSTUDIO, () => '.Rmd and .R files'],
+    [UIAppType.SAS, () => '.sas files'],
     [DEFAULT, () => null]
   );
   const savedFilesReferenceText = switchCase<UIAppType, string>(
     appType,
     [UIAppType.JUPYTER, () => 'your notebooks'],
     [UIAppType.RSTUDIO, () => 'those files'],
+    [UIAppType.SAS, () => 'those files'],
     [DEFAULT, () => null]
   );
 

@@ -9,17 +9,22 @@ import {
 
 import { environment } from 'environments/environment';
 import { findApp, UIAppType } from 'app/components/apps-panel/utils';
-import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
+import {
+  rstudioConfigIconId,
+  sasConfigIconId,
+} from 'app/components/help-sidebar-icons';
 import { leoAppsApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { appsApi } from 'app/services/swagger-fetch-clients';
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from './constants';
+import { fetchWithErrorModal } from './errors';
 import { setSidebarActiveIconStore } from './navigation';
 import { userAppsStore } from './stores';
 
 export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
+  [AppType.SAS]: 'SAS',
 };
 
 const appStatusesRequiringUpdates = [
@@ -68,17 +73,15 @@ export const createUserApp = (namespace, config: CreateAppRequest) =>
       maybeStartPollingForUserApps(namespace);
     });
 
-export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) => {
-  return appsApi()
+export const deleteUserApp = (namespace, appName, deleteDiskWithUserApp) =>
+  appsApi()
     .deleteApp(namespace, appName, deleteDiskWithUserApp)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
-export const pauseUserApp = (googleProject, appName, namespace) => {
+export const pauseUserApp = (googleProject, appName, namespace) =>
   leoAppsApi()
     .stopApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
 const localizeUserApp = (
   namespace,
@@ -86,19 +89,17 @@ const localizeUserApp = (
   appType: AppType,
   fileNames: Array<string>,
   playgroundMode: boolean
-) => {
+) =>
   appsApi().localizeApp(namespace, appName, {
     fileNames,
     playgroundMode,
     appType,
   });
-};
 
-export const resumeUserApp = (googleProject, appName, namespace) => {
+export const resumeUserApp = (googleProject, appName, namespace) =>
   leoAppsApi()
     .startApp(googleProject, appName)
     .then(() => maybeStartPollingForUserApps(namespace));
-};
 
 export const findDisk = (disks: Disk[], appType: AppType): Disk | undefined =>
   disks.find((disk) => disk.appType === appType);
@@ -114,13 +115,30 @@ export const openRStudio = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
-  localizeUserApp(
-    workspaceNamespace,
-    userApp.appName,
-    userApp.appType,
-    [],
-    false
+  fetchWithErrorModal(() =>
+    localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      [],
+      false
+    )
   );
+  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+};
+
+export const openSAS = (
+  workspaceNamespace: string,
+  userApp: UserAppEnvironment
+) => {
+  // RW-10934 SAS localization throws a 500 error
+  // fetchWithErrorModal(() => localizeUserApp(
+  //   workspaceNamespace,
+  //   userApp.appName,
+  //   userApp.appType,
+  //   [],
+  //   false
+  // ));
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
@@ -133,6 +151,18 @@ export const openRStudioOrConfigPanel = (
     openRStudio(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
+  }
+};
+
+export const openSASOrConfigPanel = (
+  workspaceNamespace: string,
+  userApps: ListAppsResponse
+) => {
+  const userApp = findApp(userApps, UIAppType.SAS);
+  if (userApp?.status === AppStatus.RUNNING) {
+    openSAS(workspaceNamespace, userApp);
+  } else {
+    setSidebarActiveIconStore.next(sasConfigIconId);
   }
 };
 

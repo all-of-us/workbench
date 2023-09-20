@@ -18,6 +18,7 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -33,11 +34,12 @@ import {
 import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   openRStudio,
+  openSAS,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
 
-import { AppLogo } from './app-logo';
+import { AppBanner } from './app-banner';
 import { AppsPanelButton } from './apps-panel-button';
 import { NewNotebookButton } from './new-notebook-button';
 import { PauseResumeButton } from './pause-resume-button';
@@ -190,6 +192,45 @@ const RStudioButtonRow = (props: {
   );
 };
 
+const SASButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  const { userApp, workspaceNamespace } = props;
+
+  const onClickLaunch = async () => {
+    openSAS(workspaceNamespace, userApp);
+  };
+
+  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
+
+  return (
+    <FlexRow>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(sasConfigIconId);
+        }}
+      />
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <TooltipTrigger
+        disabled={!launchButtonDisabled}
+        content='Environment must be running to launch SAS'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            onClick={onClickLaunch}
+            disabled={launchButtonDisabled}
+            icon={faRocket}
+            buttonText='Open SAS'
+            data-test-id='open-SAS-button'
+          />
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+  );
+};
+
 interface ExpandedAppProps {
   appType: UIAppType;
   initialUserAppInfo: UserAppEnvironment;
@@ -223,7 +264,8 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     appType,
     [UIAppType.JUPYTER, () => onClickDeleteRuntime],
     [UIAppType.CROMWELL, () => displayCromwellDeleteModal],
-    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)]
+    [UIAppType.RSTUDIO, () => () => onClickDeleteGkeApp(rstudioConfigIconId)],
+    [UIAppType.SAS, () => () => onClickDeleteGkeApp(sasConfigIconId)]
   );
 
   return (
@@ -233,7 +275,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
     >
       <FlexRow>
         <div>
-          <AppLogo
+          <AppBanner
             {...{ appType }}
             style={{ marginRight: '1em', padding: '1rem' }}
           />
@@ -253,6 +295,7 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
           content='Your application must be running in order to be deleted.'
         >
           <Clickable
+            aria-label={`Delete ${appType} Environment`}
             disabled={!trashEnabled}
             style={
               trashEnabled
@@ -298,6 +341,16 @@ export const ExpandedApp = (props: ExpandedAppProps) => {
                 />
               ),
             ],
+            [
+              appType === UIAppType.SAS,
+              () => (
+                <SASButtonRow
+                  userApp={initialUserAppInfo}
+                  workspaceNamespace={workspace.namespace}
+                />
+              ),
+            ],
+
             () => null
           )}
         </FlexColumn>

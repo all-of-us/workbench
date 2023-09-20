@@ -1,5 +1,6 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
 
 import {
   AppsApi,
@@ -8,16 +9,13 @@ import {
   RuntimeApi,
 } from 'generated/fetch';
 
+import { render, screen, waitFor } from '@testing-library/react';
 import { registerApiClient as registerLeoApiClient } from 'app/services/notebooks-swagger-fetch-clients';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import { runtimeStore, serverConfigStore } from 'app/utils/stores';
 import { AppsApi as LeoAppsApi } from 'notebooks-generated/fetch';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  findNodesContainingText,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
 import { AppsApiStub } from 'testing/stubs/apps-api-stub';
 import { LeoAppsApiStub } from 'testing/stubs/leo-apps-api-stub';
 import { NotebooksApiStub } from 'testing/stubs/notebooks-api-stub';
@@ -31,7 +29,7 @@ const stubFunction = () => ({});
 const workspaceStub = workspaceDataStub;
 
 const component = async () =>
-  mount(
+  render(
     <AppsPanel
       workspace={workspaceStub}
       onClose={stubFunction}
@@ -41,25 +39,44 @@ const component = async () =>
     />
   );
 
-const findActiveApps = (wrapper: ReactWrapper) =>
-  findNodesContainingText(wrapper, 'Active applications');
+const findActiveApps = () => screen.queryByText('Active Applications');
 
-const findAvailableApps = (wrapper: ReactWrapper, activeAppsExist: boolean) => {
-  // the text changes based on whether there are active applications above this section
-  const availableExpectedHeader = activeAppsExist
-    ? 'Launch other applications'
-    : 'Launch applications';
+const findAvailableApps = (activeAppsExist: boolean) =>
+  activeAppsExist
+    ? screen.queryByText('Launch other applications')
+    : screen.queryByText('Launch applications');
 
-  return findNodesContainingText(wrapper, availableExpectedHeader);
+const findAppBanner = (name: string) => screen.queryByRole('img', { name });
+
+const expectUnexpandedApp = (appName: string): HTMLElement => {
+  // an unexpanded app is just the banner
+  const appBanner = findAppBanner(appName);
+  expect(appBanner).toBeInTheDocument();
+
+  // now check if it's expanded - arbitrary button choice
+  const deleteEnvButton = screen.queryByRole('button', {
+    name: `Delete ${appName} Environment`,
+  });
+  expect(deleteEnvButton).not.toBeInTheDocument();
+
+  return appBanner;
 };
 
-const findUnexpandedApp = (wrapper: ReactWrapper, appName: string) =>
-  wrapper.find({ 'data-test-id': `${appName}-unexpanded` }).first();
+const expectAppIsMissing = (appName: string) => {
+  expect(findAppBanner(appName)).not.toBeInTheDocument();
+};
 
-const findExpandedApp = (wrapper: ReactWrapper, appName: string) =>
-  wrapper.find({ 'data-test-id': `${appName}-expanded` });
+const expectExpandedApp = (appName: string): HTMLElement => {
+  expect(findAppBanner(appName)).toBeInTheDocument();
+  // arbitrary button choice
+  const deleteEnvButton = screen.queryByRole('button', {
+    name: `Delete ${appName} Environment`,
+  });
+  expect(deleteEnvButton).toBeInTheDocument();
+  return deleteEnvButton;
+};
 
-describe('AppsPanel', () => {
+describe(AppsPanel.name, () => {
   const appsStub = new AppsApiStub();
   const runtimeStub = new RuntimeApiStub();
   const leoAppsStub = new LeoAppsApiStub();
@@ -85,65 +102,73 @@ describe('AppsPanel', () => {
     runtimeStub.runtime.status = undefined;
     appsStub.listAppsResponse = [];
 
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    const { container } = await component();
+    expect(container).toBeInTheDocument();
 
-    expect(findActiveApps(wrapper).exists()).toBeFalsy();
-    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+    expect(findActiveApps()).not.toBeInTheDocument();
+    expect(findAvailableApps(false)).toBeInTheDocument();
 
     // Click unexpanded Jupyter app
 
-    expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
-    const clickJupyter = findUnexpandedApp(wrapper, 'Jupyter').prop('onClick');
-    await clickJupyter();
-    await waitOneTickAndUpdate(wrapper);
+    const jupyter = expectUnexpandedApp('Jupyter');
+    jupyter.click();
 
-    expect(findUnexpandedApp(wrapper, 'Jupyter').exists()).toBeFalsy();
-    expect(findExpandedApp(wrapper, 'Jupyter').exists()).toBeTruthy();
+    await waitFor(() => expectExpandedApp('Jupyter'));
 
     // the overall apps panel state doesn't change: there are still no ActiveApps
     // the newly expanded app is in the AvailableApps section
 
-    expect(findActiveApps(wrapper).exists()).toBeFalsy();
-    expect(findAvailableApps(wrapper, false).exists()).toBeTruthy();
+    expect(findActiveApps()).not.toBeInTheDocument();
+    expect(findAvailableApps(false)).toBeInTheDocument();
   });
 
   it('should show the disabled panel when the workspace has INACTIVE billing status', async () => {
     workspaceStub.billingStatus = BillingStatus.INACTIVE;
 
-    const wrapper = await component();
-    expect(wrapper.exists()).toBeTruthy();
-    await waitOneTickAndUpdate(wrapper);
+    const { container } = await component();
+    expect(container).toBeInTheDocument();
 
     expect(
-      wrapper.find({ 'data-test-id': 'environment-disabled-panel' }).exists()
-    ).toBeTruthy();
+      screen.queryByText('Cloud services are disabled for this workspace.')
+    ).toBeInTheDocument();
 
-    expect(findActiveApps(wrapper).exists()).toBeFalsy();
-    expect(findAvailableApps(wrapper, false).exists()).toBeFalsy();
+    expect(findActiveApps()).not.toBeInTheDocument();
+    expect(findAvailableApps(false)).not.toBeInTheDocument();
   });
 
-  test.each([true, false])(
-    'should / should not show apps when the RStudio feature flag is %s',
-    async (enableRStudioGKEApp) => {
+  test.each([
+    [true, true],
+    [true, false],
+    [false, true],
+    [false, false],
+  ])(
+    'should / should not show apps based on feature flags enableRStudioGKEApp %s, enableSasGKEApp %s',
+    async (enableRStudioGKEApp, enableSasGKEApp) => {
       serverConfigStore.set({
         config: {
           ...defaultServerConfig,
           enableRStudioGKEApp,
+          enableSasGKEApp,
         },
       });
       appsStub.listAppsResponse = [];
 
-      const wrapper = await component();
-      await waitOneTickAndUpdate(wrapper);
+      await component();
 
       // Cromwell is always available
-      expect(findUnexpandedApp(wrapper, 'Cromwell').exists()).toBeTruthy();
+      expectUnexpandedApp('Cromwell');
 
-      expect(findUnexpandedApp(wrapper, 'RStudio').exists()).toEqual(
-        enableRStudioGKEApp
-      );
+      if (enableRStudioGKEApp) {
+        expectUnexpandedApp('RStudio');
+      } else {
+        expectAppIsMissing('RStudio');
+      }
+
+      if (enableSasGKEApp) {
+        expectUnexpandedApp('SAS');
+      } else {
+        expectAppIsMissing('SAS');
+      }
     }
   );
 });

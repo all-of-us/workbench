@@ -11,7 +11,10 @@ import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { userAppsStore, useStore } from 'app/utils/stores';
-import { openRStudioOrConfigPanel } from 'app/utils/user-apps-utils';
+import {
+  openRStudioOrConfigPanel,
+  openSASOrConfigPanel,
+} from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
 
@@ -59,6 +62,10 @@ export const AppSelector = (props: AppSelectorProps) => {
       case UIAppType.RSTUDIO:
         setVisibleModal(VisibleModal.None);
         openRStudioOrConfigPanel(workspace.namespace, userApps);
+        break;
+      case UIAppType.SAS:
+        setVisibleModal(VisibleModal.None);
+        openSASOrConfigPanel(workspace.namespace, userApps);
         break;
     }
   };

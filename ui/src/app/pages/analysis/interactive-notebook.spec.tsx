@@ -1,22 +1,33 @@
 import { MemoryRouter, Route } from 'react-router-dom';
 
-import { AppStatus, WorkspaceAccessLevel } from 'generated/fetch';
+import {
+  AppStatus,
+  AppType,
+  UserAppEnvironment,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
 
 import { screen } from '@testing-library/dom';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import { rstudioConfigIconId } from 'app/components/help-sidebar-icons';
+import {
+  rstudioConfigIconId,
+  sasConfigIconId,
+} from 'app/components/help-sidebar-icons';
 import * as swaggerClients from 'app/services/swagger-fetch-clients';
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 import {
   currentWorkspaceStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import { userAppsStore } from 'app/utils/stores';
+import { MatchParams, userAppsStore } from 'app/utils/stores';
 import { analysisTabName } from 'app/utils/user-apps-utils';
 
-import { createListAppsRStudioResponse } from 'testing/stubs/apps-api-stub';
+import {
+  createListAppsRStudioResponse,
+  createListAppsSASResponse,
+} from 'testing/stubs/apps-api-stub';
 import { workspaceStubs } from 'testing/stubs/workspaces';
 
 import { InteractiveNotebook } from './interactive-notebook';
@@ -45,11 +56,11 @@ const setup = (mockAppOverrides, mockNotebookOverrides): UserEvent => {
   return userEvent.setup();
 };
 
-const renderInteractiveNotebook = (pathParameters) =>
+const renderInteractiveNotebook = (pathParameters: { params: MatchParams }) =>
   render(
     <MemoryRouter
       initialEntries={[
-        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/example.Rmd`,
+        `/workspaces/sampleNameSpace/sampleWorkspace/${analysisTabName}/preview/${pathParameters.params.nbName}`,
       ]}
     >
       <Route path={`/workspaces/:ns/:wsid/${analysisTabName}/preview/:nbName`}>
@@ -58,51 +69,88 @@ const renderInteractiveNotebook = (pathParameters) =>
     </MemoryRouter>
   );
 
-test('Edit Rmd file with running RStudio', async () => {
-  const user = setup(
-    { localizeApp: () => Promise.resolve({}) },
-    {
-      getNotebookLockingMetadata: () => Promise.resolve({}),
-    }
-  );
-  const rStudioApp = createListAppsRStudioResponse({
-    status: AppStatus.RUNNING,
-  });
-  userAppsStore.set({
-    userApps: [rStudioApp],
-  });
-  const pathParameters = { params: { nbName: 'test.Rmd' } };
-  const spyWindowOpen = jest.spyOn(window, 'open');
-  spyWindowOpen.mockImplementation(jest.fn(() => window));
-  renderInteractiveNotebook(pathParameters);
-  const editButton = screen.getByTitle('Edit');
-  await user.click(editButton);
-  await waitFor(() => {
-    expect(spyWindowOpen).toHaveBeenCalledTimes(1);
-    expect(spyWindowOpen).toHaveBeenCalledWith(
-      rStudioApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
-      '_blank'
+test.each([
+  [
+    '.Rmd',
+    'RStudio',
+    createListAppsRStudioResponse({
+      status: AppStatus.RUNNING,
+    }),
+  ],
+  [
+    '.R',
+    'RStudio',
+    createListAppsRStudioResponse({
+      status: AppStatus.RUNNING,
+    }),
+  ],
+  [
+    '.sas',
+    'SAS',
+    createListAppsSASResponse({
+      status: AppStatus.RUNNING,
+    }),
+  ],
+])(
+  'Edit %s file with running %s',
+  async (suffix: string, appType: string, app: UserAppEnvironment) => {
+    const user = setup(
+      { localizeApp: () => Promise.resolve({}) },
+      {
+        getNotebookLockingMetadata: () => Promise.resolve({}),
+      }
     );
-  });
-});
+    userAppsStore.set({
+      userApps: [app],
+    });
+    const matchParams: MatchParams = { nbName: `test${suffix}` };
+    const pathParameters = { params: matchParams };
+    const spyWindowOpen = jest.spyOn(window, 'open');
+    spyWindowOpen.mockImplementation(jest.fn(() => window));
+    renderInteractiveNotebook(pathParameters);
+    const editButton = screen.getByTitle('Edit');
+    await user.click(editButton);
+    await waitFor(() => {
+      expect(spyWindowOpen).toHaveBeenCalledTimes(1);
+      expect(spyWindowOpen).toHaveBeenCalledWith(
+        app.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX],
+        '_blank'
+      );
+    });
+  }
+);
 
-test('Should open the RStudio configuration panel when you click edit on an Rmd file without a running RStudio instance.', async () => {
-  const user = setup(
-    { localizeApp: () => Promise.resolve({}) },
-    {
-      getNotebookLockingMetadata: () => Promise.resolve({}),
+test.each([
+  [AppType.RSTUDIO, '.Rmd'],
+  [AppType.RSTUDIO, '.R'],
+  [AppType.SAS, '.sas'],
+])(
+  'Should open the %s configuration panel when you click edit on a %s file without a running environment',
+  async (appType: AppType, suffix: string) => {
+    const user = setup(
+      { localizeApp: () => Promise.resolve({}) },
+      {
+        getNotebookLockingMetadata: () => Promise.resolve({}),
+      }
+    );
+
+    userAppsStore.set({
+      userApps: [],
+    });
+    const matchParams: MatchParams = { nbName: `test${suffix}` };
+    const pathParameters = { params: matchParams };
+    const spyWindowOpen = jest.spyOn(window, 'open');
+    spyWindowOpen.mockImplementation(jest.fn(() => window));
+    renderInteractiveNotebook(pathParameters);
+    const editButton = screen.getByTitle('Edit');
+    await user.click(editButton);
+    expect(spyWindowOpen).toHaveBeenCalledTimes(0);
+    if (appType === AppType.RSTUDIO) {
+      expect(setSidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
+    } else if (appType === AppType.SAS) {
+      expect(setSidebarActiveIconStore.value).toEqual(sasConfigIconId);
+    } else {
+      fail(`Unknown app type ${appType}`);
     }
-  );
-
-  userAppsStore.set({
-    userApps: [],
-  });
-  const pathParameters = { params: { nbName: 'test.Rmd' } };
-  const spyWindowOpen = jest.spyOn(window, 'open');
-  spyWindowOpen.mockImplementation(jest.fn(() => window));
-  renderInteractiveNotebook(pathParameters);
-  const editButton = screen.getByTitle('Edit');
-  await user.click(editButton);
-  expect(spyWindowOpen).toHaveBeenCalledTimes(0);
-  expect(setSidebarActiveIconStore.value).toEqual(rstudioConfigIconId);
-});
+  }
+);

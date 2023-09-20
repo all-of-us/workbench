@@ -35,7 +35,6 @@ import { defaultProps as rstudioDefaultProps } from './gke-app-configuration-pan
 const cromwellIntroTextRegex = /Cromwell is a workflow execution engine/;
 const defaultIntroTextRegex =
   /Your cloud environment is unique to this workspace and not shared with other users/;
-const rstudioIntroTextRegex = defaultIntroTextRegex;
 const deleteUnattachedPdRegex =
   /Deletes your persistent disk, which will also delete all files/;
 const confirmDeleteGkeAppText =
@@ -55,7 +54,6 @@ describe(GKEAppConfigurationPanel.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
     registerApiClient(DisksApi, new DisksApiStub());
     notificationStore.set(null);
-
     serverConfigStore.set({
       config: {
         ...defaultServerConfig,
@@ -192,7 +190,7 @@ describe(GKEAppConfigurationPanel.name, () => {
 
     await waitFor(() => {
       expect(screen.queryByText(cromwellIntroTextRegex)).not.toBeNull();
-      expect(screen.queryByText(rstudioIntroTextRegex)).toBeNull();
+      expect(screen.queryByText(defaultIntroTextRegex)).toBeNull(); // default is shared by RStudio and SAS
     });
   });
 
@@ -202,7 +200,18 @@ describe(GKEAppConfigurationPanel.name, () => {
     });
 
     await waitFor(() => {
-      expect(screen.queryByText(rstudioIntroTextRegex)).not.toBeNull();
+      expect(screen.queryByText(defaultIntroTextRegex)).not.toBeNull(); // default is shared by RStudio and SAS
+      expect(screen.queryByText(cromwellIntroTextRegex)).toBeNull();
+    });
+  });
+
+  it('should display the SAS panel when the type is SAS', async () => {
+    createWrapper({
+      appType: AppType.SAS,
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText(defaultIntroTextRegex)).not.toBeNull(); // default is shared by RStudio and SAS
       expect(screen.queryByText(cromwellIntroTextRegex)).toBeNull();
     });
   });

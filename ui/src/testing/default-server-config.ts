@@ -75,6 +75,7 @@ const defaultServerConfig: ConfigResponse = {
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   enableRStudioGKEApp: true,
+  enableSasGKEApp: true,
   tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
 };
 

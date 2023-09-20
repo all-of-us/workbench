@@ -28,6 +28,7 @@ import {
   HelpSidebarIcons,
   IconConfig,
   rstudioConfigIconId,
+  sasConfigIconId,
   showConceptIcon,
   showCriteriaIcon,
   SidebarIconId,
@@ -155,10 +156,13 @@ const styles = reactStyles({
     lineHeight: '1rem',
   },
   cromwellBetaBadge: {
-    borderColor: `#F0B1D0`,
+    borderColor: '#F0B1D0',
   },
   rstudioBetaBadge: {
-    borderColor: `#72abdc`,
+    borderColor: '#72abdc',
+  },
+  sasBetaBadge: {
+    borderColor: '#008ACD',
   },
 });
 
@@ -614,6 +618,38 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <ConfigurationPanel
                 appType={UIAppType.RSTUDIO}
+                onClose={() => this.setActiveIcon(null)}
+                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
+              />
+            ),
+          };
+        case sasConfigIconId:
+          return {
+            ...sharedGKEAppConfigSidebarContent,
+            renderHeader: () => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3
+                  style={{
+                    ...styles.sectionTitle,
+                    lineHeight: 1.75,
+                  }}
+                >
+                  SAS Cloud Environment
+                </h3>
+                <BetaBadge
+                  tooltipContent={
+                    'We are regularly improving the SAS experience. If you have feedback, reach out to support@researchallofus.org'
+                  }
+                  style={{
+                    marginLeft: '0.5rem',
+                    ...styles.sasBetaBadge,
+                  }}
+                />
+              </div>
+            ),
+            renderBody: () => (
+              <ConfigurationPanel
+                appType={UIAppType.SAS}
                 onClose={() => this.setActiveIcon(null)}
                 gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
