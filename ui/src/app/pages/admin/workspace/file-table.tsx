@@ -6,16 +6,11 @@ import { InputSwitch } from 'primereact/inputswitch';
 
 import { FileDetail } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
 import { Spinner } from 'app/components/spinners';
 import { parseDirectory } from 'app/pages/analysis/util';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { JUPYTER_FILE_EXT } from 'app/utils/constants';
-import { reactStyles } from 'app/utils';
-import { useNavigation } from 'app/utils/navigation';
 import { reactStyles } from 'app/utils';
 
 import { FilenameCell } from './filename-cell';
