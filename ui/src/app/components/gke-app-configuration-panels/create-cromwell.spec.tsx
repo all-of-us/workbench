@@ -70,12 +70,6 @@ describe(CreateCromwell.name, () => {
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
   });
 
   it('start button should create cromwell and close panel', async () => {

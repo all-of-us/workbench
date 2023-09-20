@@ -69,12 +69,6 @@ describe(CreateRStudio.name, () => {
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
   });
 
   it('start button should create rstudio and close panel', async () => {

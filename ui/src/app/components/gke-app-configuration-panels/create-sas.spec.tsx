@@ -69,12 +69,6 @@ describe(CreateSAS.name, () => {
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
   });
 
   it('Should create a SAS app and close panel when the create button is clicked', async () => {
