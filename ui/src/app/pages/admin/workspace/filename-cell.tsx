@@ -1,10 +1,11 @@
 import { FileDetail } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
 import { TooltipTrigger } from 'app/components/popups';
 import { parseDirectory } from 'app/pages/analysis/util';
-import { cond, reactStyles } from 'app/utils';
+import { reactStyles } from 'app/utils';
 import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { useNavigation } from 'app/utils/navigation';
 
