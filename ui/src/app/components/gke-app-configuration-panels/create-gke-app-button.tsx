@@ -40,7 +40,7 @@ export function CreateGkeAppButton({
   const sasAuthError: NotificationStore = {
     title: 'Error Creating SAS Environment',
     message:
-      `The apps server has indicated that the user ${username} is not authorized to create SAS apps. ` +
+      `The user ${username} is not authorized to create SAS apps. ` +
       `If you believe this to be in error, please contact the support team at ${SUPPORT_EMAIL}.`,
     onDismiss,
   };
