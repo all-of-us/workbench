@@ -91,12 +91,6 @@ describe(CreateGkeApp.name, () => {
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
   });
 
   describe.each([
