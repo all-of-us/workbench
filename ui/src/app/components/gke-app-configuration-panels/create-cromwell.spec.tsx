@@ -15,7 +15,6 @@ import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
   createListAppsCromwellResponse,
-  createListAppsRStudioResponse,
 } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
