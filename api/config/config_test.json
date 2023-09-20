@@ -152,7 +152,7 @@
     "usersPerSynchronizeAccessTask": 50
   },
   "egressAlertRemediationPolicy": {
-    "enableJiraTicketing": true,
+    "enableJiraTicketing": false,
     "notifyFromEmail": "security-alerts@researchallofus.org",
     "notifyCcEmails": ["workbench-notificatio-aaaaekogch7vg3c6hi4sgyx4le@pmi-engteam.slack.com"],
     "escalations": [{
