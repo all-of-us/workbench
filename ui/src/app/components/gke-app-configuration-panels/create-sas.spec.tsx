@@ -132,7 +132,33 @@ describe(CreateSAS.name, () => {
     );
   });
 
-  it('should render a DeletePersistentDiskButton when a disk is present but no app', async () => {
+  it('should allow deleting the environment when an app is running', async () => {
+    const disk = stubDisk();
+    const onClickDeleteGkeApp = jest.fn();
+
+    await component({
+      app: createListAppsSASResponse(),
+      disk,
+      onClickDeleteGkeApp,
+    });
+
+    const deleteButton = screen.queryByLabelText('Delete Environment');
+    expectButtonElementEnabled(deleteButton);
+    deleteButton.click();
+
+    await waitFor(() => {
+      expect(onClickDeleteGkeApp).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should not render a Delete Environment link when no app is present', async () => {
+    await component();
+
+    const deleteButton = screen.queryByLabelText('Delete Environment');
+    expect(deleteButton).not.toBeInTheDocument();
+  });
+
+  it('should allow deletion of a Persistent Disk when a disk is present but no app', async () => {
     const disk = stubDisk();
     const onClickDeleteUnattachedPersistentDisk = jest.fn();
 
@@ -151,7 +177,7 @@ describe(CreateSAS.name, () => {
     });
   });
 
-  it('should not render a DeletePersistentDiskButton when an app is present', async () => {
+  it('should not render a Delete Persistent Disk link when an app is present', async () => {
     const disk = stubDisk();
 
     await component({
@@ -163,7 +189,7 @@ describe(CreateSAS.name, () => {
     expect(deleteButton).toBeNull();
   });
 
-  it('should not render a DeletePersistentDiskButton no disk is present', async () => {
+  it('should not render a Delete Persistent Disk link when no disk is present', async () => {
     await component({
       app: undefined,
       disk: undefined,
