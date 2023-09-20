@@ -150,7 +150,9 @@ const body = JSON.stringify(
     surveyComments: 'asdfg'
   },
   newUserSatisfactionSurveyEligibility: true,
-  newUserSatisfactionSurveyEligibilityEndTime: "2023-01-10T14:38:10Z"
+  newUserSatisfactionSurveyEligibilityEndTime: "2023-01-10T14:38:10Z",
+  generalDiscoverySources: [],
+  partnerDiscoverySources: []
 }
 )
 
