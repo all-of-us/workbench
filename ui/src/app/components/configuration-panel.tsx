@@ -12,11 +12,9 @@ import {
 } from 'app/components/gke-app-configuration-panel';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { withCurrentWorkspace, withUserProfile } from 'app/utils';
-import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { SidebarIconId } from './help-sidebar-icons';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,

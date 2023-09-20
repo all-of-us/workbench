@@ -131,7 +131,7 @@ export const CreateGkeApp = ({
       <FlexRow
         style={{
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           gap: '2rem',
         }}
       >
@@ -143,7 +143,7 @@ export const CreateGkeApp = ({
         )}
         {canDeleteApp(app) && (
           <LinkButton
-            style={styles.deleteLink}
+            style={{ ...styles.deleteLink, flexShrink: 0 }}
             aria-label='Delete Environment'
             onClick={onClickDeleteGkeApp}
           >
