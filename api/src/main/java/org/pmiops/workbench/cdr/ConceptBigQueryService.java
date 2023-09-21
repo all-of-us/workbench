@@ -34,7 +34,7 @@ public class ConceptBigQueryService {
       Domain domain, Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
     Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
         dbConceptSetConceptIds.stream()
-            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+            .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
     List<Long> standardList =
         partitionSourceAndStandard.get(true).stream()
             .map(DbConceptSetConceptId::getConceptId)
