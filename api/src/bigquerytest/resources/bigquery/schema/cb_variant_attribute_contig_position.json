@@ -6,41 +6,6 @@
   },
   {
     "type": "string",
-    "name": "protein_change",
-    "mode": "nullable"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "dna_change",
-    "type": "string"
-  },
-  {
-    "type": "integer",
-    "name": "allele_count",
-    "mode": "nullable"
-  },
-  {
-    "type": "integer",
-    "name": "allele_number",
-    "mode": "NULLABLE"
-  },
-  {
-    "type": "float",
-    "name": "allele_frequency",
-    "mode": "nullable"
-  },
-  {
-    "type": "string",
-    "name": "clinical_significance",
-    "mode": "nullable"
-  },
-  {
-    "type": "string",
-    "name": "transcript",
-    "mode": "nullable"
-  },
-  {
-    "type": "string",
     "name": "contig",
     "mode": "nullable"
   },
@@ -48,30 +13,5 @@
     "type": "integer",
     "name": "position",
     "mode": "nullable"
-  },
-  {
-    "type": "string",
-    "name": "ref_allele",
-    "mode": "nullable"
-  },
-  {
-    "type": "string",
-    "name": "alt_allele",
-    "mode": "nullable"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "cons_str",
-    "type": "string"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "genes",
-    "type": "string"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "participant_count",
-    "type": "INTEGER"
   }
 ]

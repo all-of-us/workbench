@@ -58,6 +58,7 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -588,10 +589,12 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public ImmutableTriple<String, Integer, List<Variant>> findVariants(
-      String searchTerm, String pageToken, Integer pageSize) {
+      VariantFilterRequest filters) {
+    Integer pageSize = filters.getPageSize();
+    String pageToken = filters.getPageToken();
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            VariantQueryBuilder.buildCountQuery(searchTerm));
+            VariantQueryBuilder.buildCountQuery(filters));
     FieldValueList row = result.iterateAll().iterator().next();
     int count = Integer.parseInt(row.get("count").getStringValue());
 
@@ -608,7 +611,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            VariantQueryBuilder.buildQuery(searchTerm, limit, offset));
+            VariantQueryBuilder.buildQuery(filters, limit, offset));
     List<Variant> variants =
         StreamSupport.stream(result.iterateAll().spliterator(), false)
             .map(this::fieldValueListToVariant)
@@ -652,7 +655,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     FieldValues.getString(row, "genes").ifPresent(variant::setGene);
     FieldValues.getString(row, "cons_str").ifPresent(variant::setConsequence);
     FieldValues.getString(row, "protein_change").ifPresent(variant::setProteinChange);
-    FieldValues.getString(row, "clinical_significance").ifPresent(variant::setClinVarSignificance);
+    FieldValues.getString(row, "clinical_significance_string")
+        .ifPresent(variant::setClinVarSignificance);
     FieldValues.getLong(row, "allele_count").ifPresent(variant::setAlleleCount);
     FieldValues.getLong(row, "allele_number").ifPresent(variant::setAlleleNumber);
     FieldValues.getDouble(row, "allele_frequency").ifPresent(variant::setAlleleFrequency);

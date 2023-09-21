@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -239,20 +240,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<VariantListResponse> findVariants(
-      String workspaceNamespace,
-      String workspaceId,
-      String searchTerm,
-      String pageToken,
-      Integer pageSize) {
+      String workspaceNamespace, String workspaceId, VariantFilterRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateTerm(searchTerm);
+    validateTerm(request.getSearchTerm());
 
     // this method returns a paginated list of variants
     // ImmutableTriple contains nextPageToken, total results count
     // and list of variants
     ImmutableTriple<String, Integer, List<Variant>> searchResults =
-        cohortBuilderService.findVariants(searchTerm, pageToken, pageSize);
+        cohortBuilderService.findVariants(request);
 
     return ResponseEntity.ok(
         new VariantListResponse()

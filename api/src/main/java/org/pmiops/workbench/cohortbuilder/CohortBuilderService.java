@@ -20,6 +20,7 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
 
 public interface CohortBuilderService {
 
@@ -86,6 +87,5 @@ public interface CohortBuilderService {
    * chromosome position and rs number. This method returns an ImmutableTriple that includes next
    * pageToken, total query count and list of variants(paginated).
    */
-  ImmutableTriple<String, Integer, List<Variant>> findVariants(
-      String searchTerm, String pageToken, Integer pageSize);
+  ImmutableTriple<String, Integer, List<Variant>> findVariants(VariantFilterRequest filters);
 }

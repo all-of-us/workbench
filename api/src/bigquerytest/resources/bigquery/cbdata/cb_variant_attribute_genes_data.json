@@ -4,6 +4,10 @@
     "gene_symbol": "GENE"
   },
   {
+    "vid": "1-101504524-G-A",
+    "gene_symbol": "GENE2"
+  },
+  {
     "vid": "1-100550658-T-C",
     "gene_symbol": "GENE1"
   },

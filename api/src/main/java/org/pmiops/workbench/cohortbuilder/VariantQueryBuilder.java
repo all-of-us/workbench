@@ -2,11 +2,17 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.VariantFilterRequest;
 
 public final class VariantQueryBuilder {
 
@@ -35,93 +41,193 @@ public final class VariantQueryBuilder {
     }
   }
 
+  public enum VatColumns {
+    VARIANT_ID("Variant ID", "vid"),
+    GENE("Gene", "genes"),
+    CONSEQUENCE("Consequence", "cons_str"),
+    PROTEIN_CHANGE("Protein Change", "protein_change"),
+    CLINVAR_SIGNIFICANCE("ClinVar Significance", "clinical_significance_string"),
+    ALLELE_COUNT("Allele Count", "allele_count"),
+    ALLELE_NUMBER("Allele Number", "allele_number"),
+    ALLELE_FREQUENCY("Allele Frequency", "allele_frequency");
+    private final String displayName;
+    private final String columnName;
+
+    VatColumns(String displayName, String columnName) {
+      this.displayName = displayName;
+      this.columnName = columnName;
+    }
+
+    public String getDisplayName() {
+      return this.displayName;
+    }
+
+    public String getColumnName() {
+      return this.columnName;
+    }
+
+    public static String getColumnNameFromDisplayName(String displayName) {
+      return Arrays.stream(values())
+          .filter(vatColumns -> vatColumns.getDisplayName().equals(displayName))
+          .findFirst()
+          .get()
+          .getColumnName();
+    }
+
+    public static List<String> getDisplayNameList() {
+      return Arrays.stream(values()).map(VatColumns::getDisplayName).collect(Collectors.toList());
+    }
+  }
+
   private static final String SELECT_ALL_COLUMNS =
-      "SELECT vid, genes, cons_str, protein_change, clinical_significance, allele_count, allele_number, allele_frequency, participant_count\n";
+      "SELECT DISTINCT vid, genes, cons_str, protein_change, clinical_significance_string, allele_count, allele_number, allele_frequency, participant_count\n";
 
-  private static final String SELECT_COUNT = "SELECT COUNT(vid) AS count\n";
+  private static final String SELECT_COUNT = "SELECT COUNT(DISTINCT vid) AS count\n";
 
-  private static final String ORDER_BY = "ORDER BY participant_count DESC\n";
+  private static final String DEFAULT_ORDER_BY = "ORDER BY participant_count DESC\n";
 
-  private static final String LIMIT_OFFSET = "LIMIT @limit\n OFFSET @offset";
+  private static final String LIMIT_OFFSET = "LIMIT @limit OFFSET @offset";
 
   private static final String PARTICIPANT_COUNT = "AND participant_count > 0\n";
 
-  private static final String VID_SQL =
-      "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n WHERE vid = @vid\n";
+  private static final String FROM_VAT = "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n";
+
+  private static final String CONSEQUENCE = ", UNNEST(consequence) AS consequence\n";
+
+  private static final String CONSEQUENCE_IN = "AND consequence IN UNNEST(@consequences)\n";
+
+  private static final String CLINICAL_SIGNIFICANCE =
+      ", UNNEST(clinical_significance) AS clinical_significance\n";
+
+  private static final String CLINICAL_SIGNIFICANCE_IN =
+      "AND clinical_significance IN UNNEST(@clinicalSignificances)\n";
+
+  private static final String GENES_IN = "AND genes IN UNNEST(@genes)\n";
+
+  private static final String ALLELE_COUNT = "AND allele_count BETWEEN @countMin AND @countMax\n";
+
+  private static final String ALLELE_NUMBER =
+      "AND allele_number BETWEEN @numberMin AND @numberMax\n";
+
+  private static final String ALLELE_FREQ = "AND allele_frequency BETWEEN @freqMin AND @freqMax\n";
+
+  private static final String ORDER_BY = "ORDER BY @orderBy\n";
+
+  private static final String VID_SQL = "WHERE vid = @vid\n";
 
   private static final String CONTIG_POSITION_SQL =
-      "FROM `${projectId}.${dataSetId}.cb_variant_attribute_contig_position`\n"
+      "WHERE vid IN (\n"
+          + "SELECT vid\n"
+          + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_contig_position`\n"
           + "WHERE contig = @contig\n"
-          + "AND position BETWEEN @start AND @end\n";
+          + "AND position BETWEEN @start AND @end\n"
+          + ")\n";
 
   private static final String GENE_SQL =
-      "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
-          + "WHERE vid IN (\n"
+      "WHERE vid IN (\n"
           + "SELECT vid\n"
           + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_genes`\n"
           + "WHERE gene_symbol = @gene\n"
           + ")\n";
 
   private static final String RS_NUMBER_SQL =
-      "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
-          + "WHERE vid IN (\n"
+      "WHERE vid IN (\n"
           + "SELECT vid\n"
           + "FROM `${projectId}.${dataSetId}.cb_variant_attribute_rs_number`\n"
           + "WHERE rs_number = @rs_number\n"
           + ")\n";
 
-  public static QueryJobConfiguration buildQuery(String searchTerm, Integer limit, Integer offset) {
-    return QueryJobConfiguration.newBuilder(generateSQL(searchTerm, Boolean.FALSE))
-        .setNamedParameters(generateParams(searchTerm, limit, offset))
+  public static QueryJobConfiguration buildQuery(
+      VariantFilterRequest filters, Integer limit, Integer offset) {
+    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.FALSE, filters))
+        .setNamedParameters(generateParams(filters, limit, offset))
         .setUseLegacySql(false)
         .build();
   }
 
-  public static QueryJobConfiguration buildCountQuery(String searchTerm) {
-    return QueryJobConfiguration.newBuilder(generateSQL(searchTerm, Boolean.TRUE))
-        .setNamedParameters(generateParams(searchTerm, null, null))
+  public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filters) {
+    return QueryJobConfiguration.newBuilder(generateSQL(Boolean.TRUE, filters))
+        .setNamedParameters(generateParams(filters, null, null))
         .setUseLegacySql(false)
         .build();
   }
 
   @NotNull
-  private static String generateSQL(String searchTerm, boolean isCount) {
-    switch (SearchTermType.fromValue(searchTerm)) {
+  private static String generateSQL(boolean isCount, VariantFilterRequest filters) {
+    switch (SearchTermType.fromValue(filters.getSearchTerm())) {
       case VID:
-        return isCount
-            ? SELECT_COUNT + VID_SQL + PARTICIPANT_COUNT
-            : SELECT_ALL_COLUMNS + VID_SQL + PARTICIPANT_COUNT;
+        // vid SQL only returns 1 variant so no need to add filters or pagination
+        String sqlBody = FROM_VAT + VID_SQL + PARTICIPANT_COUNT;
+        return isCount ? SELECT_COUNT + sqlBody : SELECT_ALL_COLUMNS + sqlBody;
       case CONTIG:
-        return isCount
-            ? SELECT_COUNT + CONTIG_POSITION_SQL + PARTICIPANT_COUNT
-            : SELECT_ALL_COLUMNS
-                + CONTIG_POSITION_SQL
-                + PARTICIPANT_COUNT
-                + ORDER_BY
-                + LIMIT_OFFSET;
+        return generateFilterSQL(
+            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, CONTIG_POSITION_SQL, filters);
       case GENE:
-        return isCount
-            ? SELECT_COUNT + GENE_SQL + PARTICIPANT_COUNT
-            : SELECT_ALL_COLUMNS + GENE_SQL + PARTICIPANT_COUNT + ORDER_BY + LIMIT_OFFSET;
+        return generateFilterSQL(isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, GENE_SQL, filters);
       case RS_NUMBER:
-        return isCount
-            ? SELECT_COUNT + RS_NUMBER_SQL + PARTICIPANT_COUNT
-            : SELECT_ALL_COLUMNS + RS_NUMBER_SQL + PARTICIPANT_COUNT + ORDER_BY + LIMIT_OFFSET;
+        return generateFilterSQL(
+            isCount ? SELECT_COUNT : SELECT_ALL_COLUMNS, RS_NUMBER_SQL, filters);
       default:
         throw new BadRequestException("Search term not supported");
     }
   }
 
   @NotNull
+  private static String generateFilterSQL(
+      String selectSQL, String whereVidInSQL, VariantFilterRequest filters) {
+    StringBuilder sqlBuilder = new StringBuilder(selectSQL).append(FROM_VAT);
+    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
+      sqlBuilder.append(CONSEQUENCE);
+    }
+    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
+      sqlBuilder.append(CLINICAL_SIGNIFICANCE);
+    }
+    sqlBuilder.append(whereVidInSQL);
+    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
+      sqlBuilder.append(CONSEQUENCE_IN);
+    }
+    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
+      sqlBuilder.append(CLINICAL_SIGNIFICANCE_IN);
+    }
+    if (CollectionUtils.isNotEmpty(filters.getGeneList())) {
+      sqlBuilder.append(GENES_IN);
+    }
+    if (filters.getCountMin() != null && filters.getCountMax() != null) {
+      sqlBuilder.append(ALLELE_COUNT);
+    }
+    if (filters.getNumberMin() != null && filters.getNumberMax() != null) {
+      sqlBuilder.append(ALLELE_NUMBER);
+    }
+    if (filters.getFrequencyMin() != null && filters.getFrequencyMax() != null) {
+      sqlBuilder.append(ALLELE_FREQ);
+    }
+    sqlBuilder.append(PARTICIPANT_COUNT);
+    if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
+      if (StringUtils.isNotEmpty(filters.getSortBy())) {
+        sqlBuilder.append(
+            ORDER_BY.replace(
+                "@orderBy", VatColumns.getColumnNameFromDisplayName(filters.getSortBy())));
+        sqlBuilder.append(LIMIT_OFFSET);
+      } else {
+        sqlBuilder.append(DEFAULT_ORDER_BY);
+        sqlBuilder.append(LIMIT_OFFSET);
+      }
+    }
+    return sqlBuilder.toString();
+  }
+
+  @NotNull
   private static Map<String, QueryParameterValue> generateParams(
-      String searchTerm, Integer limit, Integer offset) {
+      VariantFilterRequest filters, Integer limit, Integer offset) {
+    String searchTerm = filters.getSearchTerm();
     Map<String, QueryParameterValue> params = new HashMap<>();
     switch (SearchTermType.fromValue(searchTerm)) {
       case VID:
+        // vid SQL only returns 1 variant so no need to add filter params
         params.put("vid", QueryParameterValue.string(searchTerm.toUpperCase()));
         return params;
       case CONTIG:
-        // chr13:32355000-32375000
+        // example search term for contig -> chr13:32355000-32375000
         String[] chr = searchTerm.split(":");
         String[] position = chr[1].split("-");
         params.put("contig", QueryParameterValue.string(chr[0].toLowerCase()));
@@ -133,6 +239,7 @@ public final class VariantQueryBuilder {
         if (offset != null) {
           params.put("offset", QueryParameterValue.int64(offset));
         }
+        generateFilterParams(filters, params);
         return params;
       case GENE:
         params.put("gene", QueryParameterValue.string(searchTerm.toUpperCase()));
@@ -142,6 +249,7 @@ public final class VariantQueryBuilder {
         if (offset != null) {
           params.put("offset", QueryParameterValue.int64(offset));
         }
+        generateFilterParams(filters, params);
         return params;
       case RS_NUMBER:
         params.put("rs_number", QueryParameterValue.string(searchTerm.toLowerCase()));
@@ -151,9 +259,43 @@ public final class VariantQueryBuilder {
         if (offset != null) {
           params.put("offset", QueryParameterValue.int64(offset));
         }
+        generateFilterParams(filters, params);
         return params;
       default:
         throw new BadRequestException("Search term not supported");
+    }
+  }
+
+  private static void generateFilterParams(
+      VariantFilterRequest filters, Map<String, QueryParameterValue> params) {
+    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
+      params.put(
+          "consequences",
+          QueryParameterValue.array(
+              filters.getConsequenceList().toArray(new String[0]), String.class));
+    }
+    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
+      params.put(
+          "clinicalSignificances",
+          QueryParameterValue.array(
+              filters.getClinicalSignificanceList().toArray(new String[0]), String.class));
+    }
+    if (CollectionUtils.isNotEmpty(filters.getGeneList())) {
+      params.put(
+          "genes",
+          QueryParameterValue.array(filters.getGeneList().toArray(new String[0]), String.class));
+    }
+    if (filters.getCountMin() != null && filters.getCountMax() != null) {
+      params.put("countMin", QueryParameterValue.int64(filters.getCountMin()));
+      params.put("countMax", QueryParameterValue.int64(filters.getCountMax()));
+    }
+    if (filters.getNumberMin() != null && filters.getNumberMax() != null) {
+      params.put("numberMin", QueryParameterValue.int64(filters.getNumberMin()));
+      params.put("numberMax", QueryParameterValue.int64(filters.getNumberMax()));
+    }
+    if (filters.getFrequencyMin() != null && filters.getFrequencyMax() != null) {
+      params.put("freqMin", QueryParameterValue.bigNumeric(filters.getFrequencyMin()));
+      params.put("freqMax", QueryParameterValue.bigNumeric(filters.getFrequencyMax()));
     }
   }
 }
