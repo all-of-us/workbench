@@ -3,10 +3,10 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
-import { AppsApi } from 'generated/fetch';
+import { AppsApi } from 'generated/fetch/api';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { defaultCromwellConfig } from 'app/components/apps-panel/utils';
+import { defaultSASConfig } from 'app/components/apps-panel/utils';
 import { appsApi, registerApiClient } from 'app/services/swagger-fetch-clients';
 import { serverConfigStore } from 'app/utils/stores';
 
@@ -14,7 +14,7 @@ import defaultServerConfig from 'testing/default-server-config';
 import { expectButtonElementEnabled } from 'testing/react-test-helpers';
 import {
   AppsApiStub,
-  createListAppsCromwellResponse,
+  createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 import { CdrVersionsStubVariables } from 'testing/stubs/cdr-versions-api-stub';
 import { DisksApiStub, stubDisk } from 'testing/stubs/disks-api-stub';
@@ -24,37 +24,36 @@ import {
   WorkspaceStubVariables,
 } from 'testing/stubs/workspaces';
 
-import { CreateCromwell } from './create-cromwell';
 import { CommonCreateGkeAppProps } from './create-gke-app';
+import { CreateSAS } from './create-sas';
 
-describe(CreateCromwell.name, () => {
-  const onClose = jest.fn();
-  const freeTierBillingAccountId = 'freetier';
+const onClose = jest.fn();
+const freeTierBillingAccountId = 'freetier';
+export const defaultProps: CommonCreateGkeAppProps = {
+  onClose,
+  creatorFreeCreditsRemaining: null,
+  workspace: {
+    ...workspaceStubs[0],
+    accessLevel: WorkspaceAccessLevel.WRITER,
+    billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+  },
+  profileState: {
+    profile: ProfileStubVariables.PROFILE_STUB,
+    load: jest.fn(),
+    reload: jest.fn(),
+    updateCache: jest.fn(),
+  },
+  app: undefined,
+  disk: undefined,
+  onClickDeleteUnattachedPersistentDisk: jest.fn(),
+};
 
-  const defaultProps: CommonCreateGkeAppProps = {
-    onClose,
-    creatorFreeCreditsRemaining: null,
-    workspace: {
-      ...workspaceStubs[0],
-      accessLevel: WorkspaceAccessLevel.WRITER,
-      billingAccountName: 'billingAccounts/' + freeTierBillingAccountId,
-      cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-    },
-    profileState: {
-      profile: ProfileStubVariables.PROFILE_STUB,
-      load: jest.fn(),
-      reload: jest.fn(),
-      updateCache: jest.fn(),
-    },
-    app: undefined,
-    disk: undefined,
-    onClickDeleteUnattachedPersistentDisk: jest.fn(),
-  };
-
+describe(CreateSAS.name, () => {
   let disksApiStub: DisksApiStub;
 
   const component = async (propOverrides?: Partial<CommonCreateGkeAppProps>) =>
-    render(<CreateCromwell {...{ ...defaultProps, ...propOverrides }} />);
+    render(<CreateSAS {...{ ...defaultProps, ...propOverrides }} />);
 
   beforeEach(async () => {
     disksApiStub = new DisksApiStub();
@@ -72,7 +71,7 @@ describe(CreateCromwell.name, () => {
     registerApiClient(AppsApi, new AppsApiStub());
   });
 
-  it('start button should create cromwell and close panel', async () => {
+  it('Should create a SAS app and close panel when the create button is clicked', async () => {
     await component({
       app: undefined,
       disk: undefined,
@@ -83,7 +82,7 @@ describe(CreateCromwell.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve());
 
     const startButton = screen.getByLabelText(
-      'Cromwell cloud environment create button'
+      'SAS cloud environment create button'
     );
     expectButtonElementEnabled(startButton);
     startButton.click();
@@ -92,7 +91,7 @@ describe(CreateCromwell.name, () => {
       expect(spyCreateApp).toHaveBeenCalledTimes(1);
       expect(spyCreateApp).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        defaultCromwellConfig
+        defaultSASConfig
       );
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -110,7 +109,7 @@ describe(CreateCromwell.name, () => {
       .mockImplementation((): Promise<any> => Promise.resolve());
 
     const startButton = screen.getByLabelText(
-      'Cromwell cloud environment create button'
+      'SAS cloud environment create button'
     );
     expectButtonElementEnabled(startButton);
     startButton.click();
@@ -122,13 +121,13 @@ describe(CreateCromwell.name, () => {
     });
   });
 
-  it('should display a cost of $0.40 per hour when running and $0.20 per hour when paused', async () => {
+  it('should display a cost of $0.40 per hour when running and $0.21 per hour when paused', async () => {
     await component();
     expect(screen.queryByLabelText('cost while running')).toHaveTextContent(
       '$0.40 per hour'
     );
     expect(screen.queryByLabelText('cost while paused')).toHaveTextContent(
-      '$0.20 per hour'
+      '$0.21 per hour'
     );
   });
 
@@ -142,9 +141,7 @@ describe(CreateCromwell.name, () => {
       onClickDeleteUnattachedPersistentDisk,
     });
 
-    const deleteButton = screen.getByLabelText('Delete Persistent Disk');
-    expect(deleteButton).not.toBeNull();
-
+    const deleteButton = screen.queryByLabelText('Delete Persistent Disk');
     expectButtonElementEnabled(deleteButton);
     deleteButton.click();
 
@@ -157,7 +154,7 @@ describe(CreateCromwell.name, () => {
     const disk = stubDisk();
 
     await component({
-      app: createListAppsCromwellResponse(),
+      app: createListAppsSASResponse(),
       disk,
     });
 

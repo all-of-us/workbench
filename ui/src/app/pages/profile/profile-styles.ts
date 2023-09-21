@@ -21,6 +21,9 @@ export const styles = reactStyles({
     fontSize: 14,
     marginRight: 20,
   },
+  disabledInput: {
+    backgroundColor: colorWithWhiteness(colors.disabled, 0.6),
+  },
   dataAccessTier: {
     marginBottom: '1.35rem',
     display: 'grid',

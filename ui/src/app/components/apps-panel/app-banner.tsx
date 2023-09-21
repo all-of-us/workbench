@@ -3,7 +3,7 @@ import { CSSProperties } from 'react';
 
 import { appAssets, UIAppType } from './utils';
 
-export const AppLogo = (props: {
+export const AppBanner = (props: {
   appType: UIAppType;
   style: CSSProperties;
 }) => {

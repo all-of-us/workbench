@@ -498,6 +498,15 @@ public class ProfileController implements ProfileApiDelegate {
     // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
     // the update will still work as well as it would have.
     final Profile previousProfile = profileService.getProfile(user);
+    verifyUneditableFields(previousProfile, updatedProfile);
+    final DbUser updatedUser =
+        profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
+    userService.confirmProfile(updatedUser);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private boolean verifyUneditableFields(Profile previousProfile, Profile updatedProfile) {
     final VerifiedInstitutionalAffiliation updatedAffil =
         updatedProfile.getVerifiedInstitutionalAffiliation();
     final VerifiedInstitutionalAffiliation prevAffil =
@@ -505,12 +514,14 @@ public class ProfileController implements ProfileApiDelegate {
     if (!Objects.equals(updatedAffil, prevAffil)) {
       throw new BadRequestException("Cannot update Verified Institutional Affiliation");
     }
-
-    final DbUser updatedUser =
-        profileService.updateProfile(user, Agent.asUser(user), updatedProfile, previousProfile);
-    userService.confirmProfile(updatedUser);
-
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    if (updatedProfile.getAddress() == null
+        || (!previousProfile
+            .getAddress()
+            .getCountry()
+            .equals(updatedProfile.getAddress().getCountry()))) {
+      throw new BadRequestException("Cannot update Country");
+    }
+    return true;
   }
 
   @Override

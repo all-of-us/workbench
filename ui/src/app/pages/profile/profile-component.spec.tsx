@@ -122,6 +122,15 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
+  it('should have country disabled', async () => {
+    const wrapper = component();
+
+    const country = wrapper.find('[data-test-id="country"]').first();
+
+    expect(country.first().prop('disabled')).toBe(true);
+    expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
+  });
+
   it('should display/update address', async () => {
     const wrapper = component();
 

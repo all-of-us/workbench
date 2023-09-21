@@ -6,11 +6,7 @@ import { AoU } from 'app/components/text-wrappers';
 
 export const DisabledPanel = () => {
   return (
-    <WarningMessage
-      data-test-id='environment-disabled-panel'
-      iconSize={16}
-      iconPosition={'top'}
-    >
+    <WarningMessage iconSize={16} iconPosition={'top'}>
       {
         <TextColumn>
           <div style={{ fontWeight: 600 }}>

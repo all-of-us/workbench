@@ -853,6 +853,18 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void updateProfile_badRequest_updateCountry() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          createAccountAndDbUserWithAffiliation();
+          Profile profile = profileController.getMe().getBody();
+          profile.getAddress().setCountry("Some othe country");
+          profileController.updateProfile(profile);
+        });
+  }
+
+  @Test
   public void updateProfile_badRequest_nullAddress() {
     assertThrows(
         BadRequestException.class,

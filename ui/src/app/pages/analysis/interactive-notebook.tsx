@@ -39,6 +39,7 @@ import { ACTION_DISABLED_INVALID_BILLING } from 'app/utils/strings';
 import {
   analysisTabName,
   openRStudioOrConfigPanel,
+  openSASOrConfigPanel,
 } from 'app/utils/user-apps-utils';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -544,6 +545,9 @@ export const InteractiveNotebook = fp.flow(
           if (appType === UIAppType.RSTUDIO) {
             const { userApps } = this.props.userAppsStore;
             openRStudioOrConfigPanel(ns, userApps);
+          } else if (appType === UIAppType.SAS) {
+            const { userApps } = this.props.userAppsStore;
+            openSASOrConfigPanel(ns, userApps);
           } else {
             this.runRuntime(() => {
               this.navigateEditMode();

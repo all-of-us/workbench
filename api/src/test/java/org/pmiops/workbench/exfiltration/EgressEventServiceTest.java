@@ -1,7 +1,6 @@
 package org.pmiops.workbench.exfiltration;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -15,7 +14,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -150,13 +148,31 @@ public class EgressEventServiceTest {
   @Test
   public void testAppCreateEgressEventAlert() {
 
-    SumologicEgressEvent event = recentAppEgressEvent();
+    SumologicEgressEvent event = recentAppEgressEvent(dbUser1, AppType.RSTUDIO);
 
-    doReturn(Collections.singletonList(userRStudioAppEnvironmentForUser(dbUser1)))
-        .when(leonardoApiClient)
-        .listAppsInProjectAsService(dbWorkspace.getGoogleProject());
+    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
 
-    doReturn(Collections.singletonList(dbUser1)).when(mockUserService).findUsersByUsernames(any());
+    egressEventService.handleEvent(event);
+    verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
+    verify(mockTaskQueueService).pushEgressEventTask(anyLong());
+
+    List<DbEgressEvent> dbEvents = ImmutableList.copyOf(egressEventDao.findAll());
+    assertThat(dbEvents).hasSize(1);
+    DbEgressEvent dbEvent = Iterables.getOnlyElement(dbEvents);
+    assertThat(dbEvent.getUser()).isEqualTo(dbUser1);
+    assertThat(dbEvent.getWorkspace()).isEqualTo(dbWorkspace);
+    assertThat(dbEvent.getCreationTime()).isNotNull();
+    assertThat(dbEvent.getLastModifiedTime()).isNotNull();
+    assertThat(dbEvent.getSumologicEvent()).isNotNull();
+    assertThat(dbEvent.getEgressWindowSeconds()).isEqualTo(event.getTimeWindowDuration());
+  }
+
+  @Test
+  public void testAppCreateEgressEventAlert_skipCromwell() {
+
+    SumologicEgressEvent event = recentAppEgressEvent(dbUser1, AppType.CROMWELL);
+
+    doReturn(Optional.of(dbUser1)).when(mockUserService).getByDatabaseId(dbUser1.getUserId());
 
     egressEventService.handleEvent(event);
     verify(mockEgressEventAuditor).fireEgressEventForUser(event, dbUser1);
@@ -282,11 +298,12 @@ public class EgressEventServiceTest {
         .timeWindowDuration(600L);
   }
 
-  private static SumologicEgressEvent recentAppEgressEvent() {
+  private static SumologicEgressEvent recentAppEgressEvent(DbUser user, AppType appType) {
     return new SumologicEgressEvent()
         .projectName(DEFAULT_GOOGLE_PROJECT)
         .vmName("some-vm")
-        .srcGkeCluster("a-gke-cluster")
+        .srcGkeServiceName(
+            "all-of-us-" + user.getUserId() + appType.toString().toLowerCase() + "random-abc")
         .egressMib(120.7)
         .egressMibThreshold(100.0)
         .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
@@ -305,15 +322,5 @@ public class EgressEventServiceTest {
     result.setContactEmail(userModel.getEmail());
     result.setCreationTime(Timestamp.from(adminView.getUserAccountCreatedTime().toInstant()));
     return result;
-  }
-
-  private static UserAppEnvironment userRStudioAppEnvironmentForUser(DbUser dbUser) {
-    UserAppEnvironment userAppEnvironment = new UserAppEnvironment();
-    userAppEnvironment
-        .appName("rstudio-app-name")
-        .appType(AppType.RSTUDIO)
-        .status(AppStatus.RUNNING)
-        .creator(dbUser.getContactEmail());
-    return userAppEnvironment;
   }
 }

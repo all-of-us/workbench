@@ -34,6 +34,7 @@ import org.pmiops.workbench.leonardo.api.DisksApi;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAppStatus;
+import org.pmiops.workbench.leonardo.model.LeonardoAppType;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateAppRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGetAppResponse;
@@ -79,9 +80,11 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
           LeonardoRuntimeStatus.STARTING,
           LeonardoRuntimeStatus.UPDATING);
 
-  private static Set<LeonardoAppStatus> STOPPABLE_APP_STATUSES =
+  // Keep in sync with
+  // https://github.com/DataBiosphere/leonardo/blob/807c024d8e8be86b782e519319520ca3b3705a52/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L522C42-L522C42
+  private static Set<LeonardoAppStatus> DELETABLE_APP_STATUSES =
       ImmutableSet.of(
-          LeonardoAppStatus.RUNNING, LeonardoAppStatus.PROVISIONING, LeonardoAppStatus.STARTING);
+          LeonardoAppStatus.STATUS_UNSPECIFIED, LeonardoAppStatus.RUNNING, LeonardoAppStatus.ERROR);
 
   private static final Logger log = Logger.getLogger(LeonardoApiClientImpl.class.getName());
 
@@ -652,8 +655,9 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
     return true;
   }
 
+  /** Deletes user apps (exclude Cromwell) and keep user disk. */
   @Override
-  public int stopAllUserAppsAsService(String userEmail) {
+  public int deleteUserAppsAsService(String userEmail) {
     AppsApi appsApiAsService = serviceAppsApiProvider.get();
     List<LeonardoListAppResponse> apps =
         leonardoRetryHandler.run(
@@ -664,19 +668,10 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                     /* includeLabels = */ LeonardoLabelHelper.LEONARDO_APP_LABEL_KEYS,
                     /* role = */ null));
 
-    // Only the app creator has start/stop permissions, therefore we impersonate here.
-    // If/when IA-2996 is resolved, switch this back to the service.
-    AppsApi appsApiAsImpersonatedUser = new AppsApi();
-    try {
-      appsApiAsImpersonatedUser.setApiClient(
-          leonardoApiClientFactory.newImpersonatedApiClient(userEmail));
-    } catch (IOException e) {
-      throw new ServerErrorException(e);
-    }
-
     List<Boolean> results =
         apps.stream()
-            .filter(r -> STOPPABLE_APP_STATUSES.contains(r.getStatus()))
+            .filter(r -> DELETABLE_APP_STATUSES.contains(r.getStatus()))
+            .filter(r -> r.getAppType() != LeonardoAppType.CROMWELL) // Don't delete Cromwell
             .filter(
                 r -> {
                   if (!userEmail.equals(r.getAuditInfo().getCreator())) {
@@ -697,8 +692,8 @@ public class LeonardoApiClientImpl implements LeonardoApiClient {
                   try {
                     leonardoRetryHandler.runAndThrowChecked(
                         (context) -> {
-                          appsApiAsImpersonatedUser.stopApp(
-                              r.getCloudContext().getCloudResource(), r.getAppName());
+                          appsApiAsService.deleteApp(
+                              r.getCloudContext().getCloudResource(), r.getAppName(), false);
                           return null;
                         });
                   } catch (ApiException e) {
