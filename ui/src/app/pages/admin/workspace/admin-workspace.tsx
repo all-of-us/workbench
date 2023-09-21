@@ -48,7 +48,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps) {
-    if (hasNewValidProps(this.props, prevProps, [(p) => p.match.params])) {
+    if (hasNewValidProps(this.props, prevProps, [(p) => p.match.params.ns])) {
       this.populateFederatedWorkspaceInformation();
     }
   }
