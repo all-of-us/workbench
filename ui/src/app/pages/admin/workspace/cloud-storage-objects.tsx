@@ -4,7 +4,7 @@ import { AdminWorkspaceCloudStorageCounts } from 'generated/fetch';
 
 import colors from 'app/styles/colors';
 
-import { FileDetailsTable, formatMB } from './file-table';
+import { FileTable, formatMB } from './file-table';
 import { WorkspaceInfoField } from './workspace-info-field';
 
 interface Props {
@@ -49,10 +49,7 @@ export const CloudStorageObjects = ({
           {formatMB(storageBytesUsed)}
         </WorkspaceInfoField>
       </div>
-      <FileDetailsTable
-        {...{ workspaceNamespace }}
-        bucket={storageBucketPath}
-      />
+      <FileTable {...{ workspaceNamespace }} bucket={storageBucketPath} />
     </>
   );
 };

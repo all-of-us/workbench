@@ -123,12 +123,12 @@ const NameCell = (props: NameCellProps) => {
     filenameSpan
   );
 };
-interface FileDetailsProps {
+
+interface Props {
   workspaceNamespace: string;
   bucket: string;
 }
-
-export const FileDetailsTable = (props: FileDetailsProps) => {
+export const FileTable = (props: Props) => {
   const { workspaceNamespace, bucket } = props;
 
   interface TableEntry {
