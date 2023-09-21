@@ -48,7 +48,10 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
     <DataTable value={disks} emptyMessage='No disks found'>
       <Column
         body={(disk) => (
-          <Button disabled={deleting} onClick={() => onClickDelete(disk)}>
+          <Button
+            disabled={deleting || isAttached(disk)}
+            onClick={() => onClickDelete(disk)}
+          >
             Delete
           </Button>
         )}
