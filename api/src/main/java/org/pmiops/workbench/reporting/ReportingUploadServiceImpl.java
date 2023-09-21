@@ -74,11 +74,11 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   private static final InsertAllRequestPayloadTransformer<ReportingUserGeneralDiscoverySource>
       userGeneralDiscoverySourceRequestBuilder =
-      UserGeneralDiscoverySourceColumnValueExtractor::values;
+          UserGeneralDiscoverySourceColumnValueExtractor::values;
 
   private static final InsertAllRequestPayloadTransformer<ReportingUserPartnerDiscoverySource>
       userPartnerDiscoverySourceRequestBuilder =
-      UserPartnerDiscoverySourceColumnValueExtractor::values;
+          UserPartnerDiscoverySourceColumnValueExtractor::values;
 
   /**
    * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
@@ -165,8 +165,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   }
 
   @Override
-  public void uploadUserGeneralDiscoverySourceBatch(List<ReportingUserGeneralDiscoverySource> batch,
-      long captureTimestamp) {
+  public void uploadUserGeneralDiscoverySourceBatch(
+      List<ReportingUserGeneralDiscoverySource> batch, long captureTimestamp) {
     uploadBatchTable(
         userGeneralDiscoverySourceRequestBuilder.build(
             getTableId(UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME),
@@ -175,8 +175,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   }
 
   @Override
-  public void uploadUserPartnerDiscoverySourceBatch(List<ReportingUserPartnerDiscoverySource> batch,
-      long captureTimestamp) {
+  public void uploadUserPartnerDiscoverySourceBatch(
+      List<ReportingUserPartnerDiscoverySource> batch, long captureTimestamp) {
     uploadBatchTable(
         userPartnerDiscoverySourceRequestBuilder.build(
             getTableId(UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME),

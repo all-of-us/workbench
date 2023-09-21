@@ -10,9 +10,7 @@ import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 public enum UserPartnerDiscoverySourceColumnValueExtractor
     implements ColumnValueExtractor<ReportingUserPartnerDiscoverySource> {
   USER_ID("user_id", ReportingUserPartnerDiscoverySource::getUserId),
-  ANSWER(
-      "answer",
-      ReportingUserPartnerDiscoverySource::getAnswer),
+  ANSWER("answer", ReportingUserPartnerDiscoverySource::getAnswer),
   OTHER_TEXT("otherText", ReportingUserPartnerDiscoverySource::getOtherText);
 
   public static final String TABLE_NAME = "user_partner_discovery_source";

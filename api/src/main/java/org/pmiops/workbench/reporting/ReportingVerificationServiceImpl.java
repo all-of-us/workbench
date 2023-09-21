@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -93,18 +92,27 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
         List.of(
             Map.entry(
                 WorkspaceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(WorkspaceColumnValueExtractor.TABLE_NAME)),
-            Map.entry(UserColumnValueExtractor.TABLE_NAME, reportingQueryService.getTableRowCount(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
-            Map.entry(CohortColumnValueExtractor.TABLE_NAME, reportingQueryService.getTableRowCount(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getWorkspaceCount()),
+            Map.entry(
+                UserColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+            Map.entry(
+                CohortColumnValueExtractor.TABLE_NAME,
+                reportingQueryService.getTableRowCount(
+                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getTableRowCount(
+                    NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME)),
+                reportingQueryService.getTableRowCount(
+                    UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME)),
             Map.entry(
                 UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME,
-                reportingQueryService.getTableRowCount(UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)));
+                reportingQueryService.getTableRowCount(
+                    UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME)));
 
     // fails-fast due to allMatch() so logs may be incomplete on failure
     boolean verified =

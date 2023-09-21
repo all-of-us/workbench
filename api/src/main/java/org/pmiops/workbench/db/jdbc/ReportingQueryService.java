@@ -37,10 +37,6 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
-  List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySource(long limit, long offset);
-
-  List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySource(long limit, long offset);
-
   default Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
     return getBatchedStream(this::getWorkspaceBatch);
   }
@@ -63,6 +59,22 @@ public interface ReportingQueryService {
   default Stream<List<ReportingNewUserSatisfactionSurvey>>
       getBatchedNewUserSatisfactionSurveyStream() {
     return getBatchedStream(this::getNewUserSatisfactionSurveyBatch);
+  }
+
+  List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
+      long limit, long offset);
+
+  default Stream<List<ReportingUserGeneralDiscoverySource>>
+      getBatchedUserGeneralDiscoverySourceStream() {
+    return getBatchedStream(this::getUserGeneralDiscoverySourceBatch);
+  }
+
+  List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySourceBatch(
+      long limit, long offset);
+
+  default Stream<List<ReportingUserPartnerDiscoverySource>>
+      getBatchedUserPartnerDiscoverySourceStream() {
+    return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
   }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
@@ -130,4 +142,6 @@ public interface ReportingQueryService {
   }
 
   int getTableRowCount(String tableName);
+
+  int getWorkspaceCount();
 }

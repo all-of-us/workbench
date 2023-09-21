@@ -72,6 +72,14 @@ public class ReportingServiceImpl implements ReportingService {
         .getBatchedNewUserSatisfactionSurveyStream()
         .forEach(
             b -> reportingUploadService.uploadNewUserSatisfactionSurveyBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedUserGeneralDiscoverySourceStream()
+        .forEach(
+            b -> reportingUploadService.uploadUserGeneralDiscoverySourceBatch(b, captureTimestamp));
+    reportingQueryService
+        .getBatchedUserPartnerDiscoverySourceStream()
+        .forEach(
+            b -> reportingUploadService.uploadUserPartnerDiscoverySourceBatch(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

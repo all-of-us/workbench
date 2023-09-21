@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
+import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.model.InstitutionMembershipRequirement;
 import org.pmiops.workbench.model.NewUserSatisfactionSurveySatisfaction;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -100,14 +102,15 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySource(long limit,
-      long offset) {
+  public List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
+      long limit, long offset) {
+    // Note: Only populate other_text when user_general_discovery_source is OTHER
     return jdbcTemplate.query(
         String.format(
             "SELECT\n"
                 + "  us.user_id as user_id,\n"
                 + "  us.source as answer,\n"
-                + "  u.user_general_discovery_source_other_text as other_text,\n"
+                + "  u.user_general_discovery_source_other_text as other_text\n"
                 + "FROM user_general_discovery_source us\n"
                 + " JOIN user u\n"
                 + "   ON us.user_id = u.user_id\n"
@@ -118,12 +121,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingUserGeneralDiscoverySource()
                 .userId(rs.getLong("user_id"))
                 .answer(rs.getString("answer"))
-                .otherText(rs.getString("other_text")));
+                .otherText(
+                    rs.getString("answer").equals(DbGeneralDiscoverySource.OTHER.toString())
+                        ? rs.getString("other_text")
+                        : null));
   }
 
   @Override
-  public List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySource(long limit,
-      long offset) {
+  public List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySourceBatch(
+      long limit, long offset) {
+    // Note: Only populate other_text when user_general_discovery_source is OTHER
     return jdbcTemplate.query(
         String.format(
             "SELECT\n"
@@ -140,7 +147,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             new ReportingUserPartnerDiscoverySource()
                 .userId(rs.getLong("user_id"))
                 .answer(rs.getString("answer"))
-                .otherText(rs.getString("other_text")));
+                .otherText(
+                    rs.getString("answer").equals(DbPartnerDiscoverySource.OTHER.toString())
+                        ? rs.getString("other_text")
+                        : null));
   }
 
   @Override
@@ -561,10 +571,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public int getTableRowCount(String tableName) {
-    return jdbcTemplate.queryForObject(
-        "SELECT count(*) FROM " + tableName, Integer.class);
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
   }
 
+  @Override
+  public int getWorkspaceCount() {
+    return jdbcTemplate.queryForObject(
+        "SELECT count(*) FROM workspace WHERE active_status = "
+            + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
+        Integer.class);
+  }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
