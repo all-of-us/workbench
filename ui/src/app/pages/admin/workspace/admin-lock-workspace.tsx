@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Workspace } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
@@ -36,6 +37,12 @@ export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
     setShowSpinner(false);
   };
 
+  const buttonText = cond(
+    [showSpinner && workspace.adminLocked, () => 'UNLOCKING WORKSPACE'],
+    [showSpinner && !workspace.adminLocked, () => 'LOCKING WORKSPACE'],
+    [!showSpinner && workspace.adminLocked, () => 'UNLOCK WORKSPACE'],
+    [!showSpinner && !workspace.adminLocked, () => 'LOCK WORKSPACE']
+  );
   return (
     <>
       {showLockModal && (
@@ -62,10 +69,12 @@ export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
               }}
             >
               <FlexRow>
-                <div style={{ paddingRight: '0.45rem' }}>
-                  {showSpinner && <Spinner style={{ width: 20, height: 18 }} />}
-                </div>
-                {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
+                {showSpinner && (
+                  <div style={{ paddingRight: '0.45rem' }}>
+                    <Spinner style={{ width: 20, height: 18 }} />
+                  </div>
+                )}
+                {buttonText}
               </FlexRow>
             </Button>
           </FlexColumn>
