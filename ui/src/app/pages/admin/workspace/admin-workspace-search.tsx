@@ -25,7 +25,10 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
         marginTop: '1.5rem',
       }}
     >
-      <label style={{ color: colors.primary, margin: '1.5rem' }}>
+      <label
+        style={{ color: colors.primary, margin: '1.5rem' }}
+        htmlFor='search'
+      >
         Workspace namespace
       </label>
       <TextInput
@@ -33,6 +36,7 @@ export const AdminWorkspaceSearch = (spinnerProps: WithSpinnerOverlayProps) => {
           width: '15rem',
           marginRight: '1.5rem',
         }}
+        id='search'
         onChange={(value) => setWorkspaceNamespace(value)}
         onKeyDown={(event: KeyboardEvent) => {
           if (event.key === 'Enter') {
