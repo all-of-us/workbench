@@ -262,7 +262,7 @@ export const ConceptAddModal = withCurrentWorkspace()(
         {
           name: nameValidationFormat(
             conceptSets.map((concept: ConceptSet) => concept.name),
-            ResourceType.CONCEPTSET
+            ResourceType.CONCEPT_SET
           ),
         }
       );

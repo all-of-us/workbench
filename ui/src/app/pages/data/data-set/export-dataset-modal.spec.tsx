@@ -4,7 +4,7 @@ import { mount } from 'enzyme';
 
 import {
   DataSetApi,
-  DataSetExportRequest,
+  DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
   KernelTypeEnum,
   NotebooksApi,
@@ -97,7 +97,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.Python,
+        kernelType: KernelTypeEnum.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -126,7 +126,7 @@ describe('ExportDatasetModal', () => {
         dataSetRequest: expectedDatasetRequest,
         newNotebook: true,
         notebookName: expectedNotebookName,
-        kernelType: KernelTypeEnum.Python,
+        kernelType: KernelTypeEnum.PYTHON,
         generateGenomicsAnalysisCode: false,
       })
     );
@@ -259,7 +259,7 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.Python,
+        kernelType: KernelTypeEnum.PYTHON,
       })
     );
     expect(wrapper.find('iframe').html()).toContain('hello world!');
@@ -282,11 +282,11 @@ describe('ExportDatasetModal', () => {
 
   it('Show genomics analysis tools if WGS is in the dataset', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -297,14 +297,14 @@ describe('ExportDatasetModal', () => {
 
   it('Remove genomics analysis tools if R is selected', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
 
     wrapper.find('[data-test-id="kernel-type-r"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -317,7 +317,7 @@ describe('ExportDatasetModal', () => {
     testProps.dataset.prePackagedConceptSet = [];
     const wrapper = mount(component(testProps));
 
-    Object.keys(DataSetExportRequest.GenomicsAnalysisToolEnum).forEach(
+    Object.keys(DataSetExportRequestGenomicsAnalysisToolEnum).forEach(
       (tool) => {
         expect(
           wrapper.find(`[data-test-id="genomics-tool-${tool}"]`).exists()
@@ -328,7 +328,7 @@ describe('ExportDatasetModal', () => {
 
   it('Should export code with genomics analysis tool', async () => {
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
@@ -349,9 +349,9 @@ describe('ExportDatasetModal', () => {
       dataSetRequest: expectedDatasetRequest,
       newNotebook: true,
       notebookName: expectedNotebookName,
-      kernelType: KernelTypeEnum.Python,
+      kernelType: KernelTypeEnum.PYTHON,
       generateGenomicsAnalysisCode: true,
-      genomicsAnalysisTool: DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL,
+      genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
     });
   });
 
@@ -365,7 +365,7 @@ describe('ExportDatasetModal', () => {
       html: '<div id="notebook">print("hello world!")</div>',
     };
     testProps.dataset.prePackagedConceptSet = [
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
     ];
     const wrapper = mount(component(testProps));
     const previewSpy = jest.spyOn(dataSetApi(), 'previewExportToNotebook');
@@ -377,9 +377,8 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.Python,
-        genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL,
+        kernelType: KernelTypeEnum.PYTHON,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.HAIL,
       })
     );
 
@@ -393,9 +392,9 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.Python,
+        kernelType: KernelTypeEnum.PYTHON,
         genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK,
+          DataSetExportRequestGenomicsAnalysisToolEnum.PLINK,
       })
     );
 
@@ -409,9 +408,8 @@ describe('ExportDatasetModal', () => {
       workspace.id,
       expect.objectContaining({
         dataSetRequest: expectedDatasetRequest,
-        kernelType: KernelTypeEnum.Python,
-        genomicsAnalysisTool:
-          DataSetExportRequest.GenomicsAnalysisToolEnum.NONE,
+        kernelType: KernelTypeEnum.PYTHON,
+        genomicsAnalysisTool: DataSetExportRequestGenomicsAnalysisToolEnum.NONE,
       })
     );
   });

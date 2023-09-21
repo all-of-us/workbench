@@ -151,33 +151,33 @@ const css = `
 `;
 
 const temporalMentions = [
-  TemporalMention.ANYMENTION,
-  TemporalMention.FIRSTMENTION,
-  TemporalMention.LASTMENTION,
+  TemporalMention.ANY_MENTION,
+  TemporalMention.FIRST_MENTION,
+  TemporalMention.LAST_MENTION,
 ];
 
 const temporalTimes = [
-  TemporalTime.DURINGSAMEENCOUNTERAS,
-  TemporalTime.XDAYSAFTER,
-  TemporalTime.XDAYSBEFORE,
-  TemporalTime.WITHINXDAYSOF,
+  TemporalTime.DURING_SAME_ENCOUNTER_AS,
+  TemporalTime.X_DAYS_AFTER,
+  TemporalTime.X_DAYS_BEFORE,
+  TemporalTime.WITHIN_X_DAYS_OF,
 ];
 
 function temporalEnumToText(option) {
   switch (option) {
-    case TemporalMention.ANYMENTION:
+    case TemporalMention.ANY_MENTION:
       return 'Any mention of';
-    case TemporalMention.FIRSTMENTION:
+    case TemporalMention.FIRST_MENTION:
       return 'First mention of';
-    case TemporalMention.LASTMENTION:
+    case TemporalMention.LAST_MENTION:
       return 'Last mention of';
-    case TemporalTime.DURINGSAMEENCOUNTERAS:
+    case TemporalTime.DURING_SAME_ENCOUNTER_AS:
       return 'During same encounter as';
-    case TemporalTime.XDAYSBEFORE:
+    case TemporalTime.X_DAYS_BEFORE:
       return 'X or more days before';
-    case TemporalTime.XDAYSAFTER:
+    case TemporalTime.X_DAYS_AFTER:
       return 'X or more days after';
-    case TemporalTime.WITHINXDAYSOF:
+    case TemporalTime.WITHIN_X_DAYS_OF:
       return 'On or within X days of';
   }
 }
@@ -347,14 +347,14 @@ export const SearchGroup = withCurrentWorkspace()(
     get disableTemporal() {
       return this.items.some((it) =>
         [
-          Domain.PHYSICALMEASUREMENT,
+          Domain.PHYSICAL_MEASUREMENT,
           Domain.PERSON,
           Domain.SURVEY,
           Domain.FITBIT,
-          Domain.WHOLEGENOMEVARIANT,
-          Domain.LRWHOLEGENOMEVARIANT,
-          Domain.ARRAYDATA,
-          Domain.STRUCTURALVARIANTDATA,
+          Domain.WHOLE_GENOME_VARIANT,
+          Domain.LR_WHOLE_GENOME_VARIANT,
+          Domain.ARRAY_DATA,
+          Domain.STRUCTURAL_VARIANT_DATA,
         ].includes(it.type)
       );
     }
@@ -514,7 +514,7 @@ export const SearchGroup = withCurrentWorkspace()(
         [0, 0]
       );
       const inputError =
-        time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+        time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
         isNaN(parseInt(timeValue, 10));
       return counts.includes(0) || inputError;
     }
@@ -664,7 +664,7 @@ export const SearchGroup = withCurrentWorkspace()(
               <React.Fragment>
                 {/* Temporal time dropdown */}
                 <div style={styles.cardBlock}>
-                  {time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+                  {time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
                     inputError &&
                     inputTouched && (
                       <div style={styles.inputError}>
@@ -685,7 +685,7 @@ export const SearchGroup = withCurrentWorkspace()(
                     {temporalEnumToText(time)}{' '}
                     <ClrIcon shape='caret down' size={12} />
                   </button>
-                  {time !== TemporalTime.DURINGSAMEENCOUNTERAS && (
+                  {time !== TemporalTime.DURING_SAME_ENCOUNTER_AS && (
                     <NumberInput
                       style={styles.timeInput}
                       value={timeValue}
@@ -823,7 +823,7 @@ export const SearchGroup = withCurrentWorkspace()(
               hideDescription={true}
               onCancel={() => this.setState({ renaming: false })}
               onRename={(v) => this.rename(v)}
-              resourceType={ResourceType.COHORTSEARCHGROUP}
+              resourceType={ResourceType.COHORT_SEARCH_GROUP}
             />
           )}
         </React.Fragment>

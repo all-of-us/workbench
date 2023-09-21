@@ -465,7 +465,7 @@ export class ValueListItem extends React.Component<
     dataSetApi()
       .getDataDictionaryEntry(
         parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
-        domain === Domain.PHYSICALMEASUREMENTCSS
+        domain === Domain.PHYSICAL_MEASUREMENT_CSS
           ? Domain.MEASUREMENT.toString()
           : domain.toString(),
         domainValue.value
@@ -685,36 +685,40 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 };
 
 const PREPACKAGED_SURVEY_DOMAINS = {
-  [PrePackagedConceptSetEnum.SURVEYBASICS]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYLIFESTYLE]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYOVERALLHEALTH]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYHEALTHCAREACCESSUTILIZATION]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYCOPE]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYSDOH]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYCOVIDVACCINE]: Domain.SURVEY,
-  [PrePackagedConceptSetEnum.SURVEYPFHH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_BASICS]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_LIFESTYLE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_OVERALL_HEALTH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_HEALTHCARE_ACCESS_UTILIZATION]:
+    Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_COPE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_SDOH]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE]: Domain.SURVEY,
+  [PrePackagedConceptSetEnum.SURVEY_PFHH]: Domain.SURVEY,
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
-  [PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY]:
-    Domain.FITBITHEARTRATESUMMARY,
-  [PrePackagedConceptSetEnum.FITBITACTIVITY]: Domain.FITBITACTIVITY,
-  [PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
-  [PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
+  [PrePackagedConceptSetEnum.FITBIT_HEART_RATE_SUMMARY]:
+    Domain.FITBIT_HEART_RATE_SUMMARY,
+  [PrePackagedConceptSetEnum.FITBIT_ACTIVITY]: Domain.FITBIT_ACTIVITY,
+  [PrePackagedConceptSetEnum.FITBIT_HEART_RATE_LEVEL]:
+    Domain.FITBIT_HEART_RATE_LEVEL,
+  [PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS]:
+    Domain.FITBIT_INTRADAY_STEPS,
 };
 
 const PREPACKAGED_WITH_FITBIT_SLEEP_DOMAINS = {
-  [PrePackagedConceptSetEnum.FITBITSLEEPDAILYSUMMARY]:
-    Domain.FITBITSLEEPDAILYSUMMARY,
-  [PrePackagedConceptSetEnum.FITBITSLEEPLEVEL]: Domain.FITBITSLEEPLEVEL,
+  [PrePackagedConceptSetEnum.FITBIT_SLEEP_DAILY_SUMMARY]:
+    Domain.FITBIT_SLEEP_DAILY_SUMMARY,
+  [PrePackagedConceptSetEnum.FITBIT_SLEEP_LEVEL]: Domain.FITBIT_SLEEP_LEVEL,
 };
 
 const PREPACKAGED_WITH_WHOLE_GENOME = {
-  [PrePackagedConceptSetEnum.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
+  [PrePackagedConceptSetEnum.WHOLE_GENOME]: Domain.WHOLE_GENOME_VARIANT,
 };
 
 const PREPACKAGED_WITH_ZIP_CODE_SOCIOECONOMIC = {
-  [PrePackagedConceptSetEnum.ZIPCODESOCIOECONOMIC]: Domain.ZIPCODESOCIOECONOMIC,
+  [PrePackagedConceptSetEnum.ZIP_CODE_SOCIOECONOMIC]:
+    Domain.ZIP_CODE_SOCIOECONOMIC,
 };
 let PREPACKAGED_DOMAINS = {};
 let prepackagedConceptSetToString = {};
@@ -731,21 +735,21 @@ const reverseDomainEnum = {
   VISIT: Domain.VISIT,
   SURVEY: Domain.SURVEY,
   PERSON: Domain.PERSON,
-  PHYSICAL_MEASUREMENT: Domain.PHYSICALMEASUREMENT,
-  ALL_EVENTS: Domain.ALLEVENTS,
+  PHYSICAL_MEASUREMENT: Domain.PHYSICAL_MEASUREMENT,
+  ALL_EVENTS: Domain.ALL_EVENTS,
   LAB: Domain.LAB,
   VITAL: Domain.VITAL,
   FITBIT: Domain.FITBIT,
-  FITBIT_HEART_RATE_SUMMARY: Domain.FITBITHEARTRATESUMMARY,
-  FITBIT_HEART_RATE_LEVEL: Domain.FITBITHEARTRATELEVEL,
-  FITBIT_ACTIVITY: Domain.FITBITACTIVITY,
-  FITBIT_INTRADAY_STEPS: Domain.FITBITINTRADAYSTEPS,
-  FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBITSLEEPDAILYSUMMARY,
-  FITBIT_SLEEP_LEVEL: Domain.FITBITSLEEPLEVEL,
-  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICALMEASUREMENTCSS,
-  WHOLE_GENOME_VARIANT: Domain.WHOLEGENOMEVARIANT,
-  ZIP_CODE_SOCIOECONOMIC: Domain.ZIPCODESOCIOECONOMIC,
-  ARRAY_DATA: Domain.ARRAYDATA,
+  FITBIT_HEART_RATE_SUMMARY: Domain.FITBIT_HEART_RATE_SUMMARY,
+  FITBIT_HEART_RATE_LEVEL: Domain.FITBIT_HEART_RATE_LEVEL,
+  FITBIT_ACTIVITY: Domain.FITBIT_ACTIVITY,
+  FITBIT_INTRADAY_STEPS: Domain.FITBIT_INTRADAY_STEPS,
+  FITBIT_SLEEP_DAILY_SUMMARY: Domain.FITBIT_SLEEP_DAILY_SUMMARY,
+  FITBIT_SLEEP_LEVEL: Domain.FITBIT_SLEEP_LEVEL,
+  PHYSICAL_MEASUREMENT_CSS: Domain.PHYSICAL_MEASUREMENT_CSS,
+  WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
+  ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
+  ARRAY_DATA: Domain.ARRAY_DATA,
 };
 
 // Temp workaround to prevent errors from mismatched upper and lower case values
@@ -897,7 +901,7 @@ export const DatasetPage = fp.flow(
         .map((cs) => ({
           conceptSetId: cs.id,
           domain:
-            cs.domain === Domain.PHYSICALMEASUREMENT
+            cs.domain === Domain.PHYSICAL_MEASUREMENT
               ? Domain.MEASUREMENT
               : cs.domain,
         }))
@@ -941,7 +945,7 @@ export const DatasetPage = fp.flow(
       values.items.forEach((domainWithDomainValues) => {
         const domain = reverseDomainEnum[domainWithDomainValues.domain];
         if (
-          ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+          ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
             domainWithConceptSetId.domain
           )
         ) {
@@ -1028,7 +1032,7 @@ export const DatasetPage = fp.flow(
         values.items.forEach((domainWithDomainValues) => {
           const domain = reverseDomainEnum[domainWithDomainValues.domain];
           if (
-            ![domain, Domain.PHYSICALMEASUREMENTCSS].includes(
+            ![domain, Domain.PHYSICAL_MEASUREMENT_CSS].includes(
               domainWithConceptSetId.domain
             )
           ) {
@@ -1147,7 +1151,6 @@ export const DatasetPage = fp.flow(
             updatedPrepackaged.add(prepackagedSurvey)
           );
         } else if (
-          prepackaged !== PrePackagedConceptSetEnum.SURVEY &&
           Object.keys(PREPACKAGED_SURVEY_DOMAINS).every((key) =>
             updatedPrepackaged.has(key.valueOf())
           )
@@ -1438,7 +1441,7 @@ export const DatasetPage = fp.flow(
     };
 
     const getPreviewByDomain = async (domain: Domain) => {
-      if (domain === Domain.WHOLEGENOMEVARIANT) {
+      if (domain === Domain.WHOLE_GENOME_VARIANT) {
         setPreviewList(
           (prevPreviewList) =>
             new Map(
@@ -1662,7 +1665,7 @@ export const DatasetPage = fp.flow(
 
     const onClickExport = () => {
       setModalState(
-        selectedDomains.has(Domain.WHOLEGENOMEVARIANT)
+        selectedDomains.has(Domain.WHOLE_GENOME_VARIANT)
           ? ModalState.Extract
           : ModalState.Export
       );

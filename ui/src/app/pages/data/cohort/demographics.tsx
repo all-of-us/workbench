@@ -108,8 +108,8 @@ const scrollbarCSS = `
 
 const ageTypes = [
   { label: 'Current Age', type: AttrName.AGE },
-  { label: 'Age at Consent', type: AttrName.AGEATCONSENT },
-  { label: 'Age at CDR Date', type: AttrName.AGEATCDR },
+  { label: 'Age at Consent', type: AttrName.AGE_AT_CONSENT },
+  { label: 'Age at CDR Date', type: AttrName.AGE_AT_CDR },
 ];
 
 const defaultMinAge = '18';
@@ -206,8 +206,8 @@ export class Demographics extends React.Component<Props, State> {
     const { id, namespace } = currentWorkspaceStore.getValue();
     const initialValue = {
       [AttrName.AGE]: [],
-      [AttrName.AGEATCONSENT]: [],
-      [AttrName.AGEATCDR]: [],
+      [AttrName.AGE_AT_CONSENT]: [],
+      [AttrName.AGE_AT_CDR]: [],
     };
     const response = await cohortBuilderApi().findAgeTypeCounts(namespace, id);
     const ageTypeNodes = response.items.reduce((acc, item) => {

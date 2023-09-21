@@ -116,7 +116,7 @@ const scrollbarCSS = `
 
 const ANY_PM_SELECTION = {
   parameterId: 'hasAnyPM',
-  domainId: Domain.PHYSICALMEASUREMENT.toString(),
+  domainId: Domain.PHYSICAL_MEASUREMENT.toString(),
   group: false,
   hasAncestorData: false,
   isStandard: false,
@@ -177,7 +177,7 @@ export const CriteriaTree = fp.flow(
     componentDidMount(): void {
       const { domain, selectedIds } = this.props;
       this.loadRootNodes();
-      if (domain === Domain.PHYSICALMEASUREMENT && selectedIds.length) {
+      if (domain === Domain.PHYSICAL_MEASUREMENT && selectedIds.length) {
         // Set hasAnyPM if editing a PM item
         this.setState({
           hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId),
@@ -196,7 +196,7 @@ export const CriteriaTree = fp.flow(
         }
       }
       if (
-        domain === Domain.PHYSICALMEASUREMENT &&
+        domain === Domain.PHYSICAL_MEASUREMENT &&
         prevProps.selectedIds !== selectedIds
       ) {
         // Check for hasAnyPM changes if in PM tree and selections have changed
@@ -207,7 +207,7 @@ export const CriteriaTree = fp.flow(
     }
 
     sendOnlyCriteriaType(domain: Domain) {
-      return domain === Domain.VISIT || domain === Domain.PHYSICALMEASUREMENT;
+      return domain === Domain.VISIT || domain === Domain.PHYSICAL_MEASUREMENT;
     }
 
     async loadRootNodes() {
@@ -272,7 +272,7 @@ export const CriteriaTree = fp.flow(
           });
         }
         const rootNodes = criteriaResponse.items;
-        if (domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT) {
+        if (domain === Domain.PHYSICAL_MEASUREMENT || domain === Domain.VISIT) {
           let children = [];
           const rootParentId = domain === Domain.VISIT ? -1 : 0;
           rootNodes.forEach((child) => {
@@ -341,9 +341,9 @@ export const CriteriaTree = fp.flow(
     get criteriaLookupNeeded() {
       return (
         this.props.source === 'cohort' &&
-        ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(
-          this.props.domain
-        ) &&
+        !(
+          [Domain.PHYSICAL_MEASUREMENT, Domain.VISIT] as Array<Domain>
+        ).includes(this.props.domain) &&
         currentCohortCriteriaStore.getValue().some((crit) => !crit.id)
       );
     }
@@ -395,7 +395,7 @@ export const CriteriaTree = fp.flow(
       const { domain, source } = this.props;
       return (
         !(source === 'cohort' && domain === Domain.SURVEY) &&
-        domain !== Domain.PHYSICALMEASUREMENT &&
+        domain !== Domain.PHYSICAL_MEASUREMENT &&
         domain !== Domain.VISIT
       );
     }
@@ -519,7 +519,7 @@ export const CriteriaTree = fp.flow(
                 }
                 className='show-scrollbar'
               >
-                {domain === Domain.PHYSICALMEASUREMENT && (
+                {domain === Domain.PHYSICAL_MEASUREMENT && (
                   <div style={{ margin: '0.75rem 0 0 0.75rem' }}>
                     <CheckBox
                       manageOwnState={false}

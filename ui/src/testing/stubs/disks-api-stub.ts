@@ -8,11 +8,9 @@ import {
   ListDisksResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const stubDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: true,
   name: 'stub-disk',
   blockSize: 1,
@@ -20,11 +18,11 @@ export const stubDisk = (): Disk => ({
 
 export const mockJupyterDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: true,
   name: 'mock-disk1',
   blockSize: 1,
-  status: DiskStatus.Ready,
+  status: DiskStatus.READY,
   appType: null,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
@@ -32,11 +30,11 @@ export const mockJupyterDisk = (): Disk => ({
 
 export const mockCromwellDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: false,
   name: 'mock-disk2',
   blockSize: 1,
-  status: DiskStatus.Ready,
+  status: DiskStatus.READY,
   appType: AppType.CROMWELL,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
@@ -44,11 +42,11 @@ export const mockCromwellDisk = (): Disk => ({
 
 export const mockRStudioDisk = (): Disk => ({
   size: 1000,
-  diskType: DiskType.Standard,
+  diskType: DiskType.STANDARD,
   isGceRuntime: false,
   name: 'mock-disk3',
   blockSize: 1,
-  status: DiskStatus.Ready,
+  status: DiskStatus.READY,
   appType: AppType.RSTUDIO,
   creator: '"evrii@fake-research-aou.org"',
   createdDate: '2023-05-22T18:55:10.108838Z',
@@ -56,9 +54,7 @@ export const mockRStudioDisk = (): Disk => ({
 
 export class DisksApiStub extends DisksApi {
   constructor(public disk?: Disk) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   deleteDisk(

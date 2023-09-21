@@ -315,7 +315,9 @@ describe('DataAccessRequirements', () => {
       },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    expect(enabledModules.includes(AccessModule.RASLINKLOGINGOV)).toBeFalsy();
+    expect(
+      enabledModules.includes(AccessModule.RAS_LINK_LOGIN_GOV)
+    ).toBeFalsy();
   });
 
   it('should not return the ERA module from getEligibleModules when its feature flag is disabled', () => {
@@ -323,7 +325,7 @@ describe('DataAccessRequirements', () => {
       config: { ...defaultServerConfig, enableEraCommons: false },
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
-    expect(enabledModules.includes(AccessModule.ERACOMMONS)).toBeFalsy();
+    expect(enabledModules.includes(AccessModule.ERA_COMMONS)).toBeFalsy();
   });
 
   it('should not return the Compliance module from getEligibleModules when its feature flag is disabled', () => {
@@ -332,7 +334,7 @@ describe('DataAccessRequirements', () => {
     });
     const enabledModules = getEligibleModules(allInitialModules, stubProfile);
     expect(
-      enabledModules.includes(AccessModule.COMPLIANCETRAINING)
+      enabledModules.includes(AccessModule.COMPLIANCE_TRAINING)
     ).toBeFalsy();
   });
 
@@ -351,7 +353,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[0]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.TWOFACTORAUTH);
+    expect(activeModule).toEqual(AccessModule.TWO_FACTOR_AUTH);
   });
 
   it('should return the second module (RAS) from getFocusedModule when the first module (2FA) has been completed', () => {
@@ -359,7 +361,10 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
         ],
       },
     };
@@ -386,7 +391,7 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, bypassEpochMillis: 1 },
+          { moduleName: AccessModule.TWO_FACTOR_AUTH, bypassEpochMillis: 1 },
         ],
       },
     };
@@ -424,7 +429,7 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: [
             {
-              moduleName: AccessModule.TWOFACTORAUTH,
+              moduleName: AccessModule.TWO_FACTOR_AUTH,
               completionEpochMillis: 1,
             },
           ],
@@ -442,7 +447,7 @@ describe('DataAccessRequirements', () => {
       );
 
       // update this if the order changes
-      expect(activeModule).toEqual(AccessModule.ERACOMMONS);
+      expect(activeModule).toEqual(AccessModule.ERA_COMMONS);
 
       // 2FA (module 0) is complete, so enabled #1 is active
       expect(activeModule).toEqual(enabledModules[1]);
@@ -457,8 +462,11 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
+          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
           {
             moduleName: AccessModule.IDENTITY,
             completionEpochMillis: 1,
@@ -481,7 +489,7 @@ describe('DataAccessRequirements', () => {
     expect(activeModule).toEqual(enabledModules[3]);
 
     // update this if the order changes
-    expect(activeModule).toEqual(AccessModule.COMPLIANCETRAINING);
+    expect(activeModule).toEqual(AccessModule.COMPLIANCE_TRAINING);
   });
 
   it('should return undefined from getFocusedModule when all modules have been completed', () => {
@@ -514,14 +522,17 @@ describe('DataAccessRequirements', () => {
       ...stubProfile,
       accessModules: {
         modules: [
-          { moduleName: AccessModule.TWOFACTORAUTH, completionEpochMillis: 1 },
-          { moduleName: AccessModule.ERACOMMONS, completionEpochMillis: 1 },
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.TWO_FACTOR_AUTH,
+            completionEpochMillis: 1,
+          },
+          { moduleName: AccessModule.ERA_COMMONS, completionEpochMillis: 1 },
+          {
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             completionEpochMillis: 1,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             completionEpochMillis: 1,
           },
         ],
@@ -576,7 +587,7 @@ describe('DataAccessRequirements', () => {
     });
     const { container } = component();
     expect(
-      findModule(container, AccessModule.ERACOMMONS)?.parentElement
+      findModule(container, AccessModule.ERA_COMMONS)?.parentElement
     ).toBeFalsy();
   });
 
@@ -586,7 +597,7 @@ describe('DataAccessRequirements', () => {
     });
     const { container } = component();
     expect(
-      findModule(container, AccessModule.COMPLIANCETRAINING)?.parentElement
+      findModule(container, AccessModule.COMPLIANCE_TRAINING)?.parentElement
     ).toBeFalsy();
   });
 
@@ -930,7 +941,7 @@ describe('DataAccessRequirements', () => {
   it('Should not show Era Commons Module for Registered Tier if the institution does not require eRa', async () => {
     let { container } = component();
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeTruthy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
 
     profileStore.set({
       profile: {
@@ -948,7 +959,7 @@ describe('DataAccessRequirements', () => {
     });
     ({ container } = component());
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeFalsy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeFalsy();
 
     // Ignore eraRequired if the accessTier is Controlled
     profileStore.set({
@@ -971,7 +982,7 @@ describe('DataAccessRequirements', () => {
     });
     ({ container } = component());
 
-    expect(findModule(container, AccessModule.ERACOMMONS)).toBeTruthy();
+    expect(findModule(container, AccessModule.ERA_COMMONS)).toBeTruthy();
   });
 
   it('Should display Institution has signed agreement when the user has a Tier Eligibility object for CT', async () => {
@@ -1145,7 +1156,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeTruthy();
     }
   );
@@ -1179,7 +1190,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );
@@ -1209,7 +1220,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );
@@ -1241,7 +1252,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
     }
@@ -1280,7 +1291,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findIneligibleModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeTruthy();
     }
@@ -1319,7 +1330,7 @@ describe('DataAccessRequirements', () => {
       ({ container } = component());
 
       expect(
-        findModule(findControlledTierCard(container), AccessModule.ERACOMMONS)
+        findModule(findControlledTierCard(container), AccessModule.ERA_COMMONS)
       ).toBeFalsy();
     }
   );
@@ -1394,7 +1405,7 @@ describe('DataAccessRequirements', () => {
       expect(
         findModule(
           findControlledTierCard(container),
-          AccessModule.CTCOMPLIANCETRAINING
+          AccessModule.CT_COMPLIANCE_TRAINING
         )
       ).toBeFalsy();
     }
@@ -1426,7 +1437,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIneligibleModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1451,7 +1462,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIneligibleModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIneligibleModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1481,7 +1492,7 @@ describe('DataAccessRequirements', () => {
     ({ container } = component());
 
     expect(
-      findIncompleteModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findIncompleteModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
   });
 
@@ -1494,10 +1505,12 @@ describe('DataAccessRequirements', () => {
         accessModules: {
           modules: allInitialModules.map((moduleName) => {
             if (
-              [
-                AccessModule.CTCOMPLIANCETRAINING,
-                AccessModule.DATAUSERCODEOFCONDUCT,
-              ].includes(moduleName)
+              (
+                [
+                  AccessModule.CT_COMPLIANCE_TRAINING,
+                  AccessModule.DATA_USER_CODE_OF_CONDUCT,
+                ] as Array<AccessModule>
+              ).includes(moduleName)
             ) {
               return { moduleName };
             }
@@ -1525,22 +1538,22 @@ describe('DataAccessRequirements', () => {
 
     // Both are clickable.
     expect(
-      findClickableModuleText(container, AccessModule.CTCOMPLIANCETRAINING)
+      findClickableModuleText(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
     expect(
-      findClickableModuleText(container, AccessModule.DATAUSERCODEOFCONDUCT)
+      findClickableModuleText(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
     ).toBeTruthy();
 
     // Only the first module is active.
     console.error(
       "Bob's burgers: ",
-      findNextCtaForModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     );
     expect(
-      findNextCtaForModule(container, AccessModule.CTCOMPLIANCETRAINING)
+      findNextCtaForModule(container, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toBeTruthy();
     expect(
-      findNextCtaForModule(container, AccessModule.DATAUSERCODEOFCONDUCT)
+      findNextCtaForModule(container, AccessModule.DATA_USER_CODE_OF_CONDUCT)
     ).toBeFalsy();
   });
 
@@ -1568,19 +1581,19 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1617,26 +1630,26 @@ describe('DataAccessRequirements', () => {
 
   it('should show the correct state when RT and CT modules are complete', async () => {
     expireAllRTModules();
-    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+    addOneModule(oneExpiredModule(AccessModule.CT_COMPLIANCE_TRAINING));
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
 
@@ -1657,22 +1670,22 @@ describe('DataAccessRequirements', () => {
     });
 
     expireAllRTModules();
-    addOneModule(oneExpiredModule(AccessModule.CTCOMPLIANCETRAINING));
+    addOneModule(oneExpiredModule(AccessModule.CT_COMPLIANCE_TRAINING));
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1688,7 +1701,7 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     component(DARPageMode.ANNUAL_RENEWAL);
@@ -1708,11 +1721,11 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
 
@@ -1732,15 +1745,15 @@ describe('DataAccessRequirements', () => {
     expireAllRTModules();
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
 
@@ -1761,7 +1774,7 @@ describe('DataAccessRequirements', () => {
     const newModules = [
       ...profileStore.get().profile.accessModules.modules,
       {
-        moduleName: AccessModule.TWOFACTORAUTH, // not expirable
+        moduleName: AccessModule.TWO_FACTOR_AUTH, // not expirable
         completionEpochMillis: null,
         bypassEpochMillis: null,
         expirationEpochMillis: oneYearAgo(),
@@ -1776,19 +1789,19 @@ describe('DataAccessRequirements', () => {
     profileStore.set({ profile: newProfile, load, reload, updateCache });
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
@@ -1829,20 +1842,20 @@ describe('DataAccessRequirements', () => {
     setCompletionTimes(() => Date.now());
 
     updateOneModuleExpirationTime(
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       oneYearFromNow()
     );
     updateOneModuleExpirationTime(
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       oneYearFromNow()
     );
 
     // this module will not be returned in AccessModules because it is disabled
-    removeOneModule(AccessModule.COMPLIANCETRAINING);
+    removeOneModule(AccessModule.COMPLIANCE_TRAINING);
 
     component(DARPageMode.ANNUAL_RENEWAL);
 
@@ -1872,7 +1885,7 @@ describe('DataAccessRequirements', () => {
       const spy = jest.spyOn(profileApi(), 'syncComplianceTrainingStatus');
 
       updateOneModuleExpirationTime(
-        AccessModule.COMPLIANCETRAINING,
+        AccessModule.COMPLIANCE_TRAINING,
         expirationTime
       );
 
@@ -1883,8 +1896,8 @@ describe('DataAccessRequirements', () => {
   );
 
   it('should allow completion of profile and publication confirmations when incomplete', async () => {
-    removeOneModule(AccessModule.PROFILECONFIRMATION);
-    removeOneModule(AccessModule.PUBLICATIONCONFIRMATION);
+    removeOneModule(AccessModule.PROFILE_CONFIRMATION);
+    removeOneModule(AccessModule.PUBLICATION_CONFIRMATION);
 
     const { container } = component(DARPageMode.ANNUAL_RENEWAL);
 

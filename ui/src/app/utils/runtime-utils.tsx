@@ -99,8 +99,8 @@ export enum AnalysisDiffState {
 }
 
 export const diskTypeLabels = {
-  [DiskType.Standard]: 'Standard Disk',
-  [DiskType.Ssd]: 'Solid State Disk',
+  [DiskType.STANDARD]: 'Standard Disk',
+  [DiskType.SSD]: 'Solid State Disk',
 };
 
 export interface DiskConfig {
@@ -142,7 +142,7 @@ const errorToSecuritySuspendedParams = async (
     return null;
   }
   const body = await error?.json();
-  if (body?.errorCode !== ErrorCode.COMPUTESECURITYSUSPENDED) {
+  if (body?.errorCode !== ErrorCode.COMPUTE_SECURITY_SUSPENDED) {
     return null;
   }
 
@@ -611,7 +611,7 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
         ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
         runtimePresets
       )
-    ) || RuntimeConfigurationType.UserOverride;
+    ) || RuntimeConfigurationType.USER_OVERRIDE;
 
   return runtime;
 };
@@ -693,13 +693,13 @@ export const withAnalysisConfigDefaults = (
       detachable = true;
       size = size ?? existingPersistentDisk?.size ?? DEFAULT_DISK_SIZE;
       detachableType =
-        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.Standard;
+        detachableType ?? existingPersistentDisk?.diskType ?? DiskType.STANDARD;
       if (canUseExistingDisk(r.diskConfig, existingPersistentDisk)) {
         existingDiskName = existingPersistentDisk.name;
       }
     } else {
       // No existing disk.
-      detachableType = DiskType.Standard;
+      detachableType = DiskType.STANDARD;
       detachable = true;
     }
   } else if (computeType === ComputeType.Dataproc) {
@@ -920,7 +920,7 @@ export const maybeInitializeRuntime = async (
       pollAbortSignal: signal,
       targetRuntime,
     });
-    if (runtime.status === RuntimeStatus.Error) {
+    if (runtime.status === RuntimeStatus.ERROR) {
       throw new RuntimeStatusError(runtime.errors);
     }
     return runtime;
@@ -992,25 +992,25 @@ export const useRuntimeStatus = (
       runtimeStatus,
       [
         RuntimeStatusRequest.DeleteRuntime,
-        () => (r) => r === null || r.status === RuntimeStatus.Deleted,
+        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
       ],
       [
         RuntimeStatusRequest.DeleteRuntimeAndPD,
-        () => (r) => r === null || r.status === RuntimeStatus.Deleted,
+        () => (r) => r === null || r.status === RuntimeStatus.DELETED,
       ],
       [
         RuntimeStatusRequest.DeletePD,
         () => (r) =>
-          r.status === RuntimeStatus.Running ||
-          r.status === RuntimeStatus.Stopped,
+          r.status === RuntimeStatus.RUNNING ||
+          r.status === RuntimeStatus.STOPPED,
       ],
       [
         RuntimeStatusRequest.Start,
-        () => (r) => r.status === RuntimeStatus.Running,
+        () => (r) => r.status === RuntimeStatus.RUNNING,
       ],
       [
         RuntimeStatusRequest.Stop,
-        () => (r) => r.status === RuntimeStatus.Stopped,
+        () => (r) => r.status === RuntimeStatus.STOPPED,
       ]
     );
     const initializePolling = async () => {
@@ -1160,8 +1160,8 @@ export const useCustomRuntime = (
           ].includes(mostSevereDiff)
         ) {
           if (
-            runtime.status === RuntimeStatus.Running ||
-            runtime.status === RuntimeStatus.Stopped
+            runtime.status === RuntimeStatus.RUNNING ||
+            runtime.status === RuntimeStatus.STOPPED
           ) {
             await runtimeApi().updateRuntime(currentWorkspaceNamespace, {
               runtime: request.runtime,
@@ -1172,7 +1172,7 @@ export const useCustomRuntime = (
             await LeoRuntimeInitializer.initialize({
               workspaceNamespace,
               targetRuntime: request.runtime,
-              resolutionCondition: (r) => r.status !== RuntimeStatus.Running,
+              resolutionCondition: (r) => r.status !== RuntimeStatus.RUNNING,
               pollAbortSignal: aborter.signal,
               overallTimeout: 1000 * 60, // The switch to a non running status should occur quickly
             });
@@ -1182,7 +1182,9 @@ export const useCustomRuntime = (
 
       const runtimeExists =
         !!runtime &&
-        ![RuntimeStatus.Error, RuntimeStatus.Deleted].includes(runtime.status);
+        !(
+          [RuntimeStatus.ERROR, RuntimeStatus.DELETED] as Array<RuntimeStatus>
+        ).includes(runtime.status);
       try {
         if (runtimeExists) {
           await applyRuntimeUpdate();
@@ -1194,7 +1196,7 @@ export const useCustomRuntime = (
           );
         }
 
-        if (runtime?.status === RuntimeStatus.Error) {
+        if (runtime?.status === RuntimeStatus.ERROR) {
           await runtimeApi().deleteRuntime(currentWorkspaceNamespace, false, {
             signal: aborter.signal,
           });
@@ -1277,11 +1279,16 @@ export enum PanelContent {
 
 // should we show the runtime in the UI?
 export const isVisible = (status: RuntimeStatus) =>
-  status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status);
+  status &&
+  !(
+    [RuntimeStatus.DELETED, RuntimeStatus.ERROR] as Array<RuntimeStatus>
+  ).includes(status);
 
 // is the runtime in a state where the user can take action?
 export const isActionable = (status: RuntimeStatus) =>
-  [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status);
+  (
+    [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+  ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
-  runtime?.labels?.creator;
+  (runtime?.labels as Map<string, string>).get('creator');

@@ -81,10 +81,10 @@ export function domainToTitle(domain: any): string {
     case Domain.MEASUREMENT:
       domain = 'Labs and Measurements';
       break;
-    case Domain.PHYSICALMEASUREMENT:
+    case Domain.PHYSICAL_MEASUREMENT:
       domain = 'Physical Measurements';
       break;
-    case Domain.PHYSICALMEASUREMENTCSS:
+    case Domain.PHYSICAL_MEASUREMENT_CSS:
       domain = 'Physical Measurements';
       break;
     case Domain.VISIT:
@@ -114,25 +114,25 @@ export function domainToTitle(domain: any): string {
     case Domain.SURVEY:
       domain = 'Surveys';
       break;
-    case Domain.ALLEVENTS:
+    case Domain.ALL_EVENTS:
       domain = 'All Events';
       break;
     case Domain.FITBIT:
       domain = 'Fitbit';
       break;
-    case Domain.WHOLEGENOMEVARIANT:
+    case Domain.WHOLE_GENOME_VARIANT:
       domain = 'Short Read WGS';
       break;
-    case Domain.LRWHOLEGENOMEVARIANT:
+    case Domain.LR_WHOLE_GENOME_VARIANT:
       domain = 'Long Read WGS';
       break;
-    case Domain.ARRAYDATA:
+    case Domain.ARRAY_DATA:
       domain = 'Global Diversity Array';
       break;
-    case Domain.STRUCTURALVARIANTDATA:
+    case Domain.STRUCTURAL_VARIANT_DATA:
       domain = 'Structural Variant Data';
       break;
-    case Domain.SNPINDELVARIANT:
+    case Domain.SNP_INDEL_VARIANT:
       domain = 'SNP/Indel Variants';
       break;
   }
@@ -194,9 +194,9 @@ export function ageTypeToText(ageType: AgeType) {
   switch (ageType) {
     case AgeType.AGE:
       return 'Current Age';
-    case AgeType.AGEATCDR:
+    case AgeType.AGE_AT_CDR:
       return 'Age at CDR';
-    case AgeType.AGEATCONSENT:
+    case AgeType.AGE_AT_CONSENT:
       return 'Age  at Consent';
   }
 }
@@ -207,7 +207,7 @@ export function genderSexRaceOrEthTypeToText(
   switch (genderSexRaceOrEthType) {
     case GenderSexRaceOrEthType.GENDER:
       return 'Gender Identity';
-    case GenderSexRaceOrEthType.SEXATBIRTH:
+    case GenderSexRaceOrEthType.SEX_AT_BIRTH:
       return 'Sex at Birth';
     case GenderSexRaceOrEthType.RACE:
       return 'Race';
@@ -323,8 +323,8 @@ export function parseCohortDefinition(json: string) {
         item.status = 'active';
         return item;
       });
-      grp.mention = grp.mention ? grp.mention : TemporalMention.ANYMENTION;
-      grp.time = grp.time ? grp.time : TemporalTime.DURINGSAMEENCOUNTERAS;
+      grp.mention = grp.mention ? grp.mention : TemporalMention.ANY_MENTION;
+      grp.time = grp.time ? grp.time : TemporalTime.DURING_SAME_ENCOUNTER_AS;
       grp.timeValue = grp.timeValue ? grp.timeValue : '';
       grp.timeFrame = grp.timeFrame ? grp.timeFrame : '';
       grp.status = 'active';
@@ -438,7 +438,7 @@ export function getTypeAndStandard(searchParameters: Array<any>, type: Domain) {
           ? CriteriaType.AGE
           : searchParameters[0].type;
       return { type: _type, standard: false };
-    case Domain.PHYSICALMEASUREMENT:
+    case Domain.PHYSICAL_MEASUREMENT:
       return { type: searchParameters[0].type, standard: false };
     case Domain.SURVEY:
       return { type: searchParameters[0].type, standard: false };

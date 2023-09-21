@@ -11,8 +11,6 @@ import {
   UpdateConceptSetRequest,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class ConceptStubVariables {
   static STUB_CONCEPTS: Criteria[] = [
     {
@@ -80,9 +78,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   // TODO when this piece is converted
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
     this.surveyConceptSets = ConceptSetsApiStub.stubConceptSets().filter(
@@ -124,7 +120,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         name: 'Mock Concept Set for survey overAll health',
         description: 'Mocked for tests',
         domain: Domain.OBSERVATION,
-        survey: Surveys.OVERALLHEALTH,
+        survey: Surveys.OVERALL_HEALTH,
         lastModifiedTime: new Date().getTime() - 2000,
         criteriums: [],
       },
@@ -150,7 +146,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         id: 351,
         name: 'Mock WGS',
         description: 'Mocked for tests',
-        domain: Domain.WHOLEGENOMEVARIANT,
+        domain: Domain.WHOLE_GENOME_VARIANT,
         lastModifiedTime: new Date().getTime() - 2000,
         criteriums: [],
       },

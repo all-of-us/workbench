@@ -2,11 +2,11 @@ import {
   AccessModule,
   AccessModuleConfig,
   ConfigResponse,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
 
 const defaultAccessModuleConfig: AccessModuleConfig[] = [
   {
-    name: AccessModule.TWOFACTORAUTH,
+    name: AccessModule.TWO_FACTOR_AUTH,
     expirable: false,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
@@ -18,37 +18,37 @@ const defaultAccessModuleConfig: AccessModuleConfig[] = [
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.ERACOMMONS,
+    name: AccessModule.ERA_COMMONS,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: false,
   },
   {
-    name: AccessModule.COMPLIANCETRAINING,
+    name: AccessModule.COMPLIANCE_TRAINING,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.CTCOMPLIANCETRAINING,
+    name: AccessModule.CT_COMPLIANCE_TRAINING,
     expirable: false,
     requiredForRTAccess: false,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.DATAUSERCODEOFCONDUCT,
+    name: AccessModule.DATA_USER_CODE_OF_CONDUCT,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PROFILECONFIRMATION,
+    name: AccessModule.PROFILE_CONFIRMATION,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
   },
   {
-    name: AccessModule.PUBLICATIONCONFIRMATION,
+    name: AccessModule.PUBLICATION_CONFIRMATION,
     expirable: true,
     requiredForRTAccess: true,
     requiredForCTAccess: true,
@@ -75,6 +75,7 @@ const defaultServerConfig: ConfigResponse = {
   accessModules: defaultAccessModuleConfig,
   currentDuccVersions: [3, 4],
   enableRStudioGKEApp: true,
+  enableSasGKEApp: true,
   tanagraBaseUrl: 'https://aou-tanagra.dev.pmi-ops.org',
 };
 

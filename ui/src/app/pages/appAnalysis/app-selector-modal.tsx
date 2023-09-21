@@ -11,8 +11,7 @@ import {
 } from 'app/components/modals';
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-
-export const APP_LIST = [UIAppType.JUPYTER, UIAppType.RSTUDIO];
+import { serverConfigStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
   appsLabel: {
@@ -32,6 +31,14 @@ interface AppSelectorModalProps {
 }
 export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose } = props;
+  const { config } = useStore(serverConfigStore);
+  // in display order
+  const appList = [
+    UIAppType.JUPYTER,
+    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
+  ];
+
   return (
     <Modal
       data-test-id='select-application-modal'
@@ -41,14 +48,16 @@ export const AppSelectorModal = (props: AppSelectorModalProps) => {
     >
       <ModalTitle>Analyze Data</ModalTitle>
       <ModalBody>
-        <div style={styles.appsLabel}>Select an application</div>
+        <div style={styles.appsLabel} id='select-an-app'>
+          Select an application
+        </div>
         <Dropdown
           id='application-list-dropdown'
           data-test-id='application-list-dropdown'
-          ariaLabel='Application List Dropdown'
+          aria-labelledby='select-an-app'
           value={selectedApp}
           appendTo='self'
-          options={APP_LIST}
+          options={appList}
           placeholder='Choose One'
           onChange={(e) => setSelectedApp(e.value)}
           style={{ width: '13.5rem' }}

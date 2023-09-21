@@ -6,7 +6,7 @@ import { DataTable } from 'primereact/datatable';
 
 import { FileDetail } from 'generated/fetch';
 
-import { AppLogo } from 'app/components/apps-panel/app-logo';
+import { AppBanner } from 'app/components/apps-panel/app-banner';
 import { Clickable, KebabCircleButton } from 'app/components/buttons';
 import { FadeBox } from 'app/components/containers';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -104,7 +104,7 @@ export const AppFilesList = withCurrentWorkspace()(
       // Find App Type on the basis of file name extension
       const { name } = row;
       const appType = getAppInfoFromFileName(name).appType;
-      return <AppLogo appType={appType} style={{ marginRight: '1em' }} />;
+      return <AppBanner appType={appType} style={{ marginRight: '1em' }} />;
     };
 
     const displayName = (row) => {

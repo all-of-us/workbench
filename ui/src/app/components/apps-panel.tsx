@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 
 import { BillingStatus, Workspace } from 'generated/fetch';
 
+import { switchCase } from '@terra-ui-packages/core-utils';
 import { Clickable, CloseButton } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import {
   cromwellConfigIconId,
   rstudioConfigIconId,
+  sasConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { DisabledPanel } from 'app/components/runtime-configuration-panel/disabled-panel';
@@ -22,7 +24,7 @@ import {
 } from 'app/utils/stores';
 import { maybeStartPollingForUserApps } from 'app/utils/user-apps-utils';
 
-import { AppLogo } from './apps-panel/app-logo';
+import { AppBanner } from './apps-panel/app-banner';
 import { ExpandedApp } from './apps-panel/expanded-app';
 import { findApp, getAppsByDisplayGroup, UIAppType } from './apps-panel/utils';
 
@@ -55,7 +57,7 @@ const UnexpandedApp = (props: { appType: UIAppType; onClick: Function }) => {
       propagateDataTestId
     >
       <FlexRow style={styles.availableApp}>
-        <AppLogo
+        <AppBanner
           {...{ appType }}
           style={{ marginRight: '1em', padding: '1rem' }}
         />
@@ -81,6 +83,7 @@ export const AppsPanel = (props: {
   const appsToDisplay = [
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
+    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
     UIAppType.CROMWELL,
   ];
 
@@ -147,15 +150,25 @@ export const AppsPanel = (props: {
               <UnexpandedApp
                 appType={availableApp.appType}
                 key={availableApp.appType}
-                onClick={() => {
-                  if (availableApp.appType === UIAppType.CROMWELL) {
-                    setSidebarActiveIconStore.next(cromwellConfigIconId);
-                  } else if (availableApp.appType === UIAppType.RSTUDIO) {
-                    setSidebarActiveIconStore.next(rstudioConfigIconId);
-                  } else {
-                    addToExpandedApps(availableApp.appType);
-                  }
-                }}
+                onClick={() =>
+                  switchCase(
+                    availableApp.appType,
+                    [
+                      UIAppType.CROMWELL,
+                      () =>
+                        setSidebarActiveIconStore.next(cromwellConfigIconId),
+                    ],
+                    [
+                      UIAppType.RSTUDIO,
+                      () => setSidebarActiveIconStore.next(rstudioConfigIconId),
+                    ],
+                    [
+                      UIAppType.SAS,
+                      () => setSidebarActiveIconStore.next(sasConfigIconId),
+                    ],
+                    () => addToExpandedApps(availableApp.appType)
+                  )
+                }
               />
             )
           )}

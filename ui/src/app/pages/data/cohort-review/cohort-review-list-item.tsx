@@ -77,7 +77,7 @@ export const CohortReviewListItem = fp.flow(
           onClick: () =>
             showConfirmDeleteModal(
               cohortReview.cohortName,
-              ResourceType.COHORTREVIEW,
+              ResourceType.COHORT_REVIEW,
               () => deleteReview(cohortReview.cohortReviewId)
             ),
           disabled: readOnly,
@@ -177,7 +177,7 @@ export const CohortReviewListItem = fp.flow(
             oldName={cohortReview.cohortName}
             onCancel={() => setShowRenameModal(false)}
             onRename={(name, description) => rename(name, description)}
-            resourceType={ResourceType.COHORTREVIEW}
+            resourceType={ResourceType.COHORT_REVIEW}
           />
         )}
       </React.Fragment>

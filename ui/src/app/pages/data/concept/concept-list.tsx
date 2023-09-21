@@ -217,7 +217,7 @@ export const ConceptListPage = fp.flow(
       const domainCount: CardCount = {
         domain:
           domain === 'Measurement' && type === 'PPI'
-            ? Domain.PHYSICALMEASUREMENT
+            ? Domain.PHYSICAL_MEASUREMENT
             : (domain as Domain),
         name: domainToTitle(domain),
         count: this.props.concept.length,

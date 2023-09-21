@@ -10,7 +10,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi,
 } from 'generated/fetch';
-import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch/api';
+import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
 import { RadioButton } from 'app/components/inputs';
@@ -90,7 +90,7 @@ describe('RuntimeConfigurationPanel', () => {
   const existingDisk = (): Disk => {
     return {
       size: 1000,
-      diskType: DiskType.Standard,
+      diskType: DiskType.STANDARD,
       name: 'my-existing-disk',
       blockSize: 1,
       isGceRuntime: true,
@@ -109,8 +109,8 @@ describe('RuntimeConfigurationPanel', () => {
     const { size, diskType, name } = existingDisk();
     return {
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceWithPdConfig: {
         machineType: 'n1-standard-16',
         persistentDisk: {
@@ -376,8 +376,8 @@ describe('RuntimeConfigurationPanel', () => {
     // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -406,8 +406,8 @@ describe('RuntimeConfigurationPanel', () => {
 
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -438,9 +438,9 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow creation when runtime has error status', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Error,
+      status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -460,9 +460,9 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow creation with update from error', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Error,
+      status: RuntimeStatus.ERROR,
       errors: [{ errorMessage: "I'm sorry Dave, I'm afraid I can't do that" }],
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -481,8 +481,10 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   it('should disable controls when runtime has a non-actionable status', async () => {
-    runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
-    runtimeStoreStub.runtime = runtimeApiStub.runtime;
+    setCurrentRuntime({
+      ...runtimeApiStub.runtime,
+      status: RuntimeStatus.STOPPING,
+    });
 
     // sanity check
     expect(isActionable(runtimeApiStub.runtime.status)).toBeFalsy();
@@ -517,7 +519,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig).toEqual({
       machineType: 'n1-highmem-8',
@@ -556,7 +558,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual({
       masterMachineType: 'n1-standard-2',
@@ -589,7 +591,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.GeneralAnalysis
+      RuntimeConfigurationType.GENERAL_ANALYSIS
     );
     expect(runtimeApiStub.runtime.gceWithPdConfig.persistentDisk).toEqual({
       diskType: 'pd-standard',
@@ -613,7 +615,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.HailGenomicAnalysis
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
@@ -629,8 +631,8 @@ describe('RuntimeConfigurationPanel', () => {
       const customDiskSize = 1000;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
-        status: RuntimeStatus.Deleted,
-        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceConfig: {
           ...defaultGceConfig(),
           machineType: customMachineType,
@@ -667,8 +669,8 @@ describe('RuntimeConfigurationPanel', () => {
       const customNumberOfWorkers = 5;
       setCurrentRuntime({
         ...runtimeApiStub.runtime,
-        status: RuntimeStatus.Deleted,
-        configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+        status: RuntimeStatus.DELETED,
+        configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
         gceConfig: null,
         gceWithPdConfig: null,
         dataprocConfig: {
@@ -713,8 +715,8 @@ describe('RuntimeConfigurationPanel', () => {
     setCurrentDisk(existingDisk());
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      status: RuntimeStatus.DELETED,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: {
         ...defaultGceConfig(),
         machineType: 'n1-standard-16',
@@ -755,7 +757,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.HailGenomicAnalysis
+      RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS
     );
     expect(runtimeApiStub.runtime.dataprocConfig).toEqual(
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig
@@ -778,7 +780,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.UserOverride
+      RuntimeConfigurationType.USER_OVERRIDE
     );
   });
 
@@ -798,7 +800,7 @@ describe('RuntimeConfigurationPanel', () => {
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
     expect(runtimeApiStub.runtime.configurationType).toEqual(
-      RuntimeConfigurationType.GeneralAnalysis
+      RuntimeConfigurationType.GENERAL_ANALYSIS
     );
   });
 
@@ -883,7 +885,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
     const wrapper = await component();
 
@@ -899,7 +901,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      configurationType: RuntimeConfigurationType.UserOverride,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
     });
 
     const wrapper = await component();
@@ -1099,7 +1101,7 @@ describe('RuntimeConfigurationPanel', () => {
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
-      status: RuntimeStatus.Creating,
+      status: RuntimeStatus.CREATING,
     });
 
     const wrapper = await component();
@@ -1117,8 +1119,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should send an updateRuntime API call if runtime changes do not require a delete', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -1175,7 +1177,7 @@ describe('RuntimeConfigurationPanel', () => {
   it('should show create button if runtime is deleted', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Deleted,
+      status: RuntimeStatus.DELETED,
     });
 
     const wrapper = await component();
@@ -1234,8 +1236,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should update the cost estimator when master machine changes', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
-      configurationType: RuntimeConfigurationType.UserOverride,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.USER_OVERRIDE,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: {
@@ -1284,7 +1286,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Delete');
 
     // Runtime should be deleting, and panel should have closed.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.DELETING);
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -1303,7 +1305,7 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Cancel');
 
     // Runtime should still be active, and confirm page should no longer be visible.
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.RUNNING);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -1378,18 +1380,18 @@ describe('RuntimeConfigurationPanel', () => {
     const getNextButton = () => wrapper.find({ 'aria-label': 'Next' }).first();
 
     await enableDetachable(wrapper);
-    await pickDetachableType(wrapper, DiskType.Standard);
+    await pickDetachableType(wrapper, DiskType.STANDARD);
 
     await pickDetachableDiskSize(wrapper, 49);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickDetachableType(wrapper, DiskType.Ssd);
+    await pickDetachableType(wrapper, DiskType.SSD);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
     await pickDetachableDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
 
-    await pickDetachableType(wrapper, DiskType.Standard);
+    await pickDetachableType(wrapper, DiskType.STANDARD);
     expect(getNextButton().prop('disabled')).toBeTruthy();
   });
 
@@ -1408,7 +1410,7 @@ describe('RuntimeConfigurationPanel', () => {
   });
 
   const pickSsdType = async (wrapper) =>
-    pickDetachableType(wrapper, DiskType.Ssd);
+    pickDetachableType(wrapper, DiskType.SSD);
   const decrementDetachableDiskSize = async (wrapper) => {
     const prevSize = await getDetachableDiskSize(wrapper);
     await pickDetachableDiskSize(wrapper, prevSize - 1);
@@ -1472,7 +1474,7 @@ describe('RuntimeConfigurationPanel', () => {
     if (wantDeleteRuntime) {
       expect(runtimeApiStub.runtime.status).toEqual('Deleting');
 
-      runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+      runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
       // Dropdown adds a hacky setTimeout(.., 1), which causes exceptions here, hence the retries.
       await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
@@ -1572,8 +1574,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow Dataproc -> PD transition', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
@@ -1586,10 +1588,10 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk).toBeTruthy();
   });
 
@@ -1615,10 +1617,10 @@ describe('RuntimeConfigurationPanel', () => {
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk).toBeNull();
   });
 
@@ -1639,11 +1641,11 @@ describe('RuntimeConfigurationPanel', () => {
     // Default option should be NOT to delete.
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
-    runtimeApiStub.runtime.status = RuntimeStatus.Deleted;
+    runtimeApiStub.runtime.status = RuntimeStatus.DELETED;
 
     await waitForFakeTimersAndUpdate(wrapper, /* maxRetries*/ 10);
 
-    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Creating);
+    expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.CREATING);
     expect(disksApiStub.disk?.name).toEqual(disk.name);
   });
 
@@ -1776,8 +1778,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable worker count updates for stopped dataproc cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       gceConfig: null,
       gceWithPdConfig: null,
       dataprocConfig: defaultDataprocConfig(),
@@ -1797,8 +1799,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should allow worker configuration for stopped GCE runtime', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       gceConfig: defaultGceConfig(),
       dataprocConfig: null,
     });
@@ -1818,8 +1820,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should disable Spark console for non-running cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Stopped,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      status: RuntimeStatus.STOPPED,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,
@@ -1834,8 +1836,8 @@ describe('RuntimeConfigurationPanel', () => {
   it('should render Spark console links for running cluster', async () => {
     setCurrentRuntime({
       ...runtimeApiStub.runtime,
-      status: RuntimeStatus.Running,
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      status: RuntimeStatus.RUNNING,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       dataprocConfig: defaultDataprocConfig(),
       gceConfig: null,
       gceWithPdConfig: null,

@@ -25,8 +25,6 @@ import {
 
 import { WorkspaceData } from 'app/utils/workspace-data';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 import { CdrVersionsStubVariables } from './cdr-versions-api-stub';
 import { cohortReviewStubs } from './cohort-review-service-stub';
 import { exampleCohortStubs } from './cohorts-api-stub';
@@ -50,9 +48,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   newWorkspaceOperationCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceOperations = [];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
@@ -68,7 +64,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
     return new Promise<WorkspaceResponseListResponse>((resolve) => {
       resolve({
         items: this.workspaces.map((workspace) => {
-          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          let accessLevel: WorkspaceAccessLevel =
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
           if (this.workspaceAccess.has(workspace.id)) {
             accessLevel = this.workspaceAccess.get(workspace.id);
           }
@@ -225,7 +222,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         workspace: ws,
         accessLevel:
           this.workspaceAccess.get(workspaceId) ||
-          WorkspaceAccessLevel.NOACCESS,
+          WorkspaceAccessLevel.NO_ACCESS,
       });
     });
   }
@@ -269,7 +266,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
       );
       resolve({
         items: publishedWorkspaces.map((workspace) => {
-          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
+          let accessLevel: WorkspaceAccessLevel =
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
           if (this.workspaceAccess.has(workspace.id)) {
             accessLevel = this.workspaceAccess.get(workspace.id);
           }
@@ -328,7 +326,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
       };
       const workspaceResources = convertToResources(
         cohortReviewStubs,
-        ResourceType.COHORTREVIEW,
+        ResourceType.COHORT_REVIEW,
         workspace
       )
         .concat(
@@ -344,7 +342,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
         .concat(
           convertToResources(
             ConceptSetsApiStub.stubConceptSets(),
-            ResourceType.CONCEPTSET,
+            ResourceType.CONCEPT_SET,
             workspace
           )
         );

@@ -3,7 +3,7 @@ import {
   RuntimeConfigurationType,
   RuntimeStatus,
 } from 'generated/fetch';
-import { RuntimeApi } from 'generated/fetch/api';
+import { RuntimeApi } from 'generated/fetch';
 
 import { expect } from '@jest/globals';
 import {
@@ -38,10 +38,10 @@ let mockStartRuntime: SpyInstance;
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
   googleProject: 'aou-rw-12345',
-  status: RuntimeStatus.Running,
+  status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'docker',
-  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
 };
 
 const workspaceNamespace = 'aou-rw-12345';
@@ -121,35 +121,35 @@ describe('RuntimeInitializer', () => {
     // This tests the simplest case of the initializer. No polling necessary.
     mockGetRuntimeCalls([baseRuntime]);
     const runtime = await runInitializerAndTimers();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should resume runtime if it is initially stopping / stopped', async () => {
     // This test case also includes some repeated statuses, since that is a more realistic
     // reflection of how we poll Leo & get occasional new statuses.
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Stopping },
-      { status: RuntimeStatus.Stopping },
-      { status: RuntimeStatus.Stopped },
-      { status: RuntimeStatus.Stopped },
+      { status: RuntimeStatus.STOPPING },
+      { status: RuntimeStatus.STOPPING },
+      { status: RuntimeStatus.STOPPED },
+      { status: RuntimeStatus.STOPPED },
       // Here is where we expect, chronologically, a call to startRuntime. The next two
       // runtime statuses mock out what we might expect to see after that call.
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers();
     expect(mockStartRuntime).toHaveBeenCalled();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should call callback with runtime status', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Stopped }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.STOPPED }]);
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const statuses = [];
     await runInitializerAndTimers({
@@ -157,30 +157,30 @@ describe('RuntimeInitializer', () => {
     });
 
     expect(statuses).toEqual([
-      RuntimeStatus.Stopped,
+      RuntimeStatus.STOPPED,
       // Note: onStatusUpdate will be called for every status received, not just when the status
       // value is changed.
-      RuntimeStatus.Starting,
-      RuntimeStatus.Starting,
-      RuntimeStatus.Running,
+      RuntimeStatus.STARTING,
+      RuntimeStatus.STARTING,
+      RuntimeStatus.RUNNING,
     ]);
   });
 
   it('should create runtime if it is initially nonexistent', async () => {
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 404 }));
     mockCreateRuntime.mockImplementationOnce(async () => {
-      return { status: RuntimeStatus.Creating };
+      return { status: RuntimeStatus.CREATING };
     });
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Starting },
-      { status: RuntimeStatus.Running },
+      { status: RuntimeStatus.STARTING },
+      { status: RuntimeStatus.RUNNING },
     ]);
     const runtime = await runInitializerAndTimers({
       targetRuntime: runtimePresets.generalAnalysis.runtimeTemplate,
     });
 
     expect(mockCreateRuntime).toHaveBeenCalled();
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it("should error and suggest user's most runtime if a valid one exists", async () => {
@@ -188,12 +188,12 @@ describe('RuntimeInitializer', () => {
     mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
-        configurationType: RuntimeConfigurationType.UserOverride,
+        configurationType: RuntimeConfigurationType.USER_OVERRIDE,
         gceConfig: {
           diskSize: 777,
           machineType: 'n1-standard-16',
         },
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
       };
     });
 
@@ -219,14 +219,14 @@ describe('RuntimeInitializer', () => {
     mockGetRuntime.mockImplementation(() => {
       return {
         ...defaultRuntime(),
-        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
         gceWithPdConfig: {
           machineType: DEFAULT_MACHINE_NAME,
           persistentDisk: {
             size: 120,
           },
         },
-        status: RuntimeStatus.Deleted,
+        status: RuntimeStatus.DELETED,
       };
     });
 
@@ -252,29 +252,29 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should not automatically delete errored runtimes', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Error }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.ERROR }]);
 
     const runtime = await runInitializerAndTimers();
 
-    expect(runtime.status).toEqual(RuntimeStatus.Error);
+    expect(runtime.status).toEqual(RuntimeStatus.ERROR);
   });
 
   it('should recover from intermittent 500s', async () => {
     mockGetRuntimeCalls([
-      { status: RuntimeStatus.Creating },
-      { status: RuntimeStatus.Creating },
+      { status: RuntimeStatus.CREATING },
+      { status: RuntimeStatus.CREATING },
     ]);
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
     mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Running }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.RUNNING }]);
 
     const runtime = await runInitializerAndTimers();
 
-    expect(runtime.status).toEqual(RuntimeStatus.Running);
+    expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
   it('should give up after too many server errors', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Creating }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.CREATING }]);
     for (let i = 0; i < 20; i++) {
       mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
     }
@@ -291,7 +291,7 @@ describe('RuntimeInitializer', () => {
 
   it('should timeout after max delay', async () => {
     mockGetRuntime.mockImplementation(async () => {
-      return { status: RuntimeStatus.Starting };
+      return { status: RuntimeStatus.STARTING };
     });
 
     // There's some nuance / awkwardness to this test: the LeoRuntimeInitializer uses Date.now() to get
@@ -311,7 +311,7 @@ describe('RuntimeInitializer', () => {
 
   it('should reject promise after abort signal', async () => {
     mockGetRuntime.mockImplementation(async () => {
-      return { status: RuntimeStatus.Starting };
+      return { status: RuntimeStatus.STARTING };
     });
     const aborter = new AbortController();
 
@@ -346,7 +346,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should respect the maxResumeCount option', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Stopped }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.STOPPED }]);
     try {
       await runInitializerAndTimers({ maxResumeCount: 0 });
     } catch (error) {
@@ -356,10 +356,10 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should respect custom resolutionCondition', async () => {
-    mockGetRuntimeCalls([{ status: RuntimeStatus.Stopped }]);
+    mockGetRuntimeCalls([{ status: RuntimeStatus.STOPPED }]);
     await runInitializerAndTimers({
       resolutionCondition: (runtime) =>
-        runtime.status === RuntimeStatus.Stopped,
+        runtime.status === RuntimeStatus.STOPPED,
     });
     expect(mockStartRuntime).not.toHaveBeenCalled();
   });

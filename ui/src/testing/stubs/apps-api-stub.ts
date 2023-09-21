@@ -11,8 +11,6 @@ import {
 
 import { GKE_APP_PROXY_PATH_SUFFIX } from 'app/utils/constants';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 const listAppsAppResponseSharedDefaults = {
   googleProject: 'terra-vpc-sc-dev-42c21469',
   createdDate: '2023-03-13T18:16:49.481854Z',
@@ -58,6 +56,20 @@ const createRStudioListAppsResponseDefaults: UserAppEnvironment = {
   },
 };
 
+const createSASListAppsResponseDefaults: UserAppEnvironment = {
+  ...listAppsAppResponseSharedDefaults,
+  appName: 'all-of-us-2-sas-1234',
+  appType: AppType.SAS,
+  proxyUrls: {
+    [GKE_APP_PROXY_PATH_SUFFIX]:
+      'https://leonardo.dsde-dev.broadinstitute.org/proxy/google/v1/apps/terra-vpc-sc-dev-1234/all-of-us-2-sas-1234/app',
+  },
+  diskName: 'all-of-us-pd-2-sas-1234',
+  labels: {
+    'created-by': 'fake@fake-research-aou.org',
+    'aou-app-type': 'sas',
+  },
+};
 export const createListAppsCromwellResponse = (
   overrides: Partial<UserAppEnvironment> = {}
 ): UserAppEnvironment => {
@@ -70,13 +82,17 @@ export const createListAppsRStudioResponse = (
   return { ...createRStudioListAppsResponseDefaults, ...overrides };
 };
 
+export const createListAppsSASResponse = (
+  overrides: Partial<UserAppEnvironment> = {}
+): UserAppEnvironment => {
+  return { ...createSASListAppsResponseDefaults, ...overrides };
+};
+
 export class AppsApiStub extends AppsApi {
   public listAppsResponse: ListAppsResponse;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   public createApp(): Promise<EmptyResponse> {

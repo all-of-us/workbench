@@ -103,7 +103,7 @@ describe('resources.tsx', () => {
     expect(isNotebook(testCohort)).toBeFalsy();
 
     expect(isCohortReview(testCohortReview)).toBeTruthy();
-    expect(getType(testCohortReview)).toEqual(ResourceType.COHORTREVIEW);
+    expect(getType(testCohortReview)).toEqual(ResourceType.COHORT_REVIEW);
 
     expect(isCohort(testCohortReview)).toBeFalsy();
     expect(isConceptSet(testCohortReview)).toBeFalsy();
@@ -111,7 +111,7 @@ describe('resources.tsx', () => {
     expect(isNotebook(testCohortReview)).toBeFalsy();
 
     expect(isConceptSet(testConceptSet)).toBeTruthy();
-    expect(getType(testConceptSet)).toEqual(ResourceType.CONCEPTSET);
+    expect(getType(testConceptSet)).toEqual(ResourceType.CONCEPT_SET);
 
     expect(isCohort(testConceptSet)).toBeFalsy();
     expect(isCohortReview(testConceptSet)).toBeFalsy();
@@ -137,13 +137,13 @@ describe('resources.tsx', () => {
 
   it('should return resource type strings', () => {
     expect(toDisplay(ResourceType.COHORT)).toBe('Cohort');
-    expect(toDisplay(ResourceType.COHORTREVIEW)).toBe('Cohort Review');
-    expect(toDisplay(ResourceType.CONCEPTSET)).toBe('Concept Set');
+    expect(toDisplay(ResourceType.COHORT_REVIEW)).toBe('Cohort Review');
+    expect(toDisplay(ResourceType.CONCEPT_SET)).toBe('Concept Set');
     expect(toDisplay(ResourceType.DATASET)).toBe('Dataset');
     expect(toDisplay(ResourceType.NOTEBOOK)).toBe('Notebook');
 
-    expect(toDisplay(ResourceType.COHORTSEARCHGROUP)).toBe('Group');
-    expect(toDisplay(ResourceType.COHORTSEARCHITEM)).toBe('Item');
+    expect(toDisplay(ResourceType.COHORT_SEARCH_GROUP)).toBe('Group');
+    expect(toDisplay(ResourceType.COHORT_SEARCH_ITEM)).toBe('Item');
     expect(toDisplay(ResourceType.WORKSPACE)).toBe('Workspace');
 
     expect(getTypeString(testCohort)).toBe('Cohort');

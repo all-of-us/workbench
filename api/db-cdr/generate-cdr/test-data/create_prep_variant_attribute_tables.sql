@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute`
+CREATE OR REPLACE TABLE `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute`
     CLUSTER BY vid
 AS
     WITH sorted_transcripts AS (SELECT vid, consequence, aa_change AS protein_change,
@@ -13,12 +13,12 @@ AS
     END
     ASC
     )  AS row_number
-    FROM `aou-res-curation-output-prod.C2022Q4R9.prep_vat`
+    FROM `all-of-us-ehr-dev.SC2022Q4R6.prep_vat`
     WHERE is_canonical_transcript OR transcript IS NULL
     ORDER BY vid, row_number),
     genes AS (
       SELECT vid, ARRAY_TO_STRING(ARRAY_AGG(DISTINCT gene_symbol IGNORE NULLS ORDER BY gene_symbol), ', ') AS genes
-      FROM `aou-res-curation-output-prod.C2022Q4R9.prep_vat`
+      FROM `all-of-us-ehr-dev.SC2022Q4R6.prep_vat`
       GROUP BY vid
     )
 SELECT
@@ -40,18 +40,20 @@ FROM sorted_transcripts, genes
 WHERE genes.vid = sorted_transcripts.vid
   AND (sorted_transcripts.row_number =1 or sorted_transcripts.transcript is NULL);
 
-CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute_contig_position` CLUSTER BY contig, position AS
+CREATE OR REPLACE TABLE `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute_contig_position` CLUSTER BY contig, position AS
 SELECT *
-FROM `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute`;
+FROM `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute`;
 
-CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute_genes` CLUSTER BY gene_symbol AS
-SELECT vid, gene_symbol
-FROM `aou-res-curation-output-prod.C2022Q4R9.prep_vat`
-WHERE gene_symbol IS NOT NULL
-GROUP BY vid, gene_symbol;
+CREATE OR REPLACE TABLE `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute_genes` CLUSTER BY gene_symbol AS
+SELECT pv.vid, pv.gene_symbol
+FROM `all-of-us-ehr-dev.SC2022Q4R6.prep_vat` pv
+JOIN `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute` pva ON pva.vid = pv.vid
+WHERE pv.gene_symbol IS NOT NULL
+GROUP BY pv.vid, pv.gene_symbol;
 
-CREATE OR REPLACE TABLE `aou-res-curation-output-prod.C2022Q4R9.prep_variant_attribute_rs_number` CLUSTER BY rs_number AS
-SELECT vid, rs_number
-FROM `aou-res-curation-output-prod.C2022Q4R9.prep_vat`
+CREATE OR REPLACE TABLE `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute_rs_number` CLUSTER BY rs_number AS
+SELECT pv.vid, rs_number
+FROM `all-of-us-ehr-dev.SC2022Q4R6.prep_vat` pv
 CROSS JOIN UNNEST(dbsnp_rsid) AS rs_number
-GROUP BY vid, rs_number;
+JOIN `all-of-us-ehr-dev.SC2022Q4R6.cb_variant_attribute` pva ON pva.vid = pv.vid
+GROUP BY pv.vid, rs_number;

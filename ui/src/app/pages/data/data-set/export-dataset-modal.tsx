@@ -7,6 +7,7 @@ import {
   BillingStatus,
   DataSet,
   DataSetExportRequest,
+  DataSetExportRequestGenomicsAnalysisToolEnum,
   DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
@@ -64,10 +65,13 @@ export const ExportDatasetModal = ({
   closeFunction,
 }: Props) => {
   const [existingNotebooks, setExistingNotebooks] = useState(undefined);
-  const [kernelType, setKernelType] = useState(KernelTypeEnum.Python);
-  const [genomicsAnalysisTool, setGenomicsAnalysisTool] = useState(
-    DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+  const [kernelType, setKernelType] = useState<KernelTypeEnum>(
+    KernelTypeEnum.PYTHON
   );
+  const [genomicsAnalysisTool, setGenomicsAnalysisTool] =
+    useState<DataSetExportRequestGenomicsAnalysisToolEnum>(
+      DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
+    );
   const [isExporting, setIsExporting] = useState(false);
   const [creatingNewNotebook, setCreatingNewNotebook] = useState(true);
   const [notebookNameWithoutSuffix, setNotebookNameWithoutSuffix] =
@@ -96,7 +100,7 @@ export const ExportDatasetModal = ({
 
   function hasWgs() {
     return fp.includes(
-      PrePackagedConceptSetEnum.WHOLEGENOME,
+      PrePackagedConceptSetEnum.WHOLE_GENOME,
       dataset.prePackagedConceptSet
     );
   }
@@ -209,7 +213,7 @@ export const ExportDatasetModal = ({
 
   function genomicsToolRadioButton(
     displayName: string,
-    genomicsTool: DataSetExportRequest.GenomicsAnalysisToolEnum
+    genomicsTool: DataSetExportRequestGenomicsAnalysisToolEnum
   ) {
     return (
       <label
@@ -327,22 +331,22 @@ export const ExportDatasetModal = ({
                 </label>
               ))}
 
-            {hasWgs() && kernelType === KernelTypeEnum.Python && (
+            {hasWgs() && kernelType === KernelTypeEnum.PYTHON && (
               <React.Fragment>
                 <div style={headerStyles.formLabel}>
                   Select analysis tool for genetic variant data
                 </div>
                 {genomicsToolRadioButton(
                   'Hail',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.HAIL
+                  DataSetExportRequestGenomicsAnalysisToolEnum.HAIL
                 )}
                 {genomicsToolRadioButton(
                   'PLINK',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.PLINK
+                  DataSetExportRequestGenomicsAnalysisToolEnum.PLINK
                 )}
                 {genomicsToolRadioButton(
                   'Other VCF-compatible tool',
-                  DataSetExportRequest.GenomicsAnalysisToolEnum.NONE
+                  DataSetExportRequestGenomicsAnalysisToolEnum.NONE
                 )}
               </React.Fragment>
             )}

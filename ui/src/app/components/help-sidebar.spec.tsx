@@ -19,6 +19,7 @@ import {
   WorkspacesApi,
 } from 'generated/fetch';
 
+import { screen, waitFor } from '@testing-library/react';
 import { AppsPanel } from 'app/components/apps-panel';
 import { ConfirmWorkspaceDeleteModal } from 'app/components/confirm-workspace-delete-modal';
 import {
@@ -119,7 +120,7 @@ const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
   Promise.reject(
     new Response(
       JSON.stringify({
-        errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+        errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
         parameters: {
           suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
         },
@@ -374,7 +375,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display dynamic runtime status icon', async () => {
-    setRuntimeStatus(RuntimeStatus.Running);
+    setRuntimeStatus(RuntimeStatus.RUNNING);
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -382,7 +383,7 @@ describe('HelpSidebar', () => {
       colors.asyncOperationStatus.running
     );
 
-    act(() => setRuntimeStatus(RuntimeStatus.Deleting));
+    act(() => setRuntimeStatus(RuntimeStatus.DELETING));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -393,7 +394,7 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
     runtimeStatusIcon(wrapper, /* exists */ false);
 
-    act(() => setRuntimeStatus(RuntimeStatus.Creating));
+    act(() => setRuntimeStatus(RuntimeStatus.CREATING));
     await waitForFakeTimersAndUpdate(wrapper);
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
       colors.asyncOperationStatus.starting
@@ -401,7 +402,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "starting" UX during compound runtime op with no runtime', async () => {
-    setRuntimeStatus(RuntimeStatus.Deleting);
+    setRuntimeStatus(RuntimeStatus.DELETING);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
       aborter: new AbortController(),
     });
@@ -634,31 +635,55 @@ describe('HelpSidebar', () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableRStudioGKEApp: false },
     });
-    const wrapper = await component();
+    await component();
 
-    expect(
-      wrapper
-        .find({ 'data-test-id': 'help-sidebar-icon-rstudioConfig' })
-        .exists()
-    ).toBeFalsy();
+    const rstudioIcon = screen.queryByLabelText('RStudio Icon');
+    expect(rstudioIcon).not.toBeInTheDocument();
   });
 
   it('should open the RStudio config panel after clicking the RStudio icon', async () => {
     serverConfigStore.set({
       config: { ...defaultServerConfig, enableRStudioGKEApp: true },
     });
-    const wrapper = await component();
+    await component();
 
-    expect(wrapper.text()).not.toContain('RStudio Cloud Environment');
+    const rstudioIcon = screen.queryByLabelText('RStudio Icon');
+    expect(rstudioIcon).toBeInTheDocument();
+    expect(
+      screen.queryByText('RStudio Cloud Environment')
+    ).not.toBeInTheDocument();
 
-    const rstudioIcon = wrapper.find({
-      'data-test-id': 'help-sidebar-icon-rstudioConfig',
+    rstudioIcon.click();
+    await waitFor(() =>
+      expect(
+        screen.queryByText('RStudio Cloud Environment')
+      ).toBeInTheDocument()
+    );
+  });
+
+  it('should not show the SAS icon if SAS is disabled', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableSasGKEApp: false },
     });
-    expect(rstudioIcon.exists()).toBeTruthy();
+    await component();
 
-    rstudioIcon.simulate('click');
-    await waitOneTickAndUpdate(wrapper);
+    const sasIcon = screen.queryByLabelText('SAS Icon');
+    expect(sasIcon).not.toBeInTheDocument();
+  });
 
-    expect(wrapper.text()).toContain('RStudio Cloud Environment');
+  it('should open the SAS config panel after clicking the SAS icon', async () => {
+    serverConfigStore.set({
+      config: { ...defaultServerConfig, enableSasGKEApp: true },
+    });
+    await component();
+
+    const sasIcon = screen.queryByLabelText('SAS Icon');
+    expect(sasIcon).toBeInTheDocument();
+    expect(screen.queryByText('SAS Cloud Environment')).not.toBeInTheDocument();
+
+    sasIcon.click();
+    await waitFor(() =>
+      expect(screen.queryByText('SAS Cloud Environment')).toBeInTheDocument()
+    );
   });
 });

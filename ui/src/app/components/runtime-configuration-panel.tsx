@@ -11,8 +11,7 @@ import {
   RuntimeStatus,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { switchCase } from '@terra-ui-packages/core-utils';
+import { cond, switchCase } from '@terra-ui-packages/core-utils';
 import { Button, LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { FlexColumn, FlexRow } from 'app/components/flex';
@@ -198,7 +197,7 @@ const PanelMain = fp.flow(
       useCustomRuntime(namespace, gcePersistentDisk);
 
     // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-    if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
+    if (currentRuntime && currentRuntime.status === RuntimeStatus.DELETED) {
       currentRuntime = applyPresetOverride(
         // The attached disk information is lost for deleted runtimes. In any case,
         // by default we want to offer that the user reattach their existing disk,
@@ -224,6 +223,19 @@ const PanelMain = fp.flow(
     const [analysisConfig, setAnalysisConfig] = useState(
       withAnalysisConfigDefaults(existingAnalysisConfig, gcePersistentDisk)
     );
+
+    // TODO: simplify the state logic here!  At least, try to understand why this is happening.
+    // Somehow, only setting the analysisConfig in the above useState() step means that
+    // a gcePersistentDisk update from the diskStore does not always cause analysisConfig to be updated.
+    // So we must set this explicit dependency trigger instead.
+    useEffect(
+      () =>
+        setAnalysisConfig(
+          withAnalysisConfigDefaults(analysisConfig, gcePersistentDisk)
+        ),
+      [gcePersistentDisk]
+    );
+
     const requestAnalysisConfig = (config: AnalysisConfig) =>
       setRuntimeRequest({
         runtime: fromAnalysisConfig(config),
@@ -240,19 +252,21 @@ const PanelMain = fp.flow(
         [
           currentRuntime === null ||
             currentRuntime === undefined ||
-            status === RuntimeStatus.Unknown,
+            status === RuntimeStatus.UNKNOWN,
           () => PanelContent.Create,
         ],
         [
           // General Analysis consist of GCE + PD. Display create page only if
           // 1) currentRuntime + pd both are deleted and
           // 2) configurationType is either GeneralAnalysis or HailGenomicAnalysis
-          currentRuntime?.status === RuntimeStatus.Deleted &&
+          currentRuntime?.status === RuntimeStatus.DELETED &&
             !currentRuntime?.gceWithPdConfig &&
-            [
-              RuntimeConfigurationType.GeneralAnalysis,
-              RuntimeConfigurationType.HailGenomicAnalysis,
-            ].includes(currentRuntime?.configurationType),
+            (
+              [
+                RuntimeConfigurationType.GENERAL_ANALYSIS,
+                RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+              ] as Array<RuntimeConfigurationType>
+            ).includes(currentRuntime?.configurationType),
           () => PanelContent.Create,
         ],
         () => PanelContent.Customize
@@ -450,9 +464,9 @@ const PanelMain = fp.flow(
     // where we get 'status' from
     const runtimeCanBeUpdated =
       environmentChanged &&
-      [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(
-        status as RuntimeStatus
-      ) &&
+      (
+        [RuntimeStatus.RUNNING, RuntimeStatus.STOPPED] as Array<RuntimeStatus>
+      ).includes(status as RuntimeStatus) &&
       runtimeCanBeCreated;
 
     const renderUpdateButton = () => {
@@ -629,6 +643,7 @@ const PanelMain = fp.flow(
             PanelContent.DeleteUnattachedPd,
             () => (
               <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
                 onConfirm={async () => {
                   await disksApi().deleteDisk(
                     namespace,
@@ -644,6 +659,7 @@ const PanelMain = fp.flow(
             PanelContent.DeleteUnattachedPdAndCreate,
             () => (
               <ConfirmDeleteUnattachedPD
+                appType={UIAppType.JUPYTER}
                 showCreateMessaging
                 onConfirm={async () => {
                   await disksApi().deleteDisk(
@@ -763,7 +779,7 @@ const PanelMain = fp.flow(
                           ComputeType.Dataproc && (
                           <TooltipTrigger
                             content={
-                              status !== RuntimeStatus.Running
+                              status !== RuntimeStatus.RUNNING
                                 ? 'Start your Dataproc cluster to access the Spark console'
                                 : null
                             }
@@ -771,7 +787,7 @@ const PanelMain = fp.flow(
                             <LinkButton
                               data-test-id='manage-spark-console'
                               disabled={
-                                status !== RuntimeStatus.Running ||
+                                status !== RuntimeStatus.RUNNING ||
                                 existingAnalysisConfig.computeType !==
                                   ComputeType.Dataproc
                               }

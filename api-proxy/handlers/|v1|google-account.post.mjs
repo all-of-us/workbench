@@ -107,7 +107,9 @@ const body = JSON.stringify(
     education: 'NO_EDUCATION',
     disadvantaged: 'PREFER_NOT_TO_ANSWER',
     surveyComments: null
-  }
+  },
+  generalDiscoverySources: [],
+  partnerDiscoverySources: []
 }
 )
 

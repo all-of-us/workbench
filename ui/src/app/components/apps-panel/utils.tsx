@@ -12,42 +12,50 @@ import {
 
 import { cond } from '@terra-ui-packages/core-utils';
 import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
-import * as runtimeUitils from 'app/utils/runtime-utils';
+import * as runtimeUtils from 'app/utils/runtime-utils';
 import { AnalysisConfig } from 'app/utils/runtime-utils';
-import cromwellLogo from 'assets/images/Cromwell.png';
-import cromwellIcon from 'assets/images/Cromwell-icon.png';
-import jupyterLogo from 'assets/images/Jupyter.png';
-import jupyterIcon from 'assets/images/Jupyter-icon.png';
-import rStudioLogo from 'assets/images/RStudio.png';
-import rStudioIcon from 'assets/images/RStudio-icon.png';
+import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
+import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
+import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
+import jupyterIcon from 'assets/user-apps/Jupyter-icon.png';
+import rStudioBanner from 'assets/user-apps/RStudio-banner.png';
+import rStudioIcon from 'assets/user-apps/RStudio-icon.png';
+import sasBanner from 'assets/user-apps/SAS-banner.png';
+import sasIcon from 'assets/user-apps/SAS-icon.png';
 
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
   JUPYTER = 'Jupyter',
   RSTUDIO = 'RStudio',
   CROMWELL = 'Cromwell',
+  SAS = 'SAS',
 }
 
 interface AppAssets {
   appType: UIAppType;
-  logo: string;
+  banner: string;
   icon: string;
 }
 export const appAssets: AppAssets[] = [
   {
     appType: UIAppType.JUPYTER,
-    logo: jupyterLogo,
+    banner: jupyterBanner,
     icon: jupyterIcon,
   },
   {
     appType: UIAppType.RSTUDIO,
-    logo: rStudioLogo,
+    banner: rStudioBanner,
     icon: rStudioIcon,
   },
   {
     appType: UIAppType.CROMWELL,
-    logo: cromwellLogo,
+    banner: cromwellBanner,
     icon: cromwellIcon,
+  },
+  {
+    appType: UIAppType.SAS,
+    banner: sasBanner,
+    icon: sasIcon,
   },
 ];
 
@@ -61,7 +69,7 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 50,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 
@@ -74,7 +82,20 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 100,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
+  },
+};
+
+export const defaultSASConfig: CreateAppRequest = {
+  appType: AppType.SAS,
+  kubernetesRuntimeConfig: {
+    numNodes: 1,
+    machineType: DEFAULT_MACHINE_NAME,
+    autoscalingEnabled: false,
+  },
+  persistentDiskRequest: {
+    size: 100,
+    diskType: DiskType.STANDARD,
   },
 };
 
@@ -108,9 +129,13 @@ export const canCreateApp = (app: UserAppEnvironment): boolean =>
 // matches Leonardo code
 // https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
 export const isDeletable = (status: AppStatus): boolean =>
-  [AppStatus.STATUSUNSPECIFIED, AppStatus.RUNNING, AppStatus.ERROR].includes(
-    status
-  );
+  (
+    [
+      AppStatus.STATUS_UNSPECIFIED,
+      AppStatus.RUNNING,
+      AppStatus.ERROR,
+    ] as Array<AppStatus>
+  ).includes(status);
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
   app && isDeletable(app.status);
@@ -120,12 +145,14 @@ export const canDeleteApp = (app: UserAppEnvironment): boolean =>
 export const toAppType: Record<UIAppType, AppType | null> = {
   [UIAppType.CROMWELL]: AppType.CROMWELL,
   [UIAppType.RSTUDIO]: AppType.RSTUDIO,
+  [UIAppType.SAS]: AppType.SAS,
   [UIAppType.JUPYTER]: null,
 };
 
 export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.CROMWELL]: UIAppType.CROMWELL,
   [AppType.RSTUDIO]: UIAppType.RSTUDIO,
+  [AppType.SAS]: UIAppType.SAS,
 };
 
 export const findApp = (
@@ -152,15 +179,15 @@ export const fromRuntimeStatus = (
   status: RuntimeStatus
 ): UserEnvironmentStatus =>
   cond(
-    [status === RuntimeStatus.Creating, () => UserEnvironmentStatus.CREATING],
-    [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
-    [status === RuntimeStatus.Deleting, () => UserEnvironmentStatus.DELETING],
-    [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
-    [status === RuntimeStatus.Running, () => UserEnvironmentStatus.RUNNING],
-    [status === RuntimeStatus.Stopping, () => UserEnvironmentStatus.PAUSING],
-    [status === RuntimeStatus.Stopped, () => UserEnvironmentStatus.PAUSED],
-    [status === RuntimeStatus.Starting, () => UserEnvironmentStatus.RESUMING],
-    [status === RuntimeStatus.Updating, () => UserEnvironmentStatus.UPDATING],
+    [status === RuntimeStatus.CREATING, () => UserEnvironmentStatus.CREATING],
+    [status === RuntimeStatus.DELETED, () => UserEnvironmentStatus.DELETED],
+    [status === RuntimeStatus.DELETING, () => UserEnvironmentStatus.DELETING],
+    [status === RuntimeStatus.ERROR, () => UserEnvironmentStatus.ERROR],
+    [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
+    [status === RuntimeStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
+    [status === RuntimeStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
+    [status === RuntimeStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
+    [status === RuntimeStatus.UPDATING, () => UserEnvironmentStatus.UPDATING],
     () => UserEnvironmentStatus.UNKNOWN
   );
 
@@ -204,7 +231,7 @@ const getAppDisplayState = (
     appType,
     active:
       appType === UIAppType.JUPYTER
-        ? runtimeUitils.isVisible(runtime?.status)
+        ? runtimeUtils.isVisible(runtime?.status)
         : isAppActive(findApp(userApps, appType)),
   };
 };

@@ -1,22 +1,23 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
 
 import { AppStatus } from 'generated/fetch';
 
+import { render, screen } from '@testing-library/react';
 import {
   cromwellConfigIconId,
   IconConfig,
   rstudioConfigIconId,
   RuntimeIcon,
+  sasConfigIconId,
 } from 'app/components/help-sidebar-icons';
 import { serverConfigStore, userAppsStore } from 'app/utils/stores';
-import cromwellIcon from 'assets/images/Cromwell-icon.png';
-import jupyterIcon from 'assets/images/Jupyter-icon.png';
-import rstudioIcon from 'assets/images/RStudio-icon.png';
 
 import {
   createListAppsCromwellResponse,
   createListAppsRStudioResponse,
+  createListAppsSASResponse,
 } from 'testing/stubs/apps-api-stub';
 
 import { UIAppType } from './apps-panel/utils';
@@ -35,21 +36,13 @@ const getIconConfig = (iconId, label): IconConfig => {
   };
 };
 
-const verifySidebarIcon = (wrapper: ReactWrapper, dataTestId, src, alt) => {
-  const mainIcon = wrapper.find(`[data-test-id="${dataTestId}"]`);
-  expect(mainIcon.exists()).toBeTruthy();
-  expect(mainIcon.prop('src')).toEqual(src);
-  expect(mainIcon.prop('alt')).toEqual(alt);
-};
-
 describe('CompoundIcons', () => {
   const defaultConfig = { gsuiteDomain: 'researchallofus.org' };
   beforeEach(() => {
     serverConfigStore.set({ config: defaultConfig });
   });
 
-  it('UserAppIcon renders for Cromwell', () => {
-    const icon = cromwellIcon;
+  it('UserAppIcon renders for Cromwell', async () => {
     const label = 'Cromwell Icon';
     const iconConfig = getIconConfig(cromwellConfigIconId, label);
 
@@ -57,7 +50,7 @@ describe('CompoundIcons', () => {
       userApps: [createListAppsCromwellResponse({ status: AppStatus.RUNNING })],
     });
 
-    const wrapper = mount(
+    const { container } = render(
       <UserAppIcon
         iconConfig={iconConfig}
         userSuspended={false}
@@ -65,21 +58,16 @@ describe('CompoundIcons', () => {
       />
     );
 
-    verifySidebarIcon(
-      wrapper,
-      `help-sidebar-icon-${cromwellConfigIconId}`,
-      icon,
-      label
-    );
+    const iconElement = screen.getByLabelText(label);
+    expect(iconElement).toBeInTheDocument();
 
-    const statusIndicator = wrapper.find(
+    const statusIndicator = container.querySelector(
       `[data-test-id="app-status-icon-container"]`
     );
-    expect(statusIndicator.exists()).toBeTruthy();
+    expect(statusIndicator).toBeInTheDocument();
   });
 
-  it('UserAppIcon renders for RStudio', () => {
-    const icon = rstudioIcon;
+  it('UserAppIcon renders for RStudio', async () => {
     const label = 'RStudio Icon';
     const iconConfig = getIconConfig(rstudioConfigIconId, label);
 
@@ -87,7 +75,7 @@ describe('CompoundIcons', () => {
       userApps: [createListAppsRStudioResponse({ status: AppStatus.RUNNING })],
     });
 
-    const wrapper = mount(
+    const { container } = render(
       <UserAppIcon
         iconConfig={iconConfig}
         userSuspended={false}
@@ -95,17 +83,38 @@ describe('CompoundIcons', () => {
       />
     );
 
-    verifySidebarIcon(
-      wrapper,
-      `help-sidebar-icon-${rstudioConfigIconId}`,
-      icon,
-      label
-    );
+    const iconElement = screen.getByLabelText(label);
+    expect(iconElement).toBeInTheDocument();
 
-    const statusIndicator = wrapper.find(
+    const statusIndicator = container.querySelector(
       `[data-test-id="app-status-icon-container"]`
     );
-    expect(statusIndicator.exists()).toBeTruthy();
+    expect(statusIndicator).toBeInTheDocument();
+  });
+
+  it('UserAppIcon renders for SAS', async () => {
+    const label = 'SAS Icon';
+    const iconConfig = getIconConfig(sasConfigIconId, label);
+
+    userAppsStore.set({
+      userApps: [createListAppsSASResponse({ status: AppStatus.RUNNING })],
+    });
+
+    const { container } = render(
+      <UserAppIcon
+        iconConfig={iconConfig}
+        userSuspended={false}
+        appType={UIAppType.SAS}
+      />
+    );
+
+    const iconElement = screen.getByLabelText(label);
+    expect(iconElement).toBeInTheDocument();
+
+    const statusIndicator = container.querySelector(
+      `[data-test-id="app-status-icon-container"]`
+    );
+    expect(statusIndicator).toBeInTheDocument();
   });
 
   test('RuntimeIcon renders', () => {
@@ -113,7 +122,7 @@ describe('CompoundIcons', () => {
     const label = 'Jupyter Icon';
     const iconConfig = getIconConfig(iconId, label);
 
-    const wrapper = mount(
+    const { container } = render(
       <RuntimeIcon
         iconConfig={iconConfig}
         workspaceNamespace=''
@@ -121,16 +130,12 @@ describe('CompoundIcons', () => {
       />
     );
 
-    verifySidebarIcon(
-      wrapper,
-      `help-sidebar-icon-${iconId}`,
-      jupyterIcon,
-      label
-    );
+    const iconElement = screen.getByLabelText(label);
+    expect(iconElement).toBeInTheDocument();
 
-    const statusIndicator = wrapper.find(
+    const statusIndicator = container.querySelector(
       `[data-test-id="runtime-status-icon-container"]`
     );
-    expect(statusIndicator.exists()).toBeTruthy();
+    expect(statusIndicator).toBeInTheDocument();
   });
 });

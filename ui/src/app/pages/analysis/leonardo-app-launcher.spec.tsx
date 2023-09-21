@@ -105,7 +105,7 @@ describe('NotebookLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClient(DisksApi, new DisksApiStub());
@@ -142,7 +142,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Initializing" until a Creating runtime for an existing notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -156,7 +156,7 @@ describe('NotebookLauncher', () => {
       notebookProgressStrings.get(Progress.Initializing)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
@@ -168,7 +168,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Initializing" until a Creating runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -182,7 +182,7 @@ describe('NotebookLauncher', () => {
       notebookProgressStrings.get(Progress.Initializing)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
@@ -195,7 +195,7 @@ describe('NotebookLauncher', () => {
 
   it('should be "Resuming" until a Stopped runtime for an existing notebook is running', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -209,7 +209,7 @@ describe('NotebookLauncher', () => {
       notebookProgressStrings.get(Progress.Resuming)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
@@ -221,7 +221,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Resuming" until a Stopped runtime for a new notebook is running', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Stopped;
+    runtimeStub.runtime.status = RuntimeStatus.STOPPED;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -235,7 +235,7 @@ describe('NotebookLauncher', () => {
       notebookProgressStrings.get(Progress.Resuming)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
@@ -248,7 +248,7 @@ describe('NotebookLauncher', () => {
 
   it('should be "Redirecting" when the runtime is initially Running for an existing notebook', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -262,7 +262,7 @@ describe('NotebookLauncher', () => {
   });
 
   it('should be "Redirecting" when the runtime is initially Running for a new notebook', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -277,7 +277,7 @@ describe('NotebookLauncher', () => {
 
   it('should navigate away after runtime transitions to deleting', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -295,7 +295,7 @@ describe('NotebookLauncher', () => {
     // Simulate transition to deleting - should navigate away.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Deleting,
+      status: RuntimeStatus.DELETING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -304,7 +304,7 @@ describe('NotebookLauncher', () => {
 
   it('should not navigate to notebook after runtime transitions to updating', async () => {
     history.push(notebookInitialUrl + '?kernelType=R?creating=false');
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -322,7 +322,7 @@ describe('NotebookLauncher', () => {
     // Simulate transition to updating.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Updating,
+      status: RuntimeStatus.UPDATING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -349,14 +349,14 @@ describe('NotebookLauncher', () => {
   it('should show error on mid-load compute suspension', async () => {
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Starting,
+      status: RuntimeStatus.STARTING,
     }));
 
     runtimeStub.getRuntime = () =>
       Promise.reject(
         new Response(
           JSON.stringify({
-            errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+            errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
             parameters: {
               suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
             },
@@ -473,7 +473,7 @@ describe('TerminalLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
@@ -498,7 +498,7 @@ describe('TerminalLauncher', () => {
   });
 
   it('should display terminal state header correctly when RuntimeStatus changes', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await terminalComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -512,7 +512,7 @@ describe('TerminalLauncher', () => {
       genericProgressStrings.get(Progress.Initializing)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(
@@ -525,7 +525,7 @@ describe('TerminalLauncher', () => {
 
   it('should navigate away after runtime transitions to deleting', async () => {
     history.push(terminalInitialUrl);
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
 
     const wrapper = await terminalComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -543,7 +543,7 @@ describe('TerminalLauncher', () => {
     // Simulate transition to deleting - should navigate away.
     await updateRuntime((runtime) => ({
       ...runtime,
-      status: RuntimeStatus.Deleting,
+      status: RuntimeStatus.DELETING,
     }));
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -589,7 +589,7 @@ describe('SparkConsoleLauncher', () => {
 
   beforeEach(() => {
     runtimeStub = new RuntimeApiStub();
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     registerApiClient(RuntimeApi, runtimeStub);
     registerApiClientNotebooks(JupyterApi, new JupyterApiStub());
@@ -614,7 +614,7 @@ describe('SparkConsoleLauncher', () => {
   });
 
   it('should display progress correctly when RuntimeStatus changes', async () => {
-    runtimeStub.runtime.status = RuntimeStatus.Creating;
+    runtimeStub.runtime.status = RuntimeStatus.CREATING;
 
     const wrapper = await terminalComponent();
     await waitForFakeTimersAndUpdate(wrapper);
@@ -628,7 +628,7 @@ describe('SparkConsoleLauncher', () => {
       genericProgressStrings.get(Progress.Initializing)
     );
 
-    runtimeStub.runtime.status = RuntimeStatus.Running;
+    runtimeStub.runtime.status = RuntimeStatus.RUNNING;
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(

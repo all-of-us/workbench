@@ -43,7 +43,7 @@ export async function convertAPIError(e): Promise<ErrorResponse> {
     } = await e.json();
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
   } catch {
-    return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+    return { statusCode: e.status, errorCode: ErrorCode.PARSE_ERROR };
   }
 }
 
@@ -78,7 +78,7 @@ export async function fetchWithSystemErrorHandler<T>(
           systemErrorStore.next(errorResponse);
           throw e;
         case 403:
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
+          if (errorResponse.errorCode === ErrorCode.USER_DISABLED) {
             systemErrorStore.next(errorResponse);
           }
           throw e;
@@ -202,7 +202,7 @@ interface FetchOptions {
  *  });
  *
  * @param apiCall The API function to call and handle
- * @param options:
+ * @param options
  *  expectedResponseMatcher An optional handler for errors which should NOT pop up error modals
  *  customErrorResponseFormatter An optional handler for expected responses; if missing or this handler returns
  * undefined, the default formatter will be used.

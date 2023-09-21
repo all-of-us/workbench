@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import { DisksApi, WorkspaceAccessLevel } from 'generated/fetch';
-import { AppsApi } from 'generated/fetch/api';
+import { AppsApi } from 'generated/fetch';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import { defaultRStudioConfig } from 'app/components/apps-panel/utils';
@@ -69,12 +69,6 @@ describe(CreateRStudio.name, () => {
     });
 
     registerApiClient(AppsApi, new AppsApiStub());
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
   });
 
   it('start button should create rstudio and close panel', async () => {

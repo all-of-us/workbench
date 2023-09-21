@@ -19,14 +19,14 @@ import {
 } from './access-renewal-notification';
 
 const allModules = [
-  AccessModule.DATAUSERCODEOFCONDUCT,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.CTCOMPLIANCETRAINING,
-  AccessModule.ERACOMMONS,
-  AccessModule.TWOFACTORAUTH,
-  AccessModule.RASLINKLOGINGOV,
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
+  AccessModule.DATA_USER_CODE_OF_CONDUCT,
+  AccessModule.COMPLIANCE_TRAINING,
+  AccessModule.CT_COMPLIANCE_TRAINING,
+  AccessModule.ERA_COMMONS,
+  AccessModule.TWO_FACTOR_AUTH,
+  AccessModule.RAS_LINK_LOGIN_GOV,
+  AccessModule.PROFILE_CONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
 ];
 
 const EMPTY_STRING = '';
@@ -75,18 +75,20 @@ const allCompleteOneExpired = (moduleName: AccessModule) => [
 const rtExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
-      ![
-        AccessModule.COMPLIANCETRAINING,
-        AccessModule.CTCOMPLIANCETRAINING,
-      ].includes(status.moduleName)
+      !(
+        [
+          AccessModule.COMPLIANCE_TRAINING,
+          AccessModule.CT_COMPLIANCE_TRAINING,
+        ] as Array<AccessModule>
+      ).includes(status.moduleName)
   ),
   {
-    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(5),
   },
   {
-    moduleName: AccessModule.CTCOMPLIANCETRAINING,
+    moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(10),
   },
@@ -95,18 +97,20 @@ const rtExpiresFirst = [
 const ctExpiresFirst = [
   ...allCompleteNotExpiring.filter(
     (status) =>
-      ![
-        AccessModule.COMPLIANCETRAINING,
-        AccessModule.CTCOMPLIANCETRAINING,
-      ].includes(status.moduleName)
+      !(
+        [
+          AccessModule.COMPLIANCE_TRAINING,
+          AccessModule.CT_COMPLIANCE_TRAINING,
+        ] as Array<AccessModule>
+      ).includes(status.moduleName)
   ),
   {
-    moduleName: AccessModule.COMPLIANCETRAINING, // RT
+    moduleName: AccessModule.COMPLIANCE_TRAINING, // RT
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(10),
   },
   {
-    moduleName: AccessModule.CTCOMPLIANCETRAINING,
+    moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(5),
   },
@@ -184,7 +188,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for RT when there is one expiring module',
       AccessTierShortNames.Registered,
-      allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpiring(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],
@@ -193,7 +197,7 @@ describe('Access Renewal Notification', () => {
       'for RT when there is one module expiring in two weeks',
       AccessTierShortNames.Registered,
       allCompleteOneExpiringInMoreThanTwoWeeks(
-        AccessModule.DATAUSERCODEOFCONDUCT
+        AccessModule.DATA_USER_CODE_OF_CONDUCT
       ),
       colors.notificationBanner.expiring_after_two_weeks,
       colors.primary,
@@ -203,7 +207,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for CT when there is one expiring module',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpiring(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpiring(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       EMPTY_STRING,
       EMPTY_STRING,
     ],
@@ -211,7 +215,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for RT when there is one expired module',
       AccessTierShortNames.Registered,
-      allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpired(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],
@@ -220,7 +224,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for CT when there is one expired module',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpired(AccessModule.DATAUSERCODEOFCONDUCT),
+      allCompleteOneExpired(AccessModule.DATA_USER_CODE_OF_CONDUCT),
       EMPTY_STRING,
       EMPTY_STRING,
     ],
@@ -228,7 +232,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for RT when only CT training is expiring',
       AccessTierShortNames.Registered,
-      allCompleteOneExpiring(AccessModule.CTCOMPLIANCETRAINING),
+      allCompleteOneExpiring(AccessModule.CT_COMPLIANCE_TRAINING),
       EMPTY_STRING,
       EMPTY_STRING,
     ],
@@ -236,7 +240,7 @@ describe('Access Renewal Notification', () => {
       false,
       'for RT when only CT training is expired',
       AccessTierShortNames.Registered,
-      allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
+      allCompleteOneExpired(AccessModule.CT_COMPLIANCE_TRAINING),
       EMPTY_STRING,
       EMPTY_STRING,
     ],
@@ -244,7 +248,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for CT when only CT training is expiring',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpiring(AccessModule.CTCOMPLIANCETRAINING),
+      allCompleteOneExpiring(AccessModule.CT_COMPLIANCE_TRAINING),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],
@@ -253,7 +257,7 @@ describe('Access Renewal Notification', () => {
       'for CT when only CT training is expiring in two weeks',
       AccessTierShortNames.Controlled,
       allCompleteOneExpiringInMoreThanTwoWeeks(
-        AccessModule.CTCOMPLIANCETRAINING
+        AccessModule.CT_COMPLIANCE_TRAINING
       ),
       colors.notificationBanner.expiring_after_two_weeks,
       colors.primary,
@@ -262,7 +266,7 @@ describe('Access Renewal Notification', () => {
       true,
       'for CT when only CT training is expired',
       AccessTierShortNames.Controlled,
-      allCompleteOneExpired(AccessModule.CTCOMPLIANCETRAINING),
+      allCompleteOneExpired(AccessModule.CT_COMPLIANCE_TRAINING),
       colors.notificationBanner.expiring_within_one_week,
       colors.danger,
     ],

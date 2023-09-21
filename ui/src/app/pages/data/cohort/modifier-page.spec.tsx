@@ -74,17 +74,17 @@ describe('ModifierPage', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.AGEATEVENT + '"]').length
+      wrapper.find('[data-test-id="' + ModifierType.AGE_AT_EVENT + '"]').length
     ).toBeGreaterThan(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.NUMOFOCCURRENCES + '"]')
+      wrapper.find('[data-test-id="' + ModifierType.NUM_OF_OCCURRENCES + '"]')
         .length
     ).toBe(0);
     expect(
       wrapper.find('[data-test-id="' + ModifierType.ENCOUNTERS + '"]').length
     ).toBe(0);
     expect(
-      wrapper.find('[data-test-id="' + ModifierType.EVENTDATE + '"]').length
+      wrapper.find('[data-test-id="' + ModifierType.EVENT_DATE + '"]').length
     ).toBe(0);
   });
 });

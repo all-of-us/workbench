@@ -73,13 +73,13 @@ const showParameterParent = (domain: string) =>
 
 const modifierTypeDisplay = (modifierType: ModifierType) => {
   switch (modifierType) {
-    case ModifierType.AGEATEVENT:
+    case ModifierType.AGE_AT_EVENT:
       return 'Age at Event';
     case ModifierType.ENCOUNTERS:
       return 'During Visit Type - ';
-    case ModifierType.EVENTDATE:
+    case ModifierType.EVENT_DATE:
       return 'Event Date';
-    case ModifierType.NUMOFOCCURRENCES:
+    case ModifierType.NUM_OF_OCCURRENCES:
       return 'Num of Occurrences';
   }
 };
@@ -90,11 +90,11 @@ const modifierOperatorDisplay = (operator: Operator) => {
       return 'Between';
     case Operator.EQUAL:
       return '=';
-    case Operator.GREATERTHANOREQUALTO:
+    case Operator.GREATER_THAN_OR_EQUAL_TO:
       return '>=';
     case Operator.IN:
       return '';
-    case Operator.LESSTHANOREQUALTO:
+    case Operator.LESS_THAN_OR_EQUAL_TO:
       return '<=';
   }
 };

@@ -24,7 +24,7 @@ import {
 
 const orderedSatisfactionOptions = [
   {
-    value: NewUserSatisfactionSurveySatisfaction.VERYUNSATISFIED,
+    value: NewUserSatisfactionSurveySatisfaction.VERY_UNSATISFIED,
     label: 'Very unsatisfied',
   },
   {
@@ -40,7 +40,7 @@ const orderedSatisfactionOptions = [
     label: 'Satisfied',
   },
   {
-    value: NewUserSatisfactionSurveySatisfaction.VERYSATISFIED,
+    value: NewUserSatisfactionSurveySatisfaction.VERY_SATISFIED,
     label: 'Very satisfied',
   },
 ];

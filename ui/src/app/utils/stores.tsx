@@ -68,7 +68,12 @@ export const useGenomicExtractionJobs = (
         if (
           pollWhileNonTerminal &&
           data?.some(({ status }) =>
-            [TerraJobStatus.RUNNING, TerraJobStatus.ABORTING].includes(status)
+            (
+              [
+                TerraJobStatus.RUNNING,
+                TerraJobStatus.ABORTING,
+              ] as Array<TerraJobStatus>
+            ).includes(status)
           )
         ) {
           return 10 * 1000;

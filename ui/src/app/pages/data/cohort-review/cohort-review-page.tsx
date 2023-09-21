@@ -112,7 +112,7 @@ const defaultReviewQuery = {
   page: 0,
   pageSize: rows,
   sortColumn: reverseColumnEnum.participantId,
-  sortOrder: SortOrder.Asc,
+  sortOrder: SortOrder.ASC,
   filters: { items: [] },
 } as Request;
 

@@ -7,7 +7,7 @@ import {
   UserRole,
   WorkspaceAccessLevel,
   WorkspaceUserRolesResponse,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexRow } from 'app/components/flex';
@@ -295,7 +295,7 @@ export const WorkspaceShare = fp.flow(withUserProfile())(
         .filter(({ email }) => user.email !== email)
         .concat({
           ...user,
-          role: WorkspaceAccessLevel.NOACCESS,
+          role: WorkspaceAccessLevel.NO_ACCESS,
         });
 
       this.setState({

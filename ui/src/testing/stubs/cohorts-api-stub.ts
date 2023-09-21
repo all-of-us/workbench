@@ -7,9 +7,7 @@ import {
   WorkspaceAccessLevel,
   WorkspaceResource,
 } from 'generated/fetch';
-import { CohortListResponse } from 'generated/fetch/api';
-
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
+import { CohortListResponse } from 'generated/fetch';
 
 import { convertToResources } from './resources-stub';
 import { WorkspaceStubVariables } from './workspaces';
@@ -81,9 +79,7 @@ export class CohortsApiStub extends CohortsApi {
   public resourceList: WorkspaceResource[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     const stubWorkspace: Workspace = {
       name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,

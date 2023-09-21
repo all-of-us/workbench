@@ -3,14 +3,14 @@ import { CSSProperties } from 'react';
 
 import { appAssets, UIAppType } from './utils';
 
-export const AppLogo = (props: {
+export const AppBanner = (props: {
   appType: UIAppType;
   style: CSSProperties;
 }) => {
-  const { logo } = appAssets.find((aa) => aa.appType === props.appType);
+  const { banner } = appAssets.find((aa) => aa.appType === props.appType);
   return (
     <img
-      src={logo}
+      src={banner}
       alt={props.appType}
       aria-label={props.appType}
       style={props.style}

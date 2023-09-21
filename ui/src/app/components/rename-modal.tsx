@@ -73,7 +73,7 @@ export class RenameModal extends React.Component<Props, States> {
     const errors = validate(
       {
         newName:
-          // Append .ipynb, .Rmd, or .R to the filename (if needed) based on the oldName format
+          // Append .ipynb, .Rmd, .R, .sas to the filename (if needed) based on the oldName format
           resourceType === ResourceType.NOTEBOOK
             ? appendAnalysisFileSuffixByOldName(newName?.trim(), oldName)
             : newName?.trim(),

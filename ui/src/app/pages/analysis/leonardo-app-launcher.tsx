@@ -102,8 +102,8 @@ const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
 // an iframe. When the runtime is in other states, requests to the runtime host
 // are likely to fail.
 const interactiveRuntimeStatuses = new Set<RuntimeStatus>([
-  RuntimeStatus.Running,
-  RuntimeStatus.Updating,
+  RuntimeStatus.RUNNING,
+  RuntimeStatus.UPDATING,
 ]);
 
 const styles = reactStyles({
@@ -373,9 +373,9 @@ export const LeonardoAppLauncher = fp.flow(
 
     private isRuntimeInProgress(status: RuntimeStatus): boolean {
       return (
-        status === RuntimeStatus.Starting ||
-        status === RuntimeStatus.Stopping ||
-        status === RuntimeStatus.Stopped
+        status === RuntimeStatus.STARTING ||
+        status === RuntimeStatus.STOPPING ||
+        status === RuntimeStatus.STOPPED
       );
     }
 

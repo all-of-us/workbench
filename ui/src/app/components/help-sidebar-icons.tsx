@@ -103,6 +103,7 @@ const iconStyles = reactStyles({
 
 export const rstudioConfigIconId = 'rstudioConfig';
 export const cromwellConfigIconId = 'cromwellConfig';
+export const sasConfigIconId = 'sasConfig';
 
 export type SidebarIconId =
   | 'criteria'
@@ -115,6 +116,7 @@ export type SidebarIconId =
   | 'runtimeConfig'
   | typeof cromwellConfigIconId
   | typeof rstudioConfigIconId
+  | typeof sasConfigIconId
   | 'terminal'
   | 'genomicExtractions';
 
@@ -147,6 +149,7 @@ const CompoundIcon = ({
       <img
         src={iconPath}
         alt={iconConfig.label}
+        aria-label={iconConfig.label}
         style={styles.compoundStyle}
         data-test-id={'help-sidebar-icon-' + iconConfig.id}
       />
@@ -405,9 +408,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       'runtimeConfig',
       () => (
         <RuntimeIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           workspaceNamespace={workspace.namespace}
-          {...{ userSuspended }}
         />
       ),
     ],
@@ -415,9 +418,9 @@ const DisplayIcon = (props: DisplayIconProps) => {
       cromwellConfigIconId,
       () => (
         <UserAppIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           appType={UIAppType.CROMWELL}
-          {...{ userSuspended }}
         />
       ),
     ],
@@ -425,9 +428,19 @@ const DisplayIcon = (props: DisplayIconProps) => {
       rstudioConfigIconId,
       () => (
         <UserAppIcon
+          {...{ userSuspended }}
           iconConfig={icon}
           appType={UIAppType.RSTUDIO}
+        />
+      ),
+    ],
+    [
+      sasConfigIconId,
+      () => (
+        <UserAppIcon
           {...{ userSuspended }}
+          iconConfig={icon}
+          appType={UIAppType.SAS}
         />
       ),
     ],
@@ -613,6 +626,11 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       'RStudio Icon',
       'RStudio Cloud Environment'
     ),
+    [sasConfigIconId]: gkeAppIconConfig(
+      sasConfigIconId,
+      'SAS Icon',
+      'SAS Cloud Environment'
+    ),
     terminal: {
       id: 'terminal',
       disabled: disableEnvironmentSidebarIcons,
@@ -692,6 +710,9 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
     keys.push('apps', cromwellConfigIconId);
     if (config.enableRStudioGKEApp) {
       keys.push(rstudioConfigIconId);
+    }
+    if (config.enableSasGKEApp) {
+      keys.push(sasConfigIconId);
     }
     keys.push('runtimeConfig', 'terminal');
   }

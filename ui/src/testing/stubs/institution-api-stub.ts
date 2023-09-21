@@ -12,12 +12,10 @@ import {
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 import { getTierConfig } from 'app/utils/institutions';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const VUMC: Institution = {
   shortName: 'VUMC',
   displayName: 'Vanderbilt University Medical Center',
-  organizationTypeEnum: OrganizationType.HEALTHCENTERNONPROFIT,
+  organizationTypeEnum: OrganizationType.HEALTH_CENTER_NON_PROFIT,
   tierConfigs: [
     {
       accessTierShortName: 'registered',
@@ -34,7 +32,7 @@ export const BROAD_ADDR_2 = 'broad_institution@broadinstitute.org';
 export const BROAD: Institution = {
   shortName: 'Broad',
   displayName: 'Broad Institute',
-  organizationTypeEnum: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+  organizationTypeEnum: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
   tierConfigs: [
     {
       accessTierShortName: 'registered',
@@ -92,9 +90,7 @@ export class InstitutionApiStub extends InstitutionApi {
   public institutions: Array<Institution>;
 
   constructor(institutions: Array<Institution> = defaultInstitutions) {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
 
     this.institutions = institutions;
   }
@@ -106,13 +102,12 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  deleteInstitution(shortName: string): Promise<Response> {
-    return new Promise<Response>((resolve) => {
-      this.institutions = this.institutions.filter((institution) => {
-        return institution.shortName !== shortName;
-      });
-      resolve(new Response());
+  deleteInstitution(shortName: string): Promise<void> {
+    this.institutions = this.institutions.filter((institution) => {
+      return institution.shortName !== shortName;
     });
+
+    return Promise.resolve(undefined);
   }
 
   getInstitution(shortName: string): Promise<Institution> {

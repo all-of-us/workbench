@@ -105,7 +105,7 @@ const libraryTabs = {
               workspace.workspace.id === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
-                FeaturedWorkspaceCategory.PHENOTYPELIBRARY
+                FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY
           )
       );
     },
@@ -132,7 +132,7 @@ const libraryTabs = {
               workspace.workspace.id === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
-                FeaturedWorkspaceCategory.TUTORIALWORKSPACES
+                FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES
           )
       );
     },
@@ -162,7 +162,7 @@ const libraryTabs = {
               workspace.workspace.id === featuredWorkspace.id &&
               workspace.workspace.namespace === featuredWorkspace.namespace &&
               featuredWorkspace.category ===
-                FeaturedWorkspaceCategory.DEMOPROJECTS
+                FeaturedWorkspaceCategory.DEMO_PROJECTS
           )
       );
     },

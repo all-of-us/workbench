@@ -120,9 +120,9 @@ describe('WorkspaceEdit', () => {
         scientificApproach: 'scientificApproach ',
         drugDevelopment: true,
         disseminateResearchFindingList: [
-          DisseminateResearchEnum.PUBLICATIONPERSONALBLOG,
+          DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG,
         ],
-        researchOutcomeList: [ResearchOutcomeEnum.DECREASEILLNESSBURDEN],
+        researchOutcomeList: [ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN],
       },
     };
 
@@ -220,7 +220,7 @@ describe('WorkspaceEdit', () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.AGE_CHILDREN,
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
@@ -237,7 +237,9 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+        .find(
+          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
+        )
         .first()
         .prop('checked')
     ).toEqual(true);
@@ -266,7 +268,7 @@ describe('WorkspaceEdit', () => {
 
   it('should initialize the specific populations checkbox as unchecked when creating workspaces', async () => {
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
+      SpecificPopulationEnum.AGE_CHILDREN,
     ];
     workspaceEditMode = WorkspaceEditMode.Create;
     const wrapper = component();
@@ -284,9 +286,9 @@ describe('WorkspaceEdit', () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.populationDetails = [
-      SpecificPopulationEnum.AGECHILDREN,
-      SpecificPopulationEnum.RACEMENA,
-      SpecificPopulationEnum.DISABILITYSTATUS,
+      SpecificPopulationEnum.AGE_CHILDREN,
+      SpecificPopulationEnum.RACE_MENA,
+      SpecificPopulationEnum.DISABILITY_STATUS,
     ];
 
     workspaceEditMode = WorkspaceEditMode.Edit;
@@ -301,20 +303,22 @@ describe('WorkspaceEdit', () => {
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.AGECHILDREN}-checkbox"]`)
+        .find(
+          `[data-test-id="${SpecificPopulationEnum.AGE_CHILDREN}-checkbox"]`
+        )
         .first()
         .prop('checked')
     ).toEqual(true);
     expect(
       wrapper
-        .find(`[data-test-id="${SpecificPopulationEnum.RACEMENA}-checkbox"]`)
+        .find(`[data-test-id="${SpecificPopulationEnum.RACE_MENA}-checkbox"]`)
         .first()
         .prop('checked')
     ).toEqual(true);
     expect(
       wrapper
         .find(
-          `[data-test-id="${SpecificPopulationEnum.DISABILITYSTATUS}-checkbox"]`
+          `[data-test-id="${SpecificPopulationEnum.DISABILITY_STATUS}-checkbox"]`
         )
         .first()
         .prop('checked')
@@ -706,7 +710,7 @@ describe('WorkspaceEdit', () => {
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({
         workspace,
-        accessLevel: WorkspaceAccessLevel.NOACCESS,
+        accessLevel: WorkspaceAccessLevel.NO_ACCESS,
       });
     };
 
@@ -753,7 +757,7 @@ describe('WorkspaceEdit', () => {
     workspacesApi.getWorkspace = (..._) => {
       return Promise.resolve({
         workspace,
-        accessLevel: WorkspaceAccessLevel.NOACCESS,
+        accessLevel: WorkspaceAccessLevel.NO_ACCESS,
       });
     };
 
