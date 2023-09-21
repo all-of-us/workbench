@@ -13,6 +13,7 @@ import { TextArea } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
+import { JUPYTER_FILE_EXT } from 'app/utils/constants';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
 
@@ -21,7 +22,6 @@ import { PurpleLabel } from './workspace-info-field';
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
 const NOTEBOOKS_DIRECTORY = 'notebooks';
-const NOTEBOOKS_SUFFIX = '.ipynb';
 
 const parseLocation = (file: FileDetail, bucket: string): string => {
   const prefixLength = bucket.length;
@@ -46,9 +46,10 @@ const styles = reactStyles({
     marginTop: '1.5rem',
   },
 });
+
 interface NameCellProps {
   file: FileDetail;
-  bucket: string;
+  storageBucketPath: string;
   workspaceNamespace: string;
   accessReason: string;
 }
@@ -63,7 +64,7 @@ export const formatMB = (fileSize: number): string => {
 };
 const NameCell = (props: NameCellProps) => {
   const [navigate] = useNavigation();
-  const { file, bucket, workspaceNamespace, accessReason } = props;
+  const { file, storageBucketPath, workspaceNamespace, accessReason } = props;
   const filename = file.name.trim();
 
   const filenameSpan = () => <span>{filename}</span>;
@@ -109,8 +110,9 @@ const NameCell = (props: NameCellProps) => {
 
   // remove first check after RW-5626
   const isNotebook =
-    NOTEBOOKS_DIRECTORY === parseLocation(file, bucket) &&
-    filename.endsWith(NOTEBOOKS_SUFFIX);
+    NOTEBOOKS_DIRECTORY === parseLocation(file, storageBucketPath) &&
+    filename.endsWith(JUPYTER_FILE_EXT);
+
   const isTooLargeNotebook =
     isNotebook && file.sizeInBytes > MAX_NOTEBOOK_READ_SIZE_BYTES;
 
@@ -154,10 +156,7 @@ export const FileTable = (props: Props) => {
           rawName: file.name,
           nameCell: (
             <NameCell
-              file={file}
-              bucket={storageBucketPath}
-              workspaceNamespace={workspaceNamespace}
-              accessReason={accessReason}
+              {...{ file, storageBucketPath, workspaceNamespace, accessReason }}
             />
           ),
           size: formatMB(file.sizeInBytes),

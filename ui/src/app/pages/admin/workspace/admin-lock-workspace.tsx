@@ -8,50 +8,40 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Spinner } from 'app/components/spinners';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 
-import { AdminLockRequest } from './admin-lock-request';
+import { AdminLockModal } from './admin-lock-modal';
 
 interface LockProps {
   workspace: Workspace;
-  reload: () => void;
+  reload: () => Promise<void>;
 }
-
 export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
-  const [loadingLockedStatus, setLoadingLockedStatus] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
   const [showLockModal, setShowLockModal] = useState(false);
 
   const unlock = async () => {
-    setLoadingLockedStatus(true);
+    setShowSpinner(true);
     await workspaceAdminApi()
       .setAdminUnlockedState(workspace.namespace)
       .catch((e) => {
         console.error(e);
       });
     await reload();
-    setLoadingLockedStatus(true);
+    setShowSpinner(true);
   };
 
-  const closeModalAndReload = async () => {
-    setLoadingLockedStatus(true);
+  const reloadAfterLocking = async () => {
+    setShowSpinner(true);
     setShowLockModal(false);
-    await workspaceAdminApi()
-      .setAdminUnlockedState(workspace.namespace)
-      .catch((e) => {
-        console.error(e);
-      });
     await reload();
-    setLoadingLockedStatus(false);
-  };
-
-  const toggleWorkspaceLock = () => {
-    workspace.adminLocked ? unlock() : setShowLockModal(true);
+    setShowSpinner(false);
   };
 
   return (
     <>
       {showLockModal && (
-        <AdminLockRequest
-          workspace={workspace.namespace}
-          onLock={closeModalAndReload}
+        <AdminLockModal
+          workspaceNamespace={workspace.namespace}
+          onLock={reloadAfterLocking}
           onCancel={() => setShowLockModal(false)}
         />
       )}
@@ -67,13 +57,13 @@ export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
               data-test-id='lockUnlockButton'
               type='secondary'
               style={{ border: '2px solid' }}
-              onClick={toggleWorkspaceLock}
+              onClick={() => {
+                workspace.adminLocked ? unlock() : setShowLockModal(true);
+              }}
             >
               <FlexRow>
                 <div style={{ paddingRight: '0.45rem' }}>
-                  {loadingLockedStatus && (
-                    <Spinner style={{ width: 20, height: 18 }} />
-                  )}
+                  {showSpinner && <Spinner style={{ width: 20, height: 18 }} />}
                 </div>
                 {workspace.adminLocked ? 'UNLOCK WORKSPACE' : 'LOCK WORKSPACE'}
               </FlexRow>
