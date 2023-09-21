@@ -26,7 +26,7 @@ export const AdminLockWorkspace = ({ workspace, reload }: LockProps) => {
         console.error(e);
       });
     await reload();
-    setShowSpinner(true);
+    setShowSpinner(false);
   };
 
   const reloadAfterLocking = async () => {
