@@ -1,8 +1,5 @@
 import * as React from 'react';
-import { ReactFragment } from 'react';
-import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
-import * as HighCharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import {
   CloudStorageTraffic,
@@ -24,71 +21,25 @@ import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminLockRequest } from 'app/pages/admin/admin-lock-request';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
-import {
-  FileDetailsTable,
-  formatMB,
-} from 'app/pages/admin/workspace/file-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { hasNewValidProps, reactStyles } from 'app/utils';
-import {
-  getSelectedPopulations,
-  getSelectedPrimaryPurposeItems,
-} from 'app/utils/research-purpose';
 import { getCreator } from 'app/utils/runtime-utils';
 import { MatchParams } from 'app/utils/stores';
-import { isUsingFreeTierBillingAccount } from 'app/utils/workspace-utils';
-import moment from 'moment';
+
+import { BasicInformation } from './basic-information';
+import { CloudStorageObjects } from './cloud-storage-objects';
+import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
+import { CohortBuilder } from './cohort-builder';
+import { Collaborators } from './collaborators';
+import { ResearchPurposeSection } from './research-purpose-section';
+import { PurpleLabel } from './workspace-info-field';
 
 const styles = reactStyles({
-  infoRow: {
-    width: '80%',
-    maxWidth: '1000px',
-  },
-  infoLabel: {
-    width: '300px',
-    minWidth: '180px',
-    textAlign: 'right',
-    marginRight: '1.5rem',
-  },
-  infoValue: {
-    flex: 1,
-    wordWrap: 'break-word',
-  },
-  wideWithMargin: {
-    width: '30rem',
-    marginRight: '1.5rem',
-  },
   narrowWithMargin: {
     width: '15rem',
     marginRight: '1.5rem',
   },
-  fileDetailsTable: {
-    maxWidth: '1000px',
-    marginTop: '1.5rem',
-  },
-  accessReasonText: {
-    maxWidth: '1000px',
-    height: '4.5rem',
-  },
-  previewButton: {
-    marginLeft: '20px',
-    height: '1.5rem',
-  },
 });
-
-export const PurpleLabel = ({ style = {}, children }) => {
-  return <label style={{ color: colors.primary, ...style }}>{children}</label>;
-};
-
-const WorkspaceInfoField = ({ labelText, children }) => {
-  return (
-    <FlexRow style={styles.infoRow}>
-      <PurpleLabel style={styles.infoLabel}>{labelText}</PurpleLabel>
-      <div style={styles.infoValue}>{children}</div>
-    </FlexRow>
-  );
-};
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -160,68 +111,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     if (event.key === 'Enter') {
       return this.getFederatedWorkspaceInformation();
     }
-  }
-
-  renderHighChart(cloudStorageTraffic: CloudStorageTraffic): ReactFragment {
-    HighCharts.setOptions({
-      time: {
-        useUTC: false,
-      },
-      lang: {
-        decimalPoint: '.',
-        thousandsSep: ',',
-      },
-    });
-    const options = {
-      animation: false,
-      chart: {
-        animation: false,
-        height: '150px',
-      },
-      credits: {
-        enabled: false,
-      },
-      legend: {
-        enabled: false,
-      },
-      title: {
-        text: undefined,
-      },
-      tooltip: {
-        xDateFormat: '%A, %b %e, %H:%M',
-        valueDecimals: 0,
-      },
-      xAxis: {
-        min: moment().subtract(6, 'hours').valueOf(),
-        max: moment().valueOf(),
-        title: {
-          enabled: false,
-        },
-        type: 'datetime',
-        zoomEnabled: false,
-      },
-      yAxis: {
-        title: {
-          enabled: false,
-        },
-        zoomEnabled: false,
-      },
-      series: [
-        {
-          data: cloudStorageTraffic.receivedBytes.map((x) => [
-            x.timestamp,
-            x.value,
-          ]),
-          lineWidth: 0.5,
-          name: 'GCS received bytes',
-        },
-      ],
-    };
-    return (
-      <div style={{ width: '500px', zIndex: 1001 }}>
-        <HighchartsReact highcharts={HighCharts} options={options} />
-      </div>
-    );
   }
 
   private async deleteRuntime() {
@@ -333,136 +222,21 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
                 </FlexColumn>
               </FlexRow>
             </h2>
-            <h3>Basic Information</h3>
-            <div className='basic-info' style={{ marginTop: '1.5rem' }}>
-              <WorkspaceInfoField labelText='Workspace Name'>
-                {workspace.name}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Workspace Namespace'>
-                {workspace.namespace}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Access Tier'>
-                {workspace.accessTierShortName?.toUpperCase()}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Google Project Id'>
-                {workspace.googleProject}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Billing Status'>
-                {workspace.billingStatus}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Billing Account Type'>
-                {isUsingFreeTierBillingAccount(workspace)
-                  ? 'Free tier'
-                  : 'User provided'}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Creation Time'>
-                {new Date(workspace.creationTime).toDateString()}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Last Modified Time'>
-                {new Date(workspace.lastModifiedTime).toDateString()}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Workspace Published'>
-                {workspace.published ? 'Yes' : 'No'}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Audit'>
-                {
-                  <Link to={`/admin/workspace-audit/${workspace.namespace}`}>
-                    Audit History
-                  </Link>
-                }
-              </WorkspaceInfoField>
-            </div>
-            <h3>Collaborators</h3>
-            <div className='collaborators' style={{ marginTop: '1.5rem' }}>
-              {collaborators.map((workspaceUserAdminView, i) => (
-                <div key={i}>
-                  {workspaceUserAdminView.userModel.userName +
-                    ': ' +
-                    workspaceUserAdminView.role}
-                </div>
-              ))}
-            </div>
-            <h3>Cohort Builder</h3>
-            <div className='cohort-builder' style={{ marginTop: '1.5rem' }}>
-              <WorkspaceInfoField labelText='# of Cohorts'>
-                {resources.workspaceObjects.cohortCount}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='# of Concept Sets'>
-                {resources.workspaceObjects.conceptSetCount}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='# of Data Sets'>
-                {resources.workspaceObjects.datasetCount}
-              </WorkspaceInfoField>
-            </div>
-            <h3>Cloud Storage Objects</h3>
-            <div
-              className='cloud-storage-objects'
-              style={{ marginTop: '1.5rem' }}
-            >
-              <div
-                style={{
-                  color: colors.warning,
-                  fontWeight: 'bold',
-                  maxWidth: '1000px',
-                }}
-              >
-                NOTE: if there are more than ~1000 files in the bucket, these
-                counts and the table below may be incomplete because we process
-                only a single page of storage list results.
-              </div>
-              <WorkspaceInfoField labelText='GCS bucket path'>
-                {resources.cloudStorage.storageBucketPath}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='# of Workbench-managed notebook files'>
-                {resources.cloudStorage.notebookFileCount}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='# of other files'>
-                {resources.cloudStorage.nonNotebookFileCount}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Storage used (MB)'>
-                {formatMB(resources.cloudStorage.storageBytesUsed)}
-              </WorkspaceInfoField>
-            </div>
-            <FileDetailsTable
+            <BasicInformation {...{ workspace }} />
+            <Collaborators {...{ collaborators }} />
+            <CohortBuilder workspaceObjects={resources.workspaceObjects} />
+            <CloudStorageObjects
               workspaceNamespace={workspace.namespace}
-              bucket={resources.cloudStorage.storageBucketPath}
+              cloudStorage={resources.cloudStorage}
             />
-
-            <h3>Research Purpose</h3>
-            <div className='research-purpose' style={{ marginTop: '1.5rem' }}>
-              <WorkspaceInfoField labelText='Primary purpose of project'>
-                {getSelectedPrimaryPurposeItems(workspace.researchPurpose).map(
-                  (researchPurposeItem, i) => (
-                    <div key={i}>{researchPurposeItem}</div>
-                  )
-                )}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Reason for choosing All of Us'>
-                {workspace.researchPurpose.reasonForAllOfUs}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Area of intended study'>
-                {workspace.researchPurpose.intendedStudy}
-              </WorkspaceInfoField>
-              <WorkspaceInfoField labelText='Anticipated findings'>
-                {workspace.researchPurpose.anticipatedFindings}
-              </WorkspaceInfoField>
-              {workspace.researchPurpose.populationDetails.length > 0 && (
-                <WorkspaceInfoField labelText='Population area(s) of focus'>
-                  {getSelectedPopulations(workspace.researchPurpose)}
-                </WorkspaceInfoField>
-              )}
-            </div>
+            <ResearchPurposeSection
+              researchPurpose={workspace.researchPurpose}
+            />
           </div>
         )}
 
         {cloudStorageTraffic?.receivedBytes && (
-          <div>
-            <h2>Cloud Storage Traffic</h2>
-            <div>
-              Cloud Storage <i>received_bytes_count</i> over the past 6 hours.
-            </div>
-            {this.renderHighChart(cloudStorageTraffic)}
-          </div>
+          <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
         )}
 
         {resources && resources.runtimes.length === 0 && (

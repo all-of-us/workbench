@@ -12,10 +12,11 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
-import { PurpleLabel } from 'app/pages/admin/workspace/admin-workspace';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
+
+import { PurpleLabel } from './workspace-info-field';
 
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
