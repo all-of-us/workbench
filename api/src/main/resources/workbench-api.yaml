@@ -9774,6 +9774,14 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingNewUserSatisfactionSurvey"
+      userGeneralDiscoverySource:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUserGeneralDiscoverySource"
+      userPartnerDiscoverySource:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUserPartnerDiscoverySource"
       workspaceFreeTierUsage:
         type: array
         items:
@@ -10290,6 +10298,34 @@ definitions:
       additionalInfo:
         type: string
         description: Additional information regarding the satisfaction score.
+
+  ReportingUserGeneralDiscoverySource:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      answer:
+        type: string
+        description: Answer for How did you learn about the All of Us Researcher question when signup.
+      otherText:
+        type: string
+        description: User input when choosing Other
+
+  ReportingUserPartnerDiscoverySource:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      answer:
+        type: string
+        description: Answer for Did you learn about the All of Us Researcher Workbench from any of these program partners.
+      otherText:
+        type: string
+        description: User input when choosing Other
 
   ReportingDataset:
     x-aou-note: |-

@@ -32,6 +32,8 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
+import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -95,6 +97,50 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .satisfaction(
                     NewUserSatisfactionSurveySatisfaction.valueOf(rs.getString("satisfaction")))
                 .additionalInfo(rs.getString("additional_info")));
+  }
+
+  @Override
+  public List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySource(long limit,
+      long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT\n"
+                + "  us.user_id as user_id,\n"
+                + "  us.source as answer,\n"
+                + "  u.user_general_discovery_source_other_text as other_text,\n"
+                + "FROM user_general_discovery_source us\n"
+                + " JOIN user u\n"
+                + "   ON us.user_id = u.user_id\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingUserGeneralDiscoverySource()
+                .userId(rs.getLong("user_id"))
+                .answer(rs.getString("answer"))
+                .otherText(rs.getString("other_text")));
+  }
+
+  @Override
+  public List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySource(long limit,
+      long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT\n"
+                + "  us.user_id as user_id,\n"
+                + "  us.source as answer,\n"
+                + "  u.user_partner_discovery_source_other_text as other_text,\n"
+                + "FROM user_partner_discovery_source us\n"
+                + " JOIN user u\n"
+                + "   ON us.user_id = u.user_id\n"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingUserPartnerDiscoverySource()
+                .userId(rs.getLong("user_id"))
+                .answer(rs.getString("answer"))
+                .otherText(rs.getString("other_text")));
   }
 
   @Override
@@ -514,28 +560,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public int getWorkspaceCount() {
+  public int getTableRowCount(String tableName) {
     return jdbcTemplate.queryForObject(
-        "SELECT count(*) FROM workspace WHERE active_status = "
-            + workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE),
-        Integer.class);
+        "SELECT count(*) FROM " + tableName, Integer.class);
   }
 
-  @Override
-  public int getUserCount() {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
-  }
-
-  @Override
-  public int getCohortCount() {
-    return jdbcTemplate.queryForObject("SELECT count(*) FROM cohort", Integer.class);
-  }
-
-  @Override
-  public int getNewUserSatisfactionSurveyCount() {
-    return jdbcTemplate.queryForObject(
-        "SELECT count(*) FROM new_user_satisfaction_survey", Integer.class);
-  }
 
   /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
