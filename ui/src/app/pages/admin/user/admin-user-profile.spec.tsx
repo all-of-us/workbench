@@ -55,7 +55,7 @@ const updateCache = jest.fn();
 
 const ADMIN_PROFILE: Profile = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.ACCESSCONTROLADMIN],
+  authorities: [Authority.ACCESS_CONTROL_ADMIN],
 };
 const TARGET_USER_PROFILE = ProfileStubVariables.PROFILE_STUB;
 
@@ -314,10 +314,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     saveButton = wrapper.find('[data-test-id="update-profile"]');
@@ -360,10 +360,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     const saveButton = wrapper.find('[data-test-id="update-profile"]');
@@ -403,10 +403,10 @@ describe('AdminUserProfile', () => {
     await simulateComponentChange(
       wrapper,
       findDropdown(wrapper, 'institutionalRole'),
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
     expect(findDropdown(wrapper, 'institutionalRole').props().value).toEqual(
-      InstitutionalRole.POSTDOCTORAL
+      InstitutionalRole.POST_DOCTORAL
     );
 
     await simulateTextInputChange(
@@ -527,18 +527,18 @@ describe('AdminUserProfile', () => {
   test.each([
     [
       AccessRenewalStatus.EXPIRED,
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       {
-        moduleName: AccessModule.COMPLIANCETRAINING,
+        moduleName: AccessModule.COMPLIANCE_TRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(-1),
       },
     ],
     [
       AccessRenewalStatus.NEVER_EXPIRES,
-      AccessModule.TWOFACTORAUTH,
+      AccessModule.TWO_FACTOR_AUTH,
       {
-        moduleName: AccessModule.TWOFACTORAUTH,
+        moduleName: AccessModule.TWO_FACTOR_AUTH,
         completionEpochMillis: nowPlusDays(-1000),
       },
     ],
@@ -551,26 +551,26 @@ describe('AdminUserProfile', () => {
     ],
     [
       AccessRenewalStatus.CURRENT,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       {
-        moduleName: AccessModule.CTCOMPLIANCETRAINING,
+        moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(400),
       },
     ],
     [
       AccessRenewalStatus.BYPASSED,
-      AccessModule.ERACOMMONS,
+      AccessModule.ERA_COMMONS,
       {
-        moduleName: AccessModule.ERACOMMONS,
+        moduleName: AccessModule.ERA_COMMONS,
         bypassEpochMillis: 1,
       },
     ],
     [
       AccessRenewalStatus.EXPIRING_SOON,
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       {
-        moduleName: AccessModule.PROFILECONFIRMATION,
+        moduleName: AccessModule.PROFILE_CONFIRMATION,
         completionEpochMillis: nowPlusDays(-1000),
         expirationEpochMillis: nowPlusDays(5),
       },
@@ -626,11 +626,11 @@ describe('AdminUserProfile', () => {
       },
     });
 
-    const excludedModules = [
+    const excludedModules: Array<AccessModule> = [
       AccessModule.IDENTITY,
-      AccessModule.ERACOMMONS,
-      AccessModule.COMPLIANCETRAINING,
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.ERA_COMMONS,
+      AccessModule.COMPLIANCE_TRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
     ];
     const expectedModules = orderedAccessModules.filter(
       (moduleName) => !excludedModules.includes(moduleName)
@@ -725,7 +725,7 @@ describe('AdminUserProfile', () => {
       // a previous test confirmed that the orderedAccessModules are in the expected order, so we can ref by index
 
       const eraRow = tableRows.at(
-        orderedAccessModules.indexOf(AccessModule.ERACOMMONS)
+        orderedAccessModules.indexOf(AccessModule.ERA_COMMONS)
       );
       const eraBadges = eraRow.find('[data-test-id="tier-badges"]');
 

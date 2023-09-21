@@ -157,6 +157,8 @@ export function registerApiClient<T extends BaseAPI>(
 registerApiClient(
   ConfigApi,
   new (class extends ConfigApi {
+    basePath: string;
+    fetch: any;
     constructor() {
       super();
       this.configuration = new FetchConfiguration({
@@ -181,6 +183,8 @@ export function bindApiClients(conf: FetchConfiguration) {
     registerApiClient(
       ctor,
       new (class extends ctor {
+        basePath: string;
+        fetch: any;
         constructor() {
           super();
           this.configuration = conf;

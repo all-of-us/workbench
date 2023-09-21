@@ -10,16 +10,12 @@ import {
   dropJupyterNotebookFileSuffix,
 } from 'app/pages/analysis/util';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class NotebooksApiStub extends NotebooksApi {
   notebookList: FileDetail[];
   public notebookKernel: KernelTypeEnum;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.notebookList = NotebooksApiStub.stubNotebookList();
   }
 

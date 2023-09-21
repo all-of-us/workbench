@@ -27,8 +27,8 @@ export const initialFilterState = {
     STATUS: [
       CohortStatus.INCLUDED,
       CohortStatus.EXCLUDED,
-      CohortStatus.NEEDSFURTHERREVIEW,
-      CohortStatus.NOTREVIEWED,
+      CohortStatus.NEEDS_FURTHER_REVIEW,
+      CohortStatus.NOT_REVIEWED,
       'Select All',
     ],
   },
@@ -105,7 +105,7 @@ const initialPaginationState = {
   page: 0,
   pageSize: 25,
   sortColumn: FilterColumns.PARTICIPANTID,
-  sortOrder: SortOrder.Asc,
+  sortOrder: SortOrder.ASC,
 };
 
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);

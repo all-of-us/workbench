@@ -49,6 +49,7 @@ import {
   stackdriverErrorReporterStore,
   useStore,
 } from 'app/utils/stores';
+import { Configuration as NotebookConfiguration } from 'notebooks-generated/fetch';
 import { StackdriverErrorReporter } from 'stackdriver-errors-js';
 import { Configuration as TanagraConfiguration } from 'tanagra-generated';
 
@@ -77,11 +78,12 @@ const bindClients = () => {
   bindApiClients(
     new Configuration({
       basePath: getApiBaseUrl(),
-      accessToken: () => getAccessToken(),
+      // TODO: Look into removing 'Bearer' when updating to OpenAPI 3: https://stackoverflow.com/a/45471010/2166475
+      accessToken: () => 'Bearer ' + getAccessToken(),
     })
   );
   notebooksBindApiClients(
-    new Configuration({
+    new NotebookConfiguration({
       basePath: environment.leoApiUrl,
       accessToken: () => getAccessToken(),
     })

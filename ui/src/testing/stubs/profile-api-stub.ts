@@ -6,11 +6,9 @@ import {
   ProfileApi,
   UsernameTakenResponse,
 } from 'generated/fetch';
-import { AdminUserListResponse } from 'generated/fetch/api';
+import { AdminUserListResponse } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
-
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 import { BROAD } from './institution-api-stub';
 
@@ -53,19 +51,19 @@ export class ProfileStubVariables {
     accessModules: {
       modules: [
         {
-          moduleName: AccessModule.COMPLIANCETRAINING,
+          moduleName: AccessModule.COMPLIANCE_TRAINING,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+          moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PROFILECONFIRMATION,
+          moduleName: AccessModule.PROFILE_CONFIRMATION,
           expirationEpochMillis: undefined,
         },
         {
-          moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+          moduleName: AccessModule.PUBLICATION_CONFIRMATION,
           expirationEpochMillis: undefined,
         },
       ],
@@ -91,9 +89,7 @@ export class ProfileApiStub extends ProfileApi {
   profile: Profile;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
@@ -107,7 +103,7 @@ export class ProfileApiStub extends ProfileApi {
 
   public updateProfile(updatedProfile?: Profile) {
     this.profile = updatedProfile;
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public getMe() {
@@ -115,11 +111,11 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public confirmProfile() {
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public confirmPublications() {
-    return Promise.resolve(new Response('', { status: 200 }));
+    return Promise.resolve(undefined);
   }
 
   public updatePageVisits() {

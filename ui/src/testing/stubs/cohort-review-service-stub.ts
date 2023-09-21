@@ -16,8 +16,6 @@ import {
   VocabularyListResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 const criteriaStub = {
   includes: [
     {
@@ -58,7 +56,7 @@ export const cohortReviewStubs = [
     queryResultSize: 1,
     reviewStatus: ReviewStatus.CREATED,
     participantCohortStatuses: [
-      { participantId: 1, status: CohortStatus.NOTREVIEWED },
+      { participantId: 1, status: CohortStatus.NOT_REVIEWED },
     ],
     page: 1,
     pageSize: 1,
@@ -86,7 +84,7 @@ const participantDataListResponseStub = {
   pageRequest: {
     page: 1,
     pageSize: 25,
-    sortOrder: SortOrder.Asc,
+    sortOrder: SortOrder.ASC,
     sortColumn: 'test',
   },
 };
@@ -107,9 +105,7 @@ const cohortChartDataStub = {
 
 export class CohortReviewServiceStub extends CohortReviewApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {
@@ -129,7 +125,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   getParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
     return new Promise<ParticipantCohortStatus>((resolve) =>
-      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+      resolve({ participantId: 1, status: CohortStatus.NOT_REVIEWED })
     );
   }
   getParticipantCohortAnnotations(): Promise<ParticipantCohortAnnotationListResponse> {
@@ -156,7 +152,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
   updateParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
     return new Promise<ParticipantCohortStatus>((resolve) =>
-      resolve({ participantId: 1, status: CohortStatus.NOTREVIEWED })
+      resolve({ participantId: 1, status: CohortStatus.NOT_REVIEWED })
     );
   }
   createCohortReview() {

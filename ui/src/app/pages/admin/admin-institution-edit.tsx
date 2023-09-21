@@ -135,7 +135,7 @@ const EraRequiredSwitch = (props: {
       disabled={
         !enableRasLoginGovLinking ||
         tierConfig.membershipRequirement ===
-          InstitutionMembershipRequirement.NOACCESS
+          InstitutionMembershipRequirement.NO_ACCESS
       }
     />
   );
@@ -153,7 +153,7 @@ const EnableCtSwitch = (props: {
       onToggle={(e) => onToggle(e)}
       checked={
         getTierConfig(institution, AccessTierShortNames.Controlled)
-          ?.membershipRequirement !== InstitutionMembershipRequirement.NOACCESS
+          ?.membershipRequirement !== InstitutionMembershipRequirement.NO_ACCESS
       }
       disabled={false} // TODO
     />
@@ -266,7 +266,7 @@ const TierConfig = (props: TierConfigProps) => {
           )}
         </FlexRow>
         {tierConfig.membershipRequirement !==
-          InstitutionMembershipRequirement.NOACCESS && (
+          InstitutionMembershipRequirement.NO_ACCESS && (
           <div
             style={{ marginTop: '1.5rem' }}
             data-test-id={`${accessTierShortName}-card-details`}
@@ -626,7 +626,7 @@ export const AdminInstitutionEdit = fp.flow(
           ],
         ],
         // NOACCESS -> remove completely
-        [InstitutionMembershipRequirement.NOACCESS, () => []]
+        [InstitutionMembershipRequirement.NO_ACCESS, () => []]
       );
     }
 

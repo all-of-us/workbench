@@ -44,14 +44,14 @@ export const MaybeModule = ({
   // outside of the main getAccessModuleConfig() so that function doesn't have to deal with navigate
   const moduleAction: Function = switchCase(
     moduleName,
-    [AccessModule.TWOFACTORAUTH, () => () => setShowTwoFactorAuthModal(true)],
-    [AccessModule.RASLINKLOGINGOV, () => redirectToRas],
+    [AccessModule.TWO_FACTOR_AUTH, () => () => setShowTwoFactorAuthModal(true)],
+    [AccessModule.RAS_LINK_LOGIN_GOV, () => redirectToRas],
     [AccessModule.IDENTITY, () => redirectToRas],
-    [AccessModule.ERACOMMONS, () => redirectToNiH],
-    [AccessModule.COMPLIANCETRAINING, () => redirectToRegisteredTraining],
-    [AccessModule.CTCOMPLIANCETRAINING, () => redirectToControlledTraining],
+    [AccessModule.ERA_COMMONS, () => redirectToNiH],
+    [AccessModule.COMPLIANCE_TRAINING, () => redirectToRegisteredTraining],
+    [AccessModule.CT_COMPLIANCE_TRAINING, () => redirectToControlledTraining],
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => () => {
         AnalyticsTracker.Registration.EnterDUCC();
         navigate(['data-code-of-conduct']);

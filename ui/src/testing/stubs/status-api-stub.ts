@@ -1,12 +1,7 @@
 import { StatusApi, StatusResponse } from 'generated/fetch';
-
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class StatusApiStub extends StatusApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   getStatus(): Promise<StatusResponse> {

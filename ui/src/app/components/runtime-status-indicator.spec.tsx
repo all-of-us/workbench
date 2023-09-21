@@ -21,11 +21,11 @@ import {
 
 describe('Runtime Status Indicator', () => {
   test.each([
-    [RuntimeStatus.Creating, UpdatingIcon],
-    [RuntimeStatus.Stopped, StoppedIcon],
-    [RuntimeStatus.Running, RunningIcon],
-    [RuntimeStatus.Stopping, StoppingIcon],
-    [RuntimeStatus.Error, ErrorIcon],
+    [RuntimeStatus.CREATING, UpdatingIcon],
+    [RuntimeStatus.STOPPED, StoppedIcon],
+    [RuntimeStatus.RUNNING, RunningIcon],
+    [RuntimeStatus.STOPPING, StoppingIcon],
+    [RuntimeStatus.ERROR, ErrorIcon],
   ])(
     'Runtime Status indicator renders correct indicator when runtime is in %s state',
     (status, icon) => {

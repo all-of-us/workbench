@@ -17,15 +17,15 @@ export const OrganizationTypeOptions = [
   { label: 'Industry', value: OrganizationType.INDUSTRY },
   {
     label: 'Academic Research Institution',
-    value: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+    value: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
   },
   {
     label: 'Educational Institution',
-    value: OrganizationType.EDUCATIONALINSTITUTION,
+    value: OrganizationType.EDUCATIONAL_INSTITUTION,
   },
   {
     label: 'Health Center / Non-Profit',
-    value: OrganizationType.HEALTHCENTERNONPROFIT,
+    value: OrganizationType.HEALTH_CENTER_NON_PROFIT,
   },
   { label: 'Other', value: OrganizationType.OTHER },
 ];

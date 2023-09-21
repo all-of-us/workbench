@@ -15,13 +15,13 @@ export const PREDEFINED_ATTRIBUTES = {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['90'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['60'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
   ],
   Normal: [
@@ -29,13 +29,13 @@ export const PREDEFINED_ATTRIBUTES = {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['120'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['80'],
-      operator: Operator.LESSTHANOREQUALTO,
+      operator: Operator.LESS_THAN_OR_EQUAL_TO,
     },
   ],
   'Pre-Hypertensive': [
@@ -57,13 +57,13 @@ export const PREDEFINED_ATTRIBUTES = {
       conceptId: 903118,
       name: AttrName.NUM,
       operands: ['140'],
-      operator: Operator.GREATERTHANOREQUALTO,
+      operator: Operator.GREATER_THAN_OR_EQUAL_TO,
     },
     {
       conceptId: 903115,
       name: AttrName.NUM,
       operands: ['90'],
-      operator: Operator.GREATERTHANOREQUALTO,
+      operator: Operator.GREATER_THAN_OR_EQUAL_TO,
     },
   ],
   BP_DETAIL: [
@@ -87,12 +87,12 @@ export const PREDEFINED_ATTRIBUTES = {
 };
 
 export const MODIFIERS_MAP = {
-  [ModifierType.AGEATEVENT]: {
+  [ModifierType.AGE_AT_EVENT]: {
     name: 'Age At Event',
     operators: {
       [Operator.BETWEEN]: 'Between',
-      [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
-      [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
+      [Operator.GREATER_THAN_OR_EQUAL_TO]: 'Greater Than or Equal To',
+      [Operator.LESS_THAN_OR_EQUAL_TO]: 'Less Than or Equal To',
     },
   },
   [ModifierType.CATI]: {
@@ -108,18 +108,18 @@ export const MODIFIERS_MAP = {
       [Operator.IN]: '',
     },
   },
-  [ModifierType.EVENTDATE]: {
+  [ModifierType.EVENT_DATE]: {
     name: 'Event Date',
     operators: {
       [Operator.BETWEEN]: 'Between',
-      [Operator.GREATERTHANOREQUALTO]: 'On or After',
-      [Operator.LESSTHANOREQUALTO]: 'On or Before',
+      [Operator.GREATER_THAN_OR_EQUAL_TO]: 'On or After',
+      [Operator.LESS_THAN_OR_EQUAL_TO]: 'On or Before',
     },
   },
-  [ModifierType.NUMOFOCCURRENCES]: {
+  [ModifierType.NUM_OF_OCCURRENCES]: {
     name: 'Number Of Occurrence Dates',
     operators: {
-      [Operator.GREATERTHANOREQUALTO]: 'N or More',
+      [Operator.GREATER_THAN_OR_EQUAL_TO]: 'N or More',
     },
   },
 };

@@ -8,11 +8,11 @@ const noAuth = ProfileStubVariables.PROFILE_STUB;
 
 const instAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.INSTITUTIONADMIN],
+  authorities: [Authority.INSTITUTION_ADMIN],
 };
 const accessAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.ACCESSCONTROLADMIN],
+  authorities: [Authority.ACCESS_CONTROL_ADMIN],
 };
 const devAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
@@ -20,7 +20,7 @@ const devAuth = {
 };
 const featuredWsAuth = {
   ...ProfileStubVariables.PROFILE_STUB,
-  authorities: [Authority.FEATUREDWORKSPACEADMIN],
+  authorities: [Authority.FEATURED_WORKSPACE_ADMIN],
 };
 
 describe('authorities', () => {

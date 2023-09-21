@@ -181,7 +181,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   get inMemorySearch() {
     const { domain } = this.props;
-    return domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT;
+    return domain === Domain.PHYSICAL_MEASUREMENT || domain === Domain.VISIT;
   }
 
   loadChildren() {
@@ -305,8 +305,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     return [
       CriteriaSubType.WHEEL,
       CriteriaSubType.PREG,
-      CriteriaSubType.HRIRR,
-      CriteriaSubType.HRNOIRR,
+      CriteriaSubType.HR_IRR,
+      CriteriaSubType.HR_NOIRR,
     ]
       .map((st) => st.toString())
       .includes(this.props.node.subtype);
@@ -406,7 +406,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             (crit) =>
               crit.parameterId === this.paramId() ||
               (![
-                Domain.PHYSICALMEASUREMENT.toString(),
+                Domain.PHYSICAL_MEASUREMENT.toString(),
                 Domain.VISIT.toString(),
               ].includes(domainId) &&
                 !!crit.id &&

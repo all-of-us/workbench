@@ -106,7 +106,7 @@ describe('renderResourceCard', () => {
         ...stubDataSet(),
         prePackagedConceptSet: [
           PrePackagedConceptSetEnum.PERSON,
-          PrePackagedConceptSetEnum.WHOLEGENOME,
+          PrePackagedConceptSetEnum.WHOLE_GENOME,
         ],
       },
     } as WorkspaceResource;

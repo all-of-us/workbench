@@ -27,7 +27,7 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.SAS]: 'SAS',
 };
 
-const appStatusesRequiringUpdates = [
+const appStatusesRequiringUpdates: Array<AppStatus> = [
   AppStatus.DELETING,
   AppStatus.PROVISIONING,
   AppStatus.STARTING,

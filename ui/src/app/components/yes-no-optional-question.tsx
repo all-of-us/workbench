@@ -24,7 +24,7 @@ export const YesNoOptionalQuestion = (props: YesNoOptionalQuestionProps) => {
         { label: 'No', value: YesNoPreferNot.NO },
         {
           label: 'Prefer not to answer',
-          value: YesNoPreferNot.PREFERNOTTOANSWER,
+          value: YesNoPreferNot.PREFER_NOT_TO_ANSWER,
         },
       ]}
     />

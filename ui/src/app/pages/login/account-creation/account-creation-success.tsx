@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Profile } from 'generated/fetch/api';
+import { Profile } from 'generated/fetch';
 
 import { Divider } from 'app/components/divider';
 import { PageHeader } from 'app/components/headers';

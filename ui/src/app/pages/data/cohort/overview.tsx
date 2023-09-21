@@ -187,13 +187,13 @@ export const ListOverview = fp.flow(
     constructor(props: Props) {
       super(props);
       this.state = {
-        ageType: AgeType.AGEATCDR,
+        ageType: AgeType.AGE_AT_CDR,
         apiCallCheck: 0,
         apiError: false,
         chartData: undefined,
         cohortSizeError: false,
         currentGraphOptions: {
-          ageType: AgeType.AGEATCDR,
+          ageType: AgeType.AGE_AT_CDR,
           chartType: GenderSexRaceOrEthType.RACE,
         },
         deleting: false,
@@ -333,7 +333,7 @@ export const ListOverview = fp.flow(
           [0, 0]
         );
         const inputError =
-          grp.time !== TemporalTime.DURINGSAMEENCOUNTERAS &&
+          grp.time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
           (isNaN(parseInt(grp.timeValue, 10)) || grp.timeValue < 0);
         return activeItems.includes(0) || inputError;
       });
@@ -485,12 +485,12 @@ export const ListOverview = fp.flow(
           command: () => this.setState({ ageType: AgeType.AGE }),
         },
         {
-          label: ageTypeToText(AgeType.AGEATCONSENT),
-          command: () => this.setState({ ageType: AgeType.AGEATCONSENT }),
+          label: ageTypeToText(AgeType.AGE_AT_CONSENT),
+          command: () => this.setState({ ageType: AgeType.AGE_AT_CONSENT }),
         },
         {
-          label: ageTypeToText(AgeType.AGEATCDR),
-          command: () => this.setState({ ageType: AgeType.AGEATCDR }),
+          label: ageTypeToText(AgeType.AGE_AT_CDR),
+          command: () => this.setState({ ageType: AgeType.AGE_AT_CDR }),
         },
       ];
     }
@@ -514,10 +514,10 @@ export const ListOverview = fp.flow(
         },
         {
           label: genderSexRaceOrEthTypeToText(
-            GenderSexRaceOrEthType.SEXATBIRTH
+            GenderSexRaceOrEthType.SEX_AT_BIRTH
           ),
           command: () =>
-            this.setState({ chartType: GenderSexRaceOrEthType.SEXATBIRTH }),
+            this.setState({ chartType: GenderSexRaceOrEthType.SEX_AT_BIRTH }),
         },
       ];
     }

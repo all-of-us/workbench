@@ -38,7 +38,7 @@ export const RuntimeStatusIndicator = fp.flow(
     const { runtime, loadingError } = useStore(runtimeStore);
     let status = runtime?.status;
     if (
-      (!status || status === RuntimeStatus.Deleted) &&
+      (!status || status === RuntimeStatus.DELETED) &&
       compoundRuntimeOps &&
       workspaceNamespace in compoundRuntimeOps
     ) {
@@ -48,7 +48,7 @@ export const RuntimeStatusIndicator = fp.flow(
       // There also be some lag during the runtime creation flow between when
       // the compound operation starts, and the runtime is set in the store; for
       // this reason use Creating rather than Deleting here.
-      status = RuntimeStatus.Creating;
+      status = RuntimeStatus.CREATING;
     }
 
     return (
@@ -64,18 +64,18 @@ export const RuntimeStatusIndicator = fp.flow(
             return <ErrorIcon />;
           }
           switch (status) {
-            case RuntimeStatus.Creating:
-            case RuntimeStatus.Starting:
-            case RuntimeStatus.Updating:
+            case RuntimeStatus.CREATING:
+            case RuntimeStatus.STARTING:
+            case RuntimeStatus.UPDATING:
               return <UpdatingIcon />;
-            case RuntimeStatus.Stopped:
+            case RuntimeStatus.STOPPED:
               return <StoppedIcon />;
-            case RuntimeStatus.Running:
+            case RuntimeStatus.RUNNING:
               return <RunningIcon />;
-            case RuntimeStatus.Stopping:
-            case RuntimeStatus.Deleting:
+            case RuntimeStatus.STOPPING:
+            case RuntimeStatus.DELETING:
               return <StoppingIcon />;
-            case RuntimeStatus.Error:
+            case RuntimeStatus.ERROR:
               return <ErrorIcon />;
           }
         })()}

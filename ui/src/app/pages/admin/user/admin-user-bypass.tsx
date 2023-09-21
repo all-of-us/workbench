@@ -37,20 +37,22 @@ interface State {
 const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
     ...(user.complianceTrainingBypassTime
-      ? [AccessModule.COMPLIANCETRAINING]
+      ? [AccessModule.COMPLIANCE_TRAINING]
       : []),
     ...(user.ctComplianceTrainingBypassTime
-      ? [AccessModule.CTCOMPLIANCETRAINING]
+      ? [AccessModule.CT_COMPLIANCE_TRAINING]
       : []),
-    ...(user.duccBypassTime ? [AccessModule.DATAUSERCODEOFCONDUCT] : []),
-    ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
-    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
-    ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
+    ...(user.duccBypassTime ? [AccessModule.DATA_USER_CODE_OF_CONDUCT] : []),
+    ...(user.eraCommonsBypassTime ? [AccessModule.ERA_COMMONS] : []),
+    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWO_FACTOR_AUTH] : []),
+    ...(user.rasLinkLoginGovBypassTime
+      ? [AccessModule.RAS_LINK_LOGIN_GOV]
+      : []),
     ...(user.profileConfirmationBypassTime
-      ? [AccessModule.PROFILECONFIRMATION]
+      ? [AccessModule.PROFILE_CONFIRMATION]
       : []),
     ...(user.publicationConfirmationBypassTime
-      ? [AccessModule.PUBLICATIONCONFIRMATION]
+      ? [AccessModule.PUBLICATION_CONFIRMATION]
       : []),
   ];
 };
@@ -59,27 +61,27 @@ const moduleToToggleProps: Record<
   AccessModule,
   { name: string; 'data-test-id': string }
 > = {
-  [AccessModule.COMPLIANCETRAINING]: {
+  [AccessModule.COMPLIANCE_TRAINING]: {
     name: 'RT Compliance Training',
     'data-test-id': 'rt-compliance-training-toggle',
   },
-  [AccessModule.CTCOMPLIANCETRAINING]: {
+  [AccessModule.CT_COMPLIANCE_TRAINING]: {
     name: 'CT Compliance Training',
     'data-test-id': 'ct-compliance-training-toggle',
   },
-  [AccessModule.DATAUSERCODEOFCONDUCT]: {
+  [AccessModule.DATA_USER_CODE_OF_CONDUCT]: {
     name: 'Data User Code of Conduct',
     'data-test-id': 'ducc-toggle',
   },
-  [AccessModule.ERACOMMONS]: {
+  [AccessModule.ERA_COMMONS]: {
     name: 'eRA Commons Linking',
     'data-test-id': 'era-commons-toggle',
   },
-  [AccessModule.TWOFACTORAUTH]: {
+  [AccessModule.TWO_FACTOR_AUTH]: {
     name: 'Two Factor Auth',
     'data-test-id': 'two-factor-auth-toggle',
   },
-  [AccessModule.RASLINKLOGINGOV]: {
+  [AccessModule.RAS_LINK_LOGIN_GOV]: {
     name: 'RAS Login.gov Link',
     'data-test-id': 'ras-link-login-gov-toggle',
   },
@@ -87,13 +89,17 @@ const moduleToToggleProps: Record<
     name: 'Identity Verification',
     'data-test-id': 'identity-toggle',
   },
-  [AccessModule.PROFILECONFIRMATION]: {
+  [AccessModule.PROFILE_CONFIRMATION]: {
     name: 'Profile Confirmation',
     'data-test-id': 'profile-confirmation-toggle',
   },
-  [AccessModule.PUBLICATIONCONFIRMATION]: {
+  [AccessModule.PUBLICATION_CONFIRMATION]: {
     name: 'Publication Confirmation',
     'data-test-id': 'publication-confirmation-toggle',
+  },
+  [AccessModule.RAS_LINK_ID_ME]: {
+    name: 'RAS ID.ME Link',
+    'data-test-id': 'ras-link-id-me-toggle',
   },
 };
 

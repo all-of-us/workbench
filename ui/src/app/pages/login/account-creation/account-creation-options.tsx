@@ -43,32 +43,32 @@ export const AccountCreationOptions = {
     },
     {
       label: 'Early career tenure-track researcher',
-      value: InstitutionalRole.EARLYCAREER,
+      value: InstitutionalRole.EARLY_CAREER,
     },
     {
       label: 'Mid-career tenured researcher',
-      value: InstitutionalRole.MIDCAREER,
+      value: InstitutionalRole.MID_CAREER,
     },
     {
       label: 'Late career tenured researcher',
-      value: InstitutionalRole.LATECAREER,
+      value: InstitutionalRole.LATE_CAREER,
     },
     {
       label:
         'Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research Coordinator, or other roles)',
-      value: InstitutionalRole.PROJECTPERSONNEL,
+      value: InstitutionalRole.PROJECT_PERSONNEL,
     },
     {
       label: 'Research Assistant (pre-doctoral)',
-      value: InstitutionalRole.PREDOCTORAL,
+      value: InstitutionalRole.PRE_DOCTORAL,
     },
     {
       label: 'Research associate (post-doctoral; early/mid career)',
-      value: InstitutionalRole.POSTDOCTORAL,
+      value: InstitutionalRole.POST_DOCTORAL,
     },
     {
       label: 'Senior Researcher (PI/Team Lead, senior scientist)',
-      value: InstitutionalRole.SENIORRESEARCHER,
+      value: InstitutionalRole.SENIOR_RESEARCHER,
     },
     { label: 'Teacher/Instructor/Professor', value: InstitutionalRole.TEACHER },
     { label: 'Student', value: InstitutionalRole.STUDENT },
@@ -77,15 +77,15 @@ export const AccountCreationOptions = {
   ],
   institutionalRolesByOrganizationType: [
     {
-      type: OrganizationType.ACADEMICRESEARCHINSTITUTION,
+      type: OrganizationType.ACADEMIC_RESEARCH_INSTITUTION,
       roles: [
         InstitutionalRole.UNDERGRADUATE,
         InstitutionalRole.TRAINEE,
         InstitutionalRole.FELLOW,
-        InstitutionalRole.EARLYCAREER,
-        InstitutionalRole.MIDCAREER,
-        InstitutionalRole.LATECAREER,
-        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.EARLY_CAREER,
+        InstitutionalRole.MID_CAREER,
+        InstitutionalRole.LATE_CAREER,
+        InstitutionalRole.PROJECT_PERSONNEL,
         InstitutionalRole.OTHER,
       ],
     },
@@ -93,31 +93,31 @@ export const AccountCreationOptions = {
       type: OrganizationType.INDUSTRY,
       // identical to the HEALTHCENTERNONPROFIT roles
       roles: [
-        InstitutionalRole.PREDOCTORAL,
-        InstitutionalRole.POSTDOCTORAL,
-        InstitutionalRole.SENIORRESEARCHER,
-        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.PRE_DOCTORAL,
+        InstitutionalRole.POST_DOCTORAL,
+        InstitutionalRole.SENIOR_RESEARCHER,
+        InstitutionalRole.PROJECT_PERSONNEL,
         InstitutionalRole.OTHER,
       ],
     },
     {
-      type: OrganizationType.HEALTHCENTERNONPROFIT,
+      type: OrganizationType.HEALTH_CENTER_NON_PROFIT,
       // identical to the INDUSTRY roles
       roles: [
-        InstitutionalRole.PREDOCTORAL,
-        InstitutionalRole.POSTDOCTORAL,
-        InstitutionalRole.SENIORRESEARCHER,
-        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.PRE_DOCTORAL,
+        InstitutionalRole.POST_DOCTORAL,
+        InstitutionalRole.SENIOR_RESEARCHER,
+        InstitutionalRole.PROJECT_PERSONNEL,
         InstitutionalRole.OTHER,
       ],
     },
     {
-      type: OrganizationType.EDUCATIONALINSTITUTION,
+      type: OrganizationType.EDUCATIONAL_INSTITUTION,
       roles: [
         InstitutionalRole.TEACHER,
         InstitutionalRole.STUDENT,
         InstitutionalRole.ADMIN,
-        InstitutionalRole.PROJECTPERSONNEL,
+        InstitutionalRole.PROJECT_PERSONNEL,
         InstitutionalRole.OTHER,
       ],
     },
@@ -134,23 +134,23 @@ export const AccountCreationOptions = {
     { label: 'Native Hawaiian or Other Pacific Islander', value: Race.NHOPI },
     { label: 'White', value: Race.WHITE },
     { label: 'None of these describe me', value: Race.NONE },
-    { label: 'Prefer not to answer', value: Race.PREFERNOANSWER },
+    { label: 'Prefer not to answer', value: Race.PREFER_NO_ANSWER },
   ],
   ethnicity: [
     { label: 'Hispanic or Latino', value: Ethnicity.HISPANIC },
-    { label: 'Not Hispanic or Latino', value: Ethnicity.NOTHISPANIC },
-    { label: ' Prefer not to answer', value: Ethnicity.PREFERNOANSWER },
+    { label: 'Not Hispanic or Latino', value: Ethnicity.NOT_HISPANIC },
+    { label: ' Prefer not to answer', value: Ethnicity.PREFER_NO_ANSWER },
   ],
   genderIdentity: [
     { label: 'Man', value: GenderIdentity.MAN },
-    { label: 'Non-Binary', value: GenderIdentity.NONBINARY },
+    { label: 'Non-Binary', value: GenderIdentity.NON_BINARY },
     { label: 'Transgender', value: GenderIdentity.TRANSGENDER },
     { label: 'Woman', value: GenderIdentity.WOMAN },
     {
       label: 'None of these describe me',
-      value: GenderIdentity.NONEDESCRIBEME,
+      value: GenderIdentity.NONE_DESCRIBE_ME,
     },
-    { label: 'Prefer not to answer', value: GenderIdentity.PREFERNOANSWER },
+    { label: 'Prefer not to answer', value: GenderIdentity.PREFER_NO_ANSWER },
   ],
   sexAtBirth: [
     { label: 'Female', value: SexAtBirth.FEMALE },
@@ -158,18 +158,18 @@ export const AccountCreationOptions = {
     { label: 'Male', value: SexAtBirth.MALE },
     {
       label: 'None of these describe me',
-      value: SexAtBirth.NONEOFTHESEDESCRIBEME,
+      value: SexAtBirth.NONE_OF_THESE_DESCRIBE_ME,
     },
-    { label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER },
+    { label: 'Prefer not to answer', value: SexAtBirth.PREFER_NO_ANSWER },
   ],
   levelOfEducation: [
     {
       label: 'Never attended school/no formal education',
-      value: Education.NOEDUCATION,
+      value: Education.NO_EDUCATION,
     },
     {
       label: 'Primary/Middle School/High School (Grades 1 through 12/GED)',
-      value: Education.GRADES112,
+      value: Education.GRADES_1_12,
     },
     {
       label:
@@ -180,11 +180,11 @@ export const AccountCreationOptions = {
     {
       label:
         'College graduate (4 years or more) or current post-graduate trainee',
-      value: Education.COLLEGEGRADUATE,
+      value: Education.COLLEGE_GRADUATE,
     },
     { label: 'Master’s degree', value: Education.MASTER },
     { label: 'Doctorate', value: Education.DOCTORATE },
-    { label: 'Prefer not to answer', value: Education.PREFERNOANSWER },
+    { label: 'Prefer not to answer', value: Education.PREFER_NO_ANSWER },
   ],
   Years: [],
 };

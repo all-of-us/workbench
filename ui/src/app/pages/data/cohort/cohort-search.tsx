@@ -107,8 +107,8 @@ export function initGroup(role: string, items: any) {
     items,
     count: null,
     temporal: false,
-    mention: TemporalMention.ANYMENTION,
-    time: TemporalTime.DURINGSAMEENCOUNTERAS,
+    mention: TemporalMention.ANY_MENTION,
+    time: TemporalTime.DURING_SAME_ENCOUNTER_AS,
     timeValue: '',
     timeFrame: '',
     isRequesting: false,
@@ -133,7 +133,7 @@ export function saveCriteria(selections?: Array<Selection>) {
     currentCohortSearchContextStore.getValue();
   AnalyticsTracker.CohortBuilder.SaveCriteria(domainToTitle(domain));
   const searchRequest = searchRequestStore.getValue();
-  if (domain === Domain.CONCEPTSET || domain === Domain.CONCEPTQUICKADD) {
+  if (domain === Domain.CONCEPT_SET || domain === Domain.CONCEPT_QUICK_ADD) {
     item.type = selections[0]?.domainId;
   }
   item.searchParameters = selections || currentCohortCriteriaStore.getValue();
@@ -208,17 +208,17 @@ export const CohortSearch = fp.flow(
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
-      } else if (domain === Domain.WHOLEGENOMEVARIANT) {
+      } else if (domain === Domain.WHOLE_GENOME_VARIANT) {
         this.selectGenome();
-      } else if (domain === Domain.LRWHOLEGENOMEVARIANT) {
+      } else if (domain === Domain.LR_WHOLE_GENOME_VARIANT) {
         this.selectLongReadGenome();
-      } else if (domain === Domain.ARRAYDATA) {
+      } else if (domain === Domain.ARRAY_DATA) {
         this.selectArrayData();
-      } else if (domain === Domain.STRUCTURALVARIANTDATA) {
+      } else if (domain === Domain.STRUCTURAL_VARIANT_DATA) {
         this.selectStructuralVariantData();
-      } else if (domain === Domain.CONCEPTSET) {
+      } else if (domain === Domain.CONCEPT_SET) {
         this.setState({ showAddConceptSetModal: true });
-      } else if (domain === Domain.CONCEPTQUICKADD) {
+      } else if (domain === Domain.CONCEPT_QUICK_ADD) {
         this.setState({ showConceptQuickAddModal: true });
       } else {
         this.setState({ initCriteriaSearch: true });
@@ -396,7 +396,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Short Read WGS',
         group: false,
-        domainId: Domain.WHOLEGENOMEVARIANT.toString(),
+        domainId: Domain.WHOLE_GENOME_VARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
@@ -413,7 +413,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Long Read WGS',
         group: false,
-        domainId: Domain.LRWHOLEGENOMEVARIANT.toString(),
+        domainId: Domain.LR_WHOLE_GENOME_VARIANT.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
@@ -430,7 +430,7 @@ export const CohortSearch = fp.flow(
         type: '',
         name: 'Global Diversity Array',
         group: false,
-        domainId: Domain.ARRAYDATA.toString(),
+        domainId: Domain.ARRAY_DATA.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],
@@ -449,7 +449,7 @@ export const CohortSearch = fp.flow(
         type: CriteriaType.PPI.toString(),
         name: 'Structural Variant Data',
         group: false,
-        domainId: Domain.STRUCTURALVARIANTDATA.toString(),
+        domainId: Domain.STRUCTURAL_VARIANT_DATA.toString(),
         hasAttributes: false,
         selectable: true,
         attributes: [],

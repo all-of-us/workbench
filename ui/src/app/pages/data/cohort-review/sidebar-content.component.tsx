@@ -239,7 +239,7 @@ const AnnotationItem = fp.flow(
         readValue(annotationType, annotation),
       ])[0];
       const disabled =
-        accessLevel === WorkspaceAccessLevel.NOACCESS ||
+        accessLevel === WorkspaceAccessLevel.NO_ACCESS ||
         accessLevel === WorkspaceAccessLevel.READER;
       switch (annotationType) {
         case AnnotationType.INTEGER:
@@ -499,7 +499,7 @@ export const SidebarContent = fp.flow(
         editingDefinitions,
       } = this.state;
       const disabled =
-        accessLevel === WorkspaceAccessLevel.NOACCESS ||
+        accessLevel === WorkspaceAccessLevel.NO_ACCESS ||
         accessLevel === WorkspaceAccessLevel.READER;
       const annotationsExist =
         annotationDefinitions && annotationDefinitions.length > 0;
@@ -537,12 +537,12 @@ export const SidebarContent = fp.flow(
           >
             <Select
               options={[
-                { label: '--', value: CohortStatus.NOTREVIEWED },
+                { label: '--', value: CohortStatus.NOT_REVIEWED },
                 { label: 'Excluded', value: CohortStatus.EXCLUDED },
                 { label: 'Included', value: CohortStatus.INCLUDED },
                 {
                   label: 'Needs Further Review',
-                  value: CohortStatus.NEEDSFURTHERREVIEW,
+                  value: CohortStatus.NEEDS_FURTHER_REVIEW,
                 },
               ]}
               value={savingStatus || status}

@@ -404,7 +404,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       style={{ paddingTop: '1em' }}
       value={tableData}
       footer={
-        getAccessModuleConfig(AccessModule.ERACOMMONS)
+        getAccessModuleConfig(AccessModule.ERA_COMMONS)
           .isEnabledInEnvironment && (
           <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
             {getEraNote(updatedProfile)}

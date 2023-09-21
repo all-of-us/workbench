@@ -175,7 +175,7 @@ export const getAccessModuleConfig = (
     moduleName,
 
     [
-      AccessModule.TWOFACTORAUTH,
+      AccessModule.TWO_FACTOR_AUTH,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -219,7 +219,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.ERACOMMONS,
+      AccessModule.ERA_COMMONS,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableEraCommons,
@@ -232,7 +232,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.COMPLIANCETRAINING,
+      AccessModule.COMPLIANCE_TRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -256,7 +256,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.CTCOMPLIANCETRAINING,
+      AccessModule.CT_COMPLIANCE_TRAINING,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: enableComplianceTraining,
@@ -280,7 +280,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.DATAUSERCODEOFCONDUCT,
+      AccessModule.DATA_USER_CODE_OF_CONDUCT,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -292,7 +292,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PROFILECONFIRMATION,
+      AccessModule.PROFILE_CONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -303,7 +303,7 @@ export const getAccessModuleConfig = (
     ],
 
     [
-      AccessModule.PUBLICATIONCONFIRMATION,
+      AccessModule.PUBLICATION_CONFIRMATION,
       () => ({
         ...apiConfig,
         isEnabledInEnvironment: true,
@@ -324,10 +324,10 @@ export const getAccessModuleConfig = (
 
 // the modules subject to Registered Tier Annual Access Renewal (AAR), in the order shown on the AAR page.
 export const rtAccessRenewalModules = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
-  AccessModule.DATAUSERCODEOFCONDUCT,
+  AccessModule.PROFILE_CONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
+  AccessModule.COMPLIANCE_TRAINING,
+  AccessModule.DATA_USER_CODE_OF_CONDUCT,
 ];
 
 export const wasReferredFromRenewal = (queryParams): boolean => {
@@ -391,7 +391,7 @@ export const useIsUserDisabled = () => {
           }
         } catch (e) {
           const errorResponse = await convertAPIError(e);
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED && mounted) {
+          if (errorResponse.errorCode === ErrorCode.USER_DISABLED && mounted) {
             setDisabled(true);
           }
         }
@@ -497,9 +497,9 @@ export const isExpiringOrExpired = (
   expiration: number,
   module: AccessModule
 ): boolean => {
-  const trainingModules = [
-    AccessModule.COMPLIANCETRAINING,
-    AccessModule.CTCOMPLIANCETRAINING,
+  const trainingModules: Array<AccessModule> = [
+    AccessModule.COMPLIANCE_TRAINING,
+    AccessModule.CT_COMPLIANCE_TRAINING,
   ];
   const lookback = trainingModules.includes(module)
     ? serverConfigStore.get().config.complianceTrainingRenewalLookback
@@ -618,9 +618,9 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
   // Calling both can cause conflicts, so we need to remove one.
   // We choose to remove CT arbitrarily.
   const filteredModuleNames = moduleNames.includes(
-    AccessModule.COMPLIANCETRAINING
+    AccessModule.COMPLIANCE_TRAINING
   )
-    ? moduleNames.filter((m) => m !== AccessModule.CTCOMPLIANCETRAINING)
+    ? moduleNames.filter((m) => m !== AccessModule.CT_COMPLIANCE_TRAINING)
     : moduleNames;
 
   return Promise.all(
@@ -641,7 +641,7 @@ export const isCompliant = (status: AccessModuleStatus) =>
   isCompleted(status) || isBypassed(status);
 
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
-  if (module !== AccessModule.CTCOMPLIANCETRAINING) {
+  if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
     // Currently a user can only be ineligible for CT modules.
     // Note: eRA Commons is an edge case which is handled elsewhere. It is
     // technically also possible for CT eRA commons to be ineligible.

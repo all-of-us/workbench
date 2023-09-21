@@ -421,43 +421,43 @@ export interface SpecificPopulationItem {
 export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
   {
     label: 'Race/Ethnicity',
-    shortName: SpecificPopulationEnum.RACEETHNICITY,
+    shortName: SpecificPopulationEnum.RACE_ETHNICITY,
     ubrLabel: 'Ancestry (Race/Ethnicity)',
     ubrDescription:
       'American Indian and Alaska Native (AIAN); Black, African American, or ' +
       'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
       'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)',
     subCategory: [
-      { label: 'Asian', shortName: SpecificPopulationEnum.RACEASIAN },
+      { label: 'Asian', shortName: SpecificPopulationEnum.RACE_ASIAN },
       {
         label: 'Black, African, or African American',
-        shortName: SpecificPopulationEnum.RACEAA,
+        shortName: SpecificPopulationEnum.RACE_AA,
       },
       {
         label: 'Hispanic, Latino, or Spanish',
-        shortName: SpecificPopulationEnum.RACEHISPANIC,
+        shortName: SpecificPopulationEnum.RACE_HISPANIC,
       },
       {
         label: 'American Indian or Alaska Native (AIAN)',
-        shortName: SpecificPopulationEnum.RACEAIAN,
+        shortName: SpecificPopulationEnum.RACE_AIAN,
       },
       {
         label: 'Middle Eastern or North African (MENA)',
-        shortName: SpecificPopulationEnum.RACEMENA,
+        shortName: SpecificPopulationEnum.RACE_MENA,
       },
       {
         label: 'Native Hawaiian or Pacific Islander (NHPI)',
-        shortName: SpecificPopulationEnum.RACENHPI,
+        shortName: SpecificPopulationEnum.RACE_NHPI,
       },
       {
         label: 'Multi-Ancestry or more than one race',
-        shortName: SpecificPopulationEnum.RACEMORETHANONE,
+        shortName: SpecificPopulationEnum.RACE_MORE_THAN_ONE,
       },
     ],
   },
   {
     label: 'Age Groups',
-    shortName: SpecificPopulationEnum.AGEGROUPS,
+    shortName: SpecificPopulationEnum.AGE_GROUPS,
     ubrLabel: 'Age',
     ubrDescription:
       'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older ' +
@@ -465,19 +465,19 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
     subCategory: [
       {
         label: 'Children (0-11)',
-        shortName: SpecificPopulationEnum.AGECHILDREN,
+        shortName: SpecificPopulationEnum.AGE_CHILDREN,
       },
       {
         label: 'Adolescents (12-17) ',
-        shortName: SpecificPopulationEnum.AGEADOLESCENTS,
+        shortName: SpecificPopulationEnum.AGE_ADOLESCENTS,
       },
       {
         label: 'Older adults (65-74)',
-        shortName: SpecificPopulationEnum.AGEOLDER,
+        shortName: SpecificPopulationEnum.AGE_OLDER,
       },
       {
         label: 'Older adults (75+) ',
-        shortName: SpecificPopulationEnum.AGEOLDERMORETHAN75,
+        shortName: SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75,
       },
     ],
   },
@@ -497,7 +497,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
   },
   {
     label: 'Gender Identity',
-    shortName: SpecificPopulationEnum.GENDERIDENTITY,
+    shortName: SpecificPopulationEnum.GENDER_IDENTITY,
     ubrLabel: 'Gender Identity (GI)',
     ubrDescription: 'Nonbinary; Transgender; or Other Gender Identity Choices',
     subCategory: [
@@ -505,13 +505,13 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
         label:
           'Participants who identify as gender variant, non-binary, transgender, or something ' +
           'else other than man or woman ',
-        shortName: SpecificPopulationEnum.GENDERIDENTITY,
+        shortName: SpecificPopulationEnum.GENDER_IDENTITY,
       },
     ],
   },
   {
     label: 'Sexual Orientation',
-    shortName: SpecificPopulationEnum.SEXUALORIENTATION,
+    shortName: SpecificPopulationEnum.SEXUAL_ORIENTATION,
     ubrLabel: 'Sexual Orientation (SO)',
     ubrDescription:
       'Gay; Lesbian; Bisexual; Queer; Other Sexual Orientation Choices',
@@ -520,7 +520,7 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
         label:
           'Participants who identify as asexual, bisexual, gay or lesbian, or something else ' +
           'other than straight ',
-        shortName: SpecificPopulationEnum.SEXUALORIENTATION,
+        shortName: SpecificPopulationEnum.SEXUAL_ORIENTATION,
       },
     ],
   },
@@ -538,52 +538,52 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
   },
   {
     label: 'Disability status',
-    shortName: SpecificPopulationEnum.DISABILITYSTATUS,
+    shortName: SpecificPopulationEnum.DISABILITY_STATUS,
     ubrLabel: 'Disability Status',
     ubrDescription: 'Physical and Cognitive Disabilities',
     subCategory: [
       {
         label: 'Participants with a physical and/or cognitive disability',
-        shortName: SpecificPopulationEnum.DISABILITYSTATUS,
+        shortName: SpecificPopulationEnum.DISABILITY_STATUS,
       },
     ],
   },
   {
     label: 'Access to care',
-    shortName: SpecificPopulationEnum.ACCESSTOCARE,
+    shortName: SpecificPopulationEnum.ACCESS_TO_CARE,
     ubrLabel: 'Access to Care',
     ubrDescription:
       'Limited access to care; Cannot easily obtain or access medical care',
     subCategory: [
       {
         label: 'Participants who cannot easily obtain or access medical care',
-        shortName: SpecificPopulationEnum.ACCESSTOCARE,
+        shortName: SpecificPopulationEnum.ACCESS_TO_CARE,
       },
     ],
   },
   {
     label: 'Education level',
-    shortName: SpecificPopulationEnum.EDUCATIONLEVEL,
+    shortName: SpecificPopulationEnum.EDUCATION_LEVEL,
     ubrLabel: 'Educational Attainment',
     ubrDescription:
       'Less than high school graduate or General Education Development (GED)',
     subCategory: [
       {
         label: 'Participants with less than a high school degree or equivalent',
-        shortName: SpecificPopulationEnum.EDUCATIONLEVEL,
+        shortName: SpecificPopulationEnum.EDUCATION_LEVEL,
       },
     ],
   },
   {
     label: 'Income level',
-    shortName: SpecificPopulationEnum.INCOMELEVEL,
+    shortName: SpecificPopulationEnum.INCOME_LEVEL,
     ubrLabel: 'Income Level',
     ubrDescription: 'Less than USD 25,000 [for a family of four]',
     subCategory: [
       {
         label:
           'Participants with household incomes equal to or below 200% of the Federal Poverty Level',
-        shortName: SpecificPopulationEnum.INCOMELEVEL,
+        shortName: SpecificPopulationEnum.INCOME_LEVEL,
       },
     ],
   },
@@ -592,33 +592,33 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
 export const disseminateFindings = [
   {
     label: 'Publication in peer-reviewed scientific journals',
-    shortName: DisseminateResearchEnum.PUBLICATIONPEERREVIEWEDJOURNALS,
+    shortName: DisseminateResearchEnum.PUBLICATION_PEER_REVIEWED_JOURNALS,
   },
   {
     label: 'Social media (Facebook, Instagram, Twitter)',
-    shortName: DisseminateResearchEnum.SOCIALMEDIA,
+    shortName: DisseminateResearchEnum.SOCIAL_MEDIA,
   },
   {
     label: 'Presentation at national or international scientific conferences',
-    shortName: DisseminateResearchEnum.PRESENATATIONSCIENTIFICCONFERENCES,
+    shortName: DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES,
   },
   {
     label:
       'Presentation at community forums or advisory groups (such as town halls, advocacy group ' +
       'meetings, or community advisory boards)',
-    shortName: DisseminateResearchEnum.PRESENTATIONADVISORYGROUPS,
+    shortName: DisseminateResearchEnum.PRESENTATION_ADVISORY_GROUPS,
   },
   {
     label: 'Press release or media article covering scientific publication',
-    shortName: DisseminateResearchEnum.PRESSRELEASE,
+    shortName: DisseminateResearchEnum.PRESS_RELEASE,
   },
   {
     label: 'Publication in community-based journals or blog',
-    shortName: DisseminateResearchEnum.PUBLICATIONCOMMUNITYBASEDBLOG,
+    shortName: DisseminateResearchEnum.PUBLICATION_COMMUNITY_BASED_BLOG,
   },
   {
     label: 'Publication of article in a personal blog',
-    shortName: DisseminateResearchEnum.PUBLICATIONPERSONALBLOG,
+    shortName: DisseminateResearchEnum.PUBLICATION_PERSONAL_BLOG,
   },
   { label: 'Other', shortName: DisseminateResearchEnum.OTHER },
 ];
@@ -628,35 +628,35 @@ export const researchOutcomes = [
     label:
       'This research project seeks to increase wellness and resilience, and promote ' +
       'healthy living',
-    shortName: ResearchOutcomeEnum.PROMOTEHEALTHYLIVING,
+    shortName: ResearchOutcomeEnum.PROMOTE_HEALTHY_LIVING,
   },
   {
     label:
       'This research project seeks to reduce health disparities and improve health equity ' +
       'in underrepresented in biomedical research (UBR) populations',
-    shortName: ResearchOutcomeEnum.IMPROVEHEALTHEQUALITYUBRPOPULATIONS,
+    shortName: ResearchOutcomeEnum.IMPROVE_HEALTH_EQUALITY_UBR_POPULATIONS,
   },
   {
     label:
       'This research project seeks to develop improved risk assessment and prevention ' +
       'strategies to preempt disease',
-    shortName: ResearchOutcomeEnum.IMPROVEDRISKASSESMENT,
+    shortName: ResearchOutcomeEnum.IMPROVED_RISK_ASSESMENT,
   },
   {
     label:
       'This research project seeks to provide earlier and more accurate diagnosis to ' +
       'decrease illness burden',
-    shortName: ResearchOutcomeEnum.DECREASEILLNESSBURDEN,
+    shortName: ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN,
   },
   {
     label:
       'This research project seeks to improve health outcomes and reduce disease/illness burden' +
       ' through improved treatment and development of precision intervention',
-    shortName: ResearchOutcomeEnum.PRECISIONINTERVENTION,
+    shortName: ResearchOutcomeEnum.PRECISION_INTERVENTION,
   },
   {
     label: 'None of these statements apply to this research project',
-    shortName: ResearchOutcomeEnum.NONEAPPLY,
+    shortName: ResearchOutcomeEnum.NONE_APPLY,
   },
 ];
 

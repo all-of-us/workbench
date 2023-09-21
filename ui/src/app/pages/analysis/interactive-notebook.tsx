@@ -335,18 +335,18 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private renderNotebookText() {
-      const { status = RuntimeStatus.Unknown } =
+      const { status = RuntimeStatus.UNKNOWN } =
         this.props.runtimeStore.runtime || {};
       switch (status) {
-        case RuntimeStatus.Starting:
-        case RuntimeStatus.Stopping:
-        case RuntimeStatus.Stopped:
+        case RuntimeStatus.STARTING:
+        case RuntimeStatus.STOPPING:
+        case RuntimeStatus.STOPPED:
           return 'Resuming your Jupyter environment. This may take up to 1 minute.';
-        case RuntimeStatus.Deleting:
-        case RuntimeStatus.Creating:
-        case RuntimeStatus.Deleted:
+        case RuntimeStatus.DELETING:
+        case RuntimeStatus.CREATING:
+        case RuntimeStatus.DELETED:
           return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
-        case RuntimeStatus.Error:
+        case RuntimeStatus.ERROR:
           return (
             'Error creating your analysis environment. Please delete or ' +
             'recreate via the compute configuration panel in the sidebar.'

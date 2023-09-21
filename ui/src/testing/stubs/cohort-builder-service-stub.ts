@@ -18,8 +18,6 @@ import {
   SurveyVersionListResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class SurveyStubVariables {
   static STUB_SURVEYS: SurveyModule[] = [
     {
@@ -108,7 +106,7 @@ export const CriteriaStubVariables: Criteria[] = [
   {
     id: 1,
     parentId: 0,
-    type: CriteriaType.ICD9CM.toString(),
+    type: CriteriaType.ICD9_CM.toString(),
     subtype: '',
     code: '123',
     name: 'Test',
@@ -149,7 +147,7 @@ export const CriteriaWithAttributesStubVariables: Criteria[] = [
     code: '',
     conceptId: 903133,
     count: 197614,
-    domainId: Domain.PHYSICALMEASUREMENT.toString(),
+    domainId: Domain.PHYSICAL_MEASUREMENT.toString(),
     group: false,
     hasAncestorData: false,
     hasAttributes: true,
@@ -170,7 +168,7 @@ export const CriteriaWithAttributesStubVariables: Criteria[] = [
     code: '',
     conceptId: null,
     count: 196156,
-    domainId: Domain.PHYSICALMEASUREMENT.toString(),
+    domainId: Domain.PHYSICAL_MEASUREMENT.toString(),
     group: false,
     hasAncestorData: false,
     hasAttributes: true,
@@ -403,9 +401,7 @@ export const SurveyQuestionStubVariables = {
 
 export class CohortBuilderServiceStub extends CohortBuilderApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   findDemoChartInfo(): Promise<DemoChartInfoListResponse> {

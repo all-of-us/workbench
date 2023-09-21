@@ -72,7 +72,7 @@ export const DataProcConfigSelector = ({
   // one-off resume->update workflow into Workbench, just disable the control
   // and let the user resume themselves.
   const workerCountDisabledByStopped =
-    dataprocExists && runtimeStatus === RuntimeStatus.Stopped;
+    dataprocExists && runtimeStatus === RuntimeStatus.STOPPED;
   const workerCountTooltip = workerCountDisabledByStopped
     ? 'Cannot update worker counts on a stopped Dataproc environment, please start your environment first.'
     : undefined;

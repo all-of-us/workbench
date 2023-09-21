@@ -16,23 +16,26 @@ enum AuthorityGuardedAction {
 }
 
 // The full set of Authorities which guard admin-menu actions
-const adminMenuAuthorities = new Set([
-  Authority.ACCESSCONTROLADMIN,
-  Authority.RESEARCHERDATAVIEW,
-  Authority.COMMUNICATIONSADMIN,
-  Authority.INSTITUTIONADMIN,
-  Authority.SECURITYADMIN,
+const adminMenuAuthorities: Set<Authority> = new Set([
+  Authority.ACCESS_CONTROL_ADMIN,
+  Authority.RESEARCHER_DATA_VIEW,
+  Authority.COMMUNICATIONS_ADMIN,
+  Authority.INSTITUTION_ADMIN,
+  Authority.SECURITY_ADMIN,
 ]);
 
 const authorityByPage: Map<AuthorityGuardedAction, Authority> = new Map([
-  [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITYADMIN],
-  [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESSCONTROLADMIN],
-  [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESSCONTROLADMIN],
-  [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHERDATAVIEW],
-  [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHERDATAVIEW],
-  [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONSADMIN],
-  [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTIONADMIN],
-  [AuthorityGuardedAction.PUBLISH_WORKSPACE, Authority.FEATUREDWORKSPACEADMIN],
+  [AuthorityGuardedAction.EGRESS_EVENTS, Authority.SECURITY_ADMIN],
+  [AuthorityGuardedAction.USER_ADMIN, Authority.ACCESS_CONTROL_ADMIN],
+  [AuthorityGuardedAction.USER_AUDIT, Authority.ACCESS_CONTROL_ADMIN],
+  [AuthorityGuardedAction.WORKSPACE_ADMIN, Authority.RESEARCHER_DATA_VIEW],
+  [AuthorityGuardedAction.WORKSPACE_AUDIT, Authority.RESEARCHER_DATA_VIEW],
+  [AuthorityGuardedAction.SERVICE_BANNER, Authority.COMMUNICATIONS_ADMIN],
+  [AuthorityGuardedAction.INSTITUTION_ADMIN, Authority.INSTITUTION_ADMIN],
+  [
+    AuthorityGuardedAction.PUBLISH_WORKSPACE,
+    Authority.FEATURED_WORKSPACE_ADMIN,
+  ],
 ]);
 
 const hasAuthorityForAction = (

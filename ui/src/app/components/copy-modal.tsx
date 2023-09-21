@@ -41,7 +41,7 @@ enum RequestState {
 const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.NOTEBOOK, analysisTabName)
   .set(ResourceType.COHORT, 'data')
-  .set(ResourceType.CONCEPTSET, 'data')
+  .set(ResourceType.CONCEPT_SET, 'data')
   .set(ResourceType.DATASET, 'data');
 
 export interface CopyModalProps {
@@ -291,7 +291,7 @@ const CopyModal = withCdrVersions()(
           <ModalTitle style={{ marginBottom: '0.75rem' }}>
             Copy to Workspace
           </ModalTitle>
-          {resourceType === ResourceType.CONCEPTSET && (
+          {resourceType === ResourceType.CONCEPT_SET && (
             <ConceptSetRestrictionText />
           )}
           {resourceType === ResourceType.NOTEBOOK && (
@@ -420,7 +420,7 @@ const CopyModal = withCdrVersions()(
       const accessTierMismatch: boolean =
         fromAccessTierShortName !== destination.accessTierShortName;
       const isNotebook: boolean = resourceType === ResourceType.NOTEBOOK;
-      const isConceptSet: boolean = resourceType === ResourceType.CONCEPTSET;
+      const isConceptSet: boolean = resourceType === ResourceType.CONCEPT_SET;
 
       cond(
         [
@@ -477,7 +477,7 @@ const CopyModal = withCdrVersions()(
           {accessTierMismatch && (
             <AccessTierMismatch text={accessTierMismatch} />
           )}
-          {this.showCdrMismatch(ResourceType.CONCEPTSET) && (
+          {this.showCdrMismatch(ResourceType.CONCEPT_SET) && (
             <ConceptSetCdrMismatch text={cdrMismatch} />
           )}
           <div style={headerStyles.formLabel}>Name *</div>

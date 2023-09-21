@@ -24,7 +24,7 @@ const fakeCromwellConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 50000,
-    diskType: DiskType.Ssd,
+    diskType: DiskType.SSD,
   },
 };
 
@@ -74,7 +74,7 @@ describe('User Apps Helper functions', () => {
       .mockImplementation(
         () =>
           new Promise<ListAppsResponse>(() => [
-            { status: RuntimeStatus.Running, appType: AppType.CROMWELL },
+            { status: RuntimeStatus.RUNNING, appType: AppType.CROMWELL },
           ])
       );
     await userAppsUtils.maybeStartPollingForUserApps('fakeNameSpace');

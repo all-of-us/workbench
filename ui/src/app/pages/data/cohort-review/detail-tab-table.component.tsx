@@ -188,7 +188,7 @@ const domains = [
   Domain.PROCEDURE,
   Domain.DRUG,
   Domain.OBSERVATION,
-  Domain.PHYSICALMEASUREMENT,
+  Domain.PHYSICAL_MEASUREMENT,
   Domain.LAB,
   Domain.VITAL,
 ];
@@ -397,7 +397,7 @@ export const DetailTabTable = fp.flow(
           const pageFilterRequest = {
             page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
             pageSize: lazyLoadSize,
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortOrder: sortOrder === 1 ? SortOrder.ASC : SortOrder.DESC,
             sortColumn: columns.find((col) => col.name === sortField).filter,
             domain,
             filters: lazyLoad ? filters : { items: [] },
@@ -486,7 +486,7 @@ export const DetailTabTable = fp.flow(
           const pageFilterRequest = {
             page: requestPage,
             pageSize: lazyLoadSize,
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortOrder: sortOrder === 1 ? SortOrder.ASC : SortOrder.DESC,
             sortColumn: columns.find((col) => col.name === sortField).filter,
             domain: domain,
             filters,
@@ -796,7 +796,7 @@ export const DetailTabTable = fp.flow(
       }
       if (
         domain !== Domain.SURVEY &&
-        domain !== Domain.PHYSICALMEASUREMENT &&
+        domain !== Domain.PHYSICAL_MEASUREMENT &&
         visits
       ) {
         data = data.filter((item) => visits === item.visitType);

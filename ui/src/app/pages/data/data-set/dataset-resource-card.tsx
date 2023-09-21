@@ -76,7 +76,7 @@ export const DatasetResourceCard = fp.flow(
       const { resource, inactiveBilling } = this.props;
       const enableExtraction = (
         resource.dataSet.prePackagedConceptSet || []
-      ).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
+      ).includes(PrePackagedConceptSetEnum.WHOLE_GENOME);
       return [
         {
           icon: 'pencil',

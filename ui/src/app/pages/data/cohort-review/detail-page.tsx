@@ -62,7 +62,7 @@ export const DetailPage = fp.flow(
         const request = {
           page: 0,
           pageSize: 25,
-          sortOrder: SortOrder.Asc,
+          sortOrder: SortOrder.ASC,
           filters: { items: [] },
         };
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(

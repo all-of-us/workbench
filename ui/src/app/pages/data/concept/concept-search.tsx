@@ -351,8 +351,8 @@ export const ConceptSearch = fp.flow(
 
     get displayDomainName() {
       const { conceptSet } = this.state;
-      return conceptSet.domain === Domain.PHYSICALMEASUREMENT ||
-        conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS
+      return conceptSet.domain === Domain.PHYSICAL_MEASUREMENT ||
+        conceptSet.domain === Domain.PHYSICAL_MEASUREMENT_CSS
         ? 'Physical Measurements'
         : fp.capitalize(conceptSet.domain.toString());
     }
@@ -370,9 +370,12 @@ export const ConceptSearch = fp.flow(
       return (
         !concept ||
         !unsavedChanges ||
-        ![WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER].includes(
-          accessLevel
-        )
+        !(
+          [
+            WorkspaceAccessLevel.OWNER,
+            WorkspaceAccessLevel.WRITER,
+          ] as Array<WorkspaceAccessLevel>
+        ).includes(accessLevel)
       );
     }
 
@@ -446,7 +449,7 @@ export const ConceptSearch = fp.flow(
         {
           editName: nameValidationFormat(
             existingNames,
-            ResourceType.CONCEPTSET
+            ResourceType.CONCEPT_SET
           ),
           editDescription: { length: { maximum: 1000 } },
         }
@@ -638,7 +641,7 @@ export const ConceptSearch = fp.flow(
               closeFunction={() => this.setState({ deleting: false })}
               receiveDelete={() => this.onDeleteConceptSet()}
               resourceName={conceptSet.name}
-              resourceType={ResourceType.CONCEPTSET}
+              resourceType={ResourceType.CONCEPT_SET}
             />
           )}
           {error && (
@@ -661,7 +664,7 @@ export const ConceptSearch = fp.flow(
               fromResourceName={conceptSet.name}
               fromCdrVersionId={cdrVersionId}
               fromAccessTierShortName={accessTierShortName}
-              resourceType={ResourceType.CONCEPTSET}
+              resourceType={ResourceType.CONCEPT_SET}
               onClose={() => this.setState({ copying: false })}
               onCopy={() => this.setState({ copySaving: false })}
               saveFunction={(copyRequest: CopyRequest) =>

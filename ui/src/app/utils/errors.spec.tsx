@@ -23,7 +23,7 @@ describe('defaultErrorResponseFormatter', () => {
     ],
     [
       'an error code is present',
-      { responseJson: { errorCode: ErrorCode.USERDISABLED } },
+      { responseJson: { errorCode: ErrorCode.USER_DISABLED } },
       'An API error of type USER_DISABLED occurred.',
     ],
     [
@@ -45,7 +45,7 @@ describe('defaultErrorResponseFormatter', () => {
       {
         originalResponse: { status: 404, statusText: 'Not Found' },
         responseJson: {
-          errorCode: ErrorCode.USERDISABLED,
+          errorCode: ErrorCode.USER_DISABLED,
           errorUniqueId: 'abcdef',
           message: 'You do not have access to workspace my-test-data',
         },
