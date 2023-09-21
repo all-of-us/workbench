@@ -4,8 +4,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
@@ -30,7 +28,6 @@ import {
   conceptSetsV2Api,
   reviewsV2Api,
 } from 'app/services/tanagra-swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
@@ -125,18 +122,6 @@ export const TanagraResourceList = fp.flow(
 
     const cdrVersion = findCdrVersion(r.cdrVersionId, cdrVersionTiersResponse);
     return cdrVersion?.name;
-  };
-
-  const addAdminLockToNameColumn = () => {
-    return (
-      <TooltipTrigger content={<div>Workspace compliance action required</div>}>
-        <FontAwesomeIcon
-          style={{ color: colors.warning, marginRight: '0.75rem' }}
-          size={'sm'}
-          icon={faLockAlt}
-        />
-      </TooltipTrigger>
-    );
   };
 
   const deleteResource = async (resource: TanagraWorkspaceResource) => {
@@ -240,7 +225,6 @@ export const TanagraResourceList = fp.flow(
   const displayResourceName = (rowData) => {
     const {
       resource: {
-        adminLocked,
         cohortV2,
         conceptSetV2,
         reviewV2,
@@ -270,7 +254,6 @@ export const TanagraResourceList = fp.flow(
     return (
       <Clickable>
         <RouterLink to={url} style={styles.navigation}>
-          {adminLocked && addAdminLockToNameColumn()}
           <TooltipTrigger content={displayName}>
             <span>{displayName}</span>
           </TooltipTrigger>
