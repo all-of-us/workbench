@@ -281,6 +281,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                 interactiveAnalysisService.localize(
                     workspaceNamespace,
                     userProvider.get().getRuntimeName(),
+                    null,
                     body.getNotebookNames(),
                     body.getPlaygroundMode(),
                     true)));

@@ -116,6 +116,7 @@ public class AppsController implements AppsApiDelegate {
                 interactiveAnalysisService.localize(
                     workspaceNamespace,
                     appName,
+                    body.getAppType(),
                     body.getFileNames(),
                     body.getPlaygroundMode(),
                     false)));

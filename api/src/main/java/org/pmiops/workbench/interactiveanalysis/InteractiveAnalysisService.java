@@ -7,9 +7,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -17,9 +19,11 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -54,6 +58,7 @@ public class InteractiveAnalysisService {
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
 
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "\\.(Rmd|R)$";
+  @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.(sas)$";
 
   @Autowired
   public InteractiveAnalysisService(
@@ -74,6 +79,7 @@ public class InteractiveAnalysisService {
   public String localize(
       String workspaceNamespace,
       String appName,
+      @Nullable AppType appType,
       List<String> fileNames,
       boolean isPlayground,
       boolean isGceRuntime) {
@@ -112,26 +118,29 @@ public class InteractiveAnalysisService {
         isGceRuntime ? "workspaces_playground/" + workspacePath : "workspaces_playground";
     String targetDir = isPlayground ? playgroundDir : editDir;
 
+    var storageLink =
+        new StorageLink()
+            .cloudStorageDirectory(gcsNotebooksDir)
+            .localBaseDirectory(editDir)
+            .localSafeModeBaseDirectory(playgroundDir);
+
     if (isGceRuntime) {
-      leonardoNotebooksClient.createStorageLinkForRuntime(
-          googleProjectId,
-          appName,
-          new StorageLink()
-              .cloudStorageDirectory(gcsNotebooksDir)
-              .localBaseDirectory(editDir)
-              .localSafeModeBaseDirectory(playgroundDir)
-              .pattern(JUPYTER_DELOC_PATTERN));
+      storageLink.setPattern(JUPYTER_DELOC_PATTERN);
+    } else if (AppType.RSTUDIO.equals(appType)) {
+      storageLink.setPattern(RSTUDIO_DELOC_PATTERN);
+    } else if (AppType.SAS.equals(appType)) {
+      storageLink.setPattern(SAS_DELOC_PATTERN);
+    } else {
+      throw new NotImplementedException(
+          String.format("Localizing is not yet supported for app type %s", Optional.ofNullable(appType)));
+    }
+
+    if (isGceRuntime) {
+      leonardoNotebooksClient.createStorageLinkForRuntime(googleProjectId, appName, storageLink);
     } else {
       // For now if the request is not for GCE runtime, that would be RStudio. When supporting more
       // apps, consider to use AppType.
-      leonardoNotebooksClient.createStorageLinkForApp(
-          googleProjectId,
-          appName,
-          new StorageLink()
-              .cloudStorageDirectory(gcsNotebooksDir)
-              .localBaseDirectory(editDir)
-              .localSafeModeBaseDirectory(playgroundDir)
-              .pattern(RSTUDIO_DELOC_PATTERN));
+      leonardoNotebooksClient.createStorageLinkForApp(googleProjectId, appName, storageLink);
     }
 
     // Always localize config files; usually a no-op after the first call.
