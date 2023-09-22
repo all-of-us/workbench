@@ -58,7 +58,7 @@ public class InteractiveAnalysisService {
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
 
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "\\.(Rmd|R)$";
-  @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.(sas)$";
+  @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.sas$";
 
   @Autowired
   public InteractiveAnalysisService(

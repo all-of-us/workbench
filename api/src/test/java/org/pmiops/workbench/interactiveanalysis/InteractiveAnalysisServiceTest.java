@@ -247,10 +247,11 @@ public class InteractiveAnalysisServiceTest {
 
   @Test
   public void testLocalize_appType_not_supported() {
+    var unsupportedAppType = AppType.CROMWELL;
     assertThrows(
         NotImplementedException.class,
         () ->
             interactiveAnalysisService.localize(
-                WORKSPACE_NS, APP_NAME, AppType.CROMWELL, Collections.emptyList(), false, false));
+                WORKSPACE_NS, APP_NAME, unsupportedAppType, Collections.emptyList(), false, false));
   }
 }
