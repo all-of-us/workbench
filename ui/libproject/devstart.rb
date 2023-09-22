@@ -8,7 +8,6 @@ require_relative "../../aou-utils/workbench"
 require_relative "../../api/libproject/environments"
 require_relative "../../api/libproject/gcloudcontext"
 require_relative "../../api/libproject/wboptionsparser"
-
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 class Options < OpenStruct
