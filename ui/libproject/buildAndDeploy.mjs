@@ -62,25 +62,25 @@ function  isEmpty(value) {
 async function runCommand(cmd) {
   console.log('Going to run the command: ' + cmd);
   try {
-    const executed_cmd = spawn("which", ['gsutil']);
-    executed_cmd.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    executed_cmd.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
-
-    executed_cmd.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
-    // spawn(cmd, (err, stdout, stderr) => {
-    //   if (err) {
-    //     console.error("Is this an error: ", err);
-    //   }
-    //   console.log(stdout.toString('utf8'));
-    //   console.log("Stderr: ", stderr.toString('utf8'));
+    // const executed_cmd = spawn("which", ['gsutil']);
+    // executed_cmd.stdout.on('data', (data) => {
+    //   console.log(`stdout: ${data}`);
     // });
+    //
+    // executed_cmd.stderr.on('data', (data) => {
+    //   console.error(`stderr: ${data}`);
+    // });
+    //
+    // executed_cmd.on('close', (code) => {
+    //   console.log(`child process exited with code ${code}`);
+    // });
+    spawn(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error("Is this an error: ", err);
+      }
+      console.log(stdout.toString('utf8'));
+      console.log("Stderr: ", stderr.toString('utf8'));
+    });
   } catch (e) {
     console.log("Error while running command ", e.stderr.toString());
   }
