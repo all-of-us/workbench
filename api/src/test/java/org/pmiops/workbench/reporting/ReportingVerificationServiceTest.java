@@ -16,6 +16,7 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,6 +40,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
+import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -125,6 +128,12 @@ public class ReportingVerificationServiceTest {
     String expectedNewUserSatisfactionSurveyLogPart =
         "new_user_satisfaction_survey\t2\t2\t0 (0.000%)";
     assertThat(getTestCapturedLog().contains(expectedNewUserSatisfactionSurveyLogPart)).isTrue();
+    String expectedUserGeneralDiscoverySourceLogPart =
+        "user_general_discovery_source\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedUserGeneralDiscoverySourceLogPart)).isTrue();
+    String expectedUserPartnerDiscoverySourceLogPart =
+        "user_partner_discovery_source\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedUserPartnerDiscoverySourceLogPart)).isTrue();
   }
 
   @Test
@@ -155,6 +164,8 @@ public class ReportingVerificationServiceTest {
 
     for (int i = 0; i < count; ++i) {
       DbUser user = new DbUser();
+      user.setGeneralDiscoverySources(ImmutableSet.of(DbGeneralDiscoverySource.OTHER_WEBSITE));
+      user.setPartnerDiscoverySources(ImmutableSet.of(DbPartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM));
       userDao.save(user);
       DbWorkspace dbworkspace = workspaceDao.save(createDbWorkspace(user, cdrVersion));
       cohortDao.save(createDbCohort(user, dbworkspace));
