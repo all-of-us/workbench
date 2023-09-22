@@ -1291,4 +1291,5 @@ export const isActionable = (status: RuntimeStatus) =>
   ).includes(status);
 
 export const getCreator = (runtime: ListRuntimeResponse): string | undefined =>
-  (runtime?.labels as Map<string, string>).get('creator');
+  // eslint-disable-next-line @typescript-eslint/dot-notation
+  runtime?.labels?.['creator'];
