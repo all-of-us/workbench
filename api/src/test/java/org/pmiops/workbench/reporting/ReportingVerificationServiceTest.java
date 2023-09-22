@@ -165,7 +165,9 @@ public class ReportingVerificationServiceTest {
     for (int i = 0; i < count; ++i) {
       DbUser user = new DbUser();
       user.setGeneralDiscoverySources(ImmutableSet.of(DbGeneralDiscoverySource.OTHER_WEBSITE));
-      user.setPartnerDiscoverySources(ImmutableSet.of(DbPartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM));
+      user.setPartnerDiscoverySources(
+          ImmutableSet.of(
+              DbPartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM));
       userDao.save(user);
       DbWorkspace dbworkspace = workspaceDao.save(createDbWorkspace(user, cdrVersion));
       cohortDao.save(createDbCohort(user, dbworkspace));
