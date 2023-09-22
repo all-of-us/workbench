@@ -60,14 +60,18 @@ function  isEmpty(value) {
 
 
 async function runCommand(cmd) {
-  console.log('Going to run the command: '+cmd);
-  execSync(cmd, (err, stdout, stderr) => {
-    if (err) {
-      console.error("Is this an error: " , err);
-    }
-    console.log(stdout.toString('utf8'));
-    console.log("Stderr: " , stderr.toString('utf8'));
-  });
+  console.log('Going to run the command: ' + cmd);
+  try {
+    execSync(cmd, (err, stdout, stderr) => {
+      if (err) {
+        console.error("Is this an error: ", err);
+      }
+      console.log(stdout.toString('utf8'));
+      console.log("Stderr: ", stderr.toString('utf8'));
+    });
+  } catch (e) {
+    console.log("Error while running command ", e.stderr.toString());
+  }
 }
 
 build_and_deploy(process.argv)
