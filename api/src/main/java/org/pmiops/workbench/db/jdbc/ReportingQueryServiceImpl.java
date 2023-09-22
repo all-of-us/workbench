@@ -136,7 +136,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             "SELECT\n"
                 + "  us.user_id as user_id,\n"
                 + "  us.source as answer,\n"
-                + "  u.user_partner_discovery_source_other_text as other_text,\n"
+                + "  u.user_partner_discovery_source_other_text as other_text\n"
                 + "FROM user_partner_discovery_source us\n"
                 + " JOIN user u\n"
                 + "   ON us.user_id = u.user_id\n"

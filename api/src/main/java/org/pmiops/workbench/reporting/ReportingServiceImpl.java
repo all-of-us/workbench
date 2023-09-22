@@ -9,6 +9,8 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,9 @@ public class ReportingServiceImpl implements ReportingService {
           CohortColumnValueExtractor.TABLE_NAME,
           WorkspaceColumnValueExtractor.TABLE_NAME,
           UserColumnValueExtractor.TABLE_NAME,
-          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME);
+          NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME,
+          UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME,
+          UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
