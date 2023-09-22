@@ -3,12 +3,12 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 
 import {
+  AppsApi,
   AppType,
   DisksApi,
   UserAppEnvironment,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
-import { AppsApi } from 'generated/fetch/api';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import {

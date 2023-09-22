@@ -6,6 +6,11 @@ if [[ -z "${WORKBENCH_VERSION}" ]]; then
   exit 1
 fi
 
+if [[ "$WORKBENCH_VERSION" = 'local-source' ]]; then
+  cd /mnt/local-source
+  exec "$@"
+fi
+
 if [[ ! -d ~/workbench/.git ]]; then
   git clone https://github.com/all-of-us/workbench ~/workbench
 fi
