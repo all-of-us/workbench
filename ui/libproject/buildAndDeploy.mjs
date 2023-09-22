@@ -63,9 +63,9 @@ async function runCommand(cmd) {
   console.log('Going to run the command: '+cmd);
   execSync(cmd, (err, stdout, stderr) => {
     if (err) {
-      console.error(err);
+      console.error(err.toString('utf8'));
     }
-    console.log(stdout);
+    console.log(stdout.toString('utf8'));
   });
 }
 
