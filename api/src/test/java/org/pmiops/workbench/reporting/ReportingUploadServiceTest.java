@@ -41,16 +41,22 @@ import org.mockito.Captor;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
+import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
+import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -331,6 +337,76 @@ public class ReportingUploadServiceTest {
             newUserSatisfactionSurveyColumnValues.get(
                 NewUserSatisfactionSurveyColumnValueExtractor.ID.getParameterName()))
         .isEqualTo(reportingNewUserSatisfactionSurvey.getId());
+  }
+
+  @Test
+  public void testUploadBatchUserGeneralDiscoverySource() {
+    List<ReportingUserGeneralDiscoverySource> userGeneralDiscoverySources =
+        ImmutableList.of(
+            new ReportingUserGeneralDiscoverySource()
+                .userId(100L)
+                .answer(DbGeneralDiscoverySource.ACTIVITY_PRESENTATION_OR_EVENT.toString()),
+            new ReportingUserGeneralDiscoverySource()
+                .userId(200L)
+                .answer(DbGeneralDiscoverySource.OTHER.toString())
+                .otherText("other text"));
+
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadUserGeneralDiscoverySourceBatch(
+        userGeneralDiscoverySources, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(userGeneralDiscoverySources.size());
+    final Map<String, Object> cohortColumnValues = request.getRows().get(0).getContent();
+    assertThat(
+            cohortColumnValues.get(
+                UserGeneralDiscoverySourceColumnValueExtractor.USER_ID.getParameterName()))
+        .isEqualTo(userGeneralDiscoverySources.get(0).getUserId());
+    assertThat(
+            cohortColumnValues.get(
+                UserGeneralDiscoverySourceColumnValueExtractor.ANSWER.getParameterName()))
+        .isEqualTo(userGeneralDiscoverySources.get(0).getAnswer());
+  }
+
+  @Test
+  public void testUploadBatchUserPartnerDiscoverySource() {
+    List<ReportingUserPartnerDiscoverySource> userPartnerDiscoverySources =
+        ImmutableList.of(
+            new ReportingUserPartnerDiscoverySource()
+                .userId(100L)
+                .answer(
+                    DbPartnerDiscoverySource.ALL_OF_US_EVENINGS_WITH_GENETICS_RESEARCH_PROGRAM
+                        .toString()));
+
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadUserPartnerDiscoverySourceBatch(
+        userPartnerDiscoverySources, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(userPartnerDiscoverySources.size());
+    final Map<String, Object> cohortColumnValues = request.getRows().get(0).getContent();
+    assertThat(
+            cohortColumnValues.get(
+                UserPartnerDiscoverySourceColumnValueExtractor.USER_ID.getParameterName()))
+        .isEqualTo(userPartnerDiscoverySources.get(0).getUserId());
+    assertThat(
+            cohortColumnValues.get(
+                UserPartnerDiscoverySourceColumnValueExtractor.ANSWER.getParameterName()))
+        .isEqualTo(userPartnerDiscoverySources.get(0).getAnswer());
   }
 
   @Test
