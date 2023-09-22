@@ -126,10 +126,10 @@ const NameCell = (props: NameCellProps) => {
 
 interface Props {
   workspaceNamespace: string;
-  bucket: string;
+  storageBucketPath: string;
 }
 export const FileTable = (props: Props) => {
-  const { workspaceNamespace, bucket } = props;
+  const { workspaceNamespace, storageBucketPath } = props;
 
   interface TableEntry {
     location: string;
@@ -150,12 +150,12 @@ export const FileTable = (props: Props) => {
     return fileDetails
       .map((file) => {
         return {
-          location: parseLocation(file, bucket),
+          location: parseLocation(file, storageBucketPath),
           rawName: file.name,
           nameCell: (
             <NameCell
               file={file}
-              bucket={bucket}
+              bucket={storageBucketPath}
               workspaceNamespace={workspaceNamespace}
               accessReason={accessReason}
             />

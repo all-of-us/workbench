@@ -9,10 +9,8 @@ export const Collaborators = ({ collaborators }: Props) => (
   <>
     <h3>Collaborators</h3>
     <div className='collaborators' style={{ marginTop: '1.5rem' }}>
-      {collaborators.map((workspaceUserAdminView, i) => (
-        <div key={i}>
-          {`${workspaceUserAdminView.userModel.userName}: ${workspaceUserAdminView.role}`}
-        </div>
+      {collaborators.map((c, i) => (
+        <div key={i}>{`${c.userModel.userName}: ${c.role}`}</div>
       ))}
     </div>
   </>

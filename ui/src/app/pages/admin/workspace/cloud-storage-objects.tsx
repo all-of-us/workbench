@@ -49,7 +49,7 @@ export const CloudStorageObjects = ({
           {formatMB(storageBytesUsed)}
         </WorkspaceInfoField>
       </div>
-      <FileTable {...{ workspaceNamespace }} bucket={storageBucketPath} />
+      <FileTable {...{ workspaceNamespace, storageBucketPath }} />
     </>
   );
 };
