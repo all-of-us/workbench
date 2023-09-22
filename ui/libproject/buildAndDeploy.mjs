@@ -82,7 +82,7 @@ async function runCommand(cmd) {
       console.log("Stderr: ", stderr.toString('utf8'));
     });
   } catch (e) {
-    console.log("Error while running command ", e.stderr.toString());
+    console.log("Error while running command ", e);
   }
 }
 
