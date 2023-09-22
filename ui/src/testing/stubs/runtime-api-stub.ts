@@ -35,7 +35,7 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   numberOfWorkerLocalSSDs: 0,
 });
 
-export const defaultRuntime = () => ({
+export const defaultRuntime = (): Runtime => ({
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
   status: RuntimeStatus.RUNNING,
