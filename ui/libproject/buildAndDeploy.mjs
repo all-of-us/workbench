@@ -61,10 +61,20 @@ function  isEmpty(value) {
 
 async function runCommand(cmd) {
   console.log('Going to run the command: '+cmd);
-  var output = execSync(cmd, {stdio: 'pipe'}).toString();
-  if (output) {
-    console.log('stdout:e ' + output);
+  try {
+    let res= execSync(cmd)
+    console.log("NO ERROR")
+    console.log(res.toString())
+
   }
+  catch (err){
+    console.log("output", err)
+    console.log("sdterr",err.stderr.toString())
+  }
+  // var output = execSync(cmd, {stdio: 'pipe'}).toString();
+  // if (output) {
+  //   console.log('stdout:e ' + output);
+  // }
 }
 
 build_and_deploy(process.argv)
