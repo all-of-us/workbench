@@ -3,7 +3,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {

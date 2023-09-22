@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
   faExclamationTriangle,
   faPlusCircle,
-} from '@fortawesome/pro-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { BillingStatus, FileDetail } from 'generated/fetch';
