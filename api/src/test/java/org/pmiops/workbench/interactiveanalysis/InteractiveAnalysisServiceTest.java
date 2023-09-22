@@ -120,7 +120,9 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(editDir + "/foo.ipynb", NOTEBOOK_DIR + "/foo.ipynb");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, false, true);
+    AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, appType, notebookLists, false, true);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -143,7 +145,8 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(playgroundDir + "/foo.ipynb", NOTEBOOK_DIR + "/foo.ipynb");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, true, true);
+    AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
+    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, appType, notebookLists, true, true);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -229,7 +232,7 @@ public class InteractiveAnalysisServiceTest {
             .cloudStorageDirectory(NOTEBOOK_DIR)
             .localBaseDirectory(editDir)
             .localSafeModeBaseDirectory(playgroundDir)
-            .pattern(RSTUDIO_DELOC_PATTERN);
+            .pattern(SAS_DELOC_PATTERN);
     Map<String, String> expectedLocalizeMap = new HashMap<>();
     expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);

@@ -132,7 +132,8 @@ public class InteractiveAnalysisService {
       storageLink.setPattern(SAS_DELOC_PATTERN);
     } else {
       throw new NotImplementedException(
-          String.format("Localizing is not yet supported for app type %s", Optional.ofNullable(appType)));
+          String.format(
+              "Localizing is not yet supported for app type %s", Optional.ofNullable(appType)));
     }
 
     if (isGceRuntime) {
