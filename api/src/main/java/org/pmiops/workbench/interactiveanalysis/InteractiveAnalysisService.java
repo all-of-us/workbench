@@ -59,6 +59,9 @@ public class InteractiveAnalysisService {
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "\\.(Rmd|R)$";
   @VisibleForTesting static final String SAS_DELOC_PATTERN = "\\.sas$";
 
+  static final Map<AppType, String> GKE_DELOC_PATTERNS =
+      Map.of(AppType.RSTUDIO, RSTUDIO_DELOC_PATTERN, AppType.SAS, SAS_DELOC_PATTERN);
+
   @Autowired
   public InteractiveAnalysisService(
       WorkspaceService workspaceService,
@@ -125,15 +128,16 @@ public class InteractiveAnalysisService {
 
     if (isGceRuntime) {
       storageLink.setPattern(JUPYTER_DELOC_PATTERN);
-    } else if (AppType.RSTUDIO.equals(appType)) {
-      storageLink.setPattern(RSTUDIO_DELOC_PATTERN);
-    } else if (AppType.SAS.equals(appType)) {
-      storageLink.setPattern(SAS_DELOC_PATTERN);
     } else {
-      throw new NotImplementedException(
-          String.format(
-              "Localizing is not yet supported for app type %s",
-              appType == null ? "[null]" : appType.toString()));
+      var pattern = GKE_DELOC_PATTERNS.get(appType);
+      if (pattern == null) {
+        throw new NotImplementedException(
+            String.format(
+                "Localizing is not yet supported for app type %s",
+                appType == null ? "[null]" : appType.toString()));
+      } else {
+        storageLink.setPattern(pattern);
+      }
     }
 
     if (isGceRuntime) {
