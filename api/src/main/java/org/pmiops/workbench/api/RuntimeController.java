@@ -26,6 +26,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.GceWithPdConfig;
@@ -275,12 +276,14 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
+    AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
     return ResponseEntity.ok(
         new RuntimeLocalizeResponse()
             .runtimeLocalDirectory(
                 interactiveAnalysisService.localize(
                     workspaceNamespace,
                     userProvider.get().getRuntimeName(),
+                    appType,
                     body.getNotebookNames(),
                     body.getPlaygroundMode(),
                     true)));

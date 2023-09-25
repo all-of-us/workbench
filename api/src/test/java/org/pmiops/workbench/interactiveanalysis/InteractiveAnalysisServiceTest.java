@@ -1,11 +1,14 @@
 package org.pmiops.workbench.interactiveanalysis;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.JUPYTER_DELOC_PATTERN;
 import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.RSTUDIO_DELOC_PATTERN;
+import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.SAS_DELOC_PATTERN;
 import static org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService.aouConfigDataUri;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +18,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceResponse;
@@ -115,7 +120,9 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(editDir + "/foo.ipynb", NOTEBOOK_DIR + "/foo.ipynb");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, false, true);
+    AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, appType, notebookLists, false, true);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -138,7 +145,8 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(playgroundDir + "/foo.ipynb", NOTEBOOK_DIR + "/foo.ipynb");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, true, true);
+    AppType appType = null; // Jupyter uses GCE, so it doesn't have a GKE App Type
+    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, appType, notebookLists, true, true);
     verify(mockLeonardoApiClient)
         .createStorageLinkForRuntime(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient)
@@ -146,7 +154,7 @@ public class InteractiveAnalysisServiceTest {
   }
 
   @Test
-  public void testLocalize_gkeApp_editMode() {
+  public void testLocalize_RStudio_editMode() {
     String editDir = "";
     String playgroundDir = "workspaces_playground";
     List<String> notebookLists = List.of("foo.Rmd");
@@ -161,14 +169,15 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put("foo.Rmd", NOTEBOOK_DIR + "/foo.Rmd");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, false, false);
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, notebookLists, false, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
   }
 
   @Test
-  public void testLocalize_gkeApp_playground() {
+  public void testLocalize_RStudio_playground() {
     String editDir = "";
     String playgroundDir = "workspaces_playground";
     List<String> notebookLists = List.of("foo.Rmd");
@@ -183,9 +192,66 @@ public class InteractiveAnalysisServiceTest {
     expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
     expectedLocalizeMap.put(playgroundDir + "/foo.Rmd", NOTEBOOK_DIR + "/foo.Rmd");
 
-    interactiveAnalysisService.localize(WORKSPACE_NS, APP_NAME, notebookLists, true, false);
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.RSTUDIO, notebookLists, true, false);
     verify(mockLeonardoApiClient)
         .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
     verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
+  }
+
+  @Test
+  public void testLocalize_SAS_editMode() {
+    String editDir = "";
+    String playgroundDir = "workspaces_playground";
+    List<String> notebookLists = List.of("foo.sas");
+    StorageLink expectedStorageLink =
+        new StorageLink()
+            .cloudStorageDirectory(NOTEBOOK_DIR)
+            .localBaseDirectory(editDir)
+            .localSafeModeBaseDirectory(playgroundDir)
+            .pattern(SAS_DELOC_PATTERN);
+    Map<String, String> expectedLocalizeMap = new HashMap<>();
+    expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
+    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
+    expectedLocalizeMap.put("foo.sas", NOTEBOOK_DIR + "/foo.sas");
+
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, false, false);
+    verify(mockLeonardoApiClient)
+        .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
+    verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
+  }
+
+  @Test
+  public void testLocalize_SAS_playground() {
+    String editDir = "";
+    String playgroundDir = "workspaces_playground";
+    List<String> notebookLists = List.of("foo.sas");
+    StorageLink expectedStorageLink =
+        new StorageLink()
+            .cloudStorageDirectory(NOTEBOOK_DIR)
+            .localBaseDirectory(editDir)
+            .localSafeModeBaseDirectory(playgroundDir)
+            .pattern(SAS_DELOC_PATTERN);
+    Map<String, String> expectedLocalizeMap = new HashMap<>();
+    expectedLocalizeMap.put(".all_of_us_config.json", aouConfigDataUri);
+    expectedLocalizeMap.put(playgroundDir + "/.all_of_us_config.json", aouConfigDataUri);
+    expectedLocalizeMap.put(playgroundDir + "/foo.sas", NOTEBOOK_DIR + "/foo.sas");
+
+    interactiveAnalysisService.localize(
+        WORKSPACE_NS, APP_NAME, AppType.SAS, notebookLists, true, false);
+    verify(mockLeonardoApiClient)
+        .createStorageLinkForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedStorageLink);
+    verify(mockLeonardoApiClient).localizeForApp(GOOGLE_PROJECT_ID, APP_NAME, expectedLocalizeMap);
+  }
+
+  @Test
+  public void testLocalize_appType_not_supported() {
+    var unsupportedAppType = AppType.CROMWELL;
+    assertThrows(
+        NotImplementedException.class,
+        () ->
+            interactiveAnalysisService.localize(
+                WORKSPACE_NS, APP_NAME, unsupportedAppType, Collections.emptyList(), false, false));
   }
 }
