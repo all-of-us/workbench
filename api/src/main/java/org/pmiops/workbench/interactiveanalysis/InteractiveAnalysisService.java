@@ -128,6 +128,7 @@ public class InteractiveAnalysisService {
 
     if (isGceRuntime) {
       storageLink.setPattern(JUPYTER_DELOC_PATTERN);
+      leonardoNotebooksClient.createStorageLinkForRuntime(googleProjectId, appName, storageLink);
     } else {
       var pattern = GKE_DELOC_PATTERNS.get(appType);
       if (pattern == null) {
@@ -137,15 +138,8 @@ public class InteractiveAnalysisService {
                 appType == null ? "[null]" : appType.toString()));
       } else {
         storageLink.setPattern(pattern);
+        leonardoNotebooksClient.createStorageLinkForApp(googleProjectId, appName, storageLink);
       }
-    }
-
-    if (isGceRuntime) {
-      leonardoNotebooksClient.createStorageLinkForRuntime(googleProjectId, appName, storageLink);
-    } else {
-      // For now if the request is not for GCE runtime, that would be RStudio. When supporting more
-      // apps, consider to use AppType.
-      leonardoNotebooksClient.createStorageLinkForApp(googleProjectId, appName, storageLink);
     }
 
     // Always localize config files; usually a no-op after the first call.
