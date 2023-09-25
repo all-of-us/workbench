@@ -47,7 +47,11 @@ import {
 import { AuthorityGuardedAction } from 'app/utils/authorities';
 import { DEMOGRAPHIC_SURVEY_V2_PATH } from 'app/utils/constants';
 
-import { authorityGuard, getAccessModuleGuard } from './guards';
+import {
+  authorityGuard,
+  getAccessModuleGuard,
+  restrictDemographicSurvey,
+} from './guards';
 
 const AdminBannerPage = fp.flow(withRouteData, withRoutingSpinner)(AdminBanner);
 const AdminEgressAuditPage = fp.flow(
@@ -366,7 +370,11 @@ export const SignedInRoutes = () => {
       >
         <WorkspaceWrapperPage intermediaryRoute={true} routeData={{}} />
       </AppRoute>
-      <AppRoute path={DEMOGRAPHIC_SURVEY_V2_PATH} exact>
+      <AppRoute
+        path={DEMOGRAPHIC_SURVEY_V2_PATH}
+        exact
+        guards={[restrictDemographicSurvey()]}
+      >
         <DemographicSurveyPage
           routeData={{
             title: 'Demographic Survey',

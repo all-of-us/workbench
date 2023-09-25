@@ -2,7 +2,7 @@ import * as React from 'react';
 import { mount } from 'enzyme';
 
 import * as Authentication from 'app/utils/authentication';
-import * as ProfilePicture from 'app/utils/profile-picture';
+import * as ProfilePicture from 'app/utils/profile-utils';
 import { notificationStore } from 'app/utils/stores';
 
 import { ProfileStubVariables } from 'testing/stubs/profile-api-stub';

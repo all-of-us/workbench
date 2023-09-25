@@ -17,7 +17,9 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
+import { Country } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
+import { isUserFromUS } from 'app/utils/profile-utils';
 import { authStore, profileStore } from 'app/utils/stores';
 
 import { AuthorityMissing } from './authority-missing';
@@ -95,4 +97,9 @@ export const authorityGuard = (
   allowed: () =>
     hasAuthorityForAction(profileStore.get().profile, guardedAction),
   renderBlocked: () => <AuthorityMissing action={guardedAction} />,
+});
+
+export const restrictDemographicSurvey = (): Guard => ({
+  allowed: () => isUserFromUS(profileStore.get().profile),
+  redirectPath: '/',
 });

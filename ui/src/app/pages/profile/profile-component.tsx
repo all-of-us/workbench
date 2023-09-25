@@ -42,8 +42,10 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
+import { Country } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
+import { isUserFromUS } from 'app/utils/profile-utils';
 import { canonicalizeUrl } from 'app/utils/urls';
 import { notTooLong, required } from 'app/utils/validators';
 import { withNavigation } from 'app/utils/with-navigation-hoc';
@@ -579,11 +581,13 @@ export const ProfileComponent = fp.flow(
                 <DataAccessPanel
                   userAccessTiers={profile.accessTierShortNames}
                 />
-                <DemographicSurveyPanel
-                  demographicSurveyCompletionTime={
-                    demographicSurveyV2CompletionTimeMillis
-                  }
-                />
+                {isUserFromUS(profile) && (
+                  <DemographicSurveyPanel
+                    demographicSurveyCompletionTime={
+                      demographicSurveyV2CompletionTimeMillis
+                    }
+                  />
+                )}
                 {canRenderSignedDucc(profile.duccSignedVersion) && (
                   <SignedDuccPanel
                     signedDate={profile.duccCompletionTimeEpochMillis}

@@ -16,7 +16,7 @@ import {
   hasAuthorityForAction,
 } from 'app/utils/authorities';
 import { useNavigation } from 'app/utils/navigation';
-import { getProfilePictureSrc } from 'app/utils/profile-picture';
+import { getProfilePictureSrc } from 'app/utils/profile-utils';
 import { openZendeskWidget, supportUrls } from 'app/utils/zendesk';
 
 const styles = reactStyles({

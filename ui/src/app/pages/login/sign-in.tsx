@@ -11,6 +11,7 @@ import { DemographicSurveyValidationMessage } from 'app/components/demographic-s
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { PublicAouHeaderWithDisplayTag } from 'app/components/headers';
+import { Modal, ModalBody } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { TermsOfService } from 'app/components/terms-of-service';
 import {
@@ -27,7 +28,9 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { Country } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
+import { isUserFromUS } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
@@ -255,15 +258,15 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   public getAccountCreationSteps(): Array<SignInStep> {
     return [
       SignInStep.LANDING,
-      SignInStep.TERMS_OF_SERVICE,
-      SignInStep.INSTITUTIONAL_AFFILIATION,
+      // SignInStep.TERMS_OF_SERVICE,
+      // SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE,
     ];
   }
 
-  private getNextStep(currentStep: SignInStep) {
+  private getNextStep(currentStep: SignInStep, profile: Profile) {
     const steps = this.getAccountCreationSteps();
     const index = steps.indexOf(currentStep);
     if (index === -1) {
@@ -272,6 +275,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     if (index === steps.length) {
       throw new Error('No sign-in steps remaining after step ' + currentStep);
     }
+    // if (
+    //   steps[index] === SignInStep.ACCOUNT_DETAILS &&
+    //   profile.address.country !== Country.US
+    // ) {
+    //   return steps[index];
+    // }
     return steps[index + 1];
   }
 
@@ -317,7 +326,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     const onComplete = (profile: Profile) => {
       this.setState({
         profile: profile,
-        currentStep: this.getNextStep(currentStep),
+        currentStep: this.getNextStep(currentStep, profile),
         isPreviousStep: false,
       });
     };
@@ -339,7 +348,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             onCreateAccount={async () => {
               AnalyticsTracker.Registration.CreateAccount();
               await this.setState({
-                currentStep: this.getNextStep(currentStep),
+                currentStep: this.getNextStep(currentStep, this.state.profile),
               });
             }}
           />
@@ -353,7 +362,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
               AnalyticsTracker.Registration.TOS();
               this.setState({
                 termsOfServiceVersion: tosVersion,
-                currentStep: this.getNextStep(currentStep),
+                currentStep: this.getNextStep(currentStep, this.state.profile),
                 isPreviousStep: false,
               });
             }}
@@ -394,6 +403,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
               }
               profile={this.state.profile}
             />
+            )
           </div>
         );
       case SignInStep.SUCCESS_PAGE:
@@ -404,7 +414,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   private onSubmit = async () => {
-    const { enableCaptcha } = serverConfigStore.get().config;
+    // const { enableCaptcha } = serverConfigStore.get().config;
+    const enableCaptcha = true;
     this.setState({
       loading: true,
     });
@@ -419,7 +430,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
       this.setState({
         profile: newProfile,
-        currentStep: this.getNextStep(this.state.currentStep),
+        currentStep: this.getNextStep(this.state.currentStep, newProfile),
         loading: false,
         isPreviousStep: false,
       });
@@ -443,7 +454,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private renderNavigation(currentStep: SignInStep) {
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
-      const { enableCaptcha } = serverConfigStore.get().config;
+      // const { enableCaptcha } = serverConfigStore.get().config;
+      const enableCaptcha = true;
       const { captcha, errors, loading } = this.state;
       const invalid = !!errors || (enableCaptcha && !captcha);
       return (
@@ -500,6 +512,68 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           </FlexRow>
         </div>
       );
+      // } else if (this.state.profile.address?.country !== Country.US) {
+      //   return (
+      //     <div>
+      //       <Modal>
+      //         <ModalBody>
+      //           <div
+      //             style={{
+      //               marginTop: '3rem',
+      //               marginBottom: '1.5rem',
+      //               marginLeft: '1.5rem',
+      //             }}
+      //           >
+      //             {enableCaptcha && (
+      //               <div style={{ paddingBottom: '1.5rem' }}>
+      //                 <ReCAPTCHA
+      //                   sitekey={environment.captchaSiteKey}
+      //                   ref={this.captchaRef}
+      //                   onChange={(value) => this.captureCaptchaResponse(value)}
+      //                 />
+      //               </div>
+      //             )}
+      //             <FlexRow>
+      //               <Button
+      //                 aria-label='Previous'
+      //                 type='secondary'
+      //                 style={{ marginRight: '1.5rem' }}
+      //                 onClick={() => {
+      //                   this.setState({
+      //                     currentStep: this.getPreviousStep(currentStep),
+      //                     isPreviousStep: true,
+      //                   });
+      //                 }}
+      //               >
+      //                 Close
+      //               </Button>
+      //               <TooltipTrigger
+      //                 content={
+      //                   invalid && (
+      //                     <DemographicSurveyValidationMessage
+      //                       {...{ captcha, errors }}
+      //                       isAccountCreation
+      //                     />
+      //                   )
+      //                 }
+      //               >
+      //                 <Button
+      //                   aria-label='Submit'
+      //                   disabled={invalid || loading}
+      //                   type='primary'
+      //                   data-test-id='submit-button'
+      //                   onClick={this.onSubmit}
+      //                 >
+      //                   Submit
+      //                 </Button>
+      //               </TooltipTrigger>
+      //             </FlexRow>
+      //           </div>
+      //         </ModalBody>
+      //       </Modal>
+      //     </div>
+      //   );
+      // }
     }
 
     return <></>;

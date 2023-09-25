@@ -39,6 +39,7 @@ import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { STATE_CODE_MAPPING } from 'app/utils/constants';
 import { Country } from 'app/utils/constants';
+import { isUserFromUS } from 'app/utils/profile-utils';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
 import { canonicalizeUrl } from 'app/utils/urls';
@@ -245,7 +246,7 @@ export class AccountCreation extends React.Component<
         this.updateAddress('state', stateCodeGuess);
       }
     } else {
-      this.updateAddress('country', '');
+      this.updateAddress('country', value);
     }
   }
 

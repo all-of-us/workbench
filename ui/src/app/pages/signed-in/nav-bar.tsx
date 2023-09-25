@@ -13,6 +13,7 @@ import { AccessRenewalNotificationMaybe } from 'app/pages/signed-in/access-renew
 import colors from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
 import { AccessTierShortNames } from 'app/utils/access-tiers';
+import { isUserFromUS } from 'app/utils/profile-utils';
 import { profileStore, useStore } from 'app/utils/stores';
 
 const styles = reactStyles({
@@ -119,7 +120,7 @@ export const NavBar = () => {
         accessTier={AccessTierShortNames.Controlled}
       />
       <StatusAlertBannerMaybe />
-      <TakeDemographicSurveyV2BannerMaybe />
+      {isUserFromUS(profile) && <TakeDemographicSurveyV2BannerMaybe />}
       <NewUserSatisfactionSurveyBannerMaybe />
       <CTAvailableBannerMaybe />
       {showSideNav && (
