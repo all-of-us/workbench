@@ -1,29 +1,18 @@
 import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import {
-  CloudStorageTraffic,
-  ListRuntimeResponse,
-  WorkspaceAdminView,
-} from 'generated/fetch';
+import { CloudStorageTraffic, WorkspaceAdminView } from 'generated/fetch';
 
 import { Button } from 'app/components/buttons';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Error as ErrorDiv } from 'app/components/inputs';
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-} from 'app/components/modals';
 import { Spinner, SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { AdminLockRequest } from 'app/pages/admin/admin-lock-request';
 import { EgressEventsTable } from 'app/pages/admin/egress-events-table';
 import { DisksTable } from 'app/pages/admin/workspace/disks-table';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
-import { hasNewValidProps, reactStyles } from 'app/utils';
-import { getCreator } from 'app/utils/runtime-utils';
+import { hasNewValidProps } from 'app/utils';
 import { MatchParams } from 'app/utils/stores';
 
 import { BasicInformation } from './basic-information';
@@ -33,14 +22,6 @@ import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
 import { ResearchPurposeSection } from './research-purpose-section';
 import { Runtimes } from './runtimes';
-import { PurpleLabel } from './workspace-info-field';
-
-const styles = reactStyles({
-  narrowWithMargin: {
-    width: '15rem',
-    marginRight: '1.5rem',
-  },
-});
 
 interface Props
   extends WithSpinnerOverlayProps,
@@ -69,16 +50,16 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
 
   componentDidMount() {
     this.props.hideSpinner();
-    this.getFederatedWorkspaceInformation();
+    this.populateFederatedWorkspaceInformation();
   }
 
   componentDidUpdate(prevProps) {
     if (hasNewValidProps(this.props, prevProps, [(p) => p.match.params])) {
-      this.getFederatedWorkspaceInformation();
+      this.populateFederatedWorkspaceInformation();
     }
   }
 
-  async getFederatedWorkspaceInformation() {
+  async populateFederatedWorkspaceInformation() {
     const { ns } = this.props.match.params;
     this.setState({
       loadingData: true,
@@ -106,12 +87,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     }
   }
 
-  maybeGetFederatedWorkspaceInformation(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      return this.getFederatedWorkspaceInformation();
-    }
-  }
-
   async unLockWorkspace() {
     const {
       workspaceDetails: { workspace },
@@ -119,7 +94,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     try {
       this.setState({ loadingWorkspaceAdminLockedStatus: true });
       await workspaceAdminApi().setAdminUnlockedState(workspace.namespace);
-      await this.getFederatedWorkspaceInformation();
+      await this.populateFederatedWorkspaceInformation();
       this.setState({ loadingWorkspaceAdminLockedStatus: false });
     } catch (error) {
       console.log(error);
@@ -131,7 +106,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       loadingWorkspaceAdminLockedStatus: true,
       showLockWorkspaceModal: false,
     });
-    await this.getFederatedWorkspaceInformation();
+    await this.populateFederatedWorkspaceInformation();
     this.setState({ loadingWorkspaceAdminLockedStatus: false });
   }
 
@@ -224,7 +199,7 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
           <Runtimes
             {...{ resources }}
             workspaceNamespace={workspace.namespace}
-            onDelete={() => this.getFederatedWorkspaceInformation()}
+            onDelete={() => this.populateFederatedWorkspaceInformation()}
           />
         )}
         {workspace && (
