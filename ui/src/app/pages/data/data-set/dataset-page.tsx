@@ -762,7 +762,7 @@ function domainValuePairsToLowercase(domainValuePairs: DomainValuePair[]) {
 
 interface DomainWithConceptSetId {
   domain: Domain;
-  conceptSetId: number;
+  conceptSetId?: number;
 }
 
 interface DataSetPreviewInfo {
@@ -897,20 +897,19 @@ export const DatasetPage = fp.flow(
       conceptSets: ConceptSet[],
       prepackagedConceptSets: PrePackagedConceptSetEnum[]
     ): DomainWithConceptSetId[] => {
-      return conceptSets
-        .map((cs) => ({
+      return (
+        conceptSets.map((cs) => ({
           conceptSetId: cs.id,
           domain:
             cs.domain === Domain.PHYSICAL_MEASUREMENT
               ? Domain.MEASUREMENT
               : cs.domain,
+        })) as DomainWithConceptSetId[]
+      ).concat(
+        prepackagedConceptSets.map((p) => ({
+          domain: PREPACKAGED_DOMAINS[p],
         }))
-        .concat(
-          prepackagedConceptSets.map((p) => ({
-            conceptSetId: null,
-            domain: PREPACKAGED_DOMAINS[p],
-          }))
-        );
+      );
     };
 
     const getDomainsWithConceptSetIdsFromDataSet = (d: DataSet) => {
@@ -1042,7 +1041,7 @@ export const DatasetPage = fp.flow(
           }
           const updateIndex = domainsWithConceptSetIds.findIndex(
             (dc) =>
-              dc.conceptSetId !== null &&
+              dc.conceptSetId !== undefined &&
               dc.conceptSetId === domainWithConceptSetId.conceptSetId
           );
           if (updateIndex > -1) {
@@ -1142,7 +1141,6 @@ export const DatasetPage = fp.flow(
       if (selected) {
         updatedPrepackaged.add(prepackaged);
         updatedDomainsWithConceptSetIds.add({
-          conceptSetId: null,
           domain: PREPACKAGED_DOMAINS[prepackaged],
         });
         // check surveys
@@ -1179,12 +1177,12 @@ export const DatasetPage = fp.flow(
             if (
               (PREPACKAGED_DOMAINS[prepackaged] === Domain.SURVEY &&
                 domainWithConceptSetId.domain === Domain.SURVEY &&
-                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.conceptSetId === undefined &&
                 !Array.from(updatedPrepackaged).some((domain) =>
                   domain.toString().includes('SURVEY')
                 )) ||
               (PREPACKAGED_DOMAINS[prepackaged] !== Domain.SURVEY &&
-                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.conceptSetId === undefined &&
                 domainWithConceptSetId.domain ===
                   PREPACKAGED_DOMAINS[prepackaged])
             ) {
@@ -1215,7 +1213,6 @@ export const DatasetPage = fp.flow(
           domainValueSetIsLoading.add(PREPACKAGED_DOMAINS[prepackaged])
         );
         loadValueSetForDomain({
-          conceptSetId: null,
           domain: PREPACKAGED_DOMAINS[prepackaged],
         });
       }
