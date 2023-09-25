@@ -32,6 +32,7 @@ import { CloudStorageTrafficChart } from './cloud-storage-traffic-chart';
 import { CohortBuilder } from './cohort-builder';
 import { Collaborators } from './collaborators';
 import { ResearchPurposeSection } from './research-purpose-section';
+import { Runtimes } from './runtimes';
 import { PurpleLabel } from './workspace-info-field';
 
 const styles = reactStyles({
@@ -50,8 +51,6 @@ interface State {
   cloudStorageTraffic?: CloudStorageTraffic;
   loadingData?: boolean;
   loadingWorkspaceAdminLockedStatus: boolean;
-  runtimeToDelete?: ListRuntimeResponse;
-  confirmDeleteRuntime?: boolean;
   dataLoadError?: Response;
   showLockWorkspaceModal: boolean;
 }
@@ -113,22 +112,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
     }
   }
 
-  private async deleteRuntime() {
-    await workspaceAdminApi().deleteRuntimesInWorkspace(
-      this.props.match.params.ns,
-      { runtimesToDelete: [this.state.runtimeToDelete.runtimeName] }
-    );
-    this.setState({ runtimeToDelete: null });
-    await this.getFederatedWorkspaceInformation();
-  }
-
-  private cancelDeleteRuntime() {
-    this.setState({
-      confirmDeleteRuntime: false,
-      runtimeToDelete: null,
-    });
-  }
-
   async unLockWorkspace() {
     const {
       workspaceDetails: { workspace },
@@ -161,8 +144,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
   render() {
     const {
       cloudStorageTraffic,
-      runtimeToDelete,
-      confirmDeleteRuntime,
       loadingData,
       dataLoadError,
       workspaceDetails: { collaborators, resources, workspace },
@@ -239,66 +220,12 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
           <CloudStorageTrafficChart {...{ cloudStorageTraffic }} />
         )}
 
-        {resources && resources.runtimes.length === 0 && (
-          <div>
-            <h2>Runtimes</h2>
-            <p>No active runtimes exist for this workspace.</p>
-          </div>
-        )}
-        {resources && resources.runtimes.length > 0 && (
-          <div>
-            <h2>Runtimes</h2>
-            <FlexColumn>
-              <FlexRow>
-                <PurpleLabel style={styles.narrowWithMargin}>
-                  Runtime Name
-                </PurpleLabel>
-                <PurpleLabel style={styles.narrowWithMargin}>
-                  Creator
-                </PurpleLabel>
-                <PurpleLabel style={styles.narrowWithMargin}>
-                  Created Time
-                </PurpleLabel>
-                <PurpleLabel style={styles.narrowWithMargin}>
-                  Last Accessed Time
-                </PurpleLabel>
-                <PurpleLabel style={styles.narrowWithMargin}>
-                  Status
-                </PurpleLabel>
-              </FlexRow>
-              {resources.runtimes.map((runtime, i) => (
-                <FlexRow key={i}>
-                  <div style={styles.narrowWithMargin}>
-                    {runtime.runtimeName}
-                  </div>
-                  <div style={styles.narrowWithMargin}>
-                    {getCreator(runtime)}
-                  </div>
-                  <div style={styles.narrowWithMargin}>
-                    {new Date(runtime.createdDate).toDateString()}
-                  </div>
-                  <div style={styles.narrowWithMargin}>
-                    {new Date(runtime.dateAccessed).toDateString()}
-                  </div>
-                  <div style={styles.narrowWithMargin}>{runtime.status}</div>
-                  <Button
-                    onClick={() =>
-                      this.setState({
-                        runtimeToDelete: runtime,
-                        confirmDeleteRuntime: true,
-                      })
-                    }
-                    disabled={
-                      runtimeToDelete &&
-                      runtimeToDelete.runtimeName === runtime.runtimeName
-                    }
-                  >
-                    Delete
-                  </Button>
-                </FlexRow>
-              ))}
-            </FlexColumn>
-          </div>
+        {resources && (
+          <Runtimes
+            {...{ resources }}
+            workspaceNamespace={workspace.namespace}
+            onDelete={() => this.getFederatedWorkspaceInformation()}
+          />
         )}
         {workspace && (
           <>
@@ -310,35 +237,6 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             <h2>Disks</h2>
             <DisksTable sourceWorkspaceNamespace={workspace.namespace} />
           </>
-        )}
-        {confirmDeleteRuntime && (
-          <Modal onRequestClose={() => this.cancelDeleteRuntime()}>
-            <ModalTitle>Delete Runtime</ModalTitle>
-            <ModalBody>
-              This will immediately delete the given runtime. This will disrupt
-              the user's work and may cause data loss.
-              <br />
-              <br />
-              <b>Are you sure?</b>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                type='secondary'
-                onClick={() => this.cancelDeleteRuntime()}
-              >
-                Cancel
-              </Button>
-              <Button
-                style={{ marginLeft: '0.75rem' }}
-                onClick={() => {
-                  this.setState({ confirmDeleteRuntime: false });
-                  this.deleteRuntime();
-                }}
-              >
-                Delete
-              </Button>
-            </ModalFooter>
-          </Modal>
         )}
       </div>
     );
