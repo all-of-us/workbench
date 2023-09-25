@@ -21,7 +21,6 @@ import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.model.CreateAppRequest;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,27 +162,11 @@ public class AppsControllerTest {
   }
 
   @Test
-  public void testCanPerformAppActions() {
-    // does not throw
-    controller.validateCanPerformApiAction(testWorkspace);
-  }
-
-  @Test
-  public void testCanPerformAppActions_securitySuspended() throws ApiException {
+  public void testCreateApp_securitySuspended() throws ApiException {
     user.setComputeSecuritySuspendedUntil(
         Timestamp.from(FakeClockConfiguration.NOW.toInstant().plus(Duration.ofMinutes(5))));
     assertThrows(
         FailedPreconditionException.class,
-        () -> controller.validateCanPerformApiAction(testWorkspace));
-  }
-
-  @Test
-  public void testCanPerformAppActions_noWorkspacePermission() throws ApiException {
-    doThrow(ForbiddenException.class)
-        .when(mockWorkspaceAuthService)
-        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
-
-    assertThrows(
-        ForbiddenException.class, () -> controller.validateCanPerformApiAction(testWorkspace));
+        () -> controller.createApp(WORKSPACE_NS, new CreateAppRequest().appType(AppType.RSTUDIO)));
   }
 }

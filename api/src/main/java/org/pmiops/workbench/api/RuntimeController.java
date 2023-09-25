@@ -253,7 +253,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<EmptyResponse> deleteRuntime(
       String workspaceNamespace, Boolean deleteDisk) {
     DbUser user = userProvider.get();
-    leonardoApiHelper.enforceComputeSecuritySuspension(user);
 
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
 
