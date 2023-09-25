@@ -88,6 +88,8 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
       dataLoadError,
       workspaceDetails: { collaborators, resources, workspace },
     } = this.state;
+    const { workspaceObjects, cloudStorage } = resources;
+    const { researchPurpose } = workspace;
     return (
       <div style={{ margin: '1.5rem' }}>
         {dataLoadError && (
@@ -108,14 +110,12 @@ export class AdminWorkspaceImpl extends React.Component<Props, State> {
             />
             <BasicInformation {...{ workspace }} />
             <Collaborators {...{ collaborators }} />
-            <CohortBuilder workspaceObjects={resources.workspaceObjects} />
+            <CohortBuilder {...{ workspaceObjects }} />
             <CloudStorageObjects
+              {...{ cloudStorage }}
               workspaceNamespace={workspace.namespace}
-              cloudStorage={resources.cloudStorage}
             />
-            <ResearchPurposeSection
-              researchPurpose={workspace.researchPurpose}
-            />
+            <ResearchPurposeSection {...{ researchPurpose }} />
           </div>
         )}
 
