@@ -12,10 +12,11 @@ import { FlexColumn, FlexRow } from 'app/components/flex';
 import { TextArea } from 'app/components/inputs';
 import { TooltipTrigger } from 'app/components/popups';
 import { Spinner } from 'app/components/spinners';
-import { PurpleLabel } from 'app/pages/admin/workspace/admin-workspace';
 import { workspaceAdminApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { useNavigation } from 'app/utils/navigation';
+
+import { PurpleLabel } from './workspace-info-field';
 
 const MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // see NotebooksServiceImpl
 
@@ -122,13 +123,13 @@ const NameCell = (props: NameCellProps) => {
     filenameSpan
   );
 };
-interface FileDetailsProps {
-  workspaceNamespace: string;
-  bucket: string;
-}
 
-export const FileDetailsTable = (props: FileDetailsProps) => {
-  const { workspaceNamespace, bucket } = props;
+interface Props {
+  workspaceNamespace: string;
+  storageBucketPath: string;
+}
+export const FileTable = (props: Props) => {
+  const { workspaceNamespace, storageBucketPath } = props;
 
   interface TableEntry {
     location: string;
@@ -149,12 +150,12 @@ export const FileDetailsTable = (props: FileDetailsProps) => {
     return fileDetails
       .map((file) => {
         return {
-          location: parseLocation(file, bucket),
+          location: parseLocation(file, storageBucketPath),
           rawName: file.name,
           nameCell: (
             <NameCell
               file={file}
-              bucket={bucket}
+              bucket={storageBucketPath}
               workspaceNamespace={workspaceNamespace}
               accessReason={accessReason}
             />
