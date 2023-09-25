@@ -17,7 +17,13 @@ import {
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
-import { cdrVersionStore, profileStore, withStore } from './stores';
+import {
+  CdrVersionStore,
+  cdrVersionStore,
+  profileStore,
+  withStore,
+} from './stores';
+import { WorkspaceData } from './workspace-data';
 
 const { useEffect, useState } = React;
 
@@ -275,6 +281,9 @@ export const connectReplaySubject = <T extends {}>(
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
+export interface WithCurrentWorkspace {
+  workspace: WorkspaceData;
+}
 
 // HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
@@ -320,6 +329,9 @@ export const withUserProfile = () => {
 export const withCdrVersions = () => {
   return withStore(cdrVersionStore, 'cdrVersionTiersResponse');
 };
+export interface WithCdrVersions {
+  cdrVersionTiersResponse: CdrVersionStore;
+}
 
 export function formatDomainString(domainString: string): string {
   return domainString === Domain.PHYSICAL_MEASUREMENT_CSS.toString()

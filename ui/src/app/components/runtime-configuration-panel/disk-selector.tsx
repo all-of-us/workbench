@@ -4,11 +4,11 @@ import { Dropdown } from 'primereact/dropdown';
 import { Disk, DiskType } from 'generated/fetch';
 
 import { StyledExternalLink } from 'app/components/buttons';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import { TooltipTrigger } from 'app/components/popups';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { AoU } from 'app/components/text-wrappers';
 import { ComputeType } from 'app/utils/machines';
 import {
@@ -20,6 +20,14 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { DiskSizeSelector } from './disk-size-selector';
 
+interface Props {
+  diskConfig: DiskConfig;
+  onChange: (c: DiskConfig) => void;
+  disabled: boolean;
+  disableDetachableReason: string | null;
+  existingDisk: Disk | null;
+  computeType: string | null;
+}
 export const DiskSelector = ({
   diskConfig,
   onChange,
@@ -27,14 +35,7 @@ export const DiskSelector = ({
   disableDetachableReason,
   existingDisk,
   computeType,
-}: {
-  diskConfig: DiskConfig;
-  onChange: (c: DiskConfig) => void;
-  disabled: boolean;
-  disableDetachableReason: string | null;
-  existingDisk: Disk | null;
-  computeType: string | null;
-}) => {
+}: Props) => {
   return (
     <FlexColumn
       style={{ ...styles.controlSection, gap: '11px', marginTop: '11px' }}

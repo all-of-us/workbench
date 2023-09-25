@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { RouteLink } from 'app/components/app-router';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn } from 'app/components/flex';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { SparkConsolePath } from 'app/utils/runtime-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 

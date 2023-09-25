@@ -15,11 +15,11 @@ import { withCurrentWorkspace, withUserProfile } from 'app/utils';
 import { ProfileStore } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
+import { DisabledPanel } from './common-env-conf-panels/disabled-panel';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
 } from './runtime-configuration-panel';
-import { DisabledPanel } from './runtime-configuration-panel/disabled-panel';
 
 export interface ConfigurationPanelProps {
   onClose: () => void;

@@ -11,9 +11,8 @@ import {
 } from 'generated/fetch';
 
 import { cond } from '@terra-ui-packages/core-utils';
-import { DEFAULT_MACHINE_NAME, findMachineByName } from 'app/utils/machines';
+import { DEFAULT_MACHINE_NAME } from 'app/utils/machines';
 import * as runtimeUtils from 'app/utils/runtime-utils';
-import { AnalysisConfig } from 'app/utils/runtime-utils';
 import cromwellBanner from 'assets/user-apps/Cromwell-banner.png';
 import cromwellIcon from 'assets/user-apps/Cromwell-icon.png';
 import jupyterBanner from 'assets/user-apps/Jupyter-banner.png';
@@ -99,23 +98,6 @@ export const defaultSASConfig: CreateAppRequest = {
     size: 250,
     diskType: DiskType.STANDARD,
   },
-};
-
-export const createAppRequestToAnalysisConfig = (
-  createAppRequest: CreateAppRequest
-): Partial<AnalysisConfig> => {
-  return {
-    machine: findMachineByName(
-      createAppRequest.kubernetesRuntimeConfig.machineType
-    ),
-    diskConfig: {
-      size: createAppRequest.persistentDiskRequest.size,
-      detachable: true,
-      detachableType: createAppRequest.persistentDiskRequest.diskType,
-      existingDiskName: null,
-    },
-    numNodes: createAppRequest.kubernetesRuntimeConfig.numNodes,
-  };
 };
 
 const isVisible = (status: AppStatus): boolean =>

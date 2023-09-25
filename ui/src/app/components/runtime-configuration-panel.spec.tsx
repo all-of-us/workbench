@@ -13,13 +13,13 @@ import {
 import { Disk, DiskType, Runtime, RuntimeApi } from 'generated/fetch';
 
 import { Button, LinkButton } from 'app/components/buttons';
+import { ConfirmDelete } from 'app/components/common-env-conf-panels/confirm-delete';
 import { RadioButton } from 'app/components/inputs';
 import { WarningMessage } from 'app/components/messages';
 import {
   RuntimeConfigurationPanel,
   RuntimeConfigurationPanelProps,
 } from 'app/components/runtime-configuration-panel';
-import { ConfirmDelete } from 'app/components/runtime-configuration-panel/confirm-delete';
 import { Spinner } from 'app/components/spinners';
 import {
   disksApi,

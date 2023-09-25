@@ -1,22 +1,29 @@
 import * as React from 'react';
 
 import { Button } from 'app/components/buttons';
-import { EnvironmentCostEstimator } from 'app/components/environment-cost-estimator';
+import { EnvironmentCostEstimator } from 'app/components/common-env-conf-panels/environment-cost-estimator';
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { WarningMessage } from 'app/components/messages';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { TextColumn } from 'app/components/text-column';
 import {
+  AnalysisConfig,
   diffsToUpdateMessaging,
   getAnalysisConfigDiffs,
 } from 'app/utils/runtime-utils';
 
+interface Props {
+  existingAnalysisConfig: AnalysisConfig;
+  newAnalysisConfig: AnalysisConfig;
+  onCancel: () => void;
+  updateButton: JSX.Element;
+}
 export const ConfirmUpdatePanel = ({
   existingAnalysisConfig,
   newAnalysisConfig,
   onCancel,
   updateButton,
-}) => {
+}: Props) => {
   const configDiffs = getAnalysisConfigDiffs(
     existingAnalysisConfig,
     newAnalysisConfig

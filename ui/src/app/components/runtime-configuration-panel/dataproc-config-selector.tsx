@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { InputNumber } from 'primereact/inputnumber';
 
-import { RuntimeStatus } from 'generated/fetch';
+import { DataprocConfig, RuntimeStatus } from 'generated/fetch';
 
+import { styles } from 'app/components/common-env-conf-panels/styles';
 import { FlexRow } from 'app/components/flex';
 import { InfoIcon } from 'app/components/icons';
 import { TooltipTrigger } from 'app/components/popups';
 import { MachineSelector } from 'app/components/runtime-configuration-panel/machine-selector';
-import { styles } from 'app/components/runtime-configuration-panel/styles';
 import {
   DATAPROC_MIN_DISK_SIZE_GB,
   DEFAULT_MACHINE_NAME,
@@ -20,13 +20,20 @@ import { DiskSizeSelector } from './disk-size-selector';
 
 const { useState, useEffect } = React;
 
+interface Props {
+  onChange: (dataprocConfig: DataprocConfig) => void;
+  disabled: boolean;
+  runtimeStatus: RuntimeStatus;
+  dataprocExists: boolean;
+  dataprocConfig: DataprocConfig;
+}
 export const DataProcConfigSelector = ({
   onChange,
   disabled,
   runtimeStatus,
   dataprocExists,
   dataprocConfig,
-}) => {
+}: Props) => {
   const {
     workerMachineType = DEFAULT_MACHINE_NAME,
     workerDiskSize = DATAPROC_MIN_DISK_SIZE_GB,
