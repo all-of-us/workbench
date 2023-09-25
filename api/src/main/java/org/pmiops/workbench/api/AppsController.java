@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import java.util.Optional;
 import javax.inject.Provider;
 import org.apache.arrow.util.VisibleForTesting;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -118,7 +119,8 @@ public class AppsController implements AppsApiDelegate {
                     appName,
                     body.getFileNames(),
                     body.getPlaygroundMode(),
-                    false)));
+                    false,
+                    Optional.of(body.getAppType()))));
   }
 
   /**

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.interactiveanalysis;
 
+import autovalue.shaded.com.google.common.collect.ImmutableMap;
 import com.google.common.annotations.VisibleForTesting;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,6 +8,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,9 +19,11 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.NotImplementedException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.leonardo.LeonardoApiClient;
+import org.pmiops.workbench.model.AppType;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -54,6 +58,11 @@ public class InteractiveAnalysisService {
   @VisibleForTesting static final String JUPYTER_DELOC_PATTERN = "\\.ipynb$";
 
   @VisibleForTesting static final String RSTUDIO_DELOC_PATTERN = "\\.(Rmd|R)$";
+  static final String SAS_DELOC_PATTERN = "\\.sas";
+
+  @VisibleForTesting  static final Map<AppType, String> APP_TYPE_TO_DELOC_PATTERN =
+      ImmutableMap.<AppType, String>builder().put(AppType.RSTUDIO, RSTUDIO_DELOC_PATTERN)
+              .put(AppType.SAS, SAS_DELOC_PATTERN).build();
 
   @Autowired
   public InteractiveAnalysisService(
@@ -76,7 +85,8 @@ public class InteractiveAnalysisService {
       String appName,
       List<String> fileNames,
       boolean isPlayground,
-      boolean isGceRuntime) {
+      boolean isGceRuntime,
+      Optional<AppType> appType) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
     final RawlsWorkspaceDetails firecloudWorkspace;
     try {
@@ -131,7 +141,9 @@ public class InteractiveAnalysisService {
               .cloudStorageDirectory(gcsNotebooksDir)
               .localBaseDirectory(editDir)
               .localSafeModeBaseDirectory(playgroundDir)
-              .pattern(RSTUDIO_DELOC_PATTERN));
+              .pattern(APP_TYPE_TO_DELOC_PATTERN.get(appType.orElseThrow(() ->
+                  new NotImplementedException(
+                      String.format("Localize %s file format is not implemented", appName))))));
     }
 
     // Always localize config files; usually a no-op after the first call.

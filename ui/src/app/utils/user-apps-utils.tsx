@@ -131,14 +131,15 @@ export const openSAS = (
   workspaceNamespace: string,
   userApp: UserAppEnvironment
 ) => {
-  // RW-10934 SAS localization throws a 500 error
-  // fetchWithErrorModal(() => localizeUserApp(
-  //   workspaceNamespace,
-  //   userApp.appName,
-  //   userApp.appType,
-  //   [],
-  //   false
-  // ));
+  fetchWithErrorModal(() =>
+    localizeUserApp(
+      workspaceNamespace,
+      userApp.appName,
+      userApp.appType,
+      [],
+      false
+    )
+  );
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 

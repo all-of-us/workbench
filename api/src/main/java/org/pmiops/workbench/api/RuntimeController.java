@@ -283,6 +283,6 @@ public class RuntimeController implements RuntimeApiDelegate {
                     userProvider.get().getRuntimeName(),
                     body.getNotebookNames(),
                     body.getPlaygroundMode(),
-                    true)));
+                    true, Optional.empty())));
   }
 }
