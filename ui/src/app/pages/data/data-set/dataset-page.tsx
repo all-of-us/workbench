@@ -1041,7 +1041,7 @@ export const DatasetPage = fp.flow(
           }
           const updateIndex = domainsWithConceptSetIds.findIndex(
             (dc) =>
-              dc.conceptSetId !== null &&
+              dc.conceptSetId !== undefined &&
               dc.conceptSetId === domainWithConceptSetId.conceptSetId
           );
           if (updateIndex > -1) {
@@ -1177,12 +1177,12 @@ export const DatasetPage = fp.flow(
             if (
               (PREPACKAGED_DOMAINS[prepackaged] === Domain.SURVEY &&
                 domainWithConceptSetId.domain === Domain.SURVEY &&
-                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.conceptSetId === undefined &&
                 !Array.from(updatedPrepackaged).some((domain) =>
                   domain.toString().includes('SURVEY')
                 )) ||
               (PREPACKAGED_DOMAINS[prepackaged] !== Domain.SURVEY &&
-                domainWithConceptSetId.conceptSetId === null &&
+                domainWithConceptSetId.conceptSetId === undefined &&
                 domainWithConceptSetId.domain ===
                   PREPACKAGED_DOMAINS[prepackaged])
             ) {
