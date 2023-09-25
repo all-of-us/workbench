@@ -7,7 +7,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -133,7 +132,8 @@ public class InteractiveAnalysisService {
     } else {
       throw new NotImplementedException(
           String.format(
-              "Localizing is not yet supported for app type %s", Optional.ofNullable(appType)));
+              "Localizing is not yet supported for app type %s",
+              appType == null ? "[null]" : appType.toString()));
     }
 
     if (isGceRuntime) {
