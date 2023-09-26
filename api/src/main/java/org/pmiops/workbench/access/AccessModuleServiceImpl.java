@@ -73,7 +73,7 @@ public class AccessModuleServiceImpl implements AccessModuleService {
     updateBypassTime(
         userId,
         accessModuleNameMapper.clientAccessModuleToStorage(accessBypassRequest.getModuleName()),
-        accessBypassRequest.isIsBypassed());
+        accessBypassRequest.isBypassed());
   }
 
   @Override

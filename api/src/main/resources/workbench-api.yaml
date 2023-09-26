@@ -7414,13 +7414,13 @@ components:
       - PUBLICATION_CONFIRMATION
     AccessBypassRequest:
       required:
-      - isBypassed
+      - bypassed
       - moduleName
       type: object
       properties:
         moduleName:
           $ref: '#/components/schemas/AccessModule'
-        isBypassed:
+        bypassed:
           type: boolean
           default: false
     CohortReviewListResponse:
