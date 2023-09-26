@@ -218,7 +218,7 @@ public class UserController implements UserApiDelegate {
 
     return Stream.of(
         new BillingAccount()
-            .isFreeTier(true)
+            .freeTier(true)
             .displayName("Use All of Us initial credits")
             .name(configProvider.get().billing.freeTierBillingAccountName())
             .isOpen(true));
@@ -239,7 +239,7 @@ public class UserController implements UserApiDelegate {
         .map(
             googleBillingAccount ->
                 new BillingAccount()
-                    .isFreeTier(false)
+                    .freeTier(false)
                     .displayName(googleBillingAccount.getDisplayName())
                     .name(googleBillingAccount.getName())
                     .isOpen(Boolean.TRUE.equals(googleBillingAccount.getOpen())));

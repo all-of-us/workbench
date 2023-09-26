@@ -352,7 +352,7 @@ public class UserControllerTest {
 
   static final BillingAccount freeTierBillingAccount =
       new BillingAccount()
-          .isFreeTier(true)
+          .freeTier(true)
           .displayName("Use All of Us initial credits")
           .name("billingAccounts/free-tier")
           .isOpen(true);
@@ -373,12 +373,12 @@ public class UserControllerTest {
           new BillingAccount()
               .name("googlebucks")
               .displayName("Paid using your credit card")
-              .isFreeTier(false)
+              .freeTier(false)
               .isOpen(false),
           new BillingAccount()
               .name("a2")
               .displayName("Account 2 - Open")
-              .isFreeTier(false)
+              .freeTier(false)
               .isOpen(true));
 
   // billing upgrade is true, free tier is available, cloud accounts exist

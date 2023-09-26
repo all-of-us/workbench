@@ -412,7 +412,7 @@ export const WorkspaceEdit = fp.flow(
         name:
           'billingAccounts/' +
           serverConfigStore.get().config.freeTierBillingAccountId,
-        isFreeTier: true,
+        freeTier: true,
         isOpen: true,
         displayName: this.formatFreeTierBillingAccountName(),
       };
@@ -451,7 +451,7 @@ export const WorkspaceEdit = fp.flow(
                 {
                   name: this.props.workspace.billingAccountName,
                   displayName: 'User Provided Billing Account',
-                  isFreeTier: false,
+                  freeTier: false,
                   isOpen: true,
                 },
               ],
@@ -469,7 +469,7 @@ export const WorkspaceEdit = fp.flow(
 
       // Replace the free billing account with a new display name that has spend usage.
       return billingAccounts.map((b) => {
-        if (b.isFreeTier) {
+        if (b.freeTier) {
           return {
             ...b,
             displayName: this.formatFreeTierBillingAccountName(),
@@ -486,7 +486,7 @@ export const WorkspaceEdit = fp.flow(
       billingAccounts.push({
         name: this.props.workspace.billingAccountName,
         displayName: 'User Provided Billing Account',
-        isFreeTier: false,
+        freeTier: false,
         isOpen: true,
       });
 
@@ -517,7 +517,7 @@ export const WorkspaceEdit = fp.flow(
         this.isMode(WorkspaceEditMode.Duplicate)
       ) {
         const maybeFreeTierAccount = formattedBillingAccounts.find(
-          (billingAccount) => billingAccount.isFreeTier
+          (billingAccount) => billingAccount.freeTier
         );
         if (maybeFreeTierAccount) {
           this.setState((prevState) =>

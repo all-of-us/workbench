@@ -7444,12 +7444,12 @@ components:
     BillingAccount:
       required:
       - displayName
-      - isFreeTier
+      - freeTier
       - isOpen
       - name
       type: object
       properties:
-        isFreeTier:
+        freeTier:
           type: boolean
           description: Returns true if this is the billing account used for free tier
         name:
