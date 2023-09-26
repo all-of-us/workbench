@@ -190,7 +190,7 @@ export const CriteriaSearch = fp.flow(
           hierarchyNode: {
             domainId: domain,
             type: type,
-            isStandard: standard,
+            standard: standard,
             id: 0,
           } as Criteria,
           mode: 'tree',
@@ -339,10 +339,7 @@ export const CriteriaSearch = fp.flow(
         ? fp.map((selected) => selected.parameterId, selectedCriteriaList)
         : fp.map(
             (selected) =>
-              'param' +
-              selected.conceptId +
-              selected.code +
-              selected.isStandard,
+              'param' + selected.conceptId + selected.code + selected.standard,
             selectedCriteriaList
           );
     }

@@ -385,11 +385,11 @@ export const ListSearch = fp.flow(
             .findCriteriaForCohortEdit(namespace, id, domain.toString(), {
               sourceConceptIds: currentCohortCriteriaStore
                 .getValue()
-                .filter((s) => !s.isStandard)
+                .filter((s) => !s.standard)
                 .map((s) => s.conceptId),
               standardConceptIds: currentCohortCriteriaStore
                 .getValue()
-                .filter((s) => s.isStandard)
+                .filter((s) => s.standard)
                 .map((s) => s.conceptId),
             })
             .then((response) =>

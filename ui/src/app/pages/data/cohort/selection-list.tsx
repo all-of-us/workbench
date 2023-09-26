@@ -149,7 +149,7 @@ function mapCriteria(crit: Selection) {
     domainId: crit.domainId,
     group: crit.group,
     hasAncestorData: crit.hasAncestorData,
-    isStandard: crit.isStandard,
+    standard: crit.standard,
     name: crit.name,
     parameterId: crit.parameterId,
     type: crit.type,
@@ -372,8 +372,8 @@ export const SelectionList = fp.flow(
         )
       ) {
         // Separate selections by standard and source concepts for Condition and Procedures
-        const standardConcepts = criteria.filter((con) => con.isStandard);
-        const sourceConcepts = criteria.filter((con) => !con.isStandard);
+        const standardConcepts = criteria.filter((con) => con.standard);
+        const sourceConcepts = criteria.filter((con) => !con.standard);
         return (
           <React.Fragment>
             {standardConcepts.length > 0 && (

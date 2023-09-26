@@ -10502,7 +10502,7 @@ components:
           type: boolean
           description: Whether criteria needs lookup in the criteria_ancestor table.
           default: false
-        isStandard:
+        standard:
           type: boolean
           description: Reveals if this criteria is standard or source.
           default: false

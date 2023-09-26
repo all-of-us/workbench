@@ -84,8 +84,8 @@ export const ConceptQuickAddModal = withCurrentCohortSearchContext()(
       }
     };
 
-    const getParamId = ({ code, conceptId, id, isStandard }: Criteria) => {
-      return `param${conceptId ? conceptId + code : id}${isStandard}`;
+    const getParamId = ({ code, conceptId, id, standard }: Criteria) => {
+      return `param${conceptId ? conceptId + code : id}${standard}`;
     };
 
     const addConceptsAsItems = () => {

@@ -187,7 +187,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   loadChildren() {
     const {
       domain,
-      node: { conceptId, count, id, isStandard, name, type },
+      node: { conceptId, count, id, standard, name, type },
     } = this.props;
     this.setState({ loading: true });
     const workspace = currentWorkspaceStore.getValue();
@@ -199,7 +199,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         workspace.id,
         domain.toString(),
         criteriaType,
-        isStandard,
+        standard,
         id
       )
       .then((resp) => {
@@ -210,7 +210,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               workspace.id,
               domain.toString(),
               CriteriaType[CriteriaType.RXNORM],
-              isStandard,
+              standard,
               id
             )
             .then(
@@ -293,10 +293,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   paramId(crit?: Criteria) {
     const node = crit || this.props.node;
-    const { code, conceptId, domainId, id, isStandard } = node;
+    const { code, conceptId, domainId, id, standard } = node;
     return `param${
       !!conceptId && domainId !== Domain.SURVEY.toString()
-        ? conceptId + code + isStandard
+        ? conceptId + code + standard
         : id
     }`;
   }
