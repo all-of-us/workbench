@@ -39,19 +39,19 @@ const setup = (props = createProps()) => {
   };
 };
 
-function findStateField() {
-  return screen.getByLabelText(formLabels.state) as HTMLInputElement;
+function getStateField(): HTMLInputElement {
+  return screen.getByLabelText(formLabels.state);
 }
 
-function findCountryDropdownField() {
-  return screen.getByLabelText('Country dropdown') as HTMLSelectElement;
+function getCountryDropdownField(): HTMLSelectElement {
+  return screen.getByLabelText('Country dropdown');
 }
 
-function findOtherCountryInputField() {
-  return screen.getByLabelText('Other country input') as HTMLInputElement;
+function queryOtherCountryInputField(): HTMLInputElement {
+  return screen.queryByLabelText('Other country input');
 }
 
-function getAreaOfResearchTextBox() {
+function getAreaOfResearchTextArea(): HTMLTextAreaElement {
   return screen.getByLabelText(
     'Your research background, experience, and research interests'
   );
@@ -76,15 +76,15 @@ const fillInMinimalFields = async (user: UserEvent) => {
   await user.paste('1 Main Street');
   await user.click(screen.getByLabelText(formLabels.city));
   await user.paste('Boston');
-  await user.click(findStateField());
+  await user.click(getStateField());
   await user.paste('MA');
   await user.click(screen.getByLabelText(formLabels.zipCode));
   await user.paste('02115');
-  await user.click(findCountryDropdownField());
+  await user.click(getCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
 
-  await user.click(getAreaOfResearchTextBox());
+  await user.click(getAreaOfResearchTextArea());
   await user.paste('I am an undergraduate learning genomics.');
 };
 
@@ -209,13 +209,13 @@ it('should display characters over message if research purpose character length 
   expect(screen.queryByText('2000 characters remaining')).not.toBeNull();
 
   let testInput = fp.repeat(2000, 'a');
-  await user.click(getAreaOfResearchTextBox());
+  await user.click(getAreaOfResearchTextArea());
   await user.paste(testInput);
   expect(screen.queryByText('0 characters remaining')).not.toBeNull();
 
   testInput = fp.repeat(2010, 'a');
-  await user.clear(getAreaOfResearchTextBox());
-  await user.click(getAreaOfResearchTextBox());
+  await user.clear(getAreaOfResearchTextArea());
+  await user.click(getAreaOfResearchTextArea());
   await user.paste(testInput);
   expect(screen.queryByText('10 characters over')).not.toBeNull();
 
@@ -224,65 +224,61 @@ it('should display characters over message if research purpose character length 
 });
 
 it('should display a dropdown for non-US countries', async () => {
-  const { container, user } = setup();
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
-  await user.click(findCountryDropdownField());
+  const { user } = setup();
+  expect(queryOtherCountryInputField()).toBeNull();
+  await user.click(getCountryDropdownField());
   await user.paste(Country.US);
-  await user.keyboard('{enter}');
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
-  await user.clear(findCountryDropdownField());
-  await user.click(findCountryDropdownField());
+  expect(getCountryDropdownField().value).toEqual('United States');
+  expect(queryOtherCountryInputField()).toBeNull();
+  await user.clear(getCountryDropdownField());
+  await user.click(getCountryDropdownField());
   await user.paste(Country.CA);
-  expect(findCountryDropdownField().value).toEqual('Canada');
+  expect(getCountryDropdownField().value).toEqual('Canada');
+  expect(queryOtherCountryInputField()).toBeNull();
 });
 
 it('should display a text input field for "other" non-US countries', async () => {
-  const { container, user } = setup();
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
-  await user.click(findCountryDropdownField());
-  await user.paste(Country.US);
-  await user.keyboard('{enter}');
-  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
-  await user.clear(findCountryDropdownField());
-  await user.click(findCountryDropdownField());
+  const { user } = setup();
+  expect(queryOtherCountryInputField()).toBeNull();
+  await user.click(getCountryDropdownField());
   await user.paste(Country.OTHER);
   await user.keyboard('{enter}');
-  expect(findOtherCountryInputField()).not.toBeNull();
-  await user.click(findOtherCountryInputField());
+  expect(queryOtherCountryInputField()).not.toBeNull();
+  await user.click(queryOtherCountryInputField());
   await user.paste('Sokovia');
-  expect(findOtherCountryInputField().value).toEqual('Sokovia');
+  expect(queryOtherCountryInputField().value).toEqual('Sokovia');
 });
 
 it('should capitalize a state code when selecting USA', async () => {
   const { user } = setup();
-  await user.click(findStateField());
+  await user.click(getStateField());
   await user.paste('ny');
-  expect(findStateField().value).toEqual('ny');
-  await user.click(findCountryDropdownField());
+  expect(getStateField().value).toEqual('ny');
+  await user.click(getCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
-  expect(findStateField().value).toEqual('NY');
+  expect(getStateField().value).toEqual('NY');
 });
 
 it('should change a state name to a state code after selecting USA', async () => {
   const { user } = setup();
-  await user.click(findStateField());
+  await user.click(getStateField());
   await user.paste('new york');
-  expect(findStateField().value).toEqual('new york');
-  await user.click(findCountryDropdownField());
+  expect(getStateField().value).toEqual('new york');
+  await user.click(getCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
-  expect(findStateField().value).toEqual('NY');
+  expect(getStateField().value).toEqual('NY');
 });
 
 it('should mark US states as invalid if not a 2-letter code', async () => {
   const { container, user } = setup();
   expect(container.querySelector('#stateError')).toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).toBeNull();
-  await user.click(findCountryDropdownField());
+  await user.click(getCountryDropdownField());
   await user.paste(Country.US);
   await user.keyboard('{enter}');
-  await user.click(findStateField());
+  await user.click(getStateField());
   await user.paste('new york');
   expect(container.querySelector('#stateError')).not.toBeNull();
   expect(screen.queryByText(stateCodeErrorMessage)).not.toBeNull();
