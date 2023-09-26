@@ -17,9 +17,9 @@ import { SpinnerOverlay } from 'app/components/spinners';
 import { WithSpinnerOverlayProps } from 'app/components/with-spinner-overlay';
 import { TanagraResourceList } from 'app/pages/data/tanagra-dev/tanagra-resource-list';
 import {
-  cohortsV2Api,
-  conceptSetsV2Api,
-  reviewsV2Api,
+  cohortsApi,
+  conceptSetsApi,
+  reviewsApi,
 } from 'app/services/tanagra-swagger-fetch-clients';
 import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { withCdrVersions, withCurrentWorkspace } from 'app/utils';
@@ -30,10 +30,10 @@ import { WorkspaceData } from 'app/utils/workspace-data';
 import cohortImg from 'assets/images/cohort-diagram.svg';
 import dataSetImg from 'assets/images/dataset-diagram.svg';
 import {
-  CohortV2,
-  ConceptSetV2,
+  Cohort,
+  ConceptSet,
   CreateCohortRequest,
-  ReviewV2,
+  Review,
 } from 'tanagra-generated';
 
 const styles = {
@@ -94,9 +94,9 @@ const descriptions = {
 };
 
 export interface TanagraWorkspaceResource extends WorkspaceResource {
-  cohortV2?: CohortV2;
-  conceptSetV2?: ConceptSetV2;
-  reviewV2?: ReviewV2;
+  cohortTanagra?: Cohort;
+  conceptSetTanagra?: ConceptSet;
+  reviewTanagra?: Review;
 }
 
 const mapTanagraWorkspaceResource = ({
@@ -105,9 +105,9 @@ const mapTanagraWorkspaceResource = ({
   review,
   workspace,
 }: {
-  cohort?: CohortV2;
-  conceptSet?: ConceptSetV2;
-  review?: ReviewV2;
+  cohort?: Cohort;
+  conceptSet?: ConceptSet;
+  review?: Review;
   workspace: WorkspaceData;
 }): TanagraWorkspaceResource => ({
   workspaceNamespace: workspace.namespace,
@@ -116,9 +116,9 @@ const mapTanagraWorkspaceResource = ({
   cdrVersionId: workspace.cdrVersionId,
   accessTierShortName: workspace.accessTierShortName,
   permission: workspace.accessLevel.toString(),
-  cohortV2: cohort,
-  conceptSetV2: conceptSet,
-  reviewV2: review,
+  cohortTanagra: cohort,
+  conceptSetTanagra: conceptSet,
+  reviewTanagra: review,
   lastModifiedEpochMillis: workspace.lastModifiedTime,
   adminLocked: workspace.adminLocked,
 });
@@ -153,14 +153,14 @@ export const DataComponentTanagra = fp.flow(
     try {
       setIsLoading(true);
       const [cohorts, conceptSets] = await Promise.all([
-        cohortsV2Api().listCohorts({ studyId: workspace.namespace }),
-        conceptSetsV2Api().listConceptSets({ studyId: workspace.namespace }),
+        cohortsApi().listCohorts({ studyId: workspace.namespace }),
+        conceptSetsApi().listConceptSets({ studyId: workspace.namespace }),
       ]);
       let reviews = [];
       if (cohorts.length > 0) {
         reviews = await Promise.all(
           cohorts.map((cohort) =>
-            reviewsV2Api().listReviews({
+            reviewsApi().listReviews({
               studyId: workspace.namespace,
               cohortId: cohort.id,
             })
@@ -216,13 +216,13 @@ export const DataComponentTanagra = fp.flow(
   const createCohort = async (name: string, desc: string) => {
     const createCohortRequest: CreateCohortRequest = {
       studyId: workspace.namespace,
-      cohortCreateInfoV2: {
+      cohortCreateInfo: {
         description: desc,
         displayName: name,
         underlayName: bigqueryDataset,
       },
     };
-    const newCohort = await cohortsV2Api().createCohort(createCohortRequest);
+    const newCohort = await cohortsApi().createCohort(createCohortRequest);
     navigate([
       'workspaces',
       workspace.namespace,
