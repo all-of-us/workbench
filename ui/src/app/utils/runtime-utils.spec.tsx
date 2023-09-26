@@ -1,13 +1,16 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
 
-import { RuntimeApi } from 'generated/fetch';
+import { ListRuntimeResponse, RuntimeApi } from 'generated/fetch';
 
+import { render, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
   AnalysisDiffState,
   findMostSevereDiffState,
+  getCreator,
   useCustomRuntime,
 } from 'app/utils/runtime-utils';
 import {
@@ -17,11 +20,7 @@ import {
 } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import {
-  waitForFakeTimersAndUpdate,
-  waitOneTickAndUpdate,
-} from 'testing/react-test-helpers';
-import { RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
 
 const WORKSPACE_NS = 'test';
 
@@ -72,28 +71,28 @@ describe('runtime-utils', () => {
   });
 
   it('should initialize with a value', async () => {
-    const wrapper = mount(<TestComponent />);
-    await waitOneTickAndUpdate(wrapper);
+    const { container } = render(<TestComponent />);
 
     // Runtime initialization is in progress at this point.
-    const runtime = (id) => wrapper.find({ id }).first();
-    expect(runtime('1').text()).toEqual('');
-    expect(runtime('2').text()).toEqual('');
+    const runtime = (id) => container.querySelector(`[id="${id}"]`);
+    expect(runtime('1')).toHaveTextContent('');
+    expect(runtime('2')).toHaveTextContent('');
 
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtime('1').text()).toEqual('Runtime Name');
-    expect(runtime('2').text()).toEqual('Runtime Name');
+    await waitFor(() => {
+      expect(runtime('1')).toHaveTextContent('Runtime Name');
+      expect(runtime('2')).toHaveTextContent('Runtime Name');
+    });
   });
 
   it('should update when runtime store updates', async () => {
-    const wrapper = mount(<TestComponent />);
-    await waitOneTickAndUpdate(wrapper);
+    const { container } = render(<TestComponent />);
 
-    const runtime = (id) => wrapper.find({ id }).first();
+    const runtime = (id) => container.querySelector(`[id="${id}"]`);
 
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtime('1').text()).toEqual('Runtime Name');
-    expect(runtime('2').text()).toEqual('Runtime Name');
+    await waitFor(() => {
+      expect(runtime('1')).toHaveTextContent('Runtime Name');
+      expect(runtime('2')).toHaveTextContent('Runtime Name');
+    });
 
     act(() =>
       runtimeStore.set({
@@ -104,9 +103,10 @@ describe('runtime-utils', () => {
         },
       })
     );
-    await waitForFakeTimersAndUpdate(wrapper);
-    expect(runtime('1').text()).toEqual('foo');
-    expect(runtime('2').text()).toEqual('foo');
+    await waitFor(() => {
+      expect(runtime('1')).toHaveTextContent('foo');
+      expect(runtime('2')).toHaveTextContent('foo');
+    });
   });
 
   test.each([
@@ -147,4 +147,23 @@ describe('runtime-utils', () => {
   ])('findMostSevereDiffState(%s) = %s', (diffStates, want) => {
     expect(findMostSevereDiffState(diffStates)).toEqual(want);
   });
+
+  test.each([
+    ['a runtime without a creator label', defaultRuntime(), undefined],
+    [
+      'a runtime with a creator label',
+      { ...defaultRuntime(), labels: { creator: 'scientist@aou' } },
+      'scientist@aou',
+    ],
+    ['a non-runtime object', {}, undefined],
+    ['undefined', undefined, undefined],
+    ['null', null, undefined],
+  ])(
+    'getCreator should have the expected result for %s',
+    (
+      desc: string,
+      runtimeResponse: ListRuntimeResponse,
+      expected: string | undefined
+    ) => expect(getCreator(runtimeResponse)).toEqual(expected)
+  );
 });

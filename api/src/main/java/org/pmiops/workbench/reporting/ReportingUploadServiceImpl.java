@@ -27,6 +27,8 @@ import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
+import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
@@ -38,6 +40,8 @@ import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransform
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.NewUserSatisfactionSurveyColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserGeneralDiscoverySourceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.UserPartnerDiscoverySourceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -67,6 +71,14 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   private static final InsertAllRequestPayloadTransformer<ReportingNewUserSatisfactionSurvey>
       newUserSatisfactionSurveyRequestBuilder =
           NewUserSatisfactionSurveyColumnValueExtractor::values;
+
+  private static final InsertAllRequestPayloadTransformer<ReportingUserGeneralDiscoverySource>
+      userGeneralDiscoverySourceRequestBuilder =
+          UserGeneralDiscoverySourceColumnValueExtractor::values;
+
+  private static final InsertAllRequestPayloadTransformer<ReportingUserPartnerDiscoverySource>
+      userPartnerDiscoverySourceRequestBuilder =
+          UserPartnerDiscoverySourceColumnValueExtractor::values;
 
   /**
    * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
@@ -148,6 +160,26 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     uploadBatchTable(
         newUserSatisfactionSurveyRequestBuilder.build(
             getTableId(NewUserSatisfactionSurveyColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+  }
+
+  @Override
+  public void uploadUserGeneralDiscoverySourceBatch(
+      List<ReportingUserGeneralDiscoverySource> batch, long captureTimestamp) {
+    uploadBatchTable(
+        userGeneralDiscoverySourceRequestBuilder.build(
+            getTableId(UserGeneralDiscoverySourceColumnValueExtractor.TABLE_NAME),
+            batch,
+            getFixedValues(captureTimestamp)));
+  }
+
+  @Override
+  public void uploadUserPartnerDiscoverySourceBatch(
+      List<ReportingUserPartnerDiscoverySource> batch, long captureTimestamp) {
+    uploadBatchTable(
+        userPartnerDiscoverySourceRequestBuilder.build(
+            getTableId(UserPartnerDiscoverySourceColumnValueExtractor.TABLE_NAME),
             batch,
             getFixedValues(captureTimestamp)));
   }

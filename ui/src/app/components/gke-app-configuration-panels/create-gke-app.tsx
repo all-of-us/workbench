@@ -10,14 +10,17 @@ import {
 
 import { switchCase } from '@terra-ui-packages/core-utils';
 import {
+  canDeleteApp,
   createAppRequestToAnalysisConfig,
   defaultCromwellConfig,
   defaultRStudioConfig,
   defaultSASConfig,
 } from 'app/components/apps-panel/utils';
+import { LinkButton } from 'app/components/buttons';
 import { DeletePersistentDiskButton } from 'app/components/delete-persistent-disk-button';
 import { EnvironmentInformedActionPanel } from 'app/components/environment-informed-action-panel';
 import { FlexColumn, FlexRow } from 'app/components/flex';
+import { SidebarIconId } from 'app/components/help-sidebar-icons';
 import { styles } from 'app/components/runtime-configuration-panel/styles';
 import { setSidebarActiveIconStore } from 'app/utils/navigation';
 import { ProfileStore } from 'app/utils/stores';
@@ -42,6 +45,7 @@ export interface CreateGkeAppProps {
   profileState: ProfileStore;
   app: UserAppEnvironment | undefined;
   disk: Disk | undefined;
+  onClickDeleteGkeApp: (sidebarIcon: SidebarIconId) => void;
   onClickDeleteUnattachedPersistentDisk: () => void;
   introText?: string;
   CostNote?: React.FunctionComponent;
@@ -67,6 +71,7 @@ export const CreateGkeApp = ({
   profileState,
   app,
   disk,
+  onClickDeleteGkeApp,
   onClickDeleteUnattachedPersistentDisk,
   introText = defaultIntroText,
   CostNote = () => null,
@@ -126,7 +131,7 @@ export const CreateGkeApp = ({
       <FlexRow
         style={{
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           gap: '2rem',
         }}
       >
@@ -135,6 +140,15 @@ export const CreateGkeApp = ({
             onClick={onClickDeleteUnattachedPersistentDisk}
             style={{ flexShrink: 0 }}
           />
+        )}
+        {canDeleteApp(app) && (
+          <LinkButton
+            style={{ ...styles.deleteLink, flexShrink: 0 }}
+            aria-label='Delete Environment'
+            onClick={onClickDeleteGkeApp}
+          >
+            Delete Environment
+          </LinkButton>
         )}
         <CreateAppText />
         <CreateGkeAppButton

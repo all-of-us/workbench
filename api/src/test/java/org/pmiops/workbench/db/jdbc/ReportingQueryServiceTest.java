@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +61,8 @@ import org.pmiops.workbench.db.model.DbInstitutionTierRequirement.MembershipRequ
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey;
 import org.pmiops.workbench.db.model.DbNewUserSatisfactionSurvey.Satisfaction;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUser.DbGeneralDiscoverySource;
+import org.pmiops.workbench.db.model.DbUser.DbPartnerDiscoverySource;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -70,6 +74,8 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
+import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -510,9 +516,69 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
-  public void testUserCount() {
+  public void testQueryUserGeneralDiscoverySource() {
+    final DbUser user = userFixture.createEntity();
+    user.setGeneralDiscoverySources(
+            new HashSet<>(
+                Arrays.asList(
+                    DbGeneralDiscoverySource.FRIENDS_OR_COLLEAGUES,
+                    DbGeneralDiscoverySource.OTHER_WEBSITE,
+                    DbGeneralDiscoverySource.OTHER)))
+        .setGeneralDiscoverySourceOtherText("other text");
+    userDao.save(user);
+    entityManager.flush();
+
+    final List<ReportingUserGeneralDiscoverySource> userGeneralDiscoverySources =
+        reportingQueryService.getUserGeneralDiscoverySourceBatch(5, 0);
+
+    assertThat(userGeneralDiscoverySources)
+        .containsExactly(
+            new ReportingUserGeneralDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbGeneralDiscoverySource.FRIENDS_OR_COLLEAGUES.toString()),
+            new ReportingUserGeneralDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbGeneralDiscoverySource.OTHER_WEBSITE.toString()),
+            new ReportingUserGeneralDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbGeneralDiscoverySource.OTHER.toString())
+                .otherText("other text"));
+  }
+
+  @Test
+  public void testQueryUserPartnerDiscoverySource() {
+    final DbUser user = userFixture.createEntity();
+    user.setPartnerDiscoverySources(
+            new HashSet<>(
+                Arrays.asList(
+                    DbPartnerDiscoverySource.PYXIS_PARTNERS,
+                    DbPartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF,
+                    DbPartnerDiscoverySource.OTHER)))
+        .setPartnerDiscoverySourceOtherText("other text");
+    userDao.save(user);
+    entityManager.flush();
+
+    final List<ReportingUserPartnerDiscoverySource> userPartnerDiscoverySources =
+        reportingQueryService.getUserPartnerDiscoverySourceBatch(5, 0);
+
+    assertThat(userPartnerDiscoverySources)
+        .containsExactly(
+            new ReportingUserPartnerDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbPartnerDiscoverySource.PYXIS_PARTNERS.toString()),
+            new ReportingUserPartnerDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbPartnerDiscoverySource.ALL_OF_US_RESEARCH_PROGRAM_STAFF.toString()),
+            new ReportingUserPartnerDiscoverySource()
+                .userId(user.getUserId())
+                .answer(DbPartnerDiscoverySource.OTHER.toString())
+                .otherText("other text"));
+  }
+
+  @Test
+  public void testGetRowCount() {
     createUsers(3);
-    assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
+    assertThat(reportingQueryService.getTableRowCount("user")).isEqualTo(3);
   }
 
   @Test
@@ -543,12 +609,6 @@ public class ReportingQueryServiceTest {
     final List<List<ReportingCohort>> stream =
         reportingQueryService.getBatchedCohortStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(3);
-  }
-
-  @Test
-  public void testCohortsCount() {
-    createCohorts(3);
-    assertThat(reportingQueryService.getCohortCount()).isEqualTo(3);
   }
 
   @Test
@@ -598,12 +658,6 @@ public class ReportingQueryServiceTest {
             .map(ReportingNewUserSatisfactionSurvey::getId)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(ids).hasSize(numNewUserSatisfactionSurveys);
-  }
-
-  @Test
-  public void testNewUserSatisfactionSurveysCount() {
-    createNewUserSatisfactionSurveys(5);
-    assertThat(reportingQueryService.getNewUserSatisfactionSurveyCount()).isEqualTo(5);
   }
 
   private Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
