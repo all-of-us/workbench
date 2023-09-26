@@ -1507,9 +1507,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
                 .bypassed(true),
             // would un-bypass if a bypass had existed
-            new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
-                .bypassed(false));
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).bypassed(false));
 
     final AccountPropertyUpdate request1 =
         new AccountPropertyUpdate().username(FULL_USER_NAME).accessBypassRequests(bypasses1);
