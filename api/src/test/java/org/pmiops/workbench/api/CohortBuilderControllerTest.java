@@ -1701,7 +1701,7 @@ public class CohortBuilderControllerTest {
         .path(dbCriteria.getPath())
         .hasAncestorData(dbCriteria.getAncestorData())
         .hasHierarchy(dbCriteria.getHierarchy())
-        .isStandard(dbCriteria.isStandard())
+        .standard(dbCriteria.isStandard())
         .value(dbCriteria.getValue());
   }
 
