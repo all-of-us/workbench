@@ -231,7 +231,6 @@ export class AccountCreation extends React.Component<
   }
 
   updateCountryDropdownSelection(value) {
-    this.updateAddress('country', value);
     this.setState({
       countryDropdownSelection: value,
     });
@@ -244,6 +243,9 @@ export class AccountCreation extends React.Component<
         this.updateAddress('state', stateCodeGuess);
       }
     }
+
+    // OTHER country values are set by the 'Other country input' TextInput
+    this.updateAddress('country', value === Country.OTHER ? '' : value);
   }
 
   stateInvalidError(): boolean {
@@ -704,9 +706,9 @@ export class AccountCreation extends React.Component<
                     {this.state.countryDropdownSelection === Country.OTHER && (
                       <div style={{ marginTop: '0.3rem' }}>
                         <TextInput
-                          id='country'
-                          name='country'
-                          aria-label='Country input'
+                          id='other country'
+                          name='other country'
+                          aria-label='Other country input'
                           placeholder='Please specify'
                           value={country}
                           onChange={(value) =>

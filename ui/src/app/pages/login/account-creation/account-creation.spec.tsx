@@ -47,8 +47,8 @@ function findCountryDropdownField() {
   return screen.getByLabelText('Country dropdown') as HTMLSelectElement;
 }
 
-function findCountryInputField() {
-  return screen.getByLabelText('Country input') as HTMLInputElement;
+function findOtherCountryInputField() {
+  return screen.getByLabelText('Other country input') as HTMLInputElement;
 }
 
 function getAreaOfResearchTextBox() {
@@ -223,7 +223,20 @@ it('should display characters over message if research purpose character length 
   expect(container.querySelector('[data-test-id="charRemaining"]')).toBeNull();
 });
 
-it('should display a text input field for non-US countries', async () => {
+it('should display a dropdown for non-US countries', async () => {
+  const { container, user } = setup();
+  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
+  await user.click(findCountryDropdownField());
+  await user.paste(Country.US);
+  await user.keyboard('{enter}');
+  expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
+  await user.clear(findCountryDropdownField());
+  await user.click(findCountryDropdownField());
+  await user.paste(Country.CA);
+  expect(findCountryDropdownField().value).toEqual('Canada');
+});
+
+it('should display a text input field for "other" non-US countries', async () => {
   const { container, user } = setup();
   expect(container.querySelector('[data-test-id="country-input"]')).toBeNull();
   await user.click(findCountryDropdownField());
@@ -234,10 +247,10 @@ it('should display a text input field for non-US countries', async () => {
   await user.click(findCountryDropdownField());
   await user.paste(Country.OTHER);
   await user.keyboard('{enter}');
-  expect(findCountryInputField()).not.toBeNull();
-  await user.click(findCountryInputField());
-  await user.paste('Canada');
-  expect(findCountryInputField().value).toEqual('Canada');
+  expect(findOtherCountryInputField()).not.toBeNull();
+  await user.click(findOtherCountryInputField());
+  await user.paste('Sokovia');
+  expect(findOtherCountryInputField().value).toEqual('Sokovia');
 });
 
 it('should capitalize a state code when selecting USA', async () => {
