@@ -231,21 +231,18 @@ export class AccountCreation extends React.Component<
   }
 
   updateCountryDropdownSelection(value) {
+    this.updateAddress('country', value);
     this.setState({
       countryDropdownSelection: value,
     });
 
     if (value === Country.US) {
-      this.updateAddress('country', value);
-
       const stateCodeGuess = this.autoSelectStateCode(
         this.state.profile.address.state
       );
       if (stateCodeGuess != null) {
         this.updateAddress('state', stateCodeGuess);
       }
-    } else {
-      this.updateAddress('country', '');
     }
   }
 
