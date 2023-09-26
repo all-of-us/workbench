@@ -26,6 +26,7 @@ import { BulletAlignedUnorderedList } from 'app/components/lists';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { SUPPORT_EMAIL } from 'app/components/support';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
@@ -550,9 +551,7 @@ export const ProfileComponent = fp.flow(
                           <label>Country</label>
                           <TooltipTrigger
                             side={'right'}
-                            content={
-                              'If you need to update your country, email drcsupport@researchallofus.org with your updated country.'
-                            }
+                            content={`If you need to update your country, email ${SUPPORT_EMAIL} with your updated country.`}
                           >
                             <FontAwesomeIcon icon={faCircleInfo} />
                           </TooltipTrigger>
