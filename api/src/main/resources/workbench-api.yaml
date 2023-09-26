@@ -6249,7 +6249,6 @@ definitions:
         type: integer
         format: int64
       username:
-        readOnly: true
         description: 'The username prefix, e.g. "gjordan". Note that this is different
           from the use of "username" elsewhere in the RW codebase, where username represents
           the full GSuite email address.'
