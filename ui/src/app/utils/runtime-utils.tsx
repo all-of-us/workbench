@@ -10,6 +10,7 @@ import {
   GpuConfig,
   ListRuntimeResponse,
   PersistentDiskRequest,
+  ResponseError,
   Runtime,
   RuntimeConfigurationType,
   RuntimeError,
@@ -864,7 +865,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
         try {
           leoRuntime = await runtimeApi().getRuntime(currentWorkspaceNamespace);
         } catch (e) {
-          if (e instanceof Response && e.status === 404) {
+          if (e instanceof ResponseError && e.response.status === 404) {
             // null on the runtime store indicates no existing runtime
             leoRuntime = null;
           } else {
