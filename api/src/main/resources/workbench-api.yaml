@@ -4872,6 +4872,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable visual data explorer.
+      enableHasEhrData:
+        type: boolean
+        default: false
+        description: Whether to enable has ehr data.
       tanagraBaseUrl:
         type: string
         description: The tanagra base url
