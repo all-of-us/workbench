@@ -4,7 +4,7 @@ const matchReq = req =>
   && req.method === 'GET'
 
 const body = JSON.stringify(
-{ isTaken: false }
+{ taken: false }
 )
 
 const headers = {

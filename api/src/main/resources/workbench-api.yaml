@@ -8834,15 +8834,15 @@ components:
         $ref: '#/components/schemas/Disk'
     UsernameTakenResponse:
       required:
-      - isTaken
+      - taken
       type: object
       properties:
-        isTaken:
+        taken:
           type: boolean
           description: Boolean response to whether username is already taken.
           default: false
       example:
-        isTaken: false
+        taken: false
     CheckEmailRequest:
       type: object
       properties:

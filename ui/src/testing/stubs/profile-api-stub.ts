@@ -152,7 +152,7 @@ export class ProfileApiStub extends ProfileApi {
 
   public isUsernameTaken(_username: string): Promise<UsernameTakenResponse> {
     return Promise.resolve({
-      isTaken: false,
+      taken: false,
     });
   }
 }
