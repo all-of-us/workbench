@@ -1,4 +1,4 @@
-import { Runtime, RuntimeStatus } from 'generated/fetch';
+import { ResponseError, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
@@ -280,16 +280,20 @@ export class LeoRuntimeInitializer {
   }
 
   private isNotFoundError(e: any): boolean {
-    // Our Swagger-generated APIs throw an error of type Response on a non-success status code.
-    return e instanceof Response && e.status === 404;
+    // Our Swagger-generated APIs throw an error of type ResponseError on a non-success status code.
+    return e instanceof ResponseError && e.response.status === 404;
   }
 
   private isClientError(e: any): boolean {
-    return e instanceof Response && e.status >= 400 && e.status < 500;
+    return (
+      e instanceof ResponseError &&
+      e.response.status >= 400 &&
+      e.response.status < 500
+    );
   }
 
   private handleUnknownError(e: any) {
-    if (!(e instanceof Response) || e.status >= 500) {
+    if (!(e instanceof ResponseError) || e.response.status >= 500) {
       this.serverErrorCount++;
     }
   }
