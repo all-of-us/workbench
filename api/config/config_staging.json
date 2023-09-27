@@ -117,7 +117,8 @@
     "ccSupportWhenAdminLocking": false,
     "enableRStudioGKEApp": true,
     "enableSasGKEApp": false,
-    "enableDataExplorer": false
+    "enableDataExplorer": false,
+    "enableHasEhrData": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
