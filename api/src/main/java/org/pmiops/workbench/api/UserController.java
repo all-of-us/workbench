@@ -221,7 +221,7 @@ public class UserController implements UserApiDelegate {
             .freeTier(true)
             .displayName("Use All of Us initial credits")
             .name(configProvider.get().billing.freeTierBillingAccountName())
-            .isOpen(true));
+            .open(true));
   }
 
   private Stream<BillingAccount> maybeCloudBillingAccounts() {
@@ -242,7 +242,7 @@ public class UserController implements UserApiDelegate {
                     .freeTier(false)
                     .displayName(googleBillingAccount.getDisplayName())
                     .name(googleBillingAccount.getName())
-                    .isOpen(Boolean.TRUE.equals(googleBillingAccount.getOpen())));
+                    .open(Boolean.TRUE.equals(googleBillingAccount.getOpen())));
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {

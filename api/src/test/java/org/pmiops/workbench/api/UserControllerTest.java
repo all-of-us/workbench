@@ -355,7 +355,7 @@ public class UserControllerTest {
           .freeTier(true)
           .displayName("Use All of Us initial credits")
           .name("billingAccounts/free-tier")
-          .isOpen(true);
+          .open(true);
 
   static final List<com.google.api.services.cloudbilling.model.BillingAccount>
       cloudbillingAccounts =
@@ -374,12 +374,12 @@ public class UserControllerTest {
               .name("googlebucks")
               .displayName("Paid using your credit card")
               .freeTier(false)
-              .isOpen(false),
+              .open(false),
           new BillingAccount()
               .name("a2")
               .displayName("Account 2 - Open")
               .freeTier(false)
-              .isOpen(true));
+              .open(true));
 
   // billing upgrade is true, free tier is available, cloud accounts exist
 
