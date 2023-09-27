@@ -266,7 +266,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       node: { domainId, id, name },
       scrollToMatch,
     } = this.props;
-    if (domainId === Domain.PHYSICAL_MEASUREMENT.toString() && autocompleteSelection.name === name) {
+    if (
+      domainId === Domain.PHYSICAL_MEASUREMENT.toString() &&
+      autocompleteSelection.name === name
+    ) {
       scrollToMatch(id);
       this.setState({ searchMatch: true });
     } else {
@@ -279,7 +282,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       if (searchMatch) {
         scrollToMatch(id);
       }
-      this.setState({expanded, searchMatch});
+      this.setState({ expanded, searchMatch });
     }
   }
 
