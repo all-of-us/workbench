@@ -65,7 +65,7 @@ export async function fetchWithSystemErrorHandler<T>(
       return await fetchFn();
     } catch (e) {
       retries++;
-      const errorResponse: ErrorResponse = await convertAPIError(e);
+      const errorResponse = await convertAPIError(e);
       if (retries === maxRetries) {
         systemErrorStore.next(errorResponse);
         throw e;

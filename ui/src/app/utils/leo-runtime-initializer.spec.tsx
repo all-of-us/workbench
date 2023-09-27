@@ -1,4 +1,5 @@
 import {
+  ResponseError,
   Runtime,
   RuntimeConfigurationType,
   RuntimeStatus,
@@ -45,6 +46,28 @@ const baseRuntime: Runtime = {
 };
 
 const workspaceNamespace = 'aou-rw-12345';
+
+const responseError = (status: number): ResponseError => ({
+  response: {
+    status,
+    headers: undefined,
+    ok: undefined,
+    redirected: undefined,
+    statusText: undefined,
+    type: undefined,
+    url: undefined,
+    body: undefined,
+    bodyUsed: undefined,
+    arrayBuffer: undefined,
+    blob: undefined,
+    formData: undefined,
+    json: undefined,
+    text: undefined,
+    clone: undefined,
+  },
+  name: undefined,
+  message: undefined,
+});
 
 describe('RuntimeInitializer', () => {
   beforeEach(() => {
@@ -167,7 +190,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should create runtime if it is initially nonexistent', async () => {
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 404 }));
+    mockGetRuntime.mockRejectedValueOnce(responseError(404));
     mockCreateRuntime.mockImplementationOnce(async () => {
       return { status: RuntimeStatus.CREATING };
     });
@@ -264,8 +287,8 @@ describe('RuntimeInitializer', () => {
       { status: RuntimeStatus.CREATING },
       { status: RuntimeStatus.CREATING },
     ]);
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
-    mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
+    mockGetRuntime.mockRejectedValueOnce(responseError(503));
+    mockGetRuntime.mockRejectedValueOnce(responseError(503));
     mockGetRuntimeCalls([{ status: RuntimeStatus.RUNNING }]);
 
     const runtime = await runInitializerAndTimers();
@@ -276,7 +299,7 @@ describe('RuntimeInitializer', () => {
   it('should give up after too many server errors', async () => {
     mockGetRuntimeCalls([{ status: RuntimeStatus.CREATING }]);
     for (let i = 0; i < 20; i++) {
-      mockGetRuntime.mockRejectedValueOnce(new Response(null, { status: 503 }));
+      mockGetRuntime.mockRejectedValueOnce(responseError(503));
     }
 
     // Tell Jest that we plan to have 1 assertion. This ensures that the test won't
@@ -334,7 +357,7 @@ describe('RuntimeInitializer', () => {
   it('should respect the maxCreateCount option', async () => {
     // Ensure that the initializer won't take action on a NOT_FOUND runtime if the maxCreateCount
     // is set to disallow create requests.
-    mockGetRuntime.mockRejectedValue(new Response(null, { status: 404 }));
+    mockGetRuntime.mockRejectedValue(responseError(404));
     try {
       await runInitializerAndTimers({
         maxCreateCount: 0,

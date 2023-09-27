@@ -9,6 +9,7 @@ import { mockNavigate } from 'setupTests';
 import {
   DisksApi,
   ErrorCode,
+  ResponseError,
   Runtime,
   RuntimeApi,
   RuntimeStatus,
@@ -352,20 +353,22 @@ describe('NotebookLauncher', () => {
       status: RuntimeStatus.STARTING,
     }));
 
-    runtimeStub.getRuntime = () =>
-      Promise.reject(
-        new Response(
-          JSON.stringify({
-            errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
-            parameters: {
-              suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
-            },
-          }),
-          {
-            status: 412,
-          }
-        )
-      );
+    const responseError: ResponseError = {
+      response: new Response(
+        JSON.stringify({
+          errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
+          parameters: {
+            suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
+          },
+        }),
+        {
+          status: 412,
+        }
+      ),
+      name: undefined,
+      message: undefined,
+    };
+    runtimeStub.getRuntime = () => Promise.reject(responseError);
 
     const wrapper = await notebookComponent();
     await waitForFakeTimersAndUpdate(wrapper);
