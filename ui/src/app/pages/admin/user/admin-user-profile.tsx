@@ -530,7 +530,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           aborter
         );
         setEmailValidationStatus(
-          result?.isValidMember
+          result?.validMember
             ? EmailValidationStatus.VALID
             : EmailValidationStatus.INVALID
         );

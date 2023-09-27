@@ -176,7 +176,7 @@ export class InstitutionApiStub extends InstitutionApi {
     }
 
     const response: CheckEmailResponse = {
-      isValidMember: false,
+      validMember: false,
     };
     const tierConfig = getTierConfig(
       institution,
@@ -187,13 +187,13 @@ export class InstitutionApiStub extends InstitutionApi {
         InstitutionMembershipRequirement.ADDRESSES &&
       tierConfig.emailAddresses.includes(contactEmail)
     ) {
-      response.isValidMember = true;
+      response.validMember = true;
     } else if (
       tierConfig.membershipRequirement ===
         InstitutionMembershipRequirement.DOMAINS &&
       tierConfig.emailDomains.includes(domain)
     ) {
-      response.isValidMember = true;
+      response.validMember = true;
     }
     return response;
   }
