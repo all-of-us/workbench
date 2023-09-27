@@ -6806,6 +6806,10 @@ components:
           type: boolean
           description: Whether to enable visual data explorer.
           default: false
+        enableHasEhrData:
+          type: boolean
+          default: false
+          description: Whether to enable has ehr data.
         tanagraBaseUrl:
           type: string
           description: The tanagra base url
@@ -8157,7 +8161,6 @@ components:
           description: The username prefix, e.g. "gjordan". Note that this is different
             from the use of "username" elsewhere in the RW codebase, where username
             represents the full GSuite email address.
-          readOnly: true
         creationNonce:
           type: string
           description: A value which can be used to secure API calls during the account

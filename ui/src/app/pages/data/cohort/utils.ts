@@ -358,7 +358,7 @@ export function mapParameter(sp: any) {
     domain: domainId,
     type,
     group,
-    attributes,
+    attributes: attributes ?? [],
     ancestorData: hasAncestorData,
     standard: isStandard,
   };

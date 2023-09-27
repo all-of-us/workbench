@@ -323,6 +323,8 @@ public class WorkbenchConfig {
     public boolean enableSasGKEApp;
     // If true, enable visual data explorer
     public boolean enableDataExplorer;
+    // If true, enable has EHR data
+    public boolean enableHasEhrData;
   }
 
   public static class ActionAuditConfig {

@@ -236,17 +236,16 @@ export class AccountCreation extends React.Component<
     });
 
     if (value === Country.US) {
-      this.updateAddress('country', value);
-
       const stateCodeGuess = this.autoSelectStateCode(
         this.state.profile.address.state
       );
       if (stateCodeGuess != null) {
         this.updateAddress('state', stateCodeGuess);
       }
-    } else {
-      this.updateAddress('country', '');
     }
+
+    // OTHER country values are set by the 'Other country input' TextInput
+    this.updateAddress('country', value === Country.OTHER ? '' : value);
   }
 
   stateInvalidError(): boolean {
@@ -707,9 +706,9 @@ export class AccountCreation extends React.Component<
                     {this.state.countryDropdownSelection === Country.OTHER && (
                       <div style={{ marginTop: '0.3rem' }}>
                         <TextInput
-                          id='country'
-                          name='country'
-                          aria-label='Country input'
+                          id='other country'
+                          name='other country'
+                          aria-label='Other country input'
                           placeholder='Please specify'
                           value={country}
                           onChange={(value) =>

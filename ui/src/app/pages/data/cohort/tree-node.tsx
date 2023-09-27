@@ -263,19 +263,27 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   checkAutocomplete() {
     const {
       autocompleteSelection,
-      node: { id },
+      node: { domainId, id, name },
       scrollToMatch,
     } = this.props;
-    const subtree = autocompleteSelection.path.split('.');
-    const expanded = subtree.includes(id.toString());
-    const searchMatch = subtree[subtree.length - 1] === id.toString();
-    if (expanded && !this.state.children) {
-      this.loadChildren();
-    }
-    if (searchMatch) {
+    if (
+      domainId === Domain.PHYSICAL_MEASUREMENT.toString() &&
+      autocompleteSelection.name === name
+    ) {
       scrollToMatch(id);
+      this.setState({ searchMatch: true });
+    } else {
+      const subtree = autocompleteSelection.path.split('.');
+      const expanded = subtree.includes(id.toString());
+      const searchMatch = subtree[subtree.length - 1] === id.toString();
+      if (expanded && !this.state.children) {
+        this.loadChildren();
+      }
+      if (searchMatch) {
+        scrollToMatch(id);
+      }
+      this.setState({ expanded, searchMatch });
     }
-    this.setState({ expanded, searchMatch });
   }
 
   toggleExpanded() {
