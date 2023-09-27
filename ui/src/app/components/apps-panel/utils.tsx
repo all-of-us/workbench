@@ -96,7 +96,7 @@ export const defaultSASConfig: CreateAppRequest = {
     autoscalingEnabled: false,
   },
   persistentDiskRequest: {
-    size: 100,
+    size: 250,
     diskType: DiskType.STANDARD,
   },
 };
