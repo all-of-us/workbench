@@ -190,7 +190,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace())(
         domain,
         type,
         searchTerms,
-        standard,
+        standard: standard ?? false,
         role,
         groupId,
         selectedSurvey,
