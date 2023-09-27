@@ -53,5 +53,23 @@
     "consequence": ["intron_variant", "non_coding_transcript_variant"],
     "genes": "gene1",
     "participant_count": 1
+  },
+  {
+    "vid": "1-100550658-T-AA",
+    "protein_change": "change",
+    "dna_change": "",
+    "allele_count": 7,
+    "allele_number": 18226,
+    "allele_frequency": 0.000266,
+    "clinical_significance": [],
+    "clinical_significance_string": "",
+    "transcript": "",
+    "contig": "chr20",
+    "position": 3000,
+    "ref_allele": "T",
+    "alt_allele": "C",
+    "cons_str": "",
+    "consequence": [],
+    "participant_count": 1
   }
 ]

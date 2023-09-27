@@ -5,6 +5,7 @@ import static org.pmiops.workbench.model.FilterColumns.GENDER;
 import static org.pmiops.workbench.model.FilterColumns.RACE;
 import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 
+import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
@@ -59,6 +60,7 @@ import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFiltersResponse;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -587,6 +589,14 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return cbCriteriaDao.findSurveyQuestionIds(surveyConceptIds);
   }
 
+  public VariantFiltersResponse findVariantFilters(VariantFilterRequest filters) {
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildFiltersQuery(filters));
+
+    return fieldValueListToVariantFilter(result.iterateAll().iterator().next());
+  }
+
   @Override
   public ImmutableTriple<String, Integer, List<Variant>> findVariants(
       VariantFilterRequest filters) {
@@ -647,6 +657,39 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return dbCriteria.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
+  }
+
+  private VariantFiltersResponse fieldValueListToVariantFilter(FieldValueList row) {
+    VariantFiltersResponse variantFilters = new VariantFiltersResponse();
+    FieldValues.getRepeated(row, "gene_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setGeneList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getRepeated(row, "consequence_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setConsequenceList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getRepeated(row, "clinical_significance_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setClinicalSignificanceList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getLong(row, "count_min").ifPresent(variantFilters::setCountMin);
+    FieldValues.getLong(row, "count_max").ifPresent(variantFilters::setCountMax);
+    FieldValues.getLong(row, "number_min").ifPresent(variantFilters::setNumberMin);
+    FieldValues.getLong(row, "number_max").ifPresent(variantFilters::setNumberMax);
+    FieldValues.getNumeric(row, "frequency_min").ifPresent(variantFilters::setFrequencyMin);
+    FieldValues.getNumeric(row, "frequency_max").ifPresent(variantFilters::setFrequencyMax);
+    variantFilters.setSortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
+    return variantFilters;
   }
 
   private Variant fieldValueListToVariant(FieldValueList row) {

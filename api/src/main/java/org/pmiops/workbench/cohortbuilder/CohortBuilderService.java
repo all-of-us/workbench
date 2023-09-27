@@ -21,6 +21,7 @@ import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFiltersResponse;
 
 public interface CohortBuilderService {
 
@@ -81,6 +82,12 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaByConceptIdsOrConceptCodes(List<String> conceptKeys);
 
   List<Long> findSurveyQuestionIds(List<Long> surveyConceptIds);
+
+  /**
+   * Find variant filters by specified search term. The list of variant filters can change depending
+   * on the search results.
+   */
+  VariantFiltersResponse findVariantFilters(VariantFilterRequest filters);
 
   /**
    * Find variants by specified search term. Supported searches include variant id, gene name,

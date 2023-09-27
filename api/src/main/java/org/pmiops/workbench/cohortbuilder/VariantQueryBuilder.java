@@ -84,6 +84,8 @@ public final class VariantQueryBuilder {
 
   private static final String SELECT_COUNT = "SELECT COUNT(DISTINCT vid) AS count\n";
 
+  private static final String SELECT_VID = "SELECT DISTINCT vid\n";
+
   private static final String DEFAULT_ORDER_BY = "ORDER BY participant_count DESC\n";
 
   private static final String LIMIT_OFFSET = "LIMIT @limit OFFSET @offset";
@@ -96,11 +98,22 @@ public final class VariantQueryBuilder {
 
   private static final String CONSEQUENCE_IN = "AND consequence IN UNNEST(@consequences)\n";
 
+  private static final String CONSEQUENCE_EMPTY = "AND ARRAY_LENGTH(consequence) = 0\n";
+
+  private static final String CONSEQUENCE_IN_OR_EMPTY =
+      "AND (" + CONSEQUENCE_IN + " OR " + CONSEQUENCE_EMPTY + ")\n";
+
   private static final String CLINICAL_SIGNIFICANCE =
       ", UNNEST(clinical_significance) AS clinical_significance\n";
 
   private static final String CLINICAL_SIGNIFICANCE_IN =
       "AND clinical_significance IN UNNEST(@clinicalSignificances)\n";
+
+  private static final String CLINICAL_SIGNIFICANCE_EMPTY =
+      "AND ARRAY_LENGTH(clinical_significance) = 0\n";
+
+  private static final String CLINICAL_SIGNIFICANCE_IN_OR_EMPTY =
+      "AND (clinical_significance IN UNNEST(@clinicalSignificances) OR ARRAY_LENGTH(clinical_significance) = 0)\n";
 
   private static final String GENES_IN = "AND genes IN UNNEST(@genes)\n";
 
@@ -114,6 +127,7 @@ public final class VariantQueryBuilder {
   private static final String ORDER_BY = "ORDER BY @orderBy\n";
 
   private static final String VID_SQL = "WHERE vid = @vid\n";
+  private static final String NA = "n/a";
 
   private static final String CONTIG_POSITION_SQL =
       "WHERE vid IN (\n"
@@ -137,6 +151,79 @@ public final class VariantQueryBuilder {
           + "WHERE rs_number = @rs_number\n"
           + ")\n";
 
+  private static final String FILTERS_SQL =
+      "WITH genes AS (\n"
+          + "  SELECT ARRAY_AGG(DISTINCT genes ORDER BY genes) AS gene_list\n"
+          + "  FROM (\n"
+          + "    SELECT CASE WHEN genes IS NULL THEN '"
+          + NA
+          + "' ELSE genes END AS genes\n"
+          + "    FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
+          + "    WHERE vid IN (\n"
+          + "      @innerSQL"
+          + "    )\n"
+          + "  )\n"
+          + "),\n"
+          + "consequences AS (\n"
+          + "  SELECT ARRAY_AGG(DISTINCT consequence_list ORDER BY consequence_list) AS consequence_list\n"
+          + "  FROM (\n"
+          + "    SELECT consequence_list\n"
+          + "    FROM `${projectId}.${dataSetId}.cb_variant_attribute`,\n"
+          + "    UNNEST(consequence) AS consequence_list\n"
+          + "    WHERE vid IN (\n"
+          + "      @innerSQL"
+          + "    )\n"
+          + "    UNION DISTINCT\n"
+          + "    SELECT '"
+          + NA
+          + "' AS consequence_list\n"
+          + "    FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
+          + "    WHERE vid IN (\n"
+          + "       @innerSQL"
+          + "    )\n"
+          + "    AND ARRAY_LENGTH(consequence) = 0"
+          + "  )\n"
+          + "),\n"
+          + "clinical_significance AS (\n"
+          + "  SELECT ARRAY_AGG(DISTINCT clinical_significance_list ORDER BY clinical_significance_list) AS clinical_significance_list\n"
+          + "  FROM (\n"
+          + "    SELECT clinical_significance_list\n"
+          + "    FROM `${projectId}.${dataSetId}.cb_variant_attribute`,\n"
+          + "    UNNEST(clinical_significance) AS clinical_significance_list\n"
+          + "    WHERE vid IN (\n"
+          + "      @innerSQL"
+          + "    )\n"
+          + "    UNION DISTINCT\n"
+          + "    SELECT '"
+          + NA
+          + "' AS clinical_significance_list\n"
+          + "    FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
+          + "    WHERE vid IN (\n"
+          + "       @innerSQL"
+          + "    )\n"
+          + "    AND ARRAY_LENGTH(clinical_significance) = 0"
+          + "  )\n"
+          + "),\n"
+          + "allele AS (\n"
+          + "  SELECT MIN(allele_count) AS count_min, MAX(allele_count) AS count_max, \n"
+          + "  MIN(allele_number) AS number_min, MAX(allele_number) AS number_max,\n"
+          + "  0 AS frequency_min, 1 AS frequency_max\n"
+          + "  FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n"
+          + "  WHERE vid IN (\n"
+          + "    @innerSQL"
+          + "  )\n"
+          + ")\n"
+          + "SELECT genes.gene_list, \n"
+          + "       consequences.consequence_list, \n"
+          + "       clinical_significance.clinical_significance_list, \n"
+          + "       allele.count_min, \n"
+          + "       allele.count_max, \n"
+          + "       allele.number_min, \n"
+          + "       allele.number_max,\n"
+          + "       allele.frequency_min,\n"
+          + "       allele.frequency_max\n"
+          + "FROM genes, consequences, clinical_significance, allele";
+
   public static QueryJobConfiguration buildQuery(
       VariantFilterRequest filters, Integer limit, Integer offset) {
     return QueryJobConfiguration.newBuilder(generateSQL(Boolean.FALSE, filters))
@@ -147,6 +234,14 @@ public final class VariantQueryBuilder {
 
   public static QueryJobConfiguration buildCountQuery(VariantFilterRequest filters) {
     return QueryJobConfiguration.newBuilder(generateSQL(Boolean.TRUE, filters))
+        .setNamedParameters(generateParams(filters, null, null))
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public static QueryJobConfiguration buildFiltersQuery(VariantFilterRequest filters) {
+    String innerSQL = generateSQL(Boolean.TRUE, filters).replace(SELECT_COUNT, SELECT_VID);
+    return QueryJobConfiguration.newBuilder(FILTERS_SQL.replace("@innerSQL", innerSQL))
         .setNamedParameters(generateParams(filters, null, null))
         .setUseLegacySql(false)
         .build();
@@ -175,21 +270,29 @@ public final class VariantQueryBuilder {
   @NotNull
   private static String generateFilterSQL(
       String selectSQL, String whereVidInSQL, VariantFilterRequest filters) {
+    List<String> consequences = filters.getConsequenceList();
+    List<String> clinicalSigns = filters.getClinicalSignificanceList();
     StringBuilder sqlBuilder = new StringBuilder(selectSQL).append(FROM_VAT);
-    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
+
+    if (isNotEmpty(consequences)) {
       sqlBuilder.append(CONSEQUENCE);
     }
-    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
+    if (isNotEmpty(clinicalSigns)) {
       sqlBuilder.append(CLINICAL_SIGNIFICANCE);
     }
     sqlBuilder.append(whereVidInSQL);
-    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
-      sqlBuilder.append(CONSEQUENCE_IN);
-    }
-    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
-      sqlBuilder.append(CLINICAL_SIGNIFICANCE_IN);
-    }
-    if (CollectionUtils.isNotEmpty(filters.getGeneList())) {
+    // users can select the option of 'n/a' when filtering by consequence
+    // or clinical significance. Filters with 'n/a' for consequence or
+    // clinical significance with search for empty array.
+    determineIfEmptyArraySearch(
+        consequences, sqlBuilder, CONSEQUENCE_EMPTY, CONSEQUENCE_IN_OR_EMPTY, CONSEQUENCE_IN);
+    determineIfEmptyArraySearch(
+        clinicalSigns,
+        sqlBuilder,
+        CLINICAL_SIGNIFICANCE_EMPTY,
+        CLINICAL_SIGNIFICANCE_IN_OR_EMPTY,
+        CLINICAL_SIGNIFICANCE_IN);
+    if (isNotEmpty(filters.getGeneList())) {
       sqlBuilder.append(GENES_IN);
     }
     if (filters.getCountMin() != null && filters.getCountMax() != null) {
@@ -214,6 +317,23 @@ public final class VariantQueryBuilder {
       }
     }
     return sqlBuilder.toString();
+  }
+
+  private static void determineIfEmptyArraySearch(
+      List<String> list, StringBuilder sqlBuilder, String empty, String inOrEmpty, String in) {
+    if (isNotEmpty(list)) {
+      if (list.contains(NA) && list.size() == 1) {
+        sqlBuilder.append(empty);
+      } else if (list.contains(NA) && list.size() > 1) {
+        sqlBuilder.append(inOrEmpty);
+      } else {
+        sqlBuilder.append(in);
+      }
+    }
+  }
+
+  private static boolean isNotEmpty(List<String> list) {
+    return CollectionUtils.isNotEmpty(list);
   }
 
   @NotNull
@@ -268,19 +388,19 @@ public final class VariantQueryBuilder {
 
   private static void generateFilterParams(
       VariantFilterRequest filters, Map<String, QueryParameterValue> params) {
-    if (CollectionUtils.isNotEmpty(filters.getConsequenceList())) {
+    if (isNotEmpty(filters.getConsequenceList())) {
       params.put(
           "consequences",
           QueryParameterValue.array(
               filters.getConsequenceList().toArray(new String[0]), String.class));
     }
-    if (CollectionUtils.isNotEmpty(filters.getClinicalSignificanceList())) {
+    if (isNotEmpty(filters.getClinicalSignificanceList())) {
       params.put(
           "clinicalSignificances",
           QueryParameterValue.array(
               filters.getClinicalSignificanceList().toArray(new String[0]), String.class));
     }
-    if (CollectionUtils.isNotEmpty(filters.getGeneList())) {
+    if (isNotEmpty(filters.getGeneList())) {
       params.put(
           "genes",
           QueryParameterValue.array(filters.getGeneList().toArray(new String[0]), String.class));

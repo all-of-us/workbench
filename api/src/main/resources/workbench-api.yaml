@@ -4269,6 +4269,29 @@ paths:
           description: A collection of variants
           schema:
             "$ref": "#/definitions/VariantListResponse"
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filters":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    post:
+      tags:
+        - cohortBuilder
+      consumes:
+        - application/json
+      description: Returns filters that can narrow variant results
+      operationId: findVariantFilters
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting VariantFiltersResponse.
+          schema:
+            "$ref": "#/definitions/VariantFilterRequest"
+      responses:
+        200:
+          description: A collection of variants
+          schema:
+            "$ref": "#/definitions/VariantFiltersResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -9329,6 +9352,53 @@ definitions:
       sortBy:
         type: string
         description: sort column by
+  VariantFiltersResponse:
+    type: object
+    required:
+      - blah
+    properties:
+      geneList:
+        type: array
+        description: List of string gene names
+        items:
+          type: string
+      consequenceList:
+        type: array
+        description: List of string consequence names
+        items:
+          type: string
+      clinicalSignificanceList:
+        type: array
+        description: List of string clinical significance names
+        items:
+          type: string
+      countMin:
+        type: integer
+        format: int64
+        description: Allele count min
+      countMax:
+        type: integer
+        format: int64
+        description: Allele count max
+      numberMin:
+        type: integer
+        format: int64
+        description: Allele number min
+      numberMax:
+        type: integer
+        format: int64
+        description: Allele number max
+      frequencyMin:
+        type: number
+        description: Allele frequency min(floating point)
+      frequencyMax:
+        type: number
+        description: Allele number max(floating point)
+      sortByList:
+        type: array
+        description: List of string column names
+        items:
+          type: string
   VariantListResponse:
     type: object
     required:

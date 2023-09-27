@@ -7,5 +7,10 @@
   {
     "vid": "1-100550658-T-C",
     "contig": "chr20"
+  },
+  {
+    "vid": "1-100550658-T-AA",
+    "contig": "chr20",
+    "position": 5000
   }
 ]

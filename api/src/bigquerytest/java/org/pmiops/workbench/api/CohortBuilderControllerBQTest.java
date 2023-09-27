@@ -78,6 +78,7 @@ import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFiltersResponse;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -2509,7 +2510,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 1);
+    assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
   @Test
@@ -2530,7 +2531,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 1);
+    assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
   @Test
@@ -2551,7 +2552,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 1);
+    assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
   @Test
@@ -2569,7 +2570,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 1);
+    assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
   @Test
@@ -2594,7 +2595,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 1);
+    assertFindVariantsResponse(request, expectedVariant, 1);
   }
 
   @Test
@@ -2612,10 +2613,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleNumber(18226L)
             .alleleFrequency(0.000266)
             .participantCount(1L);
-    assertResponse(request, expectedVariant, 2);
+    assertFindVariantsResponse(request, expectedVariant, 2);
   }
 
-  private void assertResponse(
+  private void assertFindVariantsResponse(
       VariantFilterRequest request, Variant expectedVariant, int totalSize) {
     VariantListResponse response =
         controller.findVariants(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
@@ -2675,6 +2676,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .alleleNumber(18226L)
                 .alleleFrequency(0.000266)
                 .participantCount(1L));
+  }
+
+  @Test
+  public void findVariantFilters() {
+    VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
+    VariantFiltersResponse expectedVariantFilter =
+        new VariantFiltersResponse()
+            .geneList(Arrays.asList("n/a", "gene, gene2"))
+            .consequenceList(
+                Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
+            .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
+            .countMin(5L)
+            .countMax(7L)
+            .numberMin(18226L)
+            .numberMax(18242L)
+            .frequencyMin(new BigDecimal(0))
+            .frequencyMax(new BigDecimal(1))
+            .sortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
+    assertFindVariantFiltersResponse(request, expectedVariantFilter);
+  }
+
+  private void assertFindVariantFiltersResponse(
+      VariantFilterRequest request, VariantFiltersResponse expectedVariantFilter) {
+    VariantFiltersResponse response =
+        controller.findVariantFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
+    assertThat(response).isNotNull();
+    assertThat(response).isEqualTo(expectedVariantFilter);
   }
 
   protected String getTablePrefix() {
