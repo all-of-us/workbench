@@ -64,7 +64,7 @@ export const DisksTable = ({ sourceWorkspaceNamespace }: Props) => {
       <Column
         header='Environment Type'
         body={(disk) =>
-          fp.capitalize(disk.isGceRuntime ? UIAppType.JUPYTER : disk.appType)
+          fp.capitalize(disk.gceRuntime ? UIAppType.JUPYTER : disk.appType)
         }
       />
       <Column field='size' header='Size (GB)' />
