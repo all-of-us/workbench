@@ -413,7 +413,7 @@ export const WorkspaceEdit = fp.flow(
           'billingAccounts/' +
           serverConfigStore.get().config.freeTierBillingAccountId,
         freeTier: true,
-        isOpen: true,
+        open: true,
         displayName: this.formatFreeTierBillingAccountName(),
       };
       // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
