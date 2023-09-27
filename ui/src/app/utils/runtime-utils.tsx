@@ -953,7 +953,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
             (disk) => !!disk.isGceRuntime
           );
         } catch (e) {
-          if (!(e instanceof Response && e.status === 404)) {
+          if (!(e instanceof ResponseError && e.response.status === 404)) {
             throw e;
           }
         }
