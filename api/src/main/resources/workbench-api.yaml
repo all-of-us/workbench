@@ -8041,7 +8041,7 @@ components:
         institution:
           type: string
           description: The insitution of the user.
-        isNihFunded:
+        nihFunded:
           type: boolean
           description: Whether its NIH Funded research
     UpdateContactEmailRequest:

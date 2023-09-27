@@ -581,7 +581,7 @@ public class MailServiceImpl implements MailService {
         .put(EmailSubstitutionField.USER_CONTACT_EMAIL, user.getContactEmail())
         .put(
             EmailSubstitutionField.NIH_FUNDED,
-            Boolean.TRUE.equals(request.isIsNihFunded()) ? "Yes" : "No")
+            Boolean.TRUE.equals(request.isNihFunded()) ? "Yes" : "No")
         .build();
   }
 
