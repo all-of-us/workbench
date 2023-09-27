@@ -178,7 +178,7 @@ public class RuntimeController implements RuntimeApiDelegate {
                     .map(leonardoMapper::toApiListDisksResponse)
                     .collect(Collectors.toList()));
         List<Disk> runtimeDisks =
-            diskList.stream().filter(Disk::isIsGceRuntime).collect(Collectors.toList());
+            diskList.stream().filter(Disk::isGceRuntime).collect(Collectors.toList());
         if (!runtimeDisks.isEmpty()) {
           // Find active disks for runtime VM. Block user from creating new disk.
           throw new BadRequestException(

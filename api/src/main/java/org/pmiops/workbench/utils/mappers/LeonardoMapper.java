@@ -120,14 +120,14 @@ public interface LeonardoMapper {
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "isGceRuntime", ignore = true)
+  @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiGetDiskResponse(LeonardoGetPersistentDiskResponse disk);
 
   @Mapping(target = "creator", source = "auditInfo.creator")
   @Mapping(target = "createdDate", source = "auditInfo.createdDate")
   @Mapping(target = "dateAccessed", source = "auditInfo.dateAccessed")
   @Mapping(target = "appType", ignore = true)
-  @Mapping(target = "isGceRuntime", ignore = true)
+  @Mapping(target = "gceRuntime", ignore = true)
   Disk toApiListDisksResponse(LeonardoListPersistentDiskResponse disk);
 
   @AfterMapping
@@ -144,7 +144,7 @@ public interface LeonardoMapper {
 
   default void setDiskEnvironmentType(Disk disk, @Nullable Object diskLabels) {
     LeonardoLabelHelper.maybeMapLeonardoLabelsToGkeApp(diskLabels)
-        .ifPresentOrElse(disk::setAppType, () -> disk.isGceRuntime(true));
+        .ifPresentOrElse(disk::setAppType, () -> disk.gceRuntime(true));
   }
 
   @Mapping(target = "patchInProgress", ignore = true)

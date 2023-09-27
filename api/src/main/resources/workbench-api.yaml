@@ -6962,7 +6962,7 @@ components:
           description: Block size of persistent disk in bytes
         appType:
           $ref: '#/components/schemas/AppType'
-        isGceRuntime:
+        gceRuntime:
           type: boolean
           description: True if disk is used by Runtime or being used by GCE runtime
           default: false
