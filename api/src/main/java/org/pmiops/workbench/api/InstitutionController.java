@@ -96,7 +96,7 @@ public class InstitutionController implements InstitutionApiDelegate {
       final String shortName, final CheckEmailRequest request) {
     return ResponseEntity.ok(
         new CheckEmailResponse()
-            .isValidMember(
+            .validMember(
                 institutionService.validateInstitutionalEmail(
                     getInstitutionImpl(shortName),
                     request.getContactEmail(),

@@ -8852,7 +8852,7 @@ components:
     CheckEmailResponse:
       type: object
       properties:
-        isValidMember:
+        validMember:
           type: boolean
           description: Whether the requested email address is a valid member of the
             institution.
