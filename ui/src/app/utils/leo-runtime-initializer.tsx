@@ -281,15 +281,21 @@ export class LeoRuntimeInitializer {
 
   private isNotFoundError(e: any): boolean {
     // Our Swagger-generated APIs throw an error of type Response on a non-success status code.
-    return e instanceof Response && e.status === 404;
+    console.warn("eeeeeeeee");
+    console.warn(e);
+    console.warn(e.response);
+    console.warn(e.response instanceof Response);
+    console.warn(e.response.status);
+    console.warn(e.response.status === 404);
+    return e.response instanceof Response && e.response.status === 404;
   }
 
   private isClientError(e: any): boolean {
-    return e instanceof Response && e.status >= 400 && e.status < 500;
+    return e.response instanceof Response && e.response.status >= 400 && e.response.status < 500;
   }
 
   private handleUnknownError(e: any) {
-    if (!(e instanceof Response) || e.status >= 500) {
+    if (!(e.response.response instanceof Response) || e.response.response.status >= 500) {
       this.serverErrorCount++;
     }
   }
