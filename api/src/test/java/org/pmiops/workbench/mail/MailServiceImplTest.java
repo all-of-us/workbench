@@ -211,7 +211,7 @@ public class MailServiceImplTest {
     workbenchConfig.billing.carahsoftEmail = "test@carasoft.com";
     DbUser user = createDbUser();
     SendBillingSetupEmailRequest request =
-        new SendBillingSetupEmailRequest().institution("inst").isNihFunded(true).phone("123456");
+        new SendBillingSetupEmailRequest().institution("inst").nihFunded(true).phone("123456");
     mailService.sendBillingSetupEmail(user, request);
 
     verify(mockMandrillApi, times(1)).send(mandrillCaptor.capture());
