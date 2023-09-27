@@ -452,7 +452,7 @@ export const WorkspaceEdit = fp.flow(
                   name: this.props.workspace.billingAccountName,
                   displayName: 'User Provided Billing Account',
                   freeTier: false,
-                  isOpen: true,
+                  open: true,
                 },
               ],
             });
@@ -487,7 +487,7 @@ export const WorkspaceEdit = fp.flow(
         name: this.props.workspace.billingAccountName,
         displayName: 'User Provided Billing Account',
         freeTier: false,
-        isOpen: true,
+        open: true,
       });
 
       if (
@@ -1288,7 +1288,7 @@ export const WorkspaceEdit = fp.flow(
       return this.state.billingAccounts.map((a) => ({
         label: a.displayName,
         value: a.name,
-        disabled: !a.isOpen,
+        disabled: !a.open,
       }));
     }
 

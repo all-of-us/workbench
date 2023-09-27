@@ -49,13 +49,13 @@ export class UserApiStub extends UserApi {
             displayName: 'Free Tier',
             name: 'free-tier',
             freeTier: true,
-            isOpen: true,
+            open: true,
           },
           {
             displayName: 'User Billing',
             name: 'user-billing',
             freeTier: false,
-            isOpen: true,
+            open: true,
           },
         ],
       });
