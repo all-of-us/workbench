@@ -17,7 +17,7 @@ import { cdrVersionsApi } from 'app/services/swagger-fetch-clients';
 import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
-import { Country, DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
+import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
 import { isUserFromUS } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,

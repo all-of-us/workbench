@@ -9,6 +9,6 @@ export const getProfilePictureSrc = () => {
 
 // TODO: ADD DATE CHECK
 export const isUserFromUS = (profile: Profile) => {
-  const userCountry = profile.address.country;
+  const userCountry = profile?.address?.country;
   return Country[userCountry] === Country.US;
 };

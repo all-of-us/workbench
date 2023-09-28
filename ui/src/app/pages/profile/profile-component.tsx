@@ -43,7 +43,6 @@ import {
   wasReferredFromRenewal,
 } from 'app/utils/access-utils';
 import { canRenderSignedDucc } from 'app/utils/code-of-conduct';
-import { Country } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
 import { NavigationProps } from 'app/utils/navigation';
 import { isUserFromUS } from 'app/utils/profile-utils';

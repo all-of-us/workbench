@@ -30,6 +30,12 @@ const createProps = (): AccountCreationProps => ({
   profile: createEmptyProfile(),
   onComplete: () => {},
   onPreviousClick: () => {},
+  onSubmit: () => {},
+  captureCaptchaResponse: (token) => {
+    console.log(token);
+  },
+  // // ToDo change this
+  captchaRef: null,
 });
 
 const setup = (props = createProps()) => {

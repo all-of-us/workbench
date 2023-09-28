@@ -11,7 +11,6 @@ import { DemographicSurveyValidationMessage } from 'app/components/demographic-s
 import { FlexColumn, FlexRow } from 'app/components/flex';
 import { Footer, FooterTypeEnum } from 'app/components/footer';
 import { PublicAouHeaderWithDisplayTag } from 'app/components/headers';
-import { Modal, ModalBody } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { TermsOfService } from 'app/components/terms-of-service';
 import {
@@ -30,8 +29,6 @@ import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { Country } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
-import { isUserFromUS } from 'app/utils/profile-utils';
-import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
 import successSmallerBackgroundImage from 'assets/images/congrats-female-standing.png';
 import landingBackgroundImage from 'assets/images/login-group.png';
@@ -258,8 +255,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   public getAccountCreationSteps(): Array<SignInStep> {
     return [
       SignInStep.LANDING,
-      // SignInStep.TERMS_OF_SERVICE,
-      // SignInStep.INSTITUTIONAL_AFFILIATION,
+      SignInStep.TERMS_OF_SERVICE,
+      SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE,
@@ -275,12 +272,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     if (index === steps.length) {
       throw new Error('No sign-in steps remaining after step ' + currentStep);
     }
-    // if (
-    //   steps[index] === SignInStep.ACCOUNT_DETAILS &&
-    //   profile.address.country !== Country.US
-    // ) {
-    //   return steps[index];
-    // }
+    if (
+      steps[index] === SignInStep.ACCOUNT_DETAILS &&
+      profile.address.country !== Country.US
+    ) {
+      return SignInStep.SUCCESS_PAGE;
+    }
     return steps[index + 1];
   }
 
@@ -383,6 +380,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             profile={this.state.profile}
             onComplete={onComplete}
             onPreviousClick={onPrevious}
+            captchaRef={this.captchaRef}
+            captureCaptchaResponse={this.captureCaptchaResponse}
+            onSubmit={this.updateProfileAndCreateAccount}
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
@@ -413,6 +413,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
+  // This method is being used if user is international
+  private updateProfileAndCreateAccount = (profile: Profile) => {
+    this.setState({ profile: profile });
+    this.onSubmit();
+  };
   private onSubmit = async () => {
     // const { enableCaptcha } = serverConfigStore.get().config;
     const enableCaptcha = true;

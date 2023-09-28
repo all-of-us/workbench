@@ -17,7 +17,6 @@ import {
   AuthorityGuardedAction,
   hasAuthorityForAction,
 } from 'app/utils/authorities';
-import { Country } from 'app/utils/constants';
 import { currentWorkspaceStore } from 'app/utils/navigation';
 import { isUserFromUS } from 'app/utils/profile-utils';
 import { authStore, profileStore } from 'app/utils/stores';
