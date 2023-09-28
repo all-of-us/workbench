@@ -39,6 +39,11 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   }
 
   @Override
+  public JSONObject getAbsorbCredentials() {
+    return getCredentialsBucketJSON("absorb-credentials.json");
+  }
+
+  @Override
   public String getMoodleApiKey() {
     return getCredentialsBucketString(configProvider.get().moodle.credentialsKeyV2);
   }

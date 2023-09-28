@@ -50,6 +50,8 @@ public interface CloudStorageClient {
 
   void deleteBlob(BlobId blobId);
 
+  JSONObject getAbsorbCredentials();
+
   String getMoodleApiKey();
 
   String getCaptchaServerKey();

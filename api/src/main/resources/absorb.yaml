@@ -1,0 +1,255 @@
+# This spec is mostly manually adapted from the Swagger 2 spec corresponding to each
+# page of the docs. These can be found through Chrome's network tab while loading
+# one of the pages.
+# Example: https://aoudev.myabsorb.com/Areas/ApiDocumentation/V15/Data/RestAuthentication.json
+# However, these specs were imperfect and needed to be manually edited.
+
+openapi: 3.0.1
+info:
+  title: Absorb
+  description: "Service for Absorb Interactions. API documentation can be found at https://aoudev.myabsorb.com/v1_5-doc"
+  version: "1.0"
+servers:
+  - url: https://rest.myabsorb.com
+
+paths:
+  /authenticate:
+    post:
+      tags:
+        - "Authenticate"
+      summary: "Authenticates the user and provides an API token to use in subsequent API calls."
+      operationId: "RestAuthentication_Authenticate"
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+      requestBody:
+        description: "The credentials required to authenticate with the API."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+      responses:
+        200:
+          description: "A unique authentication token used to make subsequent requests, valid for a limited time from when it was created."
+          content:
+            application/json:
+              schema:
+                type: "string"
+        400:
+          description: "The required body paramaters were not included."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorResponse"
+        403:
+          description: "Portal disabled."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorResponse"
+  /users:
+    get:
+      tags:
+        - "Users"
+      summary: "List users."
+      description: "Lists all selected LMS users that are available to the current, authenticated administrator."
+      operationId: "Users_GetUsers"
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/AccessToken"
+        - $ref: "#/components/parameters/Filter"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersResource"
+        422:
+          description: "A validation error occured with the provided parameters."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorResponse"
+  /users/{userId}/enrollments:
+    get:
+      tags:
+        - "Enrollments"
+      summary: "List course enrollments for specific user."
+      description: "Supports pagination, filtering, and sorting."
+      operationId: "Enrollments_GetUserEnrollments"
+      parameters:
+        - $ref: "#/components/parameters/ApiKey"
+        - $ref: "#/components/parameters/AccessToken"
+        - name: "userId"
+          schema:
+            type: "string"
+            format: "guid"
+          in: "path"
+          required: true
+          description: "The user ID."
+        - $ref: "#/components/parameters/Filter"
+      responses:
+        200:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCourseEnrollmentsResource"
+        404:
+          description: "User not found."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorResponse"
+        422:
+          description: "A validation error occured with the provided parameters."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenericErrorResponse"
+
+components:
+  parameters:
+    ApiKey:
+      name: "x-api-key"
+      in: "header"
+      schema:
+        type: "string"
+      required: true
+    AccessToken:
+      name: "Authorization"
+      in: "header"
+      schema:
+        type: "string"
+      required: true
+    Filter:
+      name: "_filter"
+      in: "query"
+      schema:
+        type: "string"
+      description: "One or more filter operations to be performed on the collection. The referenced fields must allow filtering. See the respective report's schema for which fields can be filtered. Supports most of the [OData filter syntax](http://docs.oasis-open.org/odata/odata/v4.01/cs01/part2-url-conventions/odata-v4.01-cs01-part2-url-conventions.html#sec_SystemQueryOptionfilter). Supported operations: eq, ne, gt, ge, lt, le, and, or, not, (). Supported functions: substringof('value',fieldName), endswith(fieldName,'value'), startswith(fieldName,'value'), tolower(fieldName), toupper(fieldName). Examples: _filter=`firstname eq 'Jeffrey'`, _filter=`id eq guid'a14c149a-2ce0-41d4-b532-02189ad3cb22'`, _filter=`startsWith(lastname,'leb') or dateAdded ge datetime'1998-03-06T20:38:07Z'`"
+  schemas:
+    GenericErrorResponse:
+      type: "object"
+      description: "The return type for non-200 responses"
+      properties:
+        validations:
+          type: "array"
+          description: "The validations (if any) which caused the error."
+          items:
+            type: "string"
+        code:
+          description: "The status code returned."
+          allOf:
+            - type: "integer"
+        message:
+          type: "string"
+          description: "The error message."
+        term:
+          type: "string"
+          description: "The general error term."
+        _meta:
+          type: "object"
+          description: "A list of meta data (if any). "
+          additionalProperties:
+            type: "string"
+    AuthenticationRequest:
+      type: "object"
+      required:
+        - "username"
+        - "password"
+        - "privateKey"
+      properties:
+        username:
+          type: "string"
+          description: "The login username of the user."
+          minLength: 1
+        password:
+          type: "string"
+          description: "The login password of the user."
+          minLength: 1
+        privateKey:
+          type: "string"
+          description: "A unique key identifying the client. System owners can request their key."
+          format: "guid"
+          minLength: 1
+    UsersResource:
+      type: "object"
+      properties:
+        totalItems:
+          type: "integer"
+          description: "The total number of items returned"
+          format: "int32"
+        limit:
+          type: "integer"
+          description: "The page size."
+          format: "int32"
+        offset:
+          type: "integer"
+          description: "The page number."
+          format: "int32"
+        returnedItems:
+          type: "integer"
+          description: "The number of items returned."
+          format: "int32"
+        users:
+          type: "array"
+          description: "The paged collection of resources."
+          items:
+            $ref: "#/components/schemas/UserResource"
+    UserResource:
+      type: object
+      properties:
+        id:
+          type: "string"
+          description: '`Filterable` \n\nThe unique user identifier.'
+          format: "guid"
+        username:
+          type: "string"
+          description: '`Default Sort` `Sortable` `Filterable` \n\nThe unique username.'
+    UserCourseEnrollmentsResource:
+      type: "object"
+      description: "Represents a collection of UserCourseEnrollmentResource."
+      properties:
+        totalItems:
+          type: "integer"
+          description: "The total number of items in the unbounded collection"
+          format: "int32"
+        returnedItems:
+          type: "integer"
+          description: "The number of items in the bound collection being returned"
+          format: "int32"
+        limit:
+          type: "integer"
+          description: "The current page size for the collection"
+          format: "int32"
+        offset:
+          type: "integer"
+          description: "The current offset for the collection"
+          format: "int32"
+        enrollments:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UserCourseEnrollmentResource"
+    UserCourseEnrollmentResource:
+      type: "object"
+      description: "Represents information about a course enrollment."
+      properties:
+        id:
+          type: "string"
+          description: "`Filterable` \n\nEnrollment identifier."
+          format: "guid"
+        courseId:
+          type: "string"
+          description: "`Filterable` \n\nCourse identifier."
+          format: "guid"
+        courseName:
+          type: "string"
+          description: "`Default Sort` `Sortable` `Filterable` \n\nName of the course."
+        dateCompleted:
+          type: "string"
+          description: "`Sortable` `Filterable` \n\nThe date the enrollment was completed."
+        isActive:
+          type: "boolean"
+          description: "`Sortable` `Filterable` \n\nIndicates if the enrollment is the current (active) enrollment or a historical enrollment."
