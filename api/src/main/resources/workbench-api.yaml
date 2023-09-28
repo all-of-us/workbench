@@ -4863,7 +4863,7 @@ definitions:
       enableRStudioGKEApp:
         type: boolean
         default: false
-        description: Whether users are able to use the RStudio GKE app.
+        description: Whether users are able to use the RStudio GKE app./criteria
       enableSasGKEApp:
         type: boolean
         default: false
@@ -9137,6 +9137,7 @@ definitions:
     - SNOMED
     - VISIT
     - NONE
+    - HAS_EHR_DATA
   CriteriaSubType:
     type: string
     description: possible criteria types

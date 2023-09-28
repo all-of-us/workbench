@@ -204,7 +204,9 @@ export const CohortSearch = fp.flow(
       } = this.props;
       // JSON stringify and parse prevents changes to selections from being passed to the cohortContext
       const selections = JSON.parse(JSON.stringify(item.searchParameters));
-      if (type === CriteriaType.DECEASED) {
+      if (type === CriteriaType.HAS_EHR_DATA) {
+        this.selectHasEhrData();
+      } else if (type === CriteriaType.DECEASED) {
         this.selectDeceased();
       } else if (domain.includes(Domain.FITBIT.toString())) {
         this.selectFitbit(domain, name);
@@ -351,6 +353,23 @@ export const CohortSearch = fp.flow(
       );
       this.setState({ toastVisible: true });
     };
+
+    selectHasEhrData() {
+      const param = {
+        id: null,
+        parentId: null,
+        parameterId: '',
+        type: CriteriaType.HAS_EHR_DATA.toString(),
+        name: 'Deceased',
+        group: false,
+        domainId: Domain.PERSON.toString(),
+        hasAttributes: false,
+        selectable: true,
+        attributes: [],
+      } as Selection;
+      AnalyticsTracker.CohortBuilder.SelectDemographics('Select Has EHR Data');
+      saveCriteria([param]);
+    }
 
     selectDeceased() {
       const param = {
