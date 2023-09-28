@@ -83,7 +83,7 @@ describe('NotebookLauncher', () => {
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
-            leoAppType={LeoApplicationType.Notebook}
+            leoAppType={LeoApplicationType.JupyterNotebook}
           />
         </Route>
       </Router>
@@ -450,7 +450,7 @@ describe('TerminalLauncher', () => {
           <LeonardoAppLauncher
             hideSpinner={() => {}}
             showSpinner={() => {}}
-            leoAppType={LeoApplicationType.Terminal}
+            leoAppType={LeoApplicationType.JupyterTerminal}
           />
         </Route>
       </Router>
