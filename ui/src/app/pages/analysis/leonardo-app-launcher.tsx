@@ -51,8 +51,8 @@ import {
 } from './util';
 
 export enum LeoApplicationType {
-  Notebook,
-  Terminal,
+  JupyterNotebook,
+  JupyterTerminal,
   SparkConsole,
 }
 
@@ -91,7 +91,7 @@ export const genericProgressStrings: Map<Progress, string> = new Map([
 ]);
 
 const getProgressString = (appType: LeoApplicationType, progress: Progress) => {
-  if (appType === LeoApplicationType.Notebook) {
+  if (appType === LeoApplicationType.JupyterNotebook) {
     return notebookProgressStrings.get(progress);
   } else {
     return genericProgressStrings.get(progress);
@@ -387,7 +387,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private isOpeningTerminal() {
-      return this.props.leoAppType === LeoApplicationType.Terminal;
+      return this.props.leoAppType === LeoApplicationType.JupyterTerminal;
     }
 
     private isPlaygroundMode() {
@@ -408,9 +408,12 @@ export const LeonardoAppLauncher = fp.flow(
     private getLeoAppUrl(runtime: Runtime, nbName: string): string {
       const proxyPath = switchCase(
         this.props.leoAppType,
-        [LeoApplicationType.Notebook, () => `jupyter/notebooks/${nbName}`],
         [
-          LeoApplicationType.Terminal,
+          LeoApplicationType.JupyterNotebook,
+          () => `jupyter/notebooks/${nbName}`,
+        ],
+        [
+          LeoApplicationType.JupyterTerminal,
           () => `jupyter/terminals/${terminalName}`,
         ],
         [LeoApplicationType.SparkConsole, () => this.getSparkConsolePath()]
@@ -447,7 +450,7 @@ export const LeonardoAppLauncher = fp.flow(
     private getPageTitle() {
       if (this.isOpeningTerminal()) {
         return 'Loading Terminal';
-      } else if (this.props.leoAppType === LeoApplicationType.Notebook) {
+      } else if (this.props.leoAppType === LeoApplicationType.JupyterNotebook) {
         return this.isCreatingNewNotebook()
           ? 'Creating New Notebook: '
           : 'Loading Notebook: ' + this.getNotebookName();
@@ -507,7 +510,7 @@ export const LeonardoAppLauncher = fp.flow(
           workspace.id,
           // navigate will encode the notebook name automatically
           analysisTabName,
-          ...(this.props.leoAppType === LeoApplicationType.Notebook
+          ...(this.props.leoAppType === LeoApplicationType.JupyterNotebook
             ? ['preview', this.getFullJupyterNotebookName()]
             : []),
         ]);
@@ -598,7 +601,7 @@ export const LeonardoAppLauncher = fp.flow(
     }
 
     private async getLeoAppPathAndLocalize(runtime: Runtime) {
-      if (this.props.leoAppType === LeoApplicationType.Notebook) {
+      if (this.props.leoAppType === LeoApplicationType.JupyterNotebook) {
         if (this.isCreatingNewNotebook()) {
           this.incrementProgress(Progress.Creating);
           return this.createNotebookAndLocalize(runtime);
@@ -610,12 +613,11 @@ export const LeonardoAppLauncher = fp.flow(
           ]);
           return `${localizedNotebookDir}/${fullNotebookName}`;
         }
+      } else {
+        // JupyterTerminal or SparkConsole LeoApplicationType
+        this.incrementProgress(Progress.Creating);
+        return this.localizeNotebooks([]);
       }
-
-      // Terminal or SparkConsole LeoApplicationType
-
-      this.incrementProgress(Progress.Creating);
-      return this.localizeNotebooks([]);
     }
 
     private async createNotebookAndLocalize(runtime: Runtime) {
