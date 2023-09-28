@@ -612,14 +612,10 @@ export const LeonardoAppLauncher = fp.flow(
         }
       }
 
-      const { workspace } = this.props;
+      // Terminal or SparkConsole LeoApplicationType
+
       this.incrementProgress(Progress.Creating);
-      const resp = await this.runtimeRetry(() =>
-        runtimeApi().localize(workspace.namespace, null, {
-          signal: this.pollAborter.signal,
-        })
-      );
-      return resp.runtimeLocalDirectory;
+      return this.localizeNotebooks([]);
     }
 
     private async createNotebookAndLocalize(runtime: Runtime) {
