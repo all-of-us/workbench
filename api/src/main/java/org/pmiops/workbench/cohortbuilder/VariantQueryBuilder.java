@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -94,28 +95,17 @@ public final class VariantQueryBuilder {
 
   private static final String FROM_VAT = "FROM `${projectId}.${dataSetId}.cb_variant_attribute`\n";
 
-  private static final String CONSEQUENCE = ", UNNEST(consequence) AS consequence\n";
+  private static final String CONSEQUENCE_LIKE = "cons_str LIKE @consStr";
 
-  private static final String CONSEQUENCE_IN = "AND consequence IN UNNEST(@consequences)\n";
+  private static final String CONSEQUENCE_EMPTY = "cons_str = ''";
 
-  private static final String CONSEQUENCE_EMPTY = "AND ARRAY_LENGTH(consequence) = 0\n";
+  private static final String CLINICAL_SIGNIFICANCE_LIKE =
+      "clinical_significance_string LIKE @clinStr";
 
-  private static final String CONSEQUENCE_IN_OR_EMPTY =
-      "AND (" + CONSEQUENCE_IN + " OR " + CONSEQUENCE_EMPTY + ")\n";
+  private static final String CLINICAL_SIGNIFICANCE_EMPTY = "clinical_significance_string = ''";
 
-  private static final String CLINICAL_SIGNIFICANCE =
-      ", UNNEST(clinical_significance) AS clinical_significance\n";
-
-  private static final String CLINICAL_SIGNIFICANCE_IN =
-      "AND clinical_significance IN UNNEST(@clinicalSignificances)\n";
-
-  private static final String CLINICAL_SIGNIFICANCE_EMPTY =
-      "AND ARRAY_LENGTH(clinical_significance) = 0\n";
-
-  private static final String CLINICAL_SIGNIFICANCE_IN_OR_EMPTY =
-      "AND (clinical_significance IN UNNEST(@clinicalSignificances) OR ARRAY_LENGTH(clinical_significance) = 0)\n";
-
-  private static final String GENES_IN = "AND genes IN UNNEST(@genes)\n";
+  private static final String GENES_IN = "genes IN UNNEST(@genes)";
+  private static final String GENES_IS_NULL = "genes IS NULL";
 
   private static final String ALLELE_COUNT = "AND allele_count BETWEEN @countMin AND @countMax\n";
 
@@ -272,38 +262,34 @@ public final class VariantQueryBuilder {
       String selectSQL, String whereVidInSQL, VariantFilterRequest filters) {
     List<String> consequences = filters.getConsequenceList();
     List<String> clinicalSigns = filters.getClinicalSignificanceList();
+    List<String> genes = filters.getGeneList();
     StringBuilder sqlBuilder = new StringBuilder(selectSQL).append(FROM_VAT);
-
-    if (isNotEmpty(consequences)) {
-      sqlBuilder.append(CONSEQUENCE);
-    }
-    if (isNotEmpty(clinicalSigns)) {
-      sqlBuilder.append(CLINICAL_SIGNIFICANCE);
-    }
     sqlBuilder.append(whereVidInSQL);
-    // users can select the option of 'n/a' when filtering by consequence
-    // or clinical significance. Filters with 'n/a' for consequence or
-    // clinical significance with search for empty array.
-    determineIfEmptyArraySearch(
-        consequences, sqlBuilder, CONSEQUENCE_EMPTY, CONSEQUENCE_IN_OR_EMPTY, CONSEQUENCE_IN);
-    determineIfEmptyArraySearch(
-        clinicalSigns,
+    appendEmptyOrLikeCondition(consequences, sqlBuilder, CONSEQUENCE_EMPTY, CONSEQUENCE_LIKE);
+    appendEmptyOrLikeCondition(
+        clinicalSigns, sqlBuilder, CLINICAL_SIGNIFICANCE_EMPTY, CLINICAL_SIGNIFICANCE_LIKE);
+    if (isNotEmpty(genes)) {
+      StringJoiner joiner = new StringJoiner(" OR ");
+      if (genes.contains(NA)) {
+        joiner.add(GENES_IS_NULL);
+      }
+      if (!genes.contains(NA) || genes.size() > 1) {
+        joiner.add(GENES_IN);
+      }
+      sqlBuilder.append("AND (");
+      sqlBuilder.append(joiner);
+      sqlBuilder.append(")\n");
+    }
+    appendMinMaxCondition(
+        sqlBuilder, filters.getCountMin() != null && filters.getCountMax() != null, ALLELE_COUNT);
+    appendMinMaxCondition(
         sqlBuilder,
-        CLINICAL_SIGNIFICANCE_EMPTY,
-        CLINICAL_SIGNIFICANCE_IN_OR_EMPTY,
-        CLINICAL_SIGNIFICANCE_IN);
-    if (isNotEmpty(filters.getGeneList())) {
-      sqlBuilder.append(GENES_IN);
-    }
-    if (filters.getCountMin() != null && filters.getCountMax() != null) {
-      sqlBuilder.append(ALLELE_COUNT);
-    }
-    if (filters.getNumberMin() != null && filters.getNumberMax() != null) {
-      sqlBuilder.append(ALLELE_NUMBER);
-    }
-    if (filters.getFrequencyMin() != null && filters.getFrequencyMax() != null) {
-      sqlBuilder.append(ALLELE_FREQ);
-    }
+        filters.getNumberMin() != null && filters.getNumberMax() != null,
+        ALLELE_NUMBER);
+    appendMinMaxCondition(
+        sqlBuilder,
+        filters.getFrequencyMin() != null && filters.getFrequencyMax() != null,
+        ALLELE_FREQ);
     sqlBuilder.append(PARTICIPANT_COUNT);
     if (selectSQL.equals(SELECT_ALL_COLUMNS)) {
       if (StringUtils.isNotEmpty(filters.getSortBy())) {
@@ -319,16 +305,28 @@ public final class VariantQueryBuilder {
     return sqlBuilder.toString();
   }
 
-  private static void determineIfEmptyArraySearch(
-      List<String> list, StringBuilder sqlBuilder, String empty, String inOrEmpty, String in) {
+  private static void appendEmptyOrLikeCondition(
+      List<String> list, StringBuilder sqlBuilder, String empty, String like) {
     if (isNotEmpty(list)) {
-      if (list.contains(NA) && list.size() == 1) {
-        sqlBuilder.append(empty);
-      } else if (list.contains(NA) && list.size() > 1) {
-        sqlBuilder.append(inOrEmpty);
-      } else {
-        sqlBuilder.append(in);
+      StringJoiner joiner = new StringJoiner(" OR ");
+      int i = 0;
+      for (String conStr : list) {
+        if (conStr.equals(NA)) {
+          joiner.add(empty);
+        } else {
+          joiner.add(like + i++);
+        }
       }
+      sqlBuilder.append("AND (");
+      sqlBuilder.append(joiner);
+      sqlBuilder.append(")\n");
+    }
+  }
+
+  private static void appendMinMaxCondition(
+      StringBuilder sqlBuilder, boolean filters, String alleleCount) {
+    if (filters) {
+      sqlBuilder.append(alleleCount);
     }
   }
 
@@ -388,22 +386,33 @@ public final class VariantQueryBuilder {
 
   private static void generateFilterParams(
       VariantFilterRequest filters, Map<String, QueryParameterValue> params) {
-    if (isNotEmpty(filters.getConsequenceList())) {
-      params.put(
-          "consequences",
-          QueryParameterValue.array(
-              filters.getConsequenceList().toArray(new String[0]), String.class));
+    List<String> consequences = filters.getConsequenceList();
+    List<String> clinicalSigns = filters.getClinicalSignificanceList();
+    if (isNotEmpty(consequences)) {
+      // Don't change the source consequence list as it's used for multiple queries.
+      // Generate a new list without n/a to exclude from the IN clause.
+      List<String> cons =
+          consequences.stream().filter(s -> !s.equals(NA)).collect(Collectors.toList());
+      for (int i = 0; i < cons.size(); i++) {
+        params.put("consStr" + i, QueryParameterValue.string("%" + cons.get(i) + "%"));
+      }
     }
-    if (isNotEmpty(filters.getClinicalSignificanceList())) {
-      params.put(
-          "clinicalSignificances",
-          QueryParameterValue.array(
-              filters.getClinicalSignificanceList().toArray(new String[0]), String.class));
+    if (isNotEmpty(clinicalSigns)) {
+      // Don't change the source consequence list as it's used for multiple queries.
+      // Generate a new list without n/a to exclude from the IN clause.
+      List<String> clinSigns =
+          clinicalSigns.stream().filter(s -> !s.equals(NA)).collect(Collectors.toList());
+      for (int i = 0; i < clinSigns.size(); i++) {
+        params.put("clinStr" + i, QueryParameterValue.string("%" + clinSigns.get(i) + "%"));
+      }
     }
     if (isNotEmpty(filters.getGeneList())) {
+      // convert n/a to empty string when searching genes
       params.put(
           "genes",
-          QueryParameterValue.array(filters.getGeneList().toArray(new String[0]), String.class));
+          QueryParameterValue.array(
+              filters.getGeneList().stream().filter(s -> !s.equals(NA)).toArray(String[]::new),
+              String.class));
     }
     if (filters.getCountMin() != null && filters.getCountMax() != null) {
       params.put("countMin", QueryParameterValue.int64(filters.getCountMin()));

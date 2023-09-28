@@ -14,5 +14,9 @@
   {
     "vid": "1-100550658-T-H",
     "gene_symbol": "GENE1"
+  },
+  {
+    "vid": "1-100550658-T-AA",
+    "gene_symbol": "GENE3"
   }
 ]

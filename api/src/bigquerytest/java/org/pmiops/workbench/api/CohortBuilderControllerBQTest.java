@@ -2535,6 +2535,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void findVariantsFilterByConsequenceNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene3")
+            .addConsequenceListItem("n/a")
+            .addConsequenceListItem("intron_variant");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AA")
+            .gene("gene3")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
   public void findVariantsFilterByClinicalSignificance() {
     VariantFilterRequest request =
         new VariantFilterRequest()
@@ -2556,6 +2577,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void findVariantsFilterByClinicalSignificanceNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest()
+            .searchTerm("gene3")
+            .addClinicalSignificanceListItem("n/a")
+            .addClinicalSignificanceListItem("pathogenic");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AA")
+            .gene("gene3")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
   public void findVariantsFilterByGeneList() {
     VariantFilterRequest request =
         new VariantFilterRequest().searchTerm("gene").addGeneListItem("gene, gene2");
@@ -2569,6 +2611,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .alleleCount(5L)
             .alleleNumber(18242L)
             .alleleFrequency(0.000277)
+            .participantCount(1L);
+    assertFindVariantsResponse(request, expectedVariant, 1);
+  }
+
+  @Test
+  public void findVariantsFilterByGenesListNA() {
+    VariantFilterRequest request =
+        new VariantFilterRequest().searchTerm("rs23347").addGeneListItem("n/a");
+    Variant expectedVariant =
+        new Variant()
+            .vid("1-100550658-T-AH")
+            .consequence("")
+            .proteinChange("change")
+            .clinVarSignificance("")
+            .alleleCount(7L)
+            .alleleNumber(18226L)
+            .alleleFrequency(0.000266)
             .participantCount(1L);
     assertFindVariantsResponse(request, expectedVariant, 1);
   }
@@ -2648,7 +2707,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .consequence("intron_variant, non_coding_transcript_variant")
                 .proteinChange("change")
                 .clinVarSignificance("likely pathogenic, pathogenic")
-                .alleleCount(7L)
+                .alleleCount(22L)
                 .alleleNumber(18226L)
                 .alleleFrequency(0.000266)
                 .participantCount(1L));
@@ -2683,7 +2742,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
     VariantFiltersResponse expectedVariantFilter =
         new VariantFiltersResponse()
-            .geneList(Arrays.asList("n/a", "gene, gene2"))
+            .geneList(Arrays.asList("gene, gene2", "n/a"))
             .consequenceList(
                 Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
             .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
