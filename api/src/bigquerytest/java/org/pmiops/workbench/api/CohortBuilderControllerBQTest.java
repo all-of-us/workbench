@@ -2742,7 +2742,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
     VariantFiltersResponse expectedVariantFilter =
         new VariantFiltersResponse()
-            .geneList(Arrays.asList("gene, gene2", "n/a"))
+            .geneList(Arrays.asList("gene, gene2", "gene3"))
             .consequenceList(
                 Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
             .clinicalSignificanceList(Arrays.asList("likely pathogenic", "n/a", "pathogenic"))
