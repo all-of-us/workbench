@@ -204,7 +204,7 @@ export const SystemErrorHandler = fp.flow(
                 />
               </div>
             )}
-            {systemError.errorCode === ErrorCode.USERDISABLED && (
+            {systemError.errorCode === ErrorCode.USER_DISABLED && (
               <TextModal
                 title='This account has been disabled'
                 body='Please contact a system administrator to inquire about the status of your account.'

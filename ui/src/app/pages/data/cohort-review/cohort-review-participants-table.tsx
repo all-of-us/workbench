@@ -150,8 +150,8 @@ const defaultDemoFilters: any = {
   STATUS: [
     { name: 'Included', value: CohortStatus.INCLUDED },
     { name: 'Excluded', value: CohortStatus.EXCLUDED },
-    { name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW },
-    { name: 'Unreviewed', value: CohortStatus.NOTREVIEWED },
+    { name: 'Needs Further Review', value: CohortStatus.NEEDS_FURTHER_REVIEW },
+    { name: 'Unreviewed', value: CohortStatus.NOT_REVIEWED },
     { name: 'Select All', value: 'Select All' },
   ],
 };
@@ -170,8 +170,8 @@ const formatStatusForText = (status: CohortStatus) => {
   return {
     [CohortStatus.EXCLUDED]: 'Excluded',
     [CohortStatus.INCLUDED]: 'Included',
-    [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
-    [CohortStatus.NOTREVIEWED]: '',
+    [CohortStatus.NEEDS_FURTHER_REVIEW]: 'Needs Further Review',
+    [CohortStatus.NOT_REVIEWED]: '',
   }[status];
 };
 const mapData = (participant: ParticipantCohortStatus) => {
@@ -259,7 +259,7 @@ export const CohortReviewParticipantsTable = ({ cohortReview }) => {
         page: pageState.page,
         pageSize: pageState.pageSize,
         sortColumn: reverseColumnEnum[sortState.sortField],
-        sortOrder: sortState.sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+        sortOrder: sortState.sortOrder === 1 ? SortOrder.ASC : SortOrder.DESC,
         filters: { items: queryFilters },
       } as Request;
       return cohortReviewApi().getParticipantCohortStatuses(

@@ -181,7 +181,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   get inMemorySearch() {
     const { domain } = this.props;
-    return domain === Domain.PHYSICALMEASUREMENT || domain === Domain.VISIT;
+    return domain === Domain.PHYSICAL_MEASUREMENT || domain === Domain.VISIT;
   }
 
   loadChildren() {
@@ -263,19 +263,27 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   checkAutocomplete() {
     const {
       autocompleteSelection,
-      node: { id },
+      node: { domainId, id, name },
       scrollToMatch,
     } = this.props;
-    const subtree = autocompleteSelection.path.split('.');
-    const expanded = subtree.includes(id.toString());
-    const searchMatch = subtree[subtree.length - 1] === id.toString();
-    if (expanded && !this.state.children) {
-      this.loadChildren();
-    }
-    if (searchMatch) {
+    if (
+      domainId === Domain.PHYSICAL_MEASUREMENT.toString() &&
+      autocompleteSelection.name === name
+    ) {
       scrollToMatch(id);
+      this.setState({ searchMatch: true });
+    } else {
+      const subtree = autocompleteSelection.path.split('.');
+      const expanded = subtree.includes(id.toString());
+      const searchMatch = subtree[subtree.length - 1] === id.toString();
+      if (expanded && !this.state.children) {
+        this.loadChildren();
+      }
+      if (searchMatch) {
+        scrollToMatch(id);
+      }
+      this.setState({ expanded, searchMatch });
     }
-    this.setState({ expanded, searchMatch });
   }
 
   toggleExpanded() {
@@ -305,8 +313,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     return [
       CriteriaSubType.WHEEL,
       CriteriaSubType.PREG,
-      CriteriaSubType.HRIRR,
-      CriteriaSubType.HRNOIRR,
+      CriteriaSubType.HR_IRR,
+      CriteriaSubType.HR_NOIRR,
     ]
       .map((st) => st.toString())
       .includes(this.props.node.subtype);
@@ -406,7 +414,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
             (crit) =>
               crit.parameterId === this.paramId() ||
               (![
-                Domain.PHYSICALMEASUREMENT.toString(),
+                Domain.PHYSICAL_MEASUREMENT.toString(),
                 Domain.VISIT.toString(),
               ].includes(domainId) &&
                 !!crit.id &&

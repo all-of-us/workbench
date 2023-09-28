@@ -222,7 +222,7 @@ export const CriteriaSearch = fp.flow(
       } = this.props;
       return (
         (domain === Domain.VISIT ||
-          (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT) ||
+          (source === 'cohort' && domain === Domain.PHYSICAL_MEASUREMENT) ||
           (source === 'cohort' && domain === Domain.SURVEY)) &&
         !conceptSearchTerms
       );
@@ -520,7 +520,7 @@ export const CriteriaSearch = fp.flow(
             )}
             {/* List View (using duplicated version of ListSearch) */}
             {!this.initTree &&
-            cohortContext.domain === Domain.SNPINDELVARIANT ? (
+            cohortContext.domain === Domain.SNP_INDEL_VARIANT ? (
               <VariantSearch
                 searchTerms={conceptSearchTerms}
                 select={this.addSelection}

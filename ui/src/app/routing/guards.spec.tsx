@@ -16,12 +16,12 @@ import { shouldRedirectToMaybe } from './guards';
 // a newly-created user will have Profile and Publications newly completed, and no others
 const newUserModuleState: AccessModuleStatus[] = [
   {
-    moduleName: AccessModule.PROFILECONFIRMATION,
+    moduleName: AccessModule.PROFILE_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(365),
   },
   {
-    moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+    moduleName: AccessModule.PUBLICATION_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(365),
   },
@@ -55,29 +55,31 @@ const allBypassed: AccessModuleStatus[] = Object.keys(AccessModule).map(
 // 2FA is missing (initial, not renewable)
 const allCompleteMissingOneInitial: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
-    ({ moduleName }) => moduleName !== AccessModule.TWOFACTORAUTH
+    ({ moduleName }) => moduleName !== AccessModule.TWO_FACTOR_AUTH
   );
 
 // RW-8203
 // artificial state for test users - Publications is missing (renewable, not initial registration)
 const allCompleteMissingOneRenewable: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
-    ({ moduleName }) => moduleName !== AccessModule.PUBLICATIONCONFIRMATION
+    ({ moduleName }) => moduleName !== AccessModule.PUBLICATION_CONFIRMATION
   );
 
 const allCompleteMissingOneEach: AccessModuleStatus[] =
   allCompleteNotExpiring.filter(
     ({ moduleName }) =>
-      ![
-        AccessModule.TWOFACTORAUTH,
-        AccessModule.PUBLICATIONCONFIRMATION,
-      ].includes(moduleName)
+      !(
+        [
+          AccessModule.TWO_FACTOR_AUTH,
+          AccessModule.PUBLICATION_CONFIRMATION,
+        ] as Array<AccessModule>
+      ).includes(moduleName)
   );
 
 // PUBLICATIONCONFIRMATION is expired
 const allCompleteOneExpired: AccessModuleStatus[] =
   allCompleteMissingOneRenewable.concat({
-    moduleName: AccessModule.PUBLICATIONCONFIRMATION,
+    moduleName: AccessModule.PUBLICATION_CONFIRMATION,
     completionEpochMillis: Date.now(),
     expirationEpochMillis: nowPlusDays(-1),
   });
@@ -85,10 +87,10 @@ const allCompleteOneExpired: AccessModuleStatus[] =
 const allCompleteCtTrainingExpired: AccessModuleStatus[] =
   allCompleteNotExpiring
     .filter(
-      ({ moduleName }) => moduleName !== AccessModule.CTCOMPLIANCETRAINING
+      ({ moduleName }) => moduleName !== AccessModule.CT_COMPLIANCE_TRAINING
     )
     .concat({
-      moduleName: AccessModule.CTCOMPLIANCETRAINING,
+      moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
       completionEpochMillis: Date.now(),
       expirationEpochMillis: nowPlusDays(-1),
     });

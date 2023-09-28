@@ -4,7 +4,7 @@ import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import validate from 'validate.js';
-import { faLink } from '@fortawesome/pro-solid-svg-icons';
+import { faLink } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -404,7 +404,7 @@ const AccessModuleTable = (props: AccessModuleTableProps) => {
       style={{ paddingTop: '1em' }}
       value={tableData}
       footer={
-        getAccessModuleConfig(AccessModule.ERACOMMONS)
+        getAccessModuleConfig(AccessModule.ERA_COMMONS)
           .isEnabledInEnvironment && (
           <div style={{ textAlign: 'left', fontWeight: 'normal' }}>
             {getEraNote(updatedProfile)}

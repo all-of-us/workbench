@@ -54,7 +54,7 @@ export const RuntimeInitializerModal = ({
           Continuing with this action requires a cloud analysis environment,
           which will be charged to this workspace.&nbsp;
           {defaultRuntime.configurationType ===
-          RuntimeConfigurationType.GeneralAnalysis
+          RuntimeConfigurationType.GENERAL_ANALYSIS
             ? 'Would you like to continue with this default environment?'
             : 'Would you like to continue with your most recently used environment settings in this workspace?'}
         </WarningMessage>

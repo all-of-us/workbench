@@ -18,7 +18,11 @@ import { ConfirmDelete } from './runtime-configuration-panel/confirm-delete';
 import { ConfirmDeleteEnvironmentWithPD } from './runtime-configuration-panel/confirm-delete-environment-with-pd';
 import { ConfirmDeleteUnattachedPD } from './runtime-configuration-panel/confirm-delete-unattached-pd';
 
-type InjectedProps = 'app' | 'disk' | 'onClickDeleteUnattachedPersistentDisk';
+type InjectedProps =
+  | 'app'
+  | 'disk'
+  | 'onClickDeleteGkeApp'
+  | 'onClickDeleteUnattachedPersistentDisk';
 
 export type GkeAppConfigurationPanelProps = {
   appType: AppType;
@@ -94,6 +98,14 @@ export const GKEAppConfigurationPanel = ({
   const app = findApp(gkeAppsInWorkspace, toUIAppType[appType]);
   const disk = findDisk(ownedDisksInWorkspace, appType);
 
+  const onClickDeleteGkeApp = () =>
+    setPanelContent(GKEAppPanelContent.DELETE_GKE_APP);
+
+  const onConfirmDeleteGKEApp = async (deletePDSelected) => {
+    await deleteUserApp(workspaceNamespace, app.appName, deletePDSelected);
+    onClose();
+  };
+
   const onClickDeleteUnattachedPersistentDisk = () => {
     setPanelContent(GKEAppPanelContent.DELETE_UNATTACHED_PD);
   };
@@ -118,11 +130,14 @@ export const GKEAppConfigurationPanel = ({
     setPanelContent(GKEAppPanelContent.CREATE);
   };
 
-  const onConfirmDeleteGKEApp = async (deletePDSelected) => {
-    await deleteUserApp(workspaceNamespace, app.appName, deletePDSelected);
-    onClose();
+  const createAppProps = {
+    ...props,
+    app,
+    disk,
+    onClose,
+    onClickDeleteGkeApp,
+    onClickDeleteUnattachedPersistentDisk,
   };
-
   return switchCase(
     panelContent,
     [
@@ -130,48 +145,9 @@ export const GKEAppConfigurationPanel = ({
       () =>
         switchCase(
           appType,
-          [
-            AppType.CROMWELL,
-            () => (
-              <CreateCromwell
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ],
-          [
-            AppType.RSTUDIO,
-            () => (
-              <CreateRStudio
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ],
-          [
-            AppType.SAS,
-            () => (
-              <CreateSAS
-                {...{
-                  ...props,
-                  app,
-                  disk,
-                  onClickDeleteUnattachedPersistentDisk,
-                  onClose,
-                }}
-              />
-            ),
-          ]
+          [AppType.CROMWELL, () => <CreateCromwell {...createAppProps} />],
+          [AppType.RSTUDIO, () => <CreateRStudio {...createAppProps} />],
+          [AppType.SAS, () => <CreateSAS {...createAppProps} />]
         ),
     ],
     [
@@ -187,8 +163,6 @@ export const GKEAppConfigurationPanel = ({
     [
       GKEAppPanelContent.DELETE_GKE_APP,
       () =>
-        // currently (July 2023) we do not expose detaching PDs to users, but it's possible to get into
-        // an error state where the disk is missing, so we need to account for this
         disk ? (
           <ConfirmDeleteEnvironmentWithPD
             onConfirm={onConfirmDeleteGKEApp}

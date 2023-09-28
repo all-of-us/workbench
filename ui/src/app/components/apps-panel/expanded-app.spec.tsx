@@ -102,7 +102,7 @@ describe('ExpandedApp', () => {
 
   describe('Jupyter', () => {
     it('should allow pausing when the Jupyter app is Running', async () => {
-      runtimeStub.runtime.status = RuntimeStatus.Running;
+      runtimeStub.runtime.status = RuntimeStatus.RUNNING;
       const pauseSpy = jest.spyOn(leoRuntimesApi(), 'stopRuntime');
 
       const { container } = await component(UIAppType.JUPYTER, undefined);
@@ -121,7 +121,7 @@ describe('ExpandedApp', () => {
     });
 
     it('should allow resuming when the Jupyter app is Stopped', async () => {
-      runtimeStub.runtime.status = RuntimeStatus.Stopped;
+      runtimeStub.runtime.status = RuntimeStatus.STOPPED;
       const resumeSpy = jest.spyOn(leoRuntimesApi(), 'startRuntime');
 
       const { container } = await component(UIAppType.JUPYTER, undefined);
@@ -140,15 +140,15 @@ describe('ExpandedApp', () => {
     });
 
     test.each([
-      [RuntimeStatus.Stopping, 'Pausing'],
-      [RuntimeStatus.Starting, 'Resuming'],
+      [RuntimeStatus.STOPPING, 'Pausing'],
+      [RuntimeStatus.STARTING, 'Resuming'],
 
-      [RuntimeStatus.Deleted, 'Pause'],
-      [RuntimeStatus.Deleting, 'Pause'],
-      [RuntimeStatus.Unknown, 'Pause'],
-      [RuntimeStatus.Error, 'Pause'],
-      [RuntimeStatus.Creating, 'Pause'],
-      [RuntimeStatus.Updating, 'Pause'],
+      [RuntimeStatus.DELETED, 'Pause'],
+      [RuntimeStatus.DELETING, 'Pause'],
+      [RuntimeStatus.UNKNOWN, 'Pause'],
+      [RuntimeStatus.ERROR, 'Pause'],
+      [RuntimeStatus.CREATING, 'Pause'],
+      [RuntimeStatus.UPDATING, 'Pause'],
 
       [undefined, 'Pause'],
       [null, 'Pause'],
@@ -165,7 +165,7 @@ describe('ExpandedApp', () => {
       }
     );
 
-    test.each([RuntimeStatus.Running, RuntimeStatus.Stopped])(
+    test.each([RuntimeStatus.RUNNING, RuntimeStatus.STOPPED])(
       'should allow deletion when the Jupyter app status is %s',
       async (status) => {
         runtimeStub.runtime.status = status;
@@ -184,10 +184,10 @@ describe('ExpandedApp', () => {
     );
 
     test.each([
-      RuntimeStatus.Stopping,
-      RuntimeStatus.Starting,
-      RuntimeStatus.Error,
-      RuntimeStatus.Unknown,
+      RuntimeStatus.STOPPING,
+      RuntimeStatus.STARTING,
+      RuntimeStatus.ERROR,
+      RuntimeStatus.UNKNOWN,
       undefined,
       null,
     ])(
@@ -219,7 +219,7 @@ describe('ExpandedApp', () => {
       [AppStatus.DELETING, 'Pause'],
       [AppStatus.ERROR, 'Pause'],
       [AppStatus.PROVISIONING, 'Pause'],
-      [AppStatus.STATUSUNSPECIFIED, 'Pause'],
+      [AppStatus.STATUS_UNSPECIFIED, 'Pause'],
 
       [undefined, 'Pause'],
       [null, 'Pause'],
@@ -243,7 +243,7 @@ describe('ExpandedApp', () => {
     test.each([
       AppStatus.RUNNING,
       AppStatus.ERROR,
-      AppStatus.STATUSUNSPECIFIED,
+      AppStatus.STATUS_UNSPECIFIED,
     ])('should allow deletion when the app status is %s', async (status) => {
       const appName = 'my-app';
 
@@ -348,18 +348,15 @@ describe('ExpandedApp', () => {
         launchButton.click();
 
         await waitFor(() => {
-          // RW-10934 SAS localization throws a 500 error
-          if (appType !== UIAppType.SAS) {
-            expect(localizeSpy).toHaveBeenCalledWith(
-              WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              appName,
-              {
-                appType: toAppType[appType],
-                fileNames: [],
-                playgroundMode: false,
-              }
-            );
-          }
+          expect(localizeSpy).toHaveBeenCalledWith(
+            WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+            appName,
+            {
+              appType: toAppType[appType],
+              fileNames: [],
+              playgroundMode: false,
+            }
+          );
 
           expect(windowOpenSpy).toHaveBeenCalledWith(proxyUrl, '_blank');
           expect(focusStub).toHaveBeenCalled();

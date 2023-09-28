@@ -4,8 +4,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { faLockAlt } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   CdrVersionTiersResponse,
@@ -26,11 +24,10 @@ import {
 } from 'app/components/with-confirm-delete-modal';
 import { TanagraWorkspaceResource } from 'app/pages/data/tanagra-dev/data-component-tanagra';
 import {
-  cohortsV2Api,
-  conceptSetsV2Api,
-  reviewsV2Api,
+  cohortsApi,
+  conceptSetsApi,
+  reviewsApi,
 } from 'app/services/tanagra-swagger-fetch-clients';
-import colors from 'app/styles/colors';
 import { reactStyles, withCdrVersions } from 'app/utils';
 import { findCdrVersion } from 'app/utils/cdr-versions';
 import { ROWS_PER_PAGE_RESOURCE_TABLE } from 'app/utils/constants';
@@ -127,35 +124,23 @@ export const TanagraResourceList = fp.flow(
     return cdrVersion?.name;
   };
 
-  const addAdminLockToNameColumn = () => {
-    return (
-      <TooltipTrigger content={<div>Workspace compliance action required</div>}>
-        <FontAwesomeIcon
-          style={{ color: colors.warning, marginRight: '0.75rem' }}
-          size={'sm'}
-          icon={faLockAlt}
-        />
-      </TooltipTrigger>
-    );
-  };
-
   const deleteResource = async (resource: TanagraWorkspaceResource) => {
     try {
-      if (resource.cohortV2) {
-        await cohortsV2Api().deleteCohort({
+      if (resource.cohortTanagra) {
+        await cohortsApi().deleteCohort({
           studyId: resource.workspaceNamespace,
-          cohortId: resource.cohortV2.id,
+          cohortId: resource.cohortTanagra.id,
         });
-      } else if (resource.conceptSetV2) {
-        await conceptSetsV2Api().deleteConceptSet({
+      } else if (resource.conceptSetTanagra) {
+        await conceptSetsApi().deleteConceptSet({
           studyId: resource.workspaceNamespace,
-          conceptSetId: resource.conceptSetV2.id,
+          conceptSetId: resource.conceptSetTanagra.id,
         });
-      } else if (resource.reviewV2) {
-        await reviewsV2Api().deleteReview({
+      } else if (resource.reviewTanagra) {
+        await reviewsApi().deleteReview({
           studyId: resource.workspaceNamespace,
-          cohortId: resource.reviewV2.cohort.id,
-          reviewId: resource.reviewV2.id,
+          cohortId: resource.reviewTanagra.cohort.id,
+          reviewId: resource.reviewTanagra.id,
         });
       }
       props.onUpdate();
@@ -240,7 +225,6 @@ export const TanagraResourceList = fp.flow(
   const displayResourceName = (rowData) => {
     const {
       resource: {
-        adminLocked,
         cohortV2,
         conceptSetV2,
         reviewV2,
@@ -270,7 +254,6 @@ export const TanagraResourceList = fp.flow(
     return (
       <Clickable>
         <RouterLink to={url} style={styles.navigation}>
-          {adminLocked && addAdminLockToNameColumn()}
           <TooltipTrigger content={displayName}>
             <span>{displayName}</span>
           </TooltipTrigger>

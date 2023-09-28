@@ -168,16 +168,16 @@ class SearchGroupItemParameter extends React.Component<
 
 const SKIP_DOMAIN_SEARCH = [
   Domain.FITBIT.toString(),
-  Domain.FITBITSLEEPLEVEL.toString(),
-  Domain.FITBITSLEEPDAILYSUMMARY.toString(),
-  Domain.FITBITHEARTRATELEVEL.toString(),
-  Domain.FITBITHEARTRATESUMMARY.toString(),
-  Domain.FITBITACTIVITY.toString(),
-  Domain.FITBITINTRADAYSTEPS.toString(),
-  Domain.WHOLEGENOMEVARIANT.toString(),
-  Domain.LRWHOLEGENOMEVARIANT.toString(),
-  Domain.ARRAYDATA.toString(),
-  Domain.STRUCTURALVARIANTDATA.toString(),
+  Domain.FITBIT_SLEEP_LEVEL.toString(),
+  Domain.FITBIT_SLEEP_DAILY_SUMMARY.toString(),
+  Domain.FITBIT_HEART_RATE_LEVEL.toString(),
+  Domain.FITBIT_HEART_RATE_SUMMARY.toString(),
+  Domain.FITBIT_ACTIVITY.toString(),
+  Domain.FITBIT_INTRADAY_STEPS.toString(),
+  Domain.WHOLE_GENOME_VARIANT.toString(),
+  Domain.LR_WHOLE_GENOME_VARIANT.toString(),
+  Domain.ARRAY_DATA.toString(),
+  Domain.STRUCTURAL_VARIANT_DATA.toString(),
 ];
 
 interface ItemProp extends Item {
@@ -394,7 +394,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
           );
         case ModifierType.CATI:
           return <span>{MODIFIERS_MAP[name].operators[operands[0]]}</span>;
-        case ModifierType.NUMOFOCCURRENCES:
+        case ModifierType.NUM_OF_OCCURRENCES:
           return (
             <span>
               <b>{MODIFIERS_MAP[name].name}</b> {operands[0]} Or More
@@ -629,7 +629,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
               hideDescription={true}
               onCancel={() => this.setState({ renaming: false })}
               onRename={(v) => this.rename(v)}
-              resourceType={ResourceType.COHORTSEARCHITEM}
+              resourceType={ResourceType.COHORT_SEARCH_ITEM}
             />
           )}
           {showConceptSetModal && (

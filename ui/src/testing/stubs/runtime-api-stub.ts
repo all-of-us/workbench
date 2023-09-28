@@ -15,7 +15,6 @@ import {
 } from 'app/utils/machines';
 
 import { DisksApiStub } from 'testing/stubs/disks-api-stub';
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
 
 import { stubDisk } from './disks-api-stub';
 
@@ -36,13 +35,13 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   numberOfWorkerLocalSSDs: 0,
 });
 
-export const defaultRuntime = () => ({
+export const defaultRuntime = (): Runtime => ({
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
-  status: RuntimeStatus.Running,
+  status: RuntimeStatus.RUNNING,
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
-  configurationType: RuntimeConfigurationType.GeneralAnalysis,
+  configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
   gceConfig: defaultGceConfig(),
   errors: [],
 });
@@ -51,9 +50,7 @@ export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.runtime = defaultRuntime();
   }
 
@@ -79,7 +76,7 @@ export class RuntimeApiStub extends RuntimeApi {
         reqDisk.name = dapi.disk.name;
       }
     }
-    this.runtime = { ...runtime, status: RuntimeStatus.Creating };
+    this.runtime = { ...runtime, status: RuntimeStatus.CREATING };
     return {};
   }
 
@@ -93,7 +90,7 @@ export class RuntimeApiStub extends RuntimeApi {
         this.runtime.gceWithPdConfig?.persistentDisk?.name
       );
     }
-    this.runtime.status = RuntimeStatus.Deleting;
+    this.runtime.status = RuntimeStatus.DELETING;
     return {};
   }
 
@@ -101,7 +98,7 @@ export class RuntimeApiStub extends RuntimeApi {
     return new Promise<{}>((resolve) => {
       // Setting it to Running doesn't really make sense but it reflects
       // what is currently happening in the product.
-      this.runtime.status = RuntimeStatus.Running;
+      this.runtime.status = RuntimeStatus.RUNNING;
       resolve({});
     });
   }

@@ -18,12 +18,12 @@ export const runtimePresets: {
   generalAnalysis: {
     displayName: 'General Analysis',
     runtimeTemplate: {
-      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       // TODO: Support specifying toolDockerImage here.
       gceWithPdConfig: {
         persistentDisk: {
-          diskType: DiskType.Standard,
+          diskType: DiskType.STANDARD,
           size: MIN_DISK_SIZE_GB,
           labels: {},
           name: null,
@@ -36,7 +36,7 @@ export const runtimePresets: {
   hailAnalysis: {
     displayName: 'Hail Genomics Analysis',
     runtimeTemplate: {
-      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
       autopauseThreshold: DEFAULT_AUTOPAUSE_THRESHOLD_MINUTES,
       dataprocConfig: {
         masterMachineType: DEFAULT_MACHINE_NAME,

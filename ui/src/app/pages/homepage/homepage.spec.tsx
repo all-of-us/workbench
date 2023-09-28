@@ -8,7 +8,7 @@ import {
   ConceptSetsApi,
   UserMetricsApi,
   WorkspacesApi,
-} from 'generated/fetch/api';
+} from 'generated/fetch';
 
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {

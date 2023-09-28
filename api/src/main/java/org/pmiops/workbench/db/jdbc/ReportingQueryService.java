@@ -14,6 +14,8 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingNewUserSatisfactionSurvey;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingUserGeneralDiscoverySource;
+import org.pmiops.workbench.model.ReportingUserPartnerDiscoverySource;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
@@ -35,8 +37,6 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspace> getWorkspaceBatch(long limit, long offset);
 
-  int getWorkspaceCount();
-
   default Stream<List<ReportingWorkspace>> getBatchedWorkspaceStream() {
     return getBatchedStream(this::getWorkspaceBatch);
   }
@@ -47,15 +47,11 @@ public interface ReportingQueryService {
     return getBatchedStream(this::getUserBatch);
   }
 
-  int getUserCount();
-
   List<ReportingCohort> getCohortBatch(long limit, long offset);
 
   default Stream<List<ReportingCohort>> getBatchedCohortStream() {
     return getBatchedStream(this::getCohortBatch);
   }
-
-  int getCohortCount();
 
   List<ReportingNewUserSatisfactionSurvey> getNewUserSatisfactionSurveyBatch(
       long limit, long offset);
@@ -65,7 +61,21 @@ public interface ReportingQueryService {
     return getBatchedStream(this::getNewUserSatisfactionSurveyBatch);
   }
 
-  int getNewUserSatisfactionSurveyCount();
+  List<ReportingUserGeneralDiscoverySource> getUserGeneralDiscoverySourceBatch(
+      long limit, long offset);
+
+  default Stream<List<ReportingUserGeneralDiscoverySource>>
+      getBatchedUserGeneralDiscoverySourceStream() {
+    return getBatchedStream(this::getUserGeneralDiscoverySourceBatch);
+  }
+
+  List<ReportingUserPartnerDiscoverySource> getUserPartnerDiscoverySourceBatch(
+      long limit, long offset);
+
+  default Stream<List<ReportingUserPartnerDiscoverySource>>
+      getBatchedUserPartnerDiscoverySourceStream() {
+    return getBatchedStream(this::getUserPartnerDiscoverySourceBatch);
+  }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;
@@ -130,4 +140,8 @@ public interface ReportingQueryService {
     final Iterable<List<T>> iterable = () -> batchIterator;
     return StreamSupport.stream(iterable.spliterator(), false);
   }
+
+  int getTableRowCount(String tableName);
+
+  int getWorkspaceCount();
 }

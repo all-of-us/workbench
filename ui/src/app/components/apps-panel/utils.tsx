@@ -59,7 +59,7 @@ export const appAssets: AppAssets[] = [
   },
 ];
 
-// TODO replace with better defaults
+// TODO replace with better defaults?
 export const defaultCromwellConfig: CreateAppRequest = {
   appType: AppType.CROMWELL,
   kubernetesRuntimeConfig: {
@@ -69,10 +69,11 @@ export const defaultCromwellConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 50,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 
+// TODO replace with better defaults?
 export const defaultRStudioConfig: CreateAppRequest = {
   appType: AppType.RSTUDIO,
   kubernetesRuntimeConfig: {
@@ -82,10 +83,11 @@ export const defaultRStudioConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 100,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 
+// TODO replace with better defaults?
 export const defaultSASConfig: CreateAppRequest = {
   appType: AppType.SAS,
   kubernetesRuntimeConfig: {
@@ -95,7 +97,7 @@ export const defaultSASConfig: CreateAppRequest = {
   },
   persistentDiskRequest: {
     size: 100,
-    diskType: DiskType.Standard,
+    diskType: DiskType.STANDARD,
   },
 };
 
@@ -129,9 +131,13 @@ export const canCreateApp = (app: UserAppEnvironment): boolean =>
 // matches Leonardo code
 // https://github.com/DataBiosphere/leonardo/blob/eeae99dacf542c45ec528ce97c9fa72c31aae889/core/src/main/scala/org/broadinstitute/dsde/workbench/leonardo/kubernetesModels.scala#L457
 export const isDeletable = (status: AppStatus): boolean =>
-  [AppStatus.STATUSUNSPECIFIED, AppStatus.RUNNING, AppStatus.ERROR].includes(
-    status
-  );
+  (
+    [
+      AppStatus.STATUS_UNSPECIFIED,
+      AppStatus.RUNNING,
+      AppStatus.ERROR,
+    ] as Array<AppStatus>
+  ).includes(status);
 
 export const canDeleteApp = (app: UserAppEnvironment): boolean =>
   app && isDeletable(app.status);
@@ -175,15 +181,15 @@ export const fromRuntimeStatus = (
   status: RuntimeStatus
 ): UserEnvironmentStatus =>
   cond(
-    [status === RuntimeStatus.Creating, () => UserEnvironmentStatus.CREATING],
-    [status === RuntimeStatus.Deleted, () => UserEnvironmentStatus.DELETED],
-    [status === RuntimeStatus.Deleting, () => UserEnvironmentStatus.DELETING],
-    [status === RuntimeStatus.Error, () => UserEnvironmentStatus.ERROR],
-    [status === RuntimeStatus.Running, () => UserEnvironmentStatus.RUNNING],
-    [status === RuntimeStatus.Stopping, () => UserEnvironmentStatus.PAUSING],
-    [status === RuntimeStatus.Stopped, () => UserEnvironmentStatus.PAUSED],
-    [status === RuntimeStatus.Starting, () => UserEnvironmentStatus.RESUMING],
-    [status === RuntimeStatus.Updating, () => UserEnvironmentStatus.UPDATING],
+    [status === RuntimeStatus.CREATING, () => UserEnvironmentStatus.CREATING],
+    [status === RuntimeStatus.DELETED, () => UserEnvironmentStatus.DELETED],
+    [status === RuntimeStatus.DELETING, () => UserEnvironmentStatus.DELETING],
+    [status === RuntimeStatus.ERROR, () => UserEnvironmentStatus.ERROR],
+    [status === RuntimeStatus.RUNNING, () => UserEnvironmentStatus.RUNNING],
+    [status === RuntimeStatus.STOPPING, () => UserEnvironmentStatus.PAUSING],
+    [status === RuntimeStatus.STOPPED, () => UserEnvironmentStatus.PAUSED],
+    [status === RuntimeStatus.STARTING, () => UserEnvironmentStatus.RESUMING],
+    [status === RuntimeStatus.UPDATING, () => UserEnvironmentStatus.UPDATING],
     () => UserEnvironmentStatus.UNKNOWN
   );
 

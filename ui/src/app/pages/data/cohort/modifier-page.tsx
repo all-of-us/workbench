@@ -176,7 +176,7 @@ const dateTooltip = `Dates are consistently shifted within a participant’s rec
 
 const getDefaultFormState = () => {
   const defaultFormState = {
-    name: ModifierType.AGEATEVENT,
+    name: ModifierType.AGE_AT_EVENT as ModifierType,
     label: 'Age At Event',
     type: 'number',
     operator: undefined,
@@ -188,11 +188,11 @@ const getDefaultFormState = () => {
       },
       {
         label: 'Greater Than or Equal To',
-        value: Operator.GREATERTHANOREQUALTO,
+        value: Operator.GREATER_THAN_OR_EQUAL_TO,
       },
       {
         label: 'Less Than or Equal To',
-        value: Operator.LESSTHANOREQUALTO,
+        value: Operator.LESS_THAN_OR_EQUAL_TO,
       },
       {
         label: 'Between',
@@ -241,7 +241,7 @@ export const ModifierPage = fp.flow(
 
     const addEncounters = () => {
       return ![
-        Domain.PHYSICALMEASUREMENT,
+        Domain.PHYSICAL_MEASUREMENT,
         Domain.SURVEY,
         Domain.VISIT,
       ].includes(cohortContext.domain);
@@ -256,13 +256,16 @@ export const ModifierPage = fp.flow(
           const values = existing.operands.filter((val) => !!val);
           formState[index] = {
             ...mod,
-            operator: [ModifierType.CATI, ModifierType.ENCOUNTERS].includes(
-              mod.name
-            )
+            operator: (
+              [
+                ModifierType.CATI,
+                ModifierType.ENCOUNTERS,
+              ] as Array<ModifierType>
+            ).includes(mod.name)
               ? +existing.operands[0]
               : existing.operator,
             values:
-              mod.name === ModifierType.EVENTDATE
+              (mod.name as ModifierType) === ModifierType.EVENT_DATE
                 ? values.map((val) => new Date(val + 'T08:00:00'))
                 : values,
           };
@@ -275,7 +278,7 @@ export const ModifierPage = fp.flow(
     const initModifiersForm = async () => {
       if (cohortContext.domain !== Domain.SURVEY) {
         formState.push({
-          name: ModifierType.NUMOFOCCURRENCES,
+          name: ModifierType.NUM_OF_OCCURRENCES,
           label: 'Number Of Occurrence Dates',
           type: 'number',
           operator: undefined,
@@ -287,7 +290,7 @@ export const ModifierPage = fp.flow(
             },
             {
               label: 'N or More',
-              value: Operator.GREATERTHANOREQUALTO,
+              value: Operator.GREATER_THAN_OR_EQUAL_TO,
             },
           ],
         });
@@ -323,7 +326,7 @@ export const ModifierPage = fp.flow(
       }
       if (serverConfigStore.get().config.enableEventDateModifier) {
         formState.push({
-          name: ModifierType.EVENTDATE,
+          name: ModifierType.EVENT_DATE,
           label: 'Event Date',
           type: 'date',
           operator: undefined,
@@ -335,11 +338,11 @@ export const ModifierPage = fp.flow(
             },
             {
               label: 'Is On or Before',
-              value: Operator.LESSTHANOREQUALTO,
+              value: Operator.LESS_THAN_OR_EQUAL_TO,
             },
             {
               label: 'Is On or After',
-              value: Operator.GREATERTHANOREQUALTO,
+              value: Operator.GREATER_THAN_OR_EQUAL_TO,
             },
             {
               label: 'Is Between',
@@ -399,7 +402,11 @@ export const ModifierPage = fp.flow(
       let initialState = true;
       let untouched = false;
       const errors = formState.reduce((acc, item) => {
-        if (![ModifierType.CATI, ModifierType.ENCOUNTERS].includes(item.name)) {
+        if (
+          !(
+            [ModifierType.CATI, ModifierType.ENCOUNTERS] as Array<ModifierType>
+          ).includes(item.name)
+        ) {
           item.values.forEach((val, v) => {
             if (val !== undefined) {
               initialState = false;
@@ -427,7 +434,11 @@ export const ModifierPage = fp.flow(
     const selectChange = (sel: any, index: number) => {
       AnalyticsTracker.CohortBuilder.ModifierDropdown(formState[index].label);
       const { name } = formState[index];
-      if ([ModifierType.CATI, ModifierType.ENCOUNTERS].includes(name)) {
+      if (
+        (
+          [ModifierType.CATI, ModifierType.ENCOUNTERS] as Array<ModifierType>
+        ).includes(name)
+      ) {
         formState[index].values = [sel];
       } else if (!sel) {
         formState[index].values = [undefined, undefined];
@@ -466,7 +477,7 @@ export const ModifierPage = fp.flow(
                 operands: [operator.toString()],
               });
               break;
-            case ModifierType.EVENTDATE:
+            case ModifierType.EVENT_DATE:
               const formatted = values.map((val) =>
                 moment(val, 'YYYY-MM-DD', true).isValid()
                   ? moment(val).format('YYYY-MM-DD')
@@ -626,7 +637,7 @@ export const ModifierPage = fp.flow(
                   style={{ marginTop: '1.125rem' }}
                 >
                   <label style={styles.label}>{label}</label>
-                  {name === ModifierType.EVENTDATE && (
+                  {name === ModifierType.EVENT_DATE && (
                     <TooltipTrigger content={<div>{dateTooltip}</div>}>
                       <ClrIcon
                         style={styles.info}
@@ -646,9 +657,12 @@ export const ModifierPage = fp.flow(
                       itemTemplate={(e) => optionTemplate(e, name)}
                     />
                     {operator &&
-                      ![ModifierType.CATI, ModifierType.ENCOUNTERS].includes(
-                        name
-                      ) && (
+                      !(
+                        [
+                          ModifierType.CATI,
+                          ModifierType.ENCOUNTERS,
+                        ] as Array<ModifierType>
+                      ).includes(name) && (
                         <div style={{ paddingTop: '1.5rem' }}>
                           {renderInput(i, '0', mod.type)}
                           {operator === Operator.BETWEEN && (

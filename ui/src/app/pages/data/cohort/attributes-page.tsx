@@ -267,11 +267,11 @@ const defaultOptions = [
   { label: 'Equals', value: Operator.EQUAL.toString() },
   {
     label: 'Greater Than or Equal To',
-    value: Operator.GREATERTHANOREQUALTO.toString(),
+    value: Operator.GREATER_THAN_OR_EQUAL_TO.toString(),
   },
   {
     label: 'Less Than or Equal To',
-    value: Operator.LESSTHANOREQUALTO.toString(),
+    value: Operator.LESS_THAN_OR_EQUAL_TO.toString(),
   },
   { label: 'Between', value: Operator.BETWEEN.toString() },
 ];
@@ -464,7 +464,7 @@ export const AttributesPage = fp.flow(
   };
 
   const isPhysicalMeasurement = () => {
-    return node.domainId === Domain.PHYSICALMEASUREMENT;
+    return node.domainId === Domain.PHYSICAL_MEASUREMENT;
   };
 
   const hasUnits = () => {
@@ -784,7 +784,11 @@ export const AttributesPage = fp.flow(
       numAttributes
         .filter((at) => at.operator)
         .forEach(({ operator, operands, conceptId }) => {
-          const attr = { name: AttrName.NUM, operator, operands };
+          const attr: { name: AttrName; operator: any; operands: any } = {
+            name: AttrName.NUM,
+            operator,
+            operands,
+          };
           if (subtype === CriteriaSubType.BP) {
             // Property 'conceptId' does not exist on type '{ name: AttrName; operator: any; operands: any; }'..
             // TODO RW-5572 confirm proper behavior and fix
@@ -809,7 +813,7 @@ export const AttributesPage = fp.flow(
         }, []);
         if (isCOPEOrMinuteSurvey && !anyVersion) {
           attrs.push({
-            name: AttrName.SURVEYVERSIONCONCEPTID,
+            name: AttrName.SURVEY_VERSION_CONCEPT_ID,
             operator: Operator.IN,
             operands: catOperands,
           });

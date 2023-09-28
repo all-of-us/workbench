@@ -379,9 +379,9 @@ export const HelpSidebar = fp.flow(
           if (
             newRuntime.runtimeLoaded &&
             newRuntime.workspaceNamespace === this.props.workspace.namespace &&
-            newRuntime.runtime.status === RuntimeStatus.Error &&
+            newRuntime.runtime.status === RuntimeStatus.ERROR &&
             (!oldRuntime.runtime ||
-              oldRuntime.runtime.status !== RuntimeStatus.Error) &&
+              oldRuntime.runtime.status !== RuntimeStatus.ERROR) &&
             newRuntime.runtime.errors
           ) {
             this.setState({
@@ -530,8 +530,8 @@ export const HelpSidebar = fp.flow(
             renderBody: () => (
               <ConfigurationPanel
                 {...{ runtimeConfPanelInitialState }}
-                onClose={() => this.setActiveIcon(null)}
                 appType={UIAppType.JUPYTER}
+                onClose={() => this.setActiveIcon(null)}
               />
             ),
             showFooter: false,
@@ -585,9 +585,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.CROMWELL}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -617,9 +617,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.RSTUDIO}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };
@@ -649,9 +649,9 @@ export const HelpSidebar = fp.flow(
             ),
             renderBody: () => (
               <ConfigurationPanel
+                {...{ gkeAppConfPanelInitialState }}
                 appType={UIAppType.SAS}
                 onClose={() => this.setActiveIcon(null)}
-                gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
               />
             ),
           };

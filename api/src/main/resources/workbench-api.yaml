@@ -4872,6 +4872,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to enable visual data explorer.
+      enableHasEhrData:
+        type: boolean
+        default: false
+        description: Whether to enable has ehr data.
       tanagraBaseUrl:
         type: string
         description: The tanagra base url
@@ -6249,7 +6253,6 @@ definitions:
         type: integer
         format: int64
       username:
-        readOnly: true
         description: 'The username prefix, e.g. "gjordan". Note that this is different
           from the use of "username" elsewhere in the RW codebase, where username represents
           the full GSuite email address.'
@@ -9774,6 +9777,14 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingNewUserSatisfactionSurvey"
+      userGeneralDiscoverySource:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUserGeneralDiscoverySource"
+      userPartnerDiscoverySource:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUserPartnerDiscoverySource"
       workspaceFreeTierUsage:
         type: array
         items:
@@ -10290,6 +10301,34 @@ definitions:
       additionalInfo:
         type: string
         description: Additional information regarding the satisfaction score.
+
+  ReportingUserGeneralDiscoverySource:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      answer:
+        type: string
+        description: Answer for How did you learn about the All of Us Researcher question when signup.
+      otherText:
+        type: string
+        description: User input when choosing Other
+
+  ReportingUserPartnerDiscoverySource:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user who created the survey response.
+      answer:
+        type: string
+        description: Answer for Did you learn about the All of Us Researcher Workbench from any of these program partners.
+      otherText:
+        type: string
+        description: User input when choosing Other
 
   ReportingDataset:
     x-aou-note: |-

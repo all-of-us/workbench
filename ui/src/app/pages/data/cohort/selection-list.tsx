@@ -188,7 +188,7 @@ export class SelectionInfo extends React.Component<
 
   get showType() {
     return ![
-      Domain.PHYSICALMEASUREMENT.toString(),
+      Domain.PHYSICAL_MEASUREMENT.toString(),
       Domain.DRUG.toString(),
       Domain.SURVEY.toString(),
     ].includes(this.props.selection.domainId);
@@ -354,7 +354,7 @@ export const SelectionList = fp.flow(
       return (
         criteria &&
         criteria.length > 0 &&
-        criteria[0].domainId !== Domain.PHYSICALMEASUREMENT.toString() &&
+        criteria[0].domainId !== Domain.PHYSICAL_MEASUREMENT.toString() &&
         criteria[0].domainId !== Domain.PERSON.toString()
       );
     }

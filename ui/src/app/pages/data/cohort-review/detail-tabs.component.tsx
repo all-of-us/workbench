@@ -92,7 +92,7 @@ const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
   displayName: 'Date',
-  filter: FilterColumns.STARTDATETIME,
+  filter: FilterColumns.START_DATETIME,
 };
 const itemTime = {
   name: 'itemTime',
@@ -108,68 +108,68 @@ const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Standard Vocabulary',
-  filter: FilterColumns.STANDARDVOCABULARY,
+  filter: FilterColumns.STANDARD_VOCABULARY,
 };
 const standardName = {
   name: 'standardName',
   displayName: 'Standard Name',
-  filter: FilterColumns.STANDARDNAME,
+  filter: FilterColumns.STANDARD_NAME,
 };
 const standardCode = {
   name: 'standardCode',
   displayName: 'Standard Code',
-  filter: FilterColumns.STANDARDCODE,
+  filter: FilterColumns.STANDARD_CODE,
 };
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Source Vocabulary',
-  filter: FilterColumns.SOURCEVOCABULARY,
+  filter: FilterColumns.SOURCE_VOCABULARY,
 };
 const sourceName = {
   name: 'sourceName',
   displayName: 'Source Name',
-  filter: FilterColumns.SOURCENAME,
+  filter: FilterColumns.SOURCE_NAME,
 };
 const sourceCode = {
   name: 'sourceCode',
   displayName: 'Source Code',
-  filter: FilterColumns.SOURCECODE,
+  filter: FilterColumns.SOURCE_CODE,
 };
 const value = {
   name: 'value',
   displayName: 'Value',
-  filter: FilterColumns.VALUEASNUMBER,
+  filter: FilterColumns.VALUE_AS_NUMBER,
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
   displayName: 'Age At Event',
-  filter: FilterColumns.AGEATEVENT,
+  filter: FilterColumns.AGE_AT_EVENT,
 };
 const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
-  filter: FilterColumns.VISITTYPE,
+  filter: FilterColumns.VISIT_TYPE,
 };
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
-  filter: FilterColumns.NUMMENTIONS,
+  filter: FilterColumns.NUM_MENTIONS,
 };
 const firstMention = {
   name: 'firstMention',
   displayName: 'Date First Mention',
-  filter: FilterColumns.FIRSTMENTION,
+  filter: FilterColumns.FIRST_MENTION,
 };
 const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
-  filter: FilterColumns.LASTMENTION,
+  filter: FilterColumns.LAST_MENTION,
 };
 const survey = {
   name: 'survey',
   displayName: 'Survey Name',
-  filter: FilterColumns.SURVEYNAME,
+  filter: FilterColumns.SURVEY_NAME,
 };
 const question = {
   name: 'question',
@@ -189,7 +189,7 @@ const graph = {
 const tabs = [
   {
     name: 'All Events',
-    domain: Domain.ALLEVENTS,
+    domain: Domain.ALL_EVENTS,
     columns: {
       standard: [
         itemDate,
@@ -305,7 +305,7 @@ const tabs = [
   },
   {
     name: 'Physical Measurements',
-    domain: Domain.PHYSICALMEASUREMENT,
+    domain: Domain.PHYSICAL_MEASUREMENT,
     columns: {
       standard: [
         itemDate,
@@ -462,8 +462,7 @@ export const DetailTabs = fp.flow(
           wsid,
           +crid,
           +pid,
-          domainName,
-          10
+          domainName
         );
         this.setState((prevState) => ({
           chartData: {

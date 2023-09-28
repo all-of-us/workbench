@@ -43,7 +43,7 @@ export async function convertAPIError(e): Promise<ErrorResponse> {
     } = await e.json();
     return { errorClassName, errorCode, errorUniqueId, message, statusCode };
   } catch {
-    return { statusCode: e.status, errorCode: ErrorCode.PARSEERROR };
+    return { statusCode: e.status, errorCode: ErrorCode.PARSE_ERROR };
   }
 }
 
@@ -78,7 +78,7 @@ export async function fetchWithSystemErrorHandler<T>(
           systemErrorStore.next(errorResponse);
           throw e;
         case 403:
-          if (errorResponse.errorCode === ErrorCode.USERDISABLED) {
+          if (errorResponse.errorCode === ErrorCode.USER_DISABLED) {
             systemErrorStore.next(errorResponse);
           }
           throw e;

@@ -120,7 +120,7 @@ const COMPUTE_SUSPENDED_RESPONSE_STUB = () =>
   Promise.reject(
     new Response(
       JSON.stringify({
-        errorCode: ErrorCode.COMPUTESECURITYSUSPENDED,
+        errorCode: ErrorCode.COMPUTE_SECURITY_SUSPENDED,
         parameters: {
           suspendedUntil: new Date('2000-01-01 03:00:00').toISOString(),
         },
@@ -375,7 +375,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display dynamic runtime status icon', async () => {
-    setRuntimeStatus(RuntimeStatus.Running);
+    setRuntimeStatus(RuntimeStatus.RUNNING);
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
@@ -383,7 +383,7 @@ describe('HelpSidebar', () => {
       colors.asyncOperationStatus.running
     );
 
-    act(() => setRuntimeStatus(RuntimeStatus.Deleting));
+    act(() => setRuntimeStatus(RuntimeStatus.DELETING));
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
@@ -394,7 +394,7 @@ describe('HelpSidebar', () => {
     await waitForFakeTimersAndUpdate(wrapper);
     runtimeStatusIcon(wrapper, /* exists */ false);
 
-    act(() => setRuntimeStatus(RuntimeStatus.Creating));
+    act(() => setRuntimeStatus(RuntimeStatus.CREATING));
     await waitForFakeTimersAndUpdate(wrapper);
     expect(runtimeStatusIcon(wrapper).prop('style').color).toEqual(
       colors.asyncOperationStatus.starting
@@ -402,7 +402,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should display "starting" UX during compound runtime op with no runtime', async () => {
-    setRuntimeStatus(RuntimeStatus.Deleting);
+    setRuntimeStatus(RuntimeStatus.DELETING);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {
       aborter: new AbortController(),
     });

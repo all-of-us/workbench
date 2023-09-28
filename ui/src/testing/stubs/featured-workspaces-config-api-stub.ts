@@ -5,15 +5,13 @@ import {
   FeaturedWorkspacesConfigResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 import { WorkspaceStubVariables } from './workspaces';
 
 const phenotypeWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Phenotype Library',
   namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Phenotype Library',
   id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Phenotype Library',
-  category: FeaturedWorkspaceCategory.PHENOTYPELIBRARY,
+  category: FeaturedWorkspaceCategory.PHENOTYPE_LIBRARY,
 };
 
 const tutorialWorkspace = {
@@ -21,16 +19,14 @@ const tutorialWorkspace = {
   namespace:
     WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + ' Tutorial Workspace',
   id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + ' Tutorial Workspace',
-  category: FeaturedWorkspaceCategory.TUTORIALWORKSPACES,
+  category: FeaturedWorkspaceCategory.TUTORIAL_WORKSPACES,
 };
 
 export class FeaturedWorkspacesConfigApiStub extends FeaturedWorkspacesConfigApi {
   featuredWorkspacesList: FeaturedWorkspace[];
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.featuredWorkspacesList = [phenotypeWorkspace, tutorialWorkspace];
   }
 

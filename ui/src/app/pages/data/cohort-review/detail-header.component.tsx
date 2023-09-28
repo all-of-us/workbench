@@ -325,7 +325,7 @@ export const DetailHeader = fp.flow(
         const request = {
           page: left ? page - 1 : page + 1,
           pageSize: pageSize,
-          sortOrder: SortOrder.Asc,
+          sortOrder: SortOrder.ASC,
           filters: { items: this.getRequestFilters() },
         } as PageFilterRequest;
         const getCohortReview = cohortReviewApi().getParticipantCohortStatuses(

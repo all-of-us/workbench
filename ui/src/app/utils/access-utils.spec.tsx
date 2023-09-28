@@ -42,7 +42,7 @@ import {
 import { AccessTierShortNames } from './access-tiers';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
-const arbitraryModuleName = AccessModule.PUBLICATIONCONFIRMATION;
+const arbitraryModuleName = AccessModule.PUBLICATION_CONFIRMATION;
 
 describe('maybeDaysRemaining', () => {
   beforeEach(() => {
@@ -65,7 +65,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.RASLINKLOGINGOV,
+            moduleName: AccessModule.RAS_LINK_LOGIN_GOV,
             expirationEpochMillis: undefined,
           },
         ],
@@ -81,7 +81,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: undefined,
           },
         ],
@@ -97,7 +97,7 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1) +
               ONE_MINUTE_IN_MILLIS,
@@ -118,11 +118,11 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: nowPlusDays(soonDays) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             expirationEpochMillis:
               nowPlusDays(aBitLater) + ONE_MINUTE_IN_MILLIS,
           },
@@ -140,11 +140,11 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis: nowPlusDays(30) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.DATAUSERCODEOFCONDUCT,
+            moduleName: AccessModule.DATA_USER_CODE_OF_CONDUCT,
             expirationEpochMillis: nowPlusDays(31) + ONE_MINUTE_IN_MILLIS,
           },
         ],
@@ -164,12 +164,12 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -191,12 +191,12 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -220,12 +220,12 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpected) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpected) + ONE_MINUTE_IN_MILLIS,
           },
@@ -249,12 +249,12 @@ describe('maybeDaysRemaining', () => {
       accessModules: {
         modules: [
           {
-            moduleName: AccessModule.COMPLIANCETRAINING,
+            moduleName: AccessModule.COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(rtExpires) + ONE_MINUTE_IN_MILLIS,
           },
           {
-            moduleName: AccessModule.CTCOMPLIANCETRAINING,
+            moduleName: AccessModule.CT_COMPLIANCE_TRAINING,
             expirationEpochMillis:
               nowPlusDays(ctExpires) + ONE_MINUTE_IN_MILLIS,
           },
@@ -503,7 +503,7 @@ describe('useIsUserDisabled', () => {
       Promise.reject(
         new Response(
           JSON.stringify({
-            errorCode: ErrorCode.USERDISABLED,
+            errorCode: ErrorCode.USER_DISABLED,
           })
         )
       )
@@ -605,7 +605,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(Date.now());
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(true);
   });
 
@@ -622,7 +622,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(true);
   });
 
@@ -639,7 +639,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(expirationDate, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 
@@ -656,7 +656,7 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeLessThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+      isExpiringOrExpired(expirationDate, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toEqual(true);
   });
 
@@ -671,19 +671,19 @@ describe('isExpiringOrExpired', () => {
     expect(expirationDate).toBeGreaterThan(endOfLookback);
 
     expect(
-      isExpiringOrExpired(expirationDate, AccessModule.CTCOMPLIANCETRAINING)
+      isExpiringOrExpired(expirationDate, AccessModule.CT_COMPLIANCE_TRAINING)
     ).toEqual(false);
   });
 
   it('should return isExpiringOrExpired=false if a module has a null expiration', () => {
     expect(
-      isExpiringOrExpired(null, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(null, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 
   it('should return isExpiringOrExpired=false if a module has an undefined expiration', () => {
     expect(
-      isExpiringOrExpired(undefined, AccessModule.PUBLICATIONCONFIRMATION)
+      isExpiringOrExpired(undefined, AccessModule.PUBLICATION_CONFIRMATION)
     ).toEqual(false);
   });
 });

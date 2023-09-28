@@ -43,8 +43,8 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
       otherPurpose: false,
       otherPurposeDetails: '',
       populationDetails: [
-        SpecificPopulationEnum.AGEOLDERMORETHAN75,
-        SpecificPopulationEnum.RACENHPI,
+        SpecificPopulationEnum.AGE_OLDER_MORE_THAN_75,
+        SpecificPopulationEnum.RACE_NHPI,
       ],
       populationHealth: true,
       researchOutcomeList: [],

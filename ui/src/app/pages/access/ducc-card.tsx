@@ -10,7 +10,7 @@ import { styles } from './data-access-requirements';
 import { ModulesForAnnualRenewal } from './modules-for-annual-renewal';
 import { ModulesForInitialRegistration } from './modules-for-initial-registration';
 
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+const duccModule = AccessModule.DATA_USER_CODE_OF_CONDUCT;
 export const DuccCard = (props: {
   profile: Profile;
   focusedModule: AccessModule;

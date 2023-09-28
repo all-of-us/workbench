@@ -356,8 +356,8 @@ export const ListSearch = fp.flow(
         removeDrugBrand: false,
         searching: false,
         searchSource: [
-          Domain.PHYSICALMEASUREMENT,
-          Domain.PHYSICALMEASUREMENTCSS,
+          Domain.PHYSICAL_MEASUREMENT,
+          Domain.PHYSICAL_MEASUREMENT_CSS,
         ].includes(props.searchContext.domain),
         searchTerms: props.searchTerms,
         standardOnly: false,
@@ -717,7 +717,7 @@ export const ListSearch = fp.flow(
     get criteriaLookupNeeded() {
       return (
         this.props.searchContext.source === 'cohort' &&
-        ![Domain.PHYSICALMEASUREMENT, Domain.VISIT].includes(
+        ![Domain.PHYSICAL_MEASUREMENT, Domain.VISIT].includes(
           this.props.searchContext.domain
         ) &&
         currentCohortCriteriaStore.getValue()?.some((crit) => !crit.id)

@@ -80,7 +80,7 @@ export const Module = (props: {
       <FlexRow style={styles.moduleCTA}>
         {cond(
           [
-            (active || moduleName === AccessModule.ERACOMMONS) &&
+            (active || moduleName === AccessModule.ERA_COMMONS) &&
               showRefresh &&
               !!refreshAction,
             () => <Refresh {...{ refreshAction, showSpinner }} />,

@@ -3,7 +3,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Dropdown } from 'primereact/dropdown';
 import validate from 'validate.js';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
@@ -26,6 +26,7 @@ import { BulletAlignedUnorderedList } from 'app/components/lists';
 import { withErrorModal, withSuccessModal } from 'app/components/modals';
 import { TooltipTrigger } from 'app/components/popups';
 import { SpinnerOverlay } from 'app/components/spinners';
+import { SUPPORT_EMAIL } from 'app/components/support';
 import {
   withProfileErrorModal,
   WithProfileErrorModalProps,
@@ -251,7 +252,7 @@ export const ProfileComponent = fp.flow(
       } = currentProfile;
 
       const profileConfirmationAccessModule = fp.find(
-        { moduleName: AccessModule.PROFILECONFIRMATION },
+        { moduleName: AccessModule.PROFILE_CONFIRMATION },
         profile.accessModules.modules
       );
       const hasExpired =
@@ -552,9 +553,7 @@ export const ProfileComponent = fp.flow(
                           <label>Country</label>
                           <TooltipTrigger
                             side={'right'}
-                            content={
-                              'If you need to update your country, email drcsupport@researchallofus.org with your updated country.'
-                            }
+                            content={`If you need to update your country, email ${SUPPORT_EMAIL} with your updated country.`}
                           >
                             <FontAwesomeIcon icon={faCircleInfo} />
                           </TooltipTrigger>

@@ -105,7 +105,7 @@ describe('withNewUserSatisfactionSurveyModal', () => {
     const surveyData = createSurveyData();
     const validationMock = jest
       .spyOn(surveysApi(), 'createNewUserSatisfactionSurveyWithOneTimeCode')
-      .mockImplementationOnce(() => Promise.resolve(new Response()));
+      .mockImplementationOnce(() => Promise.resolve(undefined));
 
     const wrapper = await createWrapperWithValidCode(code);
     await wrapper

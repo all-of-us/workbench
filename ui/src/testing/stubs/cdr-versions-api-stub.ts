@@ -9,8 +9,6 @@ import {
   AccessTierShortNames,
 } from 'app/utils/access-tiers';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_CDR_VERSION_ID = 'fakeCdrVersion';
@@ -86,9 +84,7 @@ export const controlledCdrVersion = controlledCdrVersionTier.versions[0];
 
 export class CdrVersionsApiStub extends CdrVersionsApi {
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
   }
 
   getCdrVersionsByTier(): Promise<CdrVersionTiersResponse> {

@@ -37,7 +37,7 @@ export const ModulesForInitialRegistration = (props: InitialCardProps) => {
           active={activeModules.includes(moduleName)}
           style={{
             marginTop:
-              index > 0 || moduleName === AccessModule.CTCOMPLIANCETRAINING
+              index > 0 || moduleName === AccessModule.CT_COMPLIANCE_TRAINING
                 ? '1.9em'
                 : '0em',
           }}

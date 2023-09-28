@@ -415,7 +415,7 @@ export const diskConfigPricePerMonth = ({
 }: Partial<DiskConfig>) => {
   return (
     size *
-    (detachableType === DiskType.Ssd ? ssdPricePerMonth : diskPricePerMonth)
+    (detachableType === DiskType.SSD ? ssdPricePerMonth : diskPricePerMonth)
   );
 };
 

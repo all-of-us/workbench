@@ -11,8 +11,6 @@ import {
   ReadOnlyNotebookResponse,
 } from 'generated/fetch';
 
-import { stubNotImplementedError } from 'testing/stubs/stub-utils';
-
 export const stubDataSet = (): DataSet => ({
   id: 1,
   name: 'Stub Dataset',
@@ -36,9 +34,7 @@ export class DataSetApiStub extends DataSetApi {
   }
 
   constructor() {
-    super(undefined, undefined, (..._: any[]) => {
-      throw stubNotImplementedError;
-    });
+    super(undefined);
     this.extractionJobs = [];
   }
 

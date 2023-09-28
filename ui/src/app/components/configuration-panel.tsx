@@ -78,9 +78,8 @@ export const ConfigurationPanel = fp.flow(
             () => (
               <div>
                 <RuntimeConfigurationPanel
-                  {...{ onClose, creatorFreeCreditsRemaining }}
+                  {...{ onClose, profileState, creatorFreeCreditsRemaining }}
                   initialPanelContent={runtimeConfPanelInitialState}
-                  profileState={profileState}
                 />
               </div>
             ),
@@ -88,14 +87,14 @@ export const ConfigurationPanel = fp.flow(
           () => (
             <GKEAppConfigurationPanel
               {...{
-                appType: toAppType[appType],
                 onClose,
                 creatorFreeCreditsRemaining,
                 workspace,
                 profileState,
-                workspaceNamespace: workspace.namespace,
-                initialPanelContent: gkeAppConfPanelInitialState,
               }}
+              appType={toAppType[appType]}
+              workspaceNamespace={workspace.namespace}
+              initialPanelContent={gkeAppConfPanelInitialState}
             />
           )
         )}

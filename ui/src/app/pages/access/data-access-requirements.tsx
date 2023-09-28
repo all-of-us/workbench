@@ -302,18 +302,18 @@ const RenewalRequirementsText = () => (
 
 // in display order
 export const initialRtModules = [
-  AccessModule.TWOFACTORAUTH,
+  AccessModule.TWO_FACTOR_AUTH,
   AccessModule.IDENTITY,
-  AccessModule.ERACOMMONS,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.ERA_COMMONS,
+  AccessModule.COMPLIANCE_TRAINING,
 ];
 export const renewalRtModules = [
-  AccessModule.PROFILECONFIRMATION,
-  AccessModule.PUBLICATIONCONFIRMATION,
-  AccessModule.COMPLIANCETRAINING,
+  AccessModule.PROFILE_CONFIRMATION,
+  AccessModule.PUBLICATION_CONFIRMATION,
+  AccessModule.COMPLIANCE_TRAINING,
 ];
-const ctModule = AccessModule.CTCOMPLIANCETRAINING;
-const duccModule = AccessModule.DATAUSERCODEOFCONDUCT;
+const ctModule = AccessModule.CT_COMPLIANCE_TRAINING;
+const duccModule = AccessModule.DATA_USER_CODE_OF_CONDUCT;
 
 // in display order
 // exported for test
@@ -400,7 +400,7 @@ const isEraCommonsModuleRequiredByInstitution = (
   // Remove the eRA Commons module when the flag to enable RAS is set and the user's
   // institution does not require eRA Commons for RT.
 
-  if (moduleNames !== AccessModule.ERACOMMONS) {
+  if (moduleNames !== AccessModule.ERA_COMMONS) {
     return true;
   }
   const { enableRasLoginGovLinking } = serverConfigStore.get().config;

@@ -70,7 +70,7 @@ describe('WorkspaceShare', () => {
   const lunaRole: UserRole = {
     ...luna,
     email: luna.email,
-    role: WorkspaceAccessLevel.NOACCESS,
+    role: WorkspaceAccessLevel.NO_ACCESS,
   };
 
   const tomRiddleDiary = {
@@ -269,7 +269,7 @@ describe('WorkspaceShare', () => {
         workspaceEtag: tomRiddleDiary.etag,
         items: [
           { ...lunaRole, role: WorkspaceAccessLevel.READER },
-          { ...ronRole, role: WorkspaceAccessLevel.NOACCESS },
+          { ...ronRole, role: WorkspaceAccessLevel.NO_ACCESS },
           { ...hermioneRole, role: WorkspaceAccessLevel.OWNER },
         ],
       }
