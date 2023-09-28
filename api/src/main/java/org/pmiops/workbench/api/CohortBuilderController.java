@@ -159,8 +159,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     if (workbenchConfigProvider.get().featureFlags.enableHasEhrData) {
-      return ResponseEntity.ok(new CriteriaMenuListResponse()
-          .items(cohortBuilderService.findCriteriaMenuByParentId(parentId)));
+      return ResponseEntity.ok(
+          new CriteriaMenuListResponse()
+              .items(cohortBuilderService.findCriteriaMenuByParentId(parentId)));
     } else {
       return ResponseEntity.ok(
           new CriteriaMenuListResponse()
