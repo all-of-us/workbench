@@ -353,6 +353,8 @@ public final class SearchGroupItemQueryBuilder {
             + String.format(DEMO_IN_SQL, DEMO_COLUMN_SQL_MAP.get(criteriaType), namedParameter);
       case DECEASED:
         return DEMO_BASE + DEC_SQL;
+      case HAS_EHR_DATA:
+        return String.format(HAS_DATA_SQL, "has_ehr_data");
       default:
         throw new BadRequestException(
             "Search unsupported for demographics type " + param.getType());
