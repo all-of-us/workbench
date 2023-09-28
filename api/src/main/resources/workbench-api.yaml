@@ -4863,7 +4863,7 @@ definitions:
       enableRStudioGKEApp:
         type: boolean
         default: false
-        description: Whether users are able to use the RStudio GKE app./criteria
+        description: Whether users are able to use the RStudio GKE app.
       enableSasGKEApp:
         type: boolean
         default: false

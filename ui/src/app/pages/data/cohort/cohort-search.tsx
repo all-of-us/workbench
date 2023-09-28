@@ -360,7 +360,7 @@ export const CohortSearch = fp.flow(
         parentId: null,
         parameterId: '',
         type: CriteriaType.HAS_EHR_DATA.toString(),
-        name: 'Deceased',
+        name: 'Has EHR Data',
         group: false,
         domainId: Domain.PERSON.toString(),
         hasAttributes: false,
