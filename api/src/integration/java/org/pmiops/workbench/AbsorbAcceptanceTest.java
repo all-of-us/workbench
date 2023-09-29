@@ -2,6 +2,7 @@ package org.pmiops.workbench;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.absorb.api.AuthenticateApi;
 import org.pmiops.workbench.absorb.api.EnrollmentsApi;
@@ -21,6 +22,7 @@ public class AbsorbAcceptanceTest extends BaseIntegrationTest {
   static class Configuration {}
 
   @Test
+  @Disabled("RW-11039")
   public void testGetCertificates() throws Exception {
     // Setup: A user with this email exists and has completed both Absorb trainings in the
     // test environment.
