@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import * as React from 'react';
 import * as fp from 'lodash/fp';
 
@@ -385,4 +387,17 @@ it('should reset "other" discovery source details to null if "other" is unselect
 
   expect(profile.generalDiscoverySourceOtherText).toBeNull();
   expect(profile.partnerDiscoverySourceOtherText).toBeNull();
+});
+
+it('Should show submit button if country is not US', async () => {
+  const onSubmit = jest.fn();
+  const { user } = setup({
+    ...createProps(),
+    onSubmit,
+  });
+  await user.click(getCountryDropdownField());
+  await user.paste(Country.AL);
+  await user.keyboard('{enter}');
+  expect(screen.getByText('Albania')).toBeInTheDocument();
+  expect(screen.getByText('Submit')).toBeInTheDocument();
 });
