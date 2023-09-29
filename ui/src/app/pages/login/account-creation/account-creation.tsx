@@ -39,7 +39,10 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { isBlank, reactStyles } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { STATE_CODE_MAPPING } from 'app/utils/constants';
+import {
+  INTL_USER_SIGN_IN_CHECK,
+  STATE_CODE_MAPPING,
+} from 'app/utils/constants';
 import { Country } from 'app/utils/constants';
 import { serverConfigStore } from 'app/utils/stores';
 import { NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION } from 'app/utils/strings';
@@ -128,8 +131,7 @@ export interface AccountCreationProps {
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
   captureCaptchaResponse: (token) => void;
-  // // ToDo change this
-  captchaRef: any;
+  captchaRef: ReCAPTCHA;
   onSubmit: (updatedProfile) => void;
 }
 
@@ -422,6 +424,13 @@ export class AccountCreation extends React.Component<
 
     return fp.isEmpty(errors) ? undefined : errors;
   }
+
+  isInternational = () => {
+    return (
+      new Date() >= INTL_USER_SIGN_IN_CHECK &&
+      this.state.countryDropdownSelection !== Country.US
+    );
+  };
 
   render() {
     // const { enableCaptcha } = serverConfigStore.get().config;
@@ -1031,7 +1040,7 @@ export class AccountCreation extends React.Component<
             </Section>
 
             {!!this.state.countryDropdownSelection &&
-              this.state.countryDropdownSelection !== Country.US &&
+              this.isInternational() &&
               enableCaptcha && (
                 <Section>
                   <div style={{ paddingBottom: '1.5rem' }}>
@@ -1068,19 +1077,19 @@ export class AccountCreation extends React.Component<
                       </BulletAlignedUnorderedList>
                     </React.Fragment>
                   ) : (
-                    this.state.countryDropdownSelection !== Country.US &&
+                    this.isInternational() &&
                     !this.state.captcha && <div>Please fill captcha</div>
                   )
                 }
                 disabled={
                   !errors &&
                   this.state.countryDropdownSelection &&
-                  this.state.countryDropdownSelection !== Country.US &&
+                  this.isInternational() &&
                   this.state.captcha
                 }
               >
                 {!!this.state.countryDropdownSelection &&
-                this.state.countryDropdownSelection !== Country.US ? (
+                this.isInternational() ? (
                   <Button
                     aria-label='Submit'
                     disabled={

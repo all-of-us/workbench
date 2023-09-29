@@ -27,7 +27,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
-import { Country } from 'app/utils/constants';
+import { Country, INTL_USER_SIGN_IN_CHECK } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
@@ -275,6 +275,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
     if (
       steps[index] === SignInStep.ACCOUNT_DETAILS &&
+      new Date() >= INTL_USER_SIGN_IN_CHECK &&
       profile.address.country !== Country.US
     ) {
       return SignInStep.SUCCESS_PAGE;
