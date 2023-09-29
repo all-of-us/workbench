@@ -1,5 +1,6 @@
 import { Disk, Runtime, RuntimeStatus } from 'generated/fetch';
 
+import { cond } from '@terra-ui-packages/core-utils';
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
 import { isAbortError, reportError } from 'app/utils/errors';
@@ -70,27 +71,27 @@ export class LeoRuntimeInitializationAbortedError extends LeoRuntimeInitializati
   }
 }
 
-export const throwIfTargetRuntimeNotFound = (
-  targetRuntime: Runtime,
+export const throwRuntimeNotFound = (
   currentRuntime: Runtime,
   gcePersistentDisk: Disk
 ) => {
-  if (!targetRuntime) {
-    // Automatic lazy creation is not supported; the caller must specify a target.
-    let defaultRuntime = runtimePresets.generalAnalysis.runtimeTemplate;
-    if (currentRuntime) {
-      defaultRuntime =
-        currentRuntime.status === RuntimeStatus.DELETED
-          ? applyPresetOverride(
-              // The attached disk information is lost for deleted runtimes. In any case,
-              // by default we want to offer that the user reattach their existing disk,
-              // if any and if the configuration allows it.
-              maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
-            )
-          : applyPresetOverride(currentRuntime);
-    }
-    throw new InitialRuntimeNotFoundError(defaultRuntime);
-  }
+  const defaultRuntime = cond<Runtime>(
+    [!currentRuntime, () => runtimePresets.generalAnalysis.runtimeTemplate],
+    [
+      // cond gotcha: need to account for undefined currentRuntime even though we know it's defined here
+      currentRuntime?.status === RuntimeStatus.DELETED,
+      () =>
+        applyPresetOverride(
+          // The attached disk information is lost for deleted runtimes. In any case,
+          // by default we want to offer that the user reattach their existing disk,
+          // if any and if the configuration allows it.
+          maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
+        ),
+    ],
+    () => applyPresetOverride(currentRuntime)
+  );
+
+  throw new InitialRuntimeNotFoundError(defaultRuntime);
 };
 
 export interface LeoRuntimeInitializerOptions {
@@ -229,11 +230,9 @@ export class LeoRuntimeInitializer {
   private async createRuntime(): Promise<void> {
     const { gcePersistentDisk } = runtimeDiskStore.get();
 
-    throwIfTargetRuntimeNotFound(
-      this.targetRuntime,
-      this.currentRuntime,
-      gcePersistentDisk
-    );
+    if (!this.targetRuntime) {
+      throwRuntimeNotFound(this.currentRuntime, gcePersistentDisk);
+    }
 
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(

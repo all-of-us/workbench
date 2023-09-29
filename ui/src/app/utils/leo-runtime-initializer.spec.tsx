@@ -19,7 +19,7 @@ import {
   InitialRuntimeNotFoundError,
   LeoRuntimeInitializer,
   LeoRuntimeInitializerOptions,
-  throwIfTargetRuntimeNotFound,
+  throwRuntimeNotFound,
 } from 'app/utils/leo-runtime-initializer';
 import { serverConfigStore } from 'app/utils/stores';
 import { RuntimesApi as LeoRuntimesApi } from 'notebooks-generated/fetch';
@@ -374,32 +374,14 @@ describe('RuntimeInitializer', () => {
 });
 
 // intended to document the current behavior of this peculiar method
-describe(throwIfTargetRuntimeNotFound.name, () => {
-  it('should not throw if targetRuntime exists', () => {
-    const targetRuntime = defaultRuntimeWithPd();
-    const currentRuntime = undefined;
-    const gcePersistentDisk = undefined;
-    expect(() =>
-      throwIfTargetRuntimeNotFound(
-        targetRuntime,
-        currentRuntime,
-        gcePersistentDisk
-      )
-    ).not.toThrow();
-  });
-
+describe(throwRuntimeNotFound.name, () => {
   it('should throw the preset default if targetRuntime and currentRuntime both do not exist', () => {
-    const targetRuntime = undefined;
     const currentRuntime = undefined;
     const gcePersistentDisk = undefined;
 
     try {
       const callSucceeded = true;
-      throwIfTargetRuntimeNotFound(
-        targetRuntime,
-        currentRuntime,
-        gcePersistentDisk
-      );
+      throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
       expect(callSucceeded).toBeFalsy();
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
@@ -410,7 +392,6 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
   });
 
   it('should apply a preset override if targetRuntime does not exist but currentRuntime exists and is not DELETED', () => {
-    const targetRuntime = undefined;
     const currentRuntime = {
       ...defaultRuntimeWithPd(),
       gceWithPdConfig: {
@@ -446,11 +427,7 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
 
     try {
       const callSucceeded = true;
-      throwIfTargetRuntimeNotFound(
-        targetRuntime,
-        currentRuntime,
-        gcePersistentDisk
-      );
+      throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
       expect(callSucceeded).toBeFalsy();
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
@@ -473,7 +450,6 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
     'should apply a preset override and connect an existing disk when: ' +
       'targetRuntime does not exist, currentRuntime exists, currentRuntime is DELETED',
     () => {
-      const targetRuntime = undefined;
       const currentRuntime = {
         ...defaultRuntime(),
         status: RuntimeStatus.DELETED,
@@ -505,11 +481,7 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
 
       try {
         const callSucceeded = true;
-        throwIfTargetRuntimeNotFound(
-          targetRuntime,
-          currentRuntime,
-          gcePersistentDisk
-        );
+        throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
         expect(callSucceeded).toBeFalsy();
       } catch (e) {
         expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
@@ -538,7 +510,6 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
     'should apply a preset override with an undefined persistent disk name when: ' +
       'targetRuntime does not exist, currentRuntime exists, currentRuntime is DELETED, gcePersistentDisk does not exist',
     () => {
-      const targetRuntime = undefined;
       const currentRuntime = {
         ...defaultRuntime(),
         status: RuntimeStatus.DELETED,
@@ -570,11 +541,7 @@ describe(throwIfTargetRuntimeNotFound.name, () => {
 
       try {
         const callSucceeded = true;
-        throwIfTargetRuntimeNotFound(
-          targetRuntime,
-          currentRuntime,
-          gcePersistentDisk
-        );
+        throwRuntimeNotFound(currentRuntime, gcePersistentDisk);
         expect(callSucceeded).toBeFalsy();
       } catch (e) {
         expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
