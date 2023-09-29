@@ -13,29 +13,27 @@ public class InterceptorUtils {
   private InterceptorUtils() {}
 
   public static Method getControllerMethod(HandlerMethod handlerMethod) {
-    // There's no concise way to find out what class implements the delegate interface, so instead
-    // depend on naming conventions. Essentially, this removes "Api" from the class name.
-    // If this becomes a bottleneck, consider caching the class mapping, or copying annotations
-    // from our implementation to the Swagger wrapper at startup (locally it takes <1ms).
-    Method apiControllerMethod = handlerMethod.getMethod();
-    String apiControllerName = apiControllerMethod.getDeclaringClass().getName();
+    String apiControllerClass = handlerMethod.getBeanType().getName();
+    String handlerMethodName = handlerMethod.getMethod().getName();
+    Class<?>[] handlerParameterTypes = handlerMethod.getMethod().getParameterTypes();
 
     // The matcher assumes that all Controllers are within the same package as the generated
     // ApiController (api package)
+    // There's no concise way to find out what class implements the delegate interface, so instead
+    // depend on naming conventions. This removes "Api" from the class name when the classname includes the word Controller.
     final String controllerName =
-        API_CONTROLLER_PATTERN.matcher(apiControllerName).replaceAll("$1$2");
+        API_CONTROLLER_PATTERN.matcher(apiControllerClass).replaceAll("$1$2");
 
     Class<?> controllerClass;
     try {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(
-          "Missing " + controllerName + " by name derived from " + apiControllerName + ".", e);
+          "Missing " + controllerName + " by name derived from " + apiControllerClass + ".", e);
     }
 
     try {
-      return controllerClass.getMethod(
-          apiControllerMethod.getName(), apiControllerMethod.getParameterTypes());
+      return controllerClass.getMethod(handlerMethodName, handlerParameterTypes);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
