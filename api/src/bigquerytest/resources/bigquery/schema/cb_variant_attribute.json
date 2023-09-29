@@ -32,6 +32,11 @@
   {
     "type": "string",
     "name": "clinical_significance",
+    "mode": "REPEATED"
+  },
+  {
+    "type": "string",
+    "name": "clinical_significance_string",
     "mode": "nullable"
   },
   {
@@ -58,6 +63,11 @@
     "type": "string",
     "name": "alt_allele",
     "mode": "nullable"
+  },
+  {
+    "mode": "REPEATED",
+    "name": "consequence",
+    "type": "string"
   },
   {
     "mode": "NULLABLE",
