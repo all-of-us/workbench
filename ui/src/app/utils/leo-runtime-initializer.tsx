@@ -1,4 +1,4 @@
-import { Runtime, RuntimeStatus } from 'generated/fetch';
+import { Disk, Runtime, RuntimeStatus } from 'generated/fetch';
 
 import { leoRuntimesApi } from 'app/services/notebooks-swagger-fetch-clients';
 import { runtimeApi } from 'app/services/swagger-fetch-clients';
@@ -69,6 +69,29 @@ export class LeoRuntimeInitializationAbortedError extends LeoRuntimeInitializati
     this.name = 'LeoRuntimeInitializationAbortedError';
   }
 }
+
+export const throwIfTargetRuntimeNotFound = (
+  targetRuntime: Runtime,
+  currentRuntime: Runtime,
+  gcePersistentDisk: Disk
+) => {
+  if (!targetRuntime) {
+    // Automatic lazy creation is not supported; the caller must specify a target.
+    let defaultRuntime = runtimePresets.generalAnalysis.runtimeTemplate;
+    if (currentRuntime) {
+      defaultRuntime =
+        currentRuntime.status === RuntimeStatus.DELETED
+          ? applyPresetOverride(
+              // The attached disk information is lost for deleted runtimes. In any case,
+              // by default we want to offer that the user reattach their existing disk,
+              // if any and if the configuration allows it.
+              maybeWithExistingDisk(currentRuntime, gcePersistentDisk)
+            )
+          : applyPresetOverride(currentRuntime);
+    }
+    throw new InitialRuntimeNotFoundError(defaultRuntime);
+  }
+};
 
 export interface LeoRuntimeInitializerOptions {
   // Core options. Most callers should provide these.
@@ -206,24 +229,11 @@ export class LeoRuntimeInitializer {
   private async createRuntime(): Promise<void> {
     const { gcePersistentDisk } = runtimeDiskStore.get();
 
-    if (!this.targetRuntime) {
-      // Automatic lazy creation is not supported; the caller must specify a target.
-      let defaultRuntime = {
-        ...runtimePresets.generalAnalysis.runtimeTemplate,
-      };
-      if (this.currentRuntime) {
-        defaultRuntime =
-          this.currentRuntime.status === RuntimeStatus.DELETED
-            ? applyPresetOverride(
-                // The attached disk information is lost for deleted runtimes. In any case,
-                // by default we want to offer that the user reattach their existing disk,
-                // if any and if the configuration allows it.
-                maybeWithExistingDisk(this.currentRuntime, gcePersistentDisk)
-              )
-            : applyPresetOverride(this.currentRuntime);
-      }
-      throw new InitialRuntimeNotFoundError(defaultRuntime);
-    }
+    throwIfTargetRuntimeNotFound(
+      this.targetRuntime,
+      this.currentRuntime,
+      gcePersistentDisk
+    );
 
     if (this.createCount >= this.maxCreateCount) {
       throw new ExceededActionCountError(

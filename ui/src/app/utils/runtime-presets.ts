@@ -70,7 +70,7 @@ export const applyPresetOverride = (runtime) => {
     return {
       ...runtime,
       gceConfig,
-      // restore the original PD name, which will cause a creation request to attach it to the new runtime
+      // restore the original PD name if it exists, which will cause a creation request to attach it to the new runtime
       gceWithPdConfig:
         gceWithPdConfig &&
         fp.set(
