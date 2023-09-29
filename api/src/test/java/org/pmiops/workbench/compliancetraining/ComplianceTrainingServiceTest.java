@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -366,6 +367,52 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatus();
     verifyNoInteractions(mockMoodleService);
+  }
+
+  @Test
+  public void testUseAbsorb_TrueWhenFeatureFlagEnabledAndMoodleNeverUsed() {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+    assertThat(complianceTrainingService.useAbsorb()).isTrue();
+  }
+
+  @Test
+  public void testUseAbsorb_TrueWhenFeatureFlagEnabledAndAbsorbPreviouslyUsed() {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+    var uam =
+        userAccessModuleDao.save(
+            new DbUserAccessModule()
+                .setAccessModule(
+                    accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get())
+                .setUser(user));
+    complianceTrainingVerificationDao.save(
+        new DbComplianceTrainingVerification()
+            .setUserAccessModule(uam)
+            .setComplianceTrainingVerificationSystem(
+                DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB));
+    assertThat(complianceTrainingService.useAbsorb()).isTrue();
+  }
+
+  @Test
+  public void testUseAbsorb_FalseWhenFeatureFlagDisabled() {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+    assertThat(complianceTrainingService.useAbsorb()).isFalse();
+  }
+
+  @Test
+  public void testUseAbsorb_FalseWhenFeatureFlagEnabledAndMoodlePreviouslyUsed() {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+    var uam =
+        userAccessModuleDao.save(
+            new DbUserAccessModule()
+                .setAccessModule(
+                    accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get())
+                .setUser(user));
+    complianceTrainingVerificationDao.save(
+        new DbComplianceTrainingVerification()
+            .setUserAccessModule(uam)
+            .setComplianceTrainingVerificationSystem(
+                DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
+    assertThat(complianceTrainingService.useAbsorb()).isFalse();
   }
 
   private void assertModuleCompletionEqual(DbAccessModuleName moduleName, Timestamp timestamp) {

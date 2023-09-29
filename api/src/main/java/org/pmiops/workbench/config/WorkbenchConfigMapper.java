@@ -53,6 +53,8 @@ public interface WorkbenchConfigMapper {
       source = "config.billing.defaultFreeCreditsDollarLimit")
   @Mapping(target = "enableComplianceTraining", source = "config.access.enableComplianceTraining")
   @Mapping(target = "complianceTrainingHost", source = "config.moodle.host")
+  @Mapping(target = "absorbSamlIdentityProviderId", source = "config.absorb.samlIdentityProviderId")
+  @Mapping(target = "absorbSamlServiceProviderId", source = "config.absorb.samlServiceProviderId")
   @Mapping(
       target = "complianceTrainingRenewalLookback",
       source = "config.access.renewal.trainingLookbackPeriod")

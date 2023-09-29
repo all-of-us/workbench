@@ -14,7 +14,9 @@ import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ComplianceTrainingVerificationDao;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
@@ -33,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
   private static final Logger log = Logger.getLogger(ComplianceTrainingServiceImpl.class.getName());
   private final MoodleService moodleService;
+  private final Provider<WorkbenchConfig> configProvider;
+  private final UserAccessModuleDao userAccessModuleDao;
   private final AccessModuleService accessModuleService;
   private final AccessModuleNameMapper accessModuleNameMapper;
   private final AccessSyncService accessSyncService;
@@ -44,6 +48,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   @Autowired
   public ComplianceTrainingServiceImpl(
       MoodleService moodleService,
+      Provider<WorkbenchConfig> configProvider,
+      UserAccessModuleDao userAccessModuleDao,
       AccessModuleService accessModuleService,
       AccessModuleNameMapper accessModuleNameMapper,
       AccessSyncService accessSyncService,
@@ -52,6 +58,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       UserService userService,
       ComplianceTrainingVerificationDao complianceTrainingVerificationDao) {
     this.moodleService = moodleService;
+    this.configProvider = configProvider;
+    this.userAccessModuleDao = userAccessModuleDao;
     this.accessModuleService = accessModuleService;
     this.accessModuleNameMapper = accessModuleNameMapper;
     this.accessSyncService = accessSyncService;
@@ -66,6 +74,24 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     DbUser user = userProvider.get();
     return syncComplianceTrainingStatus(user, Agent.asUser(user));
+  }
+
+  @Override
+  public boolean useAbsorb() {
+    var featureFlagEnabled = configProvider.get().absorb.enabledForNewUsers;
+    var userHasUsedMoodle =
+        userAccessModuleDao.getAllByUser(userProvider.get()).stream()
+            .anyMatch(
+                uam ->
+                    complianceTrainingVerificationDao
+                            .getByUserAccessModule(uam)
+                            .map(
+                                DbComplianceTrainingVerification
+                                    ::getComplianceTrainingVerificationSystem)
+                            .orElse(null)
+                        == DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem
+                            .MOODLE);
+    return featureFlagEnabled && !userHasUsedMoodle;
   }
 
   /**

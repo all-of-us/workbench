@@ -534,6 +534,17 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/account/use-absorb":
+    get:
+      tags:
+        - profile
+      summary: Whether the user should use Absorb for compliance training
+      operationId: useAbsorb
+      responses:
+        200:
+          description: Whether the user should use Absorb for compliance training
+          schema:
+            type: boolean
   "/v1/account/sync-era-commons-status":
     post:
       tags:
@@ -4815,6 +4826,12 @@ definitions:
       complianceTrainingHost:
         type: string
         description: The hostname for constructing the compliance training URL.
+      absorbSamlIdentityProviderId:
+        type: string
+        description: The SAML identity provider ID for Absorb.
+      absorbSamlServiceProviderId:
+        type: string
+        description: The SAML service provider ID for Absorb.
       enableEraCommons:
         type: boolean
         default: false
