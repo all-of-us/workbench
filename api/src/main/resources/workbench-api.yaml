@@ -4284,14 +4284,14 @@ paths:
         - in: body
           name: request
           required: true
-          description: request body for getting VariantFiltersResponse.
+          description: request body for getting VariantFilterResponse.
           schema:
             "$ref": "#/definitions/VariantFilterRequest"
       responses:
         200:
           description: A collection of variants
           schema:
-            "$ref": "#/definitions/VariantFiltersResponse"
+            "$ref": "#/definitions/VariantFilterResponse"
   "/v1/surveys/newUserSatisfactionSurvey":
     post:
       tags:
@@ -9352,10 +9352,8 @@ definitions:
       sortBy:
         type: string
         description: sort column by
-  VariantFiltersResponse:
+  VariantFilterResponse:
     type: object
-    required:
-      - blah
     properties:
       geneList:
         type: array

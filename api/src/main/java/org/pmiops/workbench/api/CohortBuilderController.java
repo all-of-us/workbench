@@ -37,7 +37,7 @@ import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
-import org.pmiops.workbench.model.VariantFiltersResponse;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -240,7 +240,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<VariantFiltersResponse> findVariantFilters(
+  public ResponseEntity<VariantFilterResponse> findVariantFilters(
       String workspaceNamespace, String workspaceId, VariantFilterRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);

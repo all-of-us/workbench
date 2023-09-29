@@ -78,7 +78,7 @@ import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
-import org.pmiops.workbench.model.VariantFiltersResponse;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -2740,8 +2740,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void findVariantFilters() {
     VariantFilterRequest request = new VariantFilterRequest().searchTerm("chr20:1000-5000");
-    VariantFiltersResponse expectedVariantFilter =
-        new VariantFiltersResponse()
+    VariantFilterResponse expectedVariantFilter =
+        new VariantFilterResponse()
             .geneList(Arrays.asList("gene, gene2", "gene3"))
             .consequenceList(
                 Arrays.asList("intron_variant", "n/a", "non_coding_transcript_variant"))
@@ -2757,8 +2757,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertFindVariantFiltersResponse(
-      VariantFilterRequest request, VariantFiltersResponse expectedVariantFilter) {
-    VariantFiltersResponse response =
+      VariantFilterRequest request, VariantFilterResponse expectedVariantFilter) {
+    VariantFilterResponse response =
         controller.findVariantFilters(WORKSPACE_NAMESPACE, WORKSPACE_ID, request).getBody();
     assertThat(response).isNotNull();
     assertThat(response).isEqualTo(expectedVariantFilter);

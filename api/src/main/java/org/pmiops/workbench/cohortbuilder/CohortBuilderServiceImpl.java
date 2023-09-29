@@ -60,7 +60,7 @@ import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
 import org.pmiops.workbench.model.VariantFilterRequest;
-import org.pmiops.workbench.model.VariantFiltersResponse;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -589,7 +589,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return cbCriteriaDao.findSurveyQuestionIds(surveyConceptIds);
   }
 
-  public VariantFiltersResponse findVariantFilters(VariantFilterRequest filters) {
+  public VariantFilterResponse findVariantFilters(VariantFilterRequest filters) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
             VariantQueryBuilder.buildFiltersQuery(filters));
@@ -659,8 +659,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
-  private VariantFiltersResponse fieldValueListToVariantFilter(FieldValueList row) {
-    VariantFiltersResponse variantFilters = new VariantFiltersResponse();
+  private VariantFilterResponse fieldValueListToVariantFilter(FieldValueList row) {
+    VariantFilterResponse variantFilters = new VariantFilterResponse();
     FieldValues.getRepeated(row, "gene_list")
         .ifPresent(
             fieldValues ->
