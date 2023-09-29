@@ -27,6 +27,7 @@ import { profileApi } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import { reactStyles, WindowSizeProps, withWindowSize } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
+import { Country } from 'app/utils/constants';
 import { convertAPIError } from 'app/utils/errors';
 import { serverConfigStore } from 'app/utils/stores';
 import successBackgroundImage from 'assets/images/congrats-female.png';
@@ -263,7 +264,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     ];
   }
 
-  private getNextStep(currentStep: SignInStep) {
+  private getNextStep(currentStep: SignInStep, profile: Profile = null) {
     const steps = this.getAccountCreationSteps();
     const index = steps.indexOf(currentStep);
     if (index === -1) {
@@ -271,6 +272,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
     if (index === steps.length) {
       throw new Error('No sign-in steps remaining after step ' + currentStep);
+    }
+    if (
+      steps[index] === SignInStep.ACCOUNT_DETAILS &&
+      profile.address.country !== Country.US
+    ) {
+      return SignInStep.SUCCESS_PAGE;
     }
     return steps[index + 1];
   }
@@ -317,7 +324,7 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     const onComplete = (profile: Profile) => {
       this.setState({
         profile: profile,
-        currentStep: this.getNextStep(currentStep),
+        currentStep: this.getNextStep(currentStep, profile),
         isPreviousStep: false,
       });
     };
@@ -374,6 +381,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             profile={this.state.profile}
             onComplete={onComplete}
             onPreviousClick={onPrevious}
+            captchaRef={this.captchaRef}
+            captureCaptchaResponse={this.captureCaptchaResponse}
+            onSubmit={this.updateProfileAndCreateAccount}
           />
         );
       case SignInStep.DEMOGRAPHIC_SURVEY:
@@ -403,6 +413,11 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     }
   }
 
+  // This method is being used if user is international
+  private updateProfileAndCreateAccount = (profile: Profile) => {
+    this.setState({ profile: profile });
+    this.onSubmit();
+  };
   private onSubmit = async () => {
     const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
@@ -443,7 +458,8 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
   private renderNavigation(currentStep: SignInStep) {
     if (currentStep === SignInStep.DEMOGRAPHIC_SURVEY) {
-      const { enableCaptcha } = serverConfigStore.get().config;
+      // const { enableCaptcha } = serverConfigStore.get().config;
+      const enableCaptcha = true;
       const { captcha, errors, loading } = this.state;
       const invalid = !!errors || (enableCaptcha && !captcha);
       return (

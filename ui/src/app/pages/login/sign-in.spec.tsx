@@ -114,7 +114,9 @@ describe('SignIn', () => {
 
     // ACCOUNT_DETAILS
     expect(wrapper.exists(AccountCreation)).toBeTruthy();
-    wrapper.find(AccountCreation).props().onComplete(createEmptyProfile());
+    const profile = createEmptyProfile();
+    profile.address.country = 'United States';
+    wrapper.find(AccountCreation).props().onComplete(profile);
 
     // DEMOGRAPHIC_SURVEY
     expect(wrapper.exists(DemographicSurvey)).toBeTruthy();
@@ -127,6 +129,46 @@ describe('SignIn', () => {
       .props();
 
     await onClick();
+
+    // SUCCESS_PAGE
+    expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();
+  });
+
+  it('should not show demographic survey of international user', async () => {
+    // This test is meant to validate the high-level flow through the sign-in component by checking
+    // that each step of the user registration flow is correctly rendered in order.
+    //
+    // As this is simply a high-level test of this component's ability to render each sub-component,
+    // we use Enzyme's shallow rendering to avoid needing to deal with the DOM-level details of
+    // each of the sub-components. Tests within the 'account-creation' folder should cover those
+    // details.
+    const wrapper = shallowComponent();
+
+    // the sign-up flow steps are enumerated by `SignInStep`:
+    // LANDING, TERMS_OF_SERVICE, INSTITUTIONAL_AFFILIATION, ACCOUNT_DETAILS, DEMOGRAPHIC_SURVEY, SUCCESS_PAGE,
+
+    // To start, the LANDING page / login component should be shown.
+    expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
+    // Simulate the "create account" button being clicked by firing the callback method.
+    wrapper.find(LoginReactComponent).props().onCreateAccount();
+    await wrapper.update();
+
+    // TERMS_OF_SERVICE
+    expect(wrapper.exists(TermsOfService)).toBeTruthy();
+    wrapper.find(TermsOfService).props().onComplete(LATEST_TOS_VERSION);
+
+    // INSTITUTIONAL_AFFILIATION
+    expect(wrapper.exists(AccountCreationInstitution)).toBeTruthy();
+    wrapper
+      .find(AccountCreationInstitution)
+      .props()
+      .onComplete(createEmptyProfile());
+
+    // ACCOUNT_DETAILS
+    expect(wrapper.exists(AccountCreation)).toBeTruthy();
+    const profile = createEmptyProfile();
+    profile.address.country = 'Canada';
+    wrapper.find(AccountCreation).props().onComplete(profile);
 
     // SUCCESS_PAGE
     expect(wrapper.exists(AccountCreationSuccess)).toBeTruthy();

@@ -366,7 +366,7 @@ export class AccountCreationInstitution extends React.Component<
         <FlexRow>
           <FlexColumn style={{ marginTop: '0.75rem', marginRight: '3rem' }}>
             <div style={{ ...styles.text, fontSize: 16, marginTop: '1.5rem' }}>
-              Please complete Step 1 of 3
+              Please complete Step 1
             </div>
             <div style={styles.institutionalDuaTextBox}>
               For access to the <AouTitle /> data, your institution needs to

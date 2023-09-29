@@ -224,4 +224,15 @@ describe('ProfilePageComponent', () => {
       wrapper.find('[data-test-id="profile-confirmation-renewal-box"]').exists()
     ).toBeFalsy();
   });
+
+  it('should not display a demographic survey if the user is international', async () => {
+    const { profile } = profileStore.get();
+    profile.address.country = 'India';
+    updateProfile(profile);
+
+    const wrapper = component();
+    expect(
+      wrapper.find('[data-test-id="demographic-survey"]').exists()
+    ).toBeFalsy();
+  });
 });

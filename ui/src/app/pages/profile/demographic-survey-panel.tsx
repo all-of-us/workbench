@@ -13,7 +13,7 @@ export const DemographicSurveyPanel = (props: Props) => {
   const { demographicSurveyCompletionTime } = props;
 
   return (
-    <div style={styles.panel}>
+    <div style={styles.panel} data-test-id='demographic-survey'>
       <div style={styles.title}>Demographics Survey</div>
       <hr style={{ ...styles.verticalLine }} />
       <div style={styles.panelBody}>
