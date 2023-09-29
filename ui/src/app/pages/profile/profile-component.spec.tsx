@@ -228,6 +228,7 @@ describe('ProfilePageComponent', () => {
   it('should not display a demographic survey if the user is international', async () => {
     const { profile } = profileStore.get();
     profile.address.country = 'India';
+    profile.firstSignInTime = new Date('2023-12-03').getTime();
     updateProfile(profile);
 
     const wrapper = component();

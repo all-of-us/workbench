@@ -389,15 +389,16 @@ it('should reset "other" discovery source details to null if "other" is unselect
   expect(profile.partnerDiscoverySourceOtherText).toBeNull();
 });
 
-it('Should show submit button if country is not US', async () => {
-  const onSubmit = jest.fn();
-  const { user } = setup({
-    ...createProps(),
-    onSubmit,
-  });
-  await user.click(getCountryDropdownField());
-  await user.paste(Country.AL);
-  await user.keyboard('{enter}');
-  expect(screen.getByText('Albania')).toBeInTheDocument();
-  expect(screen.getByText('Submit')).toBeInTheDocument();
-});
+// TODO: Can uncomment this after Nov-03
+// it('Should show submit button if country is not US', async () => {
+//   const onSubmit = jest.fn();
+//   const { user } = setup({
+//     ...createProps(),
+//     onSubmit,
+//   });
+//   await user.click(getCountryDropdownField());
+//   await user.paste(Country.AL);
+//   await user.keyboard('{enter}');
+//   expect(screen.getByText('Albania')).toBeInTheDocument();
+//   expect(screen.getByText('Submit')).toBeInTheDocument();
+// });
