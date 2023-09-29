@@ -13,7 +13,7 @@ public class InterceptorUtils {
   private InterceptorUtils() {}
 
   public static Method getControllerMethod(HandlerMethod handlerMethod) {
-    String apiControllerClass = handlerMethod.getBeanType().getName();
+    String apiControllerName = handlerMethod.getBeanType().getName();
     String handlerMethodName = handlerMethod.getMethod().getName();
     Class<?>[] handlerParameterTypes = handlerMethod.getMethod().getParameterTypes();
 
@@ -22,14 +22,14 @@ public class InterceptorUtils {
     // There's no concise way to find out what class implements the delegate interface, so instead
     // depend on naming conventions. This removes "Api" from the class name when the classname includes the word Controller.
     final String controllerName =
-        API_CONTROLLER_PATTERN.matcher(apiControllerClass).replaceAll("$1$2");
+        API_CONTROLLER_PATTERN.matcher(apiControllerName).replaceAll("$1$2");
 
     Class<?> controllerClass;
     try {
       controllerClass = Class.forName(controllerName);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(
-          "Missing " + controllerName + " by name derived from " + apiControllerClass + ".", e);
+          "Missing " + controllerName + " by name derived from " + apiControllerName + ".", e);
     }
 
     try {
