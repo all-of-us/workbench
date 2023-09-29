@@ -41,7 +41,7 @@ export const defaultDataprocConfig = (): DataprocConfig => ({
   numberOfWorkerLocalSSDs: 0,
 });
 
-export const defaultRuntime = (): Runtime => ({
+export const defaultGceRuntime = (): Runtime => ({
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
   status: RuntimeStatus.RUNNING,
@@ -52,11 +52,20 @@ export const defaultRuntime = (): Runtime => ({
   errors: [],
 });
 
-export const defaultRuntimeWithPd = (): Runtime => ({
-  ...defaultRuntime(),
+export const defaultGceRuntimeWithPd = (): Runtime => ({
+  ...defaultGceRuntime(),
   gceConfig: undefined,
   gceWithPdConfig: defaultGceWithPdConfig(),
 });
+
+export const defaultDataProcRuntime = (): Runtime => ({
+  ...defaultGceRuntime(),
+  gceConfig: undefined,
+  dataprocConfig: defaultDataprocConfig(),
+  configurationType: RuntimeConfigurationType.HAIL_GENOMIC_ANALYSIS,
+});
+
+export const defaultRuntime = defaultGceRuntime;
 
 export class RuntimeApiStub extends RuntimeApi {
   public runtime: Runtime;

@@ -651,6 +651,24 @@ export const maybeWithExistingDiskName = (
   return { ...c, existingDiskName: null };
 };
 
+// assumptions (TODO: assert or throw if not met?)
+// - the runtime has gceConfig populated - meaning that it is not DataProc and has no PD currently attached
+// - the persistent disk is defined
+export const addPersistentDisk = (
+  runtime: Runtime,
+  persistentDisk: Disk | PersistentDiskRequest
+): Runtime => {
+  const { name, size, diskType } = persistentDisk;
+  return {
+    ...runtime,
+    gceConfig: undefined,
+    gceWithPdConfig: {
+      ...runtime.gceConfig, // note: gceConfig.diskSize is discarded.  this is what we want.
+      persistentDisk: { name, size, diskType },
+    },
+  };
+};
+
 // Attach an existing disk to the given runtime, if the configuration allows it.
 export const maybeWithExistingDisk = (
   runtime: Runtime,
@@ -658,6 +676,8 @@ export const maybeWithExistingDisk = (
 ): Runtime => {
   if (!runtime || !existingDisk || runtime.dataprocConfig) {
     return runtime;
+  } else {
+    return addPersistentDisk(runtime, existingDisk);
   }
 
   return {
