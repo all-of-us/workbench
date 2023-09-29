@@ -657,6 +657,7 @@ const BoxHeader = ({
 
 const prepackagedAllSurveyConceptSetToString = {
   PERSON: 'Demographics',
+  PERSON_HAS_EHR_DATA: 'Demographics Has EHR Data',
   SURVEY: 'All Surveys',
   FITBIT_HEART_RATE_SUMMARY: 'Fitbit Heart Rate Summary',
   FITBIT_ACTIVITY: 'Fitbit Activity Summary',
@@ -681,6 +682,7 @@ const prepackagedSurveyConceptSetToString = {
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
   [PrePackagedConceptSetEnum.PERSON]: Domain.PERSON,
+  [PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA]: Domain.PERSON_HAS_EHR_DATA,
   [PrePackagedConceptSetEnum.SURVEY]: Domain.SURVEY,
 };
 
@@ -750,6 +752,7 @@ const reverseDomainEnum = {
   WHOLE_GENOME_VARIANT: Domain.WHOLE_GENOME_VARIANT,
   ZIP_CODE_SOCIOECONOMIC: Domain.ZIP_CODE_SOCIOECONOMIC,
   ARRAY_DATA: Domain.ARRAY_DATA,
+  PERSON_HAS_EHR_DATA: Domain.PERSON_HAS_EHR_DATA,
 };
 
 // Temp workaround to prevent errors from mismatched upper and lower case values

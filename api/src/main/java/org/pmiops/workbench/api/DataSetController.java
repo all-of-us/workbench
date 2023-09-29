@@ -72,6 +72,8 @@ public class DataSetController implements DataSetApiDelegate {
   public static final String EMPTY_CELL_MARKER = "";
   public static final String WHOLE_GENOME_VALUE = "VCF Files";
 
+  public static final String HAS_EHR_DATA_VALUE = "has_ehr_data";
+
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final DataSetService dataSetService;
@@ -434,6 +436,11 @@ public class DataSetController implements DataSetApiDelegate {
           new DomainWithDomainValues()
               .domain(Domain.WHOLE_GENOME_VARIANT.toString())
               .addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE)));
+    } else if (domainValue.equals(Domain.PERSON_HAS_EHR_DATA.toString())) {
+      response.setItems(
+          dataSetService.getValueListFromDomain(conceptSetId, Domain.PERSON.toString()));
+      response.getItems().get(0).setDomain(Domain.PERSON_HAS_EHR_DATA.toString());
+      response.getItems().get(0).getItems().add(new DomainValue().value(HAS_EHR_DATA_VALUE));
     } else {
       response.setItems(dataSetService.getValueListFromDomain(conceptSetId, domainValue));
     }

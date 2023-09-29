@@ -342,6 +342,7 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.SURVEY_SDOH, (short) 18)
               .put(PrePackagedConceptSetEnum.SURVEY_COVID_VACCINE, (short) 19)
               .put(PrePackagedConceptSetEnum.SURVEY_PFHH, (short) 20)
+              .put(PrePackagedConceptSetEnum.PERSON_HAS_EHR_DATA, (short) 21)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {
