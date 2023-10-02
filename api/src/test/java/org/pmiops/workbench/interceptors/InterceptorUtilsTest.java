@@ -1,20 +1,16 @@
 package org.pmiops.workbench.interceptors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.swagger.v3.oas.annotations.Operation;
 import java.lang.reflect.Method;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.FakeClockConfiguration;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApiController;
@@ -29,19 +25,6 @@ import org.springframework.web.method.HandlerMethod;
 @Import(FakeClockConfiguration.class)
 @SpringJUnitConfig
 public class InterceptorUtilsTest {
-  @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-  @Mock private HandlerMethod handler;
-  @Mock private HttpServletRequest request;
-  @Mock private HttpServletResponse response;
-
-  private CloudTaskInterceptor interceptor;
-
-  @BeforeEach
-  public void setUp() {
-    interceptor = new CloudTaskInterceptor();
-  }
-
   @Test
   public void testGetControllerMethod_withAuthorities() throws Exception {
     Class<?> apiControllerClass = UserAdminApiController.class;
@@ -74,7 +57,7 @@ public class InterceptorUtilsTest {
     assertThat(req).isNull();
   }
 
-  class NoMatchingApiControllerClass {}
+   static class NoMatchingApiControllerClass {}
 
   @Test
   public void testGetControllerMethod_missingControllerException() throws Exception {
@@ -96,13 +79,13 @@ public class InterceptorUtilsTest {
         exception.getMessage());
   }
 
-  class MatchingApiControllerClass {
+  static class MatchingApiControllerClass {
     public String getCactus() {
       return "Cactus";
     }
   }
 
-  class MatchingControllerClass {}
+  static class MatchingControllerClass {}
 
   @Test
   public void testGetControllerMethod_missingMethodException() throws Exception {
@@ -122,5 +105,18 @@ public class InterceptorUtilsTest {
     assertEquals(
         "java.lang.NoSuchMethodException: org.pmiops.workbench.interceptors.InterceptorUtilsTest$MatchingControllerClass.getCactus()",
         exception.getMessage());
+  }
+
+  @Test
+  public void testIsCloudTaskRequest_true() {
+    Operation operation = mock(Operation.class);
+    when(operation.tags()).thenReturn(new String[]{"cloudTask"});
+    assertTrue(InterceptorUtils.isCloudTaskRequest(operation));
+  }
+  @Test
+  public void testIsCloudTaskRequest_false() {
+    Operation operation = mock(Operation.class);
+    when(operation.tags()).thenReturn(new String[]{"FAKE_TAG"});
+    assertFalse(InterceptorUtils.isCloudTaskRequest(operation));
   }
 }
