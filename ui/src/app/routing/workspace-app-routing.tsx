@@ -201,7 +201,7 @@ export const WorkspaceRoutes = () => {
             workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
-          leoAppType={LeoApplicationType.Notebook}
+          leoAppType={LeoApplicationType.JupyterNotebook}
         />
       </AppRoute>
       <AppRoute
@@ -218,7 +218,7 @@ export const WorkspaceRoutes = () => {
             workspaceNavBarTab: analysisTabName,
             minimizeChrome: true,
           }}
-          leoAppType={LeoApplicationType.Terminal}
+          leoAppType={LeoApplicationType.JupyterTerminal}
         />
       </AppRoute>
       <AppRoute

@@ -159,6 +159,9 @@ export function typeToTitle(_type: string): string {
     case CriteriaType[CriteriaType.SEX]:
       _type = 'Sex Assigned at Birth';
       break;
+    case CriteriaType[CriteriaType.HAS_EHR_DATA]:
+      _type = 'Has EHR Data';
+      break;
   }
   return _type;
 }

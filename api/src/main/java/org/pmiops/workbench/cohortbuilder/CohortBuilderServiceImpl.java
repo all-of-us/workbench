@@ -5,6 +5,7 @@ import static org.pmiops.workbench.model.FilterColumns.GENDER;
 import static org.pmiops.workbench.model.FilterColumns.RACE;
 import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 
+import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Strings;
@@ -58,6 +59,8 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -582,12 +585,22 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     return cbCriteriaDao.findSurveyQuestionIds(surveyConceptIds);
   }
 
-  @Override
-  public ImmutableTriple<String, Integer, List<Variant>> findVariants(
-      String searchTerm, String pageToken, Integer pageSize) {
+  public VariantFilterResponse findVariantFilters(VariantFilterRequest filters) {
     TableResult result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            VariantQueryBuilder.buildCountQuery(searchTerm));
+            VariantQueryBuilder.buildFiltersQuery(filters));
+
+    return fieldValueListToVariantFilter(result.iterateAll().iterator().next());
+  }
+
+  @Override
+  public ImmutableTriple<String, Integer, List<Variant>> findVariants(
+      VariantFilterRequest filters) {
+    Integer pageSize = filters.getPageSize();
+    String pageToken = filters.getPageToken();
+    TableResult result =
+        bigQueryService.filterBigQueryConfigAndExecuteQuery(
+            VariantQueryBuilder.buildCountQuery(filters));
     FieldValueList row = result.iterateAll().iterator().next();
     int count = Integer.parseInt(row.get("count").getStringValue());
 
@@ -604,7 +617,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
     result =
         bigQueryService.filterBigQueryConfigAndExecuteQuery(
-            VariantQueryBuilder.buildQuery(searchTerm, limit, offset));
+            VariantQueryBuilder.buildQuery(filters, limit, offset));
     List<Variant> variants =
         StreamSupport.stream(result.iterateAll().spliterator(), false)
             .map(this::fieldValueListToVariant)
@@ -642,13 +655,47 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .collect(Collectors.toList());
   }
 
+  private VariantFilterResponse fieldValueListToVariantFilter(FieldValueList row) {
+    VariantFilterResponse variantFilters = new VariantFilterResponse();
+    FieldValues.getRepeated(row, "gene_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setGeneList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getRepeated(row, "consequence_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setConsequenceList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getRepeated(row, "clinical_significance_list")
+        .ifPresent(
+            fieldValues ->
+                variantFilters.setClinicalSignificanceList(
+                    fieldValues.stream()
+                        .map(FieldValue::getStringValue)
+                        .collect(Collectors.toList())));
+    FieldValues.getLong(row, "count_min").ifPresent(variantFilters::setCountMin);
+    FieldValues.getLong(row, "count_max").ifPresent(variantFilters::setCountMax);
+    FieldValues.getLong(row, "number_min").ifPresent(variantFilters::setNumberMin);
+    FieldValues.getLong(row, "number_max").ifPresent(variantFilters::setNumberMax);
+    FieldValues.getNumeric(row, "frequency_min").ifPresent(variantFilters::setFrequencyMin);
+    FieldValues.getNumeric(row, "frequency_max").ifPresent(variantFilters::setFrequencyMax);
+    variantFilters.setSortByList(VariantQueryBuilder.VatColumns.getDisplayNameList());
+    return variantFilters;
+  }
+
   private Variant fieldValueListToVariant(FieldValueList row) {
     Variant variant = new Variant();
     FieldValues.getString(row, "vid").ifPresent(variant::setVid);
     FieldValues.getString(row, "genes").ifPresent(variant::setGene);
     FieldValues.getString(row, "cons_str").ifPresent(variant::setConsequence);
     FieldValues.getString(row, "protein_change").ifPresent(variant::setProteinChange);
-    FieldValues.getString(row, "clinical_significance").ifPresent(variant::setClinVarSignificance);
+    FieldValues.getString(row, "clinical_significance_string")
+        .ifPresent(variant::setClinVarSignificance);
     FieldValues.getLong(row, "allele_count").ifPresent(variant::setAlleleCount);
     FieldValues.getLong(row, "allele_number").ifPresent(variant::setAlleleNumber);
     FieldValues.getDouble(row, "allele_frequency").ifPresent(variant::setAlleleFrequency);

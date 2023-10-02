@@ -138,12 +138,10 @@ export const VariantSearch = withCurrentWorkspace()(
     const searchVariants = async (searchString: string, firstPage?: number) => {
       try {
         const { items, nextPageToken, totalSize } =
-          await cohortBuilderApi().findVariants(
-            namespace,
-            id,
-            searchString,
-            pageToken
-          );
+          await cohortBuilderApi().findVariants(namespace, id, {
+            searchTerm: searchString,
+            pageToken: pageToken,
+          });
         setPageToken(nextPageToken);
         setSearchResults((prevState) =>
           firstPage ? [...prevState, ...items] : items

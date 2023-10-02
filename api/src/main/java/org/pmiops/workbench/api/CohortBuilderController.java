@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -35,6 +36,8 @@ import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SurveyVersionListResponse;
 import org.pmiops.workbench.model.SurveysResponse;
 import org.pmiops.workbench.model.Variant;
+import org.pmiops.workbench.model.VariantFilterRequest;
+import org.pmiops.workbench.model.VariantFilterResponse;
 import org.pmiops.workbench.model.VariantListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -157,10 +160,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       String workspaceNamespace, String workspaceId, Long parentId) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CriteriaMenuListResponse response =
-        new CriteriaMenuListResponse()
-            .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
-    return ResponseEntity.ok(response);
+    if (workbenchConfigProvider.get().featureFlags.enableHasEhrData) {
+      return ResponseEntity.ok(
+          new CriteriaMenuListResponse()
+              .items(cohortBuilderService.findCriteriaMenuByParentId(parentId)));
+    } else {
+      return ResponseEntity.ok(
+          new CriteriaMenuListResponse()
+              .items(
+                  cohortBuilderService.findCriteriaMenuByParentId(parentId).stream()
+                      .filter(item -> !CriteriaType.HAS_EHR_DATA.toString().equals(item.getType()))
+                      .collect(Collectors.toList())));
+    }
   }
 
   @Override
@@ -229,21 +240,27 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<VariantListResponse> findVariants(
-      String workspaceNamespace,
-      String workspaceId,
-      String searchTerm,
-      String pageToken,
-      Integer pageSize) {
+  public ResponseEntity<VariantFilterResponse> findVariantFilters(
+      String workspaceNamespace, String workspaceId, VariantFilterRequest request) {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    validateTerm(searchTerm);
+    validateTerm(request.getSearchTerm());
+
+    return ResponseEntity.ok(cohortBuilderService.findVariantFilters(request));
+  }
+
+  @Override
+  public ResponseEntity<VariantListResponse> findVariants(
+      String workspaceNamespace, String workspaceId, VariantFilterRequest request) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    validateTerm(request.getSearchTerm());
 
     // this method returns a paginated list of variants
     // ImmutableTriple contains nextPageToken, total results count
     // and list of variants
     ImmutableTriple<String, Integer, List<Variant>> searchResults =
-        cohortBuilderService.findVariants(searchTerm, pageToken, pageSize);
+        cohortBuilderService.findVariants(request);
 
     return ResponseEntity.ok(
         new VariantListResponse()

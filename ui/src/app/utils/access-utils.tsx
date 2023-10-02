@@ -10,8 +10,7 @@ import {
   Profile,
 } from 'generated/fetch';
 
-import { cond } from '@terra-ui-packages/core-utils';
-import { DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
+import { cond, DEFAULT, switchCase } from '@terra-ui-packages/core-utils';
 import { parseQueryParams } from 'app/components/app-router';
 import { Button } from 'app/components/buttons';
 import { InfoIcon } from 'app/components/icons';
@@ -54,24 +53,63 @@ export enum DARPageMode {
 
 const { useState, useEffect } = React;
 
-export async function redirectToRegisteredTraining() {
-  AnalyticsTracker.Registration.RegisteredTraining();
+const redirectToRegisteredTrainingMoodle = async () => {
   await profileApi().updatePageVisits({ page: 'moodle' });
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`;
   window.open(url, '_blank');
+};
+
+const redirectToTrainingAbsorb = async () => {
+  await profileApi().updatePageVisits({ page: 'absorb' });
+  const {
+    config: {
+      absorbSamlIdentityProviderId,
+      absorbSamlServiceProviderId,
+      gsuiteDomain,
+    },
+  } = serverConfigStore.get();
+  const url = new URL('https://accounts.google.com/o/saml2/initsso');
+  url.searchParams.set('idpid', absorbSamlIdentityProviderId);
+  url.searchParams.set('spid', absorbSamlServiceProviderId);
+  url.searchParams.set('forceauthn', 'false');
+  url.searchParams.set('hd', gsuiteDomain);
+  window.open(url.toString(), '_blank');
+};
+
+export async function redirectToRegisteredTraining() {
+  AnalyticsTracker.Registration.RegisteredTraining();
+
+  const useAbsorb = await profileApi().useAbsorb();
+
+  if (useAbsorb) {
+    await redirectToTrainingAbsorb();
+  } else {
+    await redirectToRegisteredTrainingMoodle();
+  }
 }
 
-export async function redirectToControlledTraining() {
-  AnalyticsTracker.Registration.ControlledTraining();
+const redirectToControlledTrainingMoodle = async () => {
   await profileApi().updatePageVisits({ page: 'moodle' });
   const {
     config: { complianceTrainingHost },
   } = serverConfigStore.get();
   const url = `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`;
   window.open(url, '_blank');
+};
+
+export async function redirectToControlledTraining() {
+  AnalyticsTracker.Registration.ControlledTraining();
+
+  const useAbsorb = await profileApi().useAbsorb();
+
+  if (useAbsorb) {
+    await redirectToTrainingAbsorb();
+  } else {
+    await redirectToControlledTrainingMoodle();
+  }
 }
 
 export const getTwoFactorSetupUrl = (): string => {

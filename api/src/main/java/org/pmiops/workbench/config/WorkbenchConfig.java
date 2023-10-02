@@ -23,6 +23,7 @@ public class WorkbenchConfig {
   public ServerConfig server;
   public AdminConfig admin;
   public MandrillConfig mandrill;
+  public AbsorbConfig absorb;
   public MoodleConfig moodle;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
@@ -59,6 +60,7 @@ public class WorkbenchConfig {
     config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
     config.googleDirectoryService = new GoogleDirectoryServiceConfig();
     config.mandrill = new MandrillConfig();
+    config.absorb = new AbsorbConfig();
     config.moodle = new MoodleConfig();
     config.offlineBatch = new OfflineBatchConfig();
     config.ras = new RasConfig();
@@ -252,6 +254,12 @@ public class WorkbenchConfig {
   public static class MandrillConfig {
     public String fromEmail;
     public int sendRetries;
+  }
+
+  public static class AbsorbConfig {
+    public boolean enabledForNewUsers;
+    public String samlIdentityProviderId;
+    public String samlServiceProviderId;
   }
 
   public static class MoodleConfig {

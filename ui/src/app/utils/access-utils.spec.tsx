@@ -23,6 +23,8 @@ import {
   maybeDaysRemaining,
   NOTIFICATION_THRESHOLD_DAYS,
   RAS_CALLBACK_PATH,
+  redirectToControlledTraining,
+  redirectToRegisteredTraining,
   useIsUserDisabled,
 } from 'app/utils/access-utils';
 import {
@@ -43,6 +45,112 @@ import { AccessTierShortNames } from './access-tiers';
 
 const ONE_MINUTE_IN_MILLIS = 1000 * 60;
 const arbitraryModuleName = AccessModule.PUBLICATION_CONFIRMATION;
+
+describe('redirectToRegisteredTraining', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
+
+    windowOpenSpy = jest.spyOn(window, 'open');
+  });
+
+  it('Redirects to Moodle if Absorb is disabled', async () => {
+    const complianceTrainingHost = 'moodle.org';
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        complianceTrainingHost,
+      },
+    });
+
+    profileApi().useAbsorb = () => Promise.resolve(false);
+
+    await redirectToRegisteredTraining();
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      `https://${complianceTrainingHost}/static/data-researcher.html?saml=on`,
+      '_blank'
+    );
+  });
+
+  it('Redirects to Absorb if Absorb is enabled', async () => {
+    const absorbSamlIdentityProviderId = 'fake1';
+    const absorbSamlServiceProviderId = 'fake2';
+    const gsuiteDomain = 'gmail.com';
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        absorbSamlIdentityProviderId,
+        absorbSamlServiceProviderId,
+        gsuiteDomain,
+      },
+    });
+
+    profileApi().useAbsorb = () => Promise.resolve(true);
+
+    await redirectToControlledTraining();
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      'https://accounts.google.com/o/saml2/initsso' +
+        `?idpid=${absorbSamlIdentityProviderId}&spid=${absorbSamlServiceProviderId}&forceauthn=false&hd=${gsuiteDomain}`,
+      '_blank'
+    );
+  });
+});
+
+describe('redirectToControlledTraining', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
+
+    windowOpenSpy = jest.spyOn(window, 'open');
+  });
+
+  it('Redirects to Moodle if Absorb is disabled', async () => {
+    const complianceTrainingHost = 'moodle.org';
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        complianceTrainingHost,
+      },
+    });
+
+    profileApi().useAbsorb = () => Promise.resolve(false);
+
+    await redirectToControlledTraining();
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      `https://${complianceTrainingHost}/static/data-researcher-controlled.html?saml=on`,
+      '_blank'
+    );
+  });
+
+  it('Redirects to Absorb if Absorb is enabled', async () => {
+    const absorbSamlIdentityProviderId = 'fake1';
+    const absorbSamlServiceProviderId = 'fake2';
+    const gsuiteDomain = 'gmail.com';
+    serverConfigStore.set({
+      config: {
+        ...defaultServerConfig,
+        absorbSamlIdentityProviderId,
+        absorbSamlServiceProviderId,
+        gsuiteDomain,
+      },
+    });
+
+    profileApi().useAbsorb = () => Promise.resolve(true);
+
+    await redirectToControlledTraining();
+
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      'https://accounts.google.com/o/saml2/initsso' +
+        `?idpid=${absorbSamlIdentityProviderId}&spid=${absorbSamlServiceProviderId}&forceauthn=false&hd=${gsuiteDomain}`,
+      '_blank'
+    );
+  });
+});
 
 describe('maybeDaysRemaining', () => {
   beforeEach(() => {

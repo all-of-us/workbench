@@ -485,6 +485,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/account/use-absorb:
+    get:
+      tags:
+      - profile
+      summary: Whether the user should use Absorb for compliance training
+      operationId: useAbsorb
+      responses:
+        200:
+          description: Whether the user should use Absorb for compliance training
+          content:
+            application/json:
+              schema:
+                type: boolean
   /v1/account/sync-era-commons-status:
     post:
       tags:
@@ -6137,10 +6150,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataFiltersResponse'
-  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/{searchTerm}:
-    get:
+  /v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variants:
+    post:
       tags:
-      - cohortBuilder
+        - cohortBuilder
       description: Returns genomic variants from VAT per specified search term
       operationId: findVariants
       parameters:
@@ -6156,24 +6169,13 @@ paths:
         required: true
         schema:
           type: string
-      - name: searchTerm
-        in: path
-        description: search term (variant id, gene, rs number or chr position)
-        required: true
-        schema:
-          type: string
-      - name: pageToken
-        in: query
-        description: Pagination token retrieved from a previous call to user; used
-          for retrieving additional pages of results.
-        schema:
-          type: string
-      - name: pageSize
-        in: query
-        description: Maximum number of results to return in a response. Defaults to
-          10.
-        schema:
-          type: integer
+      requestBody:
+          description: request body for getting VariantListResponse.
+          content:
+            'application/json`':
+              schema:
+                "$ref": "#/components/schemas/VariantFilterRequest"
+          required: true
       responses:
         200:
           description: A collection of variants
@@ -6181,6 +6183,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VariantListResponse'
+  "/v1/cohortbuilder/{workspaceNamespace}/{workspaceId}/variant/filters":
+    post:
+      tags:
+      - cohortBuilder
+      description: Returns filters that can narrow variant results
+      operationId: findVariantFilters
+      parameters:
+      - name: workspaceNamespace
+        in: path
+        description: The Workspace namespace
+        required: true
+        schema:
+          type: string
+      - name: workspaceId
+        in: path
+        description: The Workspace ID (a.k.a. the workspace's Firecloud name)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: request body for getting VariantListResponse.
+        content:
+          application/json':
+            schema:
+              "$ref": "#/components/schemas/VariantFilterRequest"
+        required: true
+      responses:
+        200:
+          description: A collection of variants
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/VariantFilterResponse"
   /v1/surveys/newUserSatisfactionSurvey:
     post:
       tags:
@@ -6729,6 +6764,12 @@ components:
         complianceTrainingHost:
           type: string
           description: The hostname for constructing the compliance training URL.
+        absorbSamlIdentityProviderId:
+          type: string
+          description: The SAML identity provider ID for Absorb.
+        absorbSamlServiceProviderId:
+          type: string
+          description: The SAML service provider ID for Absorb.
         enableEraCommons:
           type: boolean
           description: Whether the eRA Commons access module is enabled.
@@ -10981,6 +11022,7 @@ components:
       - SNOMED
       - VISIT
       - NONE
+      - HAS_EHR_DATA
     CriteriaSubType:
       type: string
       description: possible criteria types
@@ -11127,6 +11169,105 @@ components:
           format: int64
         conceptName:
           type: string
+    VariantFilterRequest:
+      type: object
+      required:
+      - searchTerm
+      properties:
+        searchTerm:
+          type: string
+          description: The term used to search variants.
+        pageToken:
+          type: string
+          description: Used for retrieving additional pages of results.
+        pageSize:
+          type: integer
+          description: page size of results (default is 25)
+        geneList:
+          type: array
+          description: List of string gene names
+          items:
+            type: string
+        consequenceList:
+          type: array
+          description: List of string consequence names
+          items:
+            type: string
+        clinicalSignificanceList:
+          type: array
+          description: List of string clinical significance names
+          items:
+            type: string
+        countMin:
+          type: integer
+          format: int64
+          description: Allele count min
+        countMax:
+          type: integer
+          format: int64
+          description: Allele count max
+        numberMin:
+          type: integer
+          format: int64
+          description: Allele number min
+        numberMax:
+          type: integer
+          format: int64
+          description: Allele number max
+        frequencyMin:
+          type: number
+          description: Allele frequency min(floating point)
+        frequencyMax:
+          type: number
+          description: Allele number max(floating point)
+        sortBy:
+          type: string
+          description: sort column by
+    VariantFilterResponse:
+      type: object
+      properties:
+        geneList:
+          type: array
+          description: List of string gene names
+          items:
+            type: string
+        consequenceList:
+          type: array
+          description: List of string consequence names
+          items:
+            type: string
+        clinicalSignificanceList:
+          type: array
+          description: List of string clinical significance names
+          items:
+            type: string
+        countMin:
+          type: integer
+          format: int64
+          description: Allele count min
+        countMax:
+          type: integer
+          format: int64
+          description: Allele count max
+        numberMin:
+          type: integer
+          format: int64
+          description: Allele number min
+        numberMax:
+          type: integer
+          format: int64
+          description: Allele number max
+        frequencyMin:
+          type: number
+          description: Allele frequency min(floating point)
+        frequencyMax:
+          type: number
+          description: Allele number max(floating point)
+        sortByList:
+          type: array
+          description: List of string column names
+          items:
+            type: string
     VariantListResponse:
       required:
       - items
