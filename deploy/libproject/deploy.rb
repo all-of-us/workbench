@@ -296,7 +296,7 @@ def deploy(cmd_name, args)
   #     --quiet
   # } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs", "`#{op.opts.project}`"]
+  node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs"]
 
   common.run_inline node_cmd
 
