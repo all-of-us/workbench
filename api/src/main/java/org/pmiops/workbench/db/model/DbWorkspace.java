@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -82,6 +83,8 @@ public class DbWorkspace {
   private String googleProject;
   private boolean adminLocked;
   private String adminLockedReason;
+
+  private Boolean isAws;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -661,6 +664,16 @@ public class DbWorkspace {
 
   public DbWorkspace setAdminLockedReason(String adminLockedReason) {
     this.adminLockedReason = adminLockedReason;
+    return this;
+  }
+
+  @Column(name = "is_aws")
+  public Boolean isAws() {
+    return Optional.ofNullable(isAws).orElse(false);
+  }
+
+  public DbWorkspace setAws(Boolean aws) {
+    isAws = aws;
     return this;
   }
 

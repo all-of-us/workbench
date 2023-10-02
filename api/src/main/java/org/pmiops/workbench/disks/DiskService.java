@@ -11,9 +11,11 @@ import org.pmiops.workbench.model.DiskStatus;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class DiskService {
   private static final Logger log = Logger.getLogger(DiskService.class.getName());
   private final LeonardoMapper leonardoMapper;

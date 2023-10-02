@@ -275,6 +275,11 @@ public class FreeTierBillingService {
    *     double
    */
   public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
+    //FIXME skip for AWS workspaces
+    if(dbWorkspace.isAws()) {
+      return 300;
+    }
+
     Double creatorCachedFreeTierUsage = this.getCachedFreeTierUsage(dbWorkspace.getCreator());
     Double creatorFreeTierDollarLimit = this.getUserFreeTierDollarLimit(dbWorkspace.getCreator());
     double creatorFreeCreditsRemaining =

@@ -7,12 +7,14 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -63,6 +65,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.rawls.model.RawlsWorkspaceDetails;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.AwsWorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceOperationMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -95,6 +98,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceService workspaceService;
 
+  private final AwsWorkspaceService awsWorkspaceService;
+
   @Autowired
   public WorkspacesController(
       CdrVersionDao cdrVersionDao,
@@ -113,7 +118,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceOperationDao workspaceOperationDao,
       WorkspaceOperationMapper workspaceOperationMapper,
       WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      AwsWorkspaceService awsWorkspaceService) {
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -131,6 +137,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceOperationMapper = workspaceOperationMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.awsWorkspaceService = awsWorkspaceService;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -166,6 +173,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbAccessTier accessTier = cdrVersion.getAccessTier();
     DbUser user = userProvider.get();
 
+    /*
+    In case of AWS, create the workspace differently.
+    */
+    boolean isAws = true;
+    if (isAws) {
+      workspace.setNamespace(fireCloudService.createBillingProjectName());
+      RawlsWorkspaceDetails fcWorkspace = awsWorkspaceService.createWorkspace(workspace);
+
+      final Workspace createdWorkspace =
+          createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, true);
+      return ResponseEntity.ok(createdWorkspace);
+    }
+
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
     String billingProject = createTerraBillingProject(accessTier);
     String firecloudName = FireCloudService.toFirecloudName(workspace.getName());
@@ -173,8 +193,44 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     RawlsWorkspaceDetails fcWorkspace =
         fireCloudService.createWorkspace(
             billingProject, firecloudName, accessTier.getAuthDomainName());
-    DbWorkspace dbWorkspace = createDbWorkspace(workspace, cdrVersion, user, fcWorkspace);
+
+    final Workspace createdWorkspace =
+        createDbWorkspace(workspace, cdrVersion, user, fcWorkspace, false);
+
+    if (cdrVersion.getTanagraEnabled()) {
+      try {
+        workspaceService.createTanagraStudy(
+            createdWorkspace.getNamespace(), createdWorkspace.getName());
+      } catch (Exception e) {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
+                createdWorkspace.getNamespace(), createdWorkspace.getName()),
+            e);
+      }
+    }
+    return ResponseEntity.ok(createdWorkspace);
+  }
+
+  @NotNull
+  private Workspace createDbWorkspace(
+      Workspace workspace,
+      DbCdrVersion cdrVersion,
+      DbUser user,
+      RawlsWorkspaceDetails fcWorkspace,
+      boolean isAws) {
+    DbWorkspace dbWorkspace =
+        createDbWorkspace(
+            workspace,
+            cdrVersion,
+            user,
+            fcWorkspace.getName(),
+            fcWorkspace.getNamespace(),
+            fcWorkspace.getWorkspaceId(),
+            fcWorkspace.getGoogleProject());
     try {
+      dbWorkspace.setAws(isAws);
       dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace
@@ -194,21 +250,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-
-    if (cdrVersion.getTanagraEnabled()) {
-      try {
-        workspaceService.createTanagraStudy(
-            createdWorkspace.getNamespace(), createdWorkspace.getName());
-      } catch (Exception e) {
-        log.log(
-            Level.SEVERE,
-            String.format(
-                "Could not create a Tanagra study for workspace namespace: %s, name: %s",
-                createdWorkspace.getNamespace(), createdWorkspace.getName()),
-            e);
-      }
-    }
-    return ResponseEntity.ok(createdWorkspace);
+    return createdWorkspace;
   }
 
   private DbWorkspaceOperation initWorkspaceOperation() {
@@ -270,17 +312,66 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceOperation> getWorkspaceOperation(Long id) {
-    return workspaceOperationDao
-        .findById(id)
+
+    Optional<DbWorkspaceOperation> dbWorkspaceOperation = workspaceOperationDao.findById(id);
+    return dbWorkspaceOperation
         // only callable by the creator
         .filter(dbOperation -> dbOperation.getCreatorId() == userProvider.get().getUserId())
-        .map(
-            op ->
-                ResponseEntity.ok()
-                    .body(
-                        workspaceOperationMapper.toModelWithWorkspace(
-                            op, workspaceDao, fireCloudService, workspaceMapper)))
+        .map(workspaceOperationMapper::toModelWithoutWorkspace)
+        .flatMap(
+            workspaceOperation -> {
+              Optional<DbWorkspace> activeByWorkspaceId =
+                  Optional.ofNullable(dbWorkspaceOperation.get().getWorkspaceId())
+                      .flatMap(workspaceId -> workspaceDao.findActiveByWorkspaceId(workspaceId));
+
+              if (activeByWorkspaceId.isPresent()) {
+                DbWorkspace dbWorkspace = activeByWorkspaceId.get();
+                if (dbWorkspace.isAws()) {
+                  return Optional.of(
+                          awsWorkspaceService.getWorkspace(
+                              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
+                      .map(
+                          wr ->
+                              workspaceOperationMapper.toModelWithWorkspace(
+                                  workspaceOperation, wr.getWorkspace()));
+                } else {
+                  return getFirecloudWorkspaceMaybe(
+                          dbWorkspace.getWorkspaceId(),
+                          workspaceDao,
+                          fireCloudService,
+                          workspaceMapper)
+                      .map(
+                          workspace -> {
+                            // Map workspaceOperation to a model with workspace here
+                            WorkspaceOperation modelWithWorkspace =
+                                workspaceOperationMapper.toModelWithWorkspace(
+                                    workspaceOperation, workspace);
+                            return modelWithWorkspace;
+                          });
+                }
+              }
+              return Optional.of(workspaceOperation);
+            })
+        .map(modelWithWorkspace -> ResponseEntity.ok().body(modelWithWorkspace))
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  private Optional<Workspace> getFirecloudWorkspaceMaybe(
+      long workspaceId,
+      WorkspaceDao workspaceDao,
+      FireCloudService fireCloudService,
+      WorkspaceMapper workspaceMapper) {
+    return workspaceDao
+        .findActiveByWorkspaceId(workspaceId)
+        .flatMap(
+            dbWorkspace ->
+                Optional.ofNullable(
+                        fireCloudService.getWorkspace(
+                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()))
+                    .map(
+                        fcWorkspaceResponse ->
+                            workspaceMapper.toApiWorkspace(
+                                dbWorkspace, fcWorkspaceResponse.getWorkspace())));
   }
 
   private void processWorkspaceTask(long operationId, Supplier<Workspace> workspaceAction) {
@@ -368,7 +459,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Workspace workspace,
       DbCdrVersion cdrVersion,
       DbUser user,
-      RawlsWorkspaceDetails fcWorkspace) {
+      String wsName,
+      String wsNamespace,
+      String wsId,
+      String googleProject) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     // The final step in the process is to clone the AoU representation of the
@@ -380,16 +474,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(workspace.getName());
     dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudName(fcWorkspace.getName());
-    dbWorkspace.setWorkspaceNamespace(fcWorkspace.getNamespace());
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setFirecloudName(wsName);
+    dbWorkspace.setWorkspaceNamespace(wsNamespace);
+    dbWorkspace.setFirecloudUuid(wsId);
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedBy(userProvider.get().getUsername());
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     dbWorkspace.setCdrVersion(cdrVersion);
-    dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
+    dbWorkspace.setGoogleProject(googleProject);
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -431,6 +525,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
 
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    if (dbWorkspace.isAws()) {
+      awsWorkspaceService.deleteWorkspace(dbWorkspace);
+      return ResponseEntity.ok(new EmptyResponse());
+    }
+
     workspaceService.deleteWorkspace(dbWorkspace);
     workspaceAuditor.fireDeleteAction(dbWorkspace);
 
@@ -458,13 +557,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
+    WorkspaceResponse workspace = awsWorkspaceService.getWorkspace(workspaceNamespace, workspaceId);
+    if (workspace != null) {
+      return ResponseEntity.ok(workspace);
+    }
     return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    return ResponseEntity.ok(
-        new WorkspaceResponseListResponse().items(workspaceService.getWorkspaces()));
+    List<WorkspaceResponse> workspaces = workspaceService.getWorkspaces();
+    List<WorkspaceResponse> awsWorkspaces = awsWorkspaceService.getWorkspaces();
+    workspaces.addAll(awsWorkspaces);
+    return ResponseEntity.ok(new WorkspaceResponseListResponse().items(workspaces));
   }
 
   @Override
@@ -599,7 +704,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             billingProject,
             firecloudName,
             accessTier.getAuthDomainName());
-    DbWorkspace dbWorkspace = createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspace);
+    DbWorkspace dbWorkspace =
+        createDbWorkspace(
+            toWorkspace,
+            toCdrVersion,
+            user,
+            toFcWorkspace.getName(),
+            toFcWorkspace.getNamespace(),
+            toFcWorkspace.getWorkspaceId(),
+            toFcWorkspace.getGoogleProject());
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);

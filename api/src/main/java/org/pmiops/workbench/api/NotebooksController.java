@@ -27,6 +27,7 @@ import org.pmiops.workbench.notebooks.NotebookUtils;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +37,11 @@ public class NotebooksController implements NotebooksApiDelegate {
 
   @Autowired private Clock clock;
   @Autowired private CloudStorageClient cloudStorageClient;
-  @Autowired private NotebooksService notebooksService;
+
+  @Autowired
+  @Qualifier("multicloudNotebookService")
+  private NotebooksService notebooksService;
+
   @Autowired private FireCloudService fireCloudService;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private Provider<DbUser> userProvider;

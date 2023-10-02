@@ -37,9 +37,11 @@ import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.resources.UserRecentResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class NotebooksServiceImpl implements NotebooksService {
   // Experimentally determined that generating the preview HTML for a >11MB notebook results in
   // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
