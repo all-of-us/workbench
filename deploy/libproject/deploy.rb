@@ -296,9 +296,9 @@ def deploy(cmd_name, args)
   #     --quiet
   # } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs"]
+  node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs", "`#{op.opts.project}`"]
 
-  common.run_inline node_cmd + [`#{op.opts.project}`, `#{op.opts.account}`]
+  common.run_inline node_cmd
 
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
