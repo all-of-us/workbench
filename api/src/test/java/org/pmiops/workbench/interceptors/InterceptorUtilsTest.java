@@ -83,8 +83,6 @@ public class InterceptorUtilsTest {
     Class<?>[] parameterTypes = {};
     String methodName = "toString";
     Method method = apiControllerClass.getMethod(methodName, parameterTypes);
-    ProfileApiController profileApiController =
-        new ProfileApiController(mock(ProfileController.class));
     HandlerMethod handlerMethod = mock(HandlerMethod.class);
 
     when(handlerMethod.getBeanType()).thenReturn((Class) NoMatchingApiControllerClass.class);
