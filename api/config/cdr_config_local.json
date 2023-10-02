@@ -31,7 +31,6 @@
       "creationTime": "2018-06-06 00:00:00Z",
       "releaseNumber": 1,
       "numParticipants": 0,
-      "cdrDbName": "cdr",
       "accessTier": "registered"
     },
     {
@@ -70,7 +69,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -104,7 +102,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "cdr",
       "accessTier": "registered"
     },
     {
@@ -168,7 +165,6 @@
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 10,
       "numParticipants": 234525,
-      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
@@ -189,7 +185,6 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 11,
       "numParticipants": 234525,
-      "cdrDbName": "cdr",
       "hasFitbitData": true,
       "hasFitbitSleepData": true,
       "hasCopeSurveyData": true,
