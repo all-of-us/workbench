@@ -25,7 +25,6 @@ public class WorkbenchConfig {
   public MandrillConfig mandrill;
   public AbsorbConfig absorb;
   public MoodleConfig moodle;
-  public AbsorbConfig absorb;
   public TanagraConfig tanagra;
   public ZendeskConfig zendesk;
   public AccessConfig access;
@@ -258,6 +257,7 @@ public class WorkbenchConfig {
   }
 
   public static class AbsorbConfig {
+    public String externalDepartmentId;
     public boolean enabledForNewUsers;
     public String samlIdentityProviderId;
     public String samlServiceProviderId;
@@ -266,10 +266,6 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public String credentialsKeyV2;
-  }
-
-  public static class AbsorbConfig {
-    public String externalDepartmentId;
   }
 
   public static class TanagraConfig {
