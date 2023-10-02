@@ -14,6 +14,7 @@ import { userAppsStore, useStore } from 'app/utils/stores';
 import {
   openRStudioOrConfigPanel,
   openSASOrConfigPanel,
+  openSagemakerOrConfigPanel
 } from 'app/utils/user-apps-utils';
 import { WorkspaceData } from 'app/utils/workspace-data';
 import { WorkspacePermissionsUtil } from 'app/utils/workspace-permissions';
@@ -67,6 +68,10 @@ export const AppSelector = (props: AppSelectorProps) => {
         setVisibleModal(VisibleModal.None);
         openSASOrConfigPanel(workspace.namespace, userApps);
         break;
+      case UIAppType.SAGEMAKER:
+        setVisibleModal(VisibleModal.None);
+        openSagemakerOrConfigPanel(workspace.namespace, userApps);
+        break;
     }
   };
 
@@ -89,7 +94,7 @@ export const AppSelector = (props: AppSelectorProps) => {
           VisibleModal.SelectAnApp,
           () => (
             <AppSelectorModal
-              {...{ selectedApp, setSelectedApp, onNext, onClose }}
+              {...{ selectedApp, setSelectedApp, onNext, onClose, workspace }}
             />
           ),
         ],

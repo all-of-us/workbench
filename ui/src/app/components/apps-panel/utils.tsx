@@ -28,6 +28,7 @@ export enum UIAppType {
   RSTUDIO = 'RStudio',
   CROMWELL = 'Cromwell',
   SAS = 'SAS',
+  SAGEMAKER = 'Sagemaker',
 }
 
 interface AppAssets {
@@ -131,6 +132,7 @@ export const toAppType: Record<UIAppType, AppType | null> = {
   [UIAppType.RSTUDIO]: AppType.RSTUDIO,
   [UIAppType.SAS]: AppType.SAS,
   [UIAppType.JUPYTER]: null,
+  [UIAppType.SAGEMAKER]: null
 };
 
 export const toUIAppType: Record<AppType, UIAppType> = {

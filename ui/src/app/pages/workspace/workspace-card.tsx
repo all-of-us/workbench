@@ -89,6 +89,7 @@ interface WorkspaceCardProps extends NavigationProps {
   reload(): Promise<void>;
   // non-CT users cannot click or see on CT workspaces.
   tierAccessDisabled?: boolean;
+  aws?: boolean;
 }
 
 export const WorkspaceCard = fp.flow(withNavigation)(
@@ -150,6 +151,7 @@ export const WorkspaceCard = fp.flow(withNavigation)(
         workspace: { accessTierShortName, adminLocked, namespace, id },
         accessLevel,
         tierAccessDisabled,
+        aws,
         navigate,
       } = this.props;
       const { confirmDeleting, showShareModal } = this.state;
@@ -265,6 +267,12 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                 </FlexColumn>
                 <FlexRow style={{ justifyContent: 'space-between' }}>
                   <FlexColumn>
+                  <div>{aws && <div  style={{
+                        ...styles.permissionBox,
+                        backgroundColor:
+                          colors.accent,
+                      }}>AWS</div>}</div>
+                      
                     <div
                       style={{
                         ...styles.permissionBox,
@@ -274,7 +282,9 @@ export const WorkspaceCard = fp.flow(withNavigation)(
                       data-test-id='workspace-access-level'
                     >
                       {accessLevel}
+                      
                     </div>
+                    
                     <div style={{ fontSize: 12 }}>
                       Last Changed: {displayDate(workspace.lastModifiedTime)}
                     </div>

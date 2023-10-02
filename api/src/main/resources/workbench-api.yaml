@@ -7097,6 +7097,9 @@ components:
         googleProject:
           type: string
           description: the google project used by the workspace for compute and storage
+        aws:
+          type: boolean
+          default: false
       example:
         billingAccountName: billingAccounts/000000-AAAAAA-111111
         billingStatus: ACTIVE

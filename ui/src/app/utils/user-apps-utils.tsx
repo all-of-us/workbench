@@ -143,6 +143,21 @@ export const openSAS = (
   window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
 };
 
+
+export const openSagemaker = (
+  workspaceNamespace: string,
+  userApp: UserAppEnvironment
+) => {
+  localizeUserApp(
+    workspaceNamespace,
+    userApp.appName,
+    userApp.appType,
+    [],
+    false
+  );
+  window.open(userApp.proxyUrls[GKE_APP_PROXY_PATH_SUFFIX], '_blank').focus();
+};
+
 export const openRStudioOrConfigPanel = (
   workspaceNamespace: string,
   userApps: ListAppsResponse
@@ -150,6 +165,18 @@ export const openRStudioOrConfigPanel = (
   const userApp = findApp(userApps, UIAppType.RSTUDIO);
   if (userApp?.status === AppStatus.RUNNING) {
     openRStudio(workspaceNamespace, userApp);
+  } else {
+    setSidebarActiveIconStore.next(rstudioConfigIconId);
+  }
+};
+
+export const openSagemakerOrConfigPanel = (
+  workspaceNamespace: string,
+  userApps: ListAppsResponse
+) => {
+  const userApp = findApp(userApps, UIAppType.RSTUDIO);
+  if (userApp?.status === AppStatus.RUNNING) {
+    openSagemaker(workspaceNamespace, userApp);
   } else {
     setSidebarActiveIconStore.next(rstudioConfigIconId);
   }

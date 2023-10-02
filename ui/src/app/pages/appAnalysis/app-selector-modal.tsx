@@ -28,16 +28,17 @@ interface AppSelectorModalProps {
   setSelectedApp: (UIAppType) => void;
   onNext: () => void;
   onClose: () => void;
+  workspace: Workspace;
 }
 export const AppSelectorModal = (props: AppSelectorModalProps) => {
   const { selectedApp, setSelectedApp, onNext, onClose } = props;
   const { config } = useStore(serverConfigStore);
   // in display order
-  const appList = [
+  const appList = workspace.aws ? [UIAppType.SAGEMAKER] : [
     UIAppType.JUPYTER,
     ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
     ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
-  ];
+  ] ;
 
   return (
     <Modal

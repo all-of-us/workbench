@@ -103,6 +103,7 @@ import { supportUrls } from 'app/utils/zendesk';
 
 import { OldCdrVersionModal } from './old-cdr-version-modal';
 import { UnavailableTierModal } from './unavailable-tier-modal';
+import CloudCard from './workspace-cloud-select';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -1729,6 +1730,13 @@ export const WorkspaceEdit = fp.flow(
                 )}
               </WorkspaceEditSection>
             )}
+            <hr style={{ marginTop: '1.5rem' }} />
+            <WorkspaceEditSection header={"Cloud Technology"}>
+              <FlexRow>
+                <CloudCard />
+              </FlexRow>
+            </WorkspaceEditSection>
+            
             <hr style={{ marginTop: '1.5rem' }} />
             <WorkspaceEditSection
               header={

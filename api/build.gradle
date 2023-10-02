@@ -25,6 +25,9 @@ buildscript {
 
     repositories {
         mavenCentral()
+        maven {
+            url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
+        }
     }
 
     // https://github.com/spring-projects/spring-boot/issues/26864
@@ -365,11 +368,13 @@ clean.doFirst {
 }
 
 repositories {
-    maven {
-        // for Terra service clients (currently sam-client)
-        url 'https://broadinstitute.jfrog.io/artifactory/libs-release-local'
-    }
     mavenCentral()
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release-local/'
+    }
+    maven {
+        url "https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/"
+    }
 }
 
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
@@ -486,6 +491,8 @@ dependencies {
     implementation("org.broadinstitute.dsde.workbench:sam-client_2.13:0.1-00d8cfd-SNAP") {
       exclude group: 'org.apache.oltu.oauth2', module: 'org.apache.oltu.oauth2.common'
     }
+
+    implementation group: 'bio.terra', name: 'workspace-manager-client', version: '0.254.917-SNAPSHOT'
 
     // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
     // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)

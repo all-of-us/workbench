@@ -156,6 +156,7 @@ export const WorkspaceList = fp.flow(withUserProfile())(
                             key={wp.workspace.namespace}
                             workspace={wp.workspace}
                             accessLevel={wp.accessLevel}
+                            aws={wp.workspace.aws}
                             reload={() => this.reloadWorkspaces()}
                             tierAccessDisabled={
                               !hasTierAccess(
