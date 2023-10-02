@@ -565,6 +565,8 @@ const presetEquals = (a: Runtime, b: Runtime): boolean => {
     // numberOfWorkerLocalSSDs is currently part of the API spec, but is not used by the panel.
     fp.omit(['dataprocConfig.numberOfWorkerLocalSSDs'])
   );
+  console.log('stripa', strip(a));
+  console.log('stripb', strip(b));
   return fp.isEqual(strip(a), strip(b));
 };
 
@@ -602,6 +604,13 @@ export const fromAnalysisConfig = (analysisConfig: AnalysisConfig): Runtime => {
       diskSize: diskConfig.size,
     };
   }
+
+  console.log('runtime', runtime);
+  const preset = fp.find(
+    ({ runtimeTemplate }) => presetEquals(runtime, runtimeTemplate),
+    runtimePresets
+  );
+  console.log('preset', preset);
 
   // If the selected runtime matches a preset, plumb through the appropriate configuration type.
   runtime.configurationType =
