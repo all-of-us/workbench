@@ -673,26 +673,10 @@ export const addPersistentDisk = (
 export const maybeWithExistingDisk = (
   runtime: Runtime,
   existingDisk: Disk | null
-): Runtime => {
-  if (!runtime || !existingDisk || runtime.dataprocConfig) {
-    return runtime;
-  } else {
-    return addPersistentDisk(runtime, existingDisk);
-  }
-
-  return {
-    ...runtime,
-    gceConfig: null,
-    gceWithPdConfig: {
-      ...runtime.gceConfig,
-      persistentDisk: {
-        name: existingDisk.name,
-        size: existingDisk.size,
-        diskType: existingDisk.diskType,
-      },
-    },
-  };
-};
+): Runtime =>
+  runtime && existingDisk && !runtime.dataprocConfig
+    ? addPersistentDisk(runtime, existingDisk)
+    : runtime;
 
 export const withAnalysisConfigDefaults = (
   r: AnalysisConfig,
