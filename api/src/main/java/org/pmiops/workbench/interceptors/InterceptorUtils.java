@@ -20,7 +20,8 @@ public class InterceptorUtils {
     // The matcher assumes that all Controllers are within the same package as the generated
     // ApiController (api package)
     // There's no concise way to find out what class implements the delegate interface, so instead
-    // depend on naming conventions. This removes "Api" from the class name when the classname includes the word Controller.
+    // depend on naming conventions. This removes "Api" from the class name when the classname
+    // includes the word Controller.
     final String controllerName =
         API_CONTROLLER_PATTERN.matcher(apiControllerName).replaceAll("$1$2");
 
