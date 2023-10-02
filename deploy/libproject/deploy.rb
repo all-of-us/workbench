@@ -298,7 +298,7 @@ def deploy(cmd_name, args)
 
   node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs"]
 
-  common.run_inline node_cmd + [project, version, promote, dry_run, environment_name, account, key_file]
+  common.run_inline node_cmd + ["testing"]
 
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
