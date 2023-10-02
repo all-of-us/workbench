@@ -21,6 +21,7 @@ import org.pmiops.workbench.api.ProfileApiController;
 import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.api.UserAdminApiController;
 import org.pmiops.workbench.api.UserAdminController;
+import org.pmiops.workbench.model.Authority;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.method.HandlerMethod;
@@ -54,7 +55,7 @@ public class InterceptorUtilsTest {
     Method controllerMethod = InterceptorUtils.getControllerMethod(handlerMethod);
     assertThat(controllerMethod.getName()).isEqualTo(methodName);
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);
-    assertThat(req.value()[0].name()).isEqualTo("ACCESS_CONTROL_ADMIN");
+    assertThat(req.value()).asList().containsExactly(Authority.ACCESS_CONTROL_ADMIN);
   }
 
   @Test
