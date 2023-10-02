@@ -30,7 +30,6 @@
       "creationTime": "2018-06-06 00:00:00Z",
       "releaseNumber": 1,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2020q1_1",
       "accessTier": "registered"
     },
     {
@@ -42,7 +41,6 @@
       "creationTime": "2018-11-16 00:00:00Z",
       "releaseNumber": 1,
       "numParticipants": 0,
-      "cdrDbName": "r_2019q1_4",
       "accessTier": "registered"
     },
     {
@@ -54,7 +52,6 @@
       "creationTime": "2019-05-10 00:00:00Z",
       "releaseNumber": 2,
       "numParticipants": 0,
-      "cdrDbName": "r_2019q2_2",
       "accessTier": "registered"
     },
     {
@@ -66,7 +63,6 @@
       "creationTime": "2019-05-10 00:00:00Z",
       "releaseNumber": 2,
       "numParticipants": 0,
-      "cdrDbName": "r_2019q2_2",
       "accessTier": "registered"
     },
     {

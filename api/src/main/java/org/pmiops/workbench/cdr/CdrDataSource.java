@@ -43,7 +43,8 @@ public class CdrDataSource extends AbstractRoutingDataSource {
 
   List<DbCdrVersion> getCdrVersions() {
     EntityManager em = emFactory.createEntityManager();
-    // Add null check in query since we will no longer need the CDR CloudSQL index databases when migrating to Tanagra
+    // Add null check since migrating to Tanagra will not require a CloudSQL CDR index.
+    // This also allows for skipping removed datasets.
     String jpql = "SELECT v FROM DbCdrVersion v WHERE v.cdrDbName IS NOT NULL";
     TypedQuery<DbCdrVersion> query = em.createQuery(jpql, DbCdrVersion.class);
     try {
