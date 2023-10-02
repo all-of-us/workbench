@@ -3,11 +3,18 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { ListRuntimeResponse, RuntimeApi } from 'generated/fetch';
+import {
+  ListRuntimeResponse,
+  RuntimeApi,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+} from 'generated/fetch';
 
+import { stubDisk } from '../../testing/stubs/disks-api-stub';
 import { render, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
+  addPersistentDisk,
   AnalysisDiffState,
   findMostSevereDiffState,
   getCreator,
@@ -20,7 +27,11 @@ import {
 } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
-import { defaultRuntime, RuntimeApiStub } from 'testing/stubs/runtime-api-stub';
+import {
+  defaultGceRuntime,
+  defaultRuntime,
+  RuntimeApiStub,
+} from 'testing/stubs/runtime-api-stub';
 
 const WORKSPACE_NS = 'test';
 
@@ -108,7 +119,9 @@ describe('runtime-utils', () => {
       expect(runtime('2')).toHaveTextContent('foo');
     });
   });
+});
 
+describe(findMostSevereDiffState.name, () => {
   test.each([
     [[], undefined],
     [[AnalysisDiffState.NEEDS_DELETE], AnalysisDiffState.NEEDS_DELETE],
@@ -147,7 +160,9 @@ describe('runtime-utils', () => {
   ])('findMostSevereDiffState(%s) = %s', (diffStates, want) => {
     expect(findMostSevereDiffState(diffStates)).toEqual(want);
   });
+});
 
+describe(getCreator.name, () => {
   test.each([
     ['a runtime without a creator label', defaultRuntime(), undefined],
     [
@@ -166,4 +181,32 @@ describe('runtime-utils', () => {
       expected: string | undefined
     ) => expect(getCreator(runtimeResponse)).toEqual(expected)
   );
+});
+
+describe(addPersistentDisk.name, () => {
+  it('adds a persistent disk to a GCE runtime', () => {
+    const runtime = defaultGceRuntime();
+    const disk = stubDisk();
+
+    const newRuntime = addPersistentDisk(runtime, disk);
+
+    expect(newRuntime.gceWithPdConfig).toBeTruthy();
+    expect(newRuntime.gceConfig).toBeFalsy();
+    expect(newRuntime.dataprocConfig).toBeFalsy();
+
+    // fields copied from the original runtime
+    expect(newRuntime.runtimeName).toEqual(runtime.runtimeName);
+    expect(newRuntime.googleProject).toEqual(runtime.googleProject);
+    expect(newRuntime.status).toEqual(runtime.status);
+    expect(newRuntime.createdDate).toEqual(runtime.createdDate);
+    expect(newRuntime.toolDockerImage).toEqual(runtime.toolDockerImage);
+    expect(newRuntime.configurationType).toEqual(runtime.configurationType);
+
+    // fields copied from the disk
+    expect(newRuntime.gceWithPdConfig.persistentDisk.size).toEqual(disk.size);
+    expect(newRuntime.gceWithPdConfig.persistentDisk.name).toEqual(disk.name);
+    expect(newRuntime.gceWithPdConfig.persistentDisk.diskType).toEqual(
+      disk.diskType
+    );
+  });
 });

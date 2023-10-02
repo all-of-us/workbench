@@ -203,7 +203,7 @@ const PanelMain = fp.flow(
         // by default we want to offer that the user reattach their existing disk,
         // if any and if the configuration allows it.
 
-        gcePersistentDisk && !currentRuntime.dataprocConfig
+        gcePersistentDisk && !!currentRuntime.gceConfig
           ? addPersistentDisk(currentRuntime, gcePersistentDisk)
           : currentRuntime
       );
