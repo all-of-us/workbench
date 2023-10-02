@@ -92,6 +92,7 @@
   },
   "absorb": {
     "externalDepartmentId": "Researchers",
+    "externalDepartmentIdPopulatedForNewUsers": false,
     "enabledForNewUsers": false,
     "samlIdentityProviderId": "TODO",
     "samlServiceProviderId": "TODO"
