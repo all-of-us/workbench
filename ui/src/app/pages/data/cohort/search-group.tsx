@@ -308,11 +308,12 @@ export const SearchGroup = withCurrentWorkspace()(
             const groupName =
               group.name ??
               `Group ${
-                groupIndex +
-                1 +
-                (role === 'excludes'
-                  ? searchRequestStore.getValue().includes.length + 1
-                  : 0)
+                role === 'excludes'
+                  ? searchRequestStore.getValue().includes.length +
+                    1 +
+                    groupIndex +
+                    1
+                  : groupIndex + 1
               }`;
             currentGroupCounts.push({
               groupId: group.id,
@@ -644,7 +645,16 @@ export const SearchGroup = withCurrentWorkspace()(
         overlayStyle,
         renaming,
       } = this.state;
-      const groupName = !!name ? name : `Group ${groupIndex + 1}`;
+      const groupName = !!name
+        ? name
+        : `Group ${
+            role === 'excludes'
+              ? searchRequestStore.getValue().includes.length +
+                1 +
+                groupIndex +
+                1
+              : groupIndex + 1
+          }`;
       const showGroupCount =
         !loading &&
         !error &&

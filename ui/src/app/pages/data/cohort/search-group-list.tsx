@@ -215,7 +215,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace())(
             <div key={g} data-test-id={`${role}-search-group`}>
               <SearchGroup
                 group={group}
-                groupIndex={g + index}
+                groupIndex={g}
                 role={role}
                 roleIndex={g}
                 setSearchContext={setSearchContext}
