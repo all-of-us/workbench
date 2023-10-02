@@ -56,6 +56,9 @@ class FakeApiController {
 class FakeController {
   @AuthorityRequired({Authority.SECURITY_ADMIN})
   public void handle() {}
+
+  //Needed for tests that look for this method.
+  public void getMe(){}
 }
 
 @SpringJUnitConfig
@@ -111,6 +114,8 @@ public class AuthInterceptorTest {
   }
 
   private void mockGetCallWithBearerToken() {
+    Class mockClass = FakeController.class;
+    when(mockHandler.getBeanType()).thenReturn(mockClass);
     when(mockHandler.getMethod()).thenReturn(getTestMethod());
     when(mockRequest.getMethod()).thenReturn(HttpMethods.GET);
     when(mockRequest.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
@@ -161,7 +166,7 @@ public class AuthInterceptorTest {
   }
 
   @Test
-  public void preHandleGet_firecloudLookupFails() throws Exception {
+  public void preHandleGet_firecloudLookupFails() {
     mockGetCallWithBearerToken();
 
     Userinfo userInfo = new Userinfo();
