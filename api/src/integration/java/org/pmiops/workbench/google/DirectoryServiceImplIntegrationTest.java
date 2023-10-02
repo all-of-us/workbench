@@ -40,6 +40,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     String userPrefix = String.format("integration.test.%d", Clock.systemUTC().millis());
     String username = userPrefix + "@" + config.googleDirectoryService.gSuiteDomain;
     service.createUser("Integration", "Test", username, "notasecret@gmail.com");
+    config.absorb.externalDepartmentIdPopulatedForNewUsers = true;
     boolean userNameTaken = retryTemplate().execute(c -> service.isUsernameTaken(userPrefix));
     assertThat(userNameTaken).isTrue();
 
@@ -59,7 +60,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
     assertThat(aouMeta)
-        .containsEntry("Absorb_department_external_ID", config.absorb.externalDepartmentId);
+        .containsEntry("Absorb_external_department_ID", config.absorb.externalDepartmentId);
     assertThat(service.getContactEmail(username)).hasValue("notasecret@gmail.com");
 
     retryTemplate()
