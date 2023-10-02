@@ -425,6 +425,7 @@ export class AccountCreation extends React.Component<
     return fp.isEmpty(errors) ? undefined : errors;
   }
 
+  // We need to stop showing demographic survey only after Nov-03
   isInternational = () => {
     return (
       new Date() >= INTL_USER_SIGN_IN_CHECK &&
@@ -433,8 +434,7 @@ export class AccountCreation extends React.Component<
   };
 
   render() {
-    // const { enableCaptcha } = serverConfigStore.get().config;
-    const enableCaptcha = true;
+    const { enableCaptcha } = serverConfigStore.get().config;
     const {
       profile: {
         givenName,
@@ -1038,7 +1038,7 @@ export class AccountCreation extends React.Component<
                 }
               />
             </Section>
-
+            {/* After Nov-03, if the user is international, proceed to submit the account creation request at this stage.*/}
             {!!this.state.countryDropdownSelection &&
               this.isInternational() &&
               enableCaptcha && (
@@ -1065,6 +1065,7 @@ export class AccountCreation extends React.Component<
               >
                 Previous
               </Button>
+              {/* In case of internation user add a new error/check: captcha should be filled*/}
               <TooltipTrigger
                 content={
                   errors ? (
@@ -1088,6 +1089,7 @@ export class AccountCreation extends React.Component<
                   this.state.captcha
                 }
               >
+                {/* After Nov-03, Show submit if user in international else Next to show Survey*/}
                 {!!this.state.countryDropdownSelection &&
                 this.isInternational() ? (
                   <Button

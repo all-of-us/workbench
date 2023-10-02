@@ -36,7 +36,6 @@ const createProps = (): AccountCreationProps => ({
   captureCaptchaResponse: (token) => {
     console.log(token);
   },
-  // // ToDo change this
   captchaRef: null,
 });
 
