@@ -417,25 +417,30 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   // This method is being used if user is international
   private updateProfileAndCreateAccount = (profile: Profile) => {
     this.setState({ profile: profile });
-    this.onSubmit();
+    // setState is flaky, sometimes it is unable to set profile by the time submit happens
+    // hence to be sure lets just pass profile to submit method
+    this.onSubmit(profile);
   };
-  private onSubmit = async () => {
+  private onSubmit = async (profileArg = null) => {
     const { enableCaptcha } = serverConfigStore.get().config;
     this.setState({
       loading: true,
     });
     this.props.showSpinner();
 
+    const profileToSubmit =
+      !!profileArg && profileArg.address ? profileArg : this.state.profile;
+
     try {
       const newProfile = await profileApi().createAccount({
-        profile: this.state.profile,
+        profile: profileToSubmit,
         captchaVerificationToken: this.state.captchaToken,
         termsOfServiceVersion: this.state.termsOfServiceVersion,
       });
 
       this.setState({
         profile: newProfile,
-        currentStep: this.getNextStep(this.state.currentStep),
+        currentStep: this.getNextStep(this.state.currentStep, newProfile),
         loading: false,
         isPreviousStep: false,
       });
