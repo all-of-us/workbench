@@ -282,19 +282,24 @@ def deploy(cmd_name, args)
 
   maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
                       "service (including DB updates)"
-  common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+  # common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
 
   maybe_log_jira.call "'#{op.opts.project}': completed api service " +
                       "deployment; beginning deploy of UI service"
-  common.run_inline %W{
-    ../ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
+  # common.run_inline %W{
+  #   ../ui/project.rb deploy-ui
+  #     --project #{op.opts.project}
+  #     --account #{op.opts.account}
+  #     --key-file #{op.opts.key_file}
+  #     --version #{op.opts.app_version}
+  #     #{op.opts.promote ? "--promote" : "--no-promote"}
+  #     --quiet
+  # } + (op.opts.dry_run ? %W{--dry-run} : [])
+
+  node_cmd = ["node", "../ui/libproject/buildAndDeploy.mjs"]
+
+  common.run_inline node_cmd + [project, version, promote, dry_run, environment_name, account, key_file]
+
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
   if create_ticket
