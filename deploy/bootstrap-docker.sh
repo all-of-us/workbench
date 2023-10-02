@@ -24,7 +24,7 @@ git fetch --tags
 # Drop any untracked/ignored files which may have carried over, to ensure a clean build.
 git clean -fdx
 
-git checkout "nsaxena/deploy_latest"
+git checkout "nsaxena/deploy_Latest"
 #git checkout "${WORKBENCH_VERSION}"
 git submodule update -f --init --recursive
 git status
