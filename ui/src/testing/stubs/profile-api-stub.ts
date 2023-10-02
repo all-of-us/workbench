@@ -1,12 +1,12 @@
 import {
   AccessModule,
   AdminTableUser,
+  AdminUserListResponse,
   InstitutionalRole,
   Profile,
   ProfileApi,
   UsernameTakenResponse,
 } from 'generated/fetch';
-import { AdminUserListResponse } from 'generated/fetch';
 
 import { AccessTierShortNames } from 'app/utils/access-tiers';
 
@@ -154,5 +154,9 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve({
       isTaken: false,
     });
+  }
+
+  public useAbsorb() {
+    return Promise.resolve(false);
   }
 }

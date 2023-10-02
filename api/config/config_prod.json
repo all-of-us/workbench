@@ -90,6 +90,11 @@
   "zendesk": {
     "host": "https:\/\/aousupporthelp.zendesk.com"
   },
+  "absorb": {
+    "enabledForNewUsers": false,
+    "samlIdentityProviderId": "TODO",
+    "samlServiceProviderId": "TODO"
+  },
   "moodle": {
     "host": "aou.nnlm.gov",
     "credentialsKeyV2": "moodle-key-v2.txt"
