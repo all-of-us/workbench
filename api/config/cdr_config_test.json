@@ -109,7 +109,7 @@
     },
     {
       "cdrVersionId": 7,
-      "isDefault": true,
+      "isDefault": false,
       "name": "Synthetic Dataset v4",
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "SR2022Q4R6",
@@ -125,7 +125,7 @@
     },
     {
       "cdrVersionId": 8,
-      "isDefault": true,
+      "isDefault": false,
       "name": "Synthetic Dataset in the Controlled Tier v4",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "SC2022Q4R6",
@@ -184,6 +184,44 @@
       "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
       "accessTier": "controlled",
       "tanagraEnabled": true
+    },
+    {
+      "cdrVersionId": 11,
+      "isDefault": true,
+      "name": "Synthetic Dataset v5",
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2023Q3R1",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 7,
+      "numParticipants": 234525,
+      "cdrDbName": "sr_2023q2_2",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 12,
+      "isDefault": true,
+      "name": "Synthetic Dataset in the Controlled Tier v5",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "SC2023Q3R1",
+      "wgsBigqueryDataset": "1kg_wgs_2022q1",
+      "wgsFilterSetName": "example",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 8,
+      "numParticipants": 234525,
+      "cdrDbName": "sc_2023q3_2",
+      "hasFitbitData": true,
+      "hasFitbitSleepData": true,
+      "hasCopeSurveyData": true,
+      "hasSurveyConductData": true,
+      "storageBasePath": "5",
+      "wgsVcfMergedStoragePath": "wgs/vcf/merged",
+      "wgsCramManifestPath": "wgs/cram/manifest.csv",
+      "microarrayVcfSingleSampleStoragePath": "microarray/vcf/single_sample",
+      "accessTier": "controlled"
     }
   ]
 }
