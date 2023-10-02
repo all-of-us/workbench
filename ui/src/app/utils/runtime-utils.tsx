@@ -669,15 +669,6 @@ export const addPersistentDisk = (
   };
 };
 
-// Attach an existing disk to the given runtime, if the configuration allows it.
-export const maybeWithExistingDisk = (
-  runtime: Runtime,
-  existingDisk: Disk | null
-): Runtime =>
-  runtime && existingDisk && !runtime.dataprocConfig
-    ? addPersistentDisk(runtime, existingDisk)
-    : runtime;
-
 export const withAnalysisConfigDefaults = (
   r: AnalysisConfig,
   existingPersistentDisk: Disk | null
