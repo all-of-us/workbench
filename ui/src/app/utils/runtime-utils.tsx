@@ -661,7 +661,7 @@ export const addPersistentDisk = (
   const { name, size, diskType } = persistentDisk;
   return {
     ...runtime,
-    gceConfig: undefined,
+    gceConfig: null, // TODO: why not undefined?
     gceWithPdConfig: {
       ...runtime.gceConfig, // note: gceConfig.diskSize is discarded.  this is what we want.
       persistentDisk: { name, size, diskType },
