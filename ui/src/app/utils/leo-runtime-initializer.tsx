@@ -7,7 +7,7 @@ import { isAbortError, reportError } from 'app/utils/errors';
 import { applyPresetOverride, runtimePresets } from 'app/utils/runtime-presets';
 import { runtimeDiskStore, runtimeStore } from 'app/utils/stores';
 
-import { addPersistentDisk } from './runtime-utils';
+import { maybeWithPersistentDisk } from './runtime-utils';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -100,7 +100,7 @@ export const throwRuntimeNotFound = (
         !!gcePersistentDisk,
       () =>
         applyPresetOverride(
-          addPersistentDisk(currentRuntime, gcePersistentDisk)
+          maybeWithPersistentDisk(currentRuntime, gcePersistentDisk)
         ),
     ],
     // this workspace previously contained a GCE runtime, and no GCE PD exists, but we require a PD for all GCE runtimes,
@@ -113,7 +113,7 @@ export const throwRuntimeNotFound = (
         !gcePersistentDisk,
       () =>
         applyPresetOverride(
-          addPersistentDisk(
+          maybeWithPersistentDisk(
             currentRuntime,
             runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
               .persistentDisk

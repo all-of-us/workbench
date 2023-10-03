@@ -8,10 +8,10 @@ import { ListRuntimeResponse, RuntimeApi } from 'generated/fetch';
 import { render, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
-  addPersistentDisk,
   AnalysisDiffState,
   findMostSevereDiffState,
   getCreator,
+  maybeWithPersistentDisk,
   useCustomRuntime,
 } from 'app/utils/runtime-utils';
 import {
@@ -23,7 +23,9 @@ import {
 import defaultServerConfig from 'testing/default-server-config';
 import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
+  defaultDataProcRuntime,
   defaultGceRuntime,
+  defaultGceRuntimeWithPd,
   defaultRuntime,
   RuntimeApiStub,
 } from 'testing/stubs/runtime-api-stub';
@@ -178,12 +180,46 @@ describe(getCreator.name, () => {
   );
 });
 
-describe(addPersistentDisk.name, () => {
-  it('adds a persistent disk to a GCE runtime', () => {
+describe(maybeWithPersistentDisk.name, () => {
+  it('returns the existing runtime when dataproc', () => {
+    const runtime = defaultDataProcRuntime();
+    const disk = {
+      ...stubDisk(),
+      name: 'a non default value',
+    };
+    const newRuntime = maybeWithPersistentDisk(runtime, disk);
+    expect(newRuntime).toEqual(runtime);
+  });
+
+  it('returns the existing runtime when a PD is already attached', () => {
+    const runtime = defaultGceRuntimeWithPd();
+    const disk = {
+      ...stubDisk(),
+      name: 'a non default value',
+    };
+    const newRuntime = maybeWithPersistentDisk(runtime, disk);
+    expect(newRuntime).toEqual(runtime);
+  });
+
+  it('returns the existing GCE (no PD) runtime when a the disk is null', () => {
+    const runtime = defaultGceRuntime();
+    const disk = null;
+    const newRuntime = maybeWithPersistentDisk(runtime, disk);
+    expect(newRuntime).toEqual(runtime);
+  });
+
+  it('returns the existing GCE (no PD) runtime when a the disk is undefined', () => {
+    const runtime = defaultGceRuntime();
+    const disk = undefined;
+    const newRuntime = maybeWithPersistentDisk(runtime, disk);
+    expect(newRuntime).toEqual(runtime);
+  });
+
+  it('adds a persistent disk to a GCE (no PD) runtime', () => {
     const runtime = defaultGceRuntime();
     const disk = stubDisk();
 
-    const newRuntime = addPersistentDisk(runtime, disk);
+    const newRuntime = maybeWithPersistentDisk(runtime, disk);
 
     expect(newRuntime.gceWithPdConfig).toBeTruthy();
     expect(newRuntime.gceConfig).toBeFalsy();
