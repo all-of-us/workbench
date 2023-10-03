@@ -167,12 +167,13 @@ public class AuthInterceptorTest {
   public void preHandleGet_usingServiceAccountNotInDb() throws Exception {
     mockGetCallWithBearerToken();
     Userinfo userInfo = new Userinfo();
-    String serviceAccountEmail = workbenchConfig.auth.serviceAccountApiUsers.stream()
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new RuntimeException(
-                    "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    String serviceAccountEmail =
+        workbenchConfig.auth.serviceAccountApiUsers.stream()
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
     userInfo.setEmail(serviceAccountEmail);
     when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(null);
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
@@ -184,12 +185,13 @@ public class AuthInterceptorTest {
   public void preHandleGet_usingServiceAccountInDb() throws Exception {
     mockGetCallWithBearerToken();
     Userinfo userInfo = new Userinfo();
-    String serviceAccountEmail = workbenchConfig.auth.serviceAccountApiUsers.stream()
-        .findFirst()
-        .orElseThrow(
-            () ->
-                new RuntimeException(
-                    "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    String serviceAccountEmail =
+        workbenchConfig.auth.serviceAccountApiUsers.stream()
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new RuntimeException(
+                        "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
     userInfo.setEmail(serviceAccountEmail);
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(new DbUser());
