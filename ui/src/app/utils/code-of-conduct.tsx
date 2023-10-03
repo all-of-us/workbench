@@ -4,7 +4,7 @@ import { serverConfigStore } from './stores';
  * Returns the list of current-for-compliance DUCC versions.
  * One of these versions must be signed in order to receive Registered Tier and Controlled Tier data access.
  */
-const getCurrentDUCCVersions = (): number[] =>
+export const getCurrentDUCCVersions = (): number[] =>
   serverConfigStore.get().config.currentDuccVersions;
 
 /**
