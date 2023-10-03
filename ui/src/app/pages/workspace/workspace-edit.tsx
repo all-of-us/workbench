@@ -412,8 +412,8 @@ export const WorkspaceEdit = fp.flow(
         name:
           'billingAccounts/' +
           serverConfigStore.get().config.freeTierBillingAccountId,
-        isFreeTier: true,
-        isOpen: true,
+        freeTier: true,
+        open: true,
         displayName: this.formatFreeTierBillingAccountName(),
       };
       // If user hasn't granted GCP billing scope to workbench, we can not fetch billing account from Google
@@ -451,8 +451,8 @@ export const WorkspaceEdit = fp.flow(
                 {
                   name: this.props.workspace.billingAccountName,
                   displayName: 'User Provided Billing Account',
-                  isFreeTier: false,
-                  isOpen: true,
+                  freeTier: false,
+                  open: true,
                 },
               ],
             });
@@ -469,7 +469,7 @@ export const WorkspaceEdit = fp.flow(
 
       // Replace the free billing account with a new display name that has spend usage.
       return billingAccounts.map((b) => {
-        if (b.isFreeTier) {
+        if (b.freeTier) {
           return {
             ...b,
             displayName: this.formatFreeTierBillingAccountName(),
@@ -486,8 +486,8 @@ export const WorkspaceEdit = fp.flow(
       billingAccounts.push({
         name: this.props.workspace.billingAccountName,
         displayName: 'User Provided Billing Account',
-        isFreeTier: false,
-        isOpen: true,
+        freeTier: false,
+        open: true,
       });
 
       if (
@@ -517,7 +517,7 @@ export const WorkspaceEdit = fp.flow(
         this.isMode(WorkspaceEditMode.Duplicate)
       ) {
         const maybeFreeTierAccount = formattedBillingAccounts.find(
-          (billingAccount) => billingAccount.isFreeTier
+          (billingAccount) => billingAccount.freeTier
         );
         if (maybeFreeTierAccount) {
           this.setState((prevState) =>
@@ -1288,7 +1288,7 @@ export const WorkspaceEdit = fp.flow(
       return this.state.billingAccounts.map((a) => ({
         label: a.displayName,
         value: a.name,
-        disabled: !a.isOpen,
+        disabled: !a.open,
       }));
     }
 

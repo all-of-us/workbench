@@ -404,7 +404,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       }
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetConceptIds.stream()
-              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
       List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
       List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
       queryBuilder.append(" \nWHERE (");
@@ -433,7 +433,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       queryBuilder.append(")");
     }
 
-    if (!request.getIncludesAllParticipants()) {
+    if (!request.isIncludesAllParticipants()) {
       final ImmutableList<QueryAndParameters> queryMapEntries =
           cohortService.findAllByCohortIdIn(request.getCohortIds()).stream()
               .map(this::getCohortQueryStringAndCollectNamedParameters)
@@ -778,7 +778,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       StringBuilder queryBuilder = new StringBuilder();
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetConceptIds.stream()
-              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
       String standardConceptIds =
           partitionSourceAndStandard.get(true).stream()
               .map(c -> c.getConceptId().toString())
@@ -923,7 +923,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private List<String> generateWgsCode(
       DataSetExportRequest dataSetExportRequest, DbWorkspace dbWorkspace, String qualifier) {
-    if (!dataSetExportRequest.getGenerateGenomicsAnalysisCode()) {
+    if (!dataSetExportRequest.isGenerateGenomicsAnalysisCode()) {
       return new ArrayList<>();
     }
 
@@ -1646,7 +1646,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       // get all source concepts
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
           dbConceptSetList.get(0).getConceptSetConceptIds().stream()
-              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
       List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
 
       Long[] sourceConceptIds =
@@ -1706,14 +1706,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Domain domain, List<Long> conceptSetIds) {
     List<DbConceptSetConceptId> dbConceptSetConceptIds =
         findDomainConceptIds(domain, conceptSetIds).stream()
-            .filter(c -> c.getStandard() == Boolean.TRUE)
+            .filter(c -> c.isStandard() == Boolean.TRUE)
             .collect(Collectors.toList());
     List<DbConceptSetConceptId> dbPossibleSourceConceptIds =
         conceptSetService.findAllByConceptSetIdIn(conceptSetIds).stream()
             .flatMap(
                 cs ->
                     cs.getConceptSetConceptIds().stream()
-                        .filter(c -> c.getStandard() == Boolean.FALSE))
+                        .filter(c -> c.isStandard() == Boolean.FALSE))
             .collect(Collectors.toList());
 
     Long[] sourceConceptIds =

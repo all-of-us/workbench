@@ -168,7 +168,7 @@ export const CreateBillingAccountModal = ({ onClose }: Props) => {
     setEmailSending(true);
     await profileApi().sendBillingSetupEmail({
       phone: phoneNumber,
-      isNihFunded: nihFunded,
+      nihFunded,
       institution: verifiedInstitutionalAffiliation.institutionDisplayName,
     });
     setCurrentStep(numSteps);

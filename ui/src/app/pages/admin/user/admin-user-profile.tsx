@@ -328,7 +328,7 @@ const ToggleForModule = (props: ToggleProps) => {
     (r) => r.moduleName === moduleName
   );
   const isModuleBypassed = pendingBypassState
-    ? pendingBypassState.isBypassed
+    ? pendingBypassState.bypassed
     : isBypassed(updatedProfile, moduleName);
   const highlightStyle =
     isModuleBypassed !== previouslyBypassed
@@ -347,7 +347,7 @@ const ToggleForModule = (props: ToggleProps) => {
         checked={isModuleBypassed}
         dataTestId={`${moduleName}-toggle`}
         onToggle={() =>
-          bypassUpdate({ moduleName, isBypassed: !isModuleBypassed })
+          bypassUpdate({ moduleName, bypassed: !isModuleBypassed })
         }
       />
     </FlexRow>
@@ -530,7 +530,7 @@ export const AdminUserProfile = (spinnerProps: WithSpinnerOverlayProps) => {
           aborter
         );
         setEmailValidationStatus(
-          result?.isValidMember
+          result?.validMember
             ? EmailValidationStatus.VALID
             : EmailValidationStatus.INVALID
         );

@@ -31,7 +31,6 @@ public interface CohortBuilderMapper {
   @Mapping(target = "hasAttributes", source = "attribute")
   @Mapping(target = "hasAncestorData", source = "ancestorData")
   @Mapping(target = "hasHierarchy", source = "hierarchy")
-  @Mapping(target = "isStandard", source = "standard")
   Criteria dbModelToClient(DbCriteria source);
 
   CriteriaAttribute dbModelToClient(DbCriteriaAttribute source);

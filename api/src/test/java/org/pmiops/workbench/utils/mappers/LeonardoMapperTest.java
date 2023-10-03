@@ -212,7 +212,7 @@ public class LeonardoMapperTest {
     Disk disk =
         new Disk()
             .diskType(DiskType.SSD)
-            .isGceRuntime(true)
+            .gceRuntime(true)
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
@@ -223,7 +223,7 @@ public class LeonardoMapperTest {
     Map<String, String> rstudioLabel = new HashMap<>();
     rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
     assertThat(mapper.toApiListDisksResponse(listPersistentDiskResponse.labels(rstudioLabel)))
-        .isEqualTo(disk.appType(AppType.RSTUDIO).isGceRuntime(false));
+        .isEqualTo(disk.appType(AppType.RSTUDIO).gceRuntime(false));
   }
 
   @Test
@@ -237,7 +237,7 @@ public class LeonardoMapperTest {
     Disk disk =
         new Disk()
             .diskType(DiskType.SSD)
-            .isGceRuntime(true)
+            .gceRuntime(true)
             .creator(leonardoAuditInfo.getCreator())
             .dateAccessed(leonardoAuditInfo.getDateAccessed())
             .createdDate(leonardoAuditInfo.getCreatedDate())
@@ -248,6 +248,6 @@ public class LeonardoMapperTest {
     Map<String, String> rstudioLabel = new HashMap<>();
     rstudioLabel.put(LEONARDO_LABEL_APP_TYPE, "rstudio");
     assertThat(mapper.toApiGetDiskResponse(getPersistentDiskResponse.labels(rstudioLabel)))
-        .isEqualTo(disk.appType(AppType.RSTUDIO).isGceRuntime(false));
+        .isEqualTo(disk.appType(AppType.RSTUDIO).gceRuntime(false));
   }
 }

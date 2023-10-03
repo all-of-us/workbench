@@ -948,9 +948,7 @@ export const useDisk = (currentWorkspaceNamespace: string) => {
           const availableDisks = await disksApi().listOwnedDisksInWorkspace(
             currentWorkspaceNamespace
           );
-          gcePersistentDisk = availableDisks.find(
-            (disk) => !!disk.isGceRuntime
-          );
+          gcePersistentDisk = availableDisks.find((disk) => !!disk.gceRuntime);
         } catch (e) {
           if (!(e instanceof Response && e.status === 404)) {
             throw e;

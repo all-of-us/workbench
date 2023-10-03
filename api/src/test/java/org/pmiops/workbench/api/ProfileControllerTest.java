@@ -1505,11 +1505,9 @@ public class ProfileControllerTest extends BaseControllerTest {
         ImmutableList.of(
             new AccessBypassRequest()
                 .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
-                .isBypassed(true),
+                .bypassed(true),
             // would un-bypass if a bypass had existed
-            new AccessBypassRequest()
-                .moduleName(AccessModule.COMPLIANCE_TRAINING)
-                .isBypassed(false));
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).bypassed(false));
 
     final AccountPropertyUpdate request1 =
         new AccountPropertyUpdate().username(FULL_USER_NAME).accessBypassRequests(bypasses1);
@@ -1529,11 +1527,11 @@ public class ProfileControllerTest extends BaseControllerTest {
             // un-bypass the previously bypassed
             new AccessBypassRequest()
                 .moduleName(AccessModule.DATA_USER_CODE_OF_CONDUCT)
-                .isBypassed(false),
+                .bypassed(false),
             // bypass
-            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).isBypassed(true),
-            new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).isBypassed(true));
+            new AccessBypassRequest().moduleName(AccessModule.COMPLIANCE_TRAINING).bypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.ERA_COMMONS).bypassed(true),
+            new AccessBypassRequest().moduleName(AccessModule.TWO_FACTOR_AUTH).bypassed(true));
 
     final AccountPropertyUpdate request2 = request1.accessBypassRequests(bypasses2);
     final Profile retrieved2 = profileService.updateAccountProperties(request2);

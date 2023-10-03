@@ -2,8 +2,8 @@ package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfo;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -92,10 +92,10 @@ public class AuthInterceptor implements AsyncHandlerInterceptor {
     HandlerMethod method = (HandlerMethod) handler;
 
     boolean isAuthRequired = false;
-    ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
+    Operation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), Operation.class);
     if (apiOp != null) {
-      for (Authorization auth : apiOp.authorizations()) {
-        if (auth.value().equals(authName)) {
+      for (SecurityRequirement auth : apiOp.security()) {
+        if (auth.name().equals(authName)) {
           isAuthRequired = true;
           break;
         }

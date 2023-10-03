@@ -72,7 +72,7 @@ public final class PersistentDiskUtils {
     // Find the runtime disk with maximum creation time.
     Optional<Disk> runtimeDisk =
         activeDisks.stream()
-            .filter(Disk::getIsGceRuntime)
+            .filter(Disk::isGceRuntime)
             .max(Comparator.comparing((r) -> Instant.parse(r.getCreatedDate())));
     runtimeDisk.ifPresent(recentDisks::add);
 

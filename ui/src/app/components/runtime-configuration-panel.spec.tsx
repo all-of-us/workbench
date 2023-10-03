@@ -93,7 +93,7 @@ describe('RuntimeConfigurationPanel', () => {
       diskType: DiskType.STANDARD,
       name: 'my-existing-disk',
       blockSize: 1,
-      isGceRuntime: true,
+      gceRuntime: true,
     };
   };
 

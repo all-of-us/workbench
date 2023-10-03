@@ -138,7 +138,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbCriteria> criteriaList = new ArrayList<>();
     Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
         dbConceptSetConceptIds.stream()
-            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+            .collect(Collectors.partitioningBy(DbConceptSetConceptId::isStandard));
     List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
     List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
     if (!standard.isEmpty()) {
@@ -239,7 +239,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         cbCriteriaDao.findCriteriaAutoComplete(
             criteriaSearchRequest.getDomain(),
             ImmutableList.of(criteriaSearchRequest.getType()),
-            criteriaSearchRequest.getStandard(),
+            criteriaSearchRequest.isStandard(),
             ImmutableList.of(true),
             searchTerm,
             pageRequest);
@@ -250,7 +250,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
               criteriaSearchRequest.getDomain(),
               ImmutableList.of(criteriaSearchRequest.getType()),
-              criteriaSearchRequest.getStandard(),
+              criteriaSearchRequest.isStandard(),
               ImmutableList.of(true),
               searchTerm.getCodeTerm(),
               pageRequest);
@@ -300,7 +300,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public CriteriaListWithCountResponse findCriteriaByDomain(CriteriaSearchRequest request) {
-    boolean removeDrugBrand = request.getRemoveDrugBrand();
+    boolean removeDrugBrand = request.isRemoveDrugBrand();
     PageRequest pageRequest = PageRequest.of(0, DEFAULT_CRITERIA_SEARCH_LIMIT);
 
     // if search term is empty find the top counts for the domain
@@ -323,11 +323,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     // find a match on concept code
     Page<DbCriteria> dbCriteriaPage =
         cbCriteriaDao.findCriteriaByDomainAndCodeAndStandardAndNotType(
-            request.getDomain(),
-            searchTerm.getCodeTerm(),
-            request.getStandard(),
-            type,
-            pageRequest);
+            request.getDomain(), searchTerm.getCodeTerm(), request.isStandard(), type, pageRequest);
 
     // if the modified search term is empty and endsWithTerms is empty return an empty result
     // this needs ot be here since word length of <3 are filtered and there are 2-concept codes
@@ -340,7 +336,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     if (dbCriteriaPage.getContent().isEmpty() && !request.getTerm().contains(".")) {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaByDomain(
-              request.getDomain(), searchTerm, request.getStandard(), type, pageRequest);
+              request.getDomain(), searchTerm, request.isStandard(), type, pageRequest);
     }
 
     return new CriteriaListWithCountResponse()
@@ -716,7 +712,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     } else {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaTopCountsByStandard(
-              request.getDomain(), request.getStandard(), pageRequest);
+              request.getDomain(), request.isStandard(), pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(

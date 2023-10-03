@@ -214,7 +214,7 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams,
       List<String> queryParts,
       SearchGroup searchGroup) {
-    if (searchGroup.getTemporal()) {
+    if (searchGroup.isTemporal()) {
       // build the outer temporal sql statement
       String query = buildOuterTemporalQuery(queryParams, searchGroup);
       queryParts.add(query);
@@ -264,7 +264,7 @@ public final class SearchGroupItemQueryBuilder {
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
       if (param.getAttributes().isEmpty()) {
-        if (param.getStandard()) {
+        if (param.isStandard()) {
           standardSearchParameters.add(param);
         } else {
           sourceSearchParameters.add(param);
@@ -522,7 +522,7 @@ public final class SearchGroupItemQueryBuilder {
             .collect(Collectors.toList());
     String standardParam =
         QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
+            queryParams, QueryParameterValue.int64(parameter.isStandard() ? 1 : 0));
     String conceptIdParam =
         QueryParameterUtil.addQueryParameterValue(
             queryParams,
@@ -713,7 +713,7 @@ public final class SearchGroupItemQueryBuilder {
           searchParameters.stream().map(SearchParameter::getConceptId).collect(Collectors.toList());
 
       Map<Boolean, List<SearchParameter>> parentsAndChildren =
-          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::getGroup));
+          searchParameters.stream().collect(Collectors.partitioningBy(SearchParameter::isGroup));
       List<Long> parents =
           parentsAndChildren.get(true).stream()
               .map(SearchParameter::getConceptId)

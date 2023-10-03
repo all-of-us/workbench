@@ -263,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         operation.getId(),
         fromWorkspaceNamespace,
         fromWorkspaceId,
-        request.getIncludeUserRoles(),
+        request.isIncludeUserRoles(),
         request.getWorkspace());
     return ResponseEntity.ok(workspaceOperationMapper.toModelWithoutWorkspace(operation));
   }
@@ -357,7 +357,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   request.getFromWorkspaceFirecloudName(),
                   new CloneWorkspaceRequest()
                       .workspace(request.getWorkspace())
-                      .includeUserRoles(request.getShouldDuplicateRoles()))
+                      .includeUserRoles(request.isShouldDuplicateRoles()))
               .getBody()
               .getWorkspace();
         });
@@ -393,11 +393,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
-    if (workspace.getResearchPurpose().getReviewRequested()) {
+    if (workspace.getResearchPurpose().isReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
     }
-    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().isReviewRequested());
 
     // A little unintuitive but setting this here reflects the current state of the workspace
     // while it was in the billing buffer. Setting this value will inform the update billing
@@ -512,8 +512,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
       workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
-      if (researchPurpose.getReviewRequested()) {
+      dbWorkspace.setReviewRequested(researchPurpose.isReviewRequested());
+      if (researchPurpose.isReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
       }
@@ -613,7 +613,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: It is possible for a workspace to be (partially) created and return
     // a 500 to the user if this block of code fails since the workspace is already
     // committed to the database in an earlier call
-    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
+    if (Boolean.TRUE.equals(body.isIncludeUserRoles())) {
       var fromAcl =
           workspaceAuthService.getFirecloudWorkspaceAcl(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());

@@ -1,9 +1,10 @@
 package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
@@ -15,14 +16,15 @@ public class CronInterceptor implements AsyncHandlerInterceptor {
   private static final String CRON_TAG = "cron";
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+  public boolean preHandle(
+      HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
       throws Exception {
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
     }
 
     HandlerMethod method = (HandlerMethod) handler;
-    ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
+    Operation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), Operation.class);
     if (apiOp == null) {
       return true;
     }

@@ -112,11 +112,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConceptSetsControllerTest {
 
   public static final String UPDATED_DESC = "Updated Desc";
-  private static final Criteria CRITERIA_CONDITION_1 =
+  private static Criteria CRITERIA_CONDITION_1 =
       new Criteria()
           .conceptId(123L)
           .name("a concept")
-          .isStandard(true)
+          .standard(true)
           .code("conceptA")
           .type("V1")
           .domainId(Domain.CONDITION.toString())
@@ -127,7 +127,7 @@ public class ConceptSetsControllerTest {
   private static final Criteria CRITERIA_MEASUREMENT_1 =
       new Criteria()
           .conceptId(456L)
-          .isStandard(true)
+          .standard(true)
           .name("b concept")
           .code("conceptB")
           .type("V2")
@@ -139,7 +139,7 @@ public class ConceptSetsControllerTest {
   private static final Criteria CRITERIA_CONDITION_2 =
       new Criteria()
           .conceptId(789L)
-          .isStandard(true)
+          .standard(true)
           .name("multi word concept")
           .code("conceptC")
           .type("V3")
@@ -151,7 +151,7 @@ public class ConceptSetsControllerTest {
   private static final Criteria CRITERIA_CONDITION_3 =
       new Criteria()
           .conceptId(7890L)
-          .isStandard(true)
+          .standard(true)
           .name("conceptD test concept")
           .code("conceptE")
           .type("V5")
@@ -164,7 +164,7 @@ public class ConceptSetsControllerTest {
       new Criteria()
           .conceptId(987L)
           .name("a concept")
-          .isStandard(true)
+          .standard(true)
           .code("conceptA")
           .type("V1")
           .domainId(Domain.OBSERVATION.toString())
@@ -1063,13 +1063,13 @@ public class ConceptSetsControllerTest {
     ConceptSetConceptId addedConcept3 =
         new ConceptSetConceptId()
             .conceptId(CRITERIA_CONDITION_3.getConceptId())
-            .standard(CRITERIA_CONDITION_3.getIsStandard());
+            .standard(CRITERIA_CONDITION_3.isStandard());
     updateConceptSetRequest.addAddedConceptSetConceptIdsItem(addedConcept3);
     // remove
     ConceptSetConceptId removedConcept1 =
         new ConceptSetConceptId()
             .conceptId(CRITERIA_CONDITION_1.getConceptId())
-            .standard(CRITERIA_CONDITION_1.getIsStandard());
+            .standard(CRITERIA_CONDITION_1.isStandard());
     updateConceptSetRequest.addRemovedConceptSetConceptIdsItem(removedConcept1);
     fakeClock.increment(1000L);
 
@@ -1635,7 +1635,7 @@ public class ConceptSetsControllerTest {
         .addType(criteria.getType())
         .addDomainId(criteria.getDomainId())
         .addCode(criteria.getCode())
-        .addStandard(criteria.getIsStandard())
+        .addStandard(criteria.isStandard())
         .addName(criteria.getName())
         .addFullText("+[" + criteria.getDomainId() + "_rank1]")
         .build();

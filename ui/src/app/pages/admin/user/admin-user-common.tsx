@@ -333,7 +333,7 @@ export const getEraNote = (profile: Profile): string => {
 export const wouldUpdateBypassState = (
   oldProfile: Profile,
   request: AccessBypassRequest
-): boolean => isBypassed(oldProfile, request.moduleName) !== request.isBypassed;
+): boolean => isBypassed(oldProfile, request.moduleName) !== request.bypassed;
 
 export const profileNeedsUpdate = (
   oldProfile: Profile,

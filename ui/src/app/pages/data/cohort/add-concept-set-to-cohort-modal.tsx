@@ -44,8 +44,8 @@ export const AddConceptSetToCohortModal = ({ onClose }) => {
     getConceptSets();
   }, []);
 
-  const getParamId = ({ code, conceptId, id, isStandard }: Criteria) => {
-    return `param${conceptId ? conceptId + code : id}${isStandard}`;
+  const getParamId = ({ code, conceptId, id, standard }: Criteria) => {
+    return `param${conceptId ? conceptId + code : id}${standard}`;
   };
 
   const addConceptSetAsItem = async () => {

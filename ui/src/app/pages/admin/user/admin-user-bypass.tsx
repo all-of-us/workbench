@@ -144,7 +144,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
         username,
         accessBypassRequests: changedModules.map((moduleName) => ({
           moduleName,
-          isBypassed: selectedModules.includes(moduleName),
+          bypassed: selectedModules.includes(moduleName),
         })),
       });
       this.setState({ isSaving: false });

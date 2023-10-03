@@ -133,7 +133,7 @@ public class DisksControllerTest {
             .status(DiskStatus.READY)
             .createdDate(createDate)
             .creator(user.getUsername())
-            .isGceRuntime(true);
+            .gceRuntime(true);
 
     when(mockLeonardoApiClient.getPersistentDisk(GOOGLE_PROJECT_ID, pdName))
         .thenReturn(getResponse);

@@ -29,8 +29,8 @@ const convertDate = (originalDate: string) => {
   return date.format('YYYY-MM-DD HH:mm');
 };
 
-const getEnvironmentType = (isGceRuntime: boolean, appType: AppType) => {
-  return isGceRuntime ? 'Jupyter' : fp.capitalize(appType.toString());
+const getEnvironmentType = (gceRuntime: boolean, appType: AppType) => {
+  return gceRuntime ? 'Jupyter' : fp.capitalize(appType.toString());
 };
 
 let mockDisks: ListDisksResponse;
@@ -70,7 +70,7 @@ test('loads and displays table', async () => {
     ).toBeInTheDocument();
     expect(rowScope.getByText(disk.status)).toBeInTheDocument();
     expect(
-      rowScope.getByText(getEnvironmentType(disk.isGceRuntime, disk.appType))
+      rowScope.getByText(getEnvironmentType(disk.gceRuntime, disk.appType))
     ).toBeInTheDocument();
     expect(rowScope.getByText(disk.size)).toBeInTheDocument();
     expect(

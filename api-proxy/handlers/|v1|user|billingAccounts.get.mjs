@@ -7,7 +7,7 @@ const body = JSON.stringify(
 {
   billingAccounts: [
     {
-      isFreeTier: true,
+      freeTier: true,
       name: 'billingAccounts/013713-75CFF6-1751E5',
       displayName: 'Use All of Us initial credits',
       isOpen: true

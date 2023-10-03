@@ -2380,8 +2380,7 @@ public class CohortReviewControllerTest {
   private void assertCreatedParticipantCohortAnnotation(
       ParticipantCohortAnnotation response, ParticipantCohortAnnotation expected) {
     assertThat(response.getAnnotationValueString()).isEqualTo(expected.getAnnotationValueString());
-    assertThat(response.getAnnotationValueBoolean())
-        .isEqualTo(expected.getAnnotationValueBoolean());
+    assertThat(response.isAnnotationValueBoolean()).isEqualTo(expected.isAnnotationValueBoolean());
     assertThat(response.getAnnotationValueEnum()).isEqualTo(expected.getAnnotationValueEnum());
     assertThat(response.getAnnotationValueDate()).isEqualTo(expected.getAnnotationValueDate());
     assertThat(response.getAnnotationValueInteger())
