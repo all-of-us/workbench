@@ -54,7 +54,7 @@ function setup_and_enter_docker(project, account) {
   // end
   const keyFile = fs.mkdtempSync(path.join(tmpdir(), `${account}-key`)) + '.json';
  console.log(keyFile);
- const cmd = `docker-compose run --rm -e WORKBENCH_VERSION=v7-77-rc1 -v ${keyFile}:${DOCKER_KEY_FILE_PATH} deploy deploy/deploy.mjs deploy --account ${account} --project ${project} --no-promote --app-version v7-77-rc1 --git-version v7-77-rc1 --key-file ${DOCKER_KEY_FILE_PATH} --no-update-jira --dry-run`;
+ const cmd = `docker-compose run --rm -e WORKBENCH_VERSION=v7-77-rc1 -v ${keyFile}:${DOCKER_KEY_FILE_PATH} deploy deploy/libproject/deploy.mjs deploy --account ${account} --project ${project} --no-promote --app-version v7-77-rc1 --git-version v7-77-rc1 --key-file ${DOCKER_KEY_FILE_PATH} --no-update-jira --dry-run`;
  const sA = new ServiceAccountContext(project, account, keyFile, ["docker-compose build deploy ", cmd] );
  sA.run();
 }
