@@ -399,7 +399,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testUseAbsorb_FalseWhenFeatureFlagEnabledAndMoodlePreviouslyUsed() {
+  public void testUseAbsorb_FalseWhenMoodlePreviouslyUsed() {
     providedWorkbenchConfig.absorb.enabledForNewUsers = true;
     var uam =
         userAccessModuleDao.save(
@@ -412,6 +412,50 @@ public class ComplianceTrainingServiceTest {
             .setUserAccessModule(uam)
             .setComplianceTrainingVerificationSystem(
                 DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
+    assertThat(complianceTrainingService.useAbsorb()).isFalse();
+  }
+
+  @Test
+  public void testUseAbsorb_FalseWhenMoodlePreviouslyUsed_EvenIfAbsorbPreviouslyUsed() {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    // A user uses Absorb to complete RT training.
+    assertThat(complianceTrainingService.useAbsorb()).isTrue();
+    var rtUAM =
+        userAccessModuleDao.save(
+            new DbUserAccessModule()
+                .setAccessModule(
+                    accessModuleDao.findOneByName(DbAccessModuleName.RT_COMPLIANCE_TRAINING).get())
+                .setUser(user));
+    complianceTrainingVerificationDao.save(
+        new DbComplianceTrainingVerification()
+            .setUserAccessModule(rtUAM)
+            .setComplianceTrainingVerificationSystem(
+                DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE));
+
+    // We roll back the Absorb feature flag, for some reason.
+    providedWorkbenchConfig.absorb.enabledForNewUsers = false;
+
+    // The user uses Moodle to complete CT training.
+    assertThat(complianceTrainingService.useAbsorb()).isFalse();
+    var ctUAM =
+        userAccessModuleDao.save(
+            new DbUserAccessModule()
+                .setAccessModule(
+                    accessModuleDao.findOneByName(DbAccessModuleName.CT_COMPLIANCE_TRAINING).get())
+                .setUser(user));
+    complianceTrainingVerificationDao.save(
+        new DbComplianceTrainingVerification()
+            .setUserAccessModule(ctUAM)
+            .setComplianceTrainingVerificationSystem(
+                DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB));
+
+    // We reverse the rollback of the Absorb feature flag.
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    // The user should continue to use Moodle.
+    // As-is, this will lead to errors when the user renews training after one year. However,
+    // we expect to transition all users entirely to Absorb before that happens.
     assertThat(complianceTrainingService.useAbsorb()).isFalse();
   }
 
