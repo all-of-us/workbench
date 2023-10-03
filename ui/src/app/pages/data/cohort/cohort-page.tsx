@@ -29,6 +29,7 @@ import {
 import {
   currentCohortSearchContextStore,
   currentCohortStore,
+  currentGroupCountsStore,
 } from 'app/utils/navigation';
 import { MatchParams } from 'app/utils/stores';
 import { WorkspaceData } from 'app/utils/workspace-data';
@@ -60,6 +61,7 @@ const clearCohort = () => {
   idsInUse.next(new Set());
   currentCohortStore.next(undefined);
   currentCohortSearchContextStore.next(undefined);
+  currentGroupCountsStore.next([]);
   searchRequestStore.next({
     includes: [],
     excludes: [],
