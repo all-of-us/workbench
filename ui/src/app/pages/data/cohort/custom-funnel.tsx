@@ -36,15 +36,29 @@ export const CustomFunnel = withCurrentWorkspace()(
           .getValue()
           .filter((group) => group.status === 'active');
         groupCounts.sort((a, b) => b.groupCount - a.groupCount);
-        setFunnelGroups(
-          groupCounts.map((groupCount, index) => ({
-            loading: index > 0,
-            count: index === 0 ? groupCount.groupCount : null,
-            name: index === 0 ? groupCount.groupName : null,
-            groupId: index === 0 ? groupCount.groupId : null,
-            role: index === 0 ? groupCount.role : null,
-          }))
-        );
+        if (groupCounts.length === 2) {
+          setFunnelGroups(
+            groupCounts.map(
+              ({ groupCount, groupId, groupName, role }, index) => ({
+                loading: false,
+                count: index === 0 ? groupCount : totalCount,
+                name: groupName,
+                groupId,
+                role,
+              })
+            )
+          );
+        } else {
+          setFunnelGroups(
+            groupCounts.map((groupCount, index) => ({
+              loading: index > 0,
+              count: index === 0 ? groupCount.groupCount : null,
+              name: index === 0 ? groupCount.groupName : null,
+              groupId: index === 0 ? groupCount.groupId : null,
+              role: index === 0 ? groupCount.role : null,
+            }))
+          );
+        }
         setSearchGroups([
           ...searchRequestStore
             .getValue()

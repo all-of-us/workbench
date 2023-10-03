@@ -320,27 +320,31 @@ export const ListOverview = fp.flow(
       });
     }
 
-    get hasTemporalError() {
+    get activeGroups() {
       const { searchRequest } = this.props;
-      const activeGroups = [
-        ...searchRequest.includes,
-        ...searchRequest.excludes,
-      ].filter((grp) => grp.temporal && grp.status === 'active');
-      return activeGroups.some((grp) => {
-        const activeItems = grp.items.reduce(
-          (acc, it) => {
-            if (it.status === 'active') {
-              acc[it.temporalGroup]++;
-            }
-            return acc;
-          },
-          [0, 0]
-        );
-        const inputError =
-          grp.time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
-          (isNaN(parseInt(grp.timeValue, 10)) || grp.timeValue < 0);
-        return activeItems.includes(0) || inputError;
-      });
+      return [...searchRequest.includes, ...searchRequest.excludes].filter(
+        (grp) => grp.status === 'active'
+      );
+    }
+
+    get hasTemporalError() {
+      return this.activeGroups
+        .filter((grp) => grp.temporal)
+        .some((grp) => {
+          const activeItems = grp.items.reduce(
+            (acc, it) => {
+              if (it.status === 'active') {
+                acc[it.temporalGroup]++;
+              }
+              return acc;
+            },
+            [0, 0]
+          );
+          const inputError =
+            grp.time !== TemporalTime.DURING_SAME_ENCOUNTER_AS &&
+            (isNaN(parseInt(grp.timeValue, 10)) || grp.timeValue < 0);
+          return activeItems.includes(0) || inputError;
+        });
     }
 
     get definitionErrors() {
@@ -537,6 +541,15 @@ export const ListOverview = fp.flow(
       ];
     }
 
+    get disableFunnelPlot() {
+      return (
+        this.state.loading ||
+        this.definitionErrors ||
+        this.activeGroups.length < 2 ||
+        this.activeGroups.length > 20
+      );
+    }
+
     get disableActionIcons() {
       return this.state.loading || !this.props.cohort.id;
     }
@@ -644,7 +657,7 @@ export const ListOverview = fp.flow(
                   <TooltipTrigger content={<div>View Funnel Plot</div>}>
                     <Clickable
                       style={
-                        this.disableActionIcons
+                        this.disableFunnelPlot
                           ? { ...styles.actionIcon, ...styles.disabled }
                           : styles.actionIcon
                       }
