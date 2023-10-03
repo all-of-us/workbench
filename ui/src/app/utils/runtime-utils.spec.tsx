@@ -3,14 +3,8 @@ import '@testing-library/jest-dom';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import {
-  ListRuntimeResponse,
-  RuntimeApi,
-  RuntimeConfigurationType,
-  RuntimeStatus,
-} from 'generated/fetch';
+import { ListRuntimeResponse, RuntimeApi } from 'generated/fetch';
 
-import { stubDisk } from '../../testing/stubs/disks-api-stub';
 import { render, waitFor } from '@testing-library/react';
 import { registerApiClient } from 'app/services/swagger-fetch-clients';
 import {
@@ -27,6 +21,7 @@ import {
 } from 'app/utils/stores';
 
 import defaultServerConfig from 'testing/default-server-config';
+import { stubDisk } from 'testing/stubs/disks-api-stub';
 import {
   defaultGceRuntime,
   defaultRuntime,
