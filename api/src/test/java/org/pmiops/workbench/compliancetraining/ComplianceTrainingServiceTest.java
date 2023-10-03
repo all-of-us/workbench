@@ -278,6 +278,29 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
+  public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerification() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    mockGetUserEnrollments(currentInstant(), null);
+
+    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
+
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
+
+    // RT is complete, so there should be a verification record.
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+    assertThat(rtVerification.isPresent()).isTrue();
+    assertThat(rtVerification.get().getComplianceTrainingVerificationSystem())
+            .isEqualTo(DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.ABSORB);
+
+    // CT is incomplete, so there should not be a verification record.
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+    assertThat(ctVerification.isPresent()).isFalse();
+  }
+
+  @Test
   public void testSyncComplianceTrainingStatus_Moodle_UpdatesVerification_OnePerAccessModule()
       throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
@@ -300,6 +323,32 @@ public class ComplianceTrainingServiceTest {
 
     // Complete CT training
     mockGetUserBadgesByBadgeName(userBadgesByNameRTAndCT);
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
+
+    // RT is complete, so there should be a verification record.
+    var rtVerification = getVerification(DbAccessModuleName.RT_COMPLIANCE_TRAINING);
+    assertThat(rtVerification.isPresent()).isTrue();
+
+    // CT is complete, so there should be a verification record.
+    var ctVerification = getVerification(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+    assertThat(ctVerification.isPresent()).isTrue();
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_Absorb_UpdatesVerification_OnePerAccessModule()
+          throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    assertThat(complianceTrainingVerificationDao.findAll()).isEmpty();
+
+    // Complete RT training
+    mockGetUserEnrollments(currentInstant(), null);
+    user = complianceTrainingService.syncComplianceTrainingStatus();
+    assertThat(complianceTrainingVerificationDao.findAll()).hasSize(1);
+
+    // Complete CT training
+    mockGetUserEnrollments(currentInstant(), currentInstant());
     user = complianceTrainingService.syncComplianceTrainingStatus();
     assertThat(complianceTrainingVerificationDao.findAll()).hasSize(2);
 
