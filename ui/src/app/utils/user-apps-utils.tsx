@@ -25,6 +25,7 @@ export const appTypeToString: Record<AppType, string> = {
   [AppType.CROMWELL]: 'Cromwell',
   [AppType.RSTUDIO]: 'RStudio',
   [AppType.SAS]: 'SAS',
+  [AppType.SAGEMAKER] : 'Sagemaker'
 };
 
 const appStatusesRequiringUpdates: Array<AppStatus> = [
