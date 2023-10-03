@@ -445,7 +445,8 @@ const incompleteModules = (
           getAccessModuleStatusByNameOrEmpty(
             profile.accessModules.modules,
             moduleName
-          )
+          ),
+          profile.duccSignedVersion
         ))
   );
 
@@ -651,7 +652,7 @@ export const DataAccessRequirements = fp.flow(withProfileErrorModal)(
     const ctNeedsRenewal =
       pageMode === DARPageMode.ANNUAL_RENEWAL &&
       isCompliant(moduleStatus, profile.duccSignedVersion) &&
-      !isRenewalCompleteForModule(moduleStatus);
+      !isRenewalCompleteForModule(moduleStatus, profile.duccSignedVersion);
     const showCompletionBanner = profile && !nextRequired && !ctNeedsRenewal;
 
     const rtCard = (

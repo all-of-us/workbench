@@ -546,18 +546,6 @@ export const isExpiringOrExpired = (
   return !!expiration && getWholeDaysFromNow(expiration) <= lookback;
 };
 
-// is the module "renewal complete" ?
-// meaning (bypassed || (complete and not expiring))
-export const isRenewalCompleteForModule = (status: AccessModuleStatus) => {
-  const isComplete = !!status?.completionEpochMillis;
-  const wasBypassed = !!status?.bypassEpochMillis;
-  return (
-    wasBypassed ||
-    (isComplete &&
-      !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
-  );
-};
-
 interface RenewalDisplayDates {
   lastConfirmedDate: string;
   nextReviewDate: string;
@@ -689,6 +677,19 @@ export const isCompliant = (
   status: AccessModuleStatus,
   duccSignedVersion: number
 ): boolean => isCompleted(status, duccSignedVersion) || isBypassed(status);
+
+// is the module "renewal complete" ?
+// meaning (bypassed || (complete and not expiring))
+export const isRenewalCompleteForModule = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+) => {
+  return (
+    isBypassed(status) ||
+    (isCompleted(status, duccSignedVersion) &&
+      !isExpiringOrExpired(status?.expirationEpochMillis, status.moduleName))
+  );
+};
 
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {

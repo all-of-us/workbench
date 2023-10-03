@@ -12,6 +12,8 @@ import {
   eligibleForTier,
   getAccessModuleStatusByNameOrEmpty,
   hasRtExpired,
+  isBypassed,
+  isCompleted,
 } from 'app/utils/access-utils';
 import {
   AuthorityGuardedAction,
@@ -52,7 +54,9 @@ const allCompleteOrBypassed = (
   const modules = profile?.accessModules?.modules;
   return moduleNames.every((moduleName) => {
     const status = getAccessModuleStatusByNameOrEmpty(modules, moduleName);
-    return !!status?.completionEpochMillis || !!status?.bypassEpochMillis;
+    return (
+      isCompleted(status, profile?.duccSignedVersion) || isBypassed(status)
+    );
   });
 };
 
