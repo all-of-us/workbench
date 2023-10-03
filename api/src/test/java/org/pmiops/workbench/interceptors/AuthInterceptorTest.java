@@ -166,16 +166,17 @@ public class AuthInterceptorTest {
   @Test
   public void preHandleGet_usingServiceAccountNotInDb() throws Exception {
     mockGetCallWithBearerToken();
-    when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(null);
     Userinfo userInfo = new Userinfo();
-    userInfo.setEmail(
-        workbenchConfig.auth.serviceAccountApiUsers.stream()
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new RuntimeException(
-                        "WorkbenchConfig should contain a list of serviceAccountApiUsers")));
+    String serviceAccountEmail = workbenchConfig.auth.serviceAccountApiUsers.stream()
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new RuntimeException(
+                    "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    userInfo.setEmail(serviceAccountEmail);
+    when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(null);
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+
     assertTrue(interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
@@ -183,14 +184,16 @@ public class AuthInterceptorTest {
   public void preHandleGet_usingServiceAccountInDb() throws Exception {
     mockGetCallWithBearerToken();
     Userinfo userInfo = new Userinfo();
-    userInfo.setEmail(
-        workbenchConfig.auth.serviceAccountApiUsers.stream()
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new RuntimeException(
-                        "WorkbenchConfig should contain a list of serviceAccountApiUsers")));
+    String serviceAccountEmail = workbenchConfig.auth.serviceAccountApiUsers.stream()
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new RuntimeException(
+                    "WorkbenchConfig should contain a list of serviceAccountApiUsers"));
+    userInfo.setEmail(serviceAccountEmail);
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
+    when(userDao.findUserByUsername(serviceAccountEmail)).thenReturn(new DbUser());
+
     assertTrue(interceptor.preHandle(mockRequest, mockResponse, mockHandler));
   }
 
