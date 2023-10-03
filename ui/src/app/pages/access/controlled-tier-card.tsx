@@ -49,7 +49,7 @@ const ControlledTierEraModule = (props: {
   const status = getAccessModuleStatusByName(profile, moduleName);
 
   // module is not clickable if (user is ineligible for CT) or (user has completed/bypassed module already)
-  const active = eligible && !isCompliant(status);
+  const active = eligible && !isCompliant(status, profile.duccSignedVersion);
 
   return (
     <Module

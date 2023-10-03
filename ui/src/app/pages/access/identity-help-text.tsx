@@ -45,7 +45,8 @@ export const IdentityHelpText = (props: {
 
   // don't return help text if complete or bypassed
   const needsHelp = !isCompliant(
-    getAccessModuleStatusByName(profile, AccessModule.IDENTITY)
+    getAccessModuleStatusByName(profile, AccessModule.IDENTITY),
+    profile.duccSignedVersion
   );
 
   if (!needsHelp) {

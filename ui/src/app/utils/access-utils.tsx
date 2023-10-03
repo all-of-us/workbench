@@ -672,19 +672,23 @@ export const syncModulesExternal = async (moduleNames: AccessModule[]) => {
   );
 };
 
-export const isCompleted = (status: AccessModuleStatus): boolean =>
-  !!status?.completionEpochMillis;
-export const isBypassed = (status: AccessModuleStatus): boolean =>
-  !!status?.bypassEpochMillis;
-export const isCompliant = (
+export const isCompleted = (
   status: AccessModuleStatus,
-  duccSignedVersion?: number | undefined
+  duccSignedVersion: number
 ): boolean =>
   // special case for DUCC: a user with a missing or old version is non-compliant
   status.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT &&
   !isCurrentDUCCVersion(duccSignedVersion)
     ? false
-    : isCompleted(status) || isBypassed(status);
+    : !!status?.completionEpochMillis;
+
+export const isBypassed = (status: AccessModuleStatus): boolean =>
+  !!status?.bypassEpochMillis;
+
+export const isCompliant = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+): boolean => isCompleted(status, duccSignedVersion) || isBypassed(status);
 
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
@@ -708,7 +712,7 @@ export const getStatusText = (
     'Cannot provide status text for incomplete module'
   );
   const { completionEpochMillis, bypassEpochMillis } = status;
-  return isCompleted(status)
+  return isCompleted(status, duccSignedVersion)
     ? `Completed on: ${displayDateWithoutHours(completionEpochMillis)}`
     : `Bypassed on: ${displayDateWithoutHours(bypassEpochMillis)}`;
 };
