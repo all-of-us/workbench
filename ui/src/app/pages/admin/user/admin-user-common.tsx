@@ -46,6 +46,7 @@ import {
   computeRenewalDisplayDates,
   getAccessModuleConfig,
   getAccessModuleStatusByName,
+  isBypassed,
 } from 'app/utils/access-utils';
 import { formatDate } from 'app/utils/dates';
 import { getRoleOptions } from 'app/utils/institutions';
@@ -210,19 +211,11 @@ const displayModuleStatusAndDate = (
   profile: Profile,
   moduleName: AccessModule,
   child: string
-): JSX.Element => {
-  return (
-    <div style={moduleStatusStyle(getModuleStatus(profile, moduleName))}>
-      {child}
-    </div>
-  );
-};
-
-export const isBypassed = (
-  profile: Profile,
-  moduleName: AccessModule
-): boolean =>
-  !!getAccessModuleStatusByName(profile, moduleName)?.bypassEpochMillis;
+): JSX.Element => (
+  <div style={moduleStatusStyle(getModuleStatus(profile, moduleName))}>
+    {child}
+  </div>
+);
 
 // Some modules may never expire (eg GOOGLE TWO STEP NOTIFICATION, ERA COMMONS etc),
 // in such cases set the expiry date as NEVER
@@ -335,7 +328,9 @@ export const getEraNote = (profile: Profile): string => {
 export const wouldUpdateBypassState = (
   oldProfile: Profile,
   request: AccessBypassRequest
-): boolean => isBypassed(oldProfile, request.moduleName) !== request.bypassed;
+): boolean =>
+  isBypassed(getAccessModuleStatusByName(oldProfile, request.moduleName)) !==
+  request.bypassed;
 
 export const profileNeedsUpdate = (
   oldProfile: Profile,

@@ -885,18 +885,20 @@ describe(isCompleted.name, () => {
   });
 
   it('should return true when completion time exists', () => {
+    const ignoredDuccVersion = 0;
     const status: AccessModuleStatus = {
       moduleName: arbitraryModuleName,
       completionEpochMillis: 12345,
     };
-    expect(isCompleted(status, 0)).toBeTruthy();
+    expect(isCompleted(status, ignoredDuccVersion)).toBeTruthy();
   });
 
   it('should return false when completion time does not exist', () => {
+    const ignoredDuccVersion = 0;
     const status: AccessModuleStatus = {
       moduleName: arbitraryModuleName,
     };
-    expect(isCompleted(status, 0)).toBeFalsy();
+    expect(isCompleted(status, ignoredDuccVersion)).toBeFalsy();
   });
 
   it('should return true for DUCC when completion time exists and the signed version is current', () => {
