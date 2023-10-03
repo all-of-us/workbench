@@ -57,7 +57,7 @@ public class InterceptorUtilsTest {
     assertThat(req).isNull();
   }
 
-   static class NoMatchingApiControllerClass {}
+  static class NoMatchingApiControllerClass {}
 
   @Test
   public void testGetControllerMethod_missingControllerException() throws Exception {
@@ -110,13 +110,14 @@ public class InterceptorUtilsTest {
   @Test
   public void testIsCloudTaskRequest_true() {
     Operation operation = mock(Operation.class);
-    when(operation.tags()).thenReturn(new String[]{"cloudTask"});
+    when(operation.tags()).thenReturn(new String[] {"cloudTask"});
     assertTrue(InterceptorUtils.isCloudTaskRequest(operation));
   }
+
   @Test
   public void testIsCloudTaskRequest_false() {
     Operation operation = mock(Operation.class);
-    when(operation.tags()).thenReturn(new String[]{"FAKE_TAG"});
+    when(operation.tags()).thenReturn(new String[] {"FAKE_TAG"});
     assertFalse(InterceptorUtils.isCloudTaskRequest(operation));
   }
 }
