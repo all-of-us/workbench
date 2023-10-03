@@ -29,4 +29,5 @@ git checkout "nsaxena/deploy_Latest"
 git submodule update -f --init --recursive
 git status
 
+chmod +x ~/workbench/deploy/libproject/deploy.mjs
 exec "$@"
