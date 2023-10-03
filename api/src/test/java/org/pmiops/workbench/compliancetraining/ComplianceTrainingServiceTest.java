@@ -224,17 +224,33 @@ public class ComplianceTrainingServiceTest {
     mockGetUserBadgesByBadgeName(
         ImmutableMap.of(BadgeName.REGISTERED_TIER_TRAINING, defaultBadgeDetails()));
     complianceTrainingService.syncComplianceTrainingStatus();
-    reloadUser();
     var completionTime = currentTimestamp();
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
 
     // Time passes and the user re-syncs
     tick();
     complianceTrainingService.syncComplianceTrainingStatus();
-    reloadUser();
 
     // Completion timestamp should not change when the method is called again.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, completionTime);
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_Absorb_ResyncCausesNoChanges() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    // Set up: The user completes ands syncs RT training
+    var completionTime = currentInstant();
+    mockGetUserEnrollments(completionTime, null);
+    complianceTrainingService.syncComplianceTrainingStatus();
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
+
+    // Time passes and the user re-syncs
+    tick();
+    complianceTrainingService.syncComplianceTrainingStatus();
+
+    // Completion timestamp should not change when the method is called again.
+    assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(completionTime));
   }
 
   @Test
