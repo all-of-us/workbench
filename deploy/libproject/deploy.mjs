@@ -1,6 +1,1 @@
-function deploy(arg) {
-  console.log("hey there");
-}
-
-
-deploy(process.argv)
+console.log("hello lets see if this works");
