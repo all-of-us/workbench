@@ -676,6 +676,7 @@ export const isCompleted = (
   status: AccessModuleStatus,
   duccSignedVersion: number
 ): boolean =>
+  // special case for DUCC: considered incomplete if the signed version is missing or old
   status.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT &&
   !isCurrentDUCCVersion(duccSignedVersion)
     ? false
