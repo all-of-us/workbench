@@ -6,6 +6,7 @@ import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListDisksResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,7 +16,7 @@ public class DisksController implements DisksApiDelegate {
   private final DiskService diskService;
 
   @Autowired
-  public DisksController(DiskService diskService) {
+  public DisksController(@Qualifier("multicloudDiskService") DiskService diskService) {
     this.diskService = diskService;
   }
 

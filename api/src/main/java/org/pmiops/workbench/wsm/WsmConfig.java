@@ -6,6 +6,10 @@ import bio.terra.workspace.api.WorkspaceApi;
 import bio.terra.workspace.client.ApiClient;
 import bio.terra.workspace.client.ApiException;
 import com.google.auth.oauth2.GoogleCredentials;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -14,11 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Configuration
 public class WsmConfig {
@@ -62,7 +61,7 @@ public class WsmConfig {
       // Passing on the bearer token
 
       bearerToken =
-              "ya29.a0AfB_byBd1GJ9b2ixWwrm0EBs39XOYbjGSKzCzeygkir43mdrDV65nB2fVNarUlQw_KK7r3mR4MWHdQyVHULFZpl60uPZOcVQBGolmzHgvs3ByYCycqjBapAKXtr1aH2nNu6Zw-wI-lM98BHNuVovvfc3hd8R_pEJ8xRxy-dISaAaCgYKAX8SARESFQGOcNnCJeYH4eJfMgJqIAUgU5pTOw0178";
+          "ya29.a0AfB_byBd1GJ9b2ixWwrm0EBs39XOYbjGSKzCzeygkir43mdrDV65nB2fVNarUlQw_KK7r3mR4MWHdQyVHULFZpl60uPZOcVQBGolmzHgvs3ByYCycqjBapAKXtr1aH2nNu6Zw-wI-lM98BHNuVovvfc3hd8R_pEJ8xRxy-dISaAaCgYKAX8SARESFQGOcNnCJeYH4eJfMgJqIAUgU5pTOw0178";
       // read token from file
       try {
         bearerToken = Files.readString(Path.of("/tmp/bearer_token.txt"), Charset.defaultCharset());

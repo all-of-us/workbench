@@ -29,6 +29,7 @@ import {
   IconConfig,
   rstudioConfigIconId,
   sasConfigIconId,
+  sagemakerConfigIconId,
   showConceptIcon,
   showCriteriaIcon,
   SidebarIconId,
@@ -655,6 +656,38 @@ export const HelpSidebar = fp.flow(
               />
             ),
           };
+          case sagemakerConfigIconId:
+            return {
+              ...sharedGKEAppConfigSidebarContent,
+              renderHeader: () => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <h3
+                    style={{
+                      ...styles.sectionTitle,
+                      lineHeight: 1.75,
+                    }}
+                  >
+                    Sagemaker Environment
+                  </h3>
+                  <BetaBadge
+                    tooltipContent={
+                      'We are regularly improving the Sagemaker experience. If you have feedback, reach out to support@researchallofus.org'
+                    }
+                    style={{
+                      marginLeft: '0.5rem',
+                      ...styles.rstudioBetaBadge,
+                    }}
+                  />
+                </div>
+              ),
+              renderBody: () => (
+                <ConfigurationPanel
+                  appType={UIAppType.SAGEMAKER}
+                  onClose={() => this.setActiveIcon(null)}
+                  gkeAppConfPanelInitialState={gkeAppConfPanelInitialState}
+                />
+              ),
+            };
         case 'notebooksHelp':
           return {
             headerPadding: '0.75rem',

@@ -104,6 +104,7 @@ const iconStyles = reactStyles({
 export const rstudioConfigIconId = 'rstudioConfig';
 export const cromwellConfigIconId = 'cromwellConfig';
 export const sasConfigIconId = 'sasConfig';
+export const sagemakerConfigIconId = 'sagemakerConfig';
 
 export type SidebarIconId =
   | 'criteria'
@@ -117,6 +118,7 @@ export type SidebarIconId =
   | typeof cromwellConfigIconId
   | typeof rstudioConfigIconId
   | typeof sasConfigIconId
+  | typeof sagemakerConfigIconId
   | 'terminal'
   | 'genomicExtractions';
 
@@ -445,6 +447,16 @@ const DisplayIcon = (props: DisplayIconProps) => {
       ),
     ],
     [
+      sagemakerConfigIconId,
+      () => (
+          <UserAppIcon
+              {...{ userSuspended }}
+              iconConfig={icon}
+              appType={UIAppType.SAGEMAKER}
+          />
+      ),
+    ],
+    [
       'terminal',
       () => (
         <RouteLink
@@ -631,6 +643,11 @@ const iconConfig = (props: IconConfigProps): IconConfig => {
       'SAS Icon',
       'SAS Cloud Environment'
     ),
+    [sagemakerConfigIconId]: gkeAppIconConfig(
+      sagemakerConfigIconId,
+      'Sagemaker Icon',
+      'Sagemaker Environment'
+    ),
     terminal: {
       id: 'terminal',
       disabled: disableEnvironmentSidebarIcons,
@@ -707,14 +724,22 @@ export const HelpSidebarIcons = (props: HelpSidebarIconsProps) => {
   );
 
   if (WorkspacePermissionsUtil.canWrite(workspace.accessLevel)) {
-    keys.push('apps', cromwellConfigIconId);
-    if (config.enableRStudioGKEApp) {
-      keys.push(rstudioConfigIconId);
+    keys.push('apps');
+    if(!workspace.aws) {
+      keys.push(cromwellConfigIconId);
+
+      if (config.enableRStudioGKEApp) {
+        keys.push(rstudioConfigIconId);
+      }
+      if (config.enableSasGKEApp) {
+        keys.push(sasConfigIconId);
+      }
+      keys.push('runtimeConfig', 'terminal');
     }
-    if (config.enableSasGKEApp) {
-      keys.push(sasConfigIconId);
+    else {
+      keys.push(sagemakerConfigIconId);
     }
-    keys.push('runtimeConfig', 'terminal');
+
   }
 
   if (getCdrVersion(workspace, cdrVersionTiersResponse)?.hasWgsData) {

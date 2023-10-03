@@ -8460,9 +8460,10 @@ components:
       - CROMWELL
       - RSTUDIO
       - SAS
-    DiskStatus:
-      type: string
-      enum:
+      - SAGEMAKER
+  DiskStatus:
+    type: string
+    enum:
       - Creating
       - Restoring
       - Failed

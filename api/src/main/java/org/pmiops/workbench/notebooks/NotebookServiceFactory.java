@@ -4,8 +4,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class NotebookServiceFactory {
 

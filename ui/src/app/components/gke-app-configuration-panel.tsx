@@ -17,6 +17,7 @@ import { CreateCromwell } from './gke-app-configuration-panels/create-cromwell';
 import { CreateGkeAppProps } from './gke-app-configuration-panels/create-gke-app';
 import { CreateRStudio } from './gke-app-configuration-panels/create-rstudio';
 import { CreateSAS } from './gke-app-configuration-panels/create-sas';
+import { CreateSagemaker } from './gke-app-configuration-panels/create-sagemaker';
 
 type InjectedProps =
   | 'app'

@@ -21,6 +21,8 @@ import rStudioBanner from 'assets/user-apps/RStudio-banner.png';
 import rStudioIcon from 'assets/user-apps/RStudio-icon.png';
 import sasBanner from 'assets/user-apps/SAS-banner.png';
 import sasIcon from 'assets/user-apps/SAS-icon.png';
+import sageMakerBanner from 'assets/user-apps/sagemaker-banner.png';
+import sagemakerIcon from 'assets/user-apps/sagemaker-icon.jpeg';
 
 // Eventually we will need to align this with the API's AppType
 export enum UIAppType {
@@ -56,6 +58,11 @@ export const appAssets: AppAssets[] = [
     appType: UIAppType.SAS,
     banner: sasBanner,
     icon: sasIcon,
+  },
+  {
+    appType: UIAppType.SAGEMAKER,
+    banner: sageMakerBanner,
+    icon: sagemakerIcon,
   },
 ];
 
@@ -132,13 +139,14 @@ export const toAppType: Record<UIAppType, AppType | null> = {
   [UIAppType.RSTUDIO]: AppType.RSTUDIO,
   [UIAppType.SAS]: AppType.SAS,
   [UIAppType.JUPYTER]: null,
-  [UIAppType.SAGEMAKER]: null
+  [UIAppType.SAGEMAKER]: AppType.SAGEMAKER
 };
 
 export const toUIAppType: Record<AppType, UIAppType> = {
   [AppType.CROMWELL]: UIAppType.CROMWELL,
   [AppType.RSTUDIO]: UIAppType.RSTUDIO,
   [AppType.SAS]: UIAppType.SAS,
+  [AppType.SAGEMAKER]: UIAppType.SAGEMAKER,
 };
 
 export const findApp = (

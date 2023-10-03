@@ -11,6 +11,7 @@ import {
   cromwellConfigIconId,
   rstudioConfigIconId,
   sasConfigIconId,
+  sagemakerConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import colors from 'app/styles/colors';
@@ -81,10 +82,11 @@ export const AppsPanel = (props: {
 
   // in display order
   const appsToDisplay = [
-    UIAppType.JUPYTER,
-    ...(config.enableRStudioGKEApp ? [UIAppType.RSTUDIO] : []),
-    ...(config.enableSasGKEApp ? [UIAppType.SAS] : []),
-    UIAppType.CROMWELL,
+    ...(!workspace.aws ? [UIAppType.JUPYTER]: []),
+    ...((config.enableRStudioGKEApp && !workspace.aws)  ? [UIAppType.RSTUDIO] : []),
+    ...((config.enableSasGKEApp && !workspace.aws) ? [UIAppType.SAS] : []),
+    ...(!workspace.aws ? [UIAppType.CROMWELL] : []),
+    ...(workspace.aws ? [UIAppType.SAGEMAKER] : []),
   ];
 
   useEffect(() => {
@@ -165,6 +167,10 @@ export const AppsPanel = (props: {
                     [
                       UIAppType.SAS,
                       () => setSidebarActiveIconStore.next(sasConfigIconId),
+                    ],
+                    [
+                        UIAppType.SAGEMAKER,
+                      () => setSidebarActiveIconStore.next(sagemakerConfigIconId)
                     ],
                     () => addToExpandedApps(availableApp.appType)
                   )

@@ -249,11 +249,13 @@ public interface LeonardoMapper {
   // SAS and RStudio apps are implemented as ALLOWED Helm Charts
   @ValueMapping(source = "RSTUDIO", target = "ALLOWED")
   @ValueMapping(source = "SAS", target = "ALLOWED")
+  @ValueMapping(source = "SAGEMAKER", target = MappingConstants.NULL)
   LeonardoAppType toLeonardoAppType(AppType appType);
 
   @ValueMapping(source = "RSTUDIO", target = "RSTUDIO_CHART")
   @ValueMapping(source = "SAS", target = "SAS_CHART")
   @ValueMapping(source = "CROMWELL", target = MappingConstants.NULL)
+  @ValueMapping(source = "SAGEMAKER", target = MappingConstants.NULL)
   LeonardoAllowedChartName toLeonardoAllowedChartName(AppType appType);
 
   @AfterMapping

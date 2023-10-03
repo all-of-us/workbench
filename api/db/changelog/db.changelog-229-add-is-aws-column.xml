@@ -4,9 +4,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="tarekahmed" id="db.changelog-219-bucket-audit-json-egress">
-    <addColumn tableName="egress_event">
-      <column name="bucket_audit_event" type="json">
+  <changeSet author="tarekahmed" id="db.changelog-229-add-is-aws-column">
+    <addColumn tableName="workspace">
+      <column name="is_aws" type="boolean">
         <constraints nullable="true"/>
       </column>
     </addColumn>

@@ -275,8 +275,8 @@ public class FreeTierBillingService {
    *     double
    */
   public double getWorkspaceCreatorFreeCreditsRemaining(DbWorkspace dbWorkspace) {
-    //FIXME skip for AWS workspaces
-    if(dbWorkspace.isAws()) {
+    // FIXME skip for AWS workspaces
+    if (dbWorkspace.isAws()) {
       return 300;
     }
 

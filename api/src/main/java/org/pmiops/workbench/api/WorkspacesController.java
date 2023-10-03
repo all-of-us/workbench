@@ -994,9 +994,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    if (!dbWorkspace.isAws()) { // FIXME for AWS
+      workspaceAuthService.enforceWorkspaceAccessLevel(
+          workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    }
     double freeCreditsRemaining =
         freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
     return ResponseEntity.ok(

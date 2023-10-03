@@ -1,11 +1,11 @@
 package org.pmiops.workbench.api;
 
 import javax.inject.Provider;
+import org.pmiops.workbench.app.AppsService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.interactiveanalysis.InteractiveAnalysisService;
-import org.pmiops.workbench.leonardo.LeonardoApiClient;
 import org.pmiops.workbench.leonardo.LeonardoApiHelper;
 import org.pmiops.workbench.model.AppLocalizeRequest;
 import org.pmiops.workbench.model.AppLocalizeResponse;
@@ -18,11 +18,12 @@ import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AppsController implements AppsApiDelegate {
-  private final LeonardoApiClient leonardoApiClient;
+  private final AppsService appsService;
   private final Provider<DbUser> userProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceService workspaceService;
@@ -32,14 +33,14 @@ public class AppsController implements AppsApiDelegate {
 
   @Autowired
   public AppsController(
-      LeonardoApiClient leonardoApiClient,
+      @Qualifier("multicloudAppsService") AppsService appsService,
       Provider<DbUser> userProvider,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceService workspaceService,
       LeonardoApiHelper leonardoApiHelper,
       InteractiveAnalysisService interactiveAnalysisService,
       Provider<WorkbenchConfig> configProvider) {
-    this.leonardoApiClient = leonardoApiClient;
+    this.appsService = appsService;
     this.userProvider = userProvider;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceService = workspaceService;
@@ -62,8 +63,7 @@ public class AppsController implements AppsApiDelegate {
         && !configProvider.get().featureFlags.enableSasGKEApp) {
       throw new UnsupportedOperationException("API not supported.");
     }
-
-    leonardoApiClient.createApp(createAppRequest, dbWorkspace);
+    appsService.createApp(createAppRequest, dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -72,7 +72,7 @@ public class AppsController implements AppsApiDelegate {
       String workspaceNamespace, String appName, Boolean deleteDisk) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
 
-    leonardoApiClient.deleteApp(appName, dbWorkspace, deleteDisk);
+    appsService.deleteApp(appName, dbWorkspace, deleteDisk);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -80,15 +80,16 @@ public class AppsController implements AppsApiDelegate {
   public ResponseEntity<UserAppEnvironment> getApp(String workspaceNamespace, String appName) {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
 
-    return ResponseEntity.ok(
-        leonardoApiClient.getAppByNameByProjectId(dbWorkspace.getGoogleProject(), appName));
+    return ResponseEntity.ok(appsService.getApp(appName, dbWorkspace));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> updateApp(
       String workspaceNamespace, String appName, UserAppEnvironment app) {
     leonardoApiHelper.enforceComputeSecuritySuspension(userProvider.get());
-    throw new UnsupportedOperationException("API not supported.");
+    DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
+    appsService.updateApp(appName, app, dbWorkspace);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
@@ -96,8 +97,7 @@ public class AppsController implements AppsApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.lookupWorkspaceByNamespace(workspaceNamespace);
 
     ListAppsResponse response = new ListAppsResponse();
-    response.addAll(
-        leonardoApiClient.listAppsInProjectCreatedByCreator(dbWorkspace.getGoogleProject()));
+    response.addAll(appsService.listAppsInWorkspace(dbWorkspace));
     return ResponseEntity.ok(response);
   }
 

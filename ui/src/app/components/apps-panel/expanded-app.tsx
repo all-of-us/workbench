@@ -19,6 +19,7 @@ import {
   cromwellConfigIconId,
   rstudioConfigIconId,
   sasConfigIconId,
+  sagemakerConfigIconId,
   SidebarIconId,
 } from 'app/components/help-sidebar-icons';
 import { TooltipTrigger } from 'app/components/popups';
@@ -35,6 +36,7 @@ import { runtimeStore, useStore } from 'app/utils/stores';
 import {
   openRStudio,
   openSAS,
+  openSagemaker,
   pauseUserApp,
   resumeUserApp,
 } from 'app/utils/user-apps-utils';
@@ -227,6 +229,45 @@ const SASButtonRow = (props: {
             icon={faRocket}
             buttonText='Open SAS'
             data-test-id='open-SAS-button'
+          />
+        </div>
+      </TooltipTrigger>
+    </FlexRow>
+  );
+};
+
+const SagemakerButtonRow = (props: {
+  userApp: UserAppEnvironment;
+  workspaceNamespace: string;
+}) => {
+  const { userApp, workspaceNamespace } = props;
+
+  const onClickLaunch = async () => {
+    openSagemaker(workspaceNamespace, userApp);
+  };
+
+  const launchButtonDisabled = userApp?.status !== AppStatus.RUNNING;
+
+  return (
+    <FlexRow>
+      <SettingsButton
+        onClick={() => {
+          setSidebarActiveIconStore.next(sagemakerConfigIconId);
+        }}
+      />
+      <PauseUserAppButton {...{ userApp, workspaceNamespace }} />
+      <TooltipTrigger
+        disabled={!launchButtonDisabled}
+        content='Environment must be running to launch Sagemaker'
+      >
+        {/* tooltip trigger needs a div for some reason */}
+        <div>
+          <AppsPanelButton
+            onClick={onClickLaunch}
+            disabled={launchButtonDisabled}
+            icon={faRocket}
+            buttonText='Open Sagemaker'
+            data-test-id='open-RStudio-button'
           />
         </div>
       </TooltipTrigger>
