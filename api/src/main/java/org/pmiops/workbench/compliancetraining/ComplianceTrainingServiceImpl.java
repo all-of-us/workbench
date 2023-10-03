@@ -73,6 +73,12 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   public DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     DbUser user = userProvider.get();
+
+    // Skip sync for service account user rows.
+    if (userService.isServiceAccount(user)) {
+      return user;
+    }
+
     return syncComplianceTrainingStatusMoodle(user, Agent.asUser(user));
   }
 
@@ -110,11 +116,6 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   @Transactional
   public DbUser syncComplianceTrainingStatusMoodle(DbUser dbUser, Agent agent)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    // Skip sync for service account user rows.
-    if (userService.isServiceAccount(dbUser)) {
-      return dbUser;
-    }
-
     try {
       Map<MoodleService.BadgeName, BadgeDetailsV2> userBadgesByName =
           moodleService.getUserBadgesByBadgeName(dbUser.getUsername());
