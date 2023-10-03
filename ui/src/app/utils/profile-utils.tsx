@@ -7,7 +7,7 @@ export const getProfilePictureSrc = () => {
   return authStore.get().auth?.user?.profile.picture;
 };
 
-export const isUserFromUS = (profile: Profile) => {
+export const isUserFromUSAOrSignedInBeforeNov = (profile: Profile) => {
   const userCountry = profile?.address?.country;
   const signIn = new Date(profile.firstSignInTime);
   const signed_in_after_nov = INTL_USER_SIGN_IN_CHECK <= signIn;

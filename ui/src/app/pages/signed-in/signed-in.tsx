@@ -18,7 +18,7 @@ import { reactStyles } from 'app/utils';
 import { hasRegisteredTierAccess } from 'app/utils/access-tiers';
 import { setInstitutionCategoryState } from 'app/utils/analytics';
 import { DEMOGRAPHIC_SURVEY_SESSION_KEY } from 'app/utils/constants';
-import { isUserFromUS } from 'app/utils/profile-utils';
+import { isUserFromUSAOrSignedInBeforeNov } from 'app/utils/profile-utils';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
@@ -126,9 +126,13 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
     DEMOGRAPHIC_SURVEY_SESSION_KEY
   );
 
-  const shouldShowDemographicSurveyBanner = () => {
+  const shouldRedirectToDemographicSurveyPage = () => {
     const { demographicSurveyV2 } = profileState.profile;
-    return isUserFromUS(profileState.profile) && !demographicSurveyV2;
+    return (
+      isUserFromUSAOrSignedInBeforeNov(profileState.profile) &&
+      !demographicSurveyV2 &&
+      !hasDismissedDemographicSurvey
+    );
   };
 
   return (
@@ -156,8 +160,7 @@ export const SignedInImpl = (spinnerProps: WithSpinnerOverlayProps) => {
                   : styles.appContainer
               }
             >
-              {shouldShowDemographicSurveyBanner() &&
-              !hasDismissedDemographicSurvey ? (
+              {shouldRedirectToDemographicSurveyPage() ? (
                 <DemographicSurveyPage
                   routeData={{ title: 'Demographic Survey' }}
                 />

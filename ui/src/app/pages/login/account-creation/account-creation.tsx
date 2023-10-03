@@ -426,7 +426,7 @@ export class AccountCreation extends React.Component<
   }
 
   // We need to stop showing demographic survey only after Nov-03
-  isInternational = () => {
+  shouldRestrictDemographicSurvey = () => {
     return (
       new Date() >= INTL_USER_SIGN_IN_CHECK &&
       this.state.countryDropdownSelection !== Country.US
@@ -1040,7 +1040,7 @@ export class AccountCreation extends React.Component<
             </Section>
             {/* After Nov-03, if the user is international, proceed to submit the account creation request at this stage.*/}
             {!!this.state.countryDropdownSelection &&
-              this.isInternational() &&
+              this.shouldRestrictDemographicSurvey() &&
               enableCaptcha && (
                 <Section>
                   <div style={{ paddingBottom: '1.5rem' }}>
@@ -1078,26 +1078,28 @@ export class AccountCreation extends React.Component<
                       </BulletAlignedUnorderedList>
                     </React.Fragment>
                   ) : (
-                    this.isInternational() &&
+                    this.shouldRestrictDemographicSurvey() &&
+                    enableCaptcha &&
                     !this.state.captcha && <div>Please fill captcha</div>
                   )
                 }
                 disabled={
                   !errors &&
                   this.state.countryDropdownSelection &&
-                  this.isInternational() &&
+                  this.shouldRestrictDemographicSurvey() &&
+                  enableCaptcha &&
                   this.state.captcha
                 }
               >
                 {/* After Nov-03, Show submit if user in international else Next to show Survey*/}
                 {!!this.state.countryDropdownSelection &&
-                this.isInternational() ? (
+                this.shouldRestrictDemographicSurvey() ? (
                   <Button
                     aria-label='Submit'
                     disabled={
                       this.state.usernameCheckInProgress ||
                       this.isUsernameValidationError() ||
-                      !this.state.captcha ||
+                      (enableCaptcha && !this.state.captcha) ||
                       Boolean(errors)
                     }
                     style={{ height: '3rem', width: '15rem' }}
