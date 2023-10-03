@@ -191,7 +191,8 @@ describe('RuntimeInitializer', () => {
     expect(runtime.status).toEqual(RuntimeStatus.RUNNING);
   });
 
-  it("should error and suggest user's most runtime if a valid one exists", async () => {
+  // RW-11032 Don't create gceConfig runtimes
+  it("should error and add a PD to user's most recent runtime if a valid one exists", async () => {
     serverConfigStore.set({ config: { gsuiteDomain: 'researchallofus.org' } });
     mockGetRuntime.mockImplementation(() => {
       return {
@@ -212,10 +213,15 @@ describe('RuntimeInitializer', () => {
       fail('expected initializer to throw an exception');
     } catch (e) {
       expect(e).toBeInstanceOf(InitialRuntimeNotFoundError);
+      // these are the specific fields added to the runtime
+      const { name, size, diskType } =
+        runtimePresets.generalAnalysis.runtimeTemplate.gceWithPdConfig
+          .persistentDisk;
       expect(e.defaultRuntime).toMatchObject({
-        gceConfig: {
+        gceWithPdConfig: {
           diskSize: 777,
           machineType: 'n1-standard-16',
+          persistentDisk: { name, size, diskType },
         },
       });
     }
