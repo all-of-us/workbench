@@ -31,6 +31,7 @@ import {
 } from 'app/utils/stores';
 
 import { AccessTierShortNames } from './access-tiers';
+import { isCurrentDUCCVersion } from './code-of-conduct';
 import {
   displayDateWithoutHours,
   getWholeDaysFromNow,
@@ -675,8 +676,15 @@ export const isCompleted = (status: AccessModuleStatus): boolean =>
   !!status?.completionEpochMillis;
 export const isBypassed = (status: AccessModuleStatus): boolean =>
   !!status?.bypassEpochMillis;
-export const isCompliant = (status: AccessModuleStatus) =>
-  isCompleted(status) || isBypassed(status);
+export const isCompliant = (
+  status: AccessModuleStatus,
+  duccSignedVersion?: number | undefined
+): boolean =>
+  // special case for DUCC: a user with a missing or old version is non-compliant
+  status.moduleName === AccessModule.DATA_USER_CODE_OF_CONDUCT &&
+  !isCurrentDUCCVersion(duccSignedVersion)
+    ? false
+    : isCompleted(status) || isBypassed(status);
 
 export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   if (module !== AccessModule.CT_COMPLIANCE_TRAINING) {
@@ -691,9 +699,12 @@ export const isEligibleModule = (module: AccessModule, profile: Profile) => {
   return !!controlledTierEligibility?.eligible;
 };
 
-export const getStatusText = (status: AccessModuleStatus) => {
+export const getStatusText = (
+  status: AccessModuleStatus,
+  duccSignedVersion: number
+) => {
   console.assert(
-    isCompliant(status),
+    isCompliant(status, duccSignedVersion),
     'Cannot provide status text for incomplete module'
   );
   const { completionEpochMillis, bypassEpochMillis } = status;
