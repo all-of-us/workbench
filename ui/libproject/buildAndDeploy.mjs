@@ -1,6 +1,6 @@
 import {spawn} from "child_process";
 
-function build_and_deploy(arg) {
+export default function build_and_deploy() {
   try {
     spawn("which gsutil", (err, stdout, stderr) => {
       if (err) {
@@ -14,4 +14,4 @@ function build_and_deploy(arg) {
   }
 }
 
-build_and_deploy(process.argv)
+// default build_and_deploy(process.argv)
