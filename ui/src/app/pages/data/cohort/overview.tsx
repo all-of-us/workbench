@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import * as fp from 'lodash/fp';
 import { Menu } from 'primereact/menu';
+import { OverlayPanel } from 'primereact/overlaypanel';
 
 import {
   AgeType,
@@ -14,6 +15,7 @@ import {
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
+import { environment } from 'environments/environment';
 import { Button, Clickable } from 'app/components/buttons';
 import { ComboChart } from 'app/components/combo-chart.component';
 import { ConfirmDeleteModal } from 'app/components/confirm-delete-modal';
@@ -25,6 +27,7 @@ import {
   CreateNewCohortModal,
   DiscardCohortChangesModal,
 } from 'app/pages/data/cohort/clear-cohort-modals';
+import { CustomFunnel } from 'app/pages/data/cohort/custom-funnel';
 import { GenderChart } from 'app/pages/data/cohort/gender-chart';
 import { searchRequestStore } from 'app/pages/data/cohort/search-state.service';
 import {
@@ -184,6 +187,7 @@ export const ListOverview = fp.flow(
     private ageMenu: any;
     private genderOrSexMenu: any;
     private saveMenu: any;
+    private funnelOverlay: any;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -569,6 +573,7 @@ export const ListOverview = fp.flow(
         cohortChanged,
         onCreateNewCohort,
         onDiscardCohortChanges,
+        searchRequest,
       } = this.props;
       const {
         ageType,
@@ -635,15 +640,24 @@ export const ListOverview = fp.flow(
                     />
                   </TooltipTrigger>
                 )}
-                <TooltipTrigger content={<div>Export to notebook</div>}>
-                  <Clickable
-                    style={{ ...styles.actionIcon, ...styles.disabled }}
-                    onClick={() => this.navigateTo('notebook')}
-                    disabled
-                  >
-                    <ClrIcon shape='export' className='is-solid' size={30} />
-                  </Clickable>
-                </TooltipTrigger>
+                {environment.showCBFunnelPlot && (
+                  <TooltipTrigger content={<div>View Funnel Plot</div>}>
+                    <Clickable
+                      style={
+                        this.disableActionIcons
+                          ? { ...styles.actionIcon, ...styles.disabled }
+                          : styles.actionIcon
+                      }
+                      onClick={(e) => this.funnelOverlay.toggle(e)}
+                    >
+                      <ClrIcon
+                        shape='filter-grid-circle'
+                        className='is-solid'
+                        size={30}
+                      />
+                    </Clickable>
+                  </TooltipTrigger>
+                )}
                 <TooltipTrigger content={<div>Delete cohort</div>}>
                   <Clickable
                     style={
@@ -841,7 +855,18 @@ export const ListOverview = fp.flow(
               </div>
             )}
           </div>
-
+          <OverlayPanel
+            ref={(el) => (this.funnelOverlay = el)}
+            appendTo={document.body}
+            style={{ width: '90vw' }}
+            dismissable
+          >
+            <CustomFunnel
+              onExit={(e) => this.funnelOverlay.toggle(e)}
+              searchRequest={searchRequest}
+              totalCount={total}
+            />
+          </OverlayPanel>
           {saveModalOpen && (
             <CreateModal
               entityName='Cohort'

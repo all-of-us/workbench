@@ -33,6 +33,7 @@ import colors, { colorWithWhiteness } from 'app/styles/colors';
 import { reactStyles, withCurrentWorkspace } from 'app/utils';
 import { AnalyticsTracker } from 'app/utils/analytics';
 import { isAbortError } from 'app/utils/errors';
+import { currentGroupCountsStore } from 'app/utils/navigation';
 import { WorkspaceData } from 'app/utils/workspace-data';
 
 const styles = reactStyles({
@@ -280,6 +281,7 @@ export const SearchGroup = withCurrentWorkspace()(
       this.setState({ error: false, loading: true });
       const {
         group,
+        groupIndex,
         role,
         workspace: { id, namespace },
       } = this.props;
@@ -294,9 +296,35 @@ export const SearchGroup = withCurrentWorkspace()(
         .countParticipants(namespace, id, request, {
           signal: this.aborter.signal,
         })
-        .then((count) =>
-          this.setState({ count, initializing: false, loading: false })
-        )
+        .then((count) => {
+          this.setState({ count, initializing: false, loading: false });
+          const currentGroupCounts = currentGroupCountsStore.getValue();
+          const groupCountIndex = currentGroupCounts.findIndex(
+            ({ groupId }) => groupId === group.id
+          );
+          if (groupCountIndex > -1) {
+            currentGroupCounts[groupCountIndex].groupCount = count;
+          } else {
+            const groupName =
+              group.name ??
+              `Group ${
+                role === 'excludes'
+                  ? searchRequestStore.getValue().includes.length +
+                    1 +
+                    groupIndex +
+                    1
+                  : groupIndex + 1
+              }`;
+            currentGroupCounts.push({
+              groupId: group.id,
+              groupName,
+              groupCount: count,
+              role,
+              status: 'active',
+            });
+          }
+          currentGroupCountsStore.next(currentGroupCounts);
+        })
         .catch((error) => {
           if (!isAbortError(error)) {
             console.error(error);
@@ -371,12 +399,28 @@ export const SearchGroup = withCurrentWorkspace()(
       AnalyticsTracker.CohortBuilder.SearchGroupMenu('Suppress group');
       this.setGroupProperty('status', status);
       setTimeout(() => this.setOverlayPosition());
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].status = status;
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     enable() {
       AnalyticsTracker.CohortBuilder.SearchGroupMenu('Enable suppressed group');
       this.setGroupProperty('status', 'active');
       this.setState({ overlayStyle: undefined });
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].status = 'active';
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     undo() {
@@ -392,6 +436,14 @@ export const SearchGroup = withCurrentWorkspace()(
         (grp) => grp.id !== group.id
       );
       searchRequestStore.next(searchRequest);
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts.splice(groupCountIndex, 1);
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     rename(newName: string) {
@@ -400,6 +452,14 @@ export const SearchGroup = withCurrentWorkspace()(
       searchRequest[role][roleIndex] = { ...group, name: newName };
       searchRequestStore.next(searchRequest);
       this.setState({ renaming: false });
+      const currentGroupCounts = currentGroupCountsStore.getValue();
+      const groupCountIndex = currentGroupCounts.findIndex(
+        ({ groupId }) => groupId === this.props.group.id
+      );
+      if (groupCountIndex > -1) {
+        currentGroupCounts[groupCountIndex].groupName = newName;
+        currentGroupCountsStore.next(currentGroupCounts);
+      }
     }
 
     setOverlayPosition() {
@@ -585,7 +645,16 @@ export const SearchGroup = withCurrentWorkspace()(
         overlayStyle,
         renaming,
       } = this.state;
-      const groupName = !!name ? name : `Group ${groupIndex + 1}`;
+      const groupName = !!name
+        ? name
+        : `Group ${
+            role === 'excludes'
+              ? searchRequestStore.getValue().includes.length +
+                1 +
+                groupIndex +
+                1
+              : groupIndex + 1
+          }`;
       const showGroupCount =
         !loading &&
         !error &&
