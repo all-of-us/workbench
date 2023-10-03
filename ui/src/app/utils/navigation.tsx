@@ -29,6 +29,14 @@ export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(
   undefined
 );
+export interface GroupCount {
+  groupId: string;
+  groupName: string;
+  groupCount: number;
+  role: string;
+  status: string;
+}
+export const currentGroupCountsStore = new BehaviorSubject<GroupCount[]>([]);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentCohortReviewStore = new BehaviorSubject<CohortReview>(
   undefined

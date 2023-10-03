@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import java.util.List;
-import java.util.logging.Logger;
 import org.pmiops.workbench.disks.DiskService;
 import org.pmiops.workbench.model.Disk;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DisksController implements DisksApiDelegate {
-  private static final Logger log = Logger.getLogger(DisksController.class.getName());
 
   private final DiskService diskService;
 

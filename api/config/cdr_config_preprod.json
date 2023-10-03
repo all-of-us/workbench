@@ -36,12 +36,12 @@
     {
       "cdrVersionId": 2,
       "name": "[Removed] All of Us Registered Tier Dataset v3 rc2",
+      "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
       "creationTime": "2020-04-16 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 0,
-      "cdrDbName": "r_2019q4_10",
       "accessTier": "registered"
     },
     {
@@ -53,7 +53,6 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 0,
-      "cdrDbName": "synth_r_2019q4_12",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

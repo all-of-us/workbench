@@ -1,6 +1,7 @@
 import {
   DataprocConfig,
   GceConfig,
+  GceWithPdConfig,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -25,6 +26,11 @@ export const defaultGceConfig = (): GceConfig => ({
   machineType: 'n1-standard-4',
 });
 
+export const defaultGceWithPdConfig = (): GceWithPdConfig => ({
+  machineType: 'n1-standard-4',
+  persistentDisk: stubDisk(),
+});
+
 export const defaultDataprocConfig = (): DataprocConfig => ({
   masterMachineType: 'n1-standard-4',
   masterDiskSize: DATAPROC_MIN_DISK_SIZE_GB,
@@ -44,6 +50,12 @@ export const defaultRuntime = (): Runtime => ({
   configurationType: RuntimeConfigurationType.GENERAL_ANALYSIS,
   gceConfig: defaultGceConfig(),
   errors: [],
+});
+
+export const defaultRuntimeWithPd = (): Runtime => ({
+  ...defaultRuntime(),
+  gceConfig: undefined,
+  gceWithPdConfig: defaultGceWithPdConfig(),
 });
 
 export class RuntimeApiStub extends RuntimeApi {
