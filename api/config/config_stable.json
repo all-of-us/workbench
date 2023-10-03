@@ -94,6 +94,8 @@
     "externalDepartmentId": "Development",
     "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": false,
+    "rtTrainingCourseId": "9ad49c70-3b72-4789-8282-5794efcd4ce1",
+    "ctTrainingCourseId": "3765dc64-cc64-4efa-bfc0-9a4dc2e9d09d",
     "samlIdentityProviderId": "C03q5hexf",
     "samlServiceProviderId": "133137951028"
   },

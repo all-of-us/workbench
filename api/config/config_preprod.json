@@ -94,6 +94,8 @@
     "externalDepartmentId": "Researchers",
     "externalDepartmentIdPopulatedForNewUsers": true,
     "enabledForNewUsers": false,
+    "rtTrainingCourseId": "TODO",
+    "ctTrainingCourseId": "TODO",
     "samlIdentityProviderId": "TODO",
     "samlServiceProviderId": "TODO"
   },
