@@ -361,7 +361,7 @@ public class ProfileController implements ProfileApiDelegate {
       complianceTrainingService.syncComplianceTrainingStatus();
     } catch (NotFoundException ex) {
       throw ex;
-    } catch (ApiException e) {
+    } catch (ApiException | org.pmiops.workbench.absorb.ApiException e) {
       throw new ServerErrorException(e);
     }
     return getProfileResponse(userProvider.get());

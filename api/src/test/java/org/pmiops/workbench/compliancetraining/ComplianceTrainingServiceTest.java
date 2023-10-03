@@ -7,12 +7,16 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pmiops.workbench.FakeClockConfiguration;
+import org.pmiops.workbench.absorb.AbsorbService;
+import org.pmiops.workbench.absorb.Enrollment;
 import org.pmiops.workbench.access.AccessModuleNameMapperImpl;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessModuleServiceImpl;
@@ -61,11 +65,15 @@ public class ComplianceTrainingServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
 
+  private static final String RT_ABSORB_COURSE_ID = "1234";
+  private static final String CT_ABSORB_COURSE_ID = "5678";
+
   private static DbUser user;
   private static WorkbenchConfig providedWorkbenchConfig;
   private static List<DbAccessModule> accessModules;
 
   @MockBean private MoodleService mockMoodleService;
+  @MockBean private AbsorbService mockAbsorbService;
   @MockBean private UserService userService;
 
   // use a SpyBean when we need the full service for some tests and mocks for others
@@ -122,7 +130,11 @@ public class ComplianceTrainingServiceTest {
     providedWorkbenchConfig.access.renewal.expiryDays = 365L;
     providedWorkbenchConfig.access.enableComplianceTraining = true;
 
+    providedWorkbenchConfig.absorb.rtTrainingCourseId = RT_ABSORB_COURSE_ID;
+    providedWorkbenchConfig.absorb.ctTrainingCourseId = CT_ABSORB_COURSE_ID;
+
     accessModules = TestMockFactory.createAccessModules(accessModuleDao);
+    TestMockFactory.createUserAccessModules(user, accessModules, userAccessModuleDao);
   }
 
   @Test
@@ -167,6 +179,41 @@ public class ComplianceTrainingServiceTest {
     // for both RT and CT training.
     assertModuleCompletionEqual(DbAccessModuleName.RT_COMPLIANCE_TRAINING, rtCompletionTime);
     assertModuleCompletionEqual(DbAccessModuleName.CT_COMPLIANCE_TRAINING, currentTimestamp());
+  }
+
+  @Test
+  public void testSyncComplianceTrainingStatus_Absorb() throws Exception {
+    providedWorkbenchConfig.absorb.enabledForNewUsers = true;
+
+    // User completes RT training in Absorb
+    var rtCompletionTime = currentInstant();
+    mockGetUserEnrollments(rtCompletionTime, null);
+
+    // User syncs training
+    complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion
+    // for only RT training.
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    assertModuleNotCompleted(DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+
+    // Time passes
+    tick();
+
+    // User completes CT training in Absorb
+    var ctCompletionTime = currentInstant();
+    mockGetUserEnrollments(rtCompletionTime, ctCompletionTime);
+
+    // User syncs training
+    complianceTrainingService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion
+    // for both RT and CT training.
+    assertModuleCompletionEqual(
+        DbAccessModuleName.RT_COMPLIANCE_TRAINING, Timestamp.from(rtCompletionTime));
+    assertModuleCompletionEqual(
+        DbAccessModuleName.CT_COMPLIANCE_TRAINING, Timestamp.from(ctCompletionTime));
   }
 
   @Test
@@ -350,7 +397,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_Moodle_NullBadge() throws ApiException {
+  public void testSyncComplianceTrainingStatus_Moodle_NullBadge() throws Exception {
     providedWorkbenchConfig.absorb.enabledForNewUsers = false;
 
     // When Moodle returns an empty RET badge response, we should clear the completion time.
@@ -377,7 +424,7 @@ public class ComplianceTrainingServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatus_SkippedForServiceAccount() throws ApiException {
+  public void testSyncComplianceTrainingStatus_SkippedForServiceAccount() throws Exception {
     when(userService.isServiceAccount(user)).thenReturn(true);
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
     complianceTrainingService.syncComplianceTrainingStatus();
@@ -501,6 +548,16 @@ public class ComplianceTrainingServiceTest {
     when(mockMoodleService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
   }
 
+  private void mockGetUserEnrollments(
+      @Nullable Instant rtCompletionTime, @Nullable Instant ctCompletionTime)
+      throws org.pmiops.workbench.absorb.ApiException {
+    when(mockAbsorbService.getActiveEnrollmentsForUser(USERNAME))
+        .thenReturn(
+            List.of(
+                new Enrollment(RT_ABSORB_COURSE_ID, rtCompletionTime),
+                new Enrollment(CT_ABSORB_COURSE_ID, ctCompletionTime)));
+  }
+
   private void reloadUser() {
     user = userDao.findUserByUsername(USERNAME);
   }
@@ -513,12 +570,16 @@ public class ComplianceTrainingServiceTest {
         .flatMap(uam -> complianceTrainingVerificationDao.getByUserAccessModule(uam));
   }
 
+  private Instant currentInstant() {
+    return fakeClock.instant();
+  }
+
   private long currentSecond() {
-    return fakeClock.instant().getEpochSecond();
+    return currentInstant().getEpochSecond();
   }
 
   private Timestamp currentTimestamp() {
-    return Timestamp.from(fakeClock.instant());
+    return Timestamp.from(currentInstant());
   }
 
   private void tick() {

@@ -29,11 +29,13 @@ import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.dao.AccessModuleDao;
 import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbAccessModule.DbAccessModuleName;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.db.model.DbUserCodeOfConductAgreement;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -307,6 +309,18 @@ public class TestMockFactory {
   public static List<DbAccessModule> createAccessModules(AccessModuleDao accessModuleDao) {
     accessModuleDao.saveAll(DEFAULT_ACCESS_MODULES);
     return accessModuleDao.findAll();
+  }
+
+  public static List<DbUserAccessModule> createUserAccessModules(
+      DbUser user, List<DbAccessModule> accessModules, UserAccessModuleDao userAccessModuleDao) {
+    List<DbUserAccessModule> userAccessModules = new ArrayList<>();
+    for (DbAccessModule accessModule : accessModules) {
+      DbUserAccessModule userAccessModule =
+          new DbUserAccessModule().setAccessModule(accessModule).setUser(user);
+      userAccessModules.add(userAccessModule);
+    }
+    userAccessModuleDao.saveAll(userAccessModules);
+    return userAccessModules;
   }
 
   public static DbCdrVersion createDefaultCdrVersion(long id) {

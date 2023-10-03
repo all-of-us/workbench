@@ -10,6 +10,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.absorb.AbsorbService;
+import org.pmiops.workbench.absorb.ApiException;
 import org.pmiops.workbench.access.AccessModuleNameMapper;
 import org.pmiops.workbench.access.AccessModuleService;
 import org.pmiops.workbench.access.AccessSyncService;
@@ -20,6 +22,7 @@ import org.pmiops.workbench.db.dao.UserAccessModuleDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAccessModule;
 import org.pmiops.workbench.db.model.DbComplianceTrainingVerification;
+import org.pmiops.workbench.db.model.DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessModule;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -44,6 +47,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   private final Provider<DbUser> userProvider;
   private final UserService userService;
   private final ComplianceTrainingVerificationDao complianceTrainingVerificationDao;
+  private AbsorbService absorbService;
 
   @Autowired
   public ComplianceTrainingServiceImpl(
@@ -56,7 +60,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       Clock clock,
       Provider<DbUser> userProvider,
       UserService userService,
-      ComplianceTrainingVerificationDao complianceTrainingVerificationDao) {
+      ComplianceTrainingVerificationDao complianceTrainingVerificationDao,
+      AbsorbService absorbService) {
     this.moodleService = moodleService;
     this.configProvider = configProvider;
     this.userAccessModuleDao = userAccessModuleDao;
@@ -67,11 +72,12 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
     this.userProvider = userProvider;
     this.userService = userService;
     this.complianceTrainingVerificationDao = complianceTrainingVerificationDao;
+    this.absorbService = absorbService;
   }
 
   /** Syncs the current user's training status from Moodle. */
   public DbUser syncComplianceTrainingStatus()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException, ApiException {
     DbUser user = userProvider.get();
 
     // Skip sync for service account user rows.
@@ -79,7 +85,11 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       return user;
     }
 
-    return syncComplianceTrainingStatusMoodle(user, Agent.asUser(user));
+    if (useAbsorb()) {
+      return syncComplianceTrainingStatusAbsorb(user, Agent.asUser(user));
+    } else {
+      return syncComplianceTrainingStatusMoodle(user, Agent.asUser(user));
+    }
   }
 
   @Override
@@ -95,8 +105,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
                                 DbComplianceTrainingVerification
                                     ::getComplianceTrainingVerificationSystem)
                             .orElse(null)
-                        == DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem
-                            .MOODLE);
+                        == DbComplianceTrainingVerificationSystem.MOODLE);
     return featureFlagEnabled && !userHasUsedMoodle;
   }
 
@@ -184,10 +193,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
             // - If the user has not completed any trainings yet
             // - For CT if the user has just completed RT
             if (updatedUserAccessModule.getCompletionTime() != null) {
-              var verification = retrieveVerificationOrCreate(updatedUserAccessModule);
-              verification.setComplianceTrainingVerificationSystem(
-                  DbComplianceTrainingVerification.DbComplianceTrainingVerificationSystem.MOODLE);
-              complianceTrainingVerificationDao.save(verification);
+              addVerificationSystem(
+                  updatedUserAccessModule, DbComplianceTrainingVerificationSystem.MOODLE);
             }
           });
 
@@ -207,6 +214,70 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
       }
       throw ex;
     }
+  }
+
+  /**
+   * Updates the given user's training status from Moodle.
+   *
+   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
+   * rather than user-specific OAuth tokens.
+   *
+   * <p>Using the user's email, we can get their badges from Moodle's APIs. If the badges are marked
+   * valid, we store their completion dates in the database. If they are marked invalid, we clear
+   * the completion dates from the database as the user will need to complete a new training.
+   *
+   * @param dbUser
+   * @param agent
+   */
+  @Transactional
+  public DbUser syncComplianceTrainingStatusAbsorb(DbUser dbUser, Agent agent) throws ApiException {
+    Map<String, DbAccessModule.DbAccessModuleName> courseToAccessModuleMap =
+        Map.of(
+            configProvider.get().absorb.rtTrainingCourseId,
+            DbAccessModule.DbAccessModuleName.RT_COMPLIANCE_TRAINING,
+            configProvider.get().absorb.ctTrainingCourseId,
+            DbAccessModule.DbAccessModuleName.CT_COMPLIANCE_TRAINING);
+
+    var enrollments = absorbService.getActiveEnrollmentsForUser(dbUser.getUsername());
+
+    for (Map.Entry<String, DbAccessModule.DbAccessModuleName> entry :
+        courseToAccessModuleMap.entrySet()) {
+      var courseId = entry.getKey();
+      var accessModuleName = entry.getValue();
+
+      var maybeEnrollment =
+          enrollments.stream().filter(e -> e.courseId.equals(courseId)).findFirst();
+
+      if (maybeEnrollment.isEmpty()) {
+        log.severe(
+            String.format(
+                "User `%s` is not enrolled in Absorb course `%s` for access module `%s`. Users are expected to be automatically enrolled in all courses upon visiting Absorb.",
+                dbUser.getUsername(), courseId, accessModuleName));
+        throw new NotFoundException(
+            String.format("User %s is not enrolled in Absorb course %s", dbUser.getUsername(), courseId));
+      }
+      var enrollment = maybeEnrollment.get();
+
+      // The course is incomplete, do not update the user access module
+      if (enrollment.completionTime == null) {
+        continue;
+      }
+
+      var updatedUserAccessModule =
+          accessModuleService.updateCompletionTime(
+              dbUser, accessModuleName, Timestamp.from(enrollment.completionTime));
+
+      addVerificationSystem(updatedUserAccessModule, DbComplianceTrainingVerificationSystem.ABSORB);
+    }
+
+    return accessSyncService.updateUserAccessTiers(dbUser, agent);
+  }
+
+  private void addVerificationSystem(
+      DbUserAccessModule updatedUserAccessModule, DbComplianceTrainingVerificationSystem absorb) {
+    var rtVerification = retrieveVerificationOrCreate(updatedUserAccessModule);
+    rtVerification.setComplianceTrainingVerificationSystem(absorb);
+    complianceTrainingVerificationDao.save(rtVerification);
   }
 
   private Timestamp clockNow() {
